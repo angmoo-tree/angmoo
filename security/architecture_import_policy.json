@@ -849,20 +849,12 @@
           "imported": "app.models"
         },
         {
-          "importer": "app.runtime.graph_projection.replay",
-          "imported": "app.models"
-        },
-        {
           "importer": "app.runtime.graph_projection.social_memory_read",
           "imported": "app.models"
         },
         {
           "importer": "app.runtime.graph_projection.social_memory_read",
           "imported": "app.schemas"
-        },
-        {
-          "importer": "app.runtime.graph_projection.sqlalchemy_outbox",
-          "imported": "app.models"
         },
         {
           "importer": "app.runtime.relationships.sqlalchemy_social_read_repository",
@@ -1051,6 +1043,7 @@
       "app.domains.relationships.repository.projection_commands",
       "app.domains.relationships.repository.projection_state",
       "app.domains.relationships.repository.proposals",
+      "app.domains.relationships.repository.replay",
       "app.domains.relationships.repository.sqlite_projection_state",
       "app.domains.relationships.repository.state",
       "app.domains.relationships.schemas",
@@ -1065,6 +1058,7 @@
       "app.domains.relationships.service.projection_events",
       "app.domains.relationships.service.projection_state",
       "app.domains.relationships.service.proposals",
+      "app.domains.relationships.service.replay",
       "app.domains.relationships.service.sqlite_projection_state",
       "app.domains.relationships.service.state",
       "app.domains.relationships.utils",
@@ -1232,6 +1226,7 @@
       "app.domains.worlds.service.creator",
       "app.domains.worlds.service.definition",
       "app.domains.worlds.service.generation_context",
+      "app.domains.worlds.service.projection_sources",
       "app.domains.worlds.service.reserved_roles",
       "app.domains.worlds.service.scheduling",
       "app.domains.worlds.storage"
@@ -1295,6 +1290,7 @@
       "app.domains.relationships.service.projection_events",
       "app.domains.relationships.service.projection_state",
       "app.domains.relationships.service.proposals",
+      "app.domains.relationships.service.replay",
       "app.domains.relationships.service.sqlite_projection_state",
       "app.domains.relationships.service.state",
       "app.domains.routine_posts.contracts",
@@ -1423,7 +1419,8 @@
       "app.domains.worlds.schemas",
       "app.domains.worlds.service",
       "app.domains.worlds.service.character_entry",
-      "app.domains.worlds.service.definition"
+      "app.domains.worlds.service.definition",
+      "app.domains.worlds.service.projection_sources"
     ],
     "bridges": [
       {

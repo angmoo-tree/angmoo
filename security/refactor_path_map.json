@@ -382,7 +382,8 @@
     "backend/app/services/activity_proposal_runtime.py": "backend/app/runtime/activity_proposals/composition.py",
     "backend/tests/test_activity_proposal_runtime.py": "backend/tests/relationships/test_activity_proposals.py",
     "backend/app/runtime/graph_projection/sqlalchemy_state.py": "backend/app/domains/relationships/service/projection_state.py",
-    "backend/tests/test_graph_projection_commands.py": "backend/tests/relationships/test_projection_commands.py"
+    "backend/tests/test_graph_projection_commands.py": "backend/tests/relationships/test_projection_commands.py",
+    "backend/tests/test_graph_projection_replay.py": "backend/tests/relationships/test_projection_replay.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -842,7 +843,13 @@
     "tests/test_graph_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]": "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
     "tests/test_graph_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]": "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
     "tests/test_graph_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event": "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
-    "tests/test_graph_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion": "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
+    "tests/test_graph_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion": "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion",
+    "tests/test_graph_projection_replay.py::test_event_reprocess_does_not_clear_world": "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+    "tests/test_graph_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild": "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+    "tests/test_graph_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches": "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+    "tests/test_graph_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden": "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+    "tests/test_graph_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set": "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+    "tests/test_graph_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail": "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
   },
   "details": {
     "AR-B1": {
@@ -29911,6 +29918,582 @@
         "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[False]",
         "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[True]"
       ]
+    },
+    "AR-B5-C5-D": {
+      "status": "IMPLEMENTED; focused39 PASS; original replay5/SQL10/outbox3 AST contracts PASS; source introduction pending",
+      "scope": "Relationships owns replay admission/lease/high-water/completion audit and its12 queries; Worlds owns ordered source IDs. Runtime retains Session lifecycle, clock call position, sidecar operations, metrics, errors and commit timing. Existing6 replay nodes move without changes.",
+      "split_files": {
+        "backend/app/runtime/graph_projection/replay.py": [
+          "backend/app/runtime/graph_projection/replay.py",
+          "backend/app/domains/relationships/service/replay.py",
+          "backend/app/domains/relationships/repository/replay.py",
+          "backend/app/domains/relationships/contracts/replay.py",
+          "backend/app/domains/relationships/exceptions.py"
+        ],
+        "backend/app/runtime/graph_projection/sqlalchemy_outbox.py": [
+          "backend/app/runtime/graph_projection/sqlalchemy_outbox.py",
+          "backend/app/domains/relationships/service/sqlite_projection_state.py",
+          "backend/app/domains/relationships/repository/sqlite_projection_state.py",
+          "backend/app/domains/relationships/constants.py",
+          "backend/app/domains/relationships/policies/events.py",
+          "backend/app/domains/relationships/repository/replay.py",
+          "backend/app/domains/worlds/service/projection_sources.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SessionFactory",
+          "new": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SessionFactory",
+          "direct_consumers": [
+            "backend/tests/test_l3_er2_sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqlAlchemyProjectionReplaySource",
+          "new": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqlAlchemyProjectionReplaySource",
+          "direct_consumers": [
+            "backend/tests/test_l3_er2_sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqlAlchemyProjectionOutbox",
+          "new": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqlAlchemyProjectionOutbox",
+          "direct_consumers": [
+            "backend/tests/test_l3_er2_sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "direct_consumers": [
+            "backend/tests/test_l3_er2_sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::__all__",
+          "new": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::__all__",
+          "direct_consumers": [
+            "backend/tests/test_l3_er2_sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::LEASE_TTL_SECONDS",
+          "new": "backend/app/domains/relationships/constants.py::LEASE_TTL_SECONDS",
+          "direct_consumers": [
+            "backend/app/domains/relationships/repository/sqlite_projection_state.py",
+            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/domains/relationships/service/sqlite_projection_state.py::claim",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/domains/relationships/service/sqlite_projection_state.py::finalize_success",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/domains/relationships/service/sqlite_projection_state.py::finalize_failure",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/domains/relationships/repository/sqlite_projection_state.py::claim",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/domains/relationships/repository/sqlite_projection_state.py::finalize_success",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/domains/relationships/repository/sqlite_projection_state.py::get_failure_row",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/domains/relationships/repository/sqlite_projection_state.py::apply_failure_transition",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::_claimable",
+          "new": "backend/app/domains/relationships/repository/sqlite_projection_state.py::_claimable",
+          "direct_consumers": [
+            "backend/app/domains/relationships/repository/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::_owned_active_lease",
+          "new": "backend/app/domains/relationships/repository/sqlite_projection_state.py::_owned_active_lease",
+          "direct_consumers": [
+            "backend/app/domains/relationships/repository/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::_row_has_active_lease",
+          "new": "backend/app/domains/relationships/service/sqlite_projection_state.py::_row_has_active_lease",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::_aware_utc",
+          "new": "backend/app/domains/relationships/policies/events.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::ReplayStore",
+          "new": "backend/app/domains/relationships/contracts/replay.py::ReplayStore",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::GraphReplayError",
+          "new": "backend/app/domains/relationships/exceptions.py::GraphReplayError",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/replay.py",
+            "backend/app/domains/relationships/service/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::_now",
+          "new": "backend/app/runtime/graph_projection/replay.py::_now",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::create_replay_run",
+          "new": "backend/app/runtime/graph_projection/replay.py::create_replay_run",
+          "direct_consumers": [
+            "backend/tests/relationships/test_projection_replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::GraphProjectionReplayService",
+          "new": "backend/app/runtime/graph_projection/replay.py::GraphProjectionReplayService",
+          "direct_consumers": [
+            "backend/tests/relationships/test_projection_replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::create_replay_run",
+          "new": "backend/app/domains/relationships/service/replay.py::create_replay_run",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::GraphProjectionReplayService",
+          "new": "backend/app/domains/relationships/service/replay.py::start",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::GraphProjectionReplayService",
+          "new": "backend/app/domains/relationships/service/replay.py::renew_lease",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::GraphProjectionReplayService",
+          "new": "backend/app/domains/relationships/service/replay.py::finish_failure",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::GraphProjectionReplayService",
+          "new": "backend/app/domains/relationships/service/replay.py::finish_success",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::create_replay_run",
+          "new": "backend/app/domains/relationships/repository/replay.py::active_world_rebuild_id",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::create_replay_run",
+          "new": "backend/app/domains/relationships/repository/replay.py::outbox_id_for_source",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::GraphProjectionReplayService",
+          "new": "backend/app/domains/relationships/repository/replay.py::get_run_for_update",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::GraphProjectionReplayService",
+          "new": "backend/app/domains/relationships/repository/replay.py::latest_outbox",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::GraphProjectionReplayService",
+          "new": "backend/app/domains/relationships/repository/replay.py::ordered_outbox_rows",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::GraphProjectionReplayService",
+          "new": "backend/app/domains/relationships/repository/replay.py::world_outbox_statement",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::GraphProjectionReplayService",
+          "new": "backend/app/domains/relationships/repository/replay.py::for_source_event",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::GraphProjectionReplayService",
+          "new": "backend/app/domains/relationships/repository/replay.py::through_high_water",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::GraphProjectionReplayService",
+          "new": "backend/app/domains/relationships/repository/replay.py::dead_rows",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::GraphProjectionReplayService",
+          "new": "backend/app/domains/relationships/repository/replay.py::empty_snapshot",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/replay.py::GraphProjectionReplayService",
+          "new": "backend/app/domains/relationships/repository/replay.py::get_run",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/replay.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqlAlchemyProjectionReplaySource",
+          "new": "backend/app/domains/worlds/service/projection_sources.py::list_projection_world_ids",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqlAlchemyProjectionReplaySource",
+          "new": "backend/app/domains/relationships/repository/replay.py::ordered_world_outbox_ids",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+            "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+            "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        }
+      ],
+      "new_tests": []
     }
   }
 }

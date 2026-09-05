@@ -670,3 +670,6 @@ Canonical SQLite 경로의 `service/sqlite_projection_state.py`는 lease 검증�
 
 
 Projection 명령의 버전·서명·payload 형식은 `relationships/policies/projection_commands.py`, 현재 canonical source의 적격성과 삭제/숨김·관계 방향·replay snapshot 판단은 `service/projection_commands.py`가 소유한다. Repository는 원래 nullable 조회와 evidence 순서를 유지한다. WorldCharacter의 `service/projection_scope.py`는 기존 World와 membership 연결만 확인하며 active 작성 권한 검사와 구별한다. Runtime은 같은 Session과 attached 객체를 연결하고 기존 ProjectionCommandError로 오류를 변환한다. 그래프 복구가 새로운 사건을 승인하거나 삭제된 source를 다시 공개하는 경로가 되지 않는다.
+
+
+Replay의 요청 검증·동시 실행 차단·lease·high-water 고정·완료 감사 기록은 `relationships/service/replay.py`가 소유하며 SQL은 `repository/replay.py`에 있다. 생성은 기존처럼 flush만 하고, start/renew/finalize는 기존 실행 경로의 commit 시점을 유지한다. `runtime/graph_projection/replay.py`는 Session 열기·clock·sidecar clear/apply/digest와 지표 기록을 조립한다. 복구 중 새로 들어온 outbox가 고정된 high-water 범위에 섞이지 않으며, 원래 오류와 재개·실패 상태를 유지한다. World의 전체 식별자는 World 소유 조회로 가져온다.

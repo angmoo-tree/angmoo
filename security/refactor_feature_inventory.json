@@ -2038,7 +2038,10 @@
         "backend/app/domains/relationships/repository/projection_commands.py",
         "backend/app/domains/relationships/policies/projection_commands.py",
         "backend/app/domains/world_characters/service/projection_scope.py",
-        "backend/app/runtime/graph_projection/command_references.py"
+        "backend/app/runtime/graph_projection/command_references.py",
+        "backend/app/domains/relationships/service/replay.py",
+        "backend/app/domains/relationships/repository/replay.py",
+        "backend/app/domains/worlds/service/projection_sources.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",
@@ -2178,7 +2181,7 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Current backend navigation synchronized through AR-B5-C5-B: actual Social model/contract, source persistence, timeline mutation, profile/feed/inbox/discovery/activity response and 31 HTTP ownership; Relationships models/points/graph contracts, event/evidence/state, proposal workflow and projection outbox state/CAS ownership are moved. Existing Session/commit, current-source authorization, evidence ordering and assertions are retained. Agent feed/observation UoW, media jobs, remaining graph command/replay/read composition and exact compatibility cleanup remain pending. This is a partial backend transition; frontend, integrated capture/Hosted CI/installer and whole B5 completion are not promoted. Identity-owned CommunityMutationQuotaBucket and historical class identity remain a G5/B8 owner review item. AR-B5-C5-C also moves actual projection command admission/signatures/current-source exclusion and historical WC membership to owners. Replay operations, observation UoW and remaining live source compositions are still pending.",
+      "notes": "Current backend navigation synchronized through AR-B5-C5-B: actual Social model/contract, source persistence, timeline mutation, profile/feed/inbox/discovery/activity response and 31 HTTP ownership; Relationships models/points/graph contracts, event/evidence/state, proposal workflow and projection outbox state/CAS ownership are moved. Existing Session/commit, current-source authorization, evidence ordering and assertions are retained. Agent feed/observation UoW, media jobs, remaining graph command/replay/read composition and exact compatibility cleanup remain pending. This is a partial backend transition; frontend, integrated capture/Hosted CI/installer and whole B5 completion are not promoted. Identity-owned CommunityMutationQuotaBucket and historical class identity remain a G5/B8 owner review item. AR-B5-C5-C also moves actual projection command admission/signatures/current-source exclusion and historical WC membership to owners. Replay operations, observation UoW and remaining live source compositions are still pending. AR-B5-C5-D owns replay admission, lease, high-water and completion records plus ordered canonical source queries. Existing runtime retains actual sidecar execution/session/clock/metrics orchestration. Relationship read/observation and remaining Social workflows are pending.",
       "backend_status": "MAPPED",
       "frontend_status": "MAPPED"
     },
@@ -2259,7 +2262,10 @@
         "backend/app/domains/relationships/repository/projection_commands.py",
         "backend/app/domains/relationships/policies/projection_commands.py",
         "backend/app/domains/world_characters/service/projection_scope.py",
-        "backend/app/runtime/graph_projection/command_references.py"
+        "backend/app/runtime/graph_projection/command_references.py",
+        "backend/app/domains/relationships/service/replay.py",
+        "backend/app/domains/relationships/repository/replay.py",
+        "backend/app/domains/worlds/service/projection_sources.py"
       ],
       "target_paths": [
         "backend/app/runtime/graph_projection",
@@ -2336,7 +2342,7 @@
         "backend/tests/relationships/test_projection_commands.py",
         "backend/tests/test_graph_projection_metrics.py",
         "backend/tests/test_graph_projection_postgres_concurrency.py",
-        "backend/tests/test_graph_projection_replay.py",
+        "backend/tests/relationships/test_projection_replay.py",
         "backend/tests/test_graph_projection_worker.py",
         "backend/tests/test_l3_er2_sqlite_canonical_adapter.py",
         "backend/tests/test_l3_er3_graph_query_parity.py",
@@ -2385,12 +2391,12 @@
         "tests/test_graph_projection_metrics.py::test_graph_metrics_keep_only_declared_low_cardinality_labels",
         "tests/test_graph_projection_metrics.py::test_observations_are_aggregated_without_unbounded_samples",
         "tests/test_graph_projection_postgres_concurrency.py::test_skip_locked_claim_has_one_owner_for_same_outbox",
-        "tests/test_graph_projection_replay.py::test_event_reprocess_does_not_clear_world",
-        "tests/test_graph_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
-        "tests/test_graph_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
-        "tests/test_graph_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
-        "tests/test_graph_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
-        "tests/test_graph_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail",
+        "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+        "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+        "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+        "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+        "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+        "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail",
         "tests/test_graph_projection_worker.py::test_idle_connectivity_failure_marks_projector_degraded_without_exiting",
         "tests/test_graph_projection_worker.py::test_pending_row_is_claimed_once_and_succeeds",
         "tests/test_graph_projection_worker.py::test_poison_payload_is_dead_without_store_call",
@@ -2697,7 +2703,7 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Current backend navigation synchronized through AR-B5-C5-B: actual Social model/contract, source persistence, timeline mutation, profile/feed/inbox/discovery/activity response and 31 HTTP ownership; Relationships models/points/graph contracts, event/evidence/state, proposal workflow and projection outbox state/CAS ownership are moved. Existing Session/commit, current-source authorization, evidence ordering and assertions are retained. Agent feed/observation UoW, media jobs, remaining graph command/replay/read composition and exact compatibility cleanup remain pending. This is a partial backend transition; frontend, integrated capture/Hosted CI/installer and whole B5 completion are not promoted. Identity-owned CommunityMutationQuotaBucket and historical class identity remain a G5/B8 owner review item. AR-B5-C5-C also moves actual projection command admission/signatures/current-source exclusion and historical WC membership to owners. Replay operations, observation UoW and remaining live source compositions are still pending.",
+      "notes": "Current backend navigation synchronized through AR-B5-C5-B: actual Social model/contract, source persistence, timeline mutation, profile/feed/inbox/discovery/activity response and 31 HTTP ownership; Relationships models/points/graph contracts, event/evidence/state, proposal workflow and projection outbox state/CAS ownership are moved. Existing Session/commit, current-source authorization, evidence ordering and assertions are retained. Agent feed/observation UoW, media jobs, remaining graph command/replay/read composition and exact compatibility cleanup remain pending. This is a partial backend transition; frontend, integrated capture/Hosted CI/installer and whole B5 completion are not promoted. Identity-owned CommunityMutationQuotaBucket and historical class identity remain a G5/B8 owner review item. AR-B5-C5-C also moves actual projection command admission/signatures/current-source exclusion and historical WC membership to owners. Replay operations, observation UoW and remaining live source compositions are still pending. AR-B5-C5-D owns replay admission, lease, high-water and completion records plus ordered canonical source queries. Existing runtime retains actual sidecar execution/session/clock/metrics orchestration. Relationship read/observation and remaining Social workflows are pending.",
       "backend_status": "MAPPED"
     },
     {
@@ -7435,7 +7441,7 @@
         "backend/tests/relationships/test_projection_commands.py",
         "backend/tests/test_graph_projection_metrics.py",
         "backend/tests/test_graph_projection_postgres_concurrency.py",
-        "backend/tests/test_graph_projection_replay.py",
+        "backend/tests/relationships/test_projection_replay.py",
         "backend/tests/test_graph_projection_worker.py",
         "backend/tests/test_installer_update.py",
         "backend/tests/test_l0_container_release.py",
@@ -7829,12 +7835,12 @@
         "tests/test_graph_projection_metrics.py::test_graph_metrics_keep_only_declared_low_cardinality_labels",
         "tests/test_graph_projection_metrics.py::test_observations_are_aggregated_without_unbounded_samples",
         "tests/test_graph_projection_postgres_concurrency.py::test_skip_locked_claim_has_one_owner_for_same_outbox",
-        "tests/test_graph_projection_replay.py::test_event_reprocess_does_not_clear_world",
-        "tests/test_graph_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
-        "tests/test_graph_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
-        "tests/test_graph_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
-        "tests/test_graph_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
-        "tests/test_graph_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail",
+        "tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+        "tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+        "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+        "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+        "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+        "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail",
         "tests/test_graph_projection_worker.py::test_idle_connectivity_failure_marks_projector_degraded_without_exiting",
         "tests/test_graph_projection_worker.py::test_pending_row_is_claimed_once_and_succeeds",
         "tests/test_graph_projection_worker.py::test_poison_payload_is_dead_without_store_call",

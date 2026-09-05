@@ -6,10 +6,12 @@ from collections.abc import Callable
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import Engine, select
+from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 
-from app import models
+from app.domains.worlds.service.projection_sources import list_projection_world_ids
+from app.domains.relationships.repository import replay as replay_repository
+from app.domains.relationships.repository import projection_state as state_repository
 from app.domains.relationships.constants import LEASE_TTL_SECONDS
 from app.domains.relationships.service import sqlite_projection_state
 from app.domains.relationships.policies.events import _aware_utc
@@ -36,29 +38,14 @@ class SqlAlchemyProjectionReplaySource:
 
     def world_ids(self) -> tuple[str, ...]:
         with self._session_factory() as db:
-            return tuple(
-                str(value)
-                for value in db.scalars(
-                    select(models.World.id).order_by(models.World.id)
-                )
-            )
+            return list_projection_world_ids(db)
 
     def commands_for_world(
         self,
         world_id: str,
     ) -> tuple[ProjectionCommand, ...]:
         with self._session_factory() as db:
-            outbox_ids = tuple(
-                str(value)
-                for value in db.scalars(
-                    select(models.GraphProjectionOutbox.id)
-                    .where(models.GraphProjectionOutbox.world_id == world_id)
-                    .order_by(
-                        models.GraphProjectionOutbox.created_at,
-                        models.GraphProjectionOutbox.id,
-                    )
-                )
-            )
+            outbox_ids = replay_repository.ordered_world_outbox_ids(db, world_id)
             return tuple(
                 build_projection_command(
                     db,
@@ -90,7 +77,7 @@ class SqlAlchemyProjectionOutbox:
             items = tuple(
                 ProjectionWorkItem(id=outbox_id, projection_type=row.projection_type)
                 for outbox_id in ids
-                if (row := db.get(models.GraphProjectionOutbox, outbox_id)) is not None
+                if (row := state_repository.get_outbox(db, outbox_id)) is not None
             )
             db.commit()
             return items

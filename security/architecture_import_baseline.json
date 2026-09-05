@@ -1,7 +1,7 @@
 {
-  "edge_count": 2545,
-  "external_import_count": 2287,
-  "module_count": 748,
+  "edge_count": 2558,
+  "external_import_count": 2293,
+  "module_count": 751,
   "modules": [
     {
       "external_imports": [],
@@ -3326,6 +3326,7 @@
         "typing"
       ],
       "imports": [
+        "app.domains.relationships.contracts.projection",
         "app.domains.relationships.contracts.projection_commands"
       ],
       "module": "app.domains.relationships.contracts.replay",
@@ -3569,6 +3570,18 @@
     },
     {
       "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.relationships.models"
+      ],
+      "module": "app.domains.relationships.repository.replay",
+      "path": "backend/app/domains/relationships/repository/replay.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "collections.abc",
         "datetime",
@@ -3789,6 +3802,24 @@
       ],
       "module": "app.domains.relationships.service.proposals",
       "path": "backend/app/domains/relationships/service/proposals.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.relationships.exceptions",
+        "app.domains.relationships.models",
+        "app.domains.relationships.repository.projection_commands",
+        "app.domains.relationships.repository.replay"
+      ],
+      "module": "app.domains.relationships.service.replay",
+      "path": "backend/app/domains/relationships/service/replay.py",
       "wildcard_imports": []
     },
     {
@@ -7359,6 +7390,18 @@
     },
     {
       "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.worlds.models"
+      ],
+      "module": "app.domains.worlds.service.projection_sources",
+      "path": "backend/app/domains/worlds/service/projection_sources.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "sqlalchemy",
         "sqlalchemy.orm"
@@ -8692,18 +8735,19 @@
       "external_imports": [
         "__future__",
         "datetime",
-        "sqlalchemy",
         "sqlalchemy.orm",
-        "time",
-        "typing"
+        "time"
       ],
       "imports": [
-        "app.core.ids",
+        "app.domains.relationships.contracts.replay",
+        "app.domains.relationships.exceptions",
+        "app.domains.relationships.models",
+        "app.domains.relationships.service.replay",
         "app.domains.relationships.utils.projection_digest",
-        "app.models",
+        "app.domains.worlds.service.character_entry",
         "app.runtime.graph_projection.metrics",
         "app.runtime.graph_projection.sqlalchemy_commands",
-        "app.runtime.graph_projection.worker"
+        "app.runtime.graph_projection.sqlalchemy_outbox"
       ],
       "module": "app.runtime.graph_projection.replay",
       "path": "backend/app/runtime/graph_projection/replay.py",
@@ -8757,9 +8801,11 @@
         "app.domains.relationships.contracts.outbox",
         "app.domains.relationships.contracts.projection_commands",
         "app.domains.relationships.policies.events",
+        "app.domains.relationships.repository.projection_state",
+        "app.domains.relationships.repository.replay",
         "app.domains.relationships.service.projection_state",
         "app.domains.relationships.service.sqlite_projection_state",
-        "app.models",
+        "app.domains.worlds.service.projection_sources",
         "app.runtime.graph_projection.sqlalchemy_commands"
       ],
       "module": "app.runtime.graph_projection.sqlalchemy_outbox",

@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2287,
-      "internal_edge_count": 2545,
+      "external_import_count": 2293,
+      "internal_edge_count": 2558,
       "legacy_import_exception_count": 0,
-      "module_count": 748,
+      "module_count": 751,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -111,6 +111,7 @@
           },
           {
             "imports": [
+              "app.domains.relationships.contracts.projection",
               "app.domains.relationships.contracts.projection_commands"
             ],
             "module": "app.domains.relationships.contracts.replay",
@@ -263,6 +264,13 @@
           },
           {
             "imports": [
+              "app.domains.relationships.models"
+            ],
+            "module": "app.domains.relationships.repository.replay",
+            "path": "backend/app/domains/relationships/repository/replay.py"
+          },
+          {
+            "imports": [
               "app.domains.relationships.constants",
               "app.domains.relationships.contracts.outbox",
               "app.domains.relationships.models"
@@ -399,6 +407,17 @@
             ],
             "module": "app.domains.relationships.service.proposals",
             "path": "backend/app/domains/relationships/service/proposals.py"
+          },
+          {
+            "imports": [
+              "app.core.ids",
+              "app.domains.relationships.exceptions",
+              "app.domains.relationships.models",
+              "app.domains.relationships.repository.projection_commands",
+              "app.domains.relationships.repository.replay"
+            ],
+            "module": "app.domains.relationships.service.replay",
+            "path": "backend/app/domains/relationships/service/replay.py"
           },
           {
             "imports": [
@@ -1077,12 +1096,15 @@
           },
           {
             "imports": [
-              "app.core.ids",
+              "app.domains.relationships.contracts.replay",
+              "app.domains.relationships.exceptions",
+              "app.domains.relationships.models",
+              "app.domains.relationships.service.replay",
               "app.domains.relationships.utils.projection_digest",
-              "app.models",
+              "app.domains.worlds.service.character_entry",
               "app.runtime.graph_projection.metrics",
               "app.runtime.graph_projection.sqlalchemy_commands",
-              "app.runtime.graph_projection.worker"
+              "app.runtime.graph_projection.sqlalchemy_outbox"
             ],
             "module": "app.runtime.graph_projection.replay",
             "path": "backend/app/runtime/graph_projection/replay.py"
@@ -1116,9 +1138,11 @@
               "app.domains.relationships.contracts.outbox",
               "app.domains.relationships.contracts.projection_commands",
               "app.domains.relationships.policies.events",
+              "app.domains.relationships.repository.projection_state",
+              "app.domains.relationships.repository.replay",
               "app.domains.relationships.service.projection_state",
               "app.domains.relationships.service.sqlite_projection_state",
-              "app.models",
+              "app.domains.worlds.service.projection_sources",
               "app.runtime.graph_projection.sqlalchemy_commands"
             ],
             "module": "app.runtime.graph_projection.sqlalchemy_outbox",
@@ -1785,7 +1809,7 @@
         "sha256": "bd1e83111413a0e8d66ac185b326bf70e8fb19e90632950cfcdf8d00149207f3"
       },
       {
-        "path": "backend/tests/test_graph_projection_replay.py",
+        "path": "backend/tests/relationships/test_projection_replay.py",
         "sha256": "ac461ee04eab201b93159af90e7c24fe6d5549037e0342331c2b58011efb1b2a"
       },
       {
@@ -1839,6 +1863,12 @@
     ],
     "parity_test_node_count": 97,
     "parity_test_nodes": [
+      "backend/tests/relationships/test_projection_replay.py::test_event_reprocess_does_not_clear_world",
+      "backend/tests/relationships/test_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
+      "backend/tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
+      "backend/tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
+      "backend/tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
+      "backend/tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail",
       "backend/tests/test_embedded_data_migration.py::test_each_consecutive_step_rejects_undeclared_identity_changes",
       "backend/tests/test_embedded_data_migration.py::test_failed_sqlite_step_keeps_v1_active_and_removes_staging",
       "backend/tests/test_embedded_data_migration.py::test_generation_name_limit_preserves_target_version_and_disambiguator",
@@ -1861,12 +1891,6 @@
       "backend/tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
       "backend/tests/test_feed_reaction_intent.py::test_unavailable_search_is_explicit_and_uses_zero_provider_calls",
       "backend/tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
-      "backend/tests/test_graph_projection_replay.py::test_event_reprocess_does_not_clear_world",
-      "backend/tests/test_graph_projection_replay.py::test_graph_readiness_is_rebuilding_only_for_world_rebuild",
-      "backend/tests/test_graph_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
-      "backend/tests/test_graph_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
-      "backend/tests/test_graph_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
-      "backend/tests/test_graph_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail",
       "backend/tests/test_graph_projection_worker.py::test_idle_connectivity_failure_marks_projector_degraded_without_exiting",
       "backend/tests/test_graph_projection_worker.py::test_pending_row_is_claimed_once_and_succeeds",
       "backend/tests/test_graph_projection_worker.py::test_poison_payload_is_dead_without_store_call",

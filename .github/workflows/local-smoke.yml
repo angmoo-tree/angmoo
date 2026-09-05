@@ -200,7 +200,7 @@ jobs:
             tests/test_l3_er3_graph_query_parity.py \
             tests/relationships/test_projection_commands.py \
             tests/test_graph_projection_metrics.py \
-            tests/test_graph_projection_replay.py \
+            tests/relationships/test_projection_replay.py \
             tests/test_graph_projection_worker.py \
             tests/test_relationship_graph_api.py \
             tests/test_relationship_graph_repository.py

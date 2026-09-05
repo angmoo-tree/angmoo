@@ -525,6 +525,18 @@
     {
       "markers": {
         "row_lock": [
+          30
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/relationships/repository/replay.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "19164fbc638ffdcb32d0cda76b6a8fae38024a555a9eb7209b094fb4fb0175f3",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
           18
         ]
       },
@@ -1000,19 +1012,6 @@
       "path": "backend/app/runtime/chat/world_generation.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "d020eaa538e571696b8b3d8c3609f72279d7d14c04f3dfc0b49e78915f4941f1",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "row_lock": [
-          118,
-          198
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/runtime/graph_projection/replay.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "4f73837f854a9ba7e81dce07f77410968b8ef167e84952f0bdac84e6e7227f35",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

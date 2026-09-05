@@ -1063,3 +1063,12 @@ Relationships가 payload 버전/서명/형식, source 적격성·삭제/숨김, 
 원래 **11개 정의와 nullable 조회 2개 AST 계약이 동일**하며, 집중 **47 passed / 14.94초**다. 기존 Command 테스트 7개 node를 `tests/relationships/test_projection_commands.py`로 이동하고 workflow/ER0 실제 소비자와 정확 node 지도를 갱신했다. 새 3개 node는 같은 Session·attached identity·숨김 pending write 감지·caller rollback·inactive 과거 membership 허용 및 missing/다른 World membership을 target 조회 전에 차단하는 오류를 검증한다. 첫 추출 실행은 이미 존재하는 동일 source-exclusion 상수를 확인해 정지했고, 중복 정의 대신 기존 같은 값에 연결한 뒤 진행했다. 기존 assertion/DDL/frozen 승인 범위는 변경하지 않았다. Source capture와 전체 B5/Hosted CI/installer는 후속 통합에서 검증한다.
 
 C5-C 최종 경계는 **748 modules / 2,545 edges / exact legacy 212**이며 더 이상 필요 없는 runtime→global models 예외 1개를 종료했다. PR258/263 API·응답·ORM와 full split evidence가 통과했고, 옮긴 기존 7개 node의 assertion/parametrize 계약도 직접 동일 비교했다. L4·ER0 current inventory가 통과했다.
+
+
+## AR-B5-C5-D — replay lease·high-water·완료 감사와 source 조회
+
+Relationships의 service가 생성/시작/lease 갱신/실패/성공 다섯 실제 상태 흐름을, repository가 active-run·source·잠금·high-water·정렬·dead·nullable 조회를 소유한다. 기존 ReplayStore는 canonical projection parent를 참조하는 같은 계약, GraphReplayError는 같은 오류 본문이다. World의 정렬된 식별자와 Relationships의 정렬된 outbox ID도 각각 실제 소유에 두었다. runtime의 Session 생성·clock 호출 위치·sidecar 실행·metrics 및 예외 순서는 그대로 유지한다. 생성은 flush-only, start/renew/finalize의 명시 commit/refresh 의미도 원래와 같다.
+
+원문 replay **5개 정의와 SQL 10개 및 outbox class 3개 AST 계약이 동일**하다. 집중 **39 passed / 18.74초**이며 기존 high-water 재개·delta tail 보존·삭제 원본 관계 복구·parity fail-closed·10-worker claim 경쟁을 유지한다. 새 node 없이 기존 replay 6개를 업무별 tests 경로로 옮겼으며 workflow/ER0 소비자와 full split 지도를 같이 갱신했다. 소유 코드에서 전역 model aggregate를 읽던 정확한 임시 edge 2개를 종료했다. Source capture/Hosted CI/installer와 잔여 Social/Relationship read·observation 전환은 부모 통합 및 다음 slice에서 진행한다.
+
+C5-D 최종 경계 **751 modules / 2,558 edges / exact legacy 210**, API·응답·ORM 및 full split evidence 오류 0을 확인했다. 이동한 기존 replay 6개 assertion도 직접 동일 비교했으며 최종 경로의 replay·구조 집중 **18 passed / 2.59초**다. L4 current inventory에서 옛 테스트 경로 한 건을 발견해 실제 policy 경로만 전환한 뒤 parity 97개를 유지하여 통과했다. ER0 current inventory도 통과했다.
