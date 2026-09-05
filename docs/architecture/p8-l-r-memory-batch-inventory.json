@@ -28,7 +28,7 @@
     },
     {
       "path": "backend/app/api/v1/routes/memory.py",
-      "sha256": "1cd34c6d1c6f9360dc05c94e3bcd3c329ab65e3b76a864c4345eba018ad42432"
+      "sha256": "5334608d77ff723676844b4e2a880b8760d97de48bc49572eef5bfef47e4f3fb"
     },
     {
       "path": "backend/app/domains/memory/__init__.py",
@@ -224,7 +224,7 @@
     },
     {
       "path": "backend/app/public_main.py",
-      "sha256": "cafb2d4e84d5a0d632e98cd9da5ffcee7a085ebd60051ed45c29555525ac3094"
+      "sha256": "fdcd942876d0979685d530276a4a5f0a1056838e5df91d6013c69b7e49c17d5e"
     },
     {
       "path": "backend/app/runtime/account_deletion.py",
@@ -232,7 +232,7 @@
     },
     {
       "path": "backend/app/runtime/characters/management.py",
-      "sha256": "fff2d96bdeb487e0ea2a77f0cb605bdbf95e75dadf80d1d5af1ea7f3eaa3bfb7"
+      "sha256": "af1069e3b2bf92bfb90dc985093f43507b9fbea876b884e436bf92e677fde0ae"
     },
     {
       "path": "backend/app/runtime/desktop_sidecar.py",

@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import NullPool
 
 from app import models, schemas
-from app.domains.chat.api import schemas as chat_schemas
+from app.domains.chat import schemas as chat_schemas
 from app.config import settings
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import community as community_crud

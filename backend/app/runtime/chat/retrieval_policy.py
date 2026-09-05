@@ -21,7 +21,7 @@ from app.domains.identity.public import (
 from app.domains.memory.infrastructure.sqlalchemy_models import (
     MemoryScopeSettingModel,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_models import (
+from app.domains.world_characters.models import (
     WorldCharacter,
 )
 from app.domains.worlds.models import World, WorldMembership

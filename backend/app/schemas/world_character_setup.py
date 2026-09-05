@@ -2,6 +2,6 @@
 
 import sys
 
-from app.domains.world_characters.api import setup_schemas as _implementation
+from app.domains.world_characters.schemas import setup as _implementation
 
 sys.modules[__name__] = _implementation

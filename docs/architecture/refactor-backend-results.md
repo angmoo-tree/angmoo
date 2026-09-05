@@ -467,3 +467,57 @@ M1 뒤 남아 있던 기존 credential privacy 테스트의 monkeypatch 위치 �
 공개 media mount는 기존 characters/posts/world-package-imports만 유지한다. World/draft/candidate를 anonymous 정적 경로에 추가하지 않았다. 관련 권한/비공개 검증의 통과를 실제 Installer/real-provider 검증으로 확대하지 않는다. 현재 Media M1~M6의 새 nodes는 26개이며 source introduction·통합 Actions·순차 merge는 root가 관리한다.
 
 M6 고정 후보에서 `--contracts --nodes`는 현재 **2,151 nodes**를 수집했다. 보호 계보 2,125개 대비 API/ORM·기존 assertion/suppression·누락 node·source split 오류는 없었다. 실패 목록은 M1~M5의 root 선형 capture를 기다리는 source 12개·test 21개뿐이며 M6 새 5개는 이 검사 당시 미커밋 도입이었다. source 고정 후 root가 M1~M6의 각 첫 도입 SHA에서 append-only 증거를 추가한다.
+## AR-B2 WorldCharacter 기반: 모델·계약·검증·생성기
+
+Worlds source `38c2610`에서 이어서 WC 6개 ORM을 단일 `models.py`로 모으고 HTTP schema, 순수 계약, 업무 오류, provider client, 응답 검증 및 Package seed를 역할별 경로로 옮겼다. provider budget·payload·검증·오류 본문과 seed의 caller Session/flush-only 의미는 유지한다. provider facade는 같은 module 객체를 가리키므로 기존 fake/monkeypatch와 계측 대상도 변하지 않는다. frozen SQLite v2→v3 본문은 변경하지 않고 옛 ORM 경로 두 개가 같은 class를 제공한다.
+
+18개 정확한 새 module에 부분 scope를 적용했다. 현재 실제 owner/setup/profile/lifecycle workflow는 다음 slice로 남으며 이들이 새 기반을 소비하는 bridge 43개를 종료 조건과 함께 기록했다. 5개 원본 분리 파일의 66개 symbol에 목적지·직접 소비자·행위 test node를 연결했다. 기존 contract test 파일은 WC 소유 경로로 이동하며 test assertion은 유지했다.
+
+- setup 계약·생성/승인·Package UoW 집중 회귀: **35 passed / 기존 1 warning / 19.49초**.
+- 새 동일 객체 검증과 기존 owner identity·runtime mode repair·embedded migration: **34 passed / 기존 1 warning / 65.61초**. 앞선 묶음과 contract 테스트가 겹치므로 두 수치를 유일 test node 합계로 해석하지 않는다.
+- public 승인 node: **604 유지 / 현재 2,094 PASS**.
+- 보존 `--contracts --nodes`: 기존 API·ORM·assertion·split·node 누락 없음. 보호 계보 **2,080 / 현재 2,094**. 선행 Identity·Worlds의 아직 capture되지 않은 신규 source 14개·node 12개 때문에 명령 전체는 exit 1이며 전체 PASS로 표시하지 않는다. root의 선형 통합에서 각 실제 source commit의 introduction evidence를 추가한다.
+- Live architecture **605 modules / 1,883 internal edges / legacy exact 287 PASS**, ER0 **75 PostgreSQL source / 역사 migration subset 87 / Neo4j 24 / Next 44 / workload 7 PASS**, L4 parity **97 nodes**, Memory batch inventory current. PostgreSQL 파일 감소는 WC ORM 두 파일을 한 파일로 모은 결과이며 table 계약은 그대로다.
+
+이 source slice는 WC workflow·HTTP·readiness의 전체 전환 완료가 아니다. 다음 slice는 기존 트랜잭션·오류 순서·capacity lock·provider retry·budget 및 imported World 경계를 보존하여 실제 업무 구현과 소비자를 이전한다. PR·merge·post-merge와 최종 backend/installer gate는 별도다.
+
+### AR-B2 WC owner identity 실제 서비스
+
+Foundation 이후 Character source `fe022c3`를 merge `7bc58b1`로 합쳤다. 실제 `OwnerControlledIdentityService`가 소유자 조회·생성·수정과 트랜잭션을 소유하며 기존 forwarding application/Protocol을 제거했다. Character의 특수 local seed·프로필 update는 해당 Character 서비스로, 설치 owner 조회는 Identity 서비스로 분리했다. seed의 같은 Session·세 번의 단계별 flush와 일반 create의 commit/IntegrityError rollback/refresh, update commit/refresh 순서는 유지한다. Character update helper 자체에는 새 flush가 없다.
+
+기존 owner identity 6개 node를 `tests/world_characters/test_owner_identity.py`로 이동했다. 새 seed/update 회귀는 실제 Session의 flush/commit 횟수, attached identity, rollback 후 행 제거·이전 값 복구 및 unrelated field 보존을 검증한다. Owner·Package UoW·manual Social 묶음은 **24 passed / 기존 1 warning / 17.97초**였다. 현재 API/ORM 계약은 frozen 기준과 같다. Character 합류로 옛 `app/services/agents.py` direct consumer 한 건이 없어져 G2 split의 현재 소비자를 실제 `runtime/characters/management.py`로 연결했다. Frozen 기준선이나 승인 node는 바꾸지 않았다.
+
+Live architecture는 **618 modules / 1,937 edges / legacy exact 281 PASS**, ER0 **75/87/24/44/7 PASS**, L4 parity **97**, Memory batch current이다. Owner 서비스 3개 exact module만 추가하고 기존 임시 bridge 중 실제로 사라진 연결을 제거했다. WC profile/Studio/entry/setup/runtime repair/readiness와 최종 HTTP 이전은 다음 slice다.
+
+
+### AR-B2 WC profile·Studio·lifecycle와 동일 SQL 조회 조립
+
+공개 profile/Studio/candidate의 기존 SQL join은 `runtime/world_characters/queries.py`로, 권한 확인·snapshot·typed candidate 이유 및 leave의 row version/state/replay/commit 정책은 WC 서비스로 분리했다. API/runtime에서 조회 collaborator를 주입하며 domain→runtime 또는 외부 ORM deep import를 만들지 않았다. 같은 Session과 attached 객체를 유지하고 selected-World leave의 Character 상태 쓰기도 해당 Character 서비스가 소유한다. 7개 기존 HTTP 경로를 `router/profile.py`로 옮겼으며 operation/schema 계약은 같다. 모든 남은 application forwarder와 repository Protocol을 실제 소비자 전환 후 제거했다. Runtime leave guard의 실제 Protocol은 `contracts/lifecycle.py`에 유지한다.
+
+- WC·owner/manual Social·Memory owner control: **35 passed / 기존 2 warnings / 9.83초**. 새 joined-read 회귀는 4종 read 각각 SQL 1회, 동일 이름 정렬의 tie-break, suspended/pending 필터 차이, outer join의 미연결 null 행, owner scope, 같은 Session/class identity 및 비활성 membership 제외를 검증한다. 첫 fixture는 DB에서 허용하지 않는 membership `inactive` 값을 넣어 실패했으며 기존 제약을 바꾸지 않고 실제 `left` 값으로 수정했다.
+- P8-E/R 현재 경로 계약·기존 architecture/partial scope 회귀: **80 passed / 2.16초**. P8-E의 현재 backend path 검사만 새 router로 연결했고 frozen JSON은 바꾸지 않았다.
+- Public 승인 **604 유지 / current 2,111 PASS**; 현재 API·OpenAPI·ORM 및 전체 split evidence **PASS**. 이 호출은 immutable Git blob 읽기를 memoize하여 동일 검사 중복 I/O를 줄였으며 검사 규칙/기준선을 바꾸지 않았다. 신규 source introduction capture 및 전체 assertion/node 통합 검사는 root의 선형 증거 절차에서 이어진다.
+- Live architecture **617 modules / 1,934 internal edges / exact legacy 281 PASS**, ER0 **75/87/24/44/7 PASS**, L4 parity **97**, Memory batch current. 기존 lifecycle test 3개 node를 WC 소유 경로로 옮기고 local-smoke·ER0·L4 실행 경로도 갱신했다.
+
+이 slice 뒤에도 autonomous setup/entry, runtime mode recovery, readiness, mixed cleanup과 잔여 호환 소비자 종료가 남는다. B2 전체·PR·merge·설치 검증 완료로 확대하지 않는다.
+
+
+### AR-B2 WC autonomous setup·입장·runtime repair 실제 구현
+
+1,699줄의 기존 setup 구현을 canonical service로 이전하고 동일 오류 계층을 `exceptions.py`로 옮겼다. 전환 전후 서비스 함수 본문 **42개 중 36개 AST가 동일**하며 generate/retry/approve/reject, 두 provider 단계, quota/attempt/실패 기록은 그대로다. 변경한 6개 함수는 Character 조회, World/membership/role 조회·membership seed·contract version 쓰기, Identity credential 조회를 실제 소유 서비스로 호출한다. nullable `db.get`과 scalar 차이, query 실행과 오류 변환 try 경계, 기존 flush/commit 위치를 유지했다. 외부 ORM aggregate는 삭제했다.
+
+runtime mode repair 정책은 WC service, 시작 시 session_factory/SQLite immediate 조립은 runtime으로 분리했다. imported World 제외·source marker·hash/profile/repertoire/daypart 검사 및 실패 사유 순서는 유지한다. cross-owner capacity count SQL은 runtime의 같은 query 경로로 이전했다. 첫 회귀에서 Character runtime의 새 count import 누락을 기존 capacity/활성화 테스트 5개가 잡았으며 연결을 수정한 뒤 같은 전체 묶음을 다시 통과했다.
+
+Setup·runtime repair·Agent capacity/동시 활성화·Package UoW는 **101 passed / 기존 3 warnings / 22.44초**였다. 기존 setup/runtime repair 테스트 두 파일을 `tests/world_characters/`로 옮겼고 assertion을 유지한다. 4개 정확한 module을 scope에 추가하고 실제 사라진 bridge를 제거했다. 현재 architecture **619 modules / 1,946 edges / exact legacy 281 PASS**, ER0 **75/87/24/44/7 PASS**, L4 parity **97**, Memory batch current이다. 잔여 setup/entry HTTP, readiness와 여러 업무 cleanup의 최종 소유 전환은 다음 slice다.
+
+Setup slice의 최종 현재 API·ORM 및 전체 split evidence 검사도 PASS였다. immutable Git blob 읽기 memoization만 사용했고 frozen source/checkpoint 내용은 변경하지 않았다.
+
+## AR-B6-A1 Chat 모델 정책·요청 계약 준비
+
+고정 source `9c1ad0f07cb824c158e07618d7b2ec1eca5f3135`에서 Chat의 schemas·exceptions·policies·model_binding 계약 네 파일을 실제 역할 경로로 옮겼다. 함수·클래스 본문 AST와 정책 상수는 동일하며 20개 실제 소비자와 기존 테스트의 module 참조를 바꿨다. Gemini HIGH/LOW, Gemma의 미설정 reasoning, token cap 및 lease 정책은 그대로다. 신규 행위나 신규 test node를 추가하지 않았다. Frozen migration 및 과거 inventory branch는 변경하지 않았다.
+
+- Chat B/D domain·identity/migration·모델 Hotfix·쪽지 회귀: **83 passed / 16.37초**, 고정 source에서 완료.
+- Live architecture **627 modules / 2,003 edges / exact legacy 281 PASS**. Deferred 22, L4 parity 97, ER0 76/87/24/44/7, P8-R current inventory PASS.
+- 정확한 기반 module 5개·entry 3개와 임시 소비 연결 8개만 scope에 반영했다. Thread repository/service, generation lifecycle 및 HTTP endpoint 구현은 아직 이전하지 않았다.
+
+이는 AR-B5 후 순차 통합할 독립 준비 source다. 전체 보존 계보 capture·통합 회귀·PR·merge·post-merge 및 AR-B6 완료로 표시하지 않는다.

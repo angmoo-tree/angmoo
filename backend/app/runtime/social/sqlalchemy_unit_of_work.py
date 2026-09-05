@@ -40,7 +40,7 @@ from app.domains.social.domain.writes import (
     ValidatedAutonomousWriteCommand,
 )
 from app.domains.world_characters.public import (
-    SqlAlchemyOwnerControlledIdentityRepository,
+    OwnerControlledIdentityService,
 )
 from app.core.sqlite_concurrency import (
     SqliteRetryPolicy,
@@ -746,7 +746,7 @@ def _observation_result(
 def _owner_actor(
     db: Session, *, world_id: str, current_user_id: str
 ) -> tuple[models.WorldCharacter, models.Character, models.User]:
-    snapshot = SqlAlchemyOwnerControlledIdentityRepository(db).get(
+    snapshot = OwnerControlledIdentityService(db).get(
         world_id=world_id,
         current_user_id=current_user_id,
     )

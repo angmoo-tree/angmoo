@@ -1415,6 +1415,89 @@
       "test_suppressions": {
         "tests/worlds/test_transition_contracts.py": {}
       }
+    },
+    {
+      "commit": "64537c7694819f5840aab9106f969f80c6c82d53",
+      "feature_id": "AR-B2",
+      "reason": "WorldCharacter canonical models contracts setup validation and seed with same class identity",
+      "tracked_files": {
+        "backend/app/domains/world_characters/contracts/__init__.py": "90d0a5a9721e46e23ee5ff4dcb704c63cfdde711",
+        "backend/app/domains/world_characters/contracts/provider.py": "c3c0f4239503e2bca964df561791f986dc63865a",
+        "backend/app/domains/world_characters/contracts/setup.py": "fc2c7a7c4aba1bbf62cf6784e632e9ab22f056d5",
+        "backend/app/domains/world_characters/exceptions.py": "95a581e17a5c983c5696a16f5945cdefe32ae781",
+        "backend/app/domains/world_characters/schemas/__init__.py": "6ccf66d7802e9d7d4252b3ff95661cac3bd4c695",
+        "backend/app/domains/world_characters/service/__init__.py": "d65341d349138ac1f4f627fc7db435dcb7051b67",
+        "backend/tests/world_characters/test_foundation_identity.py": "f06bdad8e5aa3454b6e7989630df4265215caa7a"
+      },
+      "test_nodes": [
+        "tests/world_characters/test_foundation_identity.py::test_frozen_migration_and_registry_use_the_same_six_model_classes",
+        "tests/world_characters/test_foundation_identity.py::test_provider_compatibility_keeps_monkeypatch_target_and_accounting_types"
+      ],
+      "test_assertions": {
+        "tests/world_characters/test_foundation_identity.py": {
+          "test_frozen_migration_and_registry_use_the_same_six_model_classes": [
+            "assert getattr(old_identity, name) is canonical",
+            "assert getattr(registered_models, name) is canonical",
+            "assert canonical.metadata is Base.metadata",
+            "assert Base.metadata.tables[canonical.__tablename__] is canonical.__table__",
+            "assert getattr(old_setup, name) is canonical",
+            "assert getattr(registered_models, name) is canonical",
+            "assert canonical.metadata is Base.metadata",
+            "assert Base.metadata.tables[canonical.__tablename__] is canonical.__table__"
+          ],
+          "test_provider_compatibility_keeps_monkeypatch_target_and_accounting_types": [
+            "assert old_provider is client",
+            "assert client.WorldCharacterProviderResult is provider.WorldCharacterProviderResult",
+            "assert client.WorldCharacterSetupProvider is provider.WorldCharacterSetupProvider",
+            "assert client.DirectLlmWorldCharacterSetupProvider is sentinel",
+            "assert original is not sentinel"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/world_characters/test_foundation_identity.py": {}
+      }
+    },
+    {
+      "commit": "cb9b18d67daf42fd8c9d93c68108e27a7cbc08e1",
+      "feature_id": "AR-B2",
+      "reason": "WorldCharacter owner identity service with same-Session Character seed and Identity owner context",
+      "tracked_files": {
+        "backend/app/domains/characters/service/owner_controlled.py": "e010a3b5aae9faa4edb651ecd4c06896411a0c30",
+        "backend/app/domains/identity/service/owner_context.py": "1d2e170b8ad4a3f7e87f89f64de89a71c43e5c7f",
+        "backend/tests/world_characters/test_owner_character_uow.py": "cc7e0602e9b83c1acbdd62328c2b47f18f315af4"
+      },
+      "test_nodes": [
+        "tests/world_characters/test_owner_character_uow.py::test_owner_character_seed_flushes_once_and_rollback_removes_the_attached_row",
+        "tests/world_characters/test_owner_character_uow.py::test_owner_character_update_defers_flush_and_preserves_unrelated_fields"
+      ],
+      "test_assertions": {
+        "tests/world_characters/test_owner_character_uow.py": {
+          "_database": [],
+          "_seed": [],
+          "test_owner_character_seed_flushes_once_and_rollback_removes_the_attached_row": [
+            "assert inspect(character).session is db",
+            "assert calls == ['flush']",
+            "assert character.handle == 'owner-owner-character-id'",
+            "assert character.topic_preferences == 'one, two'",
+            "assert character.persona_summary == 'Background'",
+            "assert character.status == 'active' and character.execution_mode == 'local'",
+            "assert character.promotion_usage_allowed is False",
+            "assert db.get(models.Character, 'owner-character-id') is None"
+          ],
+          "test_owner_character_update_defers_flush_and_preserves_unrelated_fields": [
+            "assert calls == []",
+            "assert inspect(character).session is db",
+            "assert character.name == 'Changed' and character.persona_summary == 'New intro'",
+            "assert character.handle == original_handle and character.execution_mode == 'local'",
+            "assert character.promotion_usage_allowed is False",
+            "assert character.name == 'Original' and character.persona_summary == 'Background'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/world_characters/test_owner_character_uow.py": {}
+      }
     }
   ]
 }

@@ -30,7 +30,7 @@ from app.credentials import (
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
-from app.domains.world_characters.domain.runtime_modes import (
+from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
     AUTONOMOUS_FEED_RUNTIME_MODE,
     LEGACY_FEED_RUNTIME_MODE,

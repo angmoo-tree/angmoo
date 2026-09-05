@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.config import Settings, settings
-from app.domains.chat.api import schemas
+from app.domains.chat import schemas
 from app.domains.chat.application import (
     BothRetrievalWorkflowCoordinator,
     CanonicalRetrievalPlanningService,
@@ -36,7 +36,7 @@ from app.domains.chat.domain import (
     TERMINAL_STATES,
     build_request_scope_hash,
 )
-from app.domains.chat.domain.errors import (
+from app.domains.chat.exceptions import (
     MessageCredentialInvalidError,
     MessageCredentialRequiredError,
     MessageForbiddenError,

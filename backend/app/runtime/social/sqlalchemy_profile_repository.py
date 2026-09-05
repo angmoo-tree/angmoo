@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from app.runtime.world_characters.composition import public_profile_service
+
 import binascii
 import hashlib
 import json
@@ -30,7 +32,6 @@ from app.domains.social.public import (
     WorldCharacterSocialProfileValidationError,
 )
 from app.domains.world_characters.public import (
-    SqlAlchemyWorldCharacterPublicProfileReader,
     WorldCharacterProfileNotFoundError,
 )
 from app.runtime.social.sqlalchemy_read_repository import (
@@ -54,7 +55,7 @@ class SqlAlchemyWorldCharacterSocialProfileReader:
         query: WorldCharacterSocialProfileQuery,
     ) -> WorldCharacterSocialProfilePage:
         try:
-            profile = SqlAlchemyWorldCharacterPublicProfileReader(
+            profile = public_profile_service(
                 self.db
             ).get_for_world(
                 world_id=query.world_id,

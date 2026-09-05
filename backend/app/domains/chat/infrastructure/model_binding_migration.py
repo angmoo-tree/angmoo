@@ -9,8 +9,8 @@ from sqlalchemy import MetaData, text
 from sqlalchemy.schema import CreateIndex, CreateTable
 
 from app.core.db import Base
-from app.domains.chat.domain.model_binding import MessageModelBindingMode
-from app.domains.chat.domain.policies import MESSAGE_MODELS
+from app.domains.chat.contracts.model_binding import MessageModelBindingMode
+from app.domains.chat.policies import MESSAGE_MODELS
 from app.domains.chat.infrastructure.world_scope_migration import (
     add_world_scoped_message_threads_v4_table,
 )

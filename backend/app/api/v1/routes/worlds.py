@@ -11,6 +11,7 @@ from app.domains.identity import browser_session
 from app.domains.world_characters import public as world_character_setup
 from app.domains.worlds import public as world_service
 from app.domains.worlds.router import _raise_world_error
+from app.api.world_character_dependencies import lifecycle_service
 
 
 router = APIRouter(prefix="/worlds", tags=["worlds"])
@@ -198,11 +199,9 @@ def leave_world_with_character(
 ) -> schemas.WorldCharacterLeaveRead:
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
-        result = world_character_setup.leave_studio_world_character(
-            world_character_setup.SqlAlchemyStudioWorldCharacterLifecycle(
-                db,
-                runtime_guard=_WorldCharacterLeaveRuntimeGuard(db),
-            ),
+        result = lifecycle_service(
+            db, runtime_guard=_WorldCharacterLeaveRuntimeGuard(db),
+        ).leave(
             world_id=world_id,
             character_id=character_id,
             current_user_id=user.id,

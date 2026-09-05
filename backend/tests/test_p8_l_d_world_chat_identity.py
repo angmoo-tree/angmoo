@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, func, select, text
 from sqlalchemy.orm import Session
 
 from app import models
-from app.domains.chat.api import schemas
+from app.domains.chat import schemas
 from app.runtime.chat import sqlalchemy_service as world_chat
 
 

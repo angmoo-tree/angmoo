@@ -19,7 +19,7 @@ from app.domains.social.public import (
     SocialSearchState,
     find_keyword_post_ids,
 )
-from app.domains.world_characters.domain.runtime_modes import (
+from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_FEED_RUNTIME_MODE,
 )
 from app.services import world_character_contracts
