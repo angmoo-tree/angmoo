@@ -95,7 +95,7 @@ from app.policies import name_policy
 from app.runtime.resident import activity_policy as agent_activity_policy
 from app.domains.world_characters.service import readiness as activity_profile_readiness
 from app.services import community as community_service
-from app.services import agent_runs as agent_run_service
+from app.runtime.resident import execution as agent_run_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.services import image_prompt_safety
 from app.services import maintenance as maintenance_service

@@ -1114,3 +1114,14 @@ C6d3 최종 고정 제품 tree **478 passed /기존 PostgreSQL1 skipped/기존wa
 
 
 C6d4a 최종 고정 tree **480 passed /기존 PostgreSQL1 skipped/기존warnings4/192.09초**. 경계 **763modules/2582edges/exact legacy205/cycle0**, L4 **763/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2284**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions 불변이다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 뒤 확인한다.
+
+
+## AR-B4-C6 — 슬롯 요청 정책·Resident 실행 연결
+
+슬롯 요청 2개의 원래 업무 판단을 Routines 서비스로 옮겼다. 런타임은 같은 Session에서 원래 유지보수 제한 → 캐릭터·credential 검증 → 설정 저장 → 최초 시각 → 슬롯 lock 순서를 지연 평가로 연결한다. 신규 SQLite 2개는 commit=False/True 각각 pending 행, observer 가시성, clock/lock 호출 시점, 임시 claim과 rollback을 검사한다.
+
+Resident 실행 10개 함수는 실제 provider·lease·run_created·보상 순서를 그대로 `runtime/resident/execution.py`로 옮겼다. Scheduler의 lifecycle 연결은 원래 실제 서비스를 직접 참조한다. HTTP의 실행 오류는 동일 Routines 오류 클래스를 사용한다. 기존 소스 경계 검사는 execution/post_selection/scheduler의 정확한 세 파일을 모두 검사하고 원래 positive/forbidden assertion을 유지한다. 보안 소스 검사는 새 실행과 기존 Memory 잔여를 모두 포함한다. 초기 집중 152개 통과 뒤 mock 대상 2개와 실제 scheduler 연결을 수정했고, 해당 3개 재검사는 통과했다. 최종 확대 검증은 아래에 별도로 기록한다.
+
+B7 Memory 7개 실제 정의와 원래 미호출/검사용 5개 정의는 아직 제거하지 않았다. Social·Memory·Identity·Operations·Runtime·LangGraph의 독립 source 합류까지 필요한 기존 구현 연결은 정확한 7개 edge와 제거 조건으로 기록한다. 이는 해당 후속 단계나 전체 B4 완료 주장이 아니다.
+
+최종 고정 대상 검증은 **490 passed, 1 skipped, 4 warnings / 209.73초**이다. skip은 기존 PostgreSQL 환경 표식이며 경고도 기존 항목이다. 경계는 766 modules / 2609 edges / exact legacy 202 / cycle 0, L4 766/14/97, ER0 85/87/24/44/7 및 Memory batch current이다. 읽기 전용 원래 6개 검사는 오류 0, 보호 2139개·현재 2286개 노드로 확인했다. 선행 source 최초 도입 원장 합류 전이므로 이 진단은 stock 보존 gate나 Hosted CI 통과를 대신하지 않는다.

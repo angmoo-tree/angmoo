@@ -7,7 +7,7 @@ import pytest
 
 from app.services import agent_writing
 from app.services import community
-from app.services import agent_runs
+from app.runtime.resident import execution as agent_runs
 
 
 KST = ZoneInfo("Asia/Seoul")

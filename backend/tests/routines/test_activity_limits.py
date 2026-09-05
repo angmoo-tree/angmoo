@@ -23,7 +23,7 @@ from app.domains.routines import constants as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.domains.worlds import public as world_service
 from app.runtime.resident import activity_policy as agent_activity_policy
-from app.services import agent_runs as agent_run_service
+from app.runtime.resident import execution as agent_run_service
 from app.runtime.resident import scheduler as resident_tick_scheduler
 from app.runtime.characters import creator as draft_service
 from app.runtime.characters import management as agent_service
@@ -939,7 +939,7 @@ def test_file_backed_sqlite_tick_claims_two_naive_due_slots(
         )
 
     monkeypatch.setattr(
-        resident_tick_scheduler.agent_runs,
+        resident_tick_scheduler,
         "reconcile_all_elapsed_routines",
         lambda _db, *, references: SimpleNamespace(completed=0, skipped=0),
     )
@@ -1144,7 +1144,7 @@ def test_resident_scheduler_tick_runner_uses_configured_global_tick(
 
     monkeypatch.setattr(resident_tick_scheduler, "SessionLocal", _SessionContext)
     monkeypatch.setattr(
-        resident_tick_scheduler.agent_runs,
+        resident_tick_scheduler,
         "reconcile_all_elapsed_routines",
         lambda _db, *, references: SimpleNamespace(completed=0, skipped=0),
     )
@@ -1899,7 +1899,7 @@ def test_activation_uses_canonical_initial_schedule(
         )
 
     monkeypatch.setattr(
-        agent_activity_policy,
+        agent_activity_schedule,
         "initial_tick_schedule",
         _initial_schedule,
     )

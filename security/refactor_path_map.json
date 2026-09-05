@@ -10927,6 +10927,7 @@
           "backend/app/domains/routines/service/run_identity.py",
           "backend/app/domains/routines/service/run_results.py",
           "backend/app/domains/routines/service/session_keys.py",
+          "backend/app/domains/routines/service/slot_requests.py",
           "backend/app/domains/routines/service/slot_status.py",
           "backend/app/domains/routines/service/social_context.py",
           "backend/app/domains/routines/service/state_prompts.py",
@@ -10937,6 +10938,7 @@
           "backend/app/domains/social/repository/resident_context.py",
           "backend/app/runtime/resident/credential_profiles.py",
           "backend/app/runtime/resident/decision_lanes.py",
+          "backend/app/runtime/resident/execution.py",
           "backend/app/runtime/resident/gateway_results.py",
           "backend/app/runtime/resident/read_only_lanes.py",
           "backend/app/runtime/resident/request_options.py",
@@ -11106,6 +11108,7 @@
           "old": "backend/app/services/agent_runs.py::logger",
           "new": "backend/app/services/agent_runs.py::logger",
           "direct_consumers": [
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -11156,8 +11159,8 @@
           "old": "backend/app/services/agent_runs.py::GENERIC_OBSERVATION_RESULT",
           "new": "backend/app/domains/routines/constants.py::GENERIC_OBSERVATION_RESULT",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py",
-            "backend/app/domains/routines/service/activity_evidence.py"
+            "backend/app/domains/routines/service/activity_evidence.py",
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
@@ -11247,7 +11250,7 @@
           "old": "backend/app/services/agent_runs.py::TOOL_CHOICE_COMPLETE_TICK",
           "new": "backend/app/domains/routines/constants.py::TOOL_CHOICE_COMPLETE_TICK",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11260,7 +11263,7 @@
           "old": "backend/app/services/agent_runs.py::TOOL_CHOICE_THREAD_OR_COMPLETE",
           "new": "backend/app/domains/routines/constants.py::TOOL_CHOICE_THREAD_OR_COMPLETE",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11273,7 +11276,7 @@
           "old": "backend/app/services/agent_runs.py::TOOL_CHOICE_SAVE_STATE",
           "new": "backend/app/domains/routines/constants.py::TOOL_CHOICE_SAVE_STATE",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11286,7 +11289,7 @@
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_COMPLETE_TICK",
           "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_COMPLETE_TICK",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11299,7 +11302,7 @@
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_THREAD_OR_COMPLETE",
           "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_THREAD_OR_COMPLETE",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11312,7 +11315,7 @@
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_SAVE_STATE",
           "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_SAVE_STATE",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11339,7 +11342,7 @@
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_V6_INBOX_LANE",
           "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_V6_INBOX_LANE",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11364,7 +11367,7 @@
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_V6_FEED_SCAN_LANE",
           "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_V6_FEED_SCAN_LANE",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11377,7 +11380,7 @@
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_V6_FEED_HISTORY_SANITIZE_LANE",
           "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_V6_FEED_HISTORY_SANITIZE_LANE",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11390,8 +11393,8 @@
           "old": "backend/app/services/agent_runs.py::READ_ONLY_LANE_TIMEOUT_SECONDS",
           "new": "backend/app/runtime/resident/read_only_lanes.py::READ_ONLY_LANE_TIMEOUT_SECONDS",
           "direct_consumers": [
-            "backend/app/runtime/resident/read_only_lanes.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/runtime/resident/read_only_lanes.py"
           ],
           "test_nodes": [
             "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
@@ -11442,8 +11445,8 @@
           "old": "backend/app/services/agent_runs.py::FEED_HISTORY_SANITIZE_TIMEOUT_SECONDS",
           "new": "backend/app/runtime/resident/read_only_lanes.py::FEED_HISTORY_SANITIZE_TIMEOUT_SECONDS",
           "direct_consumers": [
-            "backend/app/runtime/resident/read_only_lanes.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/runtime/resident/read_only_lanes.py"
           ],
           "test_nodes": [
             "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
@@ -11455,8 +11458,8 @@
           "old": "backend/app/services/agent_runs.py::FEED_HISTORY_SANITIZE_MAX_ATTEMPTS",
           "new": "backend/app/runtime/resident/read_only_lanes.py::FEED_HISTORY_SANITIZE_MAX_ATTEMPTS",
           "direct_consumers": [
-            "backend/app/runtime/resident/read_only_lanes.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/runtime/resident/read_only_lanes.py"
           ],
           "test_nodes": [
             "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
@@ -11468,7 +11471,7 @@
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_V6_STATE_LANE",
           "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_V6_STATE_LANE",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11481,7 +11484,7 @@
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_COMMUNITY_ONCE",
           "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_COMMUNITY_ONCE",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11507,7 +11510,7 @@
           "old": "backend/app/services/agent_runs.py::_feed_history_sanitize_stream_params",
           "new": "backend/app/runtime/resident/request_options.py::_feed_history_sanitize_stream_params",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11520,7 +11523,7 @@
           "old": "backend/app/services/agent_runs.py::_feed_scan_stream_params",
           "new": "backend/app/runtime/resident/request_options.py::_feed_scan_stream_params",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11547,6 +11550,7 @@
           "new": "backend/app/domains/routines/constants.py::GEMINI_FREE_POLICY_ID",
           "direct_consumers": [
             "backend/app/domains/routines/service/action_prompts.py",
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -11578,6 +11582,7 @@
           "old": "backend/app/services/agent_runs.py::GEMINI_FREE_INBOX_CANDIDATE_MAX",
           "new": "backend/app/domains/routines/constants.py::GEMINI_FREE_INBOX_CANDIDATE_MAX",
           "direct_consumers": [
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -11591,6 +11596,7 @@
           "old": "backend/app/services/agent_runs.py::GEMINI_FREE_FEED_CANDIDATE_MAX",
           "new": "backend/app/domains/routines/constants.py::GEMINI_FREE_FEED_CANDIDATE_MAX",
           "direct_consumers": [
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -11604,7 +11610,7 @@
           "old": "backend/app/services/agent_runs.py::GEMINI_FREE_WRITING_SEED_MAX",
           "new": "backend/app/domains/routines/constants.py::GEMINI_FREE_WRITING_SEED_MAX",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11654,7 +11660,7 @@
           "new": "backend/app/domains/routines/constants.py::DEFAULT_ACTIVITY_ACTIONS",
           "direct_consumers": [
             "backend/app/domains/routines/service/action_prompts.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -11708,7 +11714,7 @@
           "direct_consumers": [
             "backend/app/api/v1/routes/agents.py",
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11789,7 +11795,7 @@
           "old": "backend/app/services/agent_runs.py::CredentialSyncError",
           "new": "backend/app/domains/routines/exceptions.py::CredentialSyncError",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -11802,7 +11808,7 @@
           "old": "backend/app/services/agent_runs.py::ReadOnlyLaneRetryExhausted",
           "new": "backend/app/domains/routines/exceptions.py::ReadOnlyLaneRetryExhausted",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py",
+            "backend/app/runtime/resident/execution.py",
             "backend/app/runtime/resident/read_only_lanes.py"
           ],
           "test_nodes": [
@@ -11815,7 +11821,7 @@
           "old": "backend/app/services/agent_runs.py::ReadOnlyLaneDeferredError",
           "new": "backend/app/domains/routines/exceptions.py::ReadOnlyLaneDeferredError",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
@@ -11827,7 +11833,7 @@
           "old": "backend/app/services/agent_runs.py::AgentSlotUnavailableError",
           "new": "backend/app/domains/runtime/contracts.py::AgentSlotUnavailableError",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
@@ -11838,7 +11844,7 @@
           "new": "backend/app/domains/routines/exceptions.py::AgentSessionBusyError",
           "direct_consumers": [
             "backend/app/api/v1/routes/agents.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -12002,7 +12008,7 @@
           "old": "backend/app/services/agent_runs.py::_format_recent_feed_sections",
           "new": "backend/app/domains/routines/service/feed_context.py::_format_recent_feed_sections",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
@@ -12015,7 +12021,7 @@
           "old": "backend/app/services/agent_runs.py::_tool_choice_any",
           "new": "backend/app/runtime/resident/request_options.py::_tool_choice_any",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -12028,7 +12034,7 @@
           "old": "backend/app/services/agent_runs.py::_resident_public_tools_allow",
           "new": "backend/app/domains/routines/service/tool_policy.py::_resident_public_tools_allow",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -12041,7 +12047,7 @@
           "old": "backend/app/services/agent_runs.py::_gemini_free_effective_actions",
           "new": "backend/app/domains/routines/service/tool_policy.py::_gemini_free_effective_actions",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -12054,7 +12060,7 @@
           "old": "backend/app/services/agent_runs.py::_scratch_session_key",
           "new": "backend/app/domains/routines/service/session_keys.py::_scratch_session_key",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -12067,7 +12073,7 @@
           "old": "backend/app/services/agent_runs.py::_main_run_session_key",
           "new": "backend/app/domains/routines/service/session_keys.py::_main_run_session_key",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -12080,7 +12086,7 @@
           "old": "backend/app/services/agent_runs.py::_tool_auth_key",
           "new": "backend/app/domains/routines/service/session_keys.py::_tool_auth_key",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -12093,7 +12099,7 @@
           "old": "backend/app/services/agent_runs.py::_activity_daypart_window",
           "new": "backend/app/domains/routines/service/session_keys.py::_activity_daypart_window",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -12106,7 +12112,7 @@
           "old": "backend/app/services/agent_runs.py::_daypart_main_session_key",
           "new": "backend/app/domains/routines/service/session_keys.py::_daypart_main_session_key",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -12119,7 +12125,7 @@
           "old": "backend/app/services/agent_runs.py::_daypart_persistent_session_allowed",
           "new": "backend/app/domains/routines/service/session_keys.py::_daypart_persistent_session_allowed",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -12132,6 +12138,7 @@
           "old": "backend/app/services/agent_runs.py::_purge_expired_daypart_memory_events",
           "new": "backend/app/services/agent_runs.py::_purge_expired_daypart_memory_events",
           "direct_consumers": [
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -12142,7 +12149,7 @@
           "old": "backend/app/services/agent_runs.py::_collect_v6_inbox_candidates",
           "new": "backend/app/domains/routines/service/feed_context.py::_collect_v6_inbox_candidates",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
@@ -12155,7 +12162,7 @@
           "old": "backend/app/services/agent_runs.py::_format_v6_inbox_scan_context",
           "new": "backend/app/domains/routines/service/action_candidates.py::_format_v6_inbox_scan_context",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -12183,7 +12190,7 @@
           "old": "backend/app/services/agent_runs.py::_latest_v6_feed_interest_payload",
           "new": "backend/app/domains/routines/service/activity_evidence.py::_latest_v6_feed_interest_payload",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
@@ -12196,7 +12203,7 @@
           "old": "backend/app/services/agent_runs.py::_latest_v6_feed_history_sanitize_payload",
           "new": "backend/app/domains/routines/service/activity_evidence.py::_latest_v6_feed_history_sanitize_payload",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
@@ -12209,7 +12216,7 @@
           "old": "backend/app/services/agent_runs.py::_latest_v6_inbox_review_payload",
           "new": "backend/app/domains/routines/service/activity_evidence.py::_latest_v6_inbox_review_payload",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
@@ -12222,7 +12229,7 @@
           "old": "backend/app/services/agent_runs.py::_v6_inbox_candidates_from_review",
           "new": "backend/app/domains/routines/service/feed_context.py::_v6_inbox_candidates_from_review",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
@@ -12235,7 +12242,7 @@
           "old": "backend/app/services/agent_runs.py::_format_v6_inbox_compact_candidate",
           "new": "backend/app/domains/routines/service/action_candidates.py::_format_v6_inbox_compact_candidate",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -12248,7 +12255,7 @@
           "old": "backend/app/services/agent_runs.py::_format_v6_feed_interests",
           "new": "backend/app/domains/routines/service/feed_context.py::_format_v6_feed_interests",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
@@ -12271,6 +12278,7 @@
           "old": "backend/app/services/agent_runs.py::_filter_daypart_duplicate_feed_interest",
           "new": "backend/app/services/agent_runs.py::_filter_daypart_duplicate_feed_interest",
           "direct_consumers": [
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -12281,6 +12289,7 @@
           "old": "backend/app/services/agent_runs.py::_filter_daypart_duplicate_inbox_candidates",
           "new": "backend/app/services/agent_runs.py::_filter_daypart_duplicate_inbox_candidates",
           "direct_consumers": [
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -12291,6 +12300,7 @@
           "old": "backend/app/services/agent_runs.py::_build_daypart_memory_note",
           "new": "backend/app/services/agent_runs.py::_build_daypart_memory_note",
           "direct_consumers": [
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -12311,6 +12321,7 @@
           "old": "backend/app/services/agent_runs.py::_record_provided_daypart_observations",
           "new": "backend/app/services/agent_runs.py::_record_provided_daypart_observations",
           "direct_consumers": [
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -12321,6 +12332,7 @@
           "old": "backend/app/services/agent_runs.py::_format_v6_action_menu",
           "new": "backend/app/services/agent_runs.py::_format_v6_action_menu",
           "direct_consumers": [
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -12331,7 +12343,7 @@
           "old": "backend/app/services/agent_runs.py::_format_v6_action_menu_table",
           "new": "backend/app/domains/routines/service/action_menu.py::_format_v6_action_menu_table",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_menu.py::test_v6_action_menu_exposes_create_post_only_with_prepared_brief",
@@ -12345,7 +12357,7 @@
           "old": "backend/app/services/agent_runs.py::_build_v6_prepared_create_post_brief",
           "new": "backend/app/domains/routines/service/action_briefs.py::_build_v6_prepared_create_post_brief",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -12547,7 +12559,7 @@
           "old": "backend/app/services/agent_runs.py::_build_v6_inbox_lane_prompt",
           "new": "backend/app/domains/routines/service/perception_prompts.py::_build_v6_inbox_lane_prompt",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -12565,7 +12577,7 @@
           "old": "backend/app/services/agent_runs.py::_build_v6_feed_history_sanitize_lane_prompt",
           "new": "backend/app/domains/routines/service/perception_prompts.py::_build_v6_feed_history_sanitize_lane_prompt",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -12583,7 +12595,7 @@
           "old": "backend/app/services/agent_runs.py::_build_v6_feed_scan_lane_prompt",
           "new": "backend/app/domains/routines/service/perception_prompts.py::_build_v6_feed_scan_lane_prompt",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -12637,7 +12649,7 @@
           "old": "backend/app/services/agent_runs.py::_build_v6_final_action_prompt",
           "new": "backend/app/domains/routines/service/action_prompts.py::_build_v6_final_action_prompt",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -12655,7 +12667,7 @@
           "old": "backend/app/services/agent_runs.py::_build_v6_state_lane_message",
           "new": "backend/app/domains/routines/service/state_prompts.py::_build_v6_state_lane_message",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -12673,7 +12685,7 @@
           "old": "backend/app/services/agent_runs.py::_build_v6_state_lane_prompt",
           "new": "backend/app/domains/routines/service/state_prompts.py::_build_v6_state_lane_prompt",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -12691,7 +12703,7 @@
           "old": "backend/app/services/agent_runs.py::_run_feed_perception",
           "new": "backend/app/runtime/resident/decision_lanes.py::_run_feed_perception",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
@@ -12734,7 +12746,7 @@
           "new": "backend/app/domains/routines/service/action_prompts.py::_action_decision_allows_thread",
           "direct_consumers": [
             "backend/app/domains/routines/service/action_prompts.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -12770,7 +12782,7 @@
           "old": "backend/app/services/agent_runs.py::_run_action_decision",
           "new": "backend/app/runtime/resident/decision_lanes.py::_run_action_decision",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
@@ -12861,7 +12873,7 @@
           "old": "backend/app/services/agent_runs.py::_should_allow_resident_thread_tool",
           "new": "backend/app/domains/routines/service/tool_policy.py::_should_allow_resident_thread_tool",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -12874,7 +12886,7 @@
           "old": "backend/app/services/agent_runs.py::_format_recent_own_posts_to_avoid",
           "new": "backend/app/domains/routines/service/feed_context.py::_format_recent_own_posts_to_avoid",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
@@ -12887,7 +12899,7 @@
           "old": "backend/app/services/agent_runs.py::_format_recent_activity_summary",
           "new": "backend/app/domains/routines/service/feed_context.py::_format_recent_activity_summary",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
@@ -12913,7 +12925,7 @@
           "old": "backend/app/services/agent_runs.py::_format_inbox_threads",
           "new": "backend/app/domains/routines/service/feed_context.py::_format_inbox_threads",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
@@ -12926,7 +12938,7 @@
           "old": "backend/app/services/agent_runs.py::_format_social_connection_candidate",
           "new": "backend/app/domains/routines/service/social_context.py::_format_social_connection_candidate",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
@@ -12952,7 +12964,7 @@
           "old": "backend/app/services/agent_runs.py::_format_strong_social_connection_candidate",
           "new": "backend/app/domains/routines/service/social_context.py::_format_strong_social_connection_candidate",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
@@ -12965,7 +12977,7 @@
           "old": "backend/app/services/agent_runs.py::_format_relationship_review_candidate",
           "new": "backend/app/domains/routines/service/social_context.py::_format_relationship_review_candidate",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
@@ -12978,7 +12990,7 @@
           "old": "backend/app/services/agent_runs.py::_format_observation_result",
           "new": "backend/app/domains/routines/service/activity_evidence.py::_format_observation_result",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
@@ -13038,7 +13050,7 @@
           "old": "backend/app/services/agent_runs.py::_policy_allows_observe",
           "new": "backend/app/domains/routines/service/tool_policy.py::_policy_allows_observe",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
@@ -13051,7 +13063,7 @@
           "old": "backend/app/services/agent_runs.py::_has_state_saved_since",
           "new": "backend/app/domains/routines/service/activity_evidence.py::_has_state_saved_since",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
@@ -13064,8 +13076,8 @@
           "old": "backend/app/services/agent_runs.py::_has_activity_since",
           "new": "backend/app/domains/routines/service/activity_evidence.py::_has_activity_since",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py",
-            "backend/app/domains/routines/service/activity_evidence.py"
+            "backend/app/domains/routines/service/activity_evidence.py",
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
@@ -13078,7 +13090,7 @@
           "old": "backend/app/services/agent_runs.py::_has_tick_completed_since",
           "new": "backend/app/domains/routines/service/activity_evidence.py::_has_tick_completed_since",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
@@ -13091,7 +13103,7 @@
           "old": "backend/app/services/agent_runs.py::_has_thread_viewed_since",
           "new": "backend/app/domains/routines/service/activity_evidence.py::_has_thread_viewed_since",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
@@ -13118,7 +13130,7 @@
           "old": "backend/app/services/agent_runs.py::_format_tick_public_action_ledger_since",
           "new": "backend/app/domains/routines/service/activity_evidence.py::_format_tick_public_action_ledger_since",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
@@ -13131,7 +13143,7 @@
           "old": "backend/app/services/agent_runs.py::_format_tick_activity_since",
           "new": "backend/app/domains/routines/service/activity_evidence.py::_format_tick_activity_since",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
@@ -13157,7 +13169,7 @@
           "old": "backend/app/services/agent_runs.py::_format_tick_observation_context_since",
           "new": "backend/app/domains/routines/service/activity_evidence.py::_format_tick_observation_context_since",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
@@ -13170,7 +13182,7 @@
           "old": "backend/app/services/agent_runs.py::_is_success_status",
           "new": "backend/app/domains/routines/service/execution_results.py::_is_success_status",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
@@ -13232,7 +13244,7 @@
           "old": "backend/app/services/agent_runs.py::_runtime_error_backoff",
           "new": "backend/app/domains/routines/service/run_backoff.py::_runtime_error_backoff",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
@@ -13296,8 +13308,8 @@
           "old": "backend/app/services/agent_runs.py::_read_only_lane_deferred_retry_at",
           "new": "backend/app/runtime/resident/read_only_lanes.py::_read_only_lane_deferred_retry_at",
           "direct_consumers": [
-            "backend/app/runtime/resident/read_only_lanes.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/runtime/resident/read_only_lanes.py"
           ],
           "test_nodes": [
             "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
@@ -13322,8 +13334,8 @@
           "old": "backend/app/services/agent_runs.py::_run_read_only_lane_with_retry",
           "new": "backend/app/runtime/resident/read_only_lanes.py::_run_read_only_lane_with_retry",
           "direct_consumers": [
-            "backend/app/runtime/resident/read_only_lanes.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/runtime/resident/read_only_lanes.py"
           ],
           "test_nodes": [
             "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
@@ -13335,8 +13347,8 @@
           "old": "backend/app/services/agent_runs.py::_build_read_only_lane_deferred_gateway_result",
           "new": "backend/app/runtime/resident/read_only_lanes.py::_build_read_only_lane_deferred_gateway_result",
           "direct_consumers": [
-            "backend/app/runtime/resident/read_only_lanes.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/runtime/resident/read_only_lanes.py"
           ],
           "test_nodes": [
             "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
@@ -13348,8 +13360,8 @@
           "old": "backend/app/services/agent_runs.py::_feed_history_sanitize_metadata_fallback_reason",
           "new": "backend/app/runtime/resident/read_only_lanes.py::_feed_history_sanitize_metadata_fallback_reason",
           "direct_consumers": [
-            "backend/app/runtime/resident/read_only_lanes.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/runtime/resident/read_only_lanes.py"
           ],
           "test_nodes": [
             "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
@@ -13361,7 +13373,7 @@
           "old": "backend/app/services/agent_runs.py::_runtime_last_error",
           "new": "backend/app/domains/routines/service/execution_results.py::_runtime_last_error",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
@@ -13376,7 +13388,7 @@
           "new": "backend/app/domains/routines/service/tick_schedule.py::aware_utc",
           "direct_consumers": [
             "backend/app/domains/routines/service/social_context.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
@@ -13416,7 +13428,7 @@
           "old": "backend/app/services/agent_runs.py::_build_complete_tick_followup_message",
           "new": "backend/app/domains/routines/service/state_prompts.py::_build_complete_tick_followup_message",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -13434,7 +13446,7 @@
           "old": "backend/app/services/agent_runs.py::_build_complete_tick_followup_prompt",
           "new": "backend/app/domains/routines/service/state_prompts.py::_build_complete_tick_followup_prompt",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -13452,7 +13464,7 @@
           "old": "backend/app/services/agent_runs.py::_build_memory_note_refine_message",
           "new": "backend/app/domains/routines/service/state_prompts.py::_build_memory_note_refine_message",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -13470,7 +13482,7 @@
           "old": "backend/app/services/agent_runs.py::_build_memory_note_refine_prompt",
           "new": "backend/app/domains/routines/service/state_prompts.py::_build_memory_note_refine_prompt",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -13488,7 +13500,7 @@
           "old": "backend/app/services/agent_runs.py::_build_v6_state_recovery_message",
           "new": "backend/app/domains/routines/service/state_prompts.py::_build_v6_state_recovery_message",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -13506,7 +13518,7 @@
           "old": "backend/app/services/agent_runs.py::_build_v6_state_recovery_prompt",
           "new": "backend/app/domains/routines/service/state_prompts.py::_build_v6_state_recovery_prompt",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -13524,7 +13536,7 @@
           "old": "backend/app/services/agent_runs.py::_build_selected_mode_completion_message",
           "new": "backend/app/domains/routines/service/action_prompts.py::_build_selected_mode_completion_message",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -13542,7 +13554,7 @@
           "old": "backend/app/services/agent_runs.py::_build_selected_mode_completion_prompt",
           "new": "backend/app/domains/routines/service/action_prompts.py::_build_selected_mode_completion_prompt",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -13560,7 +13572,7 @@
           "old": "backend/app/services/agent_runs.py::_build_extra_system_prompt",
           "new": "backend/app/domains/routines/service/execution_prompts.py::_build_extra_system_prompt",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -13578,7 +13590,7 @@
           "old": "backend/app/services/agent_runs.py::_build_agent_message",
           "new": "backend/app/domains/routines/service/execution_prompts.py::_build_agent_message",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
@@ -13596,7 +13608,7 @@
           "old": "backend/app/services/agent_runs.py::_validate_character_and_credential",
           "new": "backend/app/domains/routines/service/run_identity.py::_validate_character_and_credential",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_identity.py::test_run_identity_reads_attached_pending_values_without_committing",
@@ -13611,7 +13623,7 @@
           "old": "backend/app/services/agent_runs.py::_ensure_slot_auth_profile",
           "new": "backend/app/runtime/resident/credential_profiles.py::_ensure_slot_auth_profile",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_identity.py::test_run_identity_reads_attached_pending_values_without_committing",
@@ -13626,7 +13638,7 @@
           "old": "backend/app/services/agent_runs.py::_release_slot_auth_profile",
           "new": "backend/app/runtime/resident/credential_profiles.py::_release_slot_auth_profile",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_identity.py::test_run_identity_reads_attached_pending_values_without_committing",
@@ -13642,7 +13654,7 @@
           "new": "backend/app/domains/routines/service/run_results.py::_safe_gateway_result",
           "direct_consumers": [
             "backend/app/domains/routines/service/run_results.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
@@ -13695,7 +13707,7 @@
           "new": "backend/app/domains/routines/service/run_results.py::_stored_gateway_result",
           "direct_consumers": [
             "backend/app/domains/routines/service/run_results.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
@@ -13709,7 +13721,7 @@
           "new": "backend/app/domains/routines/service/run_results.py::_persist_agent_run_gateway_snapshot",
           "direct_consumers": [
             "backend/app/domains/routines/service/run_results.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
@@ -13722,7 +13734,7 @@
           "old": "backend/app/services/agent_runs.py::_build_llm_trace_context",
           "new": "backend/app/runtime/resident/gateway_results.py::_build_llm_trace_context",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
@@ -13776,7 +13788,7 @@
           "new": "backend/app/domains/routines/service/run_results.py::_build_llm_usage_summary",
           "direct_consumers": [
             "backend/app/domains/routines/service/run_results.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
@@ -13790,7 +13802,7 @@
           "new": "backend/app/domains/routines/service/run_results.py::_pending_writing_composition_lanes",
           "direct_consumers": [
             "backend/app/domains/routines/service/run_results.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input",
@@ -13817,7 +13829,7 @@
           "old": "backend/app/services/agent_runs.py::_log_feed_perception_debug",
           "new": "backend/app/domains/routines/service/perception_diagnostics.py::_log_feed_perception_debug",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
@@ -13831,7 +13843,7 @@
           "old": "backend/app/services/agent_runs.py::list_resident_slots",
           "new": "backend/app/domains/routines/service/slot_status.py::list_resident_slots",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants",
@@ -13859,9 +13871,9 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::assign_resident_slot",
-          "new": "backend/app/services/agent_runs.py::assign_resident_slot",
+          "new": "backend/app/runtime/resident/execution.py::assign_resident_slot",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
@@ -13869,9 +13881,9 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::claim_temporary_resident_slot",
-          "new": "backend/app/services/agent_runs.py::claim_temporary_resident_slot",
+          "new": "backend/app/runtime/resident/execution.py::claim_temporary_resident_slot",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
@@ -13879,9 +13891,9 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::release_temporary_resident_slot",
-          "new": "backend/app/services/agent_runs.py::release_temporary_resident_slot",
+          "new": "backend/app/runtime/resident/execution.py::release_temporary_resident_slot",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
@@ -13891,7 +13903,7 @@
           "old": "backend/app/services/agent_runs.py::_scheduled_retry_next_tick_at",
           "new": "backend/app/domains/routines/service/retry_schedule.py::_scheduled_retry_next_tick_at",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants",
@@ -13904,9 +13916,9 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::run_community_once",
-          "new": "backend/app/services/agent_runs.py::run_community_once",
+          "new": "backend/app/runtime/resident/execution.py::run_community_once",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
@@ -13914,9 +13926,9 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_run_resident_individual_tool_flow",
-          "new": "backend/app/services/agent_runs.py::_run_resident_individual_tool_flow",
+          "new": "backend/app/runtime/resident/execution.py::_run_resident_individual_tool_flow",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
@@ -13924,9 +13936,9 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_run_resident_slot_once",
-          "new": "backend/app/services/agent_runs.py::_run_resident_slot_once",
+          "new": "backend/app/runtime/resident/execution.py::_run_resident_slot_once",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
@@ -13934,9 +13946,9 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::run_assigned_resident_slot_once",
-          "new": "backend/app/services/agent_runs.py::run_assigned_resident_slot_once",
+          "new": "backend/app/runtime/resident/execution.py::run_assigned_resident_slot_once",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
@@ -13944,9 +13956,9 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::run_claimed_temporary_resident_slot_once",
-          "new": "backend/app/services/agent_runs.py::run_claimed_temporary_resident_slot_once",
+          "new": "backend/app/runtime/resident/execution.py::run_claimed_temporary_resident_slot_once",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
@@ -13954,9 +13966,9 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::tick_resident_slots",
-          "new": "backend/app/services/agent_runs.py::tick_resident_slots",
+          "new": "backend/app/runtime/resident/execution.py::tick_resident_slots",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
@@ -13966,7 +13978,7 @@
           "old": "backend/app/services/agent_runs.py::_resident_slot_is_due",
           "new": "backend/app/domains/routines/service/slot_status.py::_resident_slot_is_due",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants",
@@ -13979,9 +13991,9 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_run_claimed_resident_slot_once",
-          "new": "backend/app/services/agent_runs.py::_run_claimed_resident_slot_once",
+          "new": "backend/app/runtime/resident/execution.py::_run_claimed_resident_slot_once",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
@@ -13992,7 +14004,7 @@
           "new": "backend/app/domains/routines/service/post_selection.py::_select_tick_post_id",
           "direct_consumers": [
             "backend/app/domains/routines/service/post_selection.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
@@ -14006,7 +14018,7 @@
           "old": "backend/app/services/agent_runs.py::_select_resident_run_post_id",
           "new": "backend/app/domains/routines/service/post_selection.py::_select_resident_run_post_id",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
@@ -14020,7 +14032,7 @@
           "old": "backend/app/services/agent_runs.py::_combined_runtime_evidence_post_id",
           "new": "backend/app/domains/routines/service/execution_results.py::_combined_runtime_evidence_post_id",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
@@ -14868,7 +14880,7 @@
           "new": "backend/app/domains/routines/repository/slots.py::get_agent_slot",
           "source_member": "Exact original nullable expression db.get(models.AgentSlot, agent_id); 1 occurrence(s) keep their original conditional position and same Session. Owner helper performs only that db.get; existing get_setting reused without changing ensure_setting or adding flush/commit.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
@@ -14883,7 +14895,7 @@
           "new": "backend/app/domains/characters/service/state.py::get_character_state",
           "source_member": "Exact original nullable expression db.get(models.CharacterState, character.id); 2 occurrence(s) keep their original conditional position and same Session. Owner helper performs only that db.get; existing get_setting reused without changing ensure_setting or adding flush/commit.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
@@ -14898,7 +14910,7 @@
           "new": "backend/app/domains/characters/service/state.py::get_character_state",
           "source_member": "Exact original nullable expression db.get(models.CharacterState, character.id); 2 occurrence(s) keep their original conditional position and same Session. Owner helper performs only that db.get; existing get_setting reused without changing ensure_setting or adding flush/commit.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
@@ -14913,7 +14925,7 @@
           "new": "backend/app/domains/routines/service/activity_settings.py::get_setting",
           "source_member": "Exact original nullable expression db.get(models.AgentActivitySetting, character.id); 1 occurrence(s) keep their original conditional position and same Session. Owner helper performs only that db.get; existing get_setting reused without changing ensure_setting or adding flush/commit.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
@@ -14928,7 +14940,7 @@
           "new": "backend/app/domains/routines/repository/slots.py::get_agent_slot",
           "source_member": "Exact original nullable expression db.get(models.AgentSlot, agent_id); 1 occurrence(s) keep their original conditional position and same Session. Owner helper performs only that db.get; existing get_setting reused without changing ensure_setting or adding flush/commit.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
@@ -14943,7 +14955,7 @@
           "new": "backend/app/domains/characters/service/state.py::get_character_state",
           "source_member": "Exact original nullable expression db.get(models.CharacterState, character.id); 1 occurrence(s) keep their original conditional position and same Session. Owner helper performs only that db.get; existing get_setting reused without changing ensure_setting or adding flush/commit.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
@@ -14958,7 +14970,7 @@
           "new": "backend/app/domains/routines/service/activity_settings.py::get_setting",
           "source_member": "Exact original nullable expression db.get(models.AgentActivitySetting, slot.assigned_character_id); 1 occurrence(s) keep their original conditional position and same Session. Owner helper performs only that db.get; existing get_setting reused without changing ensure_setting or adding flush/commit.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
@@ -14973,7 +14985,7 @@
           "new": "backend/app/domains/routines/service/execution_admission.py::_read_available_run_character",
           "source_member": "Exact original nullable Character lookup and missing/deleted/suspended checks only; two existing callers share the identical three statements.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_execution_admission.py::test_run_admission_preserves_owner_default_credential_scope_and_pending_visibility",
@@ -14987,7 +14999,7 @@
           "new": "backend/app/domains/routines/service/execution_admission.py::_resolve_run_owner",
           "source_member": "Exact original data.user_id-or-owner resolution and owner mismatch guard, still after the original selected-post query.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_execution_admission.py::test_run_admission_preserves_owner_default_credential_scope_and_pending_visibility",
@@ -15001,7 +15013,7 @@
           "new": "backend/app/domains/routines/service/execution_admission.py::_resolve_run_credential",
           "source_member": "Exact original explicit credential lookup/ownership/assignment/enabled branch versus default owner+character credential lookup branch. Original missing-default error remains; queries occur only in their original branch.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_execution_admission.py::test_run_admission_preserves_owner_default_credential_scope_and_pending_visibility",
@@ -15015,7 +15027,7 @@
           "new": "backend/app/domains/routines/service/execution_admission.py::_read_available_run_character",
           "source_member": "Exact original nullable Character lookup and missing/deleted/suspended checks only; two existing callers share the identical three statements.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_execution_admission.py::test_run_admission_preserves_owner_default_credential_scope_and_pending_visibility",
@@ -15029,13 +15041,41 @@
           "new": "backend/app/domains/identity/service/credential_cooldown.py::set_cooldown_until",
           "source_member": "Exact original credential.cooldown_until assignment only, three None assignments and one runtime_retry_at assignment in their original conditional positions. Caller still owns the original Session, flush/commit/rollback and surrounding policy.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_execution_admission.py::test_run_admission_preserves_owner_default_credential_scope_and_pending_visibility",
             "tests/identity/test_credential_cooldown.py::test_credential_cooldown_mutation_keeps_caller_identity_no_sql_and_rollback",
             "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
             "tests/routines/test_run_identity.py::test_run_identity_reads_attached_pending_values_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::assign_resident_slot",
+          "new": "backend/app/domains/routines/service/slot_requests.py::assign_resident_slot",
+          "source_member": "Original entire slot request policy, including maintenance gate, same-Session Character/credential validation, settings write, lazily evaluated original schedule and assignment/temporary claim, errors and schema conversion. Runtime still binds original collaborators at original call points.",
+          "direct_consumers": [
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/runtime/resident/slots.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_slot_request_workflows.py::test_slot_request_keeps_lazy_gate_read_clock_lock_and_original_transaction[False]",
+            "tests/routines/test_slot_request_workflows.py::test_slot_request_keeps_lazy_gate_read_clock_lock_and_original_transaction[True]",
+            "tests/routines/test_activity_limits.py::test_activation_uses_canonical_initial_schedule"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::claim_temporary_resident_slot",
+          "new": "backend/app/domains/routines/service/slot_requests.py::claim_temporary_resident_slot",
+          "source_member": "Original entire slot request policy, including maintenance gate, same-Session Character/credential validation, settings write, lazily evaluated original schedule and assignment/temporary claim, errors and schema conversion. Runtime still binds original collaborators at original call points.",
+          "direct_consumers": [
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/runtime/resident/slots.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_slot_request_workflows.py::test_slot_request_keeps_lazy_gate_read_clock_lock_and_original_transaction[False]",
+            "tests/routines/test_slot_request_workflows.py::test_slot_request_keeps_lazy_gate_read_clock_lock_and_original_transaction[True]",
+            "tests/routines/test_activity_limits.py::test_activation_uses_canonical_initial_schedule"
           ]
         }
       ]
@@ -25473,7 +25513,7 @@
           "new": "backend/app/domains/routines/repository/feed_cues.py::get_pending_feed_cue",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py",
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/community.py"
           ],
           "test_nodes": [
@@ -26324,9 +26364,9 @@
           "old": "backend/app/services/agent_activity_policy.py::recovery_tick_schedule",
           "new": "backend/app/runtime/resident/activity_policy.py::recovery_tick_schedule",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py",
-            "backend/app/services/langgraph_resident.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -26358,9 +26398,9 @@
           "old": "backend/app/services/agent_activity_policy.py::_aware_utc",
           "new": "backend/app/runtime/resident/activity_policy.py::_aware_utc",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py",
-            "backend/app/services/langgraph_resident.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -26817,9 +26857,9 @@
           "old": "backend/app/services/agent_activity_policy.py::recovery_tick_schedule",
           "new": "backend/app/runtime/resident/activity_policy.py::recovery_tick_schedule",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py",
-            "backend/app/services/langgraph_resident.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -26851,9 +26891,9 @@
           "old": "backend/app/services/agent_activity_policy.py::_aware_utc",
           "new": "backend/app/runtime/resident/activity_policy.py::_aware_utc",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py",
-            "backend/app/services/langgraph_resident.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -27189,9 +27229,9 @@
           "new": "backend/app/runtime/resident/activity_policy.py::build_activity_policy",
           "source_member": "The original caller Session and lazy timezone supplier are connected in runtime; actual permission logic remains the mapped routines service.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py",
-            "backend/app/services/langgraph_resident.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
@@ -27369,9 +27409,9 @@
           "old": "backend/app/services/agent_activity_policy.py::recovery_tick_schedule",
           "new": "backend/app/runtime/resident/activity_policy.py::recovery_tick_schedule",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py",
-            "backend/app/services/langgraph_resident.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -27403,9 +27443,9 @@
           "old": "backend/app/services/agent_activity_policy.py::_aware_utc",
           "new": "backend/app/runtime/resident/activity_policy.py::_aware_utc",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py",
-            "backend/app/services/langgraph_resident.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -27741,9 +27781,9 @@
           "new": "backend/app/runtime/resident/activity_policy.py::build_activity_policy",
           "source_member": "The original caller Session and lazy timezone supplier are connected in runtime; actual permission logic remains the mapped routines service.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py",
-            "backend/app/services/langgraph_resident.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/execution.py",
+            "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
@@ -27878,7 +27918,7 @@
           "source_member": "Bind the caller Session to lazy reads at the original entry; actual decisions and SQL are separately mapped.",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py",
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
@@ -28304,7 +28344,7 @@
           "new": "backend/app/domains/routines/repository/feed_cues.py::get_pending_feed_cue",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py",
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/community.py"
           ],
           "test_nodes": [
@@ -28577,13 +28617,13 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_RUNNING",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_RUNNING",
           "direct_consumers": [
-            "backend/app/domains/routines/service/slot_pool.py",
-            "backend/app/domains/routines/service/slot_recovery.py",
             "backend/app/domains/routines/service/slot_assignments.py",
             "backend/app/domains/routines/service/slot_leases.py",
-            "backend/app/services/agent_runs.py",
+            "backend/app/domains/routines/service/slot_pool.py",
+            "backend/app/domains/routines/service/slot_recovery.py",
+            "backend/app/runtime/account_deletion.py",
             "backend/app/runtime/characters/management.py",
-            "backend/app/runtime/account_deletion.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -28657,13 +28697,13 @@
           "old": "backend/app/cruds/agent_runs.py::DUE_SLOT_STATUSES",
           "new": "backend/app/domains/routines/constants.py::DUE_SLOT_STATUSES",
           "direct_consumers": [
-            "backend/app/domains/routines/service/slot_pool.py",
-            "backend/app/domains/routines/service/slot_recovery.py",
             "backend/app/domains/routines/service/slot_assignments.py",
             "backend/app/domains/routines/service/slot_leases.py",
-            "backend/app/services/agent_runs.py",
+            "backend/app/domains/routines/service/slot_pool.py",
+            "backend/app/domains/routines/service/slot_recovery.py",
+            "backend/app/runtime/account_deletion.py",
             "backend/app/runtime/characters/management.py",
-            "backend/app/runtime/account_deletion.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -28802,7 +28842,7 @@
           "new": "backend/app/domains/routines/exceptions.py::AgentRunConflictError",
           "direct_consumers": [
             "backend/app/domains/routines/service/runs.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
@@ -28817,7 +28857,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_credential",
           "new": "backend/app/cruds/agent_runs.py::get_credential",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py",
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/agent_writing.py"
           ],
           "test_nodes": [
@@ -28830,7 +28870,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_default_credential",
           "new": "backend/app/cruds/agent_runs.py::get_default_credential",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
@@ -28843,7 +28883,7 @@
           "new": "backend/app/domains/routines/service/runs.py::create_agent_run",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
@@ -28859,7 +28899,7 @@
           "new": "backend/app/domains/routines/service/runs.py::mark_agent_run_finished",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
@@ -28875,7 +28915,7 @@
           "new": "backend/app/domains/routines/service/runs.py::set_agent_run_post_id",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
@@ -29204,7 +29244,7 @@
           "new": "backend/app/domains/routines/service/slot_pool.py::claim_agent_slot",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -29219,7 +29259,7 @@
           "new": "backend/app/domains/routines/service/slot_pool.py::release_agent_slot",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -29234,7 +29274,7 @@
           "new": "backend/app/domains/routines/repository/slots.py::list_agent_slots",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -29249,7 +29289,7 @@
           "new": "backend/app/domains/routines/service/slot_recovery.py::recover_expired_resident_slot_runs",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -29308,7 +29348,7 @@
           "new": "backend/app/domains/routines/service/slot_assignments.py::release_temporary_resident_slot_assignment",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -29382,7 +29422,7 @@
           "new": "backend/app/domains/routines/service/slot_leases.py::set_resident_slot_run_id",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -29397,7 +29437,7 @@
           "new": "backend/app/domains/routines/service/slot_leases.py::extend_resident_slot_lease",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -29412,7 +29452,7 @@
           "new": "backend/app/domains/routines/service/slot_leases.py::complete_resident_slot_run",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -29809,7 +29849,7 @@
           "new": "backend/app/domains/routines/repository/feed_cues.py::get_pending_feed_cue",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py",
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/community.py"
           ],
           "test_nodes": [
@@ -30082,13 +30122,13 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_RUNNING",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_RUNNING",
           "direct_consumers": [
-            "backend/app/domains/routines/service/slot_pool.py",
-            "backend/app/domains/routines/service/slot_recovery.py",
             "backend/app/domains/routines/service/slot_assignments.py",
             "backend/app/domains/routines/service/slot_leases.py",
-            "backend/app/services/agent_runs.py",
+            "backend/app/domains/routines/service/slot_pool.py",
+            "backend/app/domains/routines/service/slot_recovery.py",
+            "backend/app/runtime/account_deletion.py",
             "backend/app/runtime/characters/management.py",
-            "backend/app/runtime/account_deletion.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -30162,13 +30202,13 @@
           "old": "backend/app/cruds/agent_runs.py::DUE_SLOT_STATUSES",
           "new": "backend/app/domains/routines/constants.py::DUE_SLOT_STATUSES",
           "direct_consumers": [
-            "backend/app/domains/routines/service/slot_pool.py",
-            "backend/app/domains/routines/service/slot_recovery.py",
             "backend/app/domains/routines/service/slot_assignments.py",
             "backend/app/domains/routines/service/slot_leases.py",
-            "backend/app/services/agent_runs.py",
+            "backend/app/domains/routines/service/slot_pool.py",
+            "backend/app/domains/routines/service/slot_recovery.py",
+            "backend/app/runtime/account_deletion.py",
             "backend/app/runtime/characters/management.py",
-            "backend/app/runtime/account_deletion.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -30307,7 +30347,7 @@
           "new": "backend/app/domains/routines/exceptions.py::AgentRunConflictError",
           "direct_consumers": [
             "backend/app/domains/routines/service/runs.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
@@ -30322,7 +30362,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_credential",
           "new": "backend/app/cruds/agent_runs.py::get_credential",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py",
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/agent_writing.py"
           ],
           "test_nodes": [
@@ -30335,7 +30375,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_default_credential",
           "new": "backend/app/cruds/agent_runs.py::get_default_credential",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
@@ -30348,7 +30388,7 @@
           "new": "backend/app/domains/routines/service/runs.py::create_agent_run",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
@@ -30364,7 +30404,7 @@
           "new": "backend/app/domains/routines/service/runs.py::mark_agent_run_finished",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
@@ -30380,7 +30420,7 @@
           "new": "backend/app/domains/routines/service/runs.py::set_agent_run_post_id",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
@@ -30709,7 +30749,7 @@
           "new": "backend/app/domains/routines/service/slot_pool.py::claim_agent_slot",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -30724,7 +30764,7 @@
           "new": "backend/app/domains/routines/service/slot_pool.py::release_agent_slot",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -30739,7 +30779,7 @@
           "new": "backend/app/domains/routines/repository/slots.py::list_agent_slots",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -30754,7 +30794,7 @@
           "new": "backend/app/domains/routines/service/slot_recovery.py::recover_expired_resident_slot_runs",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -30813,7 +30853,7 @@
           "new": "backend/app/domains/routines/service/slot_assignments.py::release_temporary_resident_slot_assignment",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -30887,7 +30927,7 @@
           "new": "backend/app/domains/routines/service/slot_leases.py::set_resident_slot_run_id",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -30902,7 +30942,7 @@
           "new": "backend/app/domains/routines/service/slot_leases.py::extend_resident_slot_lease",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -30917,7 +30957,7 @@
           "new": "backend/app/domains/routines/service/slot_leases.py::complete_resident_slot_run",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -31316,7 +31356,7 @@
           "new": "backend/app/domains/routines/repository/feed_cues.py::get_pending_feed_cue",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py",
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/community.py"
           ],
           "test_nodes": [
@@ -31589,13 +31629,13 @@
           "old": "backend/app/cruds/agent_runs.py::SLOT_STATUS_RUNNING",
           "new": "backend/app/domains/routines/constants.py::SLOT_STATUS_RUNNING",
           "direct_consumers": [
-            "backend/app/domains/routines/service/slot_pool.py",
-            "backend/app/domains/routines/service/slot_recovery.py",
             "backend/app/domains/routines/service/slot_assignments.py",
             "backend/app/domains/routines/service/slot_leases.py",
-            "backend/app/services/agent_runs.py",
+            "backend/app/domains/routines/service/slot_pool.py",
+            "backend/app/domains/routines/service/slot_recovery.py",
+            "backend/app/runtime/account_deletion.py",
             "backend/app/runtime/characters/management.py",
-            "backend/app/runtime/account_deletion.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -31669,13 +31709,13 @@
           "old": "backend/app/cruds/agent_runs.py::DUE_SLOT_STATUSES",
           "new": "backend/app/domains/routines/constants.py::DUE_SLOT_STATUSES",
           "direct_consumers": [
-            "backend/app/domains/routines/service/slot_pool.py",
-            "backend/app/domains/routines/service/slot_recovery.py",
             "backend/app/domains/routines/service/slot_assignments.py",
             "backend/app/domains/routines/service/slot_leases.py",
-            "backend/app/services/agent_runs.py",
+            "backend/app/domains/routines/service/slot_pool.py",
+            "backend/app/domains/routines/service/slot_recovery.py",
+            "backend/app/runtime/account_deletion.py",
             "backend/app/runtime/characters/management.py",
-            "backend/app/runtime/account_deletion.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -31814,7 +31854,7 @@
           "new": "backend/app/domains/routines/exceptions.py::AgentRunConflictError",
           "direct_consumers": [
             "backend/app/domains/routines/service/runs.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
@@ -31829,7 +31869,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_credential",
           "new": "backend/app/cruds/agent_runs.py::get_credential",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py",
+            "backend/app/runtime/resident/execution.py",
             "backend/app/services/agent_writing.py"
           ],
           "test_nodes": [
@@ -31842,7 +31882,7 @@
           "old": "backend/app/cruds/agent_runs.py::get_default_credential",
           "new": "backend/app/cruds/agent_runs.py::get_default_credential",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
@@ -31855,7 +31895,7 @@
           "new": "backend/app/domains/routines/service/runs.py::create_agent_run",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
@@ -31871,7 +31911,7 @@
           "new": "backend/app/domains/routines/service/runs.py::mark_agent_run_finished",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
@@ -31887,7 +31927,7 @@
           "new": "backend/app/domains/routines/service/runs.py::set_agent_run_post_id",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup",
@@ -32216,7 +32256,7 @@
           "new": "backend/app/domains/routines/service/slot_pool.py::claim_agent_slot",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -32231,7 +32271,7 @@
           "new": "backend/app/domains/routines/service/slot_pool.py::release_agent_slot",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -32246,7 +32286,7 @@
           "new": "backend/app/domains/routines/repository/slots.py::list_agent_slots",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -32261,7 +32301,7 @@
           "new": "backend/app/domains/routines/service/slot_recovery.py::recover_expired_resident_slot_runs",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -32320,7 +32360,7 @@
           "new": "backend/app/domains/routines/service/slot_assignments.py::release_temporary_resident_slot_assignment",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -32394,7 +32434,7 @@
           "new": "backend/app/domains/routines/service/slot_leases.py::set_resident_slot_run_id",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -32409,7 +32449,7 @@
           "new": "backend/app/domains/routines/service/slot_leases.py::extend_resident_slot_lease",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -32424,7 +32464,7 @@
           "new": "backend/app/domains/routines/service/slot_leases.py::complete_resident_slot_run",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
@@ -32439,7 +32479,7 @@
           "new": "backend/app/runtime/resident/slots.py::assign_resident_slot",
           "source_member": "Original public signature and same caller Session wire only; no constructor query and no duplicated decision or transaction implementation.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_slot_references.py::test_character_lock_uses_caller_session_after_slot_pool_write",
@@ -32503,7 +32543,7 @@
           "new": "backend/app/runtime/resident/slots.py::claim_resident_slot_assignment",
           "source_member": "Original public signature and same caller Session wire only; no constructor query and no duplicated decision or transaction implementation.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_slot_references.py::test_character_lock_uses_caller_session_after_slot_pool_write",
@@ -32535,7 +32575,7 @@
           "new": "backend/app/runtime/resident/slots.py::claim_due_resident_slots",
           "source_member": "Original public signature and same caller Session wire only; no constructor query and no duplicated decision or transaction implementation.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/routines/test_slot_references.py::test_character_lock_uses_caller_session_after_slot_pool_write",
@@ -32670,8 +32710,8 @@
           "old": "backend/app/domains/runtime/contracts.py::AgentSlotUnavailableError",
           "new": "backend/app/domains/routines/exceptions.py::AgentSlotUnavailableError",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py",
-            "backend/app/domains/routines/contracts/execution_errors.py"
+            "backend/app/domains/routines/contracts/execution_errors.py",
+            "backend/app/runtime/resident/execution.py"
           ],
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
@@ -33028,6 +33068,68 @@
       "ownership": "Routines owns actual available-Character, requester-owner and optional credential admission. Identity owns the bounded attached cooldown assignment; execution still decides original values and transaction timing. Runtime binds exact caller Session and existing credential lookup/default lookup without eager queries. Existing ActivityLog write8 calls now directly use the canonical original Routines function.",
       "preservation": "Original3 admission blocks, both available-Character callers, cooldown4 assignments and all remaining AgentRun bodies are AST-identical after exact binding restoration. Original role-dependent order remains: post is read before owner resolution; explicit credential branch retains checks, default branch retains owner+character query and exact missing error. New SQLite2 covers deleted/suspended precedence, explicit/default nullable/owner scope and pending rollback, plus cooldown assignment with SQL increment0 and caller rollback.",
       "remaining": "Root Identity c2cd2a64 supplies same canonical lookup2 at integration. Slot setup, resident admission/lifecycle decisions and actual execution composition continue C6d; management/HTTP/credential owner4+HTTP3 follow C7."
+    },
+    "AR-B4-C6-resident-execution": {
+      "status": "IMPLEMENTED — focused corrected3PASS; final490PASS/1existingPGskip/4existingwarnings; readonly6checks0; root stock introduction/CI pending",
+      "actual_paths": [
+        "backend/app/domains/routines/contracts/slot_requests.py",
+        "backend/app/domains/routines/service/slot_requests.py",
+        "backend/app/runtime/resident/execution.py",
+        "backend/app/runtime/resident/slots.py"
+      ],
+      "actual_workflows": [
+        "_run_claimed_resident_slot_once",
+        "_run_resident_individual_tool_flow",
+        "_run_resident_slot_once",
+        "assign_resident_slot",
+        "claim_temporary_resident_slot",
+        "release_temporary_resident_slot",
+        "run_assigned_resident_slot_once",
+        "run_claimed_temporary_resident_slot_once",
+        "run_community_once",
+        "tick_resident_slots"
+      ],
+      "direct_consumers": [
+        "backend/tests/test_daypart_persistent_session.py",
+        "backend/tests/test_follow_target_policy.py",
+        "backend/tests/test_langgraph_resident_engine.py",
+        "backend/tests/test_m3_security_harness.py",
+        "backend/tests/test_m4_public_runtime.py",
+        "backend/tests/test_r7_residual_security.py",
+        "backend/tests/test_tendency_note_action_selection.py",
+        "backend/tests/characters/test_creator_http_errors.py",
+        "backend/tests/routines/test_activity_limits.py",
+        "backend/tests/routines/test_resident_execution_bindings.py",
+        "backend/tests/world_characters/test_owner_identity.py",
+        "backend/app/runtime/characters/creator.py",
+        "backend/app/runtime/characters/management.py",
+        "backend/app/runtime/resident/scheduler.py",
+        "backend/app/api/v1/routes/agents.py"
+      ],
+      "ownership": "Routines owns original slot request admission and schedule/assignment policy. Resident execution owns provider calls, lease lifetime, run_created timing and same-Session compensation. Scheduler calls the original lifecycle service directly rather than through an unrelated execution module re-export.",
+      "preservation": "Original assignment43/temporary30 and remaining10 execution workflow bodies preserve exact argument/error/control flow and transaction order after bounded collaborator/type binding restoration. Current source boundary checks scan the explicit execution/post_selection/scheduler source set; original positive and forbidden assertions are retained. Private-runtime security checks scan both new execution and old Memory remainder.",
+      "pending_owners": {
+        "AR-B7": {
+          "source": "backend/app/services/agent_runs.py",
+          "actual_helpers": [
+            "_build_daypart_memory_note",
+            "_filter_daypart_duplicate_feed_interest",
+            "_filter_daypart_duplicate_inbox_candidates",
+            "_purge_expired_daypart_memory_events",
+            "_record_provided_daypart_observations"
+          ],
+          "removal": "Root linear B7 join binds memory.service.daypart/daypart_observations then removes original7 Memory definitions."
+        },
+        "AR-B4-LG": "run_resident_langgraph/Context current legacy import is bound to actual runtime.resident.langgraph/context when independently authored LG source joins.",
+        "AR-B5": "Community actual callbacks join Social owner source; no copied implementation.",
+        "AR-B8": "Original uncalled/test-only five definitions remain explicitly mapped; no product caller or function body is silently discarded. Root Identity/Operations/Runtime exact callback owner joins remain pending."
+      },
+      "validation": {
+        "pytest": "490 passed, 1 skipped, 4 warnings in 209.73s; original PG marker skip unchanged",
+        "architecture": "766 modules / 2609 edges / exactlegacy202 / cycle0",
+        "inventories": "L4 766/14/97; ER0 85/87/24/44/7; Memorybatch current",
+        "preservation": "read-only original6checks zero errors; protected2139/current2286. Exact signed foundation2path supplement only, stock root linear introduction gate remains pending."
+      }
     }
   },
   "test_symbols": {

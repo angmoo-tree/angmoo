@@ -11,6 +11,7 @@ PUBLIC_RUNTIME_FILES = (
     APP_ROOT / "api" / "v1" / "routes" / "agents.py",
     APP_ROOT / "runtime" / "characters" / "creator.py",
     APP_ROOT / "services" / "agent_runs.py",
+    APP_ROOT / "runtime" / "resident" / "execution.py",
     APP_ROOT / "services" / "agent_writing.py",
     APP_ROOT / "runtime" / "characters" / "management.py",
     APP_ROOT / "domains" / "identity" / "service" / "auth.py",

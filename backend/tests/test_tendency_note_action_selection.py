@@ -11,7 +11,8 @@ from app import schemas
 from app.api.v1.routes import agents as agent_routes
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
 from app.domains.routines.service import action_briefs as agent_briefs
-from app.services import agent_runs, agent_writing, character_lore, community as community_service, direct_llm
+from app.services import agent_writing, character_lore, community as community_service, direct_llm
+from app.runtime.resident import execution as agent_runs
 from app.runtime.characters import management as agent_service
 
 

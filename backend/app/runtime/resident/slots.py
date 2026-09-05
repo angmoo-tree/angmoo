@@ -1,6 +1,12 @@
 """Wire slot assignment and claim policy to its same-Session foreign reads."""
 from __future__ import annotations
 
+from collections.abc import Callable
+from app.domains.identity.models import LlmCredential
+from app.domains.routines.contracts.activity_policy import ActivityTimezoneReader
+from app.domains.routines.contracts.slot_requests import SlotRequestWorkflows
+from app.runtime.resident.identity_references import SqlAlchemyRunIdentityReferences
+
 from datetime import datetime
 
 from sqlalchemy.orm import Session
@@ -89,4 +95,25 @@ def claim_due_resident_slots(
         allowed_character_ids=allowed_character_ids,
         single_flight=single_flight,
         references=SqlAlchemySlotReferences(db),
+    )
+
+
+def build_slot_request_workflows(
+    db: Session,
+    *,
+    credential_lookup: Callable[[Session, str], LlmCredential | None],
+    default_credential_lookup: Callable[..., LlmCredential | None],
+    ensure_auto_ticks_available: Callable[[Session], None],
+    ensure_run_now_available: Callable[[Session], None],
+    timezone_reader: ActivityTimezoneReader,
+) -> SlotRequestWorkflows:
+    return SlotRequestWorkflows(
+        identity_references=lambda: SqlAlchemyRunIdentityReferences(
+            db, credential_lookup=credential_lookup,
+            default_credential_lookup=default_credential_lookup,
+        ),
+        slot_references=lambda: SqlAlchemySlotReferences(db),
+        ensure_auto_ticks_available=ensure_auto_ticks_available,
+        ensure_run_now_available=ensure_run_now_available,
+        timezone_reader=timezone_reader,
     )

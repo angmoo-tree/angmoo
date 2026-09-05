@@ -9,13 +9,8 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.services import (
-    agent_runs,
-    agent_writing,
-    character_lore,
-    direct_llm,
-    langgraph_resident,
-)
+from app.services import agent_writing, character_lore, direct_llm, langgraph_resident
+from app.runtime.resident import execution as agent_runs
 
 
 def test_langgraph_resident_does_not_call_agent_tools_http() -> None:

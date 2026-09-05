@@ -710,3 +710,12 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 ### 실행 요청의 진입 판단
 
 `routines/service/execution_admission.py`는 사용 가능한 캐릭터, 요청 소유자, 명시 또는 기본 자격 증명을 판단합니다. 명시 자격 증명과 기본 선택은 기존 검증 조건이 다르므로 두 흐름을 그대로 구분합니다. 런타임은 게시물 조회 뒤 소유자를 정하는 원래 순서를 유지합니다. `identity/service/credential_cooldown.py`는 이미 붙어 있는 credential의 대기 시각만 변경하며, 대기 여부와 저장 시점은 해당 실행 흐름이 결정합니다. 설정 변경을 이유로 먼저 commit하거나 자격 증명을 다시 읽지 않습니다.
+
+
+### Resident 실행과 슬롯 요청
+
+`routines/service/slot_requests.py`는 슬롯 요청의 실제 유지보수 제한, 캐릭터·자격 증명 판단, 활동 설정, 최초 시각과 배정 순서를 소유합니다. 같은 Session의 조회 협력은 `runtime/resident/slots.py`에서 연결하며, 필요한 시점에 평가합니다.
+
+`runtime/resident/execution.py`는 수동 실행, 슬롯별 실행, 전체 tick의 실제 비동기 실행을 조립합니다. provider 호출, lease 수명, 실행 기록 생성 시점과 실패 보상이 이곳에서 연결됩니다. 오류 처리에서 사용하는 `run_created` 같은 상태는 원래 저장 성공 직후에 바뀌어야 하므로 별도 전달 계층으로 감추지 않습니다. Scheduler는 만료 루틴을 정리하는 실제 lifecycle 서비스를 직접 호출한 뒤 실행을 시작합니다.
+
+현재 원래 `services/agent_runs.py`에는 B7 소유 Memory 함수와 별도 정리 대상인 원래 미호출 함수만 남습니다. 순차 통합 전까지 실행이 참조하는 Memory 함수는 기존 구현 자체입니다. 같은 함수를 새 파일에 복사하지 않으며, Memory 소유 전환이 합류할 때 실제 서비스로 연결합니다.
