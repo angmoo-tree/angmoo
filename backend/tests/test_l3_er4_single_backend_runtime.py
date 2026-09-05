@@ -26,9 +26,9 @@ from app.domains.runtime.service.components import ComponentObservationRegistry
 from app.domains.runtime.service.components import overlay_in_process_component_status
 from app.domains.runtime.schemas import runtime_status_read
 from app.main import create_app, create_lifespan
-from app.public_main import (
-    create_app as create_embedded_app,
-    create_lifespan as create_embedded_lifespan,
+from app.main import (
+    create_public_app as create_embedded_app,
+    create_public_lifespan as create_embedded_lifespan,
 )
 from app.runtime.single_backend_components import (
     SingleBackendRuntimeComponents,

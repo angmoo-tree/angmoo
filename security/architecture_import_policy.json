@@ -145,14 +145,6 @@
           "importer": "app.models"
         },
         {
-          "imported": "app.cruds.community",
-          "importer": "app.public_main"
-        },
-        {
-          "imported": "app.services.hosted_configuration",
-          "importer": "app.public_main"
-        },
-        {
           "imported": "app.cruds.agents",
           "importer": "app.runtime.character_lore"
         },

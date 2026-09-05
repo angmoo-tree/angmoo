@@ -1422,3 +1422,44 @@ Runtime `/runtime/status`의 실제 handler는 `domains/runtime/router.py`가 �
 Runtime 실제 source e18f5e5e764ac1774a5ee1ff770b69aedd6289d8을 Chat·Memory·root 잔여 source와 통합했다. 두 앱 factory에 실제 Runtime 진단 등록을 Routines 구성 뒤 연결하고, 기존 Chat·Package·Character·Tree·Lore·Memory·LocalBot 등록도 보존했다. RuntimeSchedulerLease는 실제 domains/runtime/models.py를 사용한다.
 
 집중 Runtime 상태·진단·단일backend·ER7·ER0·Chat HTTP·LocalBot key·Character image는55PASS/기존warning2/32.67초다. 경계804/2707/legacy177·L4 parity97·ER0 전체84/87/24/44/7 PASS, 원래6보존진단 모두0오류/protected2201/current2292다. 이는 signed 원래source 도입 원장 최종 합류 전 읽기 진단이며 stock전체PASS는 아니다. G5 사전조사는 실제102개 전역모델export·168개모델소비·136개DB import·46개동적문자열을 기록했다. 아직 합류할 Relationships와 B4/B5/C7/LocalBot 실제소유source가 있으므로 이 단계에서 전역models package/Base/DB를 변경하지 않았다. G06 source 통합 준비와 G5/B8-B 검증은 후속이다.
+
+## AR-B8-G06-A1 — 단일 앱 생성과 지원 profile 호환
+
+Chat HTTP source `74f6c06f9e5501ab3556fed1f3cbd4d5d5546217`에서 독립 준비했다. `main.py`의 실제 `create_app`·`create_lifespan`에 public의 typed RuntimeConfig·같은 Session override·설정 복원·World Package 복구·Memory 시작/종료·readiness를 통합했다. `full`/`public`은 원래 `/health`의 operation ID·응답 schema와 미구성 component 기본값 차이를 명시한다. `public_main.py`에는 같은 class/function과 public profile partial/app을 제공하는 단방향 export만 남긴다.
+
+기존 public의 오류·dataclass·검증·health·CLI 실제 정의와 lifecycle 본문, dispose/recovery/DB dependency의 **13개 AST 비교가 PASS**다. factory는 새 profile 인자·설명·입장 검사와 선택 분기를 원래 public 값으로 복원하고 같은 from-import 이름 순서를 정렬하면 전체 AST가 동일하다. 모델 등록 전 upgrade, 요청 Session·환경 설정·rollback/복구·provider 실행은 기존 runtime 연결을 그대로 사용한다.
+
+기존 ER4/ER7·공개 runtime·M3 보안·logging·설정·Identity/Character/Chat HTTP와 신규 회귀는 **152 passed / 기존 1 skipped / 1 warning / 62.84초**다. 새 6 nodes는 두 health 계약과 동일 type/factory, public의 기본 component 없음, Memory 시작 실패를 포함한 복구→extension→component→Memory→역순 정리, cold import의 DB/미디어/로그 부작용 없음과 명시적 media 준비를 검증한다. M3의 실제 health module을 public_main으로 바꾸던 옛 정규화 helper만 실제 main 소유에 맞춰 제거했고 기존 assertion/node는 유지했다. 새 공통 factory에는 HTTP/API 정책을 복제하지 않았다.
+
+현재 source 지도는 public_main 실제 구현 전체를 main으로 대응하고 G06 bridge의 소유·종료 단계를 명시한다. CLI ASGI 문자열·sidecar/contributor의 동적 모델 등록 import·검사별 full/public 참조는 다음 source에서 전환하며, G5와 최신 B4/B5/B7 callback 합류는 root의 순차 통합 범위다. 불변 baseline/checkpoint와 append-only additions는 변경하지 않는다. B8-B 호환 제거·삭제 후 실행·CI/패키징/설치 및 G06 완료는 미완료다.
+
+고정 전 전체 보존 검사에서 public factory가 partial로 바뀌며 Identity factory 검사의 자동 생성 case ID 두 개가 달라진 것을 확인했다. 원래 두 case의 `create_app0`·`create_app1` ID를 명시해 같은 입력·assertion·수집 node를 보존했다. source/split/assertion/억제 표시/API/ORM 계약에는 오류가 없으며 보호 **2,129 / 현재 2,189**다. 선행 committed source/node의 append-only capture는 아직 root 순차 통합에 남아 있어 명령 전체는 exit 1이다. 현재 경계 **656 modules / 2,158 edges / exact legacy 263 PASS**, L4 parity **97**, ER0 **78/87/24/44/7**, Memory batch current, public **196**을 확인했다. 같은 설정·logging·복구 consumer를 main으로 대응했고 더 이상 존재하지 않는 public_main의 실제 업무 import 예외 두 개를 제거했다. 독립 읽기 리뷰에서도 profile·같은 Session·partial·단방향 export에 추가 차단 문제를 발견하지 못했다.
+
+최종 재검사에서 원래 node ID를 포함한 source/split/assertion/억제 표시/API/ORM/기존 node 오류 **0**, 보호 **2,129 / 현재 2,189**를 확인했다. 미캡처된 선행 source **51개 / nodes 54개**만 전체 명령의 exit 1 원인이며, ID 보정 후 관련 실제 회귀도 **9 passed / 23.25초**다. 이번 첫 도입은 `backend/tests/runtime/test_app_factory_ownership.py` 한 파일·6 nodes이며 source commit에서 원본을 고정한다.
+
+
+## AR-B8-G06-A2 — 실제 실행·ASGI export·검사 참조 전환
+
+첫 factory source `90d7fd7f2332b2b27cf2f1bd92ed0e206427e6f7` 뒤 실제 contributor/sidecar의 모델 등록용 동적 import와 public factory 호출을 `app.main`으로 옮겼다. 두 실행기의 전체 모듈 AST는 정확한 import 및 factory alias만 복원하면 원래와 동일하다. 등록→기존 데이터 upgrade→typed RuntimeConfig→같은 Session app 생성 순서, sidecar ready/fatal·stdout/stderr·silent stream·shutdown과 log 설정을 바꾸지 않았다.
+
+개발 ASGI 경로는 `app.main:public_app`이다. `main.app`은 원래 full `/health` 계약을, `main.public_app`은 원래 public readiness 계약을 유지하며 실제 생성 함수는 하나다. 공개 inventory와 full/public 계약 검사는 두 실제 객체를 구분해서 읽는다. 일반 기존 테스트의 import/fixture도 실제 main factory로 전환했고, Chat의 두 pytest case ID와 Identity factory ID는 기존 값을 유지한다.
+
+보존 검사는 임의 assertion 허용 목록을 추가하지 않는다. 보호된 두 앱 namespace의 원본 Git source/export와 파일 map, 새 export의 실제 단일 FastAPI factory 또는 같은 factory partial/name alias를 확인한 경우에만 정확한 ASGI 문자열 상수의 이동을 인정한다. 새 실제 export의 OpenAPI도 원래 full/public frozen 계약에 직접 비교하므로 같은 factory에서 잘못된 profile을 골라도 실패한다. 다른 문자열·없는 export·다른 factory·중복/cycle·미보호 source·행위 assertion 변경을 거부하는 회귀를 추가했다.
+
+첫 집중 검증은 새 ASGI 검사 14 nodes, 호환 module import를 차단한 fresh contributor/sidecar 데이터 준비 1 node와 기존 G0/로그/ER6/ER7/Chat을 합쳐 **93 passed / 기존 1 warning / 66.27초**다. 기존 G3 CLI assertion의 앱 import 문자열 한 개만 실제 ASGI export 이동과 대응하고, 나머지 host/port/reload/logging·호출 횟수·행위 assertion은 유지했다.
+
+Docker의 실제 contributor entrypoint와 PyInstaller의 실제 sidecar entrypoint는 이미 독립 runtime 파일을 지정하므로 빌드 정의에 직접 public_main 경로가 없었다. 바뀐 static import가 main을 포함하며 logging.ini, onefile/onedir 자원 구성을 그대로 유지한다. current runtime inventory는 main을 가리키고 frozen H predecessor의 과거 경로는 재생성하지 않는다. 실제 새 bundle/installer 검증은 B8-B에 남는다.
+
+제품·일반 검사에서 public_main import는 제거했고 임시 호환 파일과 삭제 전 비교용 factory 검사만 남는다. frozen ASGI 원본 경로·negative fixture·과거 pytest ID·기존 logger 이름·역사 문서는 활성 import와 구분한다. B4/B5/B7의 최종 callback, G5, B8-B 파일 제거·삭제 후 최종 후보 실행과 전체 종료는 아직 미완료다.
+
+최종 확장 회귀는 **351 passed / 기존 1 skipped / 1 warning / 104.72초**다. stock 전체 보존 검사는 source/split/assertion/억제 표시/기존 node·full/public API/ORM 및 실제 새 ASGI export의 frozen public 계약 오류 **0**, 보호 **2,129 / 현재 2,204**다. 첫 G06 source를 포함한 현 작업트리에서 확인되는 미캡처 **52 files / 45 committed nodes**만 명령 전체의 exit 1 원인이다. 독립 검토에서도 차단 문제를 발견하지 못했다. 같은 factory 이름을 따라가는 AST는 구조 근거이며, 실제 새 target의 frozen OpenAPI 비교가 행위 gate라는 구분을 유지한다.
+
+검토 후 실제 Python source path literal map과 ASGI export map을 함께 적용한 경우도 같은 negative node에서 확인했다. 접두 문자열은 기존 파일명 정규화의 `app.main:app`까지만 변환되고 `app.main:public_app`으로 확대되지 않는다. 해당 최종 ASGI 회귀 **14 passed**를 확인했으며, 임의 문자열이나 숫자 행위 assertion을 허용하는 예외는 추가하지 않았다. 신규 첫 도입 파일은 `tests/runtime/test_asgi_preservation.py` 14 nodes와 `tests/runtime/test_canonical_bootstrap.py` 1 node다.
+
+### G5 준비 통합 — G06 단일 factory와 현재 업무 연결
+
+Runtime 통합 `8e71258`에 G06 A2 `cc513f4bc078f0547d626d97bbf2210e424b27cb`를 합류했다. 이미 전환된 Character 이미지·LocalBot key·Tree·Lore·Memory·Chat·Package·Runtime의 실제 app.state 등록을 단일 factory에 유지했다. 보존 검사에서는 기존 Memory의 실제 파일 경로 단언 정규화와 G06 ASGI export 검증을 함께 보존했다.
+
+처음 집중 실행은 **177 passed / 4 failed / 2 warnings**였다. 독립 준비한 G06의 typed RuntimeConfig 분기에 이전 World Package import 두 개가 남아 있어 contributor/sidecar·ER7 경로가 실패했다. 실제 `domains.world_packages.storage.import_media`와 `runtime.world_packages.import_commit`, readiness의 실제 Runtime contracts/service를 연결했다. 실패한 네 경로를 포함한 두 전체 관련 모듈은 **13 passed / 1 warning / 52.80초**다. 테스트 단언·예외 억제 조건을 바꾸지 않았다.
+
+최종 원래 검사 함수를 이용한 read-only 진단은 source/split/assertion/suppression/ASGI export/API·ORM/기존 node 오류 모두 **0**, 보호 **2,201 / 현재 2,313**이다. 현재 경계 **804 modules / 2,687 edges / exact legacy 175 PASS**, L4 parity97를 확인했다. 이는 source 통합 검증이며, 원래 signed source별 append-only 기록을 합류하기 전 stock 전체 Gate PASS로 표기하지 않는다. G5 실제 단일 Base·database 전환, B4/B5/LocalBot 잔여 source, public_main 검증 후 제거와 최종 설치 Gate는 계속 남아 있다.

@@ -16,7 +16,7 @@ from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.services import local_bot as local_bot_service
-from app.public_main import app as public_app
+from app.main import public_app
 
 
 DEMO_EMAIL = "demo-kimarin@angmoo.test"

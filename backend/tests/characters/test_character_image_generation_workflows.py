@@ -87,7 +87,7 @@ def test_missing_service_key_does_not_reserve_quota_or_call_provider(monkeypatch
 
 def test_both_factories_bind_original_settings_key_and_translation_callbacks():
     from app.main import create_app as hosted
-    from app.public_main import create_app as local
+    from app.main import create_public_app as local
     for factory in (hosted, local):
         request = Request({"type": "http", "app": factory()})
         workflows = dependencies.get_image_generation_workflows(request)
