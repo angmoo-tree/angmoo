@@ -1,4 +1,15 @@
 from __future__ import annotations
+from functools import partial
+from app.domains.routines.contracts.topic_arcs import TopicArcWorkflows
+from app.domains.routines.service import topic_arcs as topic_arc_service
+from app.domains.routines.policies.resident_clock import (
+    _current_kst_date,
+    _event_kst_date,
+    _korean_daypart_label,
+    _format_current_time_reference,
+    _aware_datetime,
+    _KOREAN_WEEKDAYS,
+)
 from app.domains.routines.policies.topic_dates import (
     _CARRYOVER_ACTIVE,
     _CARRYOVER_COMPLETED,
@@ -183,15 +194,6 @@ _INBOX_CONVERSATION_JUDGMENTS = {
 }
 _INBOX_CONVERSATION_TURN_LIMIT = 6
 _INBOX_DIRECT_EXCHANGE_TURN_LIMIT = 6
-_KOREAN_WEEKDAYS = (
-    "월요일",
-    "화요일",
-    "수요일",
-    "목요일",
-    "금요일",
-    "토요일",
-    "일요일",
-)
 
 
 def _langgraph_recursion_limit() -> int:
@@ -212,38 +214,25 @@ def _clip(value: Any, max_chars: int) -> str:
     return text[: max(0, max_chars - 3)].rstrip() + "..."
 
 
-
-
-def _topic_arc_step_dict(step: Any) -> dict[str, Any] | None:
-    if isinstance(step, BaseModel):
-        step = step.model_dump()
-    if not isinstance(step, dict):
-        return None
-    role = str(step.get("role") or "").strip()
-    brief = _clip(step.get("brief"), 600)
-    if role not in {"standalone", "setup", "development", "conclusion"} or not brief:
-        return None
-    result: dict[str, Any] = {"role": role, "brief": brief}
-    target_date = _normalize_iso_date(step.get("target_date"))
-    if target_date:
-        result["target_date"] = target_date
-    relative_time_original = _clip(step.get("relative_time_original"), 24)
-    if relative_time_original:
-        result["relative_time_original"] = relative_time_original
-    return result
-
-
-
-
-def _current_kst_date(ctx: LangGraphResidentContext) -> date:
-    return ctx.run_started_at.astimezone(agent_activity_policy.APP_TIMEZONE).date()
-
-
-def _event_kst_date(event: Any) -> date | None:
-    provided_at = _aware_datetime(getattr(event, "provided_at", None))
-    if provided_at is None:
-        return None
-    return provided_at.astimezone(agent_activity_policy.APP_TIMEZONE).date()
+_topic_arc_workflows = TopicArcWorkflows(
+    clip=_clip,
+    last_post_created_at=lambda ctx, last_post_id: _topic_arc_last_post_created_at(ctx, last_post_id),
+    latest_event=lambda ctx, arc_id: _latest_topic_arc_event(ctx, arc_id),
+)
+_topic_arc_step_dict = partial(topic_arc_service._topic_arc_step_dict, workflows=_topic_arc_workflows)
+_carryover_time_context = partial(topic_arc_service._carryover_time_context, workflows=_topic_arc_workflows)
+_coerce_topic_arc_draft = partial(topic_arc_service._coerce_topic_arc_draft, workflows=_topic_arc_workflows)
+_coerce_topic_arc_payload = partial(topic_arc_service._coerce_topic_arc_payload, workflows=_topic_arc_workflows)
+_topic_arc_active_step = partial(topic_arc_service._topic_arc_active_step, workflows=_topic_arc_workflows)
+_topic_arc_completed_step_summaries = partial(topic_arc_service._topic_arc_completed_step_summaries, workflows=_topic_arc_workflows)
+_topic_arc_for_prompt = partial(topic_arc_service._topic_arc_for_prompt, workflows=_topic_arc_workflows)
+_make_topic_arc_id = topic_arc_service._make_topic_arc_id
+_build_topic_arc_payload = partial(topic_arc_service._build_topic_arc_payload, workflows=_topic_arc_workflows)
+_topic_arc_recovery_decision = partial(topic_arc_service._topic_arc_recovery_decision, workflows=_topic_arc_workflows)
+_active_topic_arc = topic_arc_service._active_topic_arc
+_writing_from_topic_arc = partial(topic_arc_service._writing_from_topic_arc, workflows=_topic_arc_workflows)
+_attach_topic_arc_to_new_writing = partial(topic_arc_service._attach_topic_arc_to_new_writing, workflows=_topic_arc_workflows)
+_topic_arc_continuity_context = partial(topic_arc_service._topic_arc_continuity_context, workflows=_topic_arc_workflows)
 
 
 
@@ -258,366 +247,38 @@ def _event_kst_date(event: Any) -> date | None:
 
 
 
-def _carryover_time_context(
-    step: dict[str, Any] | None,
-    payload: dict[str, Any] | None,
-    current_date: date,
-    *,
-    reference_date: date | None = None,
-) -> dict[str, Any]:
-    if not isinstance(step, dict):
-        step = {}
-    target_date = _parse_target_date(step.get("target_date"))
-    relative_time_original = _clip(step.get("relative_time_original"), 24) or None
-    legacy_relative_time = False
-    inferred_target_date: date | None = None
-    if target_date is None and reference_date is not None:
-        legacy_anchor = _detect_relative_date_anchor(step.get("brief"), reference_date)
-        if legacy_anchor and legacy_anchor.get("relative_time_original") in {
-            "\ub0b4\uc77c",
-            "tomorrow",
-        }:
-            inferred_target_date = _parse_target_date(legacy_anchor.get("target_date"))
-            target_date = inferred_target_date
-            relative_time_original = legacy_anchor.get("relative_time_original")
-            legacy_relative_time = True
-    phase = _carryover_phase(target_date, current_date)
-    return {
-        "phase": phase,
-        "label": _carryover_phase_label(phase),
-        "target_date": target_date.isoformat() if target_date else None,
-        "relative_time_original": relative_time_original,
-        "legacy_relative_time": legacy_relative_time,
-        "inferred_target_date": (
-            inferred_target_date.isoformat() if inferred_target_date else None
-        ),
-        "current_date": current_date.isoformat(),
-        "created_kst_date": (payload or {}).get("created_kst_date"),
-        "carryover_status": (payload or {}).get("carryover_status")
-        or _CARRYOVER_ACTIVE,
-    }
 
 
-def _coerce_topic_arc_draft(
-    value: Any, *, arc_source: Literal["independent", "post_seed"] = "independent"
-) -> dict[str, Any] | None:
-    if isinstance(value, BaseModel):
-        value = value.model_dump()
-    if not isinstance(value, dict):
-        return None
-    try:
-        draft = _TopicArcDraft.model_validate(value).model_dump()
-    except ValidationError:
-        return None
-    steps = [_topic_arc_step_dict(step) for step in draft.get("steps", [])]
-    if any(step is None for step in steps):
-        return None
-    try:
-        _validate_topic_arc_step_roles(
-            [_TopicArcStep.model_validate(step) for step in steps if step is not None],
-            arc_source=arc_source,
-        )
-    except (ValidationError, ValueError):
-        return None
-    sanitized_steps: list[dict[str, Any]] = []
-    for step in steps:
-        if step is None:
-            continue
-        sanitized = {
-            "role": step["role"],
-            "brief": step["brief"],
-        }
-        sanitized_steps.append(sanitized)
-    return {
-        "arc_title": _clip(draft.get("arc_title"), 200),
-        "steps": sanitized_steps,
-    }
 
 
-def _coerce_topic_arc_payload(value: Any) -> dict[str, Any] | None:
-    if isinstance(value, BaseModel):
-        value = value.model_dump()
-    if not isinstance(value, dict):
-        return None
-    try:
-        payload = _TopicArcPayload.model_validate(value).model_dump()
-    except ValidationError:
-        return None
-    steps = [_topic_arc_step_dict(step) for step in payload.get("steps", [])]
-    if any(step is None for step in steps):
-        return None
-    payload["steps"] = [step for step in steps if step is not None]
-    payload["arc_title"] = _clip(payload.get("arc_title"), 200)
-    payload["created_kst_date"] = _normalize_iso_date(payload.get("created_kst_date"))
-    payload["carryover_status"] = (
-        payload.get("carryover_status") or _CARRYOVER_ACTIVE
-    )
-    return payload
 
 
-def _topic_arc_active_step(topic_arc: dict[str, Any]) -> dict[str, Any] | None:
-    payload = _coerce_topic_arc_payload(topic_arc)
-    if not payload or payload.get("status") != "active":
-        return None
-    index = int(payload.get("next_step_index") or 0)
-    steps = payload.get("steps", [])
-    if not isinstance(steps, list) or index < 0 or index >= len(steps):
-        return None
-    return dict(steps[index])
 
 
-def _topic_arc_completed_step_summaries(topic_arc: dict[str, Any]) -> list[str]:
-    payload = _coerce_topic_arc_payload(topic_arc)
-    if not payload:
-        return []
-    next_step_index = int(payload.get("next_step_index") or 0)
-    steps = payload.get("steps", [])
-    if not isinstance(steps, list):
-        return []
-    return [
-        _clip(step.get("brief"), 240)
-        for step in steps[:next_step_index]
-        if isinstance(step, dict) and _clip(step.get("brief"), 240)
-    ]
 
 
-def _topic_arc_for_prompt(
-    topic_arc: dict[str, Any] | None,
-    *,
-    current_date: date | None = None,
-) -> dict[str, Any] | None:
-    payload = _coerce_topic_arc_payload(topic_arc)
-    if not payload:
-        return None
-    active_step = _topic_arc_active_step(payload)
-    carryover_time_context = None
-    if active_step:
-        raw_context = topic_arc.get("carryover_time_context") if topic_arc else None
-        if isinstance(raw_context, dict):
-            carryover_time_context = raw_context
-        else:
-            context_date = current_date
-            if context_date is None and payload.get("created_kst_date"):
-                context_date = date.fromisoformat(payload["created_kst_date"])
-            if context_date is not None:
-                carryover_time_context = _carryover_time_context(
-                    active_step,
-                    payload,
-                    context_date,
-                )
-    return {
-        "arc_id": payload.get("arc_id"),
-        "arc_source": payload.get("arc_source"),
-        "topic_key": payload.get("topic_key"),
-        "source_post_id": payload.get("source_post_id"),
-        "arc_title": payload.get("arc_title"),
-        "status": payload.get("status"),
-        "carryover_status": payload.get("carryover_status"),
-        "created_kst_date": payload.get("created_kst_date"),
-        "next_step_index": payload.get("next_step_index"),
-        "step_count": len(payload.get("steps", [])),
-        "active_step": active_step,
-        "carryover_time_context": carryover_time_context,
-        "completed_step_summaries": _topic_arc_completed_step_summaries(payload),
-    }
 
 
-def _make_topic_arc_id(
-    ctx: LangGraphResidentContext,
-    *,
-    arc_source: str,
-    topic_key: str | None,
-    source_post_id: str | None,
-    arc_title: str,
-) -> str:
-    material = "|".join(
-        [
-            ctx.run_id,
-            ctx.character.id,
-            arc_source,
-            topic_key or "",
-            source_post_id or "",
-            arc_title,
-        ]
-    )
-    digest = hashlib.sha256(material.encode("utf-8")).hexdigest()[:16]
-    return f"arc:{ctx.run_id}:{digest}"
 
 
-def _build_topic_arc_payload(
-    ctx: LangGraphResidentContext,
-    *,
-    draft: dict[str, Any],
-    arc_source: Literal["independent", "post_seed"],
-    topic_key: str | None,
-    source_post_id: str | None,
-) -> dict[str, Any] | None:
-    coerced = _coerce_topic_arc_draft(draft, arc_source=arc_source)
-    if not coerced:
-        return None
-    base_date = _current_kst_date(ctx)
-    payload = {
-        "schema_version": _TOPIC_ARC_SCHEMA_VERSION,
-        "arc_id": _make_topic_arc_id(
-            ctx,
-            arc_source=arc_source,
-            topic_key=topic_key,
-            source_post_id=source_post_id,
-            arc_title=coerced["arc_title"],
-        ),
-        "arc_source": arc_source,
-        "topic_key": topic_key,
-        "source_post_id": source_post_id,
-        "arc_title": coerced["arc_title"],
-        "steps": _attach_step_date_anchors(coerced["steps"], base_date),
-        "next_step_index": 0,
-        "status": "active",
-        "last_post_id": None,
-        "created_kst_date": base_date.isoformat(),
-        "carryover_status": _CARRYOVER_ACTIVE,
-    }
-    return _coerce_topic_arc_payload(payload)
 
 
-def _topic_arc_recovery_decision(
-    ctx: LangGraphResidentContext, payload: dict[str, Any] | None, event: Any
-) -> dict[str, Any]:
-    payload = _coerce_topic_arc_payload(payload)
-    if not payload:
-        return {
-            "continue": False,
-            "reason": "payload_invalid",
-            "carryover_time_context": None,
-        }
-    if payload.get("status") != "active":
-        return {
-            "continue": False,
-            "reason": "arc_not_active",
-            "carryover_time_context": None,
-        }
-    active_step = _topic_arc_active_step(payload)
-    if not active_step:
-        return {
-            "continue": False,
-            "reason": "active_step_missing",
-            "carryover_time_context": None,
-        }
-    carryover_time_context = _carryover_time_context(
-        active_step,
-        payload,
-        _current_kst_date(ctx),
-        reference_date=_event_kst_date(event),
-    )
-    phase = str(carryover_time_context.get("phase") or "")
-    if phase == _CARRYOVER_EXPIRED:
-        return {
-            "continue": False,
-            "reason": "past_target_date",
-            "carryover_time_context": carryover_time_context,
-        }
-    if phase == _CARRYOVER_FUTURE:
-        return {
-            "continue": False,
-            "reason": "future_target_date",
-            "carryover_time_context": carryover_time_context,
-        }
-    if phase == _CARRYOVER_DUE_TODAY:
-        return {
-            "continue": True,
-            "reason": "due_today",
-            "carryover_time_context": carryover_time_context,
-        }
-    continuity = _topic_arc_continuity_context(ctx, payload)
-    continuity_mode = str(continuity.get("continuity_mode") or "")
-    if phase == _CARRYOVER_NONE and continuity_mode in {"near", "delayed"}:
-        return {
-            "continue": True,
-            "reason": f"continuity_{continuity_mode}",
-            "carryover_time_context": carryover_time_context,
-        }
-    return {
-        "continue": False,
-        "reason": (
-            "long_gap_without_due_today"
-            if continuity_mode in {"overnight_or_long_gap", "unknown"}
-            else "not_recoverable"
-        ),
-        "carryover_time_context": carryover_time_context,
-    }
 
 
-def _active_topic_arc(ctx: LangGraphResidentContext) -> dict[str, Any] | None:
-    # v8 keeps old writing_topic_arc rows for compatibility but no longer
-    # resumes them as an active writing source. Relationship points now own
-    # one-shot relationship topics.
-    return None
 
 
-def _writing_from_topic_arc(
-    topic_arc: dict[str, Any],
-    *,
-    current_date: date | None = None,
-) -> dict[str, Any] | None:
-    payload = _coerce_topic_arc_payload(topic_arc)
-    active_step = _topic_arc_active_step(payload or {})
-    if not payload or not active_step:
-        return None
-    carryover_time_context = topic_arc.get("carryover_time_context")
-    if not isinstance(carryover_time_context, dict):
-        carryover_time_context = (
-            _carryover_time_context(active_step, payload, current_date)
-            if current_date is not None
-            else None
-        )
-    return {
-        "mode": "arc_continuation",
-        "source_post_id": payload.get("source_post_id"),
-        "topic_key": payload.get("topic_key"),
-        "brief": active_step.get("brief"),
-        "topic_arc": payload,
-        "active_step": active_step,
-        "carryover_time_context": carryover_time_context,
-        "completed_step_summaries": _topic_arc_completed_step_summaries(payload),
-    }
 
 
-def _attach_topic_arc_to_new_writing(
-    ctx: LangGraphResidentContext,
-    writing: dict[str, Any],
-    *,
-    arc_source: Literal["independent", "post_seed"],
-    topic_key: str | None,
-    source_post_id: str | None,
-) -> dict[str, Any]:
-    def _skip(reason: str) -> dict[str, Any]:
-        result: dict[str, Any] = {
-            "mode": "none",
-            "brief": None,
-            "source_post_id": source_post_id,
-            "skip_reason": reason,
-        }
-        if topic_key:
-            result["topic_key"] = topic_key
-        return result
 
-    draft = writing.get("topic_arc")
-    if draft is None:
-        return _skip("topic_arc_required_for_root_writing")
-    topic_arc = _build_topic_arc_payload(
-        ctx,
-        draft=draft,
-        arc_source=arc_source,
-        topic_key=topic_key,
-        source_post_id=source_post_id,
-    )
-    active_step = _topic_arc_active_step(topic_arc or {})
-    if not topic_arc or not active_step:
-        return _skip("topic_arc_invalid_for_root_writing")
-    result = dict(writing)
-    result["topic_arc"] = topic_arc
-    result["active_step"] = active_step
-    result["completed_step_summaries"] = []
-    return result
+
+
+
+
+
+
+
+
+
 
 
 
@@ -632,39 +293,10 @@ def _decrypt_api_key(credential: models.LlmCredential) -> str:
         raise DirectLlmError("credential key cannot be decrypted") from exc
 
 
-def _korean_daypart_label(value: datetime) -> str:
-    minute_of_day = value.hour * 60 + value.minute
-    if minute_of_day < 5 * 60:
-        return "새벽"
-    if minute_of_day < 9 * 60:
-        return "아침"
-    if minute_of_day < 11 * 60 + 30:
-        return "오전"
-    if minute_of_day < 13 * 60 + 30:
-        return "점심"
-    if minute_of_day < 17 * 60 + 30:
-        return "오후"
-    if minute_of_day < 21 * 60:
-        return "저녁"
-    return "밤"
 
 
-def _format_current_time_reference(value: datetime) -> str:
-    current = value.astimezone(agent_activity_policy.APP_TIMEZONE)
-    weekday = _KOREAN_WEEKDAYS[current.weekday()]
-    daypart = _korean_daypart_label(current)
-    return (
-        f"{current.year}년 {current.month}월 {current.day}일 "
-        f"{weekday} {daypart} {current.hour:02d}:{current.minute:02d} KST"
-    )
 
 
-def _aware_datetime(value: Any) -> datetime | None:
-    if not isinstance(value, datetime):
-        return None
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)
 
 
 def _latest_topic_arc_event(
@@ -726,49 +358,6 @@ def _topic_arc_last_post_created_at(
     return _aware_datetime(getattr(post, "created_at", None))
 
 
-def _topic_arc_continuity_context(
-    ctx: LangGraphResidentContext, topic_arc: dict[str, Any]
-) -> dict[str, Any]:
-    payload = _coerce_topic_arc_payload(topic_arc)
-    arc_id = payload.get("arc_id") if payload else None
-    last_post_id = str(payload.get("last_post_id") or "").strip() if payload else ""
-    last_post_id = last_post_id or None
-    last_post_at = _topic_arc_last_post_created_at(ctx, last_post_id)
-    latest_event = _latest_topic_arc_event(ctx, arc_id)
-    latest_event_at = _aware_datetime(getattr(latest_event, "provided_at", None))
-    reference_at = last_post_at or latest_event_at
-    current_kst = ctx.run_started_at.astimezone(agent_activity_policy.APP_TIMEZONE)
-    reference_kst = (
-        reference_at.astimezone(agent_activity_policy.APP_TIMEZONE)
-        if reference_at
-        else None
-    )
-    elapsed_minutes: int | None = None
-    kst_date_changed: bool | None = None
-    daypart_changed: bool | None = None
-    continuity_mode = "unknown"
-    if reference_kst is not None:
-        elapsed = current_kst - reference_kst
-        elapsed_minutes = max(0, int(elapsed.total_seconds() // 60))
-        kst_date_changed = current_kst.date() != reference_kst.date()
-        daypart_changed = (
-            _korean_daypart_label(current_kst) != _korean_daypart_label(reference_kst)
-        )
-        if kst_date_changed or elapsed_minutes > 480:
-            continuity_mode = "overnight_or_long_gap"
-        elif elapsed_minutes <= 120:
-            continuity_mode = "near"
-        else:
-            continuity_mode = "delayed"
-    return {
-        "last_post_id": last_post_id,
-        "last_post_created_at": last_post_at.isoformat() if last_post_at else None,
-        "latest_arc_event_at": latest_event_at.isoformat() if latest_event_at else None,
-        "elapsed_minutes": elapsed_minutes,
-        "kst_date_changed": kst_date_changed,
-        "daypart_changed": daypart_changed,
-        "continuity_mode": continuity_mode,
-    }
 
 
 def _persona_context(character: models.Character, state: models.CharacterState | None) -> str:

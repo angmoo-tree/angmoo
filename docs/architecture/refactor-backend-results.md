@@ -1049,3 +1049,12 @@ LG-A 최종 고정 후보 검증: 관련 **372 passed / 기존 warnings2 / 111.9
 보존 검사에는 부모가 이미 검증하고 고정한 `6d9e342`의 invocation 내부 동일 내용 parse cache 19줄 diff만 적용했다. 모든 경로는 원래 시점마다 다시 읽고, 같은 경로의 바뀐 내용은 다시 분석한다. 원래 frozen·assertion·error 규칙과 추가 도입 ledger는 바꾸지 않았고 부모 source의 테스트나 snapshot을 복사하지 않았다.
 
 LG-B1 최종 후보 검증: 기존 LangGraph·Today·Routines와 보존 검사 회귀 **553 passed / 기존 warnings2 / 137.22초**. 경계742/2470/206legacy, L4 742/14/97, deferred22 PASS. 원래6검사 진단 sources/split/assertions/suppressions/API·ORM/missing-nodes 모두0(protected2139/current2257)이며 stock은 부모 최초 source 도입 캡처 대기입니다. 새 도입6제품 파일, 새 테스트 노드0, 기존 테스트 본문 변경0입니다.
+
+
+## AR-B4 LG-B2 — TopicArc 실제 진행·복구와 시각 규칙
+
+TopicArc 실제14함수와 시각5함수·요일상수를 소유 service/policies로 옮겼다. 원래 본문 AST는 narrow 입력 타입·같은 APP_TIMEZONE·명시 workflow 인자/nullable callback만 복원하면 일치한다. 실행부는 기존 clip과 두 조회 함수를 `TopicArcWorkflows`로 구성하여 실제 함수에 바인딩하고, 조회를 미리 호출하거나 다른 Session을 만들지 않는다. 기존 LangGraph **186 passed / 26.18초**. 새 회귀는 DB read 순서/같은 Session/commit0과 날짜만으로 결정한 분기의 추가 조회0을 검증한다.
+
+원래 Memory 이벤트 구현/clip은 B7 고정 소스를 부모 통합에서 받아야 하므로 이 작업에 같은 helper 파일을 다시 도입하지 않는다. 현재 기존 함수의 실제 callback만 유지하며 전체 LG-B/LG-C 완료나 부모 도입 ledger 완료를 주장하지 않는다.
+
+LG-B2 최종 고정 후보: **376 passed / 기존 warnings2 / 225.61초**, 원래6보존진단 모두0(protected2139/current2261). 경계744/2482/206legacy, L4 744/14/97, deferred22 PASS. 신규 제품2파일(`service/topic_arcs.py`, `policies/resident_clock.py`)과 신규 테스트1파일, 신규 수집노드4개(동일 Session/order1 + 날짜 admission3)이다. 기존 테스트 본문/assertions/노드 변경0. 부모의 source 최초 도입 ledger 합류 전 stock 전체 완료로 표시하지 않는다.

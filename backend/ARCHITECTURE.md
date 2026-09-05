@@ -674,3 +674,8 @@ Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥�
 ### Resident 계획과 결과를 판단하는 위치
 
 `routines/policies/topic_dates.py`는 상대 날짜의 기준과 이월 상태를, `handoff_coverage.py`는 이미 작성한 내용으로 전날 문맥이 충족됐는지를 판단합니다. `action_matching.py`는 관찰한 항목에 맞는 행동과 허용된 관계 행동을 고르고, `writing_contract.py`는 필수 글과 응답 형식을 결정합니다. `writer_outputs.py`는 task id로 writer 결과를 대응시키고 누락·출처 복사·잘못된 멘션을 검사하며 실제 결과를 조립합니다. 이 파일들은 받은 값만 사용하고 DB나 provider를 호출하지 않습니다. 활동 허용 입력은 기존 context의 `activity_policy` 속성만 읽는 계약이며 복제된 상태를 만들지 않습니다.
+
+
+### Topic Arc의 진행과 복구
+
+`routines/service/topic_arcs.py`가 토픽 단계 정제·시각 기준·다음 단계·진행 의도·복구 허용·시간 연속성을 판단합니다. `policies/resident_clock.py`는 원래 KST 표현과 UTC 보정만 담당합니다. 서비스에 전달되는 `TopicArcWorkflows`는 기존 텍스트 정제 함수, 마지막 게시 시각, 최근 기억 이벤트의 nullable 조회를 연결합니다. 조회는 기존 분기에서 같은 context/Session으로 호출하며, 날짜만으로 결론을 낼 수 있으면 조회하지 않습니다. 실행부의 `partial`은 실제 서비스 함수에 이 협력을 묶는 구성 코드입니다. 서비스 본문을 전달 함수로 다시 구현하거나 context·ORM 객체를 복제하지 않습니다. 공통 clipping과 Memory 이벤트 조회의 이미 구현된 소유 이전은 부모의 B7 통합에서 연결합니다.

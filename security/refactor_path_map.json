@@ -32126,11 +32126,13 @@
         "backend/app/services/langgraph_resident.py": [
           "backend/app/domains/routines/policies/action_matching.py",
           "backend/app/domains/routines/policies/handoff_coverage.py",
+          "backend/app/domains/routines/policies/resident_clock.py",
           "backend/app/domains/routines/policies/topic_arc_roles.py",
           "backend/app/domains/routines/policies/topic_dates.py",
           "backend/app/domains/routines/policies/writer_outputs.py",
           "backend/app/domains/routines/policies/writing_contract.py",
           "backend/app/domains/routines/schemas/resident_planning.py",
+          "backend/app/domains/routines/service/topic_arcs.py",
           "backend/app/services/langgraph_resident.py"
         ],
         "backend/app/domains/social/domain/subjective_context.py": [
@@ -32427,15 +32429,13 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_KOREAN_WEEKDAYS",
-          "new": "backend/app/services/langgraph_resident.py::_KOREAN_WEEKDAYS",
+          "new": "backend/app/domains/routines/policies/resident_clock.py::_KOREAN_WEEKDAYS",
           "direct_consumers": [
-            "backend/app/services/langgraph_resident.py"
+            "backend/app/domains/routines/policies/resident_clock.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_langgraph_recursion_limit",
@@ -32740,15 +32740,14 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_topic_arc_step_dict",
-          "new": "backend/app/services/langgraph_resident.py::_topic_arc_step_dict",
+          "new": "backend/app/domains/routines/service/topic_arcs.py::_topic_arc_step_dict",
           "direct_consumers": [
+            "backend/app/domains/routines/service/topic_arcs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_normalize_iso_date",
@@ -32763,27 +32762,24 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_current_kst_date",
-          "new": "backend/app/services/langgraph_resident.py::_current_kst_date",
+          "new": "backend/app/domains/routines/policies/resident_clock.py::_current_kst_date",
           "direct_consumers": [
+            "backend/app/domains/routines/service/topic_arcs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_event_kst_date",
-          "new": "backend/app/services/langgraph_resident.py::_event_kst_date",
+          "new": "backend/app/domains/routines/policies/resident_clock.py::_event_kst_date",
           "direct_consumers": [
-            "backend/app/services/langgraph_resident.py"
+            "backend/app/domains/routines/service/topic_arcs.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_normalized_relative_text",
@@ -32848,149 +32844,133 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_carryover_time_context",
-          "new": "backend/app/services/langgraph_resident.py::_carryover_time_context",
+          "new": "backend/app/domains/routines/service/topic_arcs.py::_carryover_time_context",
           "direct_consumers": [
+            "backend/app/domains/routines/service/topic_arcs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_carryover_time_context_phases_and_legacy_tomorrow_inference"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_coerce_topic_arc_draft",
-          "new": "backend/app/services/langgraph_resident.py::_coerce_topic_arc_draft",
+          "new": "backend/app/domains/routines/service/topic_arcs.py::_coerce_topic_arc_draft",
           "direct_consumers": [
+            "backend/app/domains/routines/service/topic_arcs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_independent_topic_arc_validation_requires_setup_development_conclusion",
             "tests/test_langgraph_resident_engine.py::test_post_seed_topic_arc_validation_allows_one_to_three_steps"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_coerce_topic_arc_payload",
-          "new": "backend/app/services/langgraph_resident.py::_coerce_topic_arc_payload",
+          "new": "backend/app/domains/routines/service/topic_arcs.py::_coerce_topic_arc_payload",
           "direct_consumers": [
+            "backend/app/domains/routines/service/topic_arcs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_topic_arc_active_step",
-          "new": "backend/app/services/langgraph_resident.py::_topic_arc_active_step",
+          "new": "backend/app/domains/routines/service/topic_arcs.py::_topic_arc_active_step",
           "direct_consumers": [
+            "backend/app/domains/routines/service/topic_arcs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_topic_arc_completed_step_summaries",
-          "new": "backend/app/services/langgraph_resident.py::_topic_arc_completed_step_summaries",
+          "new": "backend/app/domains/routines/service/topic_arcs.py::_topic_arc_completed_step_summaries",
           "direct_consumers": [
+            "backend/app/domains/routines/service/topic_arcs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_topic_arc_for_prompt",
-          "new": "backend/app/services/langgraph_resident.py::_topic_arc_for_prompt",
+          "new": "backend/app/domains/routines/service/topic_arcs.py::_topic_arc_for_prompt",
           "direct_consumers": [
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_post_writer_prompt_uses_current_topic_arc_step_only"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_make_topic_arc_id",
-          "new": "backend/app/services/langgraph_resident.py::_make_topic_arc_id",
+          "new": "backend/app/domains/routines/service/topic_arcs.py::_make_topic_arc_id",
           "direct_consumers": [
+            "backend/app/domains/routines/service/topic_arcs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_build_topic_arc_payload",
-          "new": "backend/app/services/langgraph_resident.py::_build_topic_arc_payload",
+          "new": "backend/app/domains/routines/service/topic_arcs.py::_build_topic_arc_payload",
           "direct_consumers": [
+            "backend/app/domains/routines/service/topic_arcs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_topic_arc_payload_anchors_relative_dates_and_ignores_llm_dates"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_topic_arc_recovery_decision",
-          "new": "backend/app/services/langgraph_resident.py::_topic_arc_recovery_decision",
+          "new": "backend/app/domains/routines/service/topic_arcs.py::_topic_arc_recovery_decision",
           "direct_consumers": [
-            "backend/tests/test_langgraph_resident_engine.py"
+            "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
-            "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+            "tests/routines/test_topic_arc_workflows.py::test_topic_arc_continuity_keeps_read_order_and_same_session",
+            "tests/routines/test_topic_arc_workflows.py::test_topic_arc_date_admission_skips_unneeded_reads"
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_active_topic_arc",
-          "new": "backend/app/services/langgraph_resident.py::_active_topic_arc",
+          "new": "backend/app/domains/routines/service/topic_arcs.py::_active_topic_arc",
           "direct_consumers": [
-            "backend/tests/test_langgraph_resident_engine.py"
+            "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_active_topic_arc_ignores_legacy_character_event",
             "tests/test_langgraph_resident_engine.py::test_active_topic_arc_skips_expired_carryover"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_writing_from_topic_arc",
-          "new": "backend/app/services/langgraph_resident.py::_writing_from_topic_arc",
+          "new": "backend/app/domains/routines/service/topic_arcs.py::_writing_from_topic_arc",
           "direct_consumers": [
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_arc_continuation_post_task_includes_due_today_carryover_context"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_attach_topic_arc_to_new_writing",
-          "new": "backend/app/services/langgraph_resident.py::_attach_topic_arc_to_new_writing",
+          "new": "backend/app/domains/routines/service/topic_arcs.py::_attach_topic_arc_to_new_writing",
           "direct_consumers": [
-            "backend/tests/test_langgraph_resident_engine.py"
+            "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_action_name_for_policy",
@@ -33016,39 +32996,36 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_korean_daypart_label",
-          "new": "backend/app/services/langgraph_resident.py::_korean_daypart_label",
+          "new": "backend/app/domains/routines/policies/resident_clock.py::_korean_daypart_label",
           "direct_consumers": [
-            "backend/app/services/langgraph_resident.py"
+            "backend/app/domains/routines/policies/resident_clock.py",
+            "backend/app/domains/routines/service/topic_arcs.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_format_current_time_reference",
-          "new": "backend/app/services/langgraph_resident.py::_format_current_time_reference",
+          "new": "backend/app/domains/routines/policies/resident_clock.py::_format_current_time_reference",
           "direct_consumers": [
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_langgraph_current_time_reference_uses_existing_korean_dayparts"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_aware_datetime",
-          "new": "backend/app/services/langgraph_resident.py::_aware_datetime",
+          "new": "backend/app/domains/routines/policies/resident_clock.py::_aware_datetime",
           "direct_consumers": [
+            "backend/app/domains/routines/policies/resident_clock.py",
+            "backend/app/domains/routines/service/topic_arcs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_latest_topic_arc_event",
@@ -33076,15 +33053,15 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_topic_arc_continuity_context",
-          "new": "backend/app/services/langgraph_resident.py::_topic_arc_continuity_context",
+          "new": "backend/app/domains/routines/service/topic_arcs.py::_topic_arc_continuity_context",
           "direct_consumers": [
+            "backend/app/domains/routines/service/topic_arcs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
-            "tests/test_langgraph_resident_engine.py::test_topic_arc_continuity_falls_back_to_latest_arc_event"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+            "tests/routines/test_topic_arc_workflows.py::test_topic_arc_continuity_keeps_read_order_and_same_session",
+            "tests/routines/test_topic_arc_workflows.py::test_topic_arc_date_admission_skips_unneeded_reads"
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_persona_context",
@@ -35691,6 +35668,21 @@
       "preservation": "43 actual pure decision functions and 11 constants match original whole AST; only relationship permission input annotation changes to a structural view of the existing activity_policy. SQL/provider/state publication/transaction untouched; actual module global dependency audit0.",
       "checker_provenance": "Only exact 19-line invocation-local content parsing cache patch from signed6d9e34249627a5b186f63ca0546bb6690c5eae32 applied, parent approved. Every file is still reread at each original check site; original frozen/source/assertion/error rules unchanged. No source/node snapshot copied.",
       "remaining": "TopicArc workflows, clipping-dependent planning and same-Session reads remain LG-B2; graph/provider/runtime ownership LG-C; original B7 Daypart and B5 point ownership remains pending parent integration."
+    },
+    "AR-B4-LG-B2": {
+      "status": "SIGNED SOURCE READY — 376 tests passed; 20 whole definitions preserved; original six diagnostics0 (2139 protected/2261 current); parent linear introductions pending",
+      "actual_paths": [
+        "backend/app/domains/routines/contracts/planning_context.py",
+        "backend/app/domains/routines/contracts/topic_arcs.py",
+        "backend/app/domains/routines/policies/resident_clock.py",
+        "backend/app/domains/routines/service/topic_arcs.py"
+      ],
+      "test_nodes": [
+        "tests/routines/test_topic_arc_workflows.py::test_topic_arc_continuity_keeps_read_order_and_same_session",
+        "tests/routines/test_topic_arc_workflows.py::test_topic_arc_date_admission_skips_unneeded_reads"
+      ],
+      "preservation": "Actual19 TopicArc/clock functions and Korean weekday constant preserve whole AST after exact input type, same APP_TIMEZONE and explicit workflow keyword/callback normalization. Original186 LangGraph cases PASS. Same original clip callable/Session/nullable reads; no added state copy/provider/commit/reordered query. Runtime binds actual functions with functools.partial; it does not duplicate policy or execute reads while binding.",
+      "remaining": "Nullable Social last-post and Memory latest-event reads remain actual original same-Session helpers, passed at original decision points. Parent B7 will connect the already-owned daypart repository and common clipping; no duplicate B7 source was introduced. LG-B3 action decisions/read helpers and LG-C graph/provider workflow still remain."
     }
   },
   "test_symbols": {

@@ -1,7 +1,7 @@
 {
-  "edge_count": 2470,
-  "external_import_count": 2322,
-  "module_count": 742,
+  "edge_count": 2482,
+  "external_import_count": 2336,
+  "module_count": 744,
   "modules": [
     {
       "external_imports": [],
@@ -3768,6 +3768,7 @@
     },
     {
       "external_imports": [
+        "datetime",
         "typing"
       ],
       "imports": [
@@ -3822,9 +3823,15 @@
     },
     {
       "external_imports": [
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy.orm",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.domains.routines.contracts.planning_context"
+      ],
       "module": "app.domains.routines.contracts.topic_arcs",
       "path": "backend/app/domains/routines/contracts/topic_arcs.py",
       "wildcard_imports": []
@@ -3954,6 +3961,20 @@
       ],
       "module": "app.domains.routines.policies.planning",
       "path": "backend/app/domains/routines/policies/planning.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.planning_context"
+      ],
+      "module": "app.domains.routines.policies.resident_clock",
+      "path": "backend/app/domains/routines/policies/resident_clock.py",
       "wildcard_imports": []
     },
     {
@@ -4836,6 +4857,26 @@
       ],
       "module": "app.domains.routines.service.tick_schedule",
       "path": "backend/app/domains/routines/service/tick_schedule.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.topic_arcs",
+        "app.domains.routines.policies.resident_clock",
+        "app.domains.routines.policies.topic_arc_roles",
+        "app.domains.routines.policies.topic_dates",
+        "app.domains.routines.schemas.resident_planning"
+      ],
+      "module": "app.domains.routines.service.topic_arcs",
+      "path": "backend/app/domains/routines/service/topic_arcs.py",
       "wildcard_imports": []
     },
     {
@@ -10665,6 +10706,7 @@
         "asyncio",
         "collections.abc",
         "datetime",
+        "functools",
         "hashlib",
         "json",
         "langgraph.errors",
@@ -10688,8 +10730,10 @@
         "app.cruds.agents",
         "app.cruds.community",
         "app.domains.routines.contracts.resident",
+        "app.domains.routines.contracts.topic_arcs",
         "app.domains.routines.policies.action_matching",
         "app.domains.routines.policies.handoff_coverage",
+        "app.domains.routines.policies.resident_clock",
         "app.domains.routines.policies.topic_arc_roles",
         "app.domains.routines.policies.topic_dates",
         "app.domains.routines.policies.writer_outputs",
@@ -10697,6 +10741,7 @@
         "app.domains.routines.repository.public_action_executions",
         "app.domains.routines.schemas.resident_planning",
         "app.domains.routines.service.public_action_executions",
+        "app.domains.routines.service.topic_arcs",
         "app.domains.social.contracts.subjective_context",
         "app.domains.world_characters.contracts.runtime_modes",
         "app.models",

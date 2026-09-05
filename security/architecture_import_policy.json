@@ -1035,6 +1035,7 @@
       "app.domains.routines.policies.activity_state",
       "app.domains.routines.policies.handoff_coverage",
       "app.domains.routines.policies.planning",
+      "app.domains.routines.policies.resident_clock",
       "app.domains.routines.policies.topic_arc_roles",
       "app.domains.routines.policies.topic_dates",
       "app.domains.routines.policies.writer_outputs",
@@ -1091,6 +1092,7 @@
       "app.domains.routines.service.slot_state",
       "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tick_schedule",
+      "app.domains.routines.service.topic_arcs",
       "app.domains.routines.utils",
       "app.domains.routines.utils.activity_actions",
       "app.domains.routines.utils.clock",
@@ -1280,6 +1282,7 @@
       "app.domains.routines.service.slot_recovery",
       "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tick_schedule",
+      "app.domains.routines.service.topic_arcs",
       "app.domains.runtime.contracts",
       "app.domains.social.contracts",
       "app.domains.social.contracts.actors",
@@ -2932,6 +2935,30 @@
         "owner_stage": "AR-B4-LG-C",
         "reason": "Existing resident execution consumes the actual planning/output rules after full body extraction; no copied implementation or wrapper.",
         "removal_condition": "Move remaining resident graph/runtime workflows and remove this exact old services consumer in LG-C.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.contracts.topic_arcs",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing graph wires actual TopicArc service, unchanged clock and same-Session nullable reads; no duplicate policy.",
+        "removal_condition": "Move actual graph/runtime module in LG-C; parent B7 connects its already-owned clipping and event query at this existing binding.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.policies.resident_clock",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing graph wires actual TopicArc service, unchanged clock and same-Session nullable reads; no duplicate policy.",
+        "removal_condition": "Move actual graph/runtime module in LG-C; parent B7 connects its already-owned clipping and event query at this existing binding.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.service.topic_arcs",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing graph wires actual TopicArc service, unchanged clock and same-Session nullable reads; no duplicate policy.",
+        "removal_condition": "Move actual graph/runtime module in LG-C; parent B7 connects its already-owned clipping and event query at this existing binding.",
         "review_date": "2026-09-06"
       }
     ]
