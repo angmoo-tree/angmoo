@@ -779,10 +779,6 @@
         },
         {
           "importer": "app.runtime.social.feed_cycle",
-          "imported": "app.services.community"
-        },
-        {
-          "importer": "app.runtime.social.feed_cycle",
           "imported": "app.services.direct_llm"
         },
         {
@@ -818,6 +814,19 @@
         {
           "importer": "app.runtime.social.agent_tool_authorization",
           "imported": "app.services.agent_activity_policy"
+        }
+      ]
+    },
+    {
+      "id": "ar-b5-agent-tool-cue-binding",
+      "owner_stage": "L6",
+      "reason": "AR-B5-C22 keeps exact current pending-cue query and consume writes in runtime until prepared B4 canonical integration; actual Social tool policy no longer depends on legacy code.",
+      "removal_condition": "Bind routines.repository.feed_cues pending query and routines.service.feed_cues consumption and remove exact old runtime import.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.social.agent_tools",
+          "imported": "app.cruds.agents"
         }
       ]
     }
@@ -1118,6 +1127,7 @@
       "app.domains.social.service.action_sources",
       "app.domains.social.service.activity_results",
       "app.domains.social.service.agent_presentation",
+      "app.domains.social.service.agent_tool_actions",
       "app.domains.social.service.agent_tool_authorization",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
@@ -1369,6 +1379,7 @@
       "app.domains.social.service.action_sources",
       "app.domains.social.service.activity_results",
       "app.domains.social.service.agent_presentation",
+      "app.domains.social.service.agent_tool_actions",
       "app.domains.social.service.agent_tool_authorization",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",

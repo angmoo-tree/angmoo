@@ -753,3 +753,6 @@ World Feed의 bounded prompt와 서버 후보/의도/공개 근거 지침은 `so
 
 
 Social Agent Tool의 Run·캐릭터·사용자 범위와 거절 메시지는 `social/service/agent_tool_authorization.py`가 소유한다. Routines의 Run 조회·활동 허용 검사와 Identity 사용자 조회는 `runtime/social/agent_tool_authorization.py`가 원래 Session으로 연결한다. Run auth key 성공을 먼저 반환하고 daypart 세션 거절 뒤에만 기존 fallback을 수행한다. 협력은 객체 복사·선조회·commit을 추가하지 않으며, 지정된 활동 거절 외의 예외는 그대로 전달한다.
+
+
+실제 Social 도구 게시/답글/반응/팔로우는 `social/service/agent_tool_actions.py`의 `AgentToolActionService`가 소유한다. 원래 권한/자기 글/중복/공개 검증 후 같은 Social timeline을 호출하고, 주제 메타데이터·성공 활동 로그·선택적 feed cue 소비를 원래 순서로 처리한다. `runtime/social/agent_tools.py`는 기존 Session의 타 업무 협력만 연결하며, provider를 호출하거나 새 commit 경계를 만들지 않는다. 기존 호출자는 구성된 `agent_tool_actions`의 원래 이름/인자를 사용한다.

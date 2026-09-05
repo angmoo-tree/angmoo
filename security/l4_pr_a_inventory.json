@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2474,
-      "internal_edge_count": 2962,
+      "external_import_count": 2476,
+      "internal_edge_count": 2987,
       "legacy_import_exception_count": 0,
-      "module_count": 836,
+      "module_count": 838,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1170,6 +1170,26 @@
           },
           {
             "imports": [
+              "app.domains.characters.service.profile",
+              "app.domains.social.contracts.agent_tools",
+              "app.domains.social.exceptions",
+              "app.domains.social.repository.posts",
+              "app.domains.social.repository.profiles",
+              "app.domains.social.repository.resident_affordances",
+              "app.domains.social.schemas.community",
+              "app.domains.social.service.activity_results",
+              "app.domains.social.service.agent_tool_authorization",
+              "app.domains.social.service.profiles",
+              "app.domains.social.service.resident_affordances",
+              "app.domains.social.service.timeline",
+              "app.domains.social.service.topic_metadata",
+              "app.domains.social.service.visibility"
+            ],
+            "module": "app.domains.social.service.agent_tool_actions",
+            "path": "backend/app/domains/social/service/agent_tool_actions.py"
+          },
+          {
+            "imports": [
               "app.domains.social.contracts.agent_tools",
               "app.domains.social.exceptions"
             ],
@@ -1862,6 +1882,7 @@
               "app.runtime.routine_posts.context_references",
               "app.runtime.routines.activity_references",
               "app.runtime.routines.joint_references",
+              "app.runtime.social.agent_tools",
               "app.runtime.social.observations",
               "app.runtime.social.sqlalchemy_inbox",
               "app.runtime.social.subjective_composition"
@@ -1899,6 +1920,19 @@
           },
           {
             "imports": [
+              "app.cruds.agents",
+              "app.domains.routines.models",
+              "app.domains.routines.service.activity_logs",
+              "app.domains.social.service.agent_tool_actions",
+              "app.runtime.social.agent_tool_authorization",
+              "app.runtime.social.feed_history",
+              "app.runtime.social.timeline"
+            ],
+            "module": "app.runtime.social.agent_tools",
+            "path": "backend/app/runtime/social/agent_tools.py"
+          },
+          {
+            "imports": [
               "app.runtime.social.discovery",
               "app.runtime.social.inbox",
               "app.runtime.social.manual_feed_references",
@@ -1932,12 +1966,12 @@
               "app.domains.world_characters.models",
               "app.runtime.activity_proposals.composition",
               "app.runtime.resident.context",
+              "app.runtime.social.agent_tools",
               "app.runtime.social.feed_reaction_provider",
               "app.runtime.social.observations",
               "app.runtime.social.subjective_composition",
               "app.runtime.social.world_feed_actions",
               "app.runtime.social.world_feed_queries",
-              "app.services.community",
               "app.services.direct_llm"
             ],
             "module": "app.runtime.social.feed_cycle",

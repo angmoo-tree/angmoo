@@ -1756,7 +1756,9 @@
         "backend/app/runtime/social/feed_history.py",
         "backend/app/domains/social/service/agent_tool_authorization.py",
         "backend/app/domains/social/contracts/agent_tools.py",
-        "backend/app/runtime/social/agent_tool_authorization.py"
+        "backend/app/runtime/social/agent_tool_authorization.py",
+        "backend/app/domains/social/service/agent_tool_actions.py",
+        "backend/app/runtime/social/agent_tools.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",

@@ -1,7 +1,7 @@
 {
-  "edge_count": 2962,
-  "external_import_count": 2474,
-  "module_count": 836,
+  "edge_count": 2987,
+  "external_import_count": 2476,
+  "module_count": 838,
   "modules": [
     {
       "external_imports": [],
@@ -6281,6 +6281,30 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.service.profile",
+        "app.domains.social.contracts.agent_tools",
+        "app.domains.social.exceptions",
+        "app.domains.social.repository.posts",
+        "app.domains.social.repository.profiles",
+        "app.domains.social.repository.resident_affordances",
+        "app.domains.social.schemas.community",
+        "app.domains.social.service.activity_results",
+        "app.domains.social.service.agent_tool_authorization",
+        "app.domains.social.service.profiles",
+        "app.domains.social.service.resident_affordances",
+        "app.domains.social.service.timeline",
+        "app.domains.social.service.topic_metadata",
+        "app.domains.social.service.visibility"
+      ],
+      "module": "app.domains.social.service.agent_tool_actions",
+      "path": "backend/app/domains/social/service/agent_tool_actions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "hashlib",
         "logging",
@@ -10858,6 +10882,7 @@
         "app.runtime.routine_posts.context_references",
         "app.runtime.routines.activity_references",
         "app.runtime.routines.joint_references",
+        "app.runtime.social.agent_tools",
         "app.runtime.social.observations",
         "app.runtime.social.sqlalchemy_inbox",
         "app.runtime.social.subjective_composition"
@@ -11106,6 +11131,23 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.cruds.agents",
+        "app.domains.routines.models",
+        "app.domains.routines.service.activity_logs",
+        "app.domains.social.service.agent_tool_actions",
+        "app.runtime.social.agent_tool_authorization",
+        "app.runtime.social.feed_history",
+        "app.runtime.social.timeline"
+      ],
+      "module": "app.runtime.social.agent_tools",
+      "path": "backend/app/runtime/social/agent_tools.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "fastapi"
       ],
       "imports": [
@@ -11154,12 +11196,12 @@
         "app.domains.world_characters.models",
         "app.runtime.activity_proposals.composition",
         "app.runtime.resident.context",
+        "app.runtime.social.agent_tools",
         "app.runtime.social.feed_reaction_provider",
         "app.runtime.social.observations",
         "app.runtime.social.subjective_composition",
         "app.runtime.social.world_feed_actions",
         "app.runtime.social.world_feed_queries",
-        "app.services.community",
         "app.services.direct_llm"
       ],
       "module": "app.runtime.social.feed_cycle",
@@ -12121,6 +12163,7 @@
         "app.domains.social.service.resident_affordances",
         "app.models",
         "app.runtime.social.agent_tool_authorization",
+        "app.runtime.social.agent_tools",
         "app.schemas",
         "app.services.agent_briefs",
         "app.services.character_lore",
@@ -12221,6 +12264,7 @@
         "app.domains.social.utils.limits",
         "app.models",
         "app.runtime.social.agent_tool_authorization",
+        "app.runtime.social.agent_tools",
         "app.runtime.social.discovery",
         "app.runtime.social.feed_history",
         "app.runtime.social.inbox",
@@ -12333,6 +12377,7 @@
         "app.models",
         "app.runtime.resident.context",
         "app.runtime.routine_posts.sqlalchemy_runtime",
+        "app.runtime.social.agent_tools",
         "app.runtime.social.feed_cycle",
         "app.runtime.social.image_generation",
         "app.runtime.social.langgraph_actions",

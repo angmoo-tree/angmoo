@@ -1,3 +1,4 @@
+from app.runtime.social.agent_tools import agent_tool_actions
 from app.runtime.social import agent_tool_authorization as social_tool_authorization
 from app.domains.social.service.agent_tool_authorization import _agent_tool_lookup_session_key
 from app.domains.social.service import resident_affordances
@@ -116,7 +117,7 @@ def create_agent_tool_post_from_brief(
     )
     lore_chunk_ids = lore_retrieval.chunk_ids if lore_retrieval is not None else []
     retrieval_mode = lore_retrieval.mode if lore_retrieval is not None else None
-    post = community_service.create_agent_tool_post(
+    post = agent_tool_actions.create_agent_tool_post(
         db,
         session_key,
         post_data,
@@ -309,7 +310,7 @@ def reply_agent_tool_post_from_brief(
             "composition returned an invalid reply payload"
         ) from exc
 
-    post = community_service.reply_agent_tool_post(
+    post = agent_tool_actions.reply_agent_tool_post(
         db, session_key, post_id, reply_data
     )
     action_memory = _build_compact_action_memory(

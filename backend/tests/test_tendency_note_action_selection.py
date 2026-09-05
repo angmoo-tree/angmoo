@@ -1,3 +1,5 @@
+from app.domains.social.service import agent_tool_actions as tool_action_service
+from app.runtime.social import agent_tools as tool_action_runtime
 from app.runtime.social import feed_history as history_runtime
 
 from app.domains.routines.service import feed_history as history_policy
@@ -1967,12 +1969,12 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
         lambda *args, **kwargs: run,
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_service,
         "_ensure_tick_action_allowed",
         lambda *args, **kwargs: None,
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_runtime.agent_tool_actions.timeline,
         "create_post",
         lambda *args, **kwargs: SimpleNamespace(
             id="post-1",
@@ -1981,17 +1983,17 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
         ),
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_service,
         "_store_post_topic_metadata",
         lambda *args, **kwargs: stored.update(kwargs),
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        tool_action_runtime.activity_logs,
         "log_activity",
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_runtime.feed_history,
         "maybe_log_feed_seed_consumed_for_created_post",
         lambda *args, **kwargs: None,
     )
@@ -2034,12 +2036,12 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
         lambda *args, **kwargs: run,
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_service,
         "_ensure_tick_action_allowed",
         lambda *args, **kwargs: None,
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_runtime.agent_tool_actions.timeline,
         "create_post",
         lambda *args, **kwargs: SimpleNamespace(
             id="post-1",
@@ -2048,17 +2050,17 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
         ),
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_service,
         "_store_post_topic_metadata",
         lambda *args, **kwargs: None,
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        tool_action_runtime.activity_logs,
         "log_activity",
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
     monkeypatch.setattr(
-        community_service,
+        tool_action_runtime.feed_history,
         "maybe_log_feed_seed_consumed_for_created_post",
         lambda *args, **kwargs: None,
     )

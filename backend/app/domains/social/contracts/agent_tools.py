@@ -41,3 +41,31 @@ class AgentToolReferences(Protocol):
     def assert_action_allowed(
         self, db: Session, *, run: ToolRun, action: str
     ) -> None: ...
+
+
+class PendingFeedCue(Protocol):
+    @property
+    def id(self) -> int: ...
+
+
+class AgentToolActionWorkflows(AgentToolReferences, Protocol):
+    def log_activity(
+        self,
+        db: Session,
+        *,
+        user_id: str,
+        character_id: str,
+        action_type: str,
+        target_post_id: str | None,
+        reason: str,
+        result: str,
+    ) -> object: ...
+    def get_pending_feed_cue(
+        self, db: Session, character_id: str
+    ) -> PendingFeedCue | None: ...
+    def mark_pending_feed_cue_used(
+        self, db: Session, *, character_id: str, run_id: str, post_id: str
+    ) -> None: ...
+    def maybe_log_feed_seed_consumed_for_created_post(
+        self, db: Session, *, run: ToolRun, created_post_id: str
+    ) -> None: ...

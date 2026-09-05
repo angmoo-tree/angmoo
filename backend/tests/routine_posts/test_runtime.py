@@ -1285,14 +1285,14 @@ def test_publish_fault_rolls_back_post_state_and_execution(monkeypatch) -> None:
     with Session(engine, expire_on_commit=False) as db:
         fixture = _seed(db)
         initial_state = dict(fixture.morning_episode.current_state_snapshot)
-        original_create = routine_post_runtime.community_service.create_agent_tool_post
+        original_create = routine_post_runtime.agent_tool_actions.create_agent_tool_post
 
         def create_then_fail(*args, **kwargs):
             original_create(*args, **kwargs)
             raise community_service.CommunityServiceError("fault after post flush")
 
         monkeypatch.setattr(
-            routine_post_runtime.community_service,
+            routine_post_runtime.agent_tool_actions,
             "create_agent_tool_post",
             create_then_fail,
         )

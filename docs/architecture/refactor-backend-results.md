@@ -1306,3 +1306,12 @@ C20 최종 확대 검증은 **454 PASS / 54.81초 / 기존 warning 5개**다. �
 첫 집중 검증은78 PASS/1 FAIL로, nullable User 조회 한 곳이 잘못된 Protocol을 db.get에 전달한 실제 연결 오류를 새 SQLite 회귀가 잡았다. 해당 위치를 원래 User 조회 협력으로 바로잡았으며 최종 직접 회귀는 **79 PASS / 6.36초 / 기존 warning2개**다. 새2개 회귀는 attached Run/User, pending 상태 조회/autoflush, commit 없음/caller rollback과 daypart 즉시 거절·지정 오류만 변환을 검사한다. 기존 assertion을 변경하지 않았다. Community50/G07/full B5 및 capture/Hosted는 후속이다.
 
 C21 최종 확대 Social·Relationships·Daypart·Tendency·LangGraph·Feed 검증은 **369 PASS / 47.75초 / 기존 warning3개**다. PR #258/#263 API/schema/ORM·보호 assertion·전체 split evidence가 통과했고, 경계 **836 module / 2962 edge / legacy180**, L4 parity99·ER0 84/87/24/44/7도 통과했다. Agent writing의 기존 권한 조회 소비자만 실제 owner/runtime으로 연결했으며 그 별도 writing 업무 구현은 이 단계에서 이전하지 않았다.
+
+
+## AR-B5-C22 — Social 도구 게시·답글·반응·팔로우 실제 소유
+
+Community 실제10개 행동은 AgentToolActionService로 옮겼다. 같은 Social timeline과 주제 메타데이터를 직접 호출하고, Routines의 실제 권한·로그·cue는 runtime 협력으로 연결한다. 10개 전체 함수와40개 잔여 함수 AST는 self/정확 협력 호출 복원 후 동일하다. Agent writing/LangGraph/RoutinePost/WorldFeed 실행의 실제 소비자도 구성된 서비스로 연결했다.
+
+첫 수집은 RoutinePost의 future import보다 새 import가 앞에 놓여1오류였으며 올바른 import 위치로 수정했다. 이후 기존88개 중86 PASS/2 FAIL은 옛 Community monkeypatch 대상이어서 실제 함수/연결 대상으로10개 receiver만 변경했다. 기존 assertion은 유지했고 **88 PASS / 8.12초**, 새 SQLite/권한/반응/Search 집중은 **20 PASS / 6.84초**다. 새 회귀는 실제 World 게시/주제/성공 로그를 원래 deferred_commits 아래에서 실행하고 caller rollback으로 함께 취소함을 검증한다. Community40 및 G07/full B5/capture/Hosted는 계속한다.
+
+C22 확대 첫 실행은386 PASS/7 FAIL/기존 PostgreSQL 전용 skip1이었다. LangGraph7개 mock receiver와 RoutinePost의 실제 실패 주입2개 참조를 새 실행 instance로 연결했고 원래 assertion·skip은 유지했다. 최종 확대는 **393 PASS / 1 기존 skip / 59.32초 / warning3개**다. PR #258/#263 API/schema/ORM·보호 변경3파일 assertion·전체 split evidence와 경계 **838 module / 2987 edge / legacy180**, L4 parity99·ER0가 통과했다. split 지도는 기존 형식대로 실제 top-level class와 destination_member를 함께 명시해10개 원래 함수의 정확한 메서드 소유를 기록했으며 검사 코드는 변경하지 않았다.
