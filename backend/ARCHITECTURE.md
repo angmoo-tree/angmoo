@@ -472,7 +472,7 @@ WorldCharacter의 공개 프로필·Studio·후보 조회와 퇴장 정책은 `s
 WorldCharacter의 생성·재시도·승인·거절·입장 정책은 `service/autonomous_setup.py`에 있습니다. Character 조회, nullable World/membership 조회·입장 membership seed·World contract version 쓰기, agent-purpose credential 조회는 각 소유 서비스와 같은 Session으로 협력합니다. `infrastructure/autonomous_setup_models.py`의 외부 ORM 집합은 제거했습니다. Provider budget·쿼터·실패 상태 기록과 commit 경계는 WC 서비스에 유지합니다. Runtime mode의 실제 repair 정책은 `service/runtime_modes.py`, 시작 시 Session factory·SQLite immediate 실행은 `runtime/world_characters/recovery.py`가 소유합니다. Runtime의 capacity query는 원래 WC/Character join을 그대로 유지합니다.
 
 
-WorldCharacter의 활동 준비 상태는 `service/readiness.py`가 판단하며 응답 class는 `schemas/readiness.py`에서 한 번만 정의합니다. `app.schemas.agents`는 이전 소비자의 같은 class identity를 유지하는 alias입니다. 새 Character 또는 Routine 코드는 이 WC 서비스/응답 계약을 직접 사용합니다. 준비 상태를 판단할 때 World 접근·profile hash·최신 ready repertoire·daypart별 후보 수의 기존 우선순위를 유지합니다.
+WorldCharacter의 활동 준비 상태는 `service/readiness.py`가 판단합니다. Character 상세 API에 들어가는 `AgentActivityProfileReadinessRead`는 `characters/schemas.py`에서 한 번만 정의하며 WC 준비 상태 서비스와 이전 `app.schemas.agents`가 같은 class를 사용합니다. Character 응답 조립이 WC 서비스를 역으로 import하지 않도록 사용하지 않는 Runtime alias와 WC 응답 파일은 제거했습니다. 준비 상태를 판단할 때 World 접근·profile hash·최신 ready repertoire·daypart별 후보 수의 기존 우선순위는 유지합니다.
 
 입장·퇴장 HTTP 4개와 설정 HTTP 6개는 WC router가 소유합니다. 피드 상태 HTTP는 현재 feed 소유 경로에 남고, 두 앱의 route 조립은 기존 feed→setup 순서를 유지합니다. World 접근 오류의 HTTP 변환은 공통 `app/api/world_errors.py`가 소유하므로 한 도메인의 router가 다른 router를 호출하지 않습니다. Scheduler/AgentRun/Slot과 setup의 퇴장 busy 조회는 runtime guard를 공통 HTTP 연결에서 주입합니다.
 

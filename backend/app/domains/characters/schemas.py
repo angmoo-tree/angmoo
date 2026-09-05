@@ -6,7 +6,6 @@ from app.domains.runtime.schemas import (
     AgentActivityLogRead,
     AgentSlotRead,
 )
-from app.domains.world_characters.schemas.readiness import AgentActivityProfileReadinessRead
 from datetime import datetime
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -286,6 +285,14 @@ class AgentImageGenerationSettingRead(UtcInstantResponseModel):
     service_free_quota_date: str | None = None
     updated_at: datetime
 
+
+
+class AgentActivityProfileReadinessRead(BaseModel):
+    ready: bool
+    source: Literal["legacy_tendency", "world_community_profile"]
+    reason_code: str | None = None
+    world_id: str | None = None
+    world_character_id: str | None = None
 
 
 class AgentDetailRead(BaseModel):

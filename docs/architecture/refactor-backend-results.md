@@ -475,3 +475,7 @@ Character·Account 삭제가 함께 사용하는 여러 업무 SQL은 `runtime/w
 - L4 live inventory `backend_modules=634 / parity_nodes=97`, ER0 `postgres_files=77 / migrations=87 / neo4j_queries=24 / next_routes=44` 생성이 통과했습니다. architecture partial Social scope 위반은 없지만 e6 기준의 Character–Runtime–WorldCharacter package cycle이 남아 root WC 통합에서 수정 중입니다. 이 source에서 예외를 추가하지 않았습니다.
 - 신규 테스트: `tests/social/test_foundation_contracts.py::test_all_social_models_share_registered_metadata_and_original_tables`, `::test_frozen_subjective_migration_and_public_values_keep_single_definitions`. 기존 테스트 노드를 삭제·완화하지 않았습니다.
 - **B5 전체 완료가 아닙니다.** 실제 Social 서비스/SQL/HTTP, Relationship의 원자 갱신, projection/outbox 및 Today 소비 경로 전환은 다음 source 단위에서 계속합니다. source introduction capture·전체 CI·병합은 root 선형 통합에서 진행합니다.
+
+### WC 최종 통합의 응답 소유권 정정
+
+WC 최종 source와 Character HTTP source를 합친 첫 고정 후보의 집중 회귀는 215 passed였지만 package 경계 검사에서 Character→WC→Character 및 Runtime alias가 포함된 순환을 발견했다. 위 최초 WC 응답 위치 기록은 이 통합 전에 해당한다. 최종 배치에서는 Character 상세 API의 `AgentActivityProfileReadinessRead` 정의를 동일 본문 그대로 `characters/schemas.py`로 옮기고 WC readiness 정책이 같은 class를 소비한다. 기존 aggregate도 이 실제 class를 가리킨다. 생산 소비자가 없는 Runtime alias와 WC schema 조각을 제거하고 source map과 실제 소비자를 갱신했다. 경계 예외를 추가하지 않았으며 준비 상태 판단 정책과 HTTP schema는 변경하지 않는다. 이 수정 전 진행 중이던 전체 보존 검사는 중단했으며 PASS로 기록하지 않는다.

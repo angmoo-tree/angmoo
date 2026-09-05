@@ -1,7 +1,7 @@
 {
-  "edge_count": 2022,
-  "external_import_count": 2068,
-  "module_count": 634,
+  "edge_count": 2019,
+  "external_import_count": 2066,
+  "module_count": 633,
   "modules": [
     {
       "external_imports": [],
@@ -951,7 +951,6 @@
         "app.domains.identity.schemas",
         "app.domains.media.schemas",
         "app.domains.runtime.schemas",
-        "app.domains.world_characters.schemas.readiness",
         "app.providers.registry"
       ],
       "module": "app.domains.characters.schemas",
@@ -4030,8 +4029,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.response_schemas",
-        "app.domains.world_characters.schemas.readiness"
+        "app.core.response_schemas"
       ],
       "module": "app.domains.runtime.schemas",
       "path": "backend/app/domains/runtime/schemas.py",
@@ -4729,16 +4727,6 @@
     },
     {
       "external_imports": [
-        "pydantic",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.domains.world_characters.schemas.readiness",
-      "path": "backend/app/domains/world_characters/schemas/readiness.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
         "__future__",
         "datetime",
         "pydantic",
@@ -4869,9 +4857,9 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.domains.characters.schemas",
         "app.domains.world_characters.contracts.readiness",
         "app.domains.world_characters.models",
-        "app.domains.world_characters.schemas.readiness",
         "app.domains.world_characters.service.setup_validation",
         "app.domains.worlds.service.character_entry"
       ],
@@ -8371,7 +8359,6 @@
         "app.domains.characters.schemas",
         "app.domains.identity.schemas",
         "app.domains.runtime.schemas",
-        "app.domains.world_characters.schemas.readiness",
         "app.providers.registry",
         "app.schemas.agent_runs",
         "app.schemas.characters",

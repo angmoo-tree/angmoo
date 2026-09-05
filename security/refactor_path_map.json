@@ -229,6 +229,7 @@
     "backend/app/services/world_character_setup.py": "backend/app/runtime/world_characters/cleanup.py",
     "backend/app/services/worlds.py": "backend/app/domains/world_characters/service/membership.py",
     "backend/app/services/activity_profile_readiness.py": "backend/app/domains/world_characters/service/readiness.py",
+    "backend/app/domains/world_characters/schemas/readiness.py": "backend/app/domains/characters/schemas.py",
     "backend/app/models/community.py": "backend/app/domains/social/models/posts.py",
     "backend/app/models/world_feed.py": "backend/app/domains/social/models/feed.py",
     "backend/app/domains/social/infrastructure/sqlalchemy_models.py": "backend/app/domains/social/models/manual_writes.py",
@@ -6732,11 +6733,9 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentActivityProfileReadinessRead",
-          "new": "backend/app/domains/world_characters/schemas/readiness.py::AgentActivityProfileReadinessRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentActivityProfileReadinessRead",
           "direct_consumers": [
             "backend/app/domains/world_characters/service/readiness.py",
-            "backend/app/domains/runtime/schemas.py",
-            "backend/app/domains/characters/schemas.py",
             "backend/app/schemas/agents.py"
           ],
           "test_nodes": [
@@ -16751,6 +16750,10 @@
         "AR-B2-worlds: all original 14 routes plus guard/error mapping now point at actual current owners",
         "AR-B2-B1: all Character/shared response symbols retained; readiness DTO has its actual WC schema owner"
       ]
+    },
+    "AR-B2-WC-readiness-owner": {
+      "reason": "The Character detail HTTP response owns its readiness DTO. WC policy consumes that same class; removing the unused Runtime alias and WC schema fragment breaks the reverse package dependency without a policy exception.",
+      "source_owner": "AR-B2"
     },
     "AR-B5-A": {
       "status": "IMPLEMENTED; focused35 PASS; original69 ASTs/API-schema-ORM/changed6files assertions/split evidence PASS. Existing e6 WC package cycle is being fixed by root; Social partial-scope checks have no violations. No source capture yet.",
