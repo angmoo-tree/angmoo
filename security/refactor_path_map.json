@@ -242,7 +242,9 @@
     "backend/app/domains/social/domain/today_activity.py": "backend/app/domains/social/contracts/today_activity.py",
     "backend/app/domains/social/domain/writes.py": "backend/app/domains/social/contracts/writes.py",
     "backend/app/domains/social/domain/__init__.py": "backend/app/domains/social/contracts/__init__.py",
-    "backend/app/domains/social/api/schemas.py": "backend/app/domains/social/schemas/manual.py"
+    "backend/app/domains/social/api/schemas.py": "backend/app/domains/social/schemas/manual.py",
+    "backend/app/schemas/community.py": "backend/app/domains/social/schemas/community.py",
+    "backend/app/schemas/world_feed.py": "backend/app/domains/social/schemas/feed.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -5074,7 +5076,14 @@
           "backend/app/cruds/community.py",
           "backend/app/domains/characters/exceptions.py",
           "backend/app/domains/characters/service/profile.py",
-          "backend/app/domains/characters/service/state.py"
+          "backend/app/domains/characters/service/state.py",
+          "backend/app/domains/social/repository/inbox.py",
+          "backend/app/domains/social/repository/media.py",
+          "backend/app/domains/social/repository/posts.py",
+          "backend/app/domains/social/repository/profiles.py",
+          "backend/app/domains/social/service/notifications.py",
+          "backend/app/domains/social/utils/cursors.py",
+          "backend/app/domains/social/utils/text.py"
         ],
         "backend/app/schemas/characters.py": [
           "backend/app/domains/characters/schemas.py",
@@ -5084,8 +5093,7 @@
           "backend/app/domains/characters/schemas.py",
           "backend/app/domains/identity/schemas.py",
           "backend/app/domains/runtime/schemas.py",
-          "backend/app/schemas/agents.py",
-          "backend/app/domains/world_characters/schemas/readiness.py"
+          "backend/app/schemas/agents.py"
         ]
       },
       "split_symbols": [
@@ -5145,9 +5153,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::_MULTIPLE_NEWLINES_RE",
-          "new": "backend/app/cruds/community.py::_MULTIPLE_NEWLINES_RE",
+          "new": "backend/app/domains/social/utils/text.py::_MULTIPLE_NEWLINES_RE",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/domains/social/utils/text.py"
           ],
           "test_nodes": [
             "tests/test_visible_post_text_sanitizer.py::test_visible_body_converts_literal_newline_escapes",
@@ -5157,9 +5165,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::sanitize_visible_post_title",
-          "new": "backend/app/cruds/community.py::sanitize_visible_post_title",
+          "new": "backend/app/domains/social/utils/text.py::sanitize_visible_post_title",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/test_visible_post_text_sanitizer.py::test_visible_title_collapses_literal_and_real_newline_escapes"
@@ -5167,9 +5175,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::sanitize_visible_post_body",
-          "new": "backend/app/cruds/community.py::sanitize_visible_post_body",
+          "new": "backend/app/domains/social/utils/text.py::sanitize_visible_post_body",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/test_visible_post_text_sanitizer.py::test_visible_body_converts_literal_newline_escapes",
@@ -5179,9 +5187,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::_visible_post_conditions",
-          "new": "backend/app/cruds/community.py::_visible_post_conditions",
+          "new": "backend/app/domains/social/repository/posts.py::_visible_post_conditions",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
@@ -5191,9 +5199,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::_visible_reference_conditions",
-          "new": "backend/app/cruds/community.py::_visible_reference_conditions",
+          "new": "backend/app/domains/social/repository/posts.py::_visible_reference_conditions",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
@@ -5203,9 +5211,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::is_report_hidden",
-          "new": "backend/app/cruds/community.py::is_report_hidden",
+          "new": "backend/app/domains/social/repository/posts.py::is_report_hidden",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5235,9 +5243,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::_like_search_terms",
-          "new": "backend/app/cruds/community.py::_like_search_terms",
+          "new": "backend/app/domains/social/repository/posts.py::_like_search_terms",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5245,9 +5253,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::_like_pattern",
-          "new": "backend/app/cruds/community.py::_like_pattern",
+          "new": "backend/app/domains/social/repository/posts.py::_like_pattern",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5255,9 +5263,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::_parse_int_cursor",
-          "new": "backend/app/cruds/community.py::_parse_int_cursor",
+          "new": "backend/app/domains/social/utils/cursors.py::_parse_int_cursor",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_response_contract.py::test_bot_notifications_hide_user_and_recipient_fields"
@@ -5308,9 +5316,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::character_has_authored_post",
-          "new": "backend/app/cruds/community.py::character_has_authored_post",
+          "new": "backend/app/domains/social/repository/posts.py::character_has_authored_post",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5318,9 +5326,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::list_posts",
-          "new": "backend/app/cruds/community.py::list_posts",
+          "new": "backend/app/domains/social/repository/posts.py::list_posts",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
@@ -5330,9 +5338,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::get_post",
-          "new": "backend/app/cruds/community.py::get_post",
+          "new": "backend/app/domains/social/repository/posts.py::get_post",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
@@ -5340,9 +5348,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::get_post_including_report_hidden",
-          "new": "backend/app/cruds/community.py::get_post_including_report_hidden",
+          "new": "backend/app/domains/social/repository/posts.py::get_post_including_report_hidden",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5350,9 +5358,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::list_post_media",
-          "new": "backend/app/cruds/community.py::list_post_media",
+          "new": "backend/app/domains/social/repository/media.py::list_post_media",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5360,9 +5368,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::create_post_media",
-          "new": "backend/app/cruds/community.py::create_post_media",
+          "new": "backend/app/domains/social/repository/media.py::create_post_media",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5370,9 +5378,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::create_post_image_generation_job",
-          "new": "backend/app/cruds/community.py::create_post_image_generation_job",
+          "new": "backend/app/domains/social/repository/media.py::create_post_image_generation_job",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5380,9 +5388,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::lock_service_image_quota",
-          "new": "backend/app/cruds/community.py::lock_service_image_quota",
+          "new": "backend/app/domains/social/repository/media.py::lock_service_image_quota",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5390,9 +5398,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_service_image_quota_used",
-          "new": "backend/app/cruds/community.py::count_service_image_quota_used",
+          "new": "backend/app/domains/social/repository/media.py::count_service_image_quota_used",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5400,9 +5408,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_service_image_global_used",
-          "new": "backend/app/cruds/community.py::count_service_image_global_used",
+          "new": "backend/app/domains/social/repository/media.py::count_service_image_global_used",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5410,9 +5418,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::create_post_image_quota_reservation",
-          "new": "backend/app/cruds/community.py::create_post_image_quota_reservation",
+          "new": "backend/app/domains/social/repository/media.py::create_post_image_quota_reservation",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5420,9 +5428,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::update_post_image_quota_reservation",
-          "new": "backend/app/cruds/community.py::update_post_image_quota_reservation",
+          "new": "backend/app/domains/social/repository/media.py::update_post_image_quota_reservation",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5430,9 +5438,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::get_post_image_quota_reservation",
-          "new": "backend/app/cruds/community.py::get_post_image_quota_reservation",
+          "new": "backend/app/domains/social/repository/media.py::get_post_image_quota_reservation",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5440,9 +5448,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_active_post_image_jobs_for_character_between",
-          "new": "backend/app/cruds/community.py::count_active_post_image_jobs_for_character_between",
+          "new": "backend/app/domains/social/repository/media.py::count_active_post_image_jobs_for_character_between",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5450,9 +5458,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::claim_next_post_image_generation_job",
-          "new": "backend/app/cruds/community.py::claim_next_post_image_generation_job",
+          "new": "backend/app/domains/social/repository/media.py::claim_next_post_image_generation_job",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5460,9 +5468,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::mark_stale_post_image_generation_jobs_failed",
-          "new": "backend/app/cruds/community.py::mark_stale_post_image_generation_jobs_failed",
+          "new": "backend/app/domains/social/repository/media.py::mark_stale_post_image_generation_jobs_failed",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5470,9 +5478,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::finish_post_image_generation_job",
-          "new": "backend/app/cruds/community.py::finish_post_image_generation_job",
+          "new": "backend/app/domains/social/repository/media.py::finish_post_image_generation_job",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5480,9 +5488,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_post_media_for_character_between",
-          "new": "backend/app/cruds/community.py::count_post_media_for_character_between",
+          "new": "backend/app/domains/social/repository/media.py::count_post_media_for_character_between",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5490,9 +5498,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::get_post_report",
-          "new": "backend/app/cruds/community.py::get_post_report",
+          "new": "backend/app/domains/social/repository/posts.py::get_post_report",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5500,9 +5508,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_post_reports",
-          "new": "backend/app/cruds/community.py::count_post_reports",
+          "new": "backend/app/domains/social/repository/posts.py::count_post_reports",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5520,9 +5528,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::list_timeline_posts",
-          "new": "backend/app/cruds/community.py::list_timeline_posts",
+          "new": "backend/app/domains/social/repository/posts.py::list_timeline_posts",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5530,9 +5538,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::list_resident_scan_posts",
-          "new": "backend/app/cruds/community.py::list_resident_scan_posts",
+          "new": "backend/app/domains/social/repository/posts.py::list_resident_scan_posts",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5540,9 +5548,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::list_profile_posts",
-          "new": "backend/app/cruds/community.py::list_profile_posts",
+          "new": "backend/app/domains/social/repository/profiles.py::list_profile_posts",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5550,9 +5558,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::list_liked_profile_posts",
-          "new": "backend/app/cruds/community.py::list_liked_profile_posts",
+          "new": "backend/app/domains/social/repository/profiles.py::list_liked_profile_posts",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5580,9 +5588,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::list_post_replies",
-          "new": "backend/app/cruds/community.py::list_post_replies",
+          "new": "backend/app/domains/social/repository/posts.py::list_post_replies",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5590,9 +5598,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::list_post_thread_replies",
-          "new": "backend/app/cruds/community.py::list_post_thread_replies",
+          "new": "backend/app/domains/social/repository/posts.py::list_post_thread_replies",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5600,9 +5608,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_post_comments",
-          "new": "backend/app/cruds/community.py::count_post_comments",
+          "new": "backend/app/domains/social/repository/posts.py::count_post_comments",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5610,9 +5618,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_post_likes",
-          "new": "backend/app/cruds/community.py::count_post_likes",
+          "new": "backend/app/domains/social/repository/posts.py::count_post_likes",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5620,9 +5628,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_post_replies",
-          "new": "backend/app/cruds/community.py::count_post_replies",
+          "new": "backend/app/domains/social/repository/posts.py::count_post_replies",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
@@ -5632,9 +5640,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_post_reposts",
-          "new": "backend/app/cruds/community.py::count_post_reposts",
+          "new": "backend/app/domains/social/repository/posts.py::count_post_reposts",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
@@ -5644,9 +5652,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_post_quotes",
-          "new": "backend/app/cruds/community.py::count_post_quotes",
+          "new": "backend/app/domains/social/repository/posts.py::count_post_quotes",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
@@ -5783,9 +5791,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::_lock_direct_user_like",
-          "new": "backend/app/cruds/community.py::_lock_direct_user_like",
+          "new": "backend/app/domains/social/repository/posts.py::_lock_direct_user_like",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/test_direct_user_like_uniqueness.py::test_direct_user_like_is_idempotent_with_database_unique_boundary",
@@ -5845,9 +5853,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::delete_repost_event_for_timeline_post",
-          "new": "backend/app/cruds/community.py::delete_repost_event_for_timeline_post",
+          "new": "backend/app/domains/social/repository/posts.py::delete_repost_event_for_timeline_post",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5855,9 +5863,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::delete_repost_events_for_post",
-          "new": "backend/app/cruds/community.py::delete_repost_events_for_post",
+          "new": "backend/app/domains/social/repository/posts.py::delete_repost_events_for_post",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5865,9 +5873,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::soft_delete_timeline_reposts_for_source",
-          "new": "backend/app/cruds/community.py::soft_delete_timeline_reposts_for_source",
+          "new": "backend/app/domains/social/repository/posts.py::soft_delete_timeline_reposts_for_source",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5875,9 +5883,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::soft_delete_post_tree",
-          "new": "backend/app/cruds/community.py::soft_delete_post_tree",
+          "new": "backend/app/domains/social/repository/posts.py::soft_delete_post_tree",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5885,9 +5893,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::get_followed_profiles_for_user",
-          "new": "backend/app/cruds/community.py::get_followed_profiles_for_user",
+          "new": "backend/app/domains/social/repository/profiles.py::get_followed_profiles_for_user",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5895,9 +5903,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::get_followed_profiles_for_character",
-          "new": "backend/app/cruds/community.py::get_followed_profiles_for_character",
+          "new": "backend/app/domains/social/repository/profiles.py::get_followed_profiles_for_character",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5945,9 +5953,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_profile_followers",
-          "new": "backend/app/cruds/community.py::count_profile_followers",
+          "new": "backend/app/domains/social/repository/profiles.py::count_profile_followers",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5955,9 +5963,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_profile_following",
-          "new": "backend/app/cruds/community.py::count_profile_following",
+          "new": "backend/app/domains/social/repository/profiles.py::count_profile_following",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5965,9 +5973,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::list_profile_following",
-          "new": "backend/app/cruds/community.py::list_profile_following",
+          "new": "backend/app/domains/social/repository/profiles.py::list_profile_following",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5975,9 +5983,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::list_profile_followers",
-          "new": "backend/app/cruds/community.py::list_profile_followers",
+          "new": "backend/app/domains/social/repository/profiles.py::list_profile_followers",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5985,9 +5993,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_profile_posts",
-          "new": "backend/app/cruds/community.py::count_profile_posts",
+          "new": "backend/app/domains/social/repository/profiles.py::count_profile_posts",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -5995,9 +6003,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_profile_replies",
-          "new": "backend/app/cruds/community.py::count_profile_replies",
+          "new": "backend/app/domains/social/repository/profiles.py::count_profile_replies",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -6005,9 +6013,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_profile_received_likes",
-          "new": "backend/app/cruds/community.py::count_profile_received_likes",
+          "new": "backend/app/domains/social/repository/profiles.py::count_profile_received_likes",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -6015,9 +6023,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::count_profile_likes",
-          "new": "backend/app/cruds/community.py::count_profile_likes",
+          "new": "backend/app/domains/social/repository/profiles.py::count_profile_likes",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -6025,9 +6033,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::create_notification",
-          "new": "backend/app/cruds/community.py::create_notification",
+          "new": "backend/app/domains/social/service/notifications.py::create_notification",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -6045,9 +6053,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::list_notifications_for_agent",
-          "new": "backend/app/cruds/community.py::list_notifications_for_agent",
+          "new": "backend/app/domains/social/repository/inbox.py::list_notifications_for_agent",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -6055,9 +6063,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::list_notifications_for_agent_page",
-          "new": "backend/app/cruds/community.py::list_notifications_for_agent_page",
+          "new": "backend/app/domains/social/repository/inbox.py::list_notifications_for_agent_page",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -6065,9 +6073,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::list_unread_reply_notifications_for_character",
-          "new": "backend/app/cruds/community.py::list_unread_reply_notifications_for_character",
+          "new": "backend/app/domains/social/repository/inbox.py::list_unread_reply_notifications_for_character",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -6075,9 +6083,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::list_unread_notifications_for_character",
-          "new": "backend/app/cruds/community.py::list_unread_notifications_for_character",
+          "new": "backend/app/domains/social/repository/inbox.py::list_unread_notifications_for_character",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -6085,9 +6093,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::get_notification_for_agent",
-          "new": "backend/app/cruds/community.py::get_notification_for_agent",
+          "new": "backend/app/domains/social/repository/inbox.py::get_notification_for_agent",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -6105,9 +6113,9 @@
         },
         {
           "old": "backend/app/cruds/community.py::mark_notification_read",
-          "new": "backend/app/cruds/community.py::mark_notification_read",
+          "new": "backend/app/domains/social/repository/inbox.py::mark_notification_read",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
             "tests/test_m3_authorization_deletion.py::test_two_user_object_authorization_matrix_denies_cross_owner_access"
@@ -16869,6 +16877,89 @@
         "tests/test_p8_l_r_today_sns_activity.py",
         "tests/test_p8_l_r_today_sns_activity_migration.py"
       ]
+    },
+    "AR-B5-B1": {
+      "status": "IMPLEMENTED; focused90 PASS; 61 function AST/both schema AST/API-schema-ORM/changed test assertions/full split evidence PASS. Source capture and whole B5 service/relationship/projection completion remain pending.",
+      "scope": "61 actual Social-only SQL/formatting functions; Community/WorldFeed HTTP schemas. Mixed Character/User/Agent queries and actual service policy remain for the next slice.",
+      "source_split_owner": "AR-B2-B1 retains the complete original cruds/community.py symbol map; B5 updates only the 61 newly moved symbols.",
+      "sql_functions_by_module": {
+        "repository/inbox": [
+          "get_notification_for_agent",
+          "list_notifications_for_agent",
+          "list_notifications_for_agent_page",
+          "list_unread_notifications_for_character",
+          "list_unread_reply_notifications_for_character",
+          "mark_notification_read"
+        ],
+        "repository/media": [
+          "claim_next_post_image_generation_job",
+          "count_active_post_image_jobs_for_character_between",
+          "count_post_media_for_character_between",
+          "count_service_image_global_used",
+          "count_service_image_quota_used",
+          "create_post_image_generation_job",
+          "create_post_image_quota_reservation",
+          "create_post_media",
+          "finish_post_image_generation_job",
+          "get_post_image_quota_reservation",
+          "list_post_media",
+          "lock_service_image_quota",
+          "mark_stale_post_image_generation_jobs_failed",
+          "update_post_image_quota_reservation"
+        ],
+        "repository/posts": [
+          "_like_pattern",
+          "_like_search_terms",
+          "_lock_direct_user_like",
+          "_visible_post_conditions",
+          "_visible_reference_conditions",
+          "character_has_authored_post",
+          "count_post_comments",
+          "count_post_likes",
+          "count_post_quotes",
+          "count_post_replies",
+          "count_post_reports",
+          "count_post_reposts",
+          "delete_repost_event_for_timeline_post",
+          "delete_repost_events_for_post",
+          "get_post",
+          "get_post_including_report_hidden",
+          "get_post_report",
+          "is_report_hidden",
+          "list_post_replies",
+          "list_post_thread_replies",
+          "list_posts",
+          "list_resident_scan_posts",
+          "list_timeline_posts",
+          "soft_delete_post_tree",
+          "soft_delete_timeline_reposts_for_source"
+        ],
+        "repository/profiles": [
+          "count_profile_followers",
+          "count_profile_following",
+          "count_profile_likes",
+          "count_profile_posts",
+          "count_profile_received_likes",
+          "count_profile_replies",
+          "get_followed_profiles_for_character",
+          "get_followed_profiles_for_user",
+          "list_liked_profile_posts",
+          "list_profile_followers",
+          "list_profile_following",
+          "list_profile_posts"
+        ],
+        "service/notifications": [
+          "create_notification"
+        ],
+        "utils/cursors": [
+          "_parse_int_cursor"
+        ],
+        "utils/text": [
+          "sanitize_visible_post_body",
+          "sanitize_visible_post_title"
+        ]
+      },
+      "transaction": "Existing flush, finish_write, deferred commits, refresh, row lock and SQLite/PostgreSQL branches are unchanged."
     }
   }
 }

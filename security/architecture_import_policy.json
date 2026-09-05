@@ -369,10 +369,6 @@
           "importer": "app.schemas"
         },
         {
-          "imported": "app.schemas.community",
-          "importer": "app.schemas"
-        },
-        {
           "imported": "app.schemas.maintenance",
           "importer": "app.schemas"
         },
@@ -397,10 +393,6 @@
           "importer": "app.schemas"
         },
         {
-          "imported": "app.schemas.world_feed",
-          "importer": "app.schemas"
-        },
-        {
           "imported": "app.schemas.worlds",
           "importer": "app.schemas"
         },
@@ -413,16 +405,8 @@
           "importer": "app.schemas.agents"
         },
         {
-          "imported": "app.schemas.community",
-          "importer": "app.schemas.agents"
-        },
-        {
           "imported": "app.schemas.media_security",
           "importer": "app.schemas.agents"
-        },
-        {
-          "imported": "app.schemas.community",
-          "importer": "app.schemas.characters"
         },
         {
           "imported": "app.models",
@@ -978,10 +962,6 @@
           "importer": "app.compatibility.routine_posts.legacy"
         },
         {
-          "imported": "app.schemas.community",
-          "importer": "app.compatibility.routine_posts.legacy"
-        },
-        {
           "imported": "app.services.activity_runtime",
           "importer": "app.compatibility.routine_posts.legacy"
         },
@@ -1028,10 +1008,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.runtime.social.sqlalchemy_unit_of_work"
-        },
-        {
-          "imported": "app.schemas.community",
           "importer": "app.runtime.social.sqlalchemy_unit_of_work"
         },
         {
@@ -1246,8 +1222,20 @@
       "app.domains.social.models.manual_writes",
       "app.domains.social.models.posts",
       "app.domains.social.models.subjective_context",
+      "app.domains.social.repository",
+      "app.domains.social.repository.inbox",
+      "app.domains.social.repository.media",
+      "app.domains.social.repository.posts",
+      "app.domains.social.repository.profiles",
       "app.domains.social.schemas",
+      "app.domains.social.schemas.community",
+      "app.domains.social.schemas.feed",
       "app.domains.social.schemas.manual",
+      "app.domains.social.service",
+      "app.domains.social.service.notifications",
+      "app.domains.social.utils",
+      "app.domains.social.utils.cursors",
+      "app.domains.social.utils.text",
       "app.domains.world_characters.client",
       "app.domains.world_characters.contracts",
       "app.domains.world_characters.contracts.lifecycle",
@@ -1336,7 +1324,10 @@
       "app.domains.social.contracts.today_activity",
       "app.domains.social.contracts.writes",
       "app.domains.social.schemas",
+      "app.domains.social.schemas.community",
+      "app.domains.social.schemas.feed",
       "app.domains.social.schemas.manual",
+      "app.domains.social.service.notifications",
       "app.domains.world_characters.contracts",
       "app.domains.world_characters.contracts.lifecycle",
       "app.domains.world_characters.contracts.owner_identity",
@@ -2203,14 +2194,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.schemas.world_feed",
-        "target": "app.domains.social.contracts.subjective_context",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.services.langgraph_resident",
         "target": "app.domains.social.contracts.subjective_context",
         "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
@@ -2224,6 +2207,94 @@
         "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
         "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
         "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.repository.inbox",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.repository.media",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.repository.posts",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.repository.profiles",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.utils.cursors",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.utils.text",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.social.schemas.community",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.social.schemas.feed",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.social.schemas.community",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.characters",
+        "target": "app.domains.social.schemas.community",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.social.service.notifications",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
+        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
+        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
         "review_date": "2026-09-05"
       }
     ]

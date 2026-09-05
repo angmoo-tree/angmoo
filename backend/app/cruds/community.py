@@ -1,3 +1,77 @@
+from app.domains.social.service.notifications import create_notification
+from app.domains.social.repository.inbox import (
+    get_notification_for_agent,
+    list_notifications_for_agent,
+    list_notifications_for_agent_page,
+    list_unread_notifications_for_character,
+    list_unread_reply_notifications_for_character,
+    mark_notification_read,
+)
+from app.domains.social.repository.media import (
+    claim_next_post_image_generation_job,
+    count_active_post_image_jobs_for_character_between,
+    count_post_media_for_character_between,
+    count_service_image_global_used,
+    count_service_image_quota_used,
+    create_post_image_generation_job,
+    create_post_image_quota_reservation,
+    create_post_media,
+    finish_post_image_generation_job,
+    get_post_image_quota_reservation,
+    list_post_media,
+    lock_service_image_quota,
+    mark_stale_post_image_generation_jobs_failed,
+    update_post_image_quota_reservation,
+)
+from app.domains.social.repository.posts import (
+    _like_pattern,
+    _like_search_terms,
+    _lock_direct_user_like,
+    _visible_post_conditions,
+    _visible_reference_conditions,
+    character_has_authored_post,
+    count_post_comments,
+    count_post_likes,
+    count_post_quotes,
+    count_post_replies,
+    count_post_reports,
+    count_post_reposts,
+    delete_repost_event_for_timeline_post,
+    delete_repost_events_for_post,
+    get_post,
+    get_post_including_report_hidden,
+    get_post_report,
+    is_report_hidden,
+    list_post_replies,
+    list_post_thread_replies,
+    list_posts,
+    list_resident_scan_posts,
+    list_timeline_posts,
+    soft_delete_post_tree,
+    soft_delete_timeline_reposts_for_source,
+)
+from app.domains.social.repository.profiles import (
+    count_profile_followers,
+    count_profile_following,
+    count_profile_likes,
+    count_profile_posts,
+    count_profile_received_likes,
+    count_profile_replies,
+    get_followed_profiles_for_character,
+    get_followed_profiles_for_user,
+    list_liked_profile_posts,
+    list_profile_followers,
+    list_profile_following,
+    list_profile_posts,
+)
+from app.domains.social.utils.cursors import (
+    _parse_int_cursor,
+)
+from app.domains.social.utils.text import (
+    sanitize_visible_post_body,
+    sanitize_visible_post_title,
+)
+
 from datetime import date, datetime, timezone
 import hashlib
 import re
@@ -100,487 +174,62 @@ PUBLIC_ACTIVITY_SUMMARIES = {
     "tick_completed": "활동 결과를 정리했어요.",
     "unfollowed": "프로필 팔로우를 해제했어요.",
 }
-_MULTIPLE_NEWLINES_RE = re.compile(r"\n{3,}")
 
 
-def sanitize_visible_post_title(value: str) -> str:
-    text = str(value or "")
-    for marker in ("\\r\\n", "\\n", "\\r", "\\t"):
-        text = text.replace(marker, " ")
-    text = text.replace("\r\n", " ").replace("\r", " ").replace("\n", " ").replace("\t", " ")
-    return " ".join(text.split())
 
 
-def sanitize_visible_post_body(value: str) -> str:
-    text = str(value or "")
-    text = (
-        text.replace("\\r\\n", "\n")
-        .replace("\\n", "\n")
-        .replace("\\r", "\n")
-        .replace("\\t", " ")
-    )
-    text = text.replace("\r\n", "\n").replace("\r", "\n").replace("\t", " ")
-    text = "\n".join(line.rstrip() for line in text.split("\n"))
-    return _MULTIPLE_NEWLINES_RE.sub("\n\n", text).strip()
 
 
-def _visible_post_conditions():
-    return (
-        models.Post.deleted_at.is_(None),
-        models.Post.report_hidden_at.is_(None),
-    )
 
 
-def _visible_reference_conditions():
-    quoted_source = aliased(models.Post)
-    reposted_source = aliased(models.Post)
-    visible_quote_ids = select(quoted_source.id).where(
-        quoted_source.deleted_at.is_(None),
-        quoted_source.report_hidden_at.is_(None),
-    )
-    visible_repost_ids = select(reposted_source.id).where(
-        reposted_source.deleted_at.is_(None),
-        reposted_source.report_hidden_at.is_(None),
-    )
-    return (
-        or_(
-            models.Post.quote_post_id.is_(None),
-            models.Post.quote_post_id.in_(visible_quote_ids),
-        ),
-        or_(
-            models.Post.repost_of_post_id.is_(None),
-            models.Post.repost_of_post_id.in_(visible_repost_ids),
-        ),
-    )
 
 
-def is_report_hidden(post: models.Post) -> bool:
-    return post.report_hidden_at is not None
 
 
-def _like_search_terms(query: str) -> list[str]:
-    raw = query.strip()
-    if not raw:
-        return []
-    terms = [raw]
-    if raw.startswith("@") and len(raw) > 1:
-        terms.append(raw[1:])
-    return list(dict.fromkeys(terms))
 
 
-def _like_pattern(term: str) -> str:
-    escaped = (
-        term.replace("\\", "\\\\")
-        .replace("%", "\\%")
-        .replace("_", "\\_")
-    )
-    return f"%{escaped}%"
 
 
-def _parse_int_cursor(value: str) -> int | None:
-    try:
-        return int(value)
-    except ValueError:
-        return None
 
 
-def character_has_authored_post(db: Session, character_id: str) -> bool:
-    return (
-        db.scalar(
-            select(models.Post.id)
-            .where(
-                models.Post.author_character_id == character_id,
-                models.Post.deleted_at.is_(None),
-            )
-            .limit(1)
-        )
-        is not None
-    )
 
 
-def list_posts(db: Session) -> list[schemas.PostSummary]:
-    comment_count = func.count(func.distinct(models.Comment.id)).label("comment_count")
-    like_count = func.count(func.distinct(models.PostLike.id)).label("like_count")
-    rows = db.execute(
-        select(models.Post, comment_count, like_count)
-        .outerjoin(models.Comment)
-        .outerjoin(models.PostLike)
-        .where(*_visible_post_conditions(), *_visible_reference_conditions())
-        .group_by(models.Post.id)
-        .order_by(models.Post.created_at.desc(), models.Post.id)
-    ).all()
-
-    return [
-        schemas.PostSummary.model_validate(
-            {
-                "id": post.id,
-                "author_name": post.author_name,
-                "title": post.title,
-                "body": post.body,
-                "created_at": post.created_at,
-                "post_type": post.post_type,
-                "author_user_id": post.author_user_id,
-                "author_character_id": post.author_character_id,
-                "reply_to_post_id": post.reply_to_post_id,
-                "quote_post_id": post.quote_post_id,
-                "repost_of_post_id": post.repost_of_post_id,
-                "comment_count": count,
-                "like_count": likes,
-                "reply_count": count_post_replies(db, post.id),
-                "repost_count": count_post_reposts(db, post.id),
-                "quote_count": count_post_quotes(db, post.id),
-            }
-        )
-        for post, count, likes in rows
-    ]
 
 
-def get_post(db: Session, post_id: str) -> models.Post | None:
-    return db.scalar(
-        select(models.Post)
-        .where(models.Post.id == post_id, *_visible_post_conditions())
-        .options(selectinload(models.Post.comments))
-    )
 
 
-def get_post_including_report_hidden(db: Session, post_id: str) -> models.Post | None:
-    return db.scalar(
-        select(models.Post)
-        .where(models.Post.id == post_id, models.Post.deleted_at.is_(None))
-        .options(selectinload(models.Post.comments))
-    )
 
 
-def list_post_media(db: Session, post_id: str) -> list[models.PostMedia]:
-    return list(
-        db.scalars(
-            select(models.PostMedia)
-            .where(models.PostMedia.post_id == post_id)
-            .order_by(models.PostMedia.created_at.asc(), models.PostMedia.id.asc())
-        )
-    )
 
 
-def create_post_media(
-    db: Session,
-    *,
-    post_id: str,
-    url: str,
-    alt_text: str,
-    model: str,
-    prompt_hash: str,
-    byte_size: int,
-    width: int,
-    height: int,
-    key_source: str = "user",
-) -> models.PostMedia:
-    media = models.PostMedia(
-        post_id=post_id,
-        media_type="image",
-        url=url,
-        alt_text=alt_text,
-        model=model,
-        prompt_hash=prompt_hash,
-        byte_size=byte_size,
-        width=width,
-        height=height,
-        key_source=key_source,
-    )
-    db.add(media)
-    db.commit()
-    db.refresh(media)
-    return media
 
 
-def create_post_image_generation_job(
-    db: Session,
-    *,
-    post_id: str,
-    user_id: str,
-    character_id: str,
-    source: str,
-    status: str,
-    image_model: str,
-    image_prompt: str,
-    key_source: str = "user",
-    quota_reservation_id: int | None = None,
-    prompt_hash: str | None = None,
-    reference_source: str | None = None,
-    skip_reason: str | None = None,
-    failure_class: str | None = None,
-) -> models.PostImageGenerationJob:
-    job = models.PostImageGenerationJob(
-        post_id=post_id,
-        user_id=user_id,
-        character_id=character_id,
-        source=source,
-        status=status,
-        key_source=key_source,
-        quota_reservation_id=quota_reservation_id,
-        image_model=image_model,
-        image_prompt=image_prompt,
-        prompt_hash=prompt_hash,
-        reference_source=reference_source,
-        skip_reason=skip_reason,
-        failure_class=failure_class,
-        attempt_count=0,
-    )
-    db.add(job)
-    db.commit()
-    db.refresh(job)
-    return job
 
 
-def lock_service_image_quota(
-    db: Session, *, user_id: str, quota_date: date
-) -> None:
-    if db.bind is None or db.bind.dialect.name != "postgresql":
-        return
-    lock_key = f"post_image_quota:service:{user_id}:{quota_date.isoformat()}"
-    db.execute(select(func.pg_advisory_xact_lock(func.hashtext(lock_key))))
 
 
-def count_service_image_quota_used(
-    db: Session, *, user_id: str, quota_date: date
-) -> int:
-    return int(
-        db.scalar(
-            select(func.count(models.PostImageQuotaReservation.id)).where(
-                models.PostImageQuotaReservation.user_id == user_id,
-                models.PostImageQuotaReservation.quota_date == quota_date,
-                models.PostImageQuotaReservation.key_source == "service",
-                models.PostImageQuotaReservation.status.in_(
-                    ("reserved", "queued", "processing", "attached")
-                ),
-            )
-        )
-        or 0
-    )
 
 
-def count_service_image_global_used(db: Session, *, quota_date: date) -> int:
-    return int(
-        db.scalar(
-            select(func.count(models.PostImageQuotaReservation.id)).where(
-                models.PostImageQuotaReservation.quota_date == quota_date,
-                models.PostImageQuotaReservation.key_source == "service",
-                models.PostImageQuotaReservation.status.in_(
-                    ("reserved", "queued", "processing", "attached")
-                ),
-            )
-        )
-        or 0
-    )
 
 
-def create_post_image_quota_reservation(
-    db: Session,
-    *,
-    user_id: str,
-    character_id: str,
-    quota_date: date,
-    source: str,
-    status: str = "reserved",
-    post_id: str | None = None,
-    job_id: int | None = None,
-) -> models.PostImageQuotaReservation:
-    reservation = models.PostImageQuotaReservation(
-        user_id=user_id,
-        character_id=character_id,
-        quota_date=quota_date,
-        key_source="service",
-        source=source,
-        status=status,
-        post_id=post_id,
-        job_id=job_id,
-    )
-    db.add(reservation)
-    db.flush()
-    return reservation
 
 
-def update_post_image_quota_reservation(
-    db: Session,
-    reservation: models.PostImageQuotaReservation,
-    *,
-    status: str,
-    post_id: str | None = None,
-    job_id: int | None = None,
-) -> models.PostImageQuotaReservation:
-    reservation.status = status
-    if post_id is not None:
-        reservation.post_id = post_id
-    if job_id is not None:
-        reservation.job_id = job_id
-    if status in {"attached", "released", "failed"}:
-        reservation.finalized_at = datetime.now(timezone.utc)
-    db.flush()
-    return reservation
 
 
-def get_post_image_quota_reservation(
-    db: Session, reservation_id: int | None
-) -> models.PostImageQuotaReservation | None:
-    if reservation_id is None:
-        return None
-    return db.get(models.PostImageQuotaReservation, reservation_id)
 
 
-def count_active_post_image_jobs_for_character_between(
-    db: Session,
-    *,
-    character_id: str,
-    start_at: datetime,
-    end_at: datetime,
-) -> int:
-    return int(
-        db.scalar(
-            select(func.count(models.PostImageGenerationJob.id))
-            .where(models.PostImageGenerationJob.character_id == character_id)
-            .where(models.PostImageGenerationJob.status.in_(("queued", "processing")))
-            .where(models.PostImageGenerationJob.created_at >= start_at)
-            .where(models.PostImageGenerationJob.created_at < end_at)
-        )
-        or 0
-    )
 
 
-def claim_next_post_image_generation_job(
-    db: Session,
-) -> models.PostImageGenerationJob | None:
-    statement = (
-        select(models.PostImageGenerationJob)
-        .where(models.PostImageGenerationJob.status == "queued")
-        .order_by(models.PostImageGenerationJob.created_at.asc())
-        .limit(1)
-    )
-    if db.bind is not None and db.bind.dialect.name == "postgresql":
-        statement = statement.with_for_update(skip_locked=True)
-    job = db.scalar(statement)
-    if job is None:
-        return None
-    now = datetime.now(timezone.utc)
-    job.status = "processing"
-    job.started_at = now
-    job.updated_at = now
-    job.attempt_count = (job.attempt_count or 0) + 1
-    reservation = get_post_image_quota_reservation(db, job.quota_reservation_id)
-    if reservation is not None and reservation.status == "queued":
-        update_post_image_quota_reservation(db, reservation, status="processing", job_id=job.id)
-    db.commit()
-    db.refresh(job)
-    return job
 
 
-def mark_stale_post_image_generation_jobs_failed(
-    db: Session,
-    *,
-    stale_before: datetime,
-) -> int:
-    rows = list(
-        db.scalars(
-            select(models.PostImageGenerationJob)
-            .where(models.PostImageGenerationJob.status == "processing")
-            .where(models.PostImageGenerationJob.started_at < stale_before)
-        )
-    )
-    now = datetime.now(timezone.utc)
-    for job in rows:
-        job.status = "failed"
-        job.failure_class = "stale_processing"
-        job.finished_at = now
-        job.updated_at = now
-        reservation = get_post_image_quota_reservation(db, job.quota_reservation_id)
-        if reservation is not None:
-            update_post_image_quota_reservation(db, reservation, status="failed", job_id=job.id)
-    if rows:
-        db.commit()
-    return len(rows)
 
 
-def finish_post_image_generation_job(
-    db: Session,
-    job: models.PostImageGenerationJob,
-    *,
-    status: str,
-    prompt_hash: str | None = None,
-    reference_source: str | None = None,
-    skip_reason: str | None = None,
-    failure_class: str | None = None,
-    media_url: str | None = None,
-    byte_size: int | None = None,
-) -> models.PostImageGenerationJob:
-    job.status = status
-    job.prompt_hash = prompt_hash or job.prompt_hash
-    job.reference_source = reference_source or job.reference_source
-    job.skip_reason = skip_reason
-    job.failure_class = failure_class
-    job.media_url = media_url
-    job.byte_size = byte_size
-    job.finished_at = datetime.now(timezone.utc)
-    reservation = get_post_image_quota_reservation(db, job.quota_reservation_id)
-    if reservation is not None:
-        reservation_status = (
-            "attached"
-            if status == "attached"
-            else "released"
-            if status == "skipped"
-            else "failed"
-        )
-        update_post_image_quota_reservation(
-            db,
-            reservation,
-            status=reservation_status,
-            post_id=job.post_id,
-            job_id=job.id,
-        )
-    db.commit()
-    db.refresh(job)
-    return job
 
 
-def count_post_media_for_character_between(
-    db: Session,
-    *,
-    character_id: str,
-    start_at: datetime,
-    end_at: datetime,
-) -> int:
-    return int(
-        db.scalar(
-            select(func.count(models.PostMedia.id))
-            .join(models.Post, models.Post.id == models.PostMedia.post_id)
-            .where(
-                models.Post.author_character_id == character_id,
-                models.Post.deleted_at.is_(None),
-                models.PostMedia.created_at >= start_at,
-                models.PostMedia.created_at < end_at,
-            )
-        )
-        or 0
-    )
 
 
-def get_post_report(
-    db: Session, *, post_id: str, reporter_user_id: str
-) -> models.PostReport | None:
-    return db.scalar(
-        select(models.PostReport).where(
-            models.PostReport.post_id == post_id,
-            models.PostReport.reporter_user_id == reporter_user_id,
-        )
-    )
 
 
-def count_post_reports(db: Session, post_id: str) -> int:
-    return (
-        db.scalar(
-            select(func.count(models.PostReport.id)).where(
-                models.PostReport.post_id == post_id
-            )
-        )
-        or 0
-    )
 
 
 def create_post_report(
@@ -614,191 +263,12 @@ def create_post_report(
     return report, True
 
 
-def list_timeline_posts(
-    db: Session,
-    *,
-    limit: int,
-    cursor: str | None = None,
-    author_user_id: str | None = None,
-    author_character_id: str | None = None,
-    followed_user_ids: set[str] | None = None,
-    followed_character_ids: set[str] | None = None,
-    content_filter: str = "all",
-) -> tuple[list[models.Post], str | None]:
-    query = select(models.Post).where(
-        *_visible_post_conditions(),
-        *_visible_reference_conditions(),
-        models.Post.reply_to_post_id.is_(None),
-    )
-    if author_user_id is not None:
-        query = query.where(models.Post.author_user_id == author_user_id)
-    if author_character_id is not None:
-        query = query.where(models.Post.author_character_id == author_character_id)
-    if content_filter == "posts":
-        query = query.where(
-            models.Post.post_type != "repost",
-            models.Post.repost_of_post_id.is_(None),
-        )
-    elif content_filter == "reposts":
-        query = query.where(
-            models.Post.post_type == "repost",
-            models.Post.repost_of_post_id.is_not(None),
-        )
-    if followed_user_ids is not None or followed_character_ids is not None:
-        feed_filters = []
-        if followed_user_ids:
-            feed_filters.append(models.Post.author_user_id.in_(followed_user_ids))
-        if followed_character_ids:
-            feed_filters.append(
-                models.Post.author_character_id.in_(followed_character_ids)
-            )
-        if not feed_filters:
-            return [], None
-        query = query.where(or_(*feed_filters))
-    if cursor:
-        cursor_post = db.get(models.Post, cursor)
-        if cursor_post is not None:
-            query = query.where(
-                or_(
-                    models.Post.created_at < cursor_post.created_at,
-                    and_(
-                        models.Post.created_at == cursor_post.created_at,
-                        models.Post.id > cursor_post.id,
-                    ),
-                )
-            )
-    rows = list(
-        db.scalars(
-            query.order_by(models.Post.created_at.desc(), models.Post.id.asc()).limit(limit)
-        )
-    )
-    next_cursor = rows[-1].id if len(rows) == limit else None
-    return rows, next_cursor
 
 
-def list_resident_scan_posts(
-    db: Session,
-    *,
-    limit: int,
-    cursor: str | None = None,
-) -> tuple[list[models.Post], str | None]:
-    query = select(models.Post).where(
-        *_visible_post_conditions(),
-        *_visible_reference_conditions(),
-        models.Post.reply_to_post_id.is_(None),
-        models.Post.post_type != "repost",
-        models.Post.repost_of_post_id.is_(None),
-    )
-    if cursor:
-        cursor_post = db.get(models.Post, cursor)
-        if cursor_post is not None:
-            query = query.where(
-                or_(
-                    models.Post.created_at < cursor_post.created_at,
-                    and_(
-                        models.Post.created_at == cursor_post.created_at,
-                        models.Post.id > cursor_post.id,
-                    ),
-                )
-            )
-    rows = list(
-        db.scalars(
-            query.order_by(models.Post.created_at.desc(), models.Post.id.asc()).limit(limit)
-        )
-    )
-    next_cursor = rows[-1].id if len(rows) == limit else None
-    return rows, next_cursor
 
 
-def list_profile_posts(
-    db: Session,
-    *,
-    limit: int,
-    cursor: str | None = None,
-    author_user_id: str | None = None,
-    author_character_id: str | None = None,
-    replies: bool = False,
-) -> tuple[list[models.Post], str | None]:
-    query = select(models.Post).where(
-        *_visible_post_conditions(), *_visible_reference_conditions()
-    )
-    if replies:
-        query = query.where(models.Post.reply_to_post_id.is_not(None))
-    else:
-        query = query.where(models.Post.reply_to_post_id.is_(None))
-    if author_user_id is not None:
-        query = query.where(models.Post.author_user_id == author_user_id)
-    if author_character_id is not None:
-        query = query.where(models.Post.author_character_id == author_character_id)
-    if cursor:
-        cursor_post = db.get(models.Post, cursor)
-        if cursor_post is not None:
-            query = query.where(
-                or_(
-                    models.Post.created_at < cursor_post.created_at,
-                    and_(
-                        models.Post.created_at == cursor_post.created_at,
-                        models.Post.id > cursor_post.id,
-                    ),
-                )
-            )
-    rows = list(
-        db.scalars(
-            query.order_by(models.Post.created_at.desc(), models.Post.id.asc()).limit(limit)
-        )
-    )
-    next_cursor = rows[-1].id if len(rows) == limit else None
-    return rows, next_cursor
 
 
-def list_liked_profile_posts(
-    db: Session,
-    *,
-    limit: int,
-    cursor: str | None = None,
-    user_id: str | None = None,
-    character_id: str | None = None,
-) -> tuple[list[models.Post], str | None]:
-    query = (
-        select(models.Post, models.PostLike.created_at)
-        .join(models.PostLike, models.PostLike.post_id == models.Post.id)
-        .where(*_visible_post_conditions(), *_visible_reference_conditions())
-    )
-    cursor_like_query = select(models.PostLike.created_at).where(
-        models.PostLike.post_id == cursor
-    )
-    if character_id is not None:
-        query = query.where(models.PostLike.character_id == character_id)
-        cursor_like_query = cursor_like_query.where(
-            models.PostLike.character_id == character_id
-        )
-    elif user_id is not None:
-        query = query.where(
-            models.PostLike.user_id == user_id,
-            models.PostLike.character_id.is_(None),
-        )
-        cursor_like_query = cursor_like_query.where(
-            models.PostLike.user_id == user_id,
-            models.PostLike.character_id.is_(None),
-        )
-    if cursor:
-        cursor_created_at = db.scalar(cursor_like_query)
-        if cursor_created_at is not None:
-            query = query.where(
-                or_(
-                    models.PostLike.created_at < cursor_created_at,
-                    and_(
-                        models.PostLike.created_at == cursor_created_at,
-                        models.Post.id > cursor,
-                    ),
-                )
-            )
-    rows = db.execute(
-        query.order_by(models.PostLike.created_at.desc(), models.Post.id.asc()).limit(limit)
-    ).all()
-    posts = [post for post, _created_at in rows]
-    next_cursor = posts[-1].id if len(posts) == limit else None
-    return posts, next_cursor
 
 
 def search_posts(
@@ -867,84 +337,18 @@ def search_characters(
     return rows[:limit], offset + limit if len(rows) > limit else None
 
 
-def list_post_replies(db: Session, post_id: str, *, limit: int = 50) -> list[models.Post]:
-    return list(
-        db.scalars(
-            select(models.Post)
-            .where(
-                models.Post.reply_to_post_id == post_id,
-                *_visible_post_conditions(),
-            )
-            .order_by(models.Post.created_at.asc(), models.Post.id.asc())
-            .limit(limit)
-        )
-    )
 
 
-def list_post_thread_replies(
-    db: Session, post_id: str, *, limit: int = 100
-) -> list[models.Post]:
-    seen = {post_id}
-    replies: list[models.Post] = []
-    frontier = [post_id]
-
-    while frontier and len(replies) < limit:
-        remaining = limit - len(replies)
-        children = list(
-            db.scalars(
-                select(models.Post)
-                .where(
-                    models.Post.reply_to_post_id.in_(frontier),
-                    *_visible_post_conditions(),
-                )
-                .order_by(models.Post.created_at.asc(), models.Post.id.asc())
-                .limit(remaining)
-            )
-        )
-        next_frontier = [child.id for child in children if child.id not in seen]
-        if not next_frontier:
-            break
-        seen.update(next_frontier)
-        replies.extend(child for child in children if child.id in next_frontier)
-        frontier = next_frontier
-
-    return replies
 
 
-def count_post_comments(db: Session, post_id: str) -> int:
-    return db.scalar(
-        select(func.count(models.Comment.id)).where(models.Comment.post_id == post_id)
-    ) or 0
 
 
-def count_post_likes(db: Session, post_id: str) -> int:
-    return db.scalar(
-        select(func.count(models.PostLike.id)).where(models.PostLike.post_id == post_id)
-    ) or 0
 
 
-def count_post_replies(db: Session, post_id: str) -> int:
-    return db.scalar(
-        select(func.count(models.Post.id)).where(
-            models.Post.reply_to_post_id == post_id,
-            *_visible_post_conditions(),
-        )
-    ) or 0
 
 
-def count_post_reposts(db: Session, post_id: str) -> int:
-    return db.scalar(
-        select(func.count(models.PostRepost.id)).where(models.PostRepost.post_id == post_id)
-    ) or 0
 
 
-def count_post_quotes(db: Session, post_id: str) -> int:
-    return db.scalar(
-        select(func.count(models.Post.id)).where(
-            models.Post.quote_post_id == post_id,
-            *_visible_post_conditions(),
-        )
-    ) or 0
 
 
 def create_post(
@@ -1073,20 +477,6 @@ def like_post(
     return like, True
 
 
-def _lock_direct_user_like(db: Session, *, post_id: str, user_id: str) -> None:
-    if db.bind is None or db.bind.dialect.name != "postgresql":
-        return
-    lock_key = int.from_bytes(
-        hashlib.sha256(
-            f"angmoo:direct-user-like:{post_id}:{user_id}:v1".encode("utf-8")
-        ).digest()[:8],
-        byteorder="big",
-        signed=True,
-    )
-    db.execute(
-        text("select pg_advisory_xact_lock(:lock_key)"),
-        {"lock_key": lock_key},
-    )
 
 
 def unlike_post(
@@ -1214,121 +604,16 @@ def delete_timeline_reposts(
     return len(rows)
 
 
-def delete_repost_event_for_timeline_post(db: Session, *, post: models.Post) -> bool:
-    if post.post_type != "repost" or post.repost_of_post_id is None:
-        return False
-    query = select(models.PostRepost).where(
-        models.PostRepost.post_id == post.repost_of_post_id
-    )
-    if post.author_character_id is not None:
-        query = query.where(models.PostRepost.character_id == post.author_character_id)
-    elif post.author_user_id is not None:
-        query = query.where(
-            models.PostRepost.user_id == post.author_user_id,
-            models.PostRepost.character_id.is_(None),
-        )
-    else:
-        return False
-    repost = db.scalar(query)
-    if repost is None:
-        return False
-    db.delete(repost)
-    db.commit()
-    return True
 
 
-def delete_repost_events_for_post(db: Session, *, post: models.Post) -> int:
-    rows = list(
-        db.scalars(
-            select(models.PostRepost).where(models.PostRepost.post_id == post.id)
-        )
-    )
-    for row in rows:
-        db.delete(row)
-    if rows:
-        db.commit()
-    return len(rows)
 
 
-def soft_delete_timeline_reposts_for_source(
-    db: Session, *, post: models.Post, deleted_at: datetime
-) -> list[models.Post]:
-    rows = list(
-        db.scalars(
-            select(models.Post).where(
-                models.Post.deleted_at.is_(None),
-                models.Post.post_type == "repost",
-                models.Post.repost_of_post_id == post.id,
-            )
-        )
-    )
-    for row in rows:
-        row.deleted_at = deleted_at
-    if rows:
-        db.commit()
-    return rows
 
 
-def soft_delete_post_tree(
-    db: Session, *, post: models.Post, deleted_at: datetime
-) -> list[models.Post]:
-    seen = {post.id}
-    frontier = [post.id]
-    rows = [post] if post.deleted_at is None else []
-
-    while frontier:
-        children = list(
-            db.scalars(
-                select(models.Post).where(models.Post.reply_to_post_id.in_(frontier))
-            )
-        )
-        next_frontier: list[str] = []
-        for child in children:
-            if child.id in seen:
-                continue
-            seen.add(child.id)
-            next_frontier.append(child.id)
-            if child.deleted_at is None:
-                rows.append(child)
-        frontier = next_frontier
-
-    for row in rows:
-        row.deleted_at = deleted_at
-    if rows:
-        db.commit()
-    return rows
 
 
-def get_followed_profiles_for_user(db: Session, user_id: str) -> tuple[set[str], set[str]]:
-    rows = db.scalars(
-        select(models.ProfileFollow).where(models.ProfileFollow.follower_user_id == user_id)
-    )
-    followed_user_ids: set[str] = set()
-    followed_character_ids: set[str] = set()
-    for row in rows:
-        if row.target_user_id:
-            followed_user_ids.add(row.target_user_id)
-        if row.target_character_id:
-            followed_character_ids.add(row.target_character_id)
-    return followed_user_ids, followed_character_ids
 
 
-def get_followed_profiles_for_character(
-    db: Session, character_id: str
-) -> tuple[set[str], set[str]]:
-    rows = db.scalars(
-        select(models.ProfileFollow).where(
-            models.ProfileFollow.follower_character_id == character_id
-        )
-    )
-    followed_user_ids: set[str] = set()
-    followed_character_ids: set[str] = set()
-    for row in rows:
-        if row.target_user_id:
-            followed_user_ids.add(row.target_user_id)
-        if row.target_character_id:
-            followed_character_ids.add(row.target_character_id)
-    return followed_user_ids, followed_character_ids
 
 
 def get_user(db: Session, user_id: str) -> models.User | None:
@@ -1416,185 +701,22 @@ def delete_follow(
     return True
 
 
-def count_profile_followers(
-    db: Session,
-    *,
-    user_id: str | None = None,
-    character_id: str | None = None,
-    follower_type: str | None = None,
-) -> int:
-    query = select(func.count(models.ProfileFollow.id))
-    if user_id is not None:
-        query = query.where(models.ProfileFollow.target_user_id == user_id)
-    else:
-        query = query.where(models.ProfileFollow.target_character_id == character_id)
-    if follower_type == "user":
-        query = query.where(models.ProfileFollow.follower_user_id.is_not(None))
-    if follower_type == "character":
-        query = query.where(models.ProfileFollow.follower_character_id.is_not(None))
-    return db.scalar(query) or 0
 
 
-def count_profile_following(
-    db: Session, *, user_id: str | None = None, character_id: str | None = None
-) -> int:
-    query = select(func.count(models.ProfileFollow.id))
-    if user_id is not None:
-        query = query.where(models.ProfileFollow.follower_user_id == user_id)
-    else:
-        query = query.where(models.ProfileFollow.follower_character_id == character_id)
-    return db.scalar(query) or 0
 
 
-def list_profile_following(
-    db: Session,
-    *,
-    user_id: str | None = None,
-    character_id: str | None = None,
-    limit: int,
-    cursor: str | None = None,
-) -> tuple[list[models.ProfileFollow], str | None]:
-    query = select(models.ProfileFollow)
-    if user_id is not None:
-        query = query.where(models.ProfileFollow.follower_user_id == user_id)
-    else:
-        query = query.where(models.ProfileFollow.follower_character_id == character_id)
-    if cursor:
-        cursor_id = _parse_int_cursor(cursor)
-        if cursor_id is not None:
-            query = query.where(models.ProfileFollow.id < cursor_id)
-    rows = list(
-        db.scalars(query.order_by(models.ProfileFollow.id.desc()).limit(limit + 1))
-    )
-    return rows[:limit], str(rows[limit - 1].id) if len(rows) > limit else None
 
 
-def list_profile_followers(
-    db: Session,
-    *,
-    user_id: str | None = None,
-    character_id: str | None = None,
-    follower_type: str | None = None,
-    limit: int,
-    cursor: str | None = None,
-) -> tuple[list[models.ProfileFollow], str | None]:
-    query = select(models.ProfileFollow)
-    if user_id is not None:
-        query = query.where(models.ProfileFollow.target_user_id == user_id)
-    else:
-        query = query.where(models.ProfileFollow.target_character_id == character_id)
-    if follower_type == "user":
-        query = query.where(models.ProfileFollow.follower_user_id.is_not(None))
-    if follower_type == "character":
-        query = query.where(models.ProfileFollow.follower_character_id.is_not(None))
-    if cursor:
-        cursor_id = _parse_int_cursor(cursor)
-        if cursor_id is not None:
-            query = query.where(models.ProfileFollow.id < cursor_id)
-    rows = list(
-        db.scalars(query.order_by(models.ProfileFollow.id.desc()).limit(limit + 1))
-    )
-    return rows[:limit], str(rows[limit - 1].id) if len(rows) > limit else None
 
 
-def count_profile_posts(
-    db: Session, *, user_id: str | None = None, character_id: str | None = None
-) -> int:
-    query = select(func.count(models.Post.id)).where(
-        *_visible_post_conditions(),
-        *_visible_reference_conditions(),
-        models.Post.reply_to_post_id.is_(None),
-    )
-    if user_id is not None:
-        query = query.where(models.Post.author_user_id == user_id)
-    else:
-        query = query.where(models.Post.author_character_id == character_id)
-    return db.scalar(query) or 0
 
 
-def count_profile_replies(
-    db: Session, *, user_id: str | None = None, character_id: str | None = None
-) -> int:
-    query = select(func.count(models.Post.id)).where(
-        *_visible_post_conditions(),
-        *_visible_reference_conditions(),
-        models.Post.reply_to_post_id.is_not(None),
-    )
-    if user_id is not None:
-        query = query.where(models.Post.author_user_id == user_id)
-    else:
-        query = query.where(models.Post.author_character_id == character_id)
-    return db.scalar(query) or 0
 
 
-def count_profile_received_likes(
-    db: Session, *, user_id: str | None = None, character_id: str | None = None
-) -> int:
-    query = (
-        select(func.count(models.PostLike.id))
-        .join(models.Post, models.PostLike.post_id == models.Post.id)
-        .where(*_visible_post_conditions(), *_visible_reference_conditions())
-    )
-    if user_id is not None:
-        query = query.where(models.Post.author_user_id == user_id)
-    else:
-        query = query.where(models.Post.author_character_id == character_id)
-    return db.scalar(query) or 0
 
 
-def count_profile_likes(
-    db: Session, *, user_id: str | None = None, character_id: str | None = None
-) -> int:
-    query = (
-        select(func.count(models.PostLike.id))
-        .join(models.Post, models.PostLike.post_id == models.Post.id)
-        .where(*_visible_post_conditions(), *_visible_reference_conditions())
-    )
-    if character_id is not None:
-        query = query.where(models.PostLike.character_id == character_id)
-    else:
-        query = query.where(
-            models.PostLike.user_id == user_id,
-            models.PostLike.character_id.is_(None),
-        )
-    return db.scalar(query) or 0
 
 
-def create_notification(
-    db: Session,
-    *,
-    notification_type: str,
-    recipient_user_id: str | None = None,
-    recipient_character_id: str | None = None,
-    actor_user_id: str | None = None,
-    actor_character_id: str | None = None,
-    post_id: str | None = None,
-    source_post_id: str | None = None,
-    data: str | None = None,
-) -> models.Notification | None:
-    if recipient_user_id is None and recipient_character_id is None:
-        return None
-    if actor_user_id and actor_user_id == recipient_user_id and recipient_character_id is None:
-        return None
-    if (
-        actor_character_id
-        and actor_character_id == recipient_character_id
-        and recipient_user_id is None
-    ):
-        return None
-    notification = models.Notification(
-        notification_type=notification_type,
-        recipient_user_id=recipient_user_id,
-        recipient_character_id=recipient_character_id,
-        actor_user_id=actor_user_id,
-        actor_character_id=actor_character_id,
-        post_id=post_id,
-        source_post_id=source_post_id,
-        data=data,
-    )
-    db.add(notification)
-    unit_of_work.finish_write(db, notification)
-    return notification
 
 
 def list_notifications(
@@ -1624,96 +746,14 @@ def list_notifications(
     return rows[:limit], str(rows[limit - 1].id) if len(rows) > limit else None
 
 
-def list_notifications_for_agent(
-    db: Session, *, user_id: str, character_id: str, limit: int
-) -> list[models.Notification]:
-    return list(
-        db.scalars(
-            select(models.Notification)
-            .where(
-                or_(
-                    models.Notification.recipient_user_id == user_id,
-                    models.Notification.recipient_character_id == character_id,
-                )
-            )
-            .order_by(
-                models.Notification.created_at.desc(),
-                models.Notification.id.desc(),
-            )
-            .limit(limit)
-        )
-    )
 
 
-def list_notifications_for_agent_page(
-    db: Session,
-    *,
-    user_id: str,
-    character_id: str,
-    limit: int,
-    cursor: str | None = None,
-) -> tuple[list[models.Notification], str | None]:
-    query = (
-        select(models.Notification)
-        .where(
-            or_(
-                models.Notification.recipient_user_id == user_id,
-                models.Notification.recipient_character_id == character_id,
-            )
-        )
-        .order_by(models.Notification.id.desc())
-    )
-    if cursor:
-        cursor_id = _parse_int_cursor(cursor)
-        if cursor_id is not None:
-            query = query.where(models.Notification.id < cursor_id)
-    rows = list(db.scalars(query.limit(limit + 1)))
-    return rows[:limit], str(rows[limit - 1].id) if len(rows) > limit else None
 
 
-def list_unread_reply_notifications_for_character(
-    db: Session, *, character_id: str, limit: int
-) -> list[models.Notification]:
-    return list_unread_notifications_for_character(
-        db,
-        character_id=character_id,
-        notification_type="reply",
-        limit=limit,
-    )
 
 
-def list_unread_notifications_for_character(
-    db: Session, *, character_id: str, notification_type: str, limit: int
-) -> list[models.Notification]:
-    return list(
-        db.scalars(
-            select(models.Notification)
-            .where(
-                models.Notification.recipient_character_id == character_id,
-                models.Notification.notification_type == notification_type,
-                models.Notification.read_at.is_(None),
-            )
-            .order_by(
-                models.Notification.created_at.desc(),
-                models.Notification.id.desc(),
-            )
-            .limit(limit)
-        )
-    )
 
 
-def get_notification_for_agent(
-    db: Session, *, user_id: str, character_id: str, notification_id: int
-) -> models.Notification | None:
-    return db.scalar(
-        select(models.Notification).where(
-            models.Notification.id == notification_id,
-            or_(
-                models.Notification.recipient_user_id == user_id,
-                models.Notification.recipient_character_id == character_id,
-            ),
-        )
-    )
 
 
 def get_notification_for_user(
@@ -1734,13 +774,6 @@ def get_notification_for_user(
     )
 
 
-def mark_notification_read(
-    db: Session, notification: models.Notification
-) -> models.Notification:
-    notification.read_at = datetime.now(timezone.utc)
-    db.commit()
-    db.refresh(notification)
-    return notification
 
 
 def get_character_activity(

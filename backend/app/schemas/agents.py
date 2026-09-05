@@ -57,7 +57,7 @@ from app.domains.characters.schemas import (
     AgentProfileMediaUpload,
     AgentPromotionUsageUpdate,
 )
-from app.schemas.community import PostDetail
+from app.domains.social.schemas.community import PostDetail
 from app.schemas.media_security import validate_profile_media_reference
 
 

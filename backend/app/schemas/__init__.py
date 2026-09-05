@@ -72,7 +72,7 @@ from app.schemas.character_lore import (
     CharacterLoreSourceRead,
     CharacterLoreStatusRead,
 )
-from app.schemas.community import (
+from app.domains.social.schemas.community import (
     AgentCompleteTickAction,
     AgentCompleteTickCreate,
     AgentCompleteTickRead,
@@ -249,7 +249,7 @@ from app.schemas.world_activity_runtime import (
     WorldCharacterRuntimeModeRead,
     WorldCharacterRuntimeModeUpdate,
 )
-from app.schemas.world_feed import (
+from app.domains.social.schemas.feed import (
     FeedAction,
     FeedCommentDraft,
     FeedCommentPurpose,

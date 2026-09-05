@@ -1,7 +1,7 @@
 {
-  "edge_count": 2019,
-  "external_import_count": 2066,
-  "module_count": 633,
+  "edge_count": 2037,
+  "external_import_count": 2080,
+  "module_count": 643,
   "modules": [
     {
       "external_imports": [],
@@ -442,9 +442,9 @@
       "imports": [
         "app.compatibility.routine_posts.canonical_interactions",
         "app.cruds.agent_runs",
+        "app.domains.social.schemas.community",
         "app.models",
         "app.runtime.relationships.sqlalchemy_social_event",
-        "app.schemas.community",
         "app.services.activity_runtime",
         "app.services.activity_state_contracts",
         "app.services.agent_activity_policy",
@@ -821,6 +821,13 @@
         "app.domains.characters.exceptions",
         "app.domains.characters.service.profile",
         "app.domains.characters.service.state",
+        "app.domains.social.repository.inbox",
+        "app.domains.social.repository.media",
+        "app.domains.social.repository.posts",
+        "app.domains.social.repository.profiles",
+        "app.domains.social.service.notifications",
+        "app.domains.social.utils.cursors",
+        "app.domains.social.utils.text",
         "app.models",
         "app.schemas"
       ],
@@ -4372,8 +4379,99 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.domains.social.repository",
+      "path": "backend/app/domains/social/repository/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.unit_of_work",
+        "app.domains.social.models.posts",
+        "app.domains.social.utils.cursors"
+      ],
+      "module": "app.domains.social.repository.inbox",
+      "path": "backend/app/domains/social/repository/inbox.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.domains.social.repository.media",
+      "path": "backend/app/domains/social/repository/media.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "hashlib",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.models.posts",
+        "app.domains.social.schemas.community"
+      ],
+      "module": "app.domains.social.repository.posts",
+      "path": "backend/app/domains/social/repository/posts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.posts",
+        "app.domains.social.utils.cursors"
+      ],
+      "module": "app.domains.social.repository.profiles",
+      "path": "backend/app/domains/social/repository/profiles.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
       "module": "app.domains.social.schemas",
       "path": "backend/app/domains/social/schemas/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.core.profile_ref"
+      ],
+      "module": "app.domains.social.schemas.community",
+      "path": "backend/app/domains/social/schemas/community.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.subjective_context"
+      ],
+      "module": "app.domains.social.schemas.feed",
+      "path": "backend/app/domains/social/schemas/feed.py",
       "wildcard_imports": []
     },
     {
@@ -4388,6 +4486,48 @@
       ],
       "module": "app.domains.social.schemas.manual",
       "path": "backend/app/domains/social/schemas/manual.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.social.service",
+      "path": "backend/app/domains/social/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.unit_of_work",
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.domains.social.service.notifications",
+      "path": "backend/app/domains/social/service/notifications.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.social.utils",
+      "path": "backend/app/domains/social/utils/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.social.utils.cursors",
+      "path": "backend/app/domains/social/utils/cursors.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "re"
+      ],
+      "imports": [],
+      "module": "app.domains.social.utils.text",
+      "path": "backend/app/domains/social/utils/text.py",
       "wildcard_imports": []
     },
     {
@@ -8186,10 +8326,10 @@
         "app.domains.social.contracts.observations",
         "app.domains.social.contracts.writes",
         "app.domains.social.models.manual_writes",
+        "app.domains.social.schemas.community",
         "app.domains.world_characters.public",
         "app.exceptions",
         "app.models",
-        "app.schemas.community",
         "app.services.community"
       ],
       "module": "app.runtime.social.sqlalchemy_unit_of_work",
@@ -8315,18 +8455,18 @@
         "app.domains.chat.api.schemas",
         "app.domains.identity.schemas",
         "app.domains.relationships.graph_read.schemas",
+        "app.domains.social.schemas.community",
+        "app.domains.social.schemas.feed",
         "app.schemas.agent_runs",
         "app.schemas.agents",
         "app.schemas.character_lore",
         "app.schemas.characters",
-        "app.schemas.community",
         "app.schemas.maintenance",
         "app.schemas.routine_post",
         "app.schemas.social_memory",
         "app.schemas.tree",
         "app.schemas.world_activity_runtime",
         "app.schemas.world_character_setup",
-        "app.schemas.world_feed",
         "app.schemas.worlds"
       ],
       "module": "app.schemas",
@@ -8359,10 +8499,10 @@
         "app.domains.characters.schemas",
         "app.domains.identity.schemas",
         "app.domains.runtime.schemas",
+        "app.domains.social.schemas.community",
         "app.providers.registry",
         "app.schemas.agent_runs",
         "app.schemas.characters",
-        "app.schemas.community",
         "app.schemas.media_security"
       ],
       "module": "app.schemas.agents",
@@ -8396,23 +8536,10 @@
       ],
       "imports": [
         "app.domains.characters.schemas",
-        "app.schemas.community"
+        "app.domains.social.schemas.community"
       ],
       "module": "app.schemas.characters",
       "path": "backend/app/schemas/characters.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "datetime",
-        "pydantic",
-        "typing"
-      ],
-      "imports": [
-        "app.core.profile_ref"
-      ],
-      "module": "app.schemas.community",
-      "path": "backend/app/schemas/community.py",
       "wildcard_imports": []
     },
     {
@@ -8495,20 +8622,6 @@
       ],
       "module": "app.schemas.world_character_setup",
       "path": "backend/app/schemas/world_character_setup.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "pydantic",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.social.contracts.subjective_context"
-      ],
-      "module": "app.schemas.world_feed",
-      "path": "backend/app/schemas/world_feed.py",
       "wildcard_imports": []
     },
     {

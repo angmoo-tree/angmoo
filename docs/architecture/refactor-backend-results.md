@@ -479,3 +479,15 @@ Character·Account 삭제가 함께 사용하는 여러 업무 SQL은 `runtime/w
 ### WC 최종 통합의 응답 소유권 정정
 
 WC 최종 source와 Character HTTP source를 합친 첫 고정 후보의 집중 회귀는 215 passed였지만 package 경계 검사에서 Character→WC→Character 및 Runtime alias가 포함된 순환을 발견했다. 위 최초 WC 응답 위치 기록은 이 통합 전에 해당한다. 최종 배치에서는 Character 상세 API의 `AgentActivityProfileReadinessRead` 정의를 동일 본문 그대로 `characters/schemas.py`로 옮기고 WC readiness 정책이 같은 class를 소비한다. 기존 aggregate도 이 실제 class를 가리킨다. 생산 소비자가 없는 Runtime alias와 WC schema 조각을 제거하고 source map과 실제 소비자를 갱신했다. 경계 예외를 추가하지 않았으며 준비 상태 판단 정책과 HTTP schema는 변경하지 않는다. 이 수정 전 진행 중이던 전체 보존 검사는 중단했으며 PASS로 기록하지 않는다.
+
+
+## AR-B5-B1 Social SQL·알림 처리·HTTP DTO
+
+- `cruds/community.py` 원본 중 Social 테이블만 다루는 실제 SQL·변환·알림 생성 함수 **61개**를 이전했습니다. 원본 61개 함수 AST와 Community/WorldFeed schema 전체 AST는 그대로입니다. 단순 export를 새 구현으로 만들지 않았으며 SQL 본문은 repository 4개, 알림 수신자/자기 자신 제외 판단과 저장은 `service/notifications.py`, 문자열·정수 cursor 변환은 utils 2개가 실제 소유합니다.
+- User/Character/Agent ORM을 함께 사용하는 나머지 조회와 Creator demo/activity 함수는 다음 소유자 분리 범위입니다. 새 SQL 모듈은 Social ORM·schema만 읽으며 외부 도메인 ORM/레거시 service/repository를 import하지 않습니다. 기존 `finish_write`·flush·refresh·락·SQL dialect 분기와 같은 Session을 보존했습니다.
+- 기존 AR-B2-B1의 `cruds/community.py` 전체 symbol 지도를 유지하면서 이전한 함수 61개와 정규식 상수 목적지만 갱신했습니다. 별도의 불완전 split을 추가하지 않았습니다. 기존 schema 2개의 실제 Python 소비자를 전환한 뒤 옛 파일을 제거했습니다.
+- 게시물 HTTP·abuse·이미지 job/quota·Feed 검색·수동 Social UoW·inbox·World profile·registry 회귀: **90 passed, 1 기존 warning / 20.32s**. 새 테스트 노드 없음.
+- architecture 경계 **643 modules / 2037 edges / legacy 263 PASS**, L4 parity97 및 ER0 live generation PASS. root의 WC readiness 순환 수정 `77081dc`는 앞선 merge `3258b69`로 포함했고 순환 예외는 추가하지 않았습니다.
+- API/ORM/원본 assertion 및 split 최종 확인과 root source capture는 별도 기록합니다. 게시물 자체의 권한·서비스 흐름, 교차 업무 query/runtime, 관계/관찰/outbox/projection 전체 전환은 아직 진행 중입니다.
+
+- B5-B1 최종 보존 확인: PR258/PR263 API·schema·ORM 모두 동일, 변경 기존 테스트 1개 파일의 assertion/raises/warns PASS, 전체 split evidence PASS. 첫 split 검사에서 root가 이미 발견한 WC readiness 목적지 한 줄만 남아 있어 `4f95df7`과 동일한 metadata 정정을 적용했습니다. split 재검사는 immutable Git read와 순수 AST 해석 함수 결과만 메모이즈한 read-only wrapper로 수행했으며 CI 검사 규칙은 수정하지 않았습니다.

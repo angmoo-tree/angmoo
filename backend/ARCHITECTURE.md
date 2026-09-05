@@ -15,6 +15,8 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 
 > **AR-B5-A Social 기반 적용 범위:** 게시물·반응·미디어 작업은 `social/models/posts.py`, Feed cursor·관찰·block은 `models/feed.py`, owner 수동 작성·inbox 후보는 `models/manual_writes.py`, 성공 행동의 당시 자기 설명은 `models/subjective_context.py`가 실제 ORM을 소유합니다. 수동 쓰기·관찰·프로필·Today·subjective context의 값과 오류는 `contracts/`, 수동 HTTP 요청·응답은 `schemas/manual.py`에 있습니다. 일반 게시물/agent tool 서비스와 Relationship/projection 전환은 뒤이은 B5 범위입니다. immutable SQLite v7→v8와 Alembic 0088의 subjective-context import는 같은 클래스와 schema helper의 호환만 남습니다. 기존 공통 model export도 같은 클래스를 사용하고 G5에서 최종 조립 위치를 정리합니다.
 
+Social의 SQL은 `repository/posts.py`, `profiles.py`, `inbox.py`, `media.py`에서 읽습니다. 다른 업무 ORM을 사용하는 복합 조회는 아직 남은 runtime 전환 범위입니다. `service/notifications.py`는 수신자 없음·자기 자신 알림 제외와 실제 저장 순서를 함께 소유하고, `utils/text.py`·`cursors.py`는 IO 없는 변환만 담당합니다. 기존 SQL helper가 호출하는 `finish_write`는 caller의 지연 commit 구간에서 flush만 하므로, 새 위치를 이유로 commit을 추가하거나 제거하지 않습니다. Community/World Feed의 HTTP DTO는 `schemas/community.py`·`feed.py`에 있습니다. `cruds/community.py`에는 아직 이전하지 않은 여러 업무 조회와 정확한 같은 함수 export가 남으며 B5/B4/G5에서 각 실제 소비자를 전환합니다.
+
 ## 목차
 
 1. [프로젝트 구조](#1-프로젝트-구조)

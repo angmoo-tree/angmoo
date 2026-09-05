@@ -307,30 +307,6 @@
     {
       "markers": {
         "advisory_lock": [
-          340,
-          1087
-        ],
-        "driver_or_url": [
-          337,
-          457,
-          1077
-        ],
-        "row_lock": [
-          458
-        ],
-        "skip_locked": [
-          458
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/cruds/community.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "49fa147559b655afdef296ac799498f8c281131e2bf4265031f4d22114e52912",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "advisory_lock": [
           160
         ],
         "driver_or_url": [
@@ -625,6 +601,43 @@
       "path": "backend/app/domains/social/models/posts.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "adcba42a7940b762aa4ff47b8595961d4ff88399ee30b70a49dcf09777cd3a95",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          93
+        ],
+        "driver_or_url": [
+          90,
+          203
+        ],
+        "row_lock": [
+          204
+        ],
+        "skip_locked": [
+          204
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/social/repository/media.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "18221945e8faad2208e7358d4d90444f3486bd923d6d079d9387c58d33b583ba",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          321
+        ],
+        "driver_or_url": [
+          311
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/social/repository/posts.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "a4a17225d2c7435d8412e82128b1e589ab80403d4b87db27a098642695a9fecb",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -948,7 +961,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "fb66b3a63c033ca0fb9dc41e04bd821919cbc8108eb0ec7da06677bc5e73eefe",
+      "source_sha256": "448fd8d1d59f471298a7e42644c59a3cc7b3f293ff48bc687a4d2052899c765c",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1214,10 +1227,10 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 77,
+  "entry_count": 78,
   "marker_counts": {
-    "advisory_lock": 9,
-    "driver_or_url": 48,
+    "advisory_lock": 10,
+    "driver_or_url": 49,
     "jsonb": 10,
     "pgvector": 5,
     "row_lock": 31,

@@ -1545,7 +1545,7 @@
         "backend/app/runtime/social/sqlalchemy_today_activity.py",
         "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
         "backend/app/runtime/social/subjective_context.py",
-        "backend/app/schemas/community.py",
+        "backend/app/domains/social/schemas/community.py",
         "backend/app/services/community.py",
         "backend/app/services/community_abuse_quota.py",
         "backend/app/services/feed_reaction_planner.py",
@@ -1593,7 +1593,14 @@
         "frontend/src/lib/community.ts",
         "frontend/src/lib/incremental-list.ts",
         "frontend/src/lib/post-card-navigation.ts",
-        "backend/tests/social/test_foundation_contracts.py"
+        "backend/tests/social/test_foundation_contracts.py",
+        "backend/app/domains/social/repository/inbox.py",
+        "backend/app/domains/social/repository/media.py",
+        "backend/app/domains/social/repository/posts.py",
+        "backend/app/domains/social/repository/profiles.py",
+        "backend/app/domains/social/service/notifications.py",
+        "backend/app/domains/social/utils/cursors.py",
+        "backend/app/domains/social/utils/text.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",
@@ -1759,11 +1766,18 @@
         "backend/app/runtime/search/callback_index.py",
         "backend/app/runtime/search/social_projection.py",
         "backend/app/runtime/search/sqlite_fts5.py",
-        "backend/app/schemas/world_feed.py",
+        "backend/app/domains/social/schemas/feed.py",
         "backend/app/services/world_feed_search.py",
         "frontend/src/app/search/page.tsx",
         "frontend/src/components/search-results-client.tsx",
-        "backend/tests/social/test_foundation_contracts.py"
+        "backend/tests/social/test_foundation_contracts.py",
+        "backend/app/domains/social/repository/inbox.py",
+        "backend/app/domains/social/repository/media.py",
+        "backend/app/domains/social/repository/posts.py",
+        "backend/app/domains/social/repository/profiles.py",
+        "backend/app/domains/social/service/notifications.py",
+        "backend/app/domains/social/utils/cursors.py",
+        "backend/app/domains/social/utils/text.py"
       ],
       "target_paths": [
         "backend/app/domains/social/repository",
@@ -2845,7 +2859,14 @@
         "frontend/src/lib/media/safe-media-url.ts",
         "frontend/src/lib/safe-media-url.ts",
         "frontend/src/lib/use-private-media-url.ts",
-        "frontend/src/shared/media/public.ts"
+        "frontend/src/shared/media/public.ts",
+        "backend/app/domains/social/repository/inbox.py",
+        "backend/app/domains/social/repository/media.py",
+        "backend/app/domains/social/repository/posts.py",
+        "backend/app/domains/social/repository/profiles.py",
+        "backend/app/domains/social/service/notifications.py",
+        "backend/app/domains/social/utils/cursors.py",
+        "backend/app/domains/social/utils/text.py"
       ],
       "target_paths": [
         "backend/app/integrations",

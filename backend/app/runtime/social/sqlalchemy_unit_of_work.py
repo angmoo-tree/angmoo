@@ -47,7 +47,7 @@ from app.core.sqlite_concurrency import (
     run_sqlite_session_immediate,
 )
 from app.exceptions import SqliteBusyRetryExhausted
-from app.schemas.community import PostCreate, TimelineReplyCreate
+from app.domains.social.schemas.community import PostCreate, TimelineReplyCreate
 from app.services import community as community_service
 
 FailureInjector = Callable[[str], None]
