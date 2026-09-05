@@ -8,7 +8,7 @@
 
 | 단계 | 상태 | 범위 |
 | --- | --- | --- |
-| AR-G0 | LOCAL CHECKS PASS · PR PENDING | 후속 체크포인트·부분 scope·단계/소유권·Actions 연결 |
+| AR-G0 | PR #265 · CI IN PROGRESS | 후속 체크포인트·부분 scope·단계/소유권·Actions 연결 |
 | AR-G1 | NOT STARTED | 설정·개발 환경 경로 |
 | AR-G2 | NOT STARTED | 실제 공통 오류·pagination |
 | AR-G3 | NOT STARTED | logging.ini·초기화·배포 |
@@ -50,3 +50,7 @@
 후속 체크포인트의 고정 digest는 `264aaf30d2534b8b7799a262edf6ff25055a0cfbf900cbb2bb8b11fcb8dd963b`다. source 도입 commit을 먼저 만들고, 그 commit의 새 검사 코드·test 증거를 별도 metadata commit으로 추가하여 PR-head 후보를 검증한다. 아직 PR-head·merge·post-merge PASS는 아니다.
 
 첫 도입 commit `c45edca0dd1d8a2426f47a37219dd740823ab902`에서 새 파일 7개·test node 115개의 증거를 캡처했다. 첫 실제 캡처에서 기존 frontend re-export 파일을 신규 파일로 오판해 실패했으며, 원래 보호 경로와 최종 목적지의 합집합으로 수정하고 회귀 테스트를 추가했다. 이 보완의 focused 검사 65개가 통과했고, 체크포인트 원본은 변경하지 않았다. 증거 추가 전의 미공개 commit은 보완판으로 대체했으며 실패한 캡처 결과를 성공 이력에 넣지 않았다.
+
+### PR 검증 중 발견한 inventory 누락
+
+[PR #265](https://github.com/angmoo-tree/angmoo/pull/265)의 첫 head `0a682d29fa8d99a208cf98dd59a8635781d82087`에서 architecture-boundary는 통과했지만 oss-boundary의 deferred runtime inventory 검사가 실패했다. 새 체크포인트가 보존한 제품 URL·privacy contact 문자열이 live inventory에 빠진 원인이었다. 기존 생성기로 `security/t2_deferred_runtime_inventory.json`을 갱신해 체크포인트 경로 1개를 추가했다. 검사 예외나 frozen 체크포인트 내용은 바꾸지 않았다. 수정 head의 전체 Actions 결과는 별도로 확인한다.

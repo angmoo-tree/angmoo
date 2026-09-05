@@ -188,6 +188,17 @@
     },
     {
       "markers": [
+        "privacy-contact",
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 local privacy contact UX",
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "security/refactor_backend_checkpoint.json"
+    },
+    {
+      "markers": [
         "hosted-extension-type"
       ],
       "owner_phases": [
