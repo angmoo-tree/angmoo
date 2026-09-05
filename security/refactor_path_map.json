@@ -18463,6 +18463,118 @@
       ],
       "scope": "Memory owns the real connection-level ON epoch and deduplicated source admission writes. Runtime retains multi-domain successful-source dispatch and SQLAlchemy event hooks.",
       "preserved": "Exact connection SQL, timestamp and version predicates, no independent Session, no commit/rollback or model call introduced; after-commit and rollback hook behavior unchanged."
+    },
+    "AR-B7-A7": {
+      "status": "SOURCE PREPARATION; three real workflow bodies exact AST after named collaborator injection; focused 41 passed / 2 warnings / 15.19s; boundary 654/2142/legacy256 PASS; source introduction capture pending sequential B4-B6 integration",
+      "split_files": {
+        "backend/app/runtime/memory/batch_runtime.py": [
+          "backend/app/runtime/memory/batch_runtime.py",
+          "backend/app/domains/memory/service/batch_preparation.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
+          "new": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
+          "direct_consumers": [
+            "backend/app/public_main.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_skip_is_success_not_failed_or_repeated",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::deliver_candidates",
+          "new": "backend/app/domains/memory/service/batch_preparation.py::deliver_candidates",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_skip_is_success_not_failed_or_repeated",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::enqueue_scope",
+          "new": "backend/app/domains/memory/service/batch_preparation.py::enqueue_scope",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_skip_is_success_not_failed_or_repeated",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::logger",
+          "new": "backend/app/runtime/memory/batch_runtime.py::logger",
+          "direct_consumers": [
+            "backend/app/public_main.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_skip_is_success_not_failed_or_repeated",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::rebuild_briefs",
+          "new": "backend/app/domains/memory/service/batch_preparation.py::rebuild_briefs",
+          "direct_consumers": [
+            "backend/app/runtime/memory/batch_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_skip_is_success_not_failed_or_repeated",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "new": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
+          "direct_consumers": [
+            "backend/app/public_main.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_skip_is_success_not_failed_or_repeated",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/batch_runtime.py::schedule_batches",
+          "new": "backend/app/runtime/memory/batch_runtime.py::schedule_batches",
+          "direct_consumers": [
+            "backend/app/public_main.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_skip_is_success_not_failed_or_repeated",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_provider_failure_never_falls_back_to_accept_all",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_post_commit_captures_delivery_without_ai",
+            "tests/test_p8_l_r_memory_batch_runtime.py::test_saved_schedule_does_not_generate_or_trigger_past_time"
+          ]
+        }
+      ],
+      "scope": "Memory services own candidate delivery/source revalidation, thread-group byte/candidate budgets, queue admission and hot-brief source validation/rebuild. Worker supplies lazy concrete stores/readers in the original Session.",
+      "preserved": "Same SQL, limit-before/after filters, thread grouping and input byte/candidate budgets, deterministic fallback, dirty flag behavior, commit boundaries and no provider calls added. Test-only partial bindings preserve existing direct call sites using the real worker composition.",
+      "remaining": "Schedule/consent policy versus foreign World join, source reconciliation and recall projection revalidation ownership; remaining runtime loops stay responsible for lock/task/shutdown."
     }
   }
 }

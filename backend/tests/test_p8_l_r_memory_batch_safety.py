@@ -26,12 +26,8 @@ from app.domains.memory.models.items import (
     MemoryMaintenanceJob,
     MemoryScopeSettingModel,
 )
-from app.runtime.memory.batch_runtime import (
-    MemoryBatchRuntime,
-    reconcile_sources,
-    deliver_candidates,
-    schedule_batches,
-)
+from app.runtime.memory.batch_runtime import MemoryBatchRuntime, reconcile_sources, schedule_batches
+from memory.preparation_support import deliver_candidates
 from app.runtime.memory.shutdown import MemoryShutdownCoordinator
 from app.runtime.memory.source_delivery import (
     install_memory_delivery,
@@ -454,7 +450,7 @@ def test_account_scrub_removes_private_memory_batches_not_other_owner(memory_ses
         asyncio.run(service.run_next(lease_token="before-scrub"))
         == "memory_selection_completed"
     )
-    from app.runtime.memory.batch_runtime import rebuild_briefs
+    from memory.preparation_support import rebuild_briefs
 
     rebuild_briefs(memory_session, now=datetime.now(UTC), source_reader=service.reader)
     outsider = models.User(

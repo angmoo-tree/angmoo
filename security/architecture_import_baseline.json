@@ -1,7 +1,7 @@
 {
-  "edge_count": 2124,
-  "external_import_count": 2099,
-  "module_count": 651,
+  "edge_count": 2142,
+  "external_import_count": 2107,
+  "module_count": 654,
   "modules": [
     {
       "external_imports": [],
@@ -2427,6 +2427,24 @@
     {
       "external_imports": [
         "__future__",
+        "collections.abc",
+        "dataclasses",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.memory.contracts.source_evidence",
+        "app.domains.memory.repository.batch",
+        "app.domains.memory.repository.consolidation",
+        "app.domains.memory.repository.items"
+      ],
+      "module": "app.domains.memory.contracts.batch_preparation",
+      "path": "backend/app/domains/memory/contracts/batch_preparation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "dataclasses",
         "typing"
       ],
@@ -3048,6 +3066,27 @@
       ],
       "module": "app.domains.memory.service",
       "path": "backend/app/domains/memory/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections",
+        "datetime",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.memory.contracts.batch_preparation",
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.exceptions",
+        "app.domains.memory.models.batch",
+        "app.domains.memory.models.items",
+        "app.domains.memory.policies.batch",
+        "app.domains.memory.policies.consolidation",
+        "app.domains.memory.service.items"
+      ],
+      "module": "app.domains.memory.service.batch_preparation",
+      "path": "backend/app/domains/memory/service/batch_preparation.py",
       "wildcard_imports": []
     },
     {
@@ -7438,6 +7477,17 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [
+        "app.domains.memory.contracts.batch_preparation",
+        "app.runtime.memory.composition",
+        "app.runtime.memory.sqlalchemy_source_reader"
+      ],
+      "module": "app.runtime.memory.batch_preparation",
+      "path": "backend/app/runtime/memory/batch_preparation.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "asyncio",
         "collections",
@@ -7457,8 +7507,10 @@
         "app.domains.memory.policies.batch",
         "app.domains.memory.policies.consolidation",
         "app.domains.memory.repository.delivery",
+        "app.domains.memory.service.batch_preparation",
         "app.domains.memory.service.batch_selection",
         "app.domains.memory.service.items",
+        "app.runtime.memory.batch_preparation",
         "app.runtime.memory.composition",
         "app.runtime.memory.source_delivery",
         "app.runtime.memory.sqlalchemy_source_reader"

@@ -21,12 +21,8 @@ from app.domains.memory.models.items import (
     MemoryItem,
     MemoryMaintenanceJob,
 )
-from app.runtime.memory.batch_runtime import (
-    deliver_candidates,
-    enqueue_scope,
-    rebuild_briefs,
-    schedule_batches,
-)
+from app.runtime.memory.batch_runtime import schedule_batches
+from memory.preparation_support import deliver_candidates, enqueue_scope, rebuild_briefs
 from app.runtime.memory.source_delivery import (
     install_memory_delivery,
     uninstall_memory_delivery,

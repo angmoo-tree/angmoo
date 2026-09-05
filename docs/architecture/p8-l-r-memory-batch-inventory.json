@@ -43,6 +43,10 @@
       "sha256": "75f47624c29a3c1fbaba95e546f38c6c1c9858c4556f9398388b5c0c87fff539"
     },
     {
+      "path": "backend/app/domains/memory/contracts/batch_preparation.py",
+      "sha256": "64f7400bd8513017174f28f05359373d2a2cc9b767c8e0757bd35fe36c8d7fa3"
+    },
+    {
       "path": "backend/app/domains/memory/contracts/consolidation_provider.py",
       "sha256": "3a11d8b8aea839d52442003bc15b1d81dcc8d11d2f5343aea7ef24b89aeed196"
     },
@@ -215,6 +219,10 @@
       "sha256": "b83e36670f6d0a95c792a8b67329b2633ae63da145ca995ac96d3ba07e9592a0"
     },
     {
+      "path": "backend/app/domains/memory/service/batch_preparation.py",
+      "sha256": "8530c38bc5d51e578d863b790a1893461d89909b8c0194f5afb44d8b3dcb6b05"
+    },
+    {
       "path": "backend/app/domains/memory/service/batch_selection.py",
       "sha256": "431673a2c3044afd42e8e4cf021231111faf82c48bc92ec4be4b2e39481f4ecd"
     },
@@ -275,8 +283,12 @@
       "sha256": "5309a0d31f701f20d70ae6e97d5e625b64e6669a81ed123b339f0424b30d2c24"
     },
     {
+      "path": "backend/app/runtime/memory/batch_preparation.py",
+      "sha256": "1b1c5b983bf128efb18fe23aebd6bf694372015f298a8965f562abf9ee187607"
+    },
+    {
       "path": "backend/app/runtime/memory/batch_runtime.py",
-      "sha256": "77697c9f5d8a1165488f6494d3efa7e2fae5aa915bcfb37564a7fafd69af3f34"
+      "sha256": "3747f6006dcf8315789198d2a4a191deffd7c6cf8b891067fb14b96f7054a6be"
     },
     {
       "path": "backend/app/runtime/memory/composition.py",
@@ -296,7 +308,7 @@
     },
     {
       "path": "backend/app/runtime/memory/source_delivery.py",
-      "sha256": "bb70b8e2290ad7c4d4ffd7e8835bf8963a9172d4efe33e875f59f3b6b2ae237e"
+      "sha256": "9fc76566b940903d71f4b2fc07940369075023bba09a4b89975ba4ac0a01fc5e"
     },
     {
       "path": "backend/app/runtime/memory/sqlalchemy_recall.py",
@@ -352,11 +364,11 @@
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_runtime.py",
-      "sha256": "4cf1e5ade7c349b398bb04da6e8a497bdb5b9782774e63c0213da7208499cabe"
+      "sha256": "332720e733612bca52d13a8b166cccd5e690ccead1d510ad3e3e0ffd8edff7af"
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_safety.py",
-      "sha256": "4b66aaa77ea1db5830aa98b6e520f34fc98ca93b4f454b1e61b8bf9d214d32c4"
+      "sha256": "3b0ed7e79ab5e46e79a3e11e31b74d52c1b0082b71236e25324580fb53c8fd9a"
     },
     {
       "path": "browser-tests/memory-batch-fixture.ts",
