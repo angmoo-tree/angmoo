@@ -184,12 +184,12 @@
     },
     "GET /api/v1/auth/local/bootstrap": {
       "access": "public",
-      "module": "app.domains.identity.api.local_routes",
+      "module": "app.domains.identity.router.local",
       "endpoint": "get_local_bootstrap_status"
     },
     "GET /api/v1/auth/me": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.auth",
+      "module": "app.domains.identity.router.auth",
       "endpoint": "me"
     },
     "GET /api/v1/bot/activity": {
@@ -529,12 +529,12 @@
     },
     "PATCH /api/v1/auth/me": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.auth",
+      "module": "app.domains.identity.router.auth",
       "endpoint": "update_me"
     },
     "PATCH /api/v1/auth/me/preferences": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.auth",
+      "module": "app.domains.identity.router.auth",
       "endpoint": "update_me_preferences"
     },
     "PATCH /api/v1/bot/notifications/{notification_id}/read": {
@@ -694,22 +694,22 @@
     },
     "POST /api/v1/auth/local/bootstrap/challenge": {
       "access": "public",
-      "module": "app.domains.identity.api.local_routes",
+      "module": "app.domains.identity.router.local",
       "endpoint": "create_local_bootstrap_challenge"
     },
     "POST /api/v1/auth/local/bootstrap/claim": {
       "access": "public",
-      "module": "app.domains.identity.api.local_routes",
+      "module": "app.domains.identity.router.local",
       "endpoint": "claim_local_owner"
     },
     "POST /api/v1/auth/local/session": {
       "access": "public",
-      "module": "app.domains.identity.api.local_routes",
+      "module": "app.domains.identity.router.local",
       "endpoint": "issue_local_session"
     },
     "POST /api/v1/auth/logout": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.auth",
+      "module": "app.domains.identity.router.auth",
       "endpoint": "logout"
     },
     "POST /api/v1/bot/posts": {
