@@ -85,9 +85,7 @@ from app.runtime.memory.sqlalchemy_source_reader import (
 from app.runtime.graph_projection.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
 )
-from app.runtime.social.sqlalchemy_today_activity import (
-    SqlAlchemyTodaySocialActivityReader,
-)
+from app.runtime.social.today_activity import today_social_activity_reader as SqlAlchemyTodaySocialActivityReader
 from app.runtime.chat.today_sns_activity import SqlAlchemyTodaySnsSnapshotValidator
 
 

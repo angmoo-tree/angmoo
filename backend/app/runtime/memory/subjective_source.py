@@ -11,9 +11,7 @@ from app.domains.relationships.models.social import (
 )
 from app.domains.routines.models.resident import AgentPublicActionExecution
 from app.domains.social.models.posts import PostLike
-from app.runtime.social.sqlalchemy_today_activity import (
-    SqlAlchemyTodaySocialActivityReader,
-)
+from app.runtime.social.today_activity import today_social_activity_reader as SqlAlchemyTodaySocialActivityReader
 
 
 def read_subjective_source(session, scope, *, source_type, source_id):

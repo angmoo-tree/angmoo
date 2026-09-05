@@ -726,4 +726,7 @@ World 캐릭터의 게시물·대꾸·좋아요 프로필은 `social/service/wor
 성공한 행동에서 명시한 동기·감정의 저장은 `social/service/subjective_context.py`가 소유한다. 실행/event/scope/evidence/source 일치, digest·중복 충돌과 검증된 row 저장 순서를 이곳에서 판단한다. `repository/subjective_context.py`는 Social source·기존 declaration을 조회하고 `runtime/social/subjective_references.py`는 같은 Session의 World/WC/Relationship 사실을 제공한다. 상위 행동 트랜잭션은 `subjective_composition.py`를 통해 연결하며 서비스는 원래 flush만 수행한다. 명시하지 않은 감정을 추론하거나 실패한 행동에 활성 declaration을 남기지 않는다.
 
 
-Today SNS의 활동 종류, 실행 성공 일치, source/chain 변경 감지값, watermark와 UTC 값 변환은 `social/service/today_activity_values.py`가 실제 구현한다. 최대 기록96·scan2048·batch512·분기 깊이8과 기존 공개 범위/event 종류 집합은 Social constants에 둔다. 현재 읽기 조립·scope·SQL의 실제 이전은 다음 slice에서 이어지며 이 값 이전만으로 조회 업무가 모두 전환된 것은 아니다.
+Today SNS의 활동 종류, 실행 성공 일치, source/chain 변경 감지값, watermark와 UTC 값 변환은 `social/service/today_activity_values.py`가 실제 구현한다. 최대 기록96·scan2048·batch512·분기 깊이8과 기존 공개 범위/event 종류 집합은 Social constants에 둔다. 조회 조립·scope·SQL은 아래 `TodaySocialActivityService`와 같은 Session 조회 협력이 소유한다.
+
+
+Today SNS의 범위·권한·차단·조상 게시물·성공 근거·명시적 자기 설명 검증과 category/count/coverage/watermark 조립은 `social/service/today_activity.py::TodaySocialActivityService`가 소유한다. `repository/today_activity.py`는 기존 bound/batch 실행과 Social post/block/declaration SQL, `runtime/social/today_activity_queries.py`는 같은 Session의 World/WC/membership/Relationship/Routines 사실을 조회한다. 구체 fact 조회는 Social의 동일 bounded query 실행을 사용해 populate_existing·정렬·상한·batch 순서를 유지한다. `runtime/social/today_activity.py::today_social_activity_reader`는 실제 서비스를 구성만 하고, 옛 SqlAlchemyTodaySocialActivityReader 파일은 제거했다.

@@ -31,10 +31,8 @@ from app.domains.social.contracts.subjective_context import (
     ActionSubjectiveContextV1,
     SubjectiveContextContractError,
 )
-from app.runtime.social.sqlalchemy_today_activity import (
-    SqlAlchemyTodaySocialActivityReader,
-    TodaySocialActivityReadError,
-)
+from app.runtime.social.today_activity import today_social_activity_reader as SqlAlchemyTodaySocialActivityReader
+from app.domains.social.exceptions import TodaySocialActivityReadError
 from app.domains.social.exceptions import SubjectiveContextPersistenceError
 from app.runtime.social.subjective_composition import record_declared_subjective_context
 from app.runtime.chat.today_sns_activity import SqlAlchemyTodaySnsSnapshotValidator
@@ -746,7 +744,7 @@ def test_batched_read_query_count_does_not_grow_per_post(today_session):
 
 
 def test_overflow_preserves_counts_and_never_claims_complete_empty(today_session, monkeypatch):
-    from app.runtime.social import sqlalchemy_today_activity as reader_module
+    from app.domains.social.service import today_activity as reader_module
     db, fixture = today_session
     _seed_today_activity(db, fixture)
     monkeypatch.setattr(reader_module, "MAX_TODAY_SOCIAL_RECORDS", 1)

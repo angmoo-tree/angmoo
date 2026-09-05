@@ -1222,3 +1222,12 @@ API·schema·ORM, 보호된 기존 Today assertion, 전체 split evidence를 통
 활동 종류·성공 실행 일치·source/chain revision·digest/watermark·UTC helper8, 상수6 및 오류1을 실제 Social service/constants/exceptions로 이전했다. 각각 원문 AST가 동일하며 현재 reader class 전체와 runtime의 원래 export도 변경하지 않았다. 역사 generator는 상수의 실제 소유 경로만 import한다. 기존 batch/scan/branch/record 상한과 public/unlisted, event type, digest field는 같다. 새로운 테스트나 판단 규칙은 추가하지 않았다. 실제 reader orchestration·scope·SQL의 역할 전환은 다음 slice로 남는다.
 
 Today·기존 응답 streaming·명시적 저장 focused37 PASS/14.38초. API·schema·ORM와 전체 split evidence, 경계795 modules/2754 edges/legacy197 및 L4/ER0 현재 inventory PASS. Frozen baseline/additions/승인 nodes는 유지했다.
+
+
+## AR-B5-C14-B — Today SNS 조회의 실제 책임 전환
+
+범위·owner·활성 scope·차단·조상/근거·명시적 context 검증 및 레거시 fallback 제외·종류·count/coverage/revision 조립은 Social 실제 service에, Social bounded batching/post/block/declaration SQL은 repository에 두었다. mixed World/WC/membership/event/execution 사실은 같은 Session runtime callback이며 ORM을 service나 응답 계약으로 우회 재수출하지 않는다. 앱/Chat/Memory 소비자는 원래 read 호출 그대로 실제 factory에 연결했고 옛 reader 파일을 제거했다.
+
+확장 read/scope/subjective policy3과 query execution/block3·active query1 AST가 원문과 동일하다. 원래 reader와 새 서비스의 **실행 SQL13개·bound parameters·순서 및 전체 records/count/coverage/watermark 값이 동일**하다. 신규 SQLite1node는 factory/range reject SQL0·sameSession, 다른 Session에서 숨긴 원본을 기존 캐시 대신 다시 확인하여 원본/자손 제외, commit0을 검증했다. 기존 Today·응답 streaming·declared context와 함께 **38 PASS / 12.41초**다. 전체 B5·원본 최초도입 capture·Hosted/installer·G07 최종 종료는 후속 단계다.
+
+고정 후보의 전체 Social 역할 회귀와 Today/streaming/수동 게시·프로필을 함께 실행해 **95 PASS / 33.62초 / 기존 Starlette 경고1**를 확인했다. API·schema·ORM, 보호된2개 원래 테스트 파일 assertion, 전체 split evidence, 경계799 modules/2763 edges/legacy197 및 L4/ER0 현재 inventory PASS.
