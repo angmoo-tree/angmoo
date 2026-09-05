@@ -1,7 +1,7 @@
 {
-  "edge_count": 2520,
-  "external_import_count": 2273,
-  "module_count": 741,
+  "edge_count": 2529,
+  "external_import_count": 2283,
+  "module_count": 743,
   "modules": [
     {
       "external_imports": [],
@@ -3543,6 +3543,23 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "collections.abc",
+        "datetime",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.constants",
+        "app.domains.relationships.contracts.outbox",
+        "app.domains.relationships.models"
+      ],
+      "module": "app.domains.relationships.repository.sqlite_projection_state",
+      "path": "backend/app/domains/relationships/repository/sqlite_projection_state.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "datetime",
         "sqlalchemy",
         "sqlalchemy.orm"
@@ -3729,6 +3746,23 @@
       ],
       "module": "app.domains.relationships.service.proposals",
       "path": "backend/app/domains/relationships/service/proposals.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "datetime",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.contracts.outbox",
+        "app.domains.relationships.policies.events",
+        "app.domains.relationships.repository.sqlite_projection_state"
+      ],
+      "module": "app.domains.relationships.service.sqlite_projection_state",
+      "path": "backend/app/domains/relationships/service/sqlite_projection_state.py",
       "wildcard_imports": []
     },
     {
@@ -8654,9 +8688,12 @@
       ],
       "imports": [
         "app.core.sqlite_concurrency",
+        "app.domains.relationships.constants",
         "app.domains.relationships.contracts.outbox",
         "app.domains.relationships.contracts.projection_commands",
+        "app.domains.relationships.policies.events",
         "app.domains.relationships.service.projection_state",
+        "app.domains.relationships.service.sqlite_projection_state",
         "app.models",
         "app.runtime.graph_projection.sqlalchemy_commands"
       ],

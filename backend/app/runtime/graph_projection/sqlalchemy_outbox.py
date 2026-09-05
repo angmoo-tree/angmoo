@@ -3,13 +3,16 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import UTC, datetime, timedelta
+from datetime import datetime
 from typing import Any
 
-from sqlalchemy import Engine, exists, or_, select, update
+from sqlalchemy import Engine, select
 from sqlalchemy.orm import Session
 
 from app import models
+from app.domains.relationships.constants import LEASE_TTL_SECONDS
+from app.domains.relationships.service import sqlite_projection_state
+from app.domains.relationships.policies.events import _aware_utc
 from app.domains.relationships.service import projection_state as graph_projection_crud
 from app.domains.relationships.contracts.outbox import (OutboxFinalizeStatus, ProjectionWorkItem)
 from app.domains.relationships.contracts.projection_commands import (ProjectionCommand)
@@ -23,7 +26,6 @@ from app.runtime.graph_projection.sqlalchemy_commands import (
 
 
 SessionFactory = Callable[[], Session]
-LEASE_TTL_SECONDS = 60
 
 
 class SqlAlchemyProjectionReplaySource:
@@ -153,110 +155,22 @@ class SqliteProjectionOutbox:
         self._retry_policy = retry_policy
 
     def claim(
-        self,
-        *,
-        worker_id: str,
-        now: datetime,
-        batch_size: int,
+        self, *, worker_id: str, now: datetime, batch_size: int
     ) -> tuple[ProjectionWorkItem, ...]:
-        if not worker_id or len(worker_id) > 128:
-            raise ValueError("invalid projection worker_id")
-        current = _aware_utc(now)
-        limit = max(1, min(batch_size, 100))
-
-        def operation(connection: Any) -> tuple[ProjectionWorkItem, ...]:
-            outbox = models.GraphProjectionOutbox.__table__
-            replay = models.GraphProjectionReplayRun.__table__
-            active_rebuild = exists(
-                select(replay.c.id).where(
-                    replay.c.world_id == outbox.c.world_id,
-                    replay.c.mode == "world_rebuild",
-                    replay.c.status.in_(("pending", "running")),
-                )
-            )
-            candidates = connection.execute(
-                select(outbox.c.id, outbox.c.projection_type)
-                .where(
-                    _claimable(outbox, now=current),
-                    or_(
-                        outbox.c.next_attempt_at.is_(None),
-                        outbox.c.next_attempt_at <= current,
-                    ),
-                    ~active_rebuild,
-                )
-                .order_by(outbox.c.created_at.asc(), outbox.c.id.asc())
-                .limit(limit)
-            ).mappings()
-            lease_expires = current + timedelta(seconds=LEASE_TTL_SECONDS)
-            claimed: list[ProjectionWorkItem] = []
-            for candidate in candidates:
-                result = connection.execute(
-                    update(outbox)
-                    .where(
-                        outbox.c.id == candidate["id"],
-                        _claimable(outbox, now=current),
-                        or_(
-                            outbox.c.next_attempt_at.is_(None),
-                            outbox.c.next_attempt_at <= current,
-                        ),
-                    )
-                    .values(
-                        status="processing",
-                        lease_owner=worker_id,
-                        lease_expires_at=lease_expires,
-                        attempt_count=outbox.c.attempt_count + 1,
-                        updated_at=current,
-                    )
-                )
-                if result.rowcount == 1:
-                    claimed.append(
-                        ProjectionWorkItem(
-                            id=str(candidate["id"]),
-                            projection_type=str(candidate["projection_type"]),
-                        )
-                    )
-            return tuple(claimed)
-
-        return self._write(operation)
+        return sqlite_projection_state.claim(
+            self._write, worker_id=worker_id, now=now, batch_size=batch_size
+        )
 
     def load_command(self, *, outbox_id: str) -> ProjectionCommand:
         with Session(self._engine) as db:
             return build_projection_command(db, outbox_id=outbox_id)
 
     def finalize_success(
-        self,
-        *,
-        outbox_id: str,
-        worker_id: str,
-        now: datetime,
+        self, *, outbox_id: str, worker_id: str, now: datetime
     ) -> OutboxFinalizeStatus:
-        current = _aware_utc(now)
-
-        def operation(connection: Any) -> OutboxFinalizeStatus:
-            outbox = models.GraphProjectionOutbox.__table__
-            result = connection.execute(
-                update(outbox)
-                .where(
-                    outbox.c.id == outbox_id,
-                    _owned_active_lease(
-                        outbox,
-                        worker_id=worker_id,
-                        now=current,
-                    ),
-                )
-                .values(
-                    status="succeeded",
-                    completed_at=current,
-                    updated_at=current,
-                    lease_owner=None,
-                    lease_expires_at=None,
-                    next_attempt_at=None,
-                    last_error_class=None,
-                )
-            )
-            return "succeeded" if result.rowcount == 1 else "lease_lost"
-
-        return self._write(operation)
+        return sqlite_projection_state.finalize_success(
+            self._write, outbox_id=outbox_id, worker_id=worker_id, now=now
+        )
 
     def finalize_failure(
         self,
@@ -268,58 +182,15 @@ class SqliteProjectionOutbox:
         terminal: bool,
         cancelled: bool = False,
     ) -> OutboxFinalizeStatus:
-        current = _aware_utc(now)
-
-        def operation(connection: Any) -> OutboxFinalizeStatus:
-            outbox = models.GraphProjectionOutbox.__table__
-            row = connection.execute(
-                select(outbox).where(outbox.c.id == outbox_id)
-            ).mappings().one_or_none()
-            if row is None or not _row_has_active_lease(
-                row,
-                worker_id=worker_id,
-                now=current,
-            ):
-                return "lease_lost"
-            attempt_count = int(row["attempt_count"])
-            created_at = _aware_utc(row["created_at"])
-            age = current - created_at
-            if cancelled:
-                status: OutboxFinalizeStatus = "cancelled"
-            elif terminal or attempt_count >= 8 or age >= timedelta(hours=24):
-                status = "dead"
-            else:
-                status = "pending"
-            next_attempt_at: datetime | None = None
-            completed_at: datetime | None = current
-            if status == "pending":
-                delays = (5, 30, 120, 600, 3600)
-                index = min(max(attempt_count - 1, 0), len(delays))
-                delay = delays[index] if index < len(delays) else 21_600
-                next_attempt_at = current + timedelta(seconds=delay)
-                completed_at = None
-            result = connection.execute(
-                update(outbox)
-                .where(
-                    outbox.c.id == outbox_id,
-                    outbox.c.status == "processing",
-                    outbox.c.lease_owner == worker_id,
-                    outbox.c.attempt_count == attempt_count,
-                    outbox.c.lease_expires_at > current,
-                )
-                .values(
-                    status=status,
-                    updated_at=current,
-                    lease_owner=None,
-                    lease_expires_at=None,
-                    last_error_class=error_class,
-                    next_attempt_at=next_attempt_at,
-                    completed_at=completed_at,
-                )
-            )
-            return status if result.rowcount == 1 else "lease_lost"
-
-        return self._write(operation)
+        return sqlite_projection_state.finalize_failure(
+            self._write,
+            outbox_id=outbox_id,
+            worker_id=worker_id,
+            now=now,
+            error_class=error_class,
+            terminal=terminal,
+            cancelled=cancelled,
+        )
 
     def _write(self, operation: Callable[[Any], Any]) -> Any:
         return run_sqlite_immediate(
@@ -327,37 +198,6 @@ class SqliteProjectionOutbox:
             operation,
             retry_policy=self._retry_policy,
         )
-
-
-def _claimable(outbox: Any, *, now: datetime) -> Any:
-    return or_(
-        outbox.c.status == "pending",
-        (outbox.c.status == "processing") & (outbox.c.lease_expires_at < now),
-    )
-
-
-def _owned_active_lease(outbox: Any, *, worker_id: str, now: datetime) -> Any:
-    return (
-        (outbox.c.status == "processing")
-        & (outbox.c.lease_owner == worker_id)
-        & (outbox.c.lease_expires_at > now)
-    )
-
-
-def _row_has_active_lease(row: Any, *, worker_id: str, now: datetime) -> bool:
-    expires_at = row["lease_expires_at"]
-    return bool(
-        row["status"] == "processing"
-        and row["lease_owner"] == worker_id
-        and isinstance(expires_at, datetime)
-        and _aware_utc(expires_at) > now
-    )
-
-
-def _aware_utc(value: datetime) -> datetime:
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)
 
 
 __all__ = [

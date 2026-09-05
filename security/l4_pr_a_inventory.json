@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2273,
-      "internal_edge_count": 2520,
+      "external_import_count": 2283,
+      "internal_edge_count": 2529,
       "legacy_import_exception_count": 0,
-      "module_count": 741,
+      "module_count": 743,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -248,6 +248,15 @@
           },
           {
             "imports": [
+              "app.domains.relationships.constants",
+              "app.domains.relationships.contracts.outbox",
+              "app.domains.relationships.models"
+            ],
+            "module": "app.domains.relationships.repository.sqlite_projection_state",
+            "path": "backend/app/domains/relationships/repository/sqlite_projection_state.py"
+          },
+          {
+            "imports": [
               "app.domains.relationships.models"
             ],
             "module": "app.domains.relationships.repository.state",
@@ -364,6 +373,15 @@
             ],
             "module": "app.domains.relationships.service.proposals",
             "path": "backend/app/domains/relationships/service/proposals.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.outbox",
+              "app.domains.relationships.policies.events",
+              "app.domains.relationships.repository.sqlite_projection_state"
+            ],
+            "module": "app.domains.relationships.service.sqlite_projection_state",
+            "path": "backend/app/domains/relationships/service/sqlite_projection_state.py"
           },
           {
             "imports": [
@@ -1057,9 +1075,12 @@
           {
             "imports": [
               "app.core.sqlite_concurrency",
+              "app.domains.relationships.constants",
               "app.domains.relationships.contracts.outbox",
               "app.domains.relationships.contracts.projection_commands",
+              "app.domains.relationships.policies.events",
               "app.domains.relationships.service.projection_state",
+              "app.domains.relationships.service.sqlite_projection_state",
               "app.models",
               "app.runtime.graph_projection.sqlalchemy_commands"
             ],

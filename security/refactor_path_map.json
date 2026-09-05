@@ -29354,6 +29354,227 @@
       "new_tests": [
         "tests/relationships/test_projection_state_transaction.py::test_sqlalchemy_lease_and_retry_remain_in_the_caller_transaction"
       ]
+    },
+    "AR-B5-C5-B": {
+      "status": "IMPLEMENTED; focused37 PASS; 10 original policy/SQL/executor AST contracts PASS; source introduction pending",
+      "scope": "Canonical SQLite lease/retry decisions and exact CAS SQL move to Relationships. Existing runtime engine ownership, run_sqlite_immediate transaction/retry executor, constructor and replay/command adapters remain. No business behavior, SQL, status or commit change.",
+      "split_files": {
+        "backend/app/runtime/graph_projection/sqlalchemy_outbox.py": [
+          "backend/app/runtime/graph_projection/sqlalchemy_outbox.py",
+          "backend/app/domains/relationships/service/sqlite_projection_state.py",
+          "backend/app/domains/relationships/repository/sqlite_projection_state.py",
+          "backend/app/domains/relationships/constants.py",
+          "backend/app/domains/relationships/policies/events.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SessionFactory",
+          "new": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SessionFactory",
+          "direct_consumers": [
+            "backend/tests/test_l3_er2_sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqlAlchemyProjectionReplaySource",
+          "new": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqlAlchemyProjectionReplaySource",
+          "direct_consumers": [
+            "backend/tests/test_l3_er2_sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqlAlchemyProjectionOutbox",
+          "new": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqlAlchemyProjectionOutbox",
+          "direct_consumers": [
+            "backend/tests/test_l3_er2_sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "direct_consumers": [
+            "backend/tests/test_l3_er2_sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::__all__",
+          "new": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::__all__",
+          "direct_consumers": [
+            "backend/tests/test_l3_er2_sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::LEASE_TTL_SECONDS",
+          "new": "backend/app/domains/relationships/constants.py::LEASE_TTL_SECONDS",
+          "direct_consumers": [
+            "backend/app/domains/relationships/repository/sqlite_projection_state.py",
+            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/domains/relationships/service/sqlite_projection_state.py::claim",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/domains/relationships/service/sqlite_projection_state.py::finalize_success",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/domains/relationships/service/sqlite_projection_state.py::finalize_failure",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/domains/relationships/repository/sqlite_projection_state.py::claim",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/domains/relationships/repository/sqlite_projection_state.py::finalize_success",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/domains/relationships/repository/sqlite_projection_state.py::get_failure_row",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::SqliteProjectionOutbox",
+          "new": "backend/app/domains/relationships/repository/sqlite_projection_state.py::apply_failure_transition",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::_claimable",
+          "new": "backend/app/domains/relationships/repository/sqlite_projection_state.py::_claimable",
+          "direct_consumers": [
+            "backend/app/domains/relationships/repository/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::_owned_active_lease",
+          "new": "backend/app/domains/relationships/repository/sqlite_projection_state.py::_owned_active_lease",
+          "direct_consumers": [
+            "backend/app/domains/relationships/repository/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::_row_has_active_lease",
+          "new": "backend/app/domains/relationships/service/sqlite_projection_state.py::_row_has_active_lease",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_outbox.py::_aware_utc",
+          "new": "backend/app/domains/relationships/policies/events.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/sqlite_projection_state.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_outbox_claim_has_one_owner_and_expired_claim_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_scheduler_user_and_scheduler_projector_competition_preserve_both_writes",
+            "tests/test_graph_projection_worker.py::test_transient_failure_retries_without_losing_row"
+          ]
+        }
+      ],
+      "new_tests": []
     }
   }
 }

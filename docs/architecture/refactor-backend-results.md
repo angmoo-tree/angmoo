@@ -1045,3 +1045,12 @@ Relationships `service/proposals.py`가 제안 한도·cooldown·preview·발행
 원문 **6개 실제 body/query 계약 AST 동일**, 집중 **37 passed / 기존 PostgreSQL 연결 gate 1 skip / 21.94초**. 새 transaction node는 SQLite에서 이 Session 기반 구현의 claim/재시도 rollback과 stale owner 차단을 검사한다. 이 테스트를 PostgreSQL skip_locked 동시성 검증으로 표시하지 않는다. canonical SQLite의 기존 10-worker claim/reclaim 회귀도 함께 통과했다. 기존 테스트 assertion은 바꾸지 않았고 source capture/Hosted PostgreSQL gate/전체 B5 종료는 부모 통합에서 수행한다.
 
 C5-A 최종 경계는 **741 modules / 2,520 edges / exact legacy 213**으로 통과했고 API·응답 스키마·ORM는 PR258/263과 동일하다. 변경된 보호 테스트 2개 파일의 assertion과 전체 기존 split evidence도 오류 0이며 L4·ER0 current inventory를 갱신했다.
+
+
+## AR-B5-C5-B — canonical SQLite lease 정책과 CAS의 실제 소유
+
+Relationships service가 원래 worker/batch/시간 검증·lease·retry/dead/cancel 정책을, repository가 원래 candidate SELECT·rebuild 제외·정렬·UPDATE CAS를 소유한다. Runtime은 기존 engine·retry policy와 `run_sqlite_immediate` executor를 그대로 가진다. 동일 callback 안에서 조회→판단→CAS가 진행되며 BEGIN IMMEDIATE/commit/rollback/재시도 범위는 바꾸지 않았다. 기존 TTL 60초와 UTC 함수는 동일 canonical 정의를 사용한다.
+
+기존 class의 constructor·load_command·_write를 포함한 **10개 policy/SQL/executor AST 계약이 동일**하다. 실제 10-worker claim/reclaim 및 scheduler/projector 경쟁·worker 실패/종료·명령/replay 집중 회귀는 **37 passed / 19.31초**다. 기존 assertion이나 신규 test node는 변경하지 않았다. B5의 mutable feature navigation도 실제 이동 경로에 맞췄으며 frozen baseline/checkpoint/additions와 기능 완료 상태는 유지한다. Source capture/Hosted CI/installer 및 잔여 command/replay/observation·Social agent/media 전환은 후속 통합과 slice에서 진행한다.
+
+최종 canonical TTL 연결과 실제 트리의 같은 회귀도 **37 passed / 17.82초**이며, 경계 **743 modules / 2,529 edges / exact legacy 213**, API·응답 스키마·ORM 및 전체 split evidence 오류 0을 확인했다. L4·ER0 current inventory도 통과했다.

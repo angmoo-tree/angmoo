@@ -664,3 +664,6 @@ Resident Context는 Character/CharacterState, LlmCredential, AgentFeedCue와 Act
 
 
 Projection outbox의 업무 상태 전이와 재시도 기준은 Relationships가 소유한다. Session 기반 경로의 `service/projection_state.py`는 원래 claim/finalize 순서를 수행하고 commit은 실행 경로가 맡는다. 후보 선택·World별 readiness 집계는 같은 도메인의 repository가 소유하며, 이 조회 결과를 그래프의 권한 판단을 대신하는 근거로 사용하지 않는다.
+
+
+Canonical SQLite 경로의 `service/sqlite_projection_state.py`는 lease 검증·retry/dead/cancel 판단을, 같은 이름의 repository는 기존 SQL과 CAS를 소유한다. Runtime의 기존 `_write`가 `run_sqlite_immediate`에 같은 connection callback을 전달하여 BEGIN IMMEDIATE·commit·busy retry를 수행한다. 서비스는 engine이나 별도 Session을 만들지 않고, 늦은 worker가 다른 lease의 성공/실패 상태를 덮어쓰지 못하도록 원래 owner·만료·attempt 조건을 그대로 사용한다.
