@@ -19,7 +19,11 @@ from app.domains.worlds.domain.reserved_roles import (
 from app.integrations.ladybug_projection import LadybugRelationshipProjection
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.runtime.migrations.embedded_data import EmbeddedDataUpgradeCoordinator
-from app.runtime.migrations.embedded_sqlite import SqliteCanonicalUpgradeError
+from app.runtime.migrations.embedded_sqlite import (
+    SqliteCanonicalUpgradeError,
+    _target_generation_name,
+)
+from app.runtime.migrations.generation import EmbeddedGenerationController
 from app.domains.chat.infrastructure.world_scope_migration import (
     rebuild_message_threads_v3,
 )
@@ -48,6 +52,7 @@ from app.runtime.persistence.sqlite_schema import (
     SQLITE_SCHEMA_VERSION,
     WORLD_PACKAGE_REGISTRY_TABLES,
     build_sqlite_v1_metadata,
+    build_sqlite_v8_metadata,
     create_schema_version_table,
     sqlite_schema_digest,
 )
@@ -56,10 +61,29 @@ from p7_graph_support import seed_projection_fixture
 
 GENERATION = "contributor-v1"
 V2_GENERATION = "supported-v2"
+MAX_LENGTH_V8_GENERATION = (
+    "er6-preview-v2-schema-v3-schema-v4-schema-v6-schema-v7-schema-v8"
+)
 
 
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def test_generation_name_limit_preserves_target_version_and_disambiguator() -> None:
+    target = _target_generation_name(MAX_LENGTH_V8_GENERATION, 9)
+    collision = _target_generation_name(
+        MAX_LENGTH_V8_GENERATION,
+        9,
+        disambiguator="deadbeef",
+    )
+
+    assert len(target) == 64
+    assert target.endswith("-schema-v9")
+    assert target != MAX_LENGTH_V8_GENERATION
+    assert len(collision) == 64
+    assert collision.endswith("-schema-v9-deadbeef")
+    assert collision not in {MAX_LENGTH_V8_GENERATION, target}
 
 
 def _seed_v1(
@@ -491,6 +515,79 @@ def test_v1_sqlite_is_copied_to_latest_and_existing_data_is_preserved(
     assert (
         root / "graph" / "current-generation.json"
     ).read_bytes() == graph_current_before
+
+
+def test_max_length_v8_generation_upgrades_without_reusing_source_directory(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "max-length-v8"
+    source = (
+        root
+        / "canonical"
+        / "generations"
+        / MAX_LENGTH_V8_GENERATION
+        / "angmoo.sqlite3"
+    )
+    source.parent.mkdir(parents=True)
+    manifest = sqlite_registry.load_sqlite_manifest(8)
+    engine = create_engine(URL.create("sqlite+pysqlite", database=str(source)))
+    try:
+        with engine.begin() as connection:
+            create_schema_version_table(connection)
+            build_sqlite_v8_metadata().create_all(connection)
+            connection.exec_driver_sql(
+                f"INSERT INTO {SCHEMA_VERSION_TABLE} ("
+                "singleton_key, schema_version, source_revision, "
+                "source_migration_count, schema_digest, created_at"
+                ") VALUES (?, ?, ?, ?, ?, ?)",
+                (
+                    1,
+                    manifest.schema_version,
+                    manifest.source_revision,
+                    manifest.source_migration_count,
+                    sqlite_schema_digest(connection),
+                    encode_utc_timestamp(datetime.now(UTC)),
+                ),
+            )
+    finally:
+        engine.dispose()
+    EmbeddedGenerationController(
+        root / "canonical",
+        artifact_relative_path="angmoo.sqlite3",
+    ).promote(
+        f"generations/{MAX_LENGTH_V8_GENERATION}",
+        manifest_sha256=manifest.manifest_sha256,
+        data_version=manifest.schema_version,
+    )
+    source_sha = _sha256(source)
+
+    result = EmbeddedDataUpgradeCoordinator(
+        StaticRuntimeDataPath(root),
+        fallback_generation=MAX_LENGTH_V8_GENERATION,
+    ).upgrade()
+
+    assert result.canonical.source_version == 8
+    assert result.canonical.target_version == SQLITE_SCHEMA_VERSION
+    assert result.canonical.migrated is True
+    assert result.canonical.generation != MAX_LENGTH_V8_GENERATION
+    assert len(result.canonical.generation) <= 64
+    assert result.canonical.generation.endswith("-schema-v9")
+    assert source.is_file()
+    assert _sha256(source) == source_sha
+    current = json.loads(
+        (root / "canonical" / "current-generation.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert current["generation"] == result.canonical.generation
+    assert current["data_version"] == SQLITE_SCHEMA_VERSION
+    previous = json.loads(
+        (root / "canonical" / "previous-generation.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert previous["generation"] == MAX_LENGTH_V8_GENERATION
+    assert previous["data_version"] == 8
 
 
 def test_supported_v2_roleless_rows_are_promoted_by_exact_expected_delta(

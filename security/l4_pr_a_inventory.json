@@ -1069,7 +1069,7 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "8ab568b72d7f69c985d7015c0a57398fc0a58b913be3d95ee1a367755bbf16a6"
+        "sha256": "5690b09ce0911347c466a9685e59879412aeeef1d36064f55f0f20d0a5adaff3"
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
@@ -1128,14 +1128,16 @@
         "sha256": "7ae830d9ecd1ae54ac8026ba2eae5904420d4d718148237eec63b2ddeb6e66ed"
       }
     ],
-    "parity_test_node_count": 95,
+    "parity_test_node_count": 97,
     "parity_test_nodes": [
       "backend/tests/test_embedded_data_migration.py::test_each_consecutive_step_rejects_undeclared_identity_changes",
       "backend/tests/test_embedded_data_migration.py::test_failed_sqlite_step_keeps_v1_active_and_removes_staging",
+      "backend/tests/test_embedded_data_migration.py::test_generation_name_limit_preserves_target_version_and_disambiguator",
       "backend/tests/test_embedded_data_migration.py::test_graph_rebuild_failure_degrades_without_replacing_previous",
       "backend/tests/test_embedded_data_migration.py::test_graph_rebuild_replays_direction_evidence_and_world_scope",
       "backend/tests/test_embedded_data_migration.py::test_graph_version_change_replays_to_staging_and_preserves_previous",
       "backend/tests/test_embedded_data_migration.py::test_legacy_marker_survives_forward_sqlite_generation_upgrade",
+      "backend/tests/test_embedded_data_migration.py::test_max_length_v8_generation_upgrades_without_reusing_source_directory",
       "backend/tests/test_embedded_data_migration.py::test_newer_sqlite_generation_fails_closed_without_replacement",
       "backend/tests/test_embedded_data_migration.py::test_supported_v2_creates_one_reserved_role_per_affected_world",
       "backend/tests/test_embedded_data_migration.py::test_supported_v2_reserved_role_conflict_fails_closed",
