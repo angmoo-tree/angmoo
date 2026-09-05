@@ -672,3 +672,8 @@ Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥�
 ### Resident 후보·도구·세션 정책
 
 `routines/service/action_candidates.py`는 읽은 후보값을 식별하고 설명하며, `tool_policy.py`는 허용 행동을 실제 도구명으로 연결합니다. `session_keys.py`는 실행/시간대 세션의 식별 및 flag·character allowlist의 원래 조건을 다룹니다. 새 SQL·provider 호출 없이 기존 전달값을 사용합니다. 원래 실행 오류8개는 `routines/exceptions.py`의 실제 클래스이며 기존 HTTP와 runtime에서 같은 객체로 처리됩니다. SDK 요청 형식은 `runtime/resident/request_options.py`에 있습니다.
+
+
+### Resident가 사용하는 Social 조회
+
+`social/repository/resident_context.py`는 좋아요·리포스트·팔로우 여부와 보이는 스레드 답글의 실제 조회를 소유합니다. 조회는 caller의 Session을 그대로 사용하며 visibility 조건·후속 조회 순서·미커밋 변경의 자동 반영·rollback 의미를 유지합니다. Routines는 이 결과를 활동 후보와 도구 허용 판단에 사용하며 Social ORM의 조회를 별도의 Routines repository에 복제하지 않습니다. 현재 남은 AgentRun 소비자는 C6b의 실행 협력 전환 대상으로 명시합니다.

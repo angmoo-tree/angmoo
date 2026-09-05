@@ -10916,6 +10916,7 @@
           "backend/app/domains/routines/service/tool_policy.py",
           "backend/app/domains/routines/utils/context_text.py",
           "backend/app/domains/runtime/contracts.py",
+          "backend/app/domains/social/repository/resident_context.py",
           "backend/app/runtime/resident/decision_lanes.py",
           "backend/app/runtime/resident/gateway_results.py",
           "backend/app/runtime/resident/read_only_lanes.py",
@@ -11925,22 +11926,26 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_has_character_like",
-          "new": "backend/app/services/agent_runs.py::_has_character_like",
+          "new": "backend/app/domains/social/repository/resident_context.py::_has_character_like",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/social/test_resident_context_queries.py::test_resident_reaction_queries_see_caller_pending_rows_and_preserve_rollback",
+            "tests/social/test_resident_context_queries.py::test_resident_thread_queries_keep_visible_ancestry_direct_reply_and_no_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_has_character_repost",
-          "new": "backend/app/services/agent_runs.py::_has_character_repost",
+          "new": "backend/app/domains/social/repository/resident_context.py::_has_character_repost",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/social/test_resident_context_queries.py::test_resident_reaction_queries_see_caller_pending_rows_and_preserve_rollback",
+            "tests/social/test_resident_context_queries.py::test_resident_thread_queries_keep_visible_ancestry_direct_reply_and_no_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12309,32 +12314,38 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_thread_reply_post_ids_for_action_gate",
-          "new": "backend/app/services/agent_runs.py::_thread_reply_post_ids_for_action_gate",
+          "new": "backend/app/domains/social/repository/resident_context.py::_thread_reply_post_ids_for_action_gate",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/social/repository/resident_context.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/social/test_resident_context_queries.py::test_resident_reaction_queries_see_caller_pending_rows_and_preserve_rollback",
+            "tests/social/test_resident_context_queries.py::test_resident_thread_queries_keep_visible_ancestry_direct_reply_and_no_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_has_character_replied_to_thread",
-          "new": "backend/app/services/agent_runs.py::_has_character_replied_to_thread",
+          "new": "backend/app/domains/social/repository/resident_context.py::_has_character_replied_to_thread",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/social/test_resident_context_queries.py::test_resident_reaction_queries_see_caller_pending_rows_and_preserve_rollback",
+            "tests/social/test_resident_context_queries.py::test_resident_thread_queries_keep_visible_ancestry_direct_reply_and_no_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_is_direct_reply_to_character_post_for_action_gate",
-          "new": "backend/app/services/agent_runs.py::_is_direct_reply_to_character_post_for_action_gate",
+          "new": "backend/app/domains/social/repository/resident_context.py::_is_direct_reply_to_character_post_for_action_gate",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/social/test_resident_context_queries.py::test_resident_reaction_queries_see_caller_pending_rows_and_preserve_rollback",
+            "tests/social/test_resident_context_queries.py::test_resident_thread_queries_keep_visible_ancestry_direct_reply_and_no_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -14578,6 +14589,19 @@
             "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
             "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log",
             "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_profile_following_status",
+          "new": "backend/app/domains/social/repository/resident_context.py::find_follow_id",
+          "source_member": "Exact original exists=db.scalar(select(ProfileFollow.id).where(follower_character_id,target_character_id).limit(1)) expression only. Original policy retains self/deleted/target checks and nullable comparison in the same order; the existing attached Character read happens first.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_resident_context_queries.py::test_resident_reaction_queries_see_caller_pending_rows_and_preserve_rollback",
+            "tests/social/test_resident_context_queries.py::test_resident_thread_queries_keep_visible_ancestry_direct_reply_and_no_commit",
             "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         }
@@ -32413,6 +32437,20 @@
       "ownership": "Routines owns actual candidate/tool/session identity policies and the original eight execution error classes. Runtime owns request option dictionaries. Existing HTTP and execution references see the same error objects through their pending legacy consumer.",
       "preservation": "Original29 functions/classes and19 constants match full AST. Original3 session tests move with unchanged bodies, KST value and settings object. Original request options, candidate hash, action order/duplicates, overnight daypart, flags/allowlist and error bases/messages remain.",
       "remaining": "Social same-Session candidate/menu reads and credential preparation remain C6b/c. Uncalled action_menu178lines and recovery2helpers plus original unused two constants remain B8-A evidence, not fabricated supported calls. Memory Daypart/Operations/B5 and LG actual bodies remain their owner work."
+    },
+    "AR-B4-C6b1-social-resident-queries": {
+      "status": "IMPLEMENTED — focused55 and final443 passed / existing PostgreSQL1 skipped; source/split/assertion/suppression/API-ORM/nodes read-only checks0; stock gate awaits root sequential introduction append",
+      "actual_paths": [
+        "backend/app/domains/social/repository/resident_context.py"
+      ],
+      "test_nodes": [
+        "tests/social/test_resident_context_queries.py::test_resident_reaction_queries_see_caller_pending_rows_and_preserve_rollback",
+        "tests/social/test_resident_context_queries.py::test_resident_thread_queries_keep_visible_ancestry_direct_reply_and_no_commit",
+        "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+      ],
+      "ownership": "The five actual PostLike/PostRepost/visible Post traversal and direct-reply query helpers plus original nullable ProfileFollow scalar now belong Social repository. B5 owner approved this non-overlapping path. Existing AgentRun composition imports the same functions while admission/menu policy moves in C6b2.",
+      "preservation": "Five original function bodies and follow scalar AST exact. Canonical Social post_repository.get_post is the same original function formerly reexported by community CRUD. SQL predicates/limit1/traversal frontier/visibility/seen IDs and same Session/autoflush/no-commit are unchanged. Original policy remains at its original call site, with only the exact follow query redirected.",
+      "remaining": "Actual admission/menu and all remaining context decisions still need Routines service plus typed same-Session runtime references in C6b2/C6c. This query-only slice does not claim full Resident completion; no future B5/B7 ancestry or duplicate implementations."
     }
   },
   "test_symbols": {

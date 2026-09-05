@@ -1117,6 +1117,7 @@
       "app.domains.social.repository.posts",
       "app.domains.social.repository.profiles",
       "app.domains.social.repository.reactions",
+      "app.domains.social.repository.resident_context",
       "app.domains.social.schemas",
       "app.domains.social.schemas.community",
       "app.domains.social.schemas.feed",
@@ -2917,6 +2918,14 @@
         "owner_stage": "AR-B4-C",
         "reason": "Existing actual resident execution uses canonical original response/decision/log policy and same provider workflow after full implementation move; no forwarding function.",
         "removal_condition": "Move actual remaining resident composition in C6 and remove legacy entry before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.social.repository.resident_context",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed Resident composition calls exactly the original query functions after Social-owned SQL extraction; no copied policy, query or wrapper.",
+        "removal_condition": "Move actual admission/context composition to typed same-Session runtime collaborator in C6b2/C6c and retire exact legacy importer before B8-A.",
         "review_date": "2026-09-06"
       }
     ]

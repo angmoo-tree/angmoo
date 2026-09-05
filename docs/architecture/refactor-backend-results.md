@@ -1045,3 +1045,11 @@ C5f 검증은 초기 **73 passed /기존 warnings2/22.28초**, 최종 고정 tre
 
 
 C6a 초기 **142 passed /기존warnings6/12.42초**, 최종 고정 tree **441 passed /기존 PostgreSQL1 skipped/기존warnings6/103.78초**. 원문29함수·클래스/19상수 AST 정확동일, 기존 세션3테스트 본문동일이며 새 동작·테스트 node 추가는 없다. 현재 boundary **742modules/2495edges/exact legacy206/cycle0**, L4 **742/14/97**, ER0 **85/87/24/44/7**, Memory batch PASS. 읽기 전용 원래6검사는 오류0이며 **보호2139/current2260**. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions 불변; root의 선형 최초도입 원장 연결 뒤 stock 전체 게이트를 다시 확인한다. 기존 class alias 소비자는 실제 HTTP/runtime의 동일객체 참조를 기록했으며 신규 타입간 상속·오류 메시지·처리순서를 바꾸지 않았다.
+
+
+## AR-B4-C6b1 — Resident의 실제 Social 조회 소유
+
+원래5 query helper와 `_profile_following_status`의 nullable scalar 한 개만 Social repository/resident_context.py로 이전했다. Social 담당과 파일 충돌 및 소유권을 확인했다. 모델·조건·정렬·limit1·BFS frontier/seen·숨김/삭제 제외·같은 Session을 바꾸지 않았고 별도 commit을 추가하지 않았다. 실제 활성 소스의 조회함수를 이동했으며 정책·HTTP·provider 동작은 그대로다. 후속 C6b2에서 실제 후보/table 규칙과 typed runtime read 협력을 연결한다. 신규 SQLite2노드는 pending 데이터의 caller/observer 차이와 rollback, visible 답글 경로 및 direct-reply 의미를 검증한다.
+
+
+C6b1 초기 **55 passed /기존 warnings2/25.07초**, 최종 고정 tree **443 passed /기존 PostgreSQL1 skipped/기존 warnings6/259.37초**. 실제5 query 함수와 follow scalar·주변 정책의 원래 AST를 확인했고, 경계 **743modules/2498edges/exact legacy206/cycle0**, L4 **743/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2262**다. 최초 signed869bae의2경로만 메모리에서 보충했으며 frozen/checkpoint/additions는 변경하지 않았다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 뒤 확인한다. C6 이후에도 settings/활성화·capacity/수동 실행/첫인사의 실제 Routines 정책과 HTTP 전환을 완료해야 하며, runtime/characters/management에 남은 업무를 완료로 간주하지 않는다.

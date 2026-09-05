@@ -1,7 +1,7 @@
 {
-  "edge_count": 2495,
-  "external_import_count": 2318,
-  "module_count": 742,
+  "edge_count": 2498,
+  "external_import_count": 2320,
+  "module_count": 743,
   "modules": [
     {
       "external_imports": [],
@@ -5604,6 +5604,19 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.posts"
+      ],
+      "module": "app.domains.social.repository.resident_context",
+      "path": "backend/app/domains/social/repository/resident_context.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.social.schemas",
@@ -10469,6 +10482,7 @@
         "app.domains.routines.service.tool_policy",
         "app.domains.routines.utils.context_text",
         "app.domains.social.public",
+        "app.domains.social.repository.resident_context",
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",
         "app.models",
