@@ -113,3 +113,19 @@ SERVICE_IMAGE_ACTIVE_RESERVATION_STATUSES = {
 
 
 IMAGE_VISUAL_IDENTITY_FIRST_GREETING_MODEL = "gemini-3.1-flash-lite"
+
+
+MAX_TODAY_SOCIAL_RECORDS = 96
+
+MAX_TODAY_SOCIAL_SCAN = 2_048
+
+MAX_TODAY_BRANCH_DEPTH = 8
+
+MAX_TODAY_QUERY_BATCH = 512
+
+_VISIBLE_POST_VISIBILITIES = {"public", "unlisted"}
+
+_POST_EVENT_TYPES = {
+    "post_published", "reply_created", "comment_created", "mention_created",
+    "joint_proposed",
+}

@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2383,
-      "internal_edge_count": 2750,
+      "external_import_count": 2384,
+      "internal_edge_count": 2754,
       "legacy_import_exception_count": 0,
-      "module_count": 794,
+      "module_count": 795,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1350,6 +1350,13 @@
           },
           {
             "imports": [
+              "app.domains.social.contracts.today_activity"
+            ],
+            "module": "app.domains.social.service.today_activity_values",
+            "path": "backend/app/domains/social/service/today_activity_values.py"
+          },
+          {
+            "imports": [
               "app.domains.social.models.posts",
               "app.domains.social.repository.posts",
               "app.domains.social.schemas.community"
@@ -1769,12 +1776,15 @@
             "imports": [
               "app.domains.relationships.models.social",
               "app.domains.routines.models.resident",
+              "app.domains.social.constants",
               "app.domains.social.contracts.subjective_context",
               "app.domains.social.contracts.today_activity",
+              "app.domains.social.exceptions",
               "app.domains.social.models.feed",
               "app.domains.social.models.posts",
               "app.domains.social.models.subjective_context",
               "app.domains.social.service.subjective_context",
+              "app.domains.social.service.today_activity_values",
               "app.domains.world_characters.models",
               "app.domains.worlds.models"
             ],

@@ -41242,6 +41242,219 @@
       ],
       "same_session_evidence": "Original policy2/error1 expanded AST, ownSQL2 and foreignSQL3 actual bodies, and all four existing caller nonimport bodies are unchanged. New SQLite2 nodes exercise original naive-to-UTC capture, attached flush/no commit/caller rollback, absent declaration no-op and failed/mismatched action rejection before SQL.",
       "remaining": "Today reader owns remaining aggregation/privacy decisions until the next slice. Shared enum definitions and later Routines/LangGraph caller paths will be joined by root; no duplicate policy or common enum created."
+    },
+    "AR-B5-C14-A": {
+      "status": "IMPLEMENTED foundations; Today aggregation/query ownership remains next slice",
+      "scope": "Eight real pure action classification/revision/UTC/watermark functions are owned by Social service/today_activity_values. Four limits plus visible-post/event-type sets are actual Social constants; read error belongs to Social exceptions. The reader and original runtime call behavior are unchanged. The live inventory import reads constants from their actual owner and frozen historical records are not rewritten.",
+      "split_files": {
+        "backend/app/runtime/social/sqlalchemy_today_activity.py": [
+          "backend/app/domains/social/constants.py",
+          "backend/app/domains/social/exceptions.py",
+          "backend/app/domains/social/service/today_activity_values.py",
+          "backend/app/runtime/social/sqlalchemy_today_activity.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::_execution_matches",
+          "new": "backend/app/domains/social/service/today_activity_values.py::_execution_matches",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/domains/social/service/today_activity_values.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::_event_kind",
+          "new": "backend/app/domains/social/service/today_activity_values.py::_event_kind",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/domains/social/service/today_activity_values.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::_post_revision",
+          "new": "backend/app/domains/social/service/today_activity_values.py::_post_revision",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/domains/social/service/today_activity_values.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::_chain_revision",
+          "new": "backend/app/domains/social/service/today_activity_values.py::_chain_revision",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/domains/social/service/today_activity_values.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::_source_revision",
+          "new": "backend/app/domains/social/service/today_activity_values.py::_source_revision",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/domains/social/service/today_activity_values.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::_digest",
+          "new": "backend/app/domains/social/service/today_activity_values.py::_digest",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/domains/social/service/today_activity_values.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::_watermark",
+          "new": "backend/app/domains/social/service/today_activity_values.py::_watermark",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/domains/social/service/today_activity_values.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::_aware",
+          "new": "backend/app/domains/social/service/today_activity_values.py::_aware",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/domains/social/service/today_activity_values.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::MAX_TODAY_SOCIAL_RECORDS",
+          "new": "backend/app/domains/social/constants.py::MAX_TODAY_SOCIAL_RECORDS",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::MAX_TODAY_SOCIAL_SCAN",
+          "new": "backend/app/domains/social/constants.py::MAX_TODAY_SOCIAL_SCAN",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::MAX_TODAY_BRANCH_DEPTH",
+          "new": "backend/app/domains/social/constants.py::MAX_TODAY_BRANCH_DEPTH",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::MAX_TODAY_QUERY_BATCH",
+          "new": "backend/app/domains/social/constants.py::MAX_TODAY_QUERY_BATCH",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::_VISIBLE_POST_VISIBILITIES",
+          "new": "backend/app/domains/social/constants.py::_VISIBLE_POST_VISIBILITIES",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::_POST_EVENT_TYPES",
+          "new": "backend/app/domains/social/constants.py::_POST_EVENT_TYPES",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::TodaySocialActivityReadError",
+          "new": "backend/app/domains/social/exceptions.py::TodaySocialActivityReadError",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::SqlAlchemyTodaySocialActivityReader",
+          "new": "backend/app/runtime/social/sqlalchemy_today_activity.py::SqlAlchemyTodaySocialActivityReader",
+          "direct_consumers": [
+            "backend/app/runtime/chat/today_sns_activity.py",
+            "backend/app/runtime/memory/subjective_source.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_today_activity.py::__all__",
+          "new": "backend/app/runtime/social/sqlalchemy_today_activity.py::__all__",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_reader_builds_only_visible_focal_same_world_activity",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed"
+          ]
+        }
+      ],
+      "new_tests": [],
+      "preservation": "Original 8 functions/6 constants/error class, reader class including every policy/query method and its original runtime exports have identical AST. No new algorithm, query, bound, event category or digest field.",
+      "remaining": "Today read orchestration/scope/subjective validation and owned SQL remain in old reader until C14-B/C; this foundation is not entire Today or B5 completion."
     }
   }
 }

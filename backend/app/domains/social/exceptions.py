@@ -69,3 +69,7 @@ class ServiceImageQuotaError(Exception):
 
 class SubjectiveContextPersistenceError(ValueError):
     """Stable fail-closed persistence error."""
+
+
+class TodaySocialActivityReadError(ValueError):
+    """Stable scope/read failure for Today SNS context."""

@@ -1215,3 +1215,10 @@ API/schema/ORM·기존 protected assertion·전체 split evidence PASS. 경계 *
 확장 policy2/error1 AST, 실제 ownSQL2/foreignSQL3 AST가 모두 동일하다. 신규 SQLite2node는 attached row flush/commit0/caller rollback과 naive UTC normalization, declaration 없음 no-op 및 실패/다른 event 실행의 SQL 이전 거절을 검증한다. 최초 신규 마지막 비교에서 빈 SQLAlchemy IdentitySet을 Python set과 비교해215PASS/1FAIL이었으며 빈 크기0으로 올바르게 확인하도록 고쳤다(제품 변경 없음). 최종 Today·원래 SNS/Chat 근거·LangGraph·World Feed·RoutinePost 포함 **245 PASS / 1 기존 PostgreSQL skip / 23.56초**. 전체 B5 및 source capture/Hosted/installer 종료는 후속 단계다.
 
 API·schema·ORM, 보호된 기존 Today assertion, 전체 split evidence를 통과했다. 구조 경계794 modules/2750 edges/legacy197 및 L4/ER0 현재 inventory PASS. Frozen source/checkpoint/additions/승인 nodes는 변경하지 않았다.
+
+
+## AR-B5-C14-A — Today SNS 값·조회 제한의 실제 소유
+
+활동 종류·성공 실행 일치·source/chain revision·digest/watermark·UTC helper8, 상수6 및 오류1을 실제 Social service/constants/exceptions로 이전했다. 각각 원문 AST가 동일하며 현재 reader class 전체와 runtime의 원래 export도 변경하지 않았다. 역사 generator는 상수의 실제 소유 경로만 import한다. 기존 batch/scan/branch/record 상한과 public/unlisted, event type, digest field는 같다. 새로운 테스트나 판단 규칙은 추가하지 않았다. 실제 reader orchestration·scope·SQL의 역할 전환은 다음 slice로 남는다.
+
+Today·기존 응답 streaming·명시적 저장 focused37 PASS/14.38초. API·schema·ORM와 전체 split evidence, 경계795 modules/2754 edges/legacy197 및 L4/ER0 현재 inventory PASS. Frozen baseline/additions/승인 nodes는 유지했다.
