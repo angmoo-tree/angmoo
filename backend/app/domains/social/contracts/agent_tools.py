@@ -1,0 +1,43 @@
+"""Readonly resident/identity facts used to authorize Social tool calls.
+
+Implementations preserve the same attached objects and Session. Only the exact
+activity denial exception is translated; unrelated failures keep propagating.
+"""
+
+from typing import Protocol
+from sqlalchemy.orm import Session
+
+
+class ToolRun(Protocol):
+    @property
+    def id(self) -> str: ...
+    @property
+    def user_id(self) -> str: ...
+    @property
+    def character_id(self) -> str: ...
+    @property
+    def post_id(self) -> str | None: ...
+    @property
+    def status(self) -> str: ...
+
+
+class ToolUser(Protocol):
+    @property
+    def id(self) -> str: ...
+
+
+class AgentToolReferences(Protocol):
+    @property
+    def activity_policy_denied(self) -> type[Exception]: ...
+    def get_active_run_for_tool_auth_key(
+        self, db: Session, key: str
+    ) -> ToolRun | None: ...
+    def get_active_run_for_session(self, db: Session, key: str) -> ToolRun | None: ...
+    def get_latest_run_for_tool_auth_key(
+        self, db: Session, key: str
+    ) -> ToolRun | None: ...
+    def get_latest_run_for_session(self, db: Session, key: str) -> ToolRun | None: ...
+    def get_user(self, db: Session, user_id: str) -> ToolUser | None: ...
+    def assert_action_allowed(
+        self, db: Session, *, run: ToolRun, action: str
+    ) -> None: ...

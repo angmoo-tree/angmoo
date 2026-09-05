@@ -1,7 +1,7 @@
 {
-  "edge_count": 2951,
-  "external_import_count": 2467,
-  "module_count": 833,
+  "edge_count": 2962,
+  "external_import_count": 2474,
+  "module_count": 836,
   "modules": [
     {
       "external_imports": [],
@@ -5396,6 +5396,16 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.social.contracts.agent_tools",
+      "path": "backend/app/domains/social/contracts/agent_tools.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "datetime",
         "sqlalchemy.orm",
         "typing"
@@ -6267,6 +6277,21 @@
       ],
       "module": "app.domains.social.service.agent_presentation",
       "path": "backend/app/domains/social/service/agent_presentation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "hashlib",
+        "logging",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.contracts.agent_tools",
+        "app.domains.social.exceptions"
+      ],
+      "module": "app.domains.social.service.agent_tool_authorization",
+      "path": "backend/app/domains/social/service/agent_tool_authorization.py",
       "wildcard_imports": []
     },
     {
@@ -11066,6 +11091,21 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.cruds.agent_runs",
+        "app.domains.identity.models",
+        "app.domains.routines.models",
+        "app.domains.social.service.agent_tool_authorization",
+        "app.services.agent_activity_policy"
+      ],
+      "module": "app.runtime.social.agent_tool_authorization",
+      "path": "backend/app/runtime/social/agent_tool_authorization.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "fastapi"
       ],
       "imports": [
@@ -12077,8 +12117,10 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.social.service.agent_tool_authorization",
         "app.domains.social.service.resident_affordances",
         "app.models",
+        "app.runtime.social.agent_tool_authorization",
         "app.schemas",
         "app.services.agent_briefs",
         "app.services.character_lore",
@@ -12165,6 +12207,7 @@
         "app.domains.social.repository.resident_affordances",
         "app.domains.social.service.activity_results",
         "app.domains.social.service.agent_presentation",
+        "app.domains.social.service.agent_tool_authorization",
         "app.domains.social.service.feed",
         "app.domains.social.service.inbox",
         "app.domains.social.service.notifications",
@@ -12177,6 +12220,7 @@
         "app.domains.social.service.visibility",
         "app.domains.social.utils.limits",
         "app.models",
+        "app.runtime.social.agent_tool_authorization",
         "app.runtime.social.discovery",
         "app.runtime.social.feed_history",
         "app.runtime.social.inbox",

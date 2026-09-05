@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2467,
-      "internal_edge_count": 2951,
+      "external_import_count": 2474,
+      "internal_edge_count": 2962,
       "legacy_import_exception_count": 0,
-      "module_count": 833,
+      "module_count": 836,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -647,6 +647,11 @@
             "path": "backend/app/domains/social/contracts/actors.py"
           },
           {
+            "imports": [],
+            "module": "app.domains.social.contracts.agent_tools",
+            "path": "backend/app/domains/social/contracts/agent_tools.py"
+          },
+          {
             "imports": [
               "app.domains.social.models.posts"
             ],
@@ -1162,6 +1167,14 @@
             ],
             "module": "app.domains.social.service.agent_presentation",
             "path": "backend/app/domains/social/service/agent_presentation.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.agent_tools",
+              "app.domains.social.exceptions"
+            ],
+            "module": "app.domains.social.service.agent_tool_authorization",
+            "path": "backend/app/domains/social/service/agent_tool_authorization.py"
           },
           {
             "imports": [
@@ -1872,6 +1885,17 @@
             ],
             "module": "app.runtime.social.action_scope",
             "path": "backend/app/runtime/social/action_scope.py"
+          },
+          {
+            "imports": [
+              "app.cruds.agent_runs",
+              "app.domains.identity.models",
+              "app.domains.routines.models",
+              "app.domains.social.service.agent_tool_authorization",
+              "app.services.agent_activity_policy"
+            ],
+            "module": "app.runtime.social.agent_tool_authorization",
+            "path": "backend/app/runtime/social/agent_tool_authorization.py"
           },
           {
             "imports": [

@@ -1,3 +1,5 @@
+from app.runtime.social import agent_tool_authorization as social_tool_authorization
+from app.domains.social.service.agent_tool_authorization import _agent_tool_lookup_session_key
 from app.domains.social.service import resident_affordances
 import asyncio
 import hashlib
@@ -68,7 +70,7 @@ def create_agent_tool_post_from_brief(
         community_service._session_fingerprint(session_key),
         data.author_character_id,
     )
-    run = community_service._get_agent_tool_run(
+    run = social_tool_authorization._get_agent_tool_run(
         db,
         session_key=session_key,
         action="post",
@@ -259,7 +261,7 @@ def reply_agent_tool_post_from_brief(
         post_id,
         data.author_character_id,
     )
-    run = community_service._get_agent_tool_run(
+    run = social_tool_authorization._get_agent_tool_run(
         db,
         session_key=session_key,
         action="reply",
@@ -469,7 +471,7 @@ def _writing_scratch_base_session_key(
         memory_session_key = session_context.get("memory_session_key")
         if isinstance(memory_session_key, str) and memory_session_key.strip():
             return memory_session_key.strip()
-    return community_service._agent_tool_lookup_session_key(run.session_key or fallback_session_key)
+    return _agent_tool_lookup_session_key(run.session_key or fallback_session_key)
 
 
 def _writing_stream_params(setting: models.AgentActivitySetting) -> dict[str, Any]:

@@ -750,3 +750,6 @@ World Feed의 bounded prompt와 서버 후보/의도/공개 근거 지침은 `so
 
 
 활동 계획에 사용할 소비 이력/최근 관심/자기 주제 이력은 `routines/service/feed_history.py`와 `routines/repository/feed_history.py`가 소유한다. Post/root 이력 SQL·숨김/공개 문맥·현재 컬럼 우선 주제 메타데이터는 `social/repository/topic_history.py`, `social/service/topic_metadata.py`가 담당한다. 실행 조립은 원래 Session의 붙어 있는 객체를 그대로 읽어 제공한다. Routines가 Social ORM이나 저장소를 직접 가져오거나, Post 컬럼이 이미 채워졌는데 활동 로그를 미리 조회하지 않는다. 중립 JSON-object fallback은 `core/json_objects.py`의 동일 함수 하나를 공유한다.
+
+
+Social Agent Tool의 Run·캐릭터·사용자 범위와 거절 메시지는 `social/service/agent_tool_authorization.py`가 소유한다. Routines의 Run 조회·활동 허용 검사와 Identity 사용자 조회는 `runtime/social/agent_tool_authorization.py`가 원래 Session으로 연결한다. Run auth key 성공을 먼저 반환하고 daypart 세션 거절 뒤에만 기존 fallback을 수행한다. 협력은 객체 복사·선조회·commit을 추가하지 않으며, 지정된 활동 거절 외의 예외는 그대로 전달한다.

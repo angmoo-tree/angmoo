@@ -1,3 +1,11 @@
+from app.domains.social.service.agent_tool_authorization import (
+    _session_fingerprint, _agent_tool_lookup_session_key,
+    _is_daypart_memory_session_key, _agent_tool_scratch_lane,
+    _raise_agent_tool_authorization_error, _agent_tool_character_id,
+)
+from app.runtime.social.agent_tool_authorization import (
+    _get_agent_tool_run, _agent_tool_user, _ensure_tick_action_allowed,
+)
 from app.runtime.social.feed_history import recent_own_root_topic_exists
 from app.core.json_objects import _json_object
 from app.domains.routines.constants import FEED_SEED_CONSUMED_ACTION_TYPE, FEED_HISTORY_SANITIZED_ACTION_TYPE, FEED_SEED_CONSUMED_LOOKBACK_DAYS, FEED_SEED_CONSUMED_LIMIT, RECENT_FEED_INTEREST_LOG_SCAN_LIMIT, RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS, RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT
@@ -367,53 +375,16 @@ def _complete_tick_representative_target(
 
 
 
-def _session_fingerprint(session_key: str) -> str:
-    return hashlib.sha256(session_key.encode("utf-8")).hexdigest()[:12]
-
-
-def _agent_tool_lookup_session_key(session_key: str) -> str:
-    for marker in (":scratch:", ":run-main:"):
-        if marker in session_key:
-            return session_key.split(marker, 1)[0]
-    return session_key
-
-
-def _is_daypart_memory_session_key(session_key: str) -> bool:
-    return ":resident-daypart:" in session_key
-
-
-def _agent_tool_scratch_lane(session_key: str) -> str | None:
-    marker = ":scratch:"
-    if marker not in session_key:
-        return None
-    suffix = session_key.split(marker, 1)[1]
-    lane = suffix.split(":", 1)[0].strip()
-    return lane or None
 
 
 
 
-def _raise_agent_tool_authorization_error(
-    *,
-    action: str,
-    reason: str,
-    session_key: str,
-    run,
-    requested_post_id: str | None = None,
-    requested_character_id: str | None = None,
-) -> None:
-    detail = (
-        f"Agent run is not authorized for this {action} "
-        f"(reason={reason}, session={_session_fingerprint(session_key)}, "
-        f"requested_post={requested_post_id or '-'}, "
-        f"requested_character={requested_character_id or '-'}, "
-        f"run_id={getattr(run, 'id', '-') if run else '-'}, "
-        f"run_status={getattr(run, 'status', '-') if run else '-'}, "
-        f"run_post={getattr(run, 'post_id', '-') if run else '-'}, "
-        f"run_character={getattr(run, 'character_id', '-') if run else '-'})"
-    )
-    logger.warning("agent tool authorization denied: %s", detail)
-    raise AgentRunAuthorizationError(detail)
+
+
+
+
+
+
 
 
 
@@ -2487,91 +2458,9 @@ def save_agent_tool_character_state(
 
 
 
-def _get_agent_tool_run(
-    db: Session,
-    *,
-    session_key: str,
-    action: str,
-    requested_post_id: str | None = None,
-    requested_character_id: str | None = None,
-) -> models.AgentRun:
-    run = agent_run_crud.get_active_run_for_tool_auth_key(db, session_key)
-    if run is not None:
-        return run
-    if _is_daypart_memory_session_key(session_key):
-        _raise_agent_tool_authorization_error(
-            action=action,
-            reason="daypart_session_key_not_authorized",
-            session_key=session_key,
-            run=None,
-            requested_post_id=requested_post_id,
-            requested_character_id=requested_character_id,
-        )
-    lookup_session_key = _agent_tool_lookup_session_key(session_key)
-    run = agent_run_crud.get_active_run_for_session(db, lookup_session_key)
-    if run is None:
-        latest_run = (
-            agent_run_crud.get_latest_run_for_tool_auth_key(db, session_key)
-            or agent_run_crud.get_latest_run_for_session(db, lookup_session_key)
-        )
-        _raise_agent_tool_authorization_error(
-            action=action,
-            reason="no_active_run",
-            session_key=session_key,
-            run=latest_run,
-            requested_post_id=requested_post_id,
-            requested_character_id=requested_character_id,
-        )
-    return run
 
 
-def _agent_tool_character_id(
-    run: models.AgentRun,
-    requested_character_id: str | None,
-    *,
-    action: str,
-    session_key: str,
-    post_id: str | None = None,
-) -> str:
-    character_id = requested_character_id or run.character_id
-    if character_id != run.character_id:
-        _raise_agent_tool_authorization_error(
-            action=action,
-            reason="character_mismatch",
-            session_key=session_key,
-            run=run,
-            requested_post_id=post_id,
-            requested_character_id=character_id,
-        )
-    return character_id
 
 
-def _agent_tool_user(
-    db: Session, run: models.AgentRun, *, action: str, session_key: str
-) -> models.User:
-    user = db.get(models.User, run.user_id)
-    if user is None:
-        _raise_agent_tool_authorization_error(
-            action=action,
-            reason="user_missing",
-            session_key=session_key,
-            run=run,
-            requested_character_id=run.character_id,
-        )
-    return user
 
 
-def _ensure_tick_action_allowed(
-    db: Session, *, session_key: str, run: models.AgentRun, action: str
-) -> None:
-    try:
-        agent_activity_policy.assert_action_allowed(db, run=run, action=action)
-    except agent_activity_policy.ActivityPolicyDeniedError as exc:
-        _raise_agent_tool_authorization_error(
-            action=action,
-            reason=str(exc),
-            session_key=session_key,
-            run=run,
-            requested_post_id=run.post_id,
-            requested_character_id=run.character_id,
-        )
