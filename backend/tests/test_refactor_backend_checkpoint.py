@@ -348,3 +348,45 @@ def test_literal_roots_require_a_tracked_path_constructor_and_unique_binding():
         source + "    root = get_root()\n",
     ):
         assert "root" not in p.literal_path_roots(altered, "backend/tests/test_old.py").get("test_contract", {})
+
+
+@pytest.mark.parametrize("rebind", [
+    "from custom import Path",
+    "import custom as Path",
+    "def Path(*args): pass",
+    "class Path: pass",
+    "from custom import token as __file__",
+    "from custom import token as BASE",
+    "def BASE(): pass",
+    "class BASE: pass",
+    "with context() as BASE: pass",
+    "try: pass\nexcept Exception as BASE: pass",
+    "from custom import *",
+])
+def test_literal_path_anchor_rejects_module_rebinding_syntax(rebind):
+    source = ("from pathlib import Path\n"
+              "BASE = Path(__file__).resolve().parents[1] / 'app'\n"
+              + rebind + "\n"
+              "def test_contract():\n"
+              "    root = BASE / 'domains' / 'world_packages'\n")
+    assert "root" not in p.literal_path_roots(source, "backend/tests/test_old.py").get("test_contract", {})
+
+
+@pytest.mark.parametrize("rebind", [
+    "from custom import Path",
+    "from custom import value as __file__",
+    "from custom import value as BASE",
+    "from custom import value as root",
+    "def Path(*args): pass",
+    "def root(): pass",
+    "class root: pass",
+    "with context() as root: pass",
+    "try: pass\n    except Exception as root: pass",
+])
+def test_literal_path_anchor_rejects_local_rebinding_syntax(rebind):
+    source = ("from pathlib import Path\n"
+              "BASE = Path(__file__).resolve().parents[1] / 'app'\n"
+              "def test_contract():\n"
+              "    root = BASE / 'domains' / 'world_packages'\n"
+              "    " + rebind + "\n")
+    assert "root" not in p.literal_path_roots(source, "backend/tests/test_old.py").get("test_contract", {})

@@ -194,6 +194,32 @@ def path_literals(files: dict[str, str]) -> list[tuple[str, str]]:
     return sorted(pairs, key=lambda pair: -len(pair[0]))
 
 
+def _scope_binding_counts(body: list[ast.stmt]) -> Counter:
+    """Include non-Name binding syntax without entering another lexical scope."""
+    counts = Counter()
+    def visit(node):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            counts[node.name] += 1
+            return
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            for alias in node.names:
+                counts[alias.asname or (alias.name.split(".")[0] if isinstance(node, ast.Import) else alias.name)] += 1
+            return
+        if isinstance(node, ast.ExceptHandler) and node.name:
+            counts[node.name] += 1
+        if isinstance(node, (ast.MatchAs, ast.MatchStar)) and node.name:
+            counts[node.name] += 1
+        if isinstance(node, ast.MatchMapping) and node.rest:
+            counts[node.rest] += 1
+        if isinstance(node, ast.Name) and isinstance(node.ctx, (ast.Store, ast.Del)):
+            counts[node.id] += 1
+        for child in ast.iter_child_nodes(node):
+            visit(child)
+    for item in body:
+        visit(item)
+    return counts
+
+
 def literal_path_roots(source: str, source_path: str) -> dict[str, dict[str, str]]:
     """Resolve only single-assignment, literal paths anchored to this test file.
 
@@ -204,7 +230,8 @@ def literal_path_roots(source: str, source_path: str) -> dict[str, dict[str, str
     path_imported = any(isinstance(n, ast.ImportFrom) and n.module == "pathlib"
                         and any(a.name == "Path" and a.asname is None for a in n.names)
                         for n in tree.body)
-    if not path_imported:
+    module_bindings = _scope_binding_counts(tree.body)
+    if not path_imported or module_bindings["Path"] != 1 or module_bindings["__file__"] or module_bindings["*"]:
         return {}
 
     def resolve(node: ast.AST, env: dict[str, PurePosixPath]):
@@ -232,7 +259,7 @@ def literal_path_roots(source: str, source_path: str) -> dict[str, dict[str, str
         return None
 
     def bindings(body: list[ast.stmt], inherited: dict[str, PurePosixPath], parameters=()):
-        stores = Counter(n.id for item in body for n in ast.walk(item) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store))
+        stores = _scope_binding_counts(body)
         env = {name: value for name, value in inherited.items() if name not in stores and name not in parameters}
         for item in body:
             targets = item.targets if isinstance(item, ast.Assign) else [item.target] if isinstance(item, ast.AnnAssign) else []
@@ -244,10 +271,7 @@ def literal_path_roots(source: str, source_path: str) -> dict[str, dict[str, str
                 env[name] = value
         return env
 
-    module_body = [n for n in tree.body if not isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))]
-    global_env = bindings(module_body, {})
-    if any(isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store) and n.id in {"Path", "__file__"} for item in module_body for n in ast.walk(item)):
-        return {}
+    global_env = bindings(tree.body, {})
     result = {}
 
     def visit(body, parents=()):
@@ -257,8 +281,8 @@ def literal_path_roots(source: str, source_path: str) -> dict[str, dict[str, str
             elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 params = {arg.arg for arg in (*node.args.posonlyargs, *node.args.args, *node.args.kwonlyargs)}
                 params.update(arg.arg for arg in (node.args.vararg, node.args.kwarg) if arg is not None)
-                local_stores = {n.id for item in node.body for n in ast.walk(item) if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Store)}
-                if (params | local_stores) & {"Path", "__file__"}:
+                local_stores = set(_scope_binding_counts(node.body))
+                if (params | local_stores) & {"Path", "__file__", "*"}:
                     continue
                 result["::".join((*parents, node.name))] = {
                     name: value.as_posix() for name, value in bindings(node.body, global_env, params).items()
