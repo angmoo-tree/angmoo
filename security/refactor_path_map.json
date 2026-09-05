@@ -282,7 +282,8 @@
     "backend/app/api/v1/routes/worlds.py": "backend/app/domains/world_characters/router/entry.py",
     "backend/app/services/world_character_setup.py": "backend/app/runtime/world_characters/cleanup.py",
     "backend/app/services/worlds.py": "backend/app/domains/world_characters/service/membership.py",
-    "backend/app/services/activity_profile_readiness.py": "backend/app/domains/world_characters/service/readiness.py"
+    "backend/app/services/activity_profile_readiness.py": "backend/app/domains/world_characters/service/readiness.py",
+    "backend/app/domains/world_characters/schemas/readiness.py": "backend/app/domains/characters/schemas.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -7376,11 +7377,9 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentActivityProfileReadinessRead",
-          "new": "backend/app/domains/world_characters/schemas/readiness.py::AgentActivityProfileReadinessRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentActivityProfileReadinessRead",
           "direct_consumers": [
             "backend/app/domains/world_characters/service/readiness.py",
-            "backend/app/domains/runtime/schemas.py",
-            "backend/app/domains/characters/schemas.py",
             "backend/app/schemas/agents.py"
           ],
           "test_nodes": [
@@ -17395,6 +17394,10 @@
         "AR-B2-worlds: all original 14 routes plus guard/error mapping now point at actual current owners",
         "AR-B2-B1: all Character/shared response symbols retained; readiness DTO has its actual WC schema owner"
       ]
+    },
+    "AR-B2-WC-readiness-owner": {
+      "reason": "The Character detail HTTP response owns its readiness DTO. WC policy consumes that same class; removing the unused Runtime alias and WC schema fragment breaks the reverse package dependency without a policy exception.",
+      "source_owner": "AR-B2"
     }
   }
 }

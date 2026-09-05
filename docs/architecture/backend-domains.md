@@ -940,5 +940,7 @@ The same-Session runtime adapters own joined reads, scheduler busy checks and
 cross-domain cleanup. WC service does not import runtime or expose another
 owner's ORM class as a service contract. Entry/setup HTTP owns no runtime state
 mutation policy. app/api/world_errors.py translates the same World error objects
-for both World and WC routers; the readiness response remains one WC-defined
-Pydantic class with the old schema path reexporting that identical object.
+for both World and WC routers. The Character detail response owns the single
+readiness Pydantic class in characters/schemas.py; WC policy and the old schema
+aggregate consume that identical object. The unused Runtime alias and WC schema
+fragment are removed, so Character response assembly does not depend back on WC.
