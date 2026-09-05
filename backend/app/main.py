@@ -201,6 +201,8 @@ def create_app(
     configure_routines_runtime(runtime_app)
     from app.runtime.characters.management import build_character_management_workflows
     runtime_app.state.character_management_workflows = build_character_management_workflows
+    from app.runtime.tree import build_tree_references
+    runtime_app.state.tree_references = build_tree_references
     from app.runtime.memory_http import build_memory_workflows
     runtime_app.state.memory_workflows = build_memory_workflows
     from app.runtime.characters.management import build_character_media_workflows

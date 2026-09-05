@@ -60,7 +60,7 @@ from app.models.agent_runs import AgentRelationshipPoint
 from app.domains.routines.models import AgentRun, AgentActivityLog, AgentFeedCue, AgentPublicActionExecution
 from app.domains.characters.models import AgentCreationDraft
 from app.models.admin_ops import AdminAuditLog, SiteOperationBanner, SiteOperationSetting
-from app.models.tree import TreeComment, TreePost
+from app.domains.tree.models import TreeComment, TreePost
 from app.models.worlds import (
     CharacterActiveWorld,
     World,

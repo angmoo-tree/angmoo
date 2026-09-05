@@ -1083,3 +1083,18 @@ Source `2056bce963e7bae027dfc73265c060f4be390604`는 기존 집합 모듈의 이
 Memory·회상·Chat 근거·배치·실행 조립 **295 passed / 2 warnings / 118.57초**, 경계 **723 modules / 2420 edges / exact legacy222 PASS**, L4·current batch inventory도 통과했다. 기존 검사 본문이나 API/ORM 계약은 변경하지 않았다.
 
 전체 stock 보존 실행은 **FAIL/PENDING**으로 남긴다. 최초 오류는 선행 Routines에서 처음 생성된 `models.py`와 `schemas.py`의 이후 이동을 아직 도입 원장에 연결하지 못한 것이다. 둘의 실제 최초 signed source는 `869bae55a2e5e665fb731396a7284b53dde8a104`로 확인했다. 이 오류 이후 protected0/current2246 및 다수 introduction 오류가 출력되므로 이를 전체 보존 PASS나 단순 신규 테스트 누락만으로 해석하지 않는다. 순차 B4~B6 합류와 원본 commit별 source/node capture 뒤 stock gate를 다시 통과해야 한다. 실제 이동 map이나 frozen baseline을 삭제하여 통과시키지 않는다.
+
+
+## AR-B8 Tree 실제 역할 전환 준비 — 2026-09-06
+
+기준 Memory `16f70f3`의 Tree 모델 2개·schema 8개·SQL 5개·업무 함수 12개·오류 5개·HTTP 4개를 실제 도메인 역할 파일로 옮겼다. 글/댓글 권한·공개 읽기·공지 작성 금지·삭제 캐릭터 표기와 같은 Session의 commit→refresh를 유지한다. foreign 작성자 검색 predicate와 Character nullable lookup만 typed `TreeReferences`로 연결하며 두 factory가 같은 실제 callback을 등록한다. 최초 등록은 G5 전까지 기존 전역 집합의 same-class export를 유지한다.
+
+고정 전 Tree 및 기존 M3 삭제 회귀 **15 passed / 기존 warning 1**이다. 원래 모델/schema/오류 전체 정의와 service/repository/HTTP의 정확한 callback 인자 변경을 제외한 본문 **36개 AST 비교가 동일**하다. 기존 Tree 테스트 3 node를 `tests/tree/test_public_contract.py`로 일대일 추적하고 새 검색·transaction 실패·HTTP 두 factory 회귀를 추가했다. API/ORM·전체 보존과 현재 inventory 검사는 이어서 확인하며, source capture·CI·G5·G06 호환 제거·설치 검증은 순차 통합 단계에 남는다. lore/LocalBot/image-setting/operations는 이번 slice에 포함하지 않았다.
+
+
+Tree 확대 검증은 **133 passed / 기존 warning 1 / 88.92s**다. stock 전체 보존은 선행 signed `869bae55`의 Routines models/schema 최초 도입 원장 연결이 남아 FAIL/PENDING이다. 원장을 변경하지 않은 읽기 진단은 protected 2,201/current 2,251의 원래 node·assertion·suppression·API/ORM·source 손실이 0이다. 이동한 Tree 테스트를 여전히 옛 위치로 가리키던 Character 선행 split 증거 7개는 동일 node의 새 경로로 갱신하고 재검사한다. G5 전 모델 등록은 실제 동일 Base table 객체로 검증하며, 새 테스트로 임시 전역 업무 export의 잔존을 강제하지 않는다.
+
+
+최종 Tree 재검사 **8 passed / 기존 warning 1 / 12.32s**, 정확 split 증거 진단 **0 errors**, 경계 **729 modules / 2,431 edges / legacy212**, L4 현재 inventory **729/14/97**, 공개 route inventory **196 operations**를 확인했다. 최종 source는 이 독립 준비 범위이며 root가 선형 원장·후속 source 합류·Hosted CI를 수행한다.
+
+별도 역사적 `scripts/verify_m4_contracts.py` 실행은 M4 당시 expected148 operations/120 paths/182 schemas와 현재196/160/266의 차이로 FAIL이다. 해당 파일과 상수는 수정하지 않았고 현재 workflow가 호출하지 않음을 확인했다. 이번 전환의 frozen API/ORM 비교는 손실 0이며, 역사적 verifier의 현재 지원 여부는 B8 종료 정리에서 별도로 판정한다.

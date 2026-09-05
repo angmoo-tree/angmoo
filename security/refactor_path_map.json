@@ -401,7 +401,13 @@
     "backend/app/domains/memory/infrastructure/maintenance_unit_of_work.py": "backend/app/domains/memory/repository/transaction.py",
     "backend/app/domains/memory/public.py": "backend/app/domains/memory/contracts/provenance.py",
     "backend/app/domains/memory/domain/__init__.py": "backend/app/domains/memory/contracts/__init__.py",
-    "backend/app/domains/memory/api/__init__.py": "backend/app/domains/memory/schemas/__init__.py"
+    "backend/app/domains/memory/api/__init__.py": "backend/app/domains/memory/schemas/__init__.py",
+    "backend/app/models/tree.py": "backend/app/domains/tree/models.py",
+    "backend/app/schemas/tree.py": "backend/app/domains/tree/schemas.py",
+    "backend/app/cruds/tree.py": "backend/app/domains/tree/repository.py",
+    "backend/app/services/tree.py": "backend/app/domains/tree/service.py",
+    "backend/app/api/v1/routes/tree.py": "backend/app/domains/tree/router.py",
+    "backend/tests/test_m4_tree_public_contract.py": "backend/tests/tree/test_public_contract.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -849,7 +855,10 @@
     "tests/test_l2_scheduler_singleton.py::test_shutdown_during_tick_drains_then_releases_without_second_tick": "tests/routines/test_scheduler_singleton.py::test_shutdown_during_tick_drains_then_releases_without_second_tick",
     "tests/test_l2_scheduler_singleton.py::test_sleep_wake_gap_does_not_replay_missed_intervals": "tests/routines/test_scheduler_singleton.py::test_sleep_wake_gap_does_not_replay_missed_intervals",
     "tests/test_l2_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates": "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
-    "tests/test_l2_scheduler_singleton.py::test_wait_between_ticks_keeps_lease_alive": "tests/routines/test_scheduler_singleton.py::test_wait_between_ticks_keeps_lease_alive"
+    "tests/test_l2_scheduler_singleton.py::test_wait_between_ticks_keeps_lease_alive": "tests/routines/test_scheduler_singleton.py::test_wait_between_ticks_keeps_lease_alive",
+    "tests/test_m4_tree_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication": "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+    "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context": "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+    "tests/test_m4_tree_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected": "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
   },
   "details": {
     "AR-B1": {
@@ -5585,7 +5594,7 @@
           "test_nodes": [
             "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
             "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
-            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
           ]
         },
         {
@@ -5597,7 +5606,7 @@
           "test_nodes": [
             "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
             "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
-            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
           ]
         },
         {
@@ -5724,7 +5733,7 @@
           "test_nodes": [
             "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
             "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
-            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
           ]
         },
         {
@@ -5734,7 +5743,7 @@
             "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
           ]
         },
         {
@@ -6026,7 +6035,7 @@
           "test_nodes": [
             "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
             "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
-            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
           ]
         },
         {
@@ -6038,7 +6047,7 @@
           "test_nodes": [
             "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
             "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
-            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
           ]
         },
         {
@@ -6050,7 +6059,7 @@
           "test_nodes": [
             "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
             "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
-            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
           ]
         },
         {
@@ -33446,6 +33455,341 @@
       ],
       "preserved": "Every prior import binding keeps the same underlying value/type/function; existing test bodies/assertions unchanged. UoW commit/rollback wraps the same caller Session. Immutable SQLite/Alembic schema aliases retain exactly five existing exports.",
       "remaining": "Later B6 source must consume these explicit paths after merge; G5 global models and final tests/CI/runtime integration remain."
+    },
+    "AR-B8-TREE": {
+      "status": "SOURCE PREPARATION; expanded133 PASS/88.92s, final Tree8 PASS;36 definition/body AST matches; frozen source/split/assertions/suppression/APIORM/nodes diagnostic0 with signed869bae55 two-file introduction supplement; stock gate pending root linear capture",
+      "scope": "Actual Tree models/schema/queries/admission/presentation/router; typed attached-character read and original author correlated SQL predicate in runtime composition.",
+      "split_files": {
+        "backend/app/services/tree.py": [
+          "backend/app/domains/tree/service.py",
+          "backend/app/domains/tree/exceptions.py",
+          "backend/app/domains/tree/constants.py"
+        ],
+        "backend/app/cruds/tree.py": [
+          "backend/app/domains/tree/repository.py",
+          "backend/app/runtime/tree.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/tree.py::CATEGORIES",
+          "new": "backend/app/domains/tree/constants.py::CATEGORIES",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::WRITABLE_CATEGORIES",
+          "new": "backend/app/domains/tree/constants.py::WRITABLE_CATEGORIES",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::DELETED_CHARACTER_NAME",
+          "new": "backend/app/domains/tree/constants.py::DELETED_CHARACTER_NAME",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::TreeServiceError",
+          "new": "backend/app/domains/tree/exceptions.py::TreeServiceError",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::TreePostNotFoundError",
+          "new": "backend/app/domains/tree/exceptions.py::TreePostNotFoundError",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::TreeCategoryError",
+          "new": "backend/app/domains/tree/exceptions.py::TreeCategoryError",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::TreeNoticeWriteForbiddenError",
+          "new": "backend/app/domains/tree/exceptions.py::TreeNoticeWriteForbiddenError",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::TreeRelatedCharacterError",
+          "new": "backend/app/domains/tree/exceptions.py::TreeRelatedCharacterError",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::list_posts",
+          "new": "backend/app/domains/tree/service.py::list_posts",
+          "direct_consumers": [
+            "backend/app/domains/tree/router.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::get_post",
+          "new": "backend/app/domains/tree/service.py::get_post",
+          "direct_consumers": [
+            "backend/app/domains/tree/router.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::create_post",
+          "new": "backend/app/domains/tree/service.py::create_post",
+          "direct_consumers": [
+            "backend/app/domains/tree/router.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::create_comment",
+          "new": "backend/app/domains/tree/service.py::create_comment",
+          "direct_consumers": [
+            "backend/app/domains/tree/router.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::_safe_category",
+          "new": "backend/app/domains/tree/service.py::_safe_category",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::_safe_limit",
+          "new": "backend/app/domains/tree/service.py::_safe_limit",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::_validate_related_character",
+          "new": "backend/app/domains/tree/service.py::_validate_related_character",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::_author_read",
+          "new": "backend/app/domains/tree/service.py::_author_read",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::_related_character_read",
+          "new": "backend/app/domains/tree/service.py::_related_character_read",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::_comment_read",
+          "new": "backend/app/domains/tree/service.py::_comment_read",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::_post_summary",
+          "new": "backend/app/domains/tree/service.py::_post_summary",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/services/tree.py::_post_detail",
+          "new": "backend/app/domains/tree/service.py::_post_detail",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/tree.py::list_tree_posts",
+          "new": "backend/app/domains/tree/repository.py::list_tree_posts",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/tree.py::get_tree_post",
+          "new": "backend/app/domains/tree/repository.py::get_tree_post",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/tree.py::create_tree_post",
+          "new": "backend/app/domains/tree/repository.py::create_tree_post",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/tree.py::create_tree_comment",
+          "new": "backend/app/domains/tree/repository.py::create_tree_comment",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/tree.py::count_tree_comments",
+          "new": "backend/app/domains/tree/repository.py::count_tree_comments",
+          "direct_consumers": [
+            "backend/app/domains/tree/service.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_public_contract.py::test_tree_reads_are_public_and_writes_require_authentication",
+            "tests/tree/test_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context",
+            "tests/tree/test_public_contract.py::test_tree_notice_and_cross_owner_character_are_rejected"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/tree.py::list_tree_posts",
+          "new": "backend/app/runtime/tree.py::_author_name_matches",
+          "direct_consumers": [
+            "backend/app/runtime/tree.py",
+            "backend/app/domains/tree/repository.py"
+          ],
+          "test_nodes": [
+            "tests/tree/test_role_contracts.py::test_search_keeps_author_comment_scope_and_tied_cursor_order"
+          ]
+        }
+      ],
+      "preserved": [
+        "Same Base/classes; category/owner/hidden/deleted presentation; created_at DESC/id ASC and tie id > cursor; original same Session commit then refresh; HTTP routes/operationIDs/auth callable identity."
+      ],
+      "remaining": [
+        "G5 aggregate models/schema same-object exports and registration",
+        "B4/B5/B6/G06 final source integration; lore/LocalBot/image-setting/operations still B8 pending"
+      ]
     }
   }
 }

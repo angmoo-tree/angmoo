@@ -10,7 +10,7 @@ from app.api.v1.routes import character_lore
 from app.api.v1.routes import community
 from app.api.v1.routes import messages
 from app.domains.memory import router as memory
-from app.api.v1.routes import tree
+from app.domains.tree import router as tree
 from app.domains.world_characters.router import entry as worlds
 from app.domains.worlds import router as world_creator
 from app.api.v1.routes import world_character_setup

@@ -110,6 +110,15 @@ backend/
 
 ## 2. 도메인 안에서 코드 찾기
 
+### Tree 게시판의 소유
+
+Tree 글·댓글은 `tree/models.py`, 공개 HTTP 형식은 `schemas.py`, 조회/저장은 `repository.py`, 공지·연결 캐릭터 권한 및 응답 조립은 `service.py`에 있습니다. `router.py`는 기존 공개 읽기와 인증 쓰기의 URL·오류를 유지하고 같은 인증/Session dependency를 사용합니다.
+
+작성자 이름 검색의 correlated SQL 조건과 캐릭터 nullable 조회는 `TreeReferences`로 연결합니다. `runtime/tree.py`가 원래 Identity SQL predicate와 Character의 실제 조회 함수를 조립하며 Session을 새로 만들거나 미리 조회하지 않습니다. 업무 순서와 권한은 Tree service에 있고 runtime으로 옮기지 않습니다. create post/comment의 commit→refresh, created_at DESC/id ASC 및 동일 시각 다음 페이지의 id > cursor 규칙은 그대로입니다.
+
+전역 모델·schema 집합은 G5 전환까지 같은 클래스 객체를 노출합니다. 기존 Tree의 services/cruds/model/schema/HTTP 파일은 실제 소비자 전환 후 제거했고 새 구현은 그 경로를 사용하지 않습니다. 다른 B8 업무와 G5·최종 배포 검증의 상태는 별도로 남습니다.
+
+
 ### Character 정체성 기반의 현재 위치
 
 AR-B2-B의 첫 전환 범위는 캐릭터 자체의 ORM·입력 schema·handle/프로필 저장·상태 저장·Package seed입니다. `characters/models.py`, `schemas.py`, `exceptions.py`, `contracts.py`, `service/profile.py`, `service/state.py`, `service/seed.py`가 실제 구현을 소유합니다. 관리 화면 전체, Creator workflow, 자율활동과 Local Bot은 아직 뒤이은 전환 범위입니다.

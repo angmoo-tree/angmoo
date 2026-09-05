@@ -94,18 +94,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.api.v1.routes.tree"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.api.v1.routes.tree"
-        },
-        {
-          "imported": "app.services.tree",
-          "importer": "app.api.v1.routes.tree"
-        },
-        {
-          "imported": "app.models",
           "importer": "app.api.v1.routes.world_activity_runtime"
         },
         {
@@ -149,10 +137,6 @@
           "importer": "app.cruds.community"
         },
         {
-          "imported": "app.models",
-          "importer": "app.cruds.tree"
-        },
-        {
           "imported": "app.cruds.community",
           "importer": "app.main"
         },
@@ -182,10 +166,6 @@
         },
         {
           "imported": "app.models.local_bot_quotas",
-          "importer": "app.models"
-        },
-        {
-          "imported": "app.models.tree",
           "importer": "app.models"
         },
         {
@@ -338,10 +318,6 @@
         },
         {
           "imported": "app.schemas.social_memory",
-          "importer": "app.schemas"
-        },
-        {
-          "imported": "app.schemas.tree",
           "importer": "app.schemas"
         },
         {
@@ -707,22 +683,6 @@
         {
           "imported": "app.services.post_image_generation",
           "importer": "app.services.post_image_job_worker"
-        },
-        {
-          "imported": "app.cruds.community",
-          "importer": "app.services.tree"
-        },
-        {
-          "imported": "app.cruds.tree",
-          "importer": "app.services.tree"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.tree"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.tree"
         },
         {
           "imported": "app.cruds.agent_runs",
@@ -1221,6 +1181,15 @@
       "app.domains.social.utils",
       "app.domains.social.utils.cursors",
       "app.domains.social.utils.text",
+      "app.domains.tree.constants",
+      "app.domains.tree.contracts",
+      "app.domains.tree.dependencies",
+      "app.domains.tree.exceptions",
+      "app.domains.tree.models",
+      "app.domains.tree.repository",
+      "app.domains.tree.router",
+      "app.domains.tree.schemas",
+      "app.domains.tree.service",
       "app.domains.world_characters.client",
       "app.domains.world_characters.contracts",
       "app.domains.world_characters.contracts.lifecycle",
@@ -1406,6 +1375,9 @@
       "app.domains.social.service.source_posts",
       "app.domains.social.service.timeline",
       "app.domains.social.service.visibility",
+      "app.domains.tree.contracts",
+      "app.domains.tree.schemas",
+      "app.domains.tree.service",
       "app.domains.world_characters.contracts",
       "app.domains.world_characters.contracts.lifecycle",
       "app.domains.world_characters.contracts.owner_identity",
@@ -2882,6 +2854,22 @@
         "owner_stage": "AR-B4 / AR-B7 / AR-B8-A",
         "removal_condition": "Move the existing resident executor/aggregate consumer to its actual role; keep only immutable migrations and exact registration/cleanup contracts where required.",
         "reason": "Original resident caller consumes actual Memory implementation or the same registered ORM object; no new forwarding implementation or product dependency.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.tree.models",
+        "owner_stage": "AR-B8-A / AR-G5",
+        "removal_condition": "Replace global aggregate model/schema imports and explicit registration in G5; no new Tree business implementation in the legacy path.",
+        "reason": "Existing aggregate exposes the same actual Tree class/schema objects during registration and consumer transition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.tree.schemas",
+        "owner_stage": "AR-B8-A / AR-G5",
+        "removal_condition": "Replace global aggregate model/schema imports and explicit registration in G5; no new Tree business implementation in the legacy path.",
+        "reason": "Existing aggregate exposes the same actual Tree class/schema objects during registration and consumer transition.",
         "review_date": "2026-09-06"
       }
     ]

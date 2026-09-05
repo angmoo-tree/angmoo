@@ -1,7 +1,7 @@
 {
-  "edge_count": 2420,
-  "external_import_count": 2249,
-  "module_count": 723,
+  "edge_count": 2431,
+  "external_import_count": 2259,
+  "module_count": 729,
   "modules": [
     {
       "external_imports": [],
@@ -53,7 +53,6 @@
         "app.api.v1.routes.character_lore",
         "app.api.v1.routes.community",
         "app.api.v1.routes.messages",
-        "app.api.v1.routes.tree",
         "app.api.v1.routes.world_activity_runtime",
         "app.api.v1.routes.world_character_setup",
         "app.api.v1.routes.world_chat",
@@ -61,6 +60,7 @@
         "app.domains.device_home.router",
         "app.domains.identity.router.auth",
         "app.domains.memory.router",
+        "app.domains.tree.router",
         "app.domains.world_characters.router.entry",
         "app.domains.world_characters.router.profile",
         "app.domains.world_characters.router.setup",
@@ -85,7 +85,6 @@
         "app.api.v1.routes.manual_social",
         "app.api.v1.routes.messages",
         "app.api.v1.routes.runtime_status",
-        "app.api.v1.routes.tree",
         "app.api.v1.routes.world_activity_runtime",
         "app.api.v1.routes.world_character_setup",
         "app.api.v1.routes.world_chat",
@@ -94,6 +93,7 @@
         "app.domains.identity.router.auth",
         "app.domains.identity.router.local",
         "app.domains.memory.router",
+        "app.domains.tree.router",
         "app.domains.world_characters.router.entry",
         "app.domains.world_characters.router.profile",
         "app.domains.world_characters.router.setup",
@@ -255,22 +255,6 @@
       ],
       "module": "app.api.v1.routes.runtime_status",
       "path": "backend/app/api/v1/routes/runtime_status.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "fastapi",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.core.db",
-        "app.domains.identity.dependencies",
-        "app.models",
-        "app.schemas",
-        "app.services.tree"
-      ],
-      "module": "app.api.v1.routes.tree",
-      "path": "backend/app/api/v1/routes/tree.py",
       "wildcard_imports": []
     },
     {
@@ -797,18 +781,6 @@
       ],
       "module": "app.cruds.community",
       "path": "backend/app/cruds/community.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.models"
-      ],
-      "module": "app.cruds.tree",
-      "path": "backend/app/cruds/tree.py",
       "wildcard_imports": []
     },
     {
@@ -5552,6 +5524,126 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.domains.tree",
+      "path": "backend/app/domains/tree/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.tree.constants",
+      "path": "backend/app/domains/tree/constants.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy.orm",
+        "sqlalchemy.sql.elements",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.tree.contracts",
+      "path": "backend/app/domains/tree/contracts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi"
+      ],
+      "imports": [
+        "app.api.identity_dependencies",
+        "app.core.db",
+        "app.domains.tree.contracts"
+      ],
+      "module": "app.domains.tree.dependencies",
+      "path": "backend/app/domains/tree/dependencies.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.tree.exceptions",
+      "path": "backend/app/domains/tree/exceptions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.tree.models",
+      "path": "backend/app/domains/tree/models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections.abc",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "sqlalchemy.sql.elements"
+      ],
+      "imports": [
+        "app.domains.tree.contracts",
+        "app.domains.tree.models"
+      ],
+      "module": "app.domains.tree.repository",
+      "path": "backend/app/domains/tree/repository.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.tree.contracts",
+        "app.domains.tree.dependencies",
+        "app.domains.tree.schemas",
+        "app.domains.tree.service"
+      ],
+      "module": "app.domains.tree.router",
+      "path": "backend/app/domains/tree/router.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.tree.schemas",
+      "path": "backend/app/domains/tree/schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.tree.constants",
+        "app.domains.tree.contracts",
+        "app.domains.tree.exceptions",
+        "app.domains.tree.models",
+        "app.domains.tree.repository",
+        "app.domains.tree.schemas"
+      ],
+      "module": "app.domains.tree.service",
+      "path": "backend/app/domains/tree/service.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
       "module": "app.domains.world_characters",
       "path": "backend/app/domains/world_characters/__init__.py",
       "wildcard_imports": []
@@ -7409,6 +7501,7 @@
         "app.runtime.routines.composition",
         "app.runtime.single_backend_components",
         "app.runtime.startup_security",
+        "app.runtime.tree",
         "app.runtime.world_packages.composition",
         "app.services.hosted_configuration"
       ],
@@ -7433,6 +7526,7 @@
         "app.domains.social.models.manual_writes",
         "app.domains.social.models.posts",
         "app.domains.social.models.subjective_context",
+        "app.domains.tree.models",
         "app.domains.world_packages.models",
         "app.models.admin_ops",
         "app.models.agent_local_keys",
@@ -7440,7 +7534,6 @@
         "app.models.agent_settings",
         "app.models.character_lore",
         "app.models.local_bot_quotas",
-        "app.models.tree",
         "app.models.world_activity_runtime",
         "app.models.world_character_setup",
         "app.models.worlds"
@@ -7587,20 +7680,6 @@
       ],
       "module": "app.models.profile_images",
       "path": "backend/app/models/profile_images.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.core.db"
-      ],
-      "module": "app.models.tree",
-      "path": "backend/app/models/tree.py",
       "wildcard_imports": []
     },
     {
@@ -7763,6 +7842,7 @@
         "app.runtime.routines.composition",
         "app.runtime.single_backend_components",
         "app.runtime.startup_security",
+        "app.runtime.tree",
         "app.runtime.world_characters.recovery",
         "app.runtime.world_packages.composition",
         "app.runtime.world_packages.import_commit",
@@ -9702,6 +9782,20 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "sqlalchemy.sql.elements"
+      ],
+      "imports": [
+        "app.domains.characters.service.profile",
+        "app.domains.identity.models",
+        "app.domains.tree.contracts",
+        "app.domains.tree.models"
+      ],
+      "module": "app.runtime.tree",
+      "path": "backend/app/runtime/tree.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.runtime.world_characters",
@@ -9919,12 +10013,12 @@
         "app.domains.routines.schemas.runs",
         "app.domains.social.schemas.community",
         "app.domains.social.schemas.feed",
+        "app.domains.tree.schemas",
         "app.schemas.agents",
         "app.schemas.character_lore",
         "app.schemas.characters",
         "app.schemas.maintenance",
         "app.schemas.social_memory",
-        "app.schemas.tree",
         "app.schemas.world_activity_runtime",
         "app.schemas.world_character_setup",
         "app.schemas.worlds"
@@ -10024,17 +10118,6 @@
       "imports": [],
       "module": "app.schemas.social_memory",
       "path": "backend/app/schemas/social_memory.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "datetime",
-        "pydantic",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.schemas.tree",
-      "path": "backend/app/schemas/tree.py",
       "wildcard_imports": []
     },
     {
@@ -10685,21 +10768,6 @@
       ],
       "module": "app.services.social_routine_interactions",
       "path": "backend/app/services/social_routine_interactions.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "sqlalchemy.orm",
-        "uuid"
-      ],
-      "imports": [
-        "app.cruds.community",
-        "app.cruds.tree",
-        "app.models",
-        "app.schemas"
-      ],
-      "module": "app.services.tree",
-      "path": "backend/app/services/tree.py",
       "wildcard_imports": []
     },
     {

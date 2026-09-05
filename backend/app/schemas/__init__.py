@@ -142,7 +142,7 @@ from app.domains.social.schemas.community import (
     TimelineQuoteCreate,
     TimelineReplyCreate,
 )
-from app.schemas.tree import (
+from app.domains.tree.schemas import (
     TreeAuthorRead,
     TreeCategory,
     TreeCommentCreate,
