@@ -1063,3 +1063,11 @@ C6b1 초기 **55 passed /기존 warnings2/25.07초**, 최종 고정 tree **443 p
 
 
 C6b2 최종 고정 tree는 **538 passed /기존 PostgreSQL1 skipped/기존warnings4/187.22초**이며 기존 checkpoint·node 검사도 포함했다. 경계 **747modules/2520edges/exact legacy206/cycle0**, L4 **747/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2264**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions 불변이다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 뒤 다시 확인한다. 호출 token만 바꾸어 원문의 여러 줄 서식을 유지했고 실제5정책과 남은 전체 AgentRun의 AST 및 원래2테스트 assertion을 대조했다.
+
+
+## AR-B4-C6c1 — Resident 알림·게시물·자기 실행 이력 SQL
+
+원래7개 SQL 조각과 스레드 루트 함수1개를 실제 소유로 분리했다. 동일 알림 SQL 두 곳은 원래30/20을 인자로 유지하는 한 함수로 묶었고 나머지 조건·정렬·limit·nullable·Session은 그대로다. 실제 업무 선택과 표현은 원래 위치에서 후속 C6c2로 이어진다. 신규3SQLite는 알림 type/recipient/unread와30/20, 게시물 숨김·삭제/시각/정렬·8/5/200, 스레드 cycle, pending 관계검토와 observer/rollback을 검증한다. 원문7SQL 및 helper와 모든 남은 AgentRun 본문은 exact query를 복원하면 AST가 같다.
+
+
+C6c1 초기 **60 passed /기존warnings2/25.78초**, 최종 고정 tree **455 passed /기존 PostgreSQL1 skipped/기존warnings4/211.47초**. 경계 **748modules/2522edges/exact legacy206/cycle0**, L4 **748/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2267**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions는 수정하지 않았다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 이후 별도로 확인한다.

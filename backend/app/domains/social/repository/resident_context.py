@@ -1,4 +1,6 @@
 """Original Social relationship and visible-thread reads for resident decisions."""
+from datetime import datetime
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -99,3 +101,99 @@ def find_follow_id(
             )
             .limit(1)
         )
+
+
+def find_review_notification(
+    db: Session, *, notification_id: int, character_id: str
+) -> models.Notification | None:
+    return db.scalar(
+        select(models.Notification).where(
+            models.Notification.id == notification_id,
+            models.Notification.recipient_character_id == character_id,
+            models.Notification.notification_type == "reply",
+        )
+    )
+
+
+def list_recent_own_posts(db: Session, *, character_id: str) -> list[models.Post]:
+    return list(
+        db.scalars(
+            select(models.Post)
+            .where(
+                models.Post.author_character_id == character_id,
+                models.Post.deleted_at.is_(None),
+                models.Post.report_hidden_at.is_(None),
+            )
+            .order_by(models.Post.created_at.desc(), models.Post.id.asc())
+            .limit(8)
+        )
+    )
+
+
+def list_unread_reply_notifications(
+    db: Session, *, character_id: str, limit: int
+) -> list[models.Notification]:
+    return list(
+        db.scalars(
+            select(models.Notification)
+            .where(
+                models.Notification.recipient_character_id == character_id,
+                models.Notification.notification_type == "reply",
+                models.Notification.read_at.is_(None),
+            )
+            .order_by(
+                models.Notification.created_at.desc(),
+                models.Notification.id.desc(),
+            )
+            .limit(limit)
+        )
+    )
+
+
+def list_recent_reply_posts(db: Session, *, since: datetime) -> list[models.Post]:
+    return list(
+        db.scalars(
+            select(models.Post)
+            .where(
+                models.Post.reply_to_post_id.is_not(None),
+                models.Post.deleted_at.is_(None),
+                models.Post.report_hidden_at.is_(None),
+                models.Post.created_at >= since,
+            )
+            .order_by(models.Post.created_at.desc(), models.Post.id.desc())
+            .limit(200)
+        )
+    )
+
+
+def list_recent_followed_posts(
+    db: Session, *, target_id: str, since: datetime
+) -> list[models.Post]:
+    post_filter = models.Post.author_character_id == target_id
+    return list(
+        db.scalars(
+            select(models.Post)
+            .where(
+                post_filter,
+                models.Post.deleted_at.is_(None),
+                models.Post.report_hidden_at.is_(None),
+                models.Post.created_at >= since,
+            )
+            .order_by(models.Post.created_at.desc(), models.Post.id.asc())
+            .limit(5)
+        )
+    )
+
+
+def _thread_root_post_id_for_prompt(db: Session, post_id: str) -> str | None:
+    post = community_crud.get_post(db, post_id)
+    if post is None:
+        return None
+    seen = {post.id}
+    while post.reply_to_post_id is not None:
+        parent = community_crud.get_post(db, post.reply_to_post_id)
+        if parent is None or parent.id in seen:
+            return None
+        post = parent
+        seen.add(post.id)
+    return post.id

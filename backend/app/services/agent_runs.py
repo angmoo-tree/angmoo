@@ -1,3 +1,5 @@
+from app.domains.routines.repository import resident_context as resident_own_queries
+from app.domains.social.repository.resident_context import _thread_root_post_id_for_prompt
 from app.runtime.resident.context_references import SqlAlchemyResidentActionReferences
 from app.domains.routines.service.action_menu import _format_v6_action_menu_table
 from app.domains.routines.service.action_candidates import _profile_display_name_for_action_menu
@@ -377,13 +379,7 @@ def _v6_inbox_candidates_from_review(
         notification_id = int(raw_notification_id)
     except (TypeError, ValueError):
         return []
-    notification = db.scalar(
-        select(models.Notification).where(
-            models.Notification.id == notification_id,
-            models.Notification.recipient_character_id == character_id,
-            models.Notification.notification_type == "reply",
-        )
-    )
+    notification = resident_context_queries.find_review_notification(db, notification_id=notification_id, character_id=character_id)
     if notification is None:
         return []
     source_post_id = notification.source_post_id or notification.post_id
@@ -1039,18 +1035,7 @@ def _v6_possible_post_actions(
 
 
 def _format_recent_own_posts_to_avoid(db: Session, *, character_id: str) -> str:
-    posts = list(
-        db.scalars(
-            select(models.Post)
-            .where(
-                models.Post.author_character_id == character_id,
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-            )
-            .order_by(models.Post.created_at.desc(), models.Post.id.asc())
-            .limit(8)
-        )
-    )
+    posts = resident_context_queries.list_recent_own_posts(db, character_id=character_id)
     if not posts:
         return "- none"
     return "\n".join(
@@ -1077,18 +1062,6 @@ def _format_recent_activity_summary(db: Session, *, character_id: str) -> str:
     )
 
 
-def _thread_root_post_id_for_prompt(db: Session, post_id: str) -> str | None:
-    post = community_crud.get_post(db, post_id)
-    if post is None:
-        return None
-    seen = {post.id}
-    while post.reply_to_post_id is not None:
-        parent = community_crud.get_post(db, post.reply_to_post_id)
-        if parent is None or parent.id in seen:
-            return None
-        post = parent
-        seen.add(post.id)
-    return post.id
 
 
 def _format_inbox_threads(
@@ -1099,21 +1072,7 @@ def _format_inbox_threads(
     character_id: str,
     allowed_actions: tuple[str, ...],
 ) -> tuple[str, bool]:
-    notifications = list(
-        db.scalars(
-            select(models.Notification)
-            .where(
-                models.Notification.recipient_character_id == character_id,
-                models.Notification.notification_type == "reply",
-                models.Notification.read_at.is_(None),
-            )
-            .order_by(
-                models.Notification.created_at.desc(),
-                models.Notification.id.desc(),
-            )
-            .limit(30)
-        )
-    )
+    notifications = resident_context_queries.list_unread_reply_notifications(db, character_id=character_id, limit=30)
     grouped: dict[str, list[models.Notification]] = {}
     for notification in notifications:
         anchor_post_id = notification.source_post_id or notification.post_id
@@ -1198,21 +1157,7 @@ def _format_social_connection_candidate(
     candidates: list[str] = []
     seen_targets: set[tuple[str, str]] = set()
 
-    notifications = list(
-        db.scalars(
-            select(models.Notification)
-            .where(
-                models.Notification.recipient_character_id == character_id,
-                models.Notification.notification_type == "reply",
-                models.Notification.read_at.is_(None),
-            )
-            .order_by(
-                models.Notification.created_at.desc(),
-                models.Notification.id.desc(),
-            )
-            .limit(20)
-        )
-    )
+    notifications = resident_context_queries.list_unread_reply_notifications(db, character_id=character_id, limit=20)
     for item in notifications:
         target_type, target_id = _profile_target_parts(
             user_id=item.actor_user_id, character_id=item.actor_character_id
@@ -1339,19 +1284,7 @@ def _format_strong_social_connection_candidate(
 - reason: follow is not allowed in this tick by backend activity policy."""
 
     since = datetime.now(UTC) - timedelta(days=3)
-    reply_posts = list(
-        db.scalars(
-            select(models.Post)
-            .where(
-                models.Post.reply_to_post_id.is_not(None),
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-                models.Post.created_at >= since,
-            )
-            .order_by(models.Post.created_at.desc(), models.Post.id.desc())
-            .limit(200)
-        )
-    )
+    reply_posts = resident_context_queries.list_recent_reply_posts(db, since=since)
     if not reply_posts:
         return """- status: none
 - reason: No recent reply posts were found for a strong social connection check."""
@@ -1511,18 +1444,7 @@ def _format_relationship_review_candidate(
     if has_feed_cue or has_inbox:
         return "- none"
     now = datetime.now(UTC)
-    last_review = db.scalar(
-        select(models.AgentActivityLog.created_at)
-        .where(
-            models.AgentActivityLog.character_id == character_id,
-            models.AgentActivityLog.action_type == "relationship_reviewed",
-        )
-        .order_by(
-            models.AgentActivityLog.created_at.desc(),
-            models.AgentActivityLog.id.desc(),
-        )
-        .limit(1)
-    )
+    last_review = resident_own_queries.latest_relationship_review_at(db, character_id=character_id)
     if last_review is not None and _aware_utc(last_review) > now - timedelta(hours=24):
         return "- none"
 
@@ -1536,20 +1458,7 @@ def _format_relationship_review_candidate(
             continue
         target_character = community_crud.get_character(db, target_id)
         target_name = target_character.name if target_character is not None else target_id
-        post_filter = models.Post.author_character_id == target_id
-        recent_posts = list(
-            db.scalars(
-                select(models.Post)
-                .where(
-                    post_filter,
-                    models.Post.deleted_at.is_(None),
-                    models.Post.report_hidden_at.is_(None),
-                    models.Post.created_at >= since,
-                )
-                .order_by(models.Post.created_at.desc(), models.Post.id.asc())
-                .limit(5)
-            )
-        )
+        recent_posts = resident_context_queries.list_recent_followed_posts(db, target_id=target_id, since=since)
         if not recent_posts:
             continue
         activities = "\n".join(

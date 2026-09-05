@@ -682,3 +682,6 @@ Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥�
 ### Resident 행동 후보의 허용과 표현
 
 `routines/service/action_admission.py`는 자기 글·기존 반응·답글·팔로우 상태에 따라 허용 도구와 차단 이유를 정합니다. `action_menu.py`는 실제 후보 표를, `action_candidates.py`는 읽은 작성자 이름을 표현합니다. `contracts/action_context.py`의 제한된 읽기 협력을 `runtime/resident/context_references.py`가 같은 Session으로 연결합니다. 조건을 판단하기 전 모든 자료를 미리 읽지 않고, 원래 분기에서 필요한 조회만 수행하며 받은 ORM 객체를 복제하지 않습니다. Social SQL과 숨김 판단은 Social 소유 함수를 사용합니다.
+
+
+Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 SQL은 같은 `social/repository/resident_context.py`가 소유합니다. 읽지 않은 알림의30/20개 제한, 최근 자기 글8개·대상 글5개·답글200개와 원래 정렬을 각각 호출 목적에 맞게 유지합니다. Routines 자기 활동 로그의 최근 관계 검토 시각만 `routines/repository/resident_context.py`에서 읽습니다. 스레드 루트 추적은 원래 cycle·없는 부모의 처리만 수행하며, 별도의 공개 여부 검사와 합치지 않습니다.

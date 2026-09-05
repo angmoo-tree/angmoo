@@ -1,7 +1,7 @@
 {
-  "edge_count": 2520,
-  "external_import_count": 2327,
-  "module_count": 747,
+  "edge_count": 2522,
+  "external_import_count": 2331,
+  "module_count": 748,
   "modules": [
     {
       "external_imports": [],
@@ -4021,6 +4021,19 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.repository.resident_context",
+      "path": "backend/app/domains/routines/repository/resident_context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime",
         "sqlalchemy",
@@ -5646,6 +5659,7 @@
     },
     {
       "external_imports": [
+        "datetime",
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
@@ -10519,6 +10533,7 @@
         "app.domains.routines.constants",
         "app.domains.routines.exceptions",
         "app.domains.routines.repository.feed_cues",
+        "app.domains.routines.repository.resident_context",
         "app.domains.routines.repository.slots",
         "app.domains.routines.service.action_admission",
         "app.domains.routines.service.action_briefs",

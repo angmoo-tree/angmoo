@@ -10899,6 +10899,7 @@
           "backend/app/domains/routines/contracts/backoff.py",
           "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/repository/activity_evidence.py",
+          "backend/app/domains/routines/repository/resident_context.py",
           "backend/app/domains/routines/repository/run_backoff.py",
           "backend/app/domains/routines/repository/runs.py",
           "backend/app/domains/routines/service/action_admission.py",
@@ -12865,12 +12866,15 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_thread_root_post_id_for_prompt",
-          "new": "backend/app/services/agent_runs.py::_thread_root_post_id_for_prompt",
+          "new": "backend/app/domains/social/repository/resident_context.py::_thread_root_post_id_for_prompt",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
+            "tests/social/test_resident_context_history.py::test_resident_post_history_keeps_filters_order_limits_and_root_cycle",
+            "tests/routines/test_resident_review_history.py::test_relationship_review_time_observes_pending_log_without_committing",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -14632,6 +14636,104 @@
           "test_nodes": [
             "tests/social/test_resident_context_queries.py::test_resident_reaction_queries_see_caller_pending_rows_and_preserve_rollback",
             "tests/social/test_resident_context_queries.py::test_resident_thread_queries_keep_visible_ancestry_direct_reply_and_no_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_v6_inbox_candidates_from_review",
+          "new": "backend/app/domains/social/repository/resident_context.py::find_review_notification",
+          "source_member": "Exact original notification query expression. SQL predicates/order/nullable/limit and original conditional caller position are unchanged.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
+            "tests/social/test_resident_context_history.py::test_resident_post_history_keeps_filters_order_limits_and_root_cycle",
+            "tests/routines/test_resident_review_history.py::test_relationship_review_time_observes_pending_log_without_committing",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_format_recent_own_posts_to_avoid",
+          "new": "backend/app/domains/social/repository/resident_context.py::list_recent_own_posts",
+          "source_member": "Exact original posts query expression. SQL predicates/order/nullable/limit and original conditional caller position are unchanged.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
+            "tests/social/test_resident_context_history.py::test_resident_post_history_keeps_filters_order_limits_and_root_cycle",
+            "tests/routines/test_resident_review_history.py::test_relationship_review_time_observes_pending_log_without_committing",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_format_inbox_threads",
+          "new": "backend/app/domains/social/repository/resident_context.py::list_unread_reply_notifications",
+          "source_member": "Exact original notifications query expression. SQL predicates/order/nullable/limit and original conditional caller position are unchanged. The two identical unread-reply queries retain explicit original limit30/20 via one actual query function.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
+            "tests/social/test_resident_context_history.py::test_resident_post_history_keeps_filters_order_limits_and_root_cycle",
+            "tests/routines/test_resident_review_history.py::test_relationship_review_time_observes_pending_log_without_committing",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_format_social_connection_candidate",
+          "new": "backend/app/domains/social/repository/resident_context.py::list_unread_reply_notifications",
+          "source_member": "Exact original notifications query expression. SQL predicates/order/nullable/limit and original conditional caller position are unchanged. The two identical unread-reply queries retain explicit original limit30/20 via one actual query function.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
+            "tests/social/test_resident_context_history.py::test_resident_post_history_keeps_filters_order_limits_and_root_cycle",
+            "tests/routines/test_resident_review_history.py::test_relationship_review_time_observes_pending_log_without_committing",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_format_strong_social_connection_candidate",
+          "new": "backend/app/domains/social/repository/resident_context.py::list_recent_reply_posts",
+          "source_member": "Exact original reply_posts query expression. SQL predicates/order/nullable/limit and original conditional caller position are unchanged.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
+            "tests/social/test_resident_context_history.py::test_resident_post_history_keeps_filters_order_limits_and_root_cycle",
+            "tests/routines/test_resident_review_history.py::test_relationship_review_time_observes_pending_log_without_committing",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_format_relationship_review_candidate",
+          "new": "backend/app/domains/social/repository/resident_context.py::list_recent_followed_posts",
+          "source_member": "Exact original recent_posts query expression with its original post_filter expression. SQL predicates/order/nullable/limit and original conditional caller position are unchanged.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
+            "tests/social/test_resident_context_history.py::test_resident_post_history_keeps_filters_order_limits_and_root_cycle",
+            "tests/routines/test_resident_review_history.py::test_relationship_review_time_observes_pending_log_without_committing",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_format_relationship_review_candidate",
+          "new": "backend/app/domains/routines/repository/resident_context.py::latest_relationship_review_at",
+          "source_member": "Exact original last_review query expression. SQL predicates/order/nullable/limit and original conditional caller position are unchanged.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
+            "tests/social/test_resident_context_history.py::test_resident_post_history_keeps_filters_order_limits_and_root_cycle",
+            "tests/routines/test_resident_review_history.py::test_relationship_review_time_observes_pending_log_without_committing",
             "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         }
@@ -32505,6 +32607,22 @@
       "ownership": "Five actual action admission, profile label and active menu-table policies belong Routines. Nine bounded runtime reads bind canonical Social/Character/Identity owners on the original Session and return the original attached values. No eager reads, copied foreign models, new Session, commit or provider calls.",
       "preservation": "Exact five original policy ASTs and all remaining AgentRun bodies after restoring only explicit collaborator calls/first input. Original two action-menu tests keep every assertion and adapt only dependency patch targets/reference input. Two SQLite tests cover pending reactions/follows, observer isolation, hidden ancestry and caller rollback.",
       "remaining": "Other feed/inbox/relationship context and credential execution preparation remain C6c/C6d. Real mixed execution belongs runtime after owner policies are separated. Settings/autonomy/tendency/manual/first-greeting and HTTP remain C7, Memory daypart B7, operations and credential owners retain their source."
+    },
+    "AR-B4-C6c1-resident-context-queries": {
+      "status": "IMPLEMENTED — initial60 and final455 passed / existing PostgreSQL1 skipped; original read-only6checks0, stock gate awaits sequential introduction append",
+      "actual_paths": [
+        "backend/app/domains/social/repository/resident_context.py",
+        "backend/app/domains/routines/repository/resident_context.py"
+      ],
+      "test_nodes": [
+        "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
+        "tests/social/test_resident_context_history.py::test_resident_post_history_keeps_filters_order_limits_and_root_cycle",
+        "tests/routines/test_resident_review_history.py::test_relationship_review_time_observes_pending_log_without_committing",
+        "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+      ],
+      "ownership": "Social owns actual notification/post-history queries and thread ancestry. Routines owns only its own ActivityLog latest relationship review read. Existing mixed context policies keep their original branching and call sites before typed policy transfer in C6c2.",
+      "preservation": "Seven original SQL fragments preserve AST, including the exact duplicate unread-reply query with original limit30/20 supplied explicitly. Original thread helper body and all surrounding original AgentRun functions preserve AST after exact query restoration. No commit/flush/Session creation or new visibility predicate.",
+      "remaining": "Original context policy selection/formatting still belongs the next actual Routines service slice; this is only real SQL ownership. Memory/B5/Operations future source remains independently owned and is not copied or merged."
     }
   },
   "test_symbols": {
