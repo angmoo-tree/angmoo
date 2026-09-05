@@ -685,3 +685,14 @@ Feed 목록·following의 실제 함수 4개, Inbox 업무 함수 4개를 Social
 신규 `tests/social/test_inbox_workflows.py`의 **3 nodes**는 한 번의 owner subquery·삭제/다른 owner 제외·cursor/잘못된 cursor의 기존 처리, 없는 대상의 쓰기 전 차단, 원래 명시적 read commit이 같은 Session의 미저장 변경까지 확정하는 계약, Character inbox의 명시적 recipient OR 범위를 검증한다. 첫 집중 실행은 **56 passed / 1 failed**였다. 실패는 Feed helper의 monkeypatch가 옛 module을 대상으로 한 경우였으며 실제 새 소유 함수로 옮겼고 assertion은 변경하지 않았다.
 
 수정 후 **57 passed / 1 existing warning / 13.63s**, #258/#263 API·schema·ORM 차이 0, 변경 보호 테스트 1개 파일의 assertion PASS, 전체 split evidence PASS다. 원래 Community CRUD/서비스 전체 symbol 지도를 갱신하고 새로운 source/test capture는 root가 순차 수행한다. Today·검색·agent/resident·미디어 job, Relationships/projection과 최종 HTTP·호환 소비자 종료는 아직 B5 잔여다.
+
+
+## AR-B5-B8 — 기본 검색·Today 집계와 순위
+
+검색 입력/공개 응답·Today 점수와 정렬은 Social discovery service로, Character 자체 검색 SQL은 Character service로 이전했다. Post/Character 검색과 Character/AgentActivityLog 집계는 기존 SQL 그대로 runtime query가 소유한다. 인기 root Post의 SQL은 Social repository로 추출하고 공통 LIKE helper 2개는 core/search_text.py로 옮겼다. 새 공유 정의를 만드는 과정에서 같은 함수를 도메인마다 복제하지 않았다.
+
+원본문과 추출 SQL의 AST **11 checks PASS**이며 SQL 수·조건·outer join·순서·cursor/offset·자정 범위·점수/동점 규칙이 같다. 신규 `tests/social/test_discovery_workflows.py`의 **3 nodes**는 빈 검색 0쿼리, literal `%`/`@handle` 검색·삭제 Character/비공개/숨김 Post 제외, KST 경계 직전 제외·당일 포함·원래 점수/동점 순서·단일 집계 SQL/commit 0, 인기 root의 경계·삭제·대꾸·숨김·동점 ID 순서를 검증한다.
+
+집중 검증 **33 passed / 5.35s**, #258/#263 API/schema/ORM 차이 0, 기존 보호 테스트 변경 0, 전체 split evidence PASS다. 경계는 **677 modules / 2,239 edges / 243 exact legacy edges**다. 두 legacy edge 증가는 기존 활동 로그/hidden-action 읽기가 명명된 runtime으로 이동한 사실만 기록하며 AR-B4-C가 소유 이전 후 종료한다. B4 담당자가 timezone은 아직 core.agent_activity_schedule의 같은 객체임을 확인했다.
+
+전역 Today 순위와 World 범위 Chat Today SNS snapshot은 구분한다. 후자의 source/관찰/World/coverage와 Relationships/projection, agent/resident, media job·HTTP 전환은 여전히 B5 잔여다. Source introduction capture·통합 Actions·PR/merge는 root가 진행하며 이 source의 집중 PASS를 전체 B5 완료로 확대하지 않는다.

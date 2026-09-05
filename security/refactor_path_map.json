@@ -5242,9 +5242,11 @@
       "reason": "Move Character foundation implementations into flat roles while preserving existing legacy Creator/activity/runtime consumers; remaining source symbols explicitly stay in place. Test links are affected regression navigation, not exhaustive per-symbol coverage.",
       "split_files": {
         "backend/app/cruds/community.py": [
+          "backend/app/core/search_text.py",
           "backend/app/cruds/community.py",
           "backend/app/domains/characters/exceptions.py",
           "backend/app/domains/characters/service/profile.py",
+          "backend/app/domains/characters/service/search.py",
           "backend/app/domains/characters/service/state.py",
           "backend/app/domains/identity/service/profile.py",
           "backend/app/domains/social/repository/inbox.py",
@@ -5256,6 +5258,7 @@
           "backend/app/domains/social/service/source_posts.py",
           "backend/app/domains/social/utils/cursors.py",
           "backend/app/domains/social/utils/text.py",
+          "backend/app/runtime/social/discovery.py",
           "backend/app/runtime/social/inbox.py"
         ],
         "backend/app/schemas/characters.py": [
@@ -5416,22 +5419,26 @@
         },
         {
           "old": "backend/app/cruds/community.py::_like_search_terms",
-          "new": "backend/app/domains/social/repository/posts.py::_like_search_terms",
+          "new": "backend/app/core/search_text.py::_like_search_terms",
           "direct_consumers": [
-            "backend/app/cruds/community.py"
+            "backend/app/domains/social/repository/posts.py",
+            "backend/app/runtime/social/discovery.py",
+            "backend/app/domains/characters/service/search.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_discovery_workflows.py::test_discovery_keeps_literal_like_escape_join_scope_and_empty_query"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::_like_pattern",
-          "new": "backend/app/domains/social/repository/posts.py::_like_pattern",
+          "new": "backend/app/core/search_text.py::_like_pattern",
           "direct_consumers": [
-            "backend/app/cruds/community.py"
+            "backend/app/domains/social/repository/posts.py",
+            "backend/app/runtime/social/discovery.py",
+            "backend/app/domains/characters/service/search.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_discovery_workflows.py::test_discovery_keeps_literal_like_escape_join_scope_and_empty_query"
           ]
         },
         {
@@ -5741,22 +5748,25 @@
         },
         {
           "old": "backend/app/cruds/community.py::search_posts",
-          "new": "backend/app/cruds/community.py::search_posts",
+          "new": "backend/app/runtime/social/discovery.py::SqlAlchemyDiscoveryReads",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py",
+            "backend/app/domains/social/service/discovery.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+            "tests/social/test_discovery_workflows.py::test_discovery_keeps_literal_like_escape_join_scope_and_empty_query"
+          ],
+          "destination_member": "SqlAlchemyDiscoveryReads.search_posts"
         },
         {
           "old": "backend/app/cruds/community.py::search_characters",
-          "new": "backend/app/cruds/community.py::search_characters",
+          "new": "backend/app/domains/characters/service/search.py::search_characters",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py",
+            "backend/app/domains/social/service/discovery.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_discovery_workflows.py::test_discovery_keeps_literal_like_escape_join_scope_and_empty_query"
           ]
         },
         {
@@ -13526,7 +13536,9 @@
           "backend/app/domains/characters/service/state.py",
           "backend/app/domains/social/constants.py",
           "backend/app/domains/social/exceptions.py",
+          "backend/app/domains/social/repository/posts.py",
           "backend/app/domains/social/service/activity_results.py",
+          "backend/app/domains/social/service/discovery.py",
           "backend/app/domains/social/service/feed.py",
           "backend/app/domains/social/service/inbox.py",
           "backend/app/domains/social/service/notifications.py",
@@ -13537,6 +13549,7 @@
           "backend/app/domains/social/service/visibility.py",
           "backend/app/domains/social/utils/limits.py",
           "backend/app/domains/world_characters/service/social_scope.py",
+          "backend/app/runtime/social/discovery.py",
           "backend/app/runtime/social/timeline.py",
           "backend/app/services/community.py"
         ],
@@ -14533,53 +14546,67 @@
         },
         {
           "old": "backend/app/services/community.py::list_today_popular_posts",
-          "new": "backend/app/services/community.py::list_today_popular_posts",
+          "new": "backend/app/domains/social/service/feed.py::list_today_popular_posts",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/services/community.py",
+            "backend/app/domains/social/service/discovery.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_discovery_workflows.py::test_today_activity_keeps_kst_cutoff_single_query_and_score_tie_order",
+            "tests/social/test_discovery_workflows.py::test_today_root_query_keeps_original_cutoff_visibility_and_order"
           ]
         },
         {
           "old": "backend/app/services/community.py::list_today_activity",
-          "new": "backend/app/services/community.py::list_today_activity",
+          "new": "backend/app/domains/social/service/discovery.py::SocialDiscoveryService",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/services/community.py",
+            "backend/app/runtime/social/discovery.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
-          ]
+            "tests/social/test_discovery_workflows.py::test_discovery_keeps_literal_like_escape_join_scope_and_empty_query",
+            "tests/social/test_discovery_workflows.py::test_today_activity_keeps_kst_cutoff_single_query_and_score_tie_order",
+            "tests/social/test_discovery_workflows.py::test_today_root_query_keeps_original_cutoff_visibility_and_order"
+          ],
+          "destination_member": "SocialDiscoveryService.list_today_activity"
         },
         {
           "old": "backend/app/services/community.py::_today_start_utc",
-          "new": "backend/app/services/community.py::_today_start_utc",
+          "new": "backend/app/domains/social/service/feed.py::_today_start_utc",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/services/community.py",
+            "backend/app/domains/social/service/discovery.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_discovery_workflows.py::test_today_activity_keeps_kst_cutoff_single_query_and_score_tie_order",
+            "tests/social/test_discovery_workflows.py::test_today_root_query_keeps_original_cutoff_visibility_and_order"
           ]
         },
         {
           "old": "backend/app/services/community.py::_post_reaction_score",
-          "new": "backend/app/services/community.py::_post_reaction_score",
+          "new": "backend/app/domains/social/service/feed.py::_post_reaction_score",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/services/community.py",
+            "backend/app/domains/social/service/discovery.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_discovery_workflows.py::test_today_activity_keeps_kst_cutoff_single_query_and_score_tie_order",
+            "tests/social/test_discovery_workflows.py::test_today_root_query_keeps_original_cutoff_visibility_and_order"
           ]
         },
         {
           "old": "backend/app/services/community.py::search_nest",
-          "new": "backend/app/services/community.py::search_nest",
+          "new": "backend/app/domains/social/service/discovery.py::SocialDiscoveryService",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/services/community.py",
+            "backend/app/runtime/social/discovery.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
-          ]
+            "tests/social/test_discovery_workflows.py::test_discovery_keeps_literal_like_escape_join_scope_and_empty_query",
+            "tests/social/test_discovery_workflows.py::test_today_activity_keeps_kst_cutoff_single_query_and_score_tie_order",
+            "tests/social/test_discovery_workflows.py::test_today_root_query_keeps_original_cutoff_visibility_and_order"
+          ],
+          "destination_member": "SocialDiscoveryService.search_nest"
         },
         {
           "old": "backend/app/services/community.py::list_following_feed",
@@ -16335,6 +16362,29 @@
             "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
           ],
           "destination_member": "RuntimeSocialWriteWorkflows.exclude_events_for_posts"
+        },
+        {
+          "old": "backend/app/services/community.py::list_today_activity",
+          "new": "backend/app/runtime/social/discovery.py::SqlAlchemyDiscoveryReads",
+          "destination_member": "SqlAlchemyDiscoveryReads.list_today_activity_rows",
+          "source_member": "Original rows = db.execute(select(Character fields, action CASE aggregates).join(AgentActivityLog).where(day cutoff, hidden-action exclusion).group_by(Character fields)).all(); exact same SQL and caller Session.",
+          "direct_consumers": [
+            "backend/app/domains/social/service/discovery.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_discovery_workflows.py::test_today_activity_keeps_kst_cutoff_single_query_and_score_tie_order"
+          ]
+        },
+        {
+          "old": "backend/app/services/community.py::list_today_popular_posts",
+          "new": "backend/app/domains/social/repository/posts.py::list_today_root_posts",
+          "source_member": "Original posts = list(db.scalars(select(Post).where(deleted/hidden/root/day cutoff).order_by(created DESC,id ASC))) query; same Session and filter order.",
+          "direct_consumers": [
+            "backend/app/domains/social/service/feed.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_discovery_workflows.py::test_today_root_query_keeps_original_cutoff_visibility_and_order"
+          ]
         }
       ]
     },
@@ -18728,6 +18778,23 @@
         "tests/social/test_inbox_workflows.py::test_character_inbox_keeps_explicit_user_or_character_scope"
       ],
       "remaining": "Today/search/agent/resident workflows, media jobs, Relationships/projection, HTTP ownership and legacy cleanup."
+    },
+    "AR-B5-B8": {
+      "status": "IMPLEMENTED; focused33 PASS; original body and extracted SQL AST11 checks PASS; API/ORM/assertions/full split PASS; source introduction and integration pending",
+      "scope": "Actual search admission, visibility, character text query, Today cutoff/count/score/tie ordering; joined SQL stays same-Session runtime composition. Shared LIKE token/escape helpers have one real core definition.",
+      "source_split_owners": [
+        "AR-B2-B1 retains original CRUD symbols; AR-B2-B6 retains original Community service symbols plus exact split query evidence."
+      ],
+      "new_tests": [
+        "backend/tests/social/test_discovery_workflows.py"
+      ],
+      "test_nodes": [
+        "tests/social/test_discovery_workflows.py::test_discovery_keeps_literal_like_escape_join_scope_and_empty_query",
+        "tests/social/test_discovery_workflows.py::test_today_activity_keeps_kst_cutoff_single_query_and_score_tie_order",
+        "tests/social/test_discovery_workflows.py::test_today_root_query_keeps_original_cutoff_visibility_and_order"
+      ],
+      "pending_activity_owner": "AR-B4-C will migrate AgentActivityLog and hidden-action constants; exact pre-existing runtime dependencies are scoped until then.",
+      "remaining": "Agent/resident workflows, media jobs, World Feed search and manual/observed UoWs, Relationships/projection, HTTP and legacy cleanup."
     }
   }
 }

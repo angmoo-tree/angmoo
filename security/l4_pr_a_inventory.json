@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2132,
-      "internal_edge_count": 2215,
+      "external_import_count": 2142,
+      "internal_edge_count": 2239,
       "legacy_import_exception_count": 0,
-      "module_count": 673,
+      "module_count": 677,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -286,6 +286,13 @@
             "path": "backend/app/domains/social/contracts/actors.py"
           },
           {
+            "imports": [
+              "app.domains.social.models.posts"
+            ],
+            "module": "app.domains.social.contracts.discovery",
+            "path": "backend/app/domains/social/contracts/discovery.py"
+          },
+          {
             "imports": [],
             "module": "app.domains.social.contracts.inbox",
             "path": "backend/app/domains/social/contracts/inbox.py"
@@ -449,6 +456,7 @@
           },
           {
             "imports": [
+              "app.core.search_text",
               "app.domains.social.models.posts",
               "app.domains.social.schemas.community"
             ],
@@ -518,6 +526,21 @@
           },
           {
             "imports": [
+              "app.domains.characters.service.search",
+              "app.domains.social.contracts.discovery",
+              "app.domains.social.schemas.community",
+              "app.domains.social.service.feed",
+              "app.domains.social.service.presentation",
+              "app.domains.social.service.profiles",
+              "app.domains.social.service.visibility",
+              "app.domains.social.utils.limits"
+            ],
+            "module": "app.domains.social.service.discovery",
+            "path": "backend/app/domains/social/service/discovery.py"
+          },
+          {
+            "imports": [
+              "app.core.agent_activity_schedule",
               "app.domains.characters.service.profile",
               "app.domains.social.contracts.actors",
               "app.domains.social.exceptions",
@@ -824,6 +847,20 @@
           },
           {
             "imports": [
+              "app.core.search_text",
+              "app.cruds.agents",
+              "app.domains.characters.models",
+              "app.domains.social.contracts.discovery",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.posts",
+              "app.domains.social.service.discovery",
+              "app.models.agent_runs"
+            ],
+            "module": "app.runtime.social.discovery",
+            "path": "backend/app/runtime/social/discovery.py"
+          },
+          {
+            "imports": [
               "app.domains.characters.models",
               "app.domains.social.contracts.actors",
               "app.domains.social.models.posts",
@@ -938,6 +975,7 @@
               "app.cruds.agents",
               "app.domains.characters.exceptions",
               "app.domains.characters.service.profile",
+              "app.domains.characters.service.search",
               "app.domains.characters.service.state",
               "app.domains.identity.service.profile",
               "app.domains.social.repository.inbox",
@@ -950,6 +988,7 @@
               "app.domains.social.utils.cursors",
               "app.domains.social.utils.text",
               "app.models",
+              "app.runtime.social.discovery",
               "app.runtime.social.inbox",
               "app.schemas"
             ],

@@ -1,3 +1,7 @@
+from app.domains.social.service.feed import list_today_popular_posts, _today_start_utc, _post_reaction_score
+from app.runtime.social.discovery import discovery_service
+list_today_activity = discovery_service.list_today_activity
+search_nest = discovery_service.search_nest
 from app.domains.social.service.feed import list_posts, list_feed, list_following_feed, list_character_following_feed
 from app.domains.social.service.inbox import list_notifications_for_character, mark_character_notification_read
 from app.runtime.social.inbox import inbox_service
@@ -1423,144 +1427,14 @@ def _raise_agent_tool_authorization_error(
 
 
 
-def list_today_popular_posts(
-    db: Session, *, limit: int = 2
-) -> list[schemas.PostSummary]:
-    day_start = _today_start_utc()
-    posts = list(
-        db.scalars(
-            select(models.Post)
-            .where(
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-                models.Post.reply_to_post_id.is_(None),
-                models.Post.created_at >= day_start,
-            )
-            .order_by(models.Post.created_at.desc(), models.Post.id.asc())
-        )
-    )
-    ranked_posts = [
-        summary
-        for summary in (
-            _post_summary(db, post)
-            for post in posts
-            if _is_post_public_context_visible(db, post)
-        )
-        if _post_reaction_score(summary) > 0
-    ]
-    safe_limit = max(1, min(limit, 10))
-    return sorted(
-        ranked_posts,
-        key=lambda post: (-_post_reaction_score(post), post.created_at),
-    )[:safe_limit]
 
 
-def list_today_activity(db: Session, *, limit: int = 3) -> list[schemas.TodayActivityRead]:
-    day_start = _today_start_utc()
-    post_types = ("post_created", "quoted")
-    reply_types = ("commented", "replied")
-    like_types = ("liked",)
-
-    rows = db.execute(
-        select(
-            models.Character.id,
-            models.Character.name,
-            models.Character.handle,
-            models.Character.avatar_url,
-            func.sum(
-                case((models.AgentActivityLog.action_type.in_(post_types), 1), else_=0)
-            ).label("post_count"),
-            func.sum(
-                case((models.AgentActivityLog.action_type.in_(reply_types), 1), else_=0)
-            ).label("reply_count"),
-            func.sum(
-                case((models.AgentActivityLog.action_type.in_(like_types), 1), else_=0)
-            ).label("like_count"),
-        )
-        .join(
-            models.AgentActivityLog,
-            models.AgentActivityLog.character_id == models.Character.id,
-        )
-        .where(models.AgentActivityLog.created_at >= day_start)
-        .where(
-            models.AgentActivityLog.action_type.not_in(
-                agent_crud.HIDDEN_ACTIVITY_ACTION_TYPES
-            )
-        )
-        .group_by(
-            models.Character.id,
-            models.Character.name,
-            models.Character.handle,
-            models.Character.avatar_url,
-        )
-    ).all()
-
-    rankings = []
-    for row in rows:
-        post_count = int(row.post_count or 0)
-        reply_count = int(row.reply_count or 0)
-        like_count = int(row.like_count or 0)
-        score = post_count * 3 + reply_count * 2 + like_count
-        if score <= 0:
-            continue
-        rankings.append(
-            schemas.TodayActivityRead(
-                character_id=row.id,
-                name=row.name,
-                handle=row.handle,
-                avatar_url=row.avatar_url,
-                post_count=post_count,
-                reply_count=reply_count,
-                like_count=like_count,
-                score=score,
-            )
-        )
-
-    safe_limit = max(1, min(limit, 50))
-    return sorted(rankings, key=lambda item: (-item.score, item.name))[:safe_limit]
 
 
-def _today_start_utc() -> datetime:
-    local_now = datetime.now(tz=agent_activity_policy.APP_TIMEZONE)
-    return datetime.combine(
-        local_now.date(), time.min, tzinfo=agent_activity_policy.APP_TIMEZONE
-    ).astimezone(UTC)
 
 
-def _post_reaction_score(post: schemas.PostSummary) -> int:
-    return (
-        post.like_count * 2
-        + post.reply_count
-        + post.repost_count * 2
-        + post.quote_count * 2
-    )
 
 
-def search_nest(
-    db: Session, *, query: str, limit: int = 20, offset: int = 0
-) -> schemas.SearchResults:
-    normalized_query = query.strip()
-    if not normalized_query:
-        return schemas.SearchResults(query="", posts=[], characters=[])
-    safe_limit = _safe_limit(limit)
-    safe_offset = max(0, offset)
-    posts, posts_next_offset = community_crud.search_posts(
-        db, normalized_query, limit=safe_limit, offset=safe_offset
-    )
-    characters, characters_next_offset = community_crud.search_characters(
-        db, normalized_query, limit=safe_limit, offset=safe_offset
-    )
-    return schemas.SearchResults(
-        query=normalized_query,
-        posts=[
-            _post_summary(db, post)
-            for post in posts
-            if _is_post_public_context_visible(db, post)
-        ],
-        characters=[_character_search_result(character) for character in characters],
-        posts_next_offset=posts_next_offset,
-        characters_next_offset=characters_next_offset,
-    )
 
 
 

@@ -1,3 +1,4 @@
+from app.core.search_text import _like_search_terms, _like_pattern
 """Social-owned SQL; original caller transaction/flush/finish_write behavior is preserved."""
 
 from datetime import date, datetime, timezone
@@ -40,22 +41,7 @@ def _visible_reference_conditions():
 def is_report_hidden(post: models.Post) -> bool:
     return post.report_hidden_at is not None
 
-def _like_search_terms(query: str) -> list[str]:
-    raw = query.strip()
-    if not raw:
-        return []
-    terms = [raw]
-    if raw.startswith("@") and len(raw) > 1:
-        terms.append(raw[1:])
-    return list(dict.fromkeys(terms))
 
-def _like_pattern(term: str) -> str:
-    escaped = (
-        term.replace("\\", "\\\\")
-        .replace("%", "\\%")
-        .replace("_", "\\_")
-    )
-    return f"%{escaped}%"
 
 def character_has_authored_post(db: Session, character_id: str) -> bool:
     return (
@@ -402,3 +388,18 @@ def soft_delete_post_tree(
     if rows:
         db.commit()
     return rows
+
+
+def list_today_root_posts(db: Session, *, day_start: datetime) -> list[models.Post]:
+    return list(
+            db.scalars(
+                select(models.Post)
+                .where(
+                    models.Post.deleted_at.is_(None),
+                    models.Post.report_hidden_at.is_(None),
+                    models.Post.reply_to_post_id.is_(None),
+                    models.Post.created_at >= day_start,
+                )
+                .order_by(models.Post.created_at.desc(), models.Post.id.asc())
+            )
+        )

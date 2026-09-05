@@ -15,7 +15,7 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 
 > **AR-B5-A Social 기반 적용 범위:** 게시물·반응·미디어 작업은 `social/models/posts.py`, Feed cursor·관찰·block은 `models/feed.py`, owner 수동 작성·inbox 후보는 `models/manual_writes.py`, 성공 행동의 당시 자기 설명은 `models/subjective_context.py`가 실제 ORM을 소유합니다. 수동 쓰기·관찰·프로필·Today·subjective context의 값과 오류는 `contracts/`, 수동 HTTP 요청·응답은 `schemas/manual.py`에 있습니다. 원본 글·반응·프로필 업무 흐름은 아래 B5-B2~B6 적용 범위로 이어지며 agent 도구와 Relationship/projection 전환은 아직 남아 있습니다. immutable SQLite v7→v8와 Alembic 0088의 subjective-context import는 같은 클래스와 schema helper의 호환만 남습니다. 기존 공통 model export도 같은 클래스를 사용하고 G5에서 최종 조립 위치를 정리합니다.
 
-> **AR-B5-B1/B2 Social 읽기 적용 범위:** `repository/{posts,profiles,media,inbox}.py`는 Social 테이블의 실제 SQL을 소유하고, `service/notifications.py`는 수신자·자기 알림 판단을 수행합니다. `service/posts.py`는 게시물·스레드 읽기, `service/visibility.py`는 삭제·신고·인용·조상 게시물 공개 판단, `service/presentation.py`는 응답 조립을 담당합니다. User와 Character 조회는 각 소유 도메인의 service를 같은 Session으로 호출합니다. 멘션 조회의 한 번의 SQL, 입력 순서·삭제/정지 필터와 nullable 조회를 유지하며, 조회 협력은 flush/commit을 추가하지 않습니다. 원본 글·반응은 `service/timeline.py`, 프로필·팔로우는 `service/profiles.py`가 현재 실제 업무 구현을 소유합니다. Feed 목록·following은 `service/feed.py`, Inbox 목록·읽음 판단은 `service/inbox.py`에 있습니다. Today 집계·검색·agent 도구와 HTTP 연결은 이어지는 B5에서 이전합니다.
+> **AR-B5-B1/B2 Social 읽기 적용 범위:** `repository/{posts,profiles,media,inbox}.py`는 Social 테이블의 실제 SQL을 소유하고, `service/notifications.py`는 수신자·자기 알림 판단을 수행합니다. `service/posts.py`는 게시물·스레드 읽기, `service/visibility.py`는 삭제·신고·인용·조상 게시물 공개 판단, `service/presentation.py`는 응답 조립을 담당합니다. User와 Character 조회는 각 소유 도메인의 service를 같은 Session으로 호출합니다. 멘션 조회의 한 번의 SQL, 입력 순서·삭제/정지 필터와 nullable 조회를 유지하며, 조회 협력은 flush/commit을 추가하지 않습니다. 원본 글·반응은 `service/timeline.py`, 프로필·팔로우는 `service/profiles.py`가 현재 실제 업무 구현을 소유합니다. Feed 목록·following은 `service/feed.py`, Inbox 목록·읽음 판단은 `service/inbox.py`에 있습니다. 기본 검색·Today 순위는 `service/discovery.py`가 담당합니다. World Feed 검색·agent 도구와 HTTP 연결은 이어지는 B5에서 이전합니다.
 
 > **Social 저장과 협력:** `service/source_posts.py`는 원본 글·타임라인 글 생성, `repository/reactions.py`는 반응·신고 저장, `repository/profiles.py`는 팔로우 저장을 소유합니다. 이미 검증된 actor의 id/name/display_name을 읽는 협력은 외부 ORM 조회를 대신하는 우회 저장소가 아닙니다. `service/joint_posts.py`의 각 필드 대입과 `notifications.ensure_joint_started_notification`의 query/add는 기존 공동 활동 caller의 Session과 저장 순서를 유지합니다.
 
@@ -559,3 +559,12 @@ Feed 목록과 following 권한은 `social/service/feed.py`가 소유한다. 현
 Inbox의 없는 알림 오류와 응답·읽음 흐름은 `social/service/inbox.py`에서 찾는다. `runtime/social/inbox.py`의 조회는 Character 소유권 subquery와 Notification을 기존 한 번의 SQL로 연결한다. 소유 Character를 먼저 별도 조회해 ID 목록으로 바꾸지 않으므로 쿼리 수와 읽기 시점이 같다. 이 조회는 `UserInboxReads` 계약으로 전달하며 runtime에서 알림 상태를 변경하지 않는다.
 
 읽음 대입·commit·refresh는 Social `service/notifications.py`가 실제로 수행한다. 이 경로는 원래 deferred write 문맥에서도 명시적으로 commit하던 동작을 유지한다. 새 소스 작성의 flush/finish_write 계약과 임의로 같게 바꾸지 않는다. Character Inbox의 명시적 User 또는 Character recipient 범위와 상위 caller의 기존 인증 조건도 유지한다.
+
+
+### Social 검색과 Today 순위
+
+기본 검색 입력·현재 공개 판단·응답과 Today 활동 점수·동점 정렬은 `social/service/discovery.py`의 실제 정책이다. Character 텍스트 검색은 `characters/service/search.py`가 소유하고, Post와 Character 이름을 함께 찾는 SQL 및 Character와 활동 로그의 집계는 `runtime/social/discovery.py`에서 한 번의 기존 쿼리로 연결한다. 공통 LIKE token/escape는 `core/search_text.py`에 한 번만 정의한다. `%`·`_`·역슬래시를 새 wildcard 문법으로 해석하지 않는다.
+
+Today 인기 root Post의 SQL은 Social repository에 있고 공개 응답·반응 점수는 Feed service가 결정한다. 활동 순위의 KST 자정·포스트/대꾸/좋아요 가중치·이름에 따른 동점 순서를 유지한다. 이 전역 Today 순위는 Chat 근거용의 World 범위 Today SNS snapshot과 서로 다른 기존 기능이므로 합치지 않는다.
+
+현재 AgentActivityLog와 hidden-action 상수는 AR-B4-C 이전 대상이다. 그 두 원래 조회 의존은 runtime의 정확한 임시 소비자로 기록하고 Social 도메인이 옛 model/CRUD를 다시 import하지 않는다. 이 조회는 provider 호출이나 commit을 만들지 않는다.

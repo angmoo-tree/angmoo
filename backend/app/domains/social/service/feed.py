@@ -1,4 +1,6 @@
 """Feed selection, owner authorization and public response composition."""
+from datetime import UTC, datetime, time
+from app.core import agent_activity_schedule as agent_activity_policy
 from sqlalchemy.orm import Session
 from app.domains.social.contracts.actors import SocialUser
 from app.domains.social.schemas import community as schemas
@@ -96,4 +98,41 @@ def list_character_following_feed(
             if _is_post_public_context_visible(db, post)
         ],
         next_cursor=next_cursor,
+    )
+
+
+def list_today_popular_posts(
+    db: Session, *, limit: int = 2
+) -> list[schemas.PostSummary]:
+    day_start = _today_start_utc()
+    posts = post_repository.list_today_root_posts(db, day_start=day_start)
+    ranked_posts = [
+        summary
+        for summary in (
+            _post_summary(db, post)
+            for post in posts
+            if _is_post_public_context_visible(db, post)
+        )
+        if _post_reaction_score(summary) > 0
+    ]
+    safe_limit = max(1, min(limit, 10))
+    return sorted(
+        ranked_posts,
+        key=lambda post: (-_post_reaction_score(post), post.created_at),
+    )[:safe_limit]
+
+
+def _today_start_utc() -> datetime:
+    local_now = datetime.now(tz=agent_activity_policy.APP_TIMEZONE)
+    return datetime.combine(
+        local_now.date(), time.min, tzinfo=agent_activity_policy.APP_TIMEZONE
+    ).astimezone(UTC)
+
+
+def _post_reaction_score(post: schemas.PostSummary) -> int:
+    return (
+        post.like_count * 2
+        + post.reply_count
+        + post.repost_count * 2
+        + post.quote_count * 2
     )

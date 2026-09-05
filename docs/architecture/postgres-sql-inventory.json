@@ -628,16 +628,16 @@
     {
       "markers": {
         "advisory_lock": [
-          321
+          307
         ],
         "driver_or_url": [
-          311
+          297
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/social/repository/posts.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "a4a17225d2c7435d8412e82128b1e589ab80403d4b87db27a098642695a9fecb",
+      "source_sha256": "6a8f18c435d62e47d6aeaf6233f3dd24df4595cdecd3891bb2cebb61f598cad8",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

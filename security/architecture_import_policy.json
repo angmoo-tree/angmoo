@@ -1037,6 +1037,23 @@
           "imported": "app.services.community_abuse_quota"
         }
       ]
+    },
+    {
+      "id": "ar-b5-discovery-existing-activity-read",
+      "owner_stage": "L6",
+      "reason": "The original Today aggregate joins Character with the still-unmigrated AgentActivityLog and hidden-action set. Only the exact same read dependencies move into runtime composition; no new domain code consumes legacy implementations.",
+      "removal_condition": "AR-B4-C moves AgentActivityLog and its hidden-action constants and updates this exact Social discovery consumer, retaining query shape and Session.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.social.discovery",
+          "imported": "app.cruds.agents"
+        },
+        {
+          "importer": "app.runtime.social.discovery",
+          "imported": "app.models.agent_runs"
+        }
+      ]
     }
   ],
   "legacy_module_cycles": [],
@@ -1105,6 +1122,7 @@
       "app.domains.characters.service.persona",
       "app.domains.characters.service.profile",
       "app.domains.characters.service.promotion",
+      "app.domains.characters.service.search",
       "app.domains.characters.service.seed",
       "app.domains.characters.service.state",
       "app.domains.characters.service.world_lifecycle",
@@ -1138,6 +1156,7 @@
       "app.domains.social.constants",
       "app.domains.social.contracts",
       "app.domains.social.contracts.actors",
+      "app.domains.social.contracts.discovery",
       "app.domains.social.contracts.inbox",
       "app.domains.social.contracts.inbox_reads",
       "app.domains.social.contracts.observations",
@@ -1165,6 +1184,7 @@
       "app.domains.social.schemas.manual",
       "app.domains.social.service",
       "app.domains.social.service.activity_results",
+      "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
       "app.domains.social.service.inbox",
       "app.domains.social.service.joint_posts",
@@ -1244,6 +1264,7 @@
       "app.domains.characters.service.persona",
       "app.domains.characters.service.profile",
       "app.domains.characters.service.promotion",
+      "app.domains.characters.service.search",
       "app.domains.characters.service.seed",
       "app.domains.characters.service.state",
       "app.domains.characters.service.world_lifecycle",
@@ -1266,6 +1287,7 @@
       "app.domains.runtime.schemas",
       "app.domains.social.contracts",
       "app.domains.social.contracts.actors",
+      "app.domains.social.contracts.discovery",
       "app.domains.social.contracts.inbox",
       "app.domains.social.contracts.inbox_reads",
       "app.domains.social.contracts.observations",
@@ -1280,6 +1302,7 @@
       "app.domains.social.schemas.feed",
       "app.domains.social.schemas.manual",
       "app.domains.social.service.activity_results",
+      "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
       "app.domains.social.service.inbox",
       "app.domains.social.service.joint_posts",
@@ -2464,6 +2487,14 @@
         "reason": "Remaining old HTTP and agent callers use identical actual Feed/Inbox service functions while their source transition is pending.",
         "removal_condition": "Move the remaining consumers to canonical Social services and remove this exact import.",
         "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.characters.service.search",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "The old CRUD name is the same original Character-owned text search; its remaining caller migration is tracked explicitly.",
+        "removal_condition": "Migrate exact legacy CRUD search callers and remove the alias.",
+        "review_date": "2026-09-06"
       }
     ]
   }

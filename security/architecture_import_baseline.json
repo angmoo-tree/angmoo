@@ -1,7 +1,7 @@
 {
-  "edge_count": 2215,
-  "external_import_count": 2132,
-  "module_count": 673,
+  "edge_count": 2239,
+  "external_import_count": 2142,
+  "module_count": 677,
   "modules": [
     {
       "external_imports": [],
@@ -828,6 +828,7 @@
         "app.cruds.agents",
         "app.domains.characters.exceptions",
         "app.domains.characters.service.profile",
+        "app.domains.characters.service.search",
         "app.domains.characters.service.state",
         "app.domains.identity.service.profile",
         "app.domains.social.repository.inbox",
@@ -840,6 +841,7 @@
         "app.domains.social.utils.cursors",
         "app.domains.social.utils.text",
         "app.models",
+        "app.runtime.social.discovery",
         "app.runtime.social.inbox",
         "app.schemas"
       ],
@@ -1215,6 +1217,19 @@
       ],
       "module": "app.domains.characters.service.promotion",
       "path": "backend/app/domains/characters/service/promotion.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.search_text",
+        "app.domains.characters.models"
+      ],
+      "module": "app.domains.characters.service.search",
+      "path": "backend/app/domains/characters/service/search.py",
       "wildcard_imports": []
     },
     {
@@ -4262,6 +4277,19 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.domains.social.contracts.discovery",
+      "path": "backend/app/domains/social/contracts/discovery.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "dataclasses",
         "datetime"
@@ -4564,6 +4592,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.core.search_text",
         "app.domains.social.models.posts",
         "app.domains.social.schemas.community"
       ],
@@ -4678,6 +4707,26 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.domains.characters.service.search",
+        "app.domains.social.contracts.discovery",
+        "app.domains.social.schemas.community",
+        "app.domains.social.service.feed",
+        "app.domains.social.service.presentation",
+        "app.domains.social.service.profiles",
+        "app.domains.social.service.visibility",
+        "app.domains.social.utils.limits"
+      ],
+      "module": "app.domains.social.service.discovery",
+      "path": "backend/app/domains/social/service/discovery.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.agent_activity_schedule",
         "app.domains.characters.service.profile",
         "app.domains.social.contracts.actors",
         "app.domains.social.exceptions",
@@ -8605,6 +8654,26 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.search_text",
+        "app.cruds.agents",
+        "app.domains.characters.models",
+        "app.domains.social.contracts.discovery",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.posts",
+        "app.domains.social.service.discovery",
+        "app.models.agent_runs"
+      ],
+      "module": "app.runtime.social.discovery",
+      "path": "backend/app/runtime/social/discovery.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
@@ -9429,6 +9498,7 @@
         "app.domains.social.service.visibility",
         "app.domains.social.utils.limits",
         "app.models",
+        "app.runtime.social.discovery",
         "app.runtime.social.inbox",
         "app.runtime.social.timeline",
         "app.schemas",
