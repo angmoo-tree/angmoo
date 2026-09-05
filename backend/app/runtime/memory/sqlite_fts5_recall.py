@@ -21,16 +21,14 @@ from threading import RLock
 import unicodedata
 
 from app.core.search_text import normalize_search_text
-from app.domains.memory.public import (
-    MEMORY_RECALL_GENERATION,
-    MEMORY_RECALL_SCHEMA_VERSION,
-    MemoryRecallCandidate,
-    MemoryRecallDoctor,
-    MemoryRecallDocument,
-    MemoryRecallSearchQuery,
-    MemorySourceTypeV1,
-    RecallDocumentKind,
-)
+from app.domains.memory.contracts.recall import MEMORY_RECALL_GENERATION
+from app.domains.memory.contracts.recall import MEMORY_RECALL_SCHEMA_VERSION
+from app.domains.memory.contracts.recall import MemoryRecallCandidate
+from app.domains.memory.contracts.recall import MemoryRecallDoctor
+from app.domains.memory.contracts.recall import MemoryRecallDocument
+from app.domains.memory.contracts.recall import MemoryRecallSearchQuery
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+from app.domains.memory.contracts.recall import RecallDocumentKind
 from app.domains.runtime.ports.runtime_data_path import RuntimeDataPathPort
 
 

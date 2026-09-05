@@ -27,12 +27,10 @@ CORPUS_PATH = (
 )
 
 from app.domains.chat.domain import RetrievalRoute  # noqa: E402
-from app.domains.memory.public import (  # noqa: E402
-    CANONICAL_PLAN_VERSION,
-    CANONICAL_PRIMITIVE_REGISTRY,
-    MAX_CANONICAL_PLAN_STEPS,
-    canonical_retrieval_plan_response_schema,
-)
+from app.domains.memory.contracts.retrieval_plan import CANONICAL_PLAN_VERSION
+from app.domains.memory.service.recall import CANONICAL_PRIMITIVE_REGISTRY
+from app.domains.memory.contracts.retrieval_plan import MAX_CANONICAL_PLAN_STEPS
+from app.domains.memory.policies.retrieval_planner import canonical_retrieval_plan_response_schema
 from app.runtime.migrations.sqlite_versions.registry import (  # noqa: E402
     load_sqlite_manifest,
 )

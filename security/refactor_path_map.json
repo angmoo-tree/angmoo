@@ -397,7 +397,11 @@
     "backend/app/domains/memory/infrastructure/activation.py": "backend/app/domains/memory/repository/activation.py",
     "backend/app/api/v1/routes/memory.py": "backend/app/domains/memory/router.py",
     "backend/app/runtime/memory/sqlalchemy_recall.py": "backend/app/domains/memory/repository/recall.py",
-    "backend/app/runtime/memory/sqlalchemy_source_reader.py": "backend/app/domains/memory/service/source_evidence.py"
+    "backend/app/runtime/memory/sqlalchemy_source_reader.py": "backend/app/domains/memory/service/source_evidence.py",
+    "backend/app/domains/memory/infrastructure/maintenance_unit_of_work.py": "backend/app/domains/memory/repository/transaction.py",
+    "backend/app/domains/memory/public.py": "backend/app/domains/memory/contracts/provenance.py",
+    "backend/app/domains/memory/domain/__init__.py": "backend/app/domains/memory/contracts/__init__.py",
+    "backend/app/domains/memory/api/__init__.py": "backend/app/domains/memory/schemas/__init__.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -32309,6 +32313,1139 @@
         }
       ],
       "remaining": "Final old aggregates/compatibility and sequential B4-B6 integration/capture remain."
+    },
+    "AR-B7-A12": {
+      "status": "SOURCE PREPARATION; 273 exact aggregate object identities and full UoW AST preserved; broad295 PASS/2 warnings/118.57s; boundary723/2420/legacy222; sequential capture/full integration pending",
+      "scope": "Remove unused Memory public/domain/API aggregate files; keep ordinary role package markers and exact historical schema aliases. Existing transaction implementation moves unchanged to repository/transaction.py.",
+      "aggregate_exports": [
+        {
+          "old": "app.domains.memory.public::CANONICAL_PRIMITIVE_REGISTRY",
+          "new": "app.domains.memory.service.recall::CANONICAL_PRIMITIVE_REGISTRY"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalPrimitiveSpec",
+          "new": "app.domains.memory.service.recall::CanonicalPrimitiveSpec"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalPlanExecutionContext",
+          "new": "app.domains.memory.service.retrieval_plan::CanonicalPlanExecutionContext"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalPlanExecutionResult",
+          "new": "app.domains.memory.service.retrieval_plan::CanonicalPlanExecutionResult"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalPlanStepExecution",
+          "new": "app.domains.memory.service.retrieval_plan::CanonicalPlanStepExecution"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalPlanValidationResult",
+          "new": "app.domains.memory.service.retrieval_plan::CanonicalPlanValidationResult"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalRetrievalPlanExecutor",
+          "new": "app.domains.memory.service.retrieval_plan::CanonicalRetrievalPlanExecutor"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalRetrievalPlanValidator",
+          "new": "app.domains.memory.service.retrieval_plan::CanonicalRetrievalPlanValidator"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalRecallService",
+          "new": "app.domains.memory.service.recall::CanonicalRecallService"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalRecallValidator",
+          "new": "app.domains.memory.service.recall::CanonicalRecallValidator"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryConsolidationService",
+          "new": "app.domains.memory.service.consolidation::MemoryConsolidationService"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryScopeService",
+          "new": "app.domains.memory.service.scope::MemoryScopeService"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryReadService",
+          "new": "app.domains.memory.service.inspector::MemoryReadService"
+        },
+        {
+          "old": "app.domains.memory.public::memory_lifecycle",
+          "new": "app.domains.memory.service.inspector::memory_lifecycle"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryWriteLifecycleService",
+          "new": "app.domains.memory.service.items::MemoryWriteLifecycleService"
+        },
+        {
+          "old": "app.domains.memory.public::CANONICAL_PLAN_VERSION",
+          "new": "app.domains.memory.contracts.retrieval_plan::CANONICAL_PLAN_VERSION"
+        },
+        {
+          "old": "app.domains.memory.public::MAINTENANCE_LEASE_DURATION",
+          "new": "app.domains.memory.policies.consolidation::MAINTENANCE_LEASE_DURATION"
+        },
+        {
+          "old": "app.domains.memory.public::MAX_CANONICAL_PLAN_STEPS",
+          "new": "app.domains.memory.contracts.retrieval_plan::MAX_CANONICAL_PLAN_STEPS"
+        },
+        {
+          "old": "app.domains.memory.public::MAX_CANONICAL_SEARCH_TEXT_CHARACTERS",
+          "new": "app.domains.memory.policies.retrieval_planner::MAX_CANONICAL_SEARCH_TEXT_CHARACTERS"
+        },
+        {
+          "old": "app.domains.memory.public::MAX_HOT_BRIEF_SOURCE_ITEMS",
+          "new": "app.domains.memory.policies.consolidation::MAX_HOT_BRIEF_SOURCE_ITEMS"
+        },
+        {
+          "old": "app.domains.memory.public::MAX_HOT_BRIEF_SUMMARY_LENGTH",
+          "new": "app.domains.memory.policies.consolidation::MAX_HOT_BRIEF_SUMMARY_LENGTH"
+        },
+        {
+          "old": "app.domains.memory.public::MAX_MAINTENANCE_ATTEMPTS",
+          "new": "app.domains.memory.policies.consolidation::MAX_MAINTENANCE_ATTEMPTS"
+        },
+        {
+          "old": "app.domains.memory.public::MAX_MAINTENANCE_BATCH_CANDIDATES",
+          "new": "app.domains.memory.policies.consolidation::MAX_MAINTENANCE_BATCH_CANDIDATES"
+        },
+        {
+          "old": "app.domains.memory.public::MAX_MAINTENANCE_PROVIDER_INPUT_CHARACTERS",
+          "new": "app.domains.memory.policies.consolidation::MAX_MAINTENANCE_PROVIDER_INPUT_CHARACTERS"
+        },
+        {
+          "old": "app.domains.memory.public::MAX_SHUTDOWN_DRAIN_JOBS",
+          "new": "app.domains.memory.policies.consolidation::MAX_SHUTDOWN_DRAIN_JOBS"
+        },
+        {
+          "old": "app.domains.memory.public::MEMORY_CONSOLIDATION_CONTRACT_VERSION",
+          "new": "app.domains.memory.policies.consolidation::MEMORY_CONSOLIDATION_CONTRACT_VERSION"
+        },
+        {
+          "old": "app.domains.memory.public::MEMORY_CONSOLIDATION_POLICY_V1",
+          "new": "app.domains.memory.policies.consolidation::MEMORY_CONSOLIDATION_POLICY_V1"
+        },
+        {
+          "old": "app.domains.memory.public::MEMORY_CONSOLIDATION_PROVIDER_OUTPUT_VERSION",
+          "new": "app.domains.memory.policies.consolidation_output::MEMORY_CONSOLIDATION_PROVIDER_OUTPUT_VERSION"
+        },
+        {
+          "old": "app.domains.memory.public::MEMORY_HOT_BRIEF_CONTRACT_VERSION",
+          "new": "app.domains.memory.policies.consolidation::MEMORY_HOT_BRIEF_CONTRACT_VERSION"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalPlanContractError",
+          "new": "app.domains.memory.contracts.retrieval_plan::CanonicalPlanContractError"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalPlanStep",
+          "new": "app.domains.memory.contracts.retrieval_plan::CanonicalPlanStep"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalRetrievalPlan",
+          "new": "app.domains.memory.contracts.retrieval_plan::CanonicalRetrievalPlan"
+        },
+        {
+          "old": "app.domains.memory.public::canonical_retrieval_plan_response_schema",
+          "new": "app.domains.memory.policies.retrieval_planner::canonical_retrieval_plan_response_schema"
+        },
+        {
+          "old": "app.domains.memory.public::parse_canonical_retrieval_plan_payload",
+          "new": "app.domains.memory.policies.retrieval_planner::parse_canonical_retrieval_plan_payload"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalRecallOperation",
+          "new": "app.domains.memory.contracts.recall::CanonicalRecallOperation"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalRecallQuery",
+          "new": "app.domains.memory.contracts.recall::CanonicalRecallQuery"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalRecallRecord",
+          "new": "app.domains.memory.contracts.recall::CanonicalRecallRecord"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalRecallResult",
+          "new": "app.domains.memory.contracts.recall::CanonicalRecallResult"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalRecallStatus",
+          "new": "app.domains.memory.contracts.recall::CanonicalRecallStatus"
+        },
+        {
+          "old": "app.domains.memory.public::DEFAULT_MEMORY_RETENTION_DAYS",
+          "new": "app.domains.memory.policies.retention::DEFAULT_MEMORY_RETENTION_DAYS"
+        },
+        {
+          "old": "app.domains.memory.public::MAX_CANONICAL_RECALL_RESULTS",
+          "new": "app.domains.memory.contracts.recall::MAX_CANONICAL_RECALL_RESULTS"
+        },
+        {
+          "old": "app.domains.memory.public::MAX_MEMORY_SUMMARY_LENGTH",
+          "new": "app.domains.memory.contracts.items::MAX_MEMORY_SUMMARY_LENGTH"
+        },
+        {
+          "old": "app.domains.memory.public::MEMORY_RECALL_CONTRACT_VERSION",
+          "new": "app.domains.memory.contracts.recall::MEMORY_RECALL_CONTRACT_VERSION"
+        },
+        {
+          "old": "app.domains.memory.public::MEMORY_RECALL_GENERATION",
+          "new": "app.domains.memory.contracts.recall::MEMORY_RECALL_GENERATION"
+        },
+        {
+          "old": "app.domains.memory.public::MEMORY_RECALL_SCHEMA_VERSION",
+          "new": "app.domains.memory.contracts.recall::MEMORY_RECALL_SCHEMA_VERSION"
+        },
+        {
+          "old": "app.domains.memory.public::MEMORY_WRITE_CONTRACT_VERSION",
+          "new": "app.domains.memory.contracts.items::MEMORY_WRITE_CONTRACT_VERSION"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryCandidateRecord",
+          "new": "app.domains.memory.contracts.items::MemoryCandidateRecord"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryCandidateStatus",
+          "new": "app.domains.memory.contracts.provenance::MemoryCandidateStatus"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryConsolidationDecision",
+          "new": "app.domains.memory.policies.consolidation::MemoryConsolidationDecision"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryConsolidationOutcome",
+          "new": "app.domains.memory.policies.consolidation::MemoryConsolidationOutcome"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryConsolidationPolicy",
+          "new": "app.domains.memory.policies.consolidation::MemoryConsolidationPolicy"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryConsolidationRunResult",
+          "new": "app.domains.memory.policies.consolidation::MemoryConsolidationRunResult"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryConsolidationScheduleResult",
+          "new": "app.domains.memory.policies.consolidation::MemoryConsolidationScheduleResult"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryConflictError",
+          "new": "app.domains.memory.exceptions::MemoryConflictError"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryDomainError",
+          "new": "app.domains.memory.exceptions::MemoryDomainError"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryHotBriefStatus",
+          "new": "app.domains.memory.contracts.provenance::MemoryHotBriefStatus"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryHotBriefRecord",
+          "new": "app.domains.memory.policies.consolidation::MemoryHotBriefRecord"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryItemStatus",
+          "new": "app.domains.memory.contracts.provenance::MemoryItemStatus"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryEvidenceAvailability",
+          "new": "app.domains.memory.contracts.inspector::MemoryEvidenceAvailability"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryEvidenceRead",
+          "new": "app.domains.memory.contracts.inspector::MemoryEvidenceRead"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryItemDetail",
+          "new": "app.domains.memory.contracts.inspector::MemoryItemDetail"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryItemEvidenceRecord",
+          "new": "app.domains.memory.contracts.inspector::MemoryItemEvidenceRecord"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryItemPage",
+          "new": "app.domains.memory.contracts.inspector::MemoryItemPage"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryLifecycle",
+          "new": "app.domains.memory.contracts.inspector::MemoryLifecycle"
+        },
+        {
+          "old": "app.domains.memory.public::MEMORY_READ_CONTRACT_VERSION",
+          "new": "app.domains.memory.contracts.inspector::MEMORY_READ_CONTRACT_VERSION"
+        },
+        {
+          "old": "app.domains.memory.public::MAX_MEMORY_READ_PAGE_SIZE",
+          "new": "app.domains.memory.contracts.inspector::MAX_MEMORY_READ_PAGE_SIZE"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryItemRecord",
+          "new": "app.domains.memory.contracts.items::MemoryItemRecord"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryJobStatus",
+          "new": "app.domains.memory.contracts.provenance::MemoryJobStatus"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryKindV1",
+          "new": "app.domains.memory.contracts.provenance::MemoryKindV1"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryMaintenanceLane",
+          "new": "app.domains.memory.policies.consolidation::MemoryMaintenanceLane"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryMaintenanceProviderTelemetry",
+          "new": "app.domains.memory.policies.consolidation::MemoryMaintenanceProviderTelemetry"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryMaintenanceSnapshot",
+          "new": "app.domains.memory.policies.consolidation::MemoryMaintenanceSnapshot"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryNotFoundError",
+          "new": "app.domains.memory.exceptions::MemoryNotFoundError"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryProviderMode",
+          "new": "app.domains.memory.contracts.provenance::MemoryProviderMode"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryScope",
+          "new": "app.domains.memory.contracts.scope::MemoryScope"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryScopeError",
+          "new": "app.domains.memory.exceptions::MemoryScopeError"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryScopeSetting",
+          "new": "app.domains.memory.contracts.scope::MemoryScopeSetting"
+        },
+        {
+          "old": "app.domains.memory.public::MemorySourceTypeV1",
+          "new": "app.domains.memory.contracts.provenance::MemorySourceTypeV1"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryValidationError",
+          "new": "app.domains.memory.exceptions::MemoryValidationError"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryWriteOutcome",
+          "new": "app.domains.memory.contracts.items::MemoryWriteOutcome"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryWriteResult",
+          "new": "app.domains.memory.contracts.items::MemoryWriteResult"
+        },
+        {
+          "old": "app.domains.memory.public::MemorySummaryProposal",
+          "new": "app.domains.memory.policies.consolidation_output::MemorySummaryProposal"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryRecallCandidate",
+          "new": "app.domains.memory.contracts.recall::MemoryRecallCandidate"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryRecallDoctor",
+          "new": "app.domains.memory.contracts.recall::MemoryRecallDoctor"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryRecallDocument",
+          "new": "app.domains.memory.contracts.recall::MemoryRecallDocument"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryRecallSearchQuery",
+          "new": "app.domains.memory.contracts.recall::MemoryRecallSearchQuery"
+        },
+        {
+          "old": "app.domains.memory.public::RecallDocumentKind",
+          "new": "app.domains.memory.contracts.recall::RecallDocumentKind"
+        },
+        {
+          "old": "app.domains.memory.public::SOURCE_KIND_BY_TYPE",
+          "new": "app.domains.memory.contracts.recall::SOURCE_KIND_BY_TYPE"
+        },
+        {
+          "old": "app.domains.memory.public::memory_candidate_idempotency_key",
+          "new": "app.domains.memory.contracts.items::memory_candidate_idempotency_key"
+        },
+        {
+          "old": "app.domains.memory.public::memory_correction_item_id",
+          "new": "app.domains.memory.contracts.items::memory_correction_item_id"
+        },
+        {
+          "old": "app.domains.memory.public::normalize_memory_idempotency_key",
+          "new": "app.domains.memory.contracts.items::normalize_memory_idempotency_key"
+        },
+        {
+          "old": "app.domains.memory.public::normalize_memory_source_id",
+          "new": "app.domains.memory.contracts.items::normalize_memory_source_id"
+        },
+        {
+          "old": "app.domains.memory.public::normalize_memory_summary",
+          "new": "app.domains.memory.contracts.items::normalize_memory_summary"
+        },
+        {
+          "old": "app.domains.memory.public::validate_source_digest",
+          "new": "app.domains.memory.contracts.items::validate_source_digest"
+        },
+        {
+          "old": "app.domains.memory.public::validate_source_kind",
+          "new": "app.domains.memory.contracts.items::validate_source_kind"
+        },
+        {
+          "old": "app.domains.memory.public::is_memory_expired",
+          "new": "app.domains.memory.policies.retention::is_memory_expired"
+        },
+        {
+          "old": "app.domains.memory.public::validate_memory_item_shape",
+          "new": "app.domains.memory.policies.validation::validate_memory_item_shape"
+        },
+        {
+          "old": "app.domains.memory.public::validate_retention_days",
+          "new": "app.domains.memory.policies.retention::validate_retention_days"
+        },
+        {
+          "old": "app.domains.memory.public::deterministic_hot_brief",
+          "new": "app.domains.memory.policies.consolidation::deterministic_hot_brief"
+        },
+        {
+          "old": "app.domains.memory.public::evaluate_memory_consolidation",
+          "new": "app.domains.memory.policies.consolidation::evaluate_memory_consolidation"
+        },
+        {
+          "old": "app.domains.memory.public::memory_consolidation_response_schema",
+          "new": "app.domains.memory.policies.consolidation_output::memory_consolidation_response_schema"
+        },
+        {
+          "old": "app.domains.memory.public::memory_item_high_watermark",
+          "new": "app.domains.memory.policies.consolidation::memory_item_high_watermark"
+        },
+        {
+          "old": "app.domains.memory.public::memory_item_set_digest",
+          "new": "app.domains.memory.policies.consolidation::memory_item_set_digest"
+        },
+        {
+          "old": "app.domains.memory.public::parse_memory_consolidation_payload",
+          "new": "app.domains.memory.policies.consolidation_output::parse_memory_consolidation_payload"
+        },
+        {
+          "old": "app.domains.memory.public::validate_consolidation_summary",
+          "new": "app.domains.memory.policies.consolidation::validate_consolidation_summary"
+        },
+        {
+          "old": "app.domains.memory.public::MAX_CANONICAL_PLANNER_MESSAGE_CHARACTERS",
+          "new": "app.domains.memory.contracts.planner_provider::MAX_CANONICAL_PLANNER_MESSAGE_CHARACTERS"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalRecallRepositoryPort",
+          "new": "app.domains.memory.contracts.recall_store::CanonicalRecallRepositoryPort"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalMemoryEvidence",
+          "new": "app.domains.memory.contracts.source_evidence::CanonicalMemoryEvidence"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalPlannerEntity",
+          "new": "app.domains.memory.contracts.planner_provider::CanonicalPlannerEntity"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalPlannerOutputError",
+          "new": "app.domains.memory.contracts.planner_provider::CanonicalPlannerOutputError"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalPlannerProviderPort",
+          "new": "app.domains.memory.contracts.planner_provider::CanonicalPlannerProviderPort"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalPlannerProviderResult",
+          "new": "app.domains.memory.contracts.planner_provider::CanonicalPlannerProviderResult"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalPlannerRelationship",
+          "new": "app.domains.memory.contracts.planner_provider::CanonicalPlannerRelationship"
+        },
+        {
+          "old": "app.domains.memory.public::CanonicalPlannerRequest",
+          "new": "app.domains.memory.contracts.planner_provider::CanonicalPlannerRequest"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryConsolidationProviderError",
+          "new": "app.domains.memory.contracts.consolidation_provider::MemoryConsolidationProviderError"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryConsolidationProviderPort",
+          "new": "app.domains.memory.contracts.consolidation_provider::MemoryConsolidationProviderPort"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryConsolidationProviderRequest",
+          "new": "app.domains.memory.contracts.consolidation_provider::MemoryConsolidationProviderRequest"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryConsolidationProviderResult",
+          "new": "app.domains.memory.contracts.consolidation_provider::MemoryConsolidationProviderResult"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryConsolidationRepositoryPort",
+          "new": "app.domains.memory.contracts.consolidation_store::MemoryConsolidationRepositoryPort"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryConsolidationSource",
+          "new": "app.domains.memory.contracts.consolidation_provider::MemoryConsolidationSource"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryMaintenanceQueuePort",
+          "new": "app.domains.memory.contracts.maintenance_queue::MemoryMaintenanceQueuePort"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryMaintenanceUnitOfWorkPort",
+          "new": "app.domains.memory.contracts.maintenance_transaction::MemoryMaintenanceUnitOfWorkPort"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryMaintenanceWorkItem",
+          "new": "app.domains.memory.contracts.maintenance_queue::MemoryMaintenanceWorkItem"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryRepositoryPort",
+          "new": "app.domains.memory.contracts.item_store::MemoryRepositoryPort"
+        },
+        {
+          "old": "app.domains.memory.public::MemoryRecallIndexPort",
+          "new": "app.domains.memory.contracts.recall_store::MemoryRecallIndexPort"
+        },
+        {
+          "old": "app.domains.memory.public::MemorySourceEvidenceReaderPort",
+          "new": "app.domains.memory.contracts.source_evidence::MemorySourceEvidenceReaderPort"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryConflictError",
+          "new": "app.domains.memory.exceptions::MemoryConflictError"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryDomainError",
+          "new": "app.domains.memory.exceptions::MemoryDomainError"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryNotFoundError",
+          "new": "app.domains.memory.exceptions::MemoryNotFoundError"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryScopeError",
+          "new": "app.domains.memory.exceptions::MemoryScopeError"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryValidationError",
+          "new": "app.domains.memory.exceptions::MemoryValidationError"
+        },
+        {
+          "old": "app.domains.memory.domain::MAX_MEMORY_SUMMARY_LENGTH",
+          "new": "app.domains.memory.contracts.items::MAX_MEMORY_SUMMARY_LENGTH"
+        },
+        {
+          "old": "app.domains.memory.domain::MEMORY_WRITE_CONTRACT_VERSION",
+          "new": "app.domains.memory.contracts.items::MEMORY_WRITE_CONTRACT_VERSION"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryCandidateRecord",
+          "new": "app.domains.memory.contracts.items::MemoryCandidateRecord"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryItemRecord",
+          "new": "app.domains.memory.contracts.items::MemoryItemRecord"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryWriteOutcome",
+          "new": "app.domains.memory.contracts.items::MemoryWriteOutcome"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryWriteResult",
+          "new": "app.domains.memory.contracts.items::MemoryWriteResult"
+        },
+        {
+          "old": "app.domains.memory.domain::as_utc",
+          "new": "app.domains.memory.contracts.items::as_utc"
+        },
+        {
+          "old": "app.domains.memory.domain::memory_candidate_idempotency_key",
+          "new": "app.domains.memory.contracts.items::memory_candidate_idempotency_key"
+        },
+        {
+          "old": "app.domains.memory.domain::memory_correction_item_id",
+          "new": "app.domains.memory.contracts.items::memory_correction_item_id"
+        },
+        {
+          "old": "app.domains.memory.domain::normalize_memory_idempotency_key",
+          "new": "app.domains.memory.contracts.items::normalize_memory_idempotency_key"
+        },
+        {
+          "old": "app.domains.memory.domain::normalize_memory_source_id",
+          "new": "app.domains.memory.contracts.items::normalize_memory_source_id"
+        },
+        {
+          "old": "app.domains.memory.domain::normalize_memory_summary",
+          "new": "app.domains.memory.contracts.items::normalize_memory_summary"
+        },
+        {
+          "old": "app.domains.memory.domain::validate_source_digest",
+          "new": "app.domains.memory.contracts.items::validate_source_digest"
+        },
+        {
+          "old": "app.domains.memory.domain::validate_source_kind",
+          "new": "app.domains.memory.contracts.items::validate_source_kind"
+        },
+        {
+          "old": "app.domains.memory.domain::validate_memory_item_shape",
+          "new": "app.domains.memory.policies.validation::validate_memory_item_shape"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryCandidateStatus",
+          "new": "app.domains.memory.contracts.provenance::MemoryCandidateStatus"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryHotBriefStatus",
+          "new": "app.domains.memory.contracts.provenance::MemoryHotBriefStatus"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryItemStatus",
+          "new": "app.domains.memory.contracts.provenance::MemoryItemStatus"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryJobStatus",
+          "new": "app.domains.memory.contracts.provenance::MemoryJobStatus"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryKindV1",
+          "new": "app.domains.memory.contracts.provenance::MemoryKindV1"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryProviderMode",
+          "new": "app.domains.memory.contracts.provenance::MemoryProviderMode"
+        },
+        {
+          "old": "app.domains.memory.domain::MemorySourceTypeV1",
+          "new": "app.domains.memory.contracts.provenance::MemorySourceTypeV1"
+        },
+        {
+          "old": "app.domains.memory.domain::DEFAULT_MEMORY_RETENTION_DAYS",
+          "new": "app.domains.memory.policies.retention::DEFAULT_MEMORY_RETENTION_DAYS"
+        },
+        {
+          "old": "app.domains.memory.domain::is_memory_expired",
+          "new": "app.domains.memory.policies.retention::is_memory_expired"
+        },
+        {
+          "old": "app.domains.memory.domain::validate_retention_days",
+          "new": "app.domains.memory.policies.retention::validate_retention_days"
+        },
+        {
+          "old": "app.domains.memory.domain::CANONICAL_PLAN_VERSION",
+          "new": "app.domains.memory.contracts.retrieval_plan::CANONICAL_PLAN_VERSION"
+        },
+        {
+          "old": "app.domains.memory.domain::MAX_CANONICAL_PLAN_STEPS",
+          "new": "app.domains.memory.contracts.retrieval_plan::MAX_CANONICAL_PLAN_STEPS"
+        },
+        {
+          "old": "app.domains.memory.domain::CanonicalPlanContractError",
+          "new": "app.domains.memory.contracts.retrieval_plan::CanonicalPlanContractError"
+        },
+        {
+          "old": "app.domains.memory.domain::CanonicalPlanStep",
+          "new": "app.domains.memory.contracts.retrieval_plan::CanonicalPlanStep"
+        },
+        {
+          "old": "app.domains.memory.domain::CanonicalRetrievalPlan",
+          "new": "app.domains.memory.contracts.retrieval_plan::CanonicalRetrievalPlan"
+        },
+        {
+          "old": "app.domains.memory.domain::MAX_CANONICAL_SEARCH_TEXT_CHARACTERS",
+          "new": "app.domains.memory.policies.retrieval_planner::MAX_CANONICAL_SEARCH_TEXT_CHARACTERS"
+        },
+        {
+          "old": "app.domains.memory.domain::canonical_retrieval_plan_response_schema",
+          "new": "app.domains.memory.policies.retrieval_planner::canonical_retrieval_plan_response_schema"
+        },
+        {
+          "old": "app.domains.memory.domain::parse_canonical_retrieval_plan_payload",
+          "new": "app.domains.memory.policies.retrieval_planner::parse_canonical_retrieval_plan_payload"
+        },
+        {
+          "old": "app.domains.memory.domain::CanonicalRecallOperation",
+          "new": "app.domains.memory.contracts.recall::CanonicalRecallOperation"
+        },
+        {
+          "old": "app.domains.memory.domain::CanonicalRecallQuery",
+          "new": "app.domains.memory.contracts.recall::CanonicalRecallQuery"
+        },
+        {
+          "old": "app.domains.memory.domain::CanonicalRecallRecord",
+          "new": "app.domains.memory.contracts.recall::CanonicalRecallRecord"
+        },
+        {
+          "old": "app.domains.memory.domain::CanonicalRecallResult",
+          "new": "app.domains.memory.contracts.recall::CanonicalRecallResult"
+        },
+        {
+          "old": "app.domains.memory.domain::CanonicalRecallStatus",
+          "new": "app.domains.memory.contracts.recall::CanonicalRecallStatus"
+        },
+        {
+          "old": "app.domains.memory.domain::MAX_CANONICAL_RECALL_RESULTS",
+          "new": "app.domains.memory.contracts.recall::MAX_CANONICAL_RECALL_RESULTS"
+        },
+        {
+          "old": "app.domains.memory.domain::MEMORY_RECALL_CONTRACT_VERSION",
+          "new": "app.domains.memory.contracts.recall::MEMORY_RECALL_CONTRACT_VERSION"
+        },
+        {
+          "old": "app.domains.memory.domain::MEMORY_RECALL_GENERATION",
+          "new": "app.domains.memory.contracts.recall::MEMORY_RECALL_GENERATION"
+        },
+        {
+          "old": "app.domains.memory.domain::MEMORY_RECALL_SCHEMA_VERSION",
+          "new": "app.domains.memory.contracts.recall::MEMORY_RECALL_SCHEMA_VERSION"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryRecallCandidate",
+          "new": "app.domains.memory.contracts.recall::MemoryRecallCandidate"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryRecallDoctor",
+          "new": "app.domains.memory.contracts.recall::MemoryRecallDoctor"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryRecallDocument",
+          "new": "app.domains.memory.contracts.recall::MemoryRecallDocument"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryRecallSearchQuery",
+          "new": "app.domains.memory.contracts.recall::MemoryRecallSearchQuery"
+        },
+        {
+          "old": "app.domains.memory.domain::RecallDocumentKind",
+          "new": "app.domains.memory.contracts.recall::RecallDocumentKind"
+        },
+        {
+          "old": "app.domains.memory.domain::SOURCE_KIND_BY_TYPE",
+          "new": "app.domains.memory.contracts.recall::SOURCE_KIND_BY_TYPE"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryScope",
+          "new": "app.domains.memory.contracts.scope::MemoryScope"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryScopeSetting",
+          "new": "app.domains.memory.contracts.scope::MemoryScopeSetting"
+        },
+        {
+          "old": "app.domains.memory.domain::MAX_MEMORY_READ_PAGE_SIZE",
+          "new": "app.domains.memory.contracts.inspector::MAX_MEMORY_READ_PAGE_SIZE"
+        },
+        {
+          "old": "app.domains.memory.domain::MEMORY_READ_CONTRACT_VERSION",
+          "new": "app.domains.memory.contracts.inspector::MEMORY_READ_CONTRACT_VERSION"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryEvidenceAvailability",
+          "new": "app.domains.memory.contracts.inspector::MemoryEvidenceAvailability"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryEvidenceRead",
+          "new": "app.domains.memory.contracts.inspector::MemoryEvidenceRead"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryItemDetail",
+          "new": "app.domains.memory.contracts.inspector::MemoryItemDetail"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryItemEvidenceRecord",
+          "new": "app.domains.memory.contracts.inspector::MemoryItemEvidenceRecord"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryItemPage",
+          "new": "app.domains.memory.contracts.inspector::MemoryItemPage"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryLifecycle",
+          "new": "app.domains.memory.contracts.inspector::MemoryLifecycle"
+        },
+        {
+          "old": "app.domains.memory.domain::MAINTENANCE_LEASE_DURATION",
+          "new": "app.domains.memory.policies.consolidation::MAINTENANCE_LEASE_DURATION"
+        },
+        {
+          "old": "app.domains.memory.domain::MAX_HOT_BRIEF_SOURCE_ITEMS",
+          "new": "app.domains.memory.policies.consolidation::MAX_HOT_BRIEF_SOURCE_ITEMS"
+        },
+        {
+          "old": "app.domains.memory.domain::MAX_HOT_BRIEF_SUMMARY_LENGTH",
+          "new": "app.domains.memory.policies.consolidation::MAX_HOT_BRIEF_SUMMARY_LENGTH"
+        },
+        {
+          "old": "app.domains.memory.domain::MAX_MAINTENANCE_ATTEMPTS",
+          "new": "app.domains.memory.policies.consolidation::MAX_MAINTENANCE_ATTEMPTS"
+        },
+        {
+          "old": "app.domains.memory.domain::MAX_MAINTENANCE_BATCH_CANDIDATES",
+          "new": "app.domains.memory.policies.consolidation::MAX_MAINTENANCE_BATCH_CANDIDATES"
+        },
+        {
+          "old": "app.domains.memory.domain::MAX_MAINTENANCE_PROVIDER_INPUT_CHARACTERS",
+          "new": "app.domains.memory.policies.consolidation::MAX_MAINTENANCE_PROVIDER_INPUT_CHARACTERS"
+        },
+        {
+          "old": "app.domains.memory.domain::MAX_SHUTDOWN_DRAIN_JOBS",
+          "new": "app.domains.memory.policies.consolidation::MAX_SHUTDOWN_DRAIN_JOBS"
+        },
+        {
+          "old": "app.domains.memory.domain::MEMORY_CONSOLIDATION_CONTRACT_VERSION",
+          "new": "app.domains.memory.policies.consolidation::MEMORY_CONSOLIDATION_CONTRACT_VERSION"
+        },
+        {
+          "old": "app.domains.memory.domain::MEMORY_CONSOLIDATION_POLICY_V1",
+          "new": "app.domains.memory.policies.consolidation::MEMORY_CONSOLIDATION_POLICY_V1"
+        },
+        {
+          "old": "app.domains.memory.domain::MEMORY_HOT_BRIEF_CONTRACT_VERSION",
+          "new": "app.domains.memory.policies.consolidation::MEMORY_HOT_BRIEF_CONTRACT_VERSION"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryConsolidationDecision",
+          "new": "app.domains.memory.policies.consolidation::MemoryConsolidationDecision"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryConsolidationOutcome",
+          "new": "app.domains.memory.policies.consolidation::MemoryConsolidationOutcome"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryConsolidationPolicy",
+          "new": "app.domains.memory.policies.consolidation::MemoryConsolidationPolicy"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryConsolidationRunResult",
+          "new": "app.domains.memory.policies.consolidation::MemoryConsolidationRunResult"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryConsolidationScheduleResult",
+          "new": "app.domains.memory.policies.consolidation::MemoryConsolidationScheduleResult"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryHotBriefRecord",
+          "new": "app.domains.memory.policies.consolidation::MemoryHotBriefRecord"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryMaintenanceLane",
+          "new": "app.domains.memory.policies.consolidation::MemoryMaintenanceLane"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryMaintenanceProviderTelemetry",
+          "new": "app.domains.memory.policies.consolidation::MemoryMaintenanceProviderTelemetry"
+        },
+        {
+          "old": "app.domains.memory.domain::MemoryMaintenanceSnapshot",
+          "new": "app.domains.memory.policies.consolidation::MemoryMaintenanceSnapshot"
+        },
+        {
+          "old": "app.domains.memory.domain::deterministic_hot_brief",
+          "new": "app.domains.memory.policies.consolidation::deterministic_hot_brief"
+        },
+        {
+          "old": "app.domains.memory.domain::evaluate_memory_consolidation",
+          "new": "app.domains.memory.policies.consolidation::evaluate_memory_consolidation"
+        },
+        {
+          "old": "app.domains.memory.domain::memory_item_high_watermark",
+          "new": "app.domains.memory.policies.consolidation::memory_item_high_watermark"
+        },
+        {
+          "old": "app.domains.memory.domain::memory_item_set_digest",
+          "new": "app.domains.memory.policies.consolidation::memory_item_set_digest"
+        },
+        {
+          "old": "app.domains.memory.domain::validate_consolidation_summary",
+          "new": "app.domains.memory.policies.consolidation::validate_consolidation_summary"
+        },
+        {
+          "old": "app.domains.memory.domain::MEMORY_CONSOLIDATION_PROVIDER_OUTPUT_VERSION",
+          "new": "app.domains.memory.policies.consolidation_output::MEMORY_CONSOLIDATION_PROVIDER_OUTPUT_VERSION"
+        },
+        {
+          "old": "app.domains.memory.domain::MemorySummaryProposal",
+          "new": "app.domains.memory.policies.consolidation_output::MemorySummaryProposal"
+        },
+        {
+          "old": "app.domains.memory.domain::memory_consolidation_response_schema",
+          "new": "app.domains.memory.policies.consolidation_output::memory_consolidation_response_schema"
+        },
+        {
+          "old": "app.domains.memory.domain::parse_memory_consolidation_payload",
+          "new": "app.domains.memory.policies.consolidation_output::parse_memory_consolidation_payload"
+        },
+        {
+          "old": "app.domains.memory.service::MemoryScopeService",
+          "new": "app.domains.memory.service.scope::MemoryScopeService"
+        },
+        {
+          "old": "app.domains.memory.service::MemoryWriteLifecycleService",
+          "new": "app.domains.memory.service.items::MemoryWriteLifecycleService"
+        },
+        {
+          "old": "app.domains.memory.service::CANONICAL_PRIMITIVE_REGISTRY",
+          "new": "app.domains.memory.service.recall::CANONICAL_PRIMITIVE_REGISTRY"
+        },
+        {
+          "old": "app.domains.memory.service::CanonicalPrimitiveSpec",
+          "new": "app.domains.memory.service.recall::CanonicalPrimitiveSpec"
+        },
+        {
+          "old": "app.domains.memory.service::CanonicalRecallService",
+          "new": "app.domains.memory.service.recall::CanonicalRecallService"
+        },
+        {
+          "old": "app.domains.memory.service::CanonicalRecallValidator",
+          "new": "app.domains.memory.service.recall::CanonicalRecallValidator"
+        },
+        {
+          "old": "app.domains.memory.service::CanonicalPlanExecutionContext",
+          "new": "app.domains.memory.service.retrieval_plan::CanonicalPlanExecutionContext"
+        },
+        {
+          "old": "app.domains.memory.service::CanonicalPlanExecutionResult",
+          "new": "app.domains.memory.service.retrieval_plan::CanonicalPlanExecutionResult"
+        },
+        {
+          "old": "app.domains.memory.service::CanonicalPlanStepExecution",
+          "new": "app.domains.memory.service.retrieval_plan::CanonicalPlanStepExecution"
+        },
+        {
+          "old": "app.domains.memory.service::CanonicalPlanValidationResult",
+          "new": "app.domains.memory.service.retrieval_plan::CanonicalPlanValidationResult"
+        },
+        {
+          "old": "app.domains.memory.service::CanonicalRetrievalPlanExecutor",
+          "new": "app.domains.memory.service.retrieval_plan::CanonicalRetrievalPlanExecutor"
+        },
+        {
+          "old": "app.domains.memory.service::CanonicalRetrievalPlanValidator",
+          "new": "app.domains.memory.service.retrieval_plan::CanonicalRetrievalPlanValidator"
+        },
+        {
+          "old": "app.domains.memory.service::MemoryConsolidationService",
+          "new": "app.domains.memory.service.consolidation::MemoryConsolidationService"
+        },
+        {
+          "old": "app.domains.memory.service::MemoryReadService",
+          "new": "app.domains.memory.service.inspector::MemoryReadService"
+        },
+        {
+          "old": "app.domains.memory.service::memory_lifecycle",
+          "new": "app.domains.memory.service.inspector::memory_lifecycle"
+        },
+        {
+          "old": "app.domains.memory.contracts::MemoryMaintenanceQueuePort",
+          "new": "app.domains.memory.contracts.maintenance_queue::MemoryMaintenanceQueuePort"
+        },
+        {
+          "old": "app.domains.memory.contracts::MemoryMaintenanceWorkItem",
+          "new": "app.domains.memory.contracts.maintenance_queue::MemoryMaintenanceWorkItem"
+        },
+        {
+          "old": "app.domains.memory.contracts::MemoryRepositoryPort",
+          "new": "app.domains.memory.contracts.item_store::MemoryRepositoryPort"
+        },
+        {
+          "old": "app.domains.memory.contracts::CanonicalRecallRepositoryPort",
+          "new": "app.domains.memory.contracts.recall_store::CanonicalRecallRepositoryPort"
+        },
+        {
+          "old": "app.domains.memory.contracts::MemoryRecallIndexPort",
+          "new": "app.domains.memory.contracts.recall_store::MemoryRecallIndexPort"
+        },
+        {
+          "old": "app.domains.memory.contracts::CanonicalMemoryEvidence",
+          "new": "app.domains.memory.contracts.source_evidence::CanonicalMemoryEvidence"
+        },
+        {
+          "old": "app.domains.memory.contracts::MemorySourceEvidenceReaderPort",
+          "new": "app.domains.memory.contracts.source_evidence::MemorySourceEvidenceReaderPort"
+        },
+        {
+          "old": "app.domains.memory.contracts::MAX_CANONICAL_PLANNER_MESSAGE_CHARACTERS",
+          "new": "app.domains.memory.contracts.planner_provider::MAX_CANONICAL_PLANNER_MESSAGE_CHARACTERS"
+        },
+        {
+          "old": "app.domains.memory.contracts::CanonicalPlannerEntity",
+          "new": "app.domains.memory.contracts.planner_provider::CanonicalPlannerEntity"
+        },
+        {
+          "old": "app.domains.memory.contracts::CanonicalPlannerOutputError",
+          "new": "app.domains.memory.contracts.planner_provider::CanonicalPlannerOutputError"
+        },
+        {
+          "old": "app.domains.memory.contracts::CanonicalPlannerProviderPort",
+          "new": "app.domains.memory.contracts.planner_provider::CanonicalPlannerProviderPort"
+        },
+        {
+          "old": "app.domains.memory.contracts::CanonicalPlannerProviderResult",
+          "new": "app.domains.memory.contracts.planner_provider::CanonicalPlannerProviderResult"
+        },
+        {
+          "old": "app.domains.memory.contracts::CanonicalPlannerRelationship",
+          "new": "app.domains.memory.contracts.planner_provider::CanonicalPlannerRelationship"
+        },
+        {
+          "old": "app.domains.memory.contracts::CanonicalPlannerRequest",
+          "new": "app.domains.memory.contracts.planner_provider::CanonicalPlannerRequest"
+        },
+        {
+          "old": "app.domains.memory.contracts::MemoryConsolidationProviderError",
+          "new": "app.domains.memory.contracts.consolidation_provider::MemoryConsolidationProviderError"
+        },
+        {
+          "old": "app.domains.memory.contracts::MemoryConsolidationProviderPort",
+          "new": "app.domains.memory.contracts.consolidation_provider::MemoryConsolidationProviderPort"
+        },
+        {
+          "old": "app.domains.memory.contracts::MemoryConsolidationProviderRequest",
+          "new": "app.domains.memory.contracts.consolidation_provider::MemoryConsolidationProviderRequest"
+        },
+        {
+          "old": "app.domains.memory.contracts::MemoryConsolidationProviderResult",
+          "new": "app.domains.memory.contracts.consolidation_provider::MemoryConsolidationProviderResult"
+        },
+        {
+          "old": "app.domains.memory.contracts::MemoryConsolidationSource",
+          "new": "app.domains.memory.contracts.consolidation_provider::MemoryConsolidationSource"
+        },
+        {
+          "old": "app.domains.memory.contracts::MemoryConsolidationRepositoryPort",
+          "new": "app.domains.memory.contracts.consolidation_store::MemoryConsolidationRepositoryPort"
+        },
+        {
+          "old": "app.domains.memory.contracts::MemoryMaintenanceUnitOfWorkPort",
+          "new": "app.domains.memory.contracts.maintenance_transaction::MemoryMaintenanceUnitOfWorkPort"
+        },
+        {
+          "old": "app.domains.memory.infrastructure::SqlAlchemyMemoryMaintenanceQueue",
+          "new": "app.domains.memory.repository.queue::SqlAlchemyMemoryMaintenanceQueue"
+        },
+        {
+          "old": "app.domains.memory.infrastructure::SqlAlchemyMemoryRepository",
+          "new": "app.domains.memory.repository.items::SqlAlchemyMemoryRepository"
+        },
+        {
+          "old": "app.domains.memory.infrastructure::SqlAlchemyMemoryConsolidationRepository",
+          "new": "app.domains.memory.repository.consolidation::SqlAlchemyMemoryConsolidationRepository"
+        },
+        {
+          "old": "app.domains.memory.infrastructure::SqlAlchemyMemoryMaintenanceUnitOfWork",
+          "new": "app.domains.memory.repository.transaction::SqlAlchemyMemoryMaintenanceUnitOfWork"
+        },
+        {
+          "old": "app.domains.memory.infrastructure::MemoryCandidate",
+          "new": "app.domains.memory.models.items::MemoryCandidate"
+        },
+        {
+          "old": "app.domains.memory.infrastructure::MemoryHotBrief",
+          "new": "app.domains.memory.models.items::MemoryHotBrief"
+        },
+        {
+          "old": "app.domains.memory.infrastructure::MemoryHotBriefItem",
+          "new": "app.domains.memory.models.items::MemoryHotBriefItem"
+        },
+        {
+          "old": "app.domains.memory.infrastructure::MemoryItem",
+          "new": "app.domains.memory.models.items::MemoryItem"
+        },
+        {
+          "old": "app.domains.memory.infrastructure::MemoryItemEvidence",
+          "new": "app.domains.memory.models.items::MemoryItemEvidence"
+        },
+        {
+          "old": "app.domains.memory.infrastructure::MemoryMaintenanceJob",
+          "new": "app.domains.memory.models.items::MemoryMaintenanceJob"
+        },
+        {
+          "old": "app.domains.memory.infrastructure::MemoryScopeSettingModel",
+          "new": "app.domains.memory.models.items::MemoryScopeSettingModel"
+        },
+        {
+          "old": "app.runtime.memory::EmbeddedMemoryRecallProjection",
+          "new": "app.runtime.memory.recall_projection::EmbeddedMemoryRecallProjection"
+        },
+        {
+          "old": "app.runtime.memory::MemoryRecallProjectionState",
+          "new": "app.runtime.memory.recall_projection::MemoryRecallProjectionState"
+        },
+        {
+          "old": "app.runtime.memory::SqlAlchemyCanonicalRecallRepository",
+          "new": "app.runtime.memory.recall_composition::canonical_recall_repository"
+        },
+        {
+          "old": "app.runtime.memory::SqlAlchemyMemoryRecallDocumentSource",
+          "new": "app.runtime.memory.recall_composition::recall_document_source"
+        },
+        {
+          "old": "app.runtime.memory::SqlAlchemyMemorySourceEvidenceReader",
+          "new": "app.runtime.memory.source_composition::source_evidence_reader"
+        },
+        {
+          "old": "app.runtime.memory::MemoryRecallIndexError",
+          "new": "app.runtime.memory.sqlite_fts5_recall::MemoryRecallIndexError"
+        },
+        {
+          "old": "app.runtime.memory::MemoryRecallIndexSchemaError",
+          "new": "app.runtime.memory.sqlite_fts5_recall::MemoryRecallIndexSchemaError"
+        },
+        {
+          "old": "app.runtime.memory::MemoryRecallIndexSettings",
+          "new": "app.runtime.memory.sqlite_fts5_recall::MemoryRecallIndexSettings"
+        },
+        {
+          "old": "app.runtime.memory::SqliteMemoryRecallIndex",
+          "new": "app.runtime.memory.sqlite_fts5_recall::SqliteMemoryRecallIndex"
+        }
+      ],
+      "direct_consumers": [
+        "backend/tests/test_p8_l_f_memory_domain.py",
+        "backend/tests/test_p8_l_g_memory_write_lifecycle.py",
+        "backend/tests/test_p8_l_h_canonical_recall.py",
+        "backend/tests/test_p8_l_j_response_generation_lifecycle.py",
+        "backend/tests/test_p8_l_l_canonical_retrieval_planner.py",
+        "backend/tests/test_p8_l_n_both_workflow_coordinator.py",
+        "backend/tests/test_p8_l_o_memory_consolidation.py",
+        "backend/tests/test_p8_l_p_evidence_response_streaming.py",
+        "backend/tests/test_p8_l_q_memory_read_inspector.py",
+        "backend/app/runtime/configuration.py",
+        "backend/app/runtime/memory_privacy.py",
+        "backend/app/runtime/chat/memory_producer.py",
+        "backend/app/runtime/chat/world_generation.py",
+        "backend/app/runtime/memory/recall_projection.py",
+        "backend/app/runtime/memory/source_queries.py",
+        "backend/app/runtime/memory/sqlite_fts5_recall.py",
+        "backend/app/domains/chat/public.py",
+        "backend/app/domains/chat/application/answer_request.py",
+        "backend/app/domains/chat/application/both_retrieval.py",
+        "backend/app/domains/chat/application/canonical_retrieval.py",
+        "backend/app/domains/chat/application/evidence_assembly.py",
+        "backend/app/domains/chat/application/retrieval_routing.py",
+        "scripts/ci/generate_p8_l_k_retrieval_router_inventory.py",
+        "scripts/ci/generate_p8_l_l_canonical_retrieval_planner_inventory.py",
+        "scripts/ci/generate_p8_l_o_memory_consolidation_inventory.py"
+      ],
+      "removed_paths": [
+        "backend/app/domains/memory/infrastructure/maintenance_unit_of_work.py",
+        "backend/app/domains/memory/public.py",
+        "backend/app/domains/memory/domain/__init__.py",
+        "backend/app/domains/memory/api/__init__.py"
+      ],
+      "preserved": "Every prior import binding keeps the same underlying value/type/function; existing test bodies/assertions unchanged. UoW commit/rollback wraps the same caller Session. Immutable SQLite/Alembic schema aliases retain exactly five existing exports.",
+      "remaining": "Later B6 source must consume these explicit paths after merge; G5 global models and final tests/CI/runtime integration remain."
     }
   }
 }

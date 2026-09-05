@@ -42,7 +42,7 @@ from app.domains.chat.domain.retrieval_router import (  # noqa: E402
     ROUTER_SECURITY_VALIDATION_CODES,
     ROUTER_VALIDATION_CODES,
 )
-from app.domains.memory.public import CANONICAL_PRIMITIVE_REGISTRY  # noqa: E402
+from app.domains.memory.service.recall import CANONICAL_PRIMITIVE_REGISTRY
 from app.domains.relationships.public import (  # noqa: E402
     GRAPH_RECALL_PRIMITIVE_REGISTRY,
 )

@@ -1,7 +1,7 @@
 {
-  "edge_count": 2442,
+  "edge_count": 2420,
   "external_import_count": 2249,
-  "module_count": 726,
+  "module_count": 723,
   "modules": [
     {
       "external_imports": [],
@@ -1271,7 +1271,7 @@
         "app.domains.chat.domain.resolved_envelope",
         "app.domains.chat.domain.retrieval_intent",
         "app.domains.chat.domain.workflow_recipe",
-        "app.domains.memory.public",
+        "app.domains.memory.service.recall",
         "app.domains.relationships.public"
       ],
       "module": "app.domains.chat.application.answer_request",
@@ -1295,7 +1295,7 @@
         "app.domains.chat.domain.resolved_envelope",
         "app.domains.chat.domain.retrieval_intent",
         "app.domains.chat.domain.workflow_recipe",
-        "app.domains.memory.public",
+        "app.domains.memory.contracts.recall",
         "app.domains.relationships.public"
       ],
       "module": "app.domains.chat.application.both_retrieval",
@@ -1317,7 +1317,10 @@
         "app.domains.chat.domain.resolved_envelope",
         "app.domains.chat.domain.retrieval_intent",
         "app.domains.chat.domain.workflow_recipe",
-        "app.domains.memory.public"
+        "app.domains.memory.contracts.planner_provider",
+        "app.domains.memory.contracts.retrieval_plan",
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.service.retrieval_plan"
       ],
       "module": "app.domains.chat.application.canonical_retrieval",
       "path": "backend/app/domains/chat/application/canonical_retrieval.py",
@@ -1354,7 +1357,8 @@
         "app.domains.chat.domain.response_request",
         "app.domains.chat.domain.retrieval_intent",
         "app.domains.chat.domain.today_sns_activity",
-        "app.domains.memory.public",
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.recall",
         "app.domains.relationships.public"
       ],
       "module": "app.domains.chat.application.evidence_assembly",
@@ -1464,7 +1468,7 @@
         "app.domains.chat.domain.retrieval_router",
         "app.domains.chat.ports.retrieval_policy",
         "app.domains.chat.ports.retrieval_router_provider",
-        "app.domains.memory.public",
+        "app.domains.memory.service.recall",
         "app.domains.relationships.public"
       ],
       "module": "app.domains.chat.application.retrieval_routing",
@@ -1883,7 +1887,7 @@
         "app.domains.chat.domain",
         "app.domains.chat.domain.errors",
         "app.domains.chat.ports",
-        "app.domains.memory.public",
+        "app.domains.memory.contracts.retrieval_plan",
         "app.domains.relationships.public"
       ],
       "module": "app.domains.chat.public",
@@ -2406,22 +2410,6 @@
     {
       "external_imports": [],
       "imports": [],
-      "module": "app.domains.memory.api",
-      "path": "backend/app/domains/memory/api/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.memory.contracts.consolidation_provider",
-        "app.domains.memory.contracts.consolidation_store",
-        "app.domains.memory.contracts.item_store",
-        "app.domains.memory.contracts.maintenance_queue",
-        "app.domains.memory.contracts.maintenance_transaction",
-        "app.domains.memory.contracts.planner_provider",
-        "app.domains.memory.contracts.recall_store",
-        "app.domains.memory.contracts.source_evidence"
-      ],
       "module": "app.domains.memory.contracts",
       "path": "backend/app/domains/memory/contracts/__init__.py",
       "wildcard_imports": []
@@ -2742,26 +2730,6 @@
     },
     {
       "external_imports": [],
-      "imports": [
-        "app.domains.memory.contracts.inspector",
-        "app.domains.memory.contracts.items",
-        "app.domains.memory.contracts.provenance",
-        "app.domains.memory.contracts.recall",
-        "app.domains.memory.contracts.retrieval_plan",
-        "app.domains.memory.contracts.scope",
-        "app.domains.memory.exceptions",
-        "app.domains.memory.policies.consolidation",
-        "app.domains.memory.policies.consolidation_output",
-        "app.domains.memory.policies.retention",
-        "app.domains.memory.policies.retrieval_planner",
-        "app.domains.memory.policies.validation"
-      ],
-      "module": "app.domains.memory.domain",
-      "path": "backend/app/domains/memory/domain/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
       "imports": [],
       "module": "app.domains.memory.exceptions",
       "path": "backend/app/domains/memory/exceptions.py",
@@ -2769,13 +2737,7 @@
     },
     {
       "external_imports": [],
-      "imports": [
-        "app.domains.memory.infrastructure.maintenance_unit_of_work",
-        "app.domains.memory.models.items",
-        "app.domains.memory.repository.consolidation",
-        "app.domains.memory.repository.items",
-        "app.domains.memory.repository.queue"
-      ],
+      "imports": [],
       "module": "app.domains.memory.infrastructure",
       "path": "backend/app/domains/memory/infrastructure/__init__.py",
       "wildcard_imports": []
@@ -2787,16 +2749,6 @@
       ],
       "module": "app.domains.memory.infrastructure.batch_models",
       "path": "backend/app/domains/memory/infrastructure/batch_models.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "sqlalchemy.orm"
-      ],
-      "imports": [],
-      "module": "app.domains.memory.infrastructure.maintenance_unit_of_work",
-      "path": "backend/app/domains/memory/infrastructure/maintenance_unit_of_work.py",
       "wildcard_imports": []
     },
     {
@@ -2962,17 +2914,6 @@
       ],
       "module": "app.domains.memory.policies.validation",
       "path": "backend/app/domains/memory/policies/validation.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.memory.contracts",
-        "app.domains.memory.domain",
-        "app.domains.memory.service"
-      ],
-      "module": "app.domains.memory.public",
-      "path": "backend/app/domains/memory/public.py",
       "wildcard_imports": []
     },
     {
@@ -3163,6 +3104,16 @@
     {
       "external_imports": [
         "__future__",
+        "sqlalchemy.orm"
+      ],
+      "imports": [],
+      "module": "app.domains.memory.repository.transaction",
+      "path": "backend/app/domains/memory/repository/transaction.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "fastapi",
         "sqlalchemy.orm"
       ],
@@ -3208,14 +3159,7 @@
     },
     {
       "external_imports": [],
-      "imports": [
-        "app.domains.memory.service.consolidation",
-        "app.domains.memory.service.inspector",
-        "app.domains.memory.service.items",
-        "app.domains.memory.service.recall",
-        "app.domains.memory.service.retrieval_plan",
-        "app.domains.memory.service.scope"
-      ],
+      "imports": [],
       "module": "app.domains.memory.service",
       "path": "backend/app/domains/memory/service/__init__.py",
       "wildcard_imports": []
@@ -8022,9 +7966,11 @@
       ],
       "imports": [
         "app.domains.chat.ports",
-        "app.domains.memory.public",
-        "app.runtime.memory",
-        "app.runtime.memory.composition"
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.service.items",
+        "app.runtime.memory.composition",
+        "app.runtime.memory.source_composition"
       ],
       "module": "app.runtime.chat.memory_producer",
       "path": "backend/app/runtime/chat/memory_producer.py",
@@ -8141,7 +8087,12 @@
         "app.domains.chat.infrastructure",
         "app.domains.chat.ports",
         "app.domains.identity.public",
-        "app.domains.memory.public",
+        "app.domains.memory.contracts.inspector",
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.exceptions",
+        "app.domains.memory.service.inspector",
+        "app.domains.memory.service.retrieval_plan",
         "app.domains.relationships.infrastructure.sqlalchemy_social_models",
         "app.domains.relationships.public",
         "app.integrations.llm",
@@ -8193,9 +8144,11 @@
         "app.config",
         "app.core.db",
         "app.domains.identity.service.local_owner",
-        "app.domains.memory.public",
+        "app.domains.memory.service.recall",
         "app.domains.runtime.ports.runtime_data_path",
-        "app.runtime.memory",
+        "app.runtime.memory.recall_composition",
+        "app.runtime.memory.recall_projection",
+        "app.runtime.memory.sqlite_fts5_recall",
         "app.runtime.persistence.runtime_data_path",
         "app.runtime.search"
       ],
@@ -8470,12 +8423,7 @@
     },
     {
       "external_imports": [],
-      "imports": [
-        "app.runtime.memory.recall_composition",
-        "app.runtime.memory.recall_projection",
-        "app.runtime.memory.source_composition",
-        "app.runtime.memory.sqlite_fts5_recall"
-      ],
+      "imports": [],
       "module": "app.runtime.memory",
       "path": "backend/app/runtime/memory/__init__.py",
       "wildcard_imports": []
@@ -8565,7 +8513,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.domains.memory.infrastructure",
+        "app.domains.memory.models.items",
         "app.runtime.memory.recall_composition",
         "app.runtime.memory.sqlite_fts5_recall"
       ],
@@ -8664,7 +8612,9 @@
       ],
       "imports": [
         "app.domains.chat.infrastructure.sqlalchemy_models",
-        "app.domains.memory.public",
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.contracts.source_evidence",
         "app.domains.relationships.infrastructure.sqlalchemy_social_models",
         "app.domains.routines.models",
         "app.runtime.memory.subjective_source",
@@ -8692,7 +8642,8 @@
       ],
       "imports": [
         "app.core.search_text",
-        "app.domains.memory.public",
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.recall",
         "app.domains.runtime.ports.runtime_data_path"
       ],
       "module": "app.runtime.memory.sqlite_fts5_recall",
@@ -8740,8 +8691,8 @@
       ],
       "imports": [
         "app.core.db",
-        "app.domains.memory.infrastructure",
-        "app.domains.memory.models.batch"
+        "app.domains.memory.models.batch",
+        "app.domains.memory.models.items"
       ],
       "module": "app.runtime.memory_privacy",
       "path": "backend/app/runtime/memory_privacy.py",

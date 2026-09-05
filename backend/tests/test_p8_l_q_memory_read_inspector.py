@@ -17,16 +17,14 @@ from app.core.db import Base, get_db
 from app.runtime.memory.composition import (
     memory_repository as SqlAlchemyMemoryRepository,
 )
-from app.domains.memory.public import (
-    MemoryEvidenceAvailability,
-    MemoryKindV1,
-    MemoryReadService,
-    MemoryScope,
-    MemoryScopeService,
-    MemorySourceTypeV1,
-    MemoryWriteLifecycleService,
-)
-from app.runtime.memory import SqlAlchemyMemorySourceEvidenceReader
+from app.domains.memory.contracts.inspector import MemoryEvidenceAvailability
+from app.domains.memory.contracts.provenance import MemoryKindV1
+from app.domains.memory.service.inspector import MemoryReadService
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.service.scope import MemoryScopeService
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+from app.domains.memory.service.items import MemoryWriteLifecycleService
+from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
 
 
 NOW = datetime(2026, 9, 3, 9, tzinfo=UTC)

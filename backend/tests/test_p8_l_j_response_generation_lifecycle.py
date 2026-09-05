@@ -36,11 +36,9 @@ from app.domains.chat.domain import (
     build_request_scope_hash,
 )
 from app.domains.chat.infrastructure import SqlAlchemyResponseLifecycleRepository
-from app.domains.memory.public import (
-    CANONICAL_PRIMITIVE_REGISTRY,
-    CanonicalPlanStep,
-    CanonicalRetrievalPlan,
-)
+from app.domains.memory.service.recall import CANONICAL_PRIMITIVE_REGISTRY
+from app.domains.memory.contracts.retrieval_plan import CanonicalPlanStep
+from app.domains.memory.contracts.retrieval_plan import CanonicalRetrievalPlan
 from app.domains.relationships.public import (
     GRAPH_RECALL_PRIMITIVE_REGISTRY,
     GraphPlanStep,

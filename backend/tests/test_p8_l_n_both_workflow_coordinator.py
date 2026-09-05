@@ -25,18 +25,16 @@ from app.domains.chat.public import (
     parse_retrieval_intent_payload,
     select_workflow_recipe,
 )
-from app.domains.memory.public import (
-    CANONICAL_PRIMITIVE_REGISTRY,
-    CanonicalPlannerOutputError,
-    CanonicalPlannerProviderResult,
-    CanonicalRecallOperation,
-    CanonicalRecallRecord,
-    CanonicalRecallResult,
-    CanonicalRecallStatus,
-    CanonicalRetrievalPlanExecutor,
-    RecallDocumentKind,
-    parse_canonical_retrieval_plan_payload,
-)
+from app.domains.memory.service.recall import CANONICAL_PRIMITIVE_REGISTRY
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerOutputError
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerProviderResult
+from app.domains.memory.contracts.recall import CanonicalRecallOperation
+from app.domains.memory.contracts.recall import CanonicalRecallRecord
+from app.domains.memory.contracts.recall import CanonicalRecallResult
+from app.domains.memory.contracts.recall import CanonicalRecallStatus
+from app.domains.memory.service.retrieval_plan import CanonicalRetrievalPlanExecutor
+from app.domains.memory.contracts.recall import RecallDocumentKind
+from app.domains.memory.policies.retrieval_planner import parse_canonical_retrieval_plan_payload
 from app.domains.relationships.public import (
     GRAPH_RECALL_PRIMITIVE_REGISTRY,
     GraphPlannerOutputError,

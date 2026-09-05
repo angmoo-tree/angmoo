@@ -11,29 +11,28 @@ from sqlalchemy.orm import Session
 from app import models
 from app.core.db import Base
 from app.domains.identity.public import CredentialMaterial, CredentialPurpose
-from app.domains.memory.infrastructure import SqlAlchemyMemoryMaintenanceQueue, SqlAlchemyMemoryMaintenanceUnitOfWork
+from app.domains.memory.repository.queue import SqlAlchemyMemoryMaintenanceQueue
+from app.domains.memory.repository.transaction import SqlAlchemyMemoryMaintenanceUnitOfWork
 from app.runtime.memory.composition import (
     memory_consolidation_repository as SqlAlchemyMemoryConsolidationRepository,
 )
-from app.domains.memory.public import (
-    CanonicalMemoryEvidence,
-    MemoryCandidateStatus,
-    MemoryConflictError,
-    MemoryConsolidationOutcome,
-    MemoryConsolidationProviderError,
-    MemoryConsolidationProviderResult,
-    MemoryConsolidationService,
-    MemoryHotBriefStatus,
-    MemoryKindV1,
-    MemoryMaintenanceLane,
-    MemoryProviderMode,
-    MemoryScope,
-    MemoryScopeService,
-    MemorySourceTypeV1,
-    MemorySummaryProposal,
-    MemoryWriteLifecycleService,
-    parse_memory_consolidation_payload,
-)
+from app.domains.memory.contracts.source_evidence import CanonicalMemoryEvidence
+from app.domains.memory.contracts.provenance import MemoryCandidateStatus
+from app.domains.memory.exceptions import MemoryConflictError
+from app.domains.memory.policies.consolidation import MemoryConsolidationOutcome
+from app.domains.memory.contracts.consolidation_provider import MemoryConsolidationProviderError
+from app.domains.memory.contracts.consolidation_provider import MemoryConsolidationProviderResult
+from app.domains.memory.service.consolidation import MemoryConsolidationService
+from app.domains.memory.contracts.provenance import MemoryHotBriefStatus
+from app.domains.memory.contracts.provenance import MemoryKindV1
+from app.domains.memory.policies.consolidation import MemoryMaintenanceLane
+from app.domains.memory.contracts.provenance import MemoryProviderMode
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.service.scope import MemoryScopeService
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+from app.domains.memory.policies.consolidation_output import MemorySummaryProposal
+from app.domains.memory.service.items import MemoryWriteLifecycleService
+from app.domains.memory.policies.consolidation_output import parse_memory_consolidation_payload
 from app.providers.contracts import ProviderResponse, ProviderUsage
 import app.integrations.llm.memory_consolidation as consolidation_adapter_module
 from app.integrations.llm.memory_consolidation import (

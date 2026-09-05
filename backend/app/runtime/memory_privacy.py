@@ -3,15 +3,13 @@
 from sqlalchemy import delete, or_, select
 
 from app.core.db import Base
-from app.domains.memory.infrastructure import (
-    MemoryCandidate,
-    MemoryHotBrief,
-    MemoryHotBriefItem,
-    MemoryItem,
-    MemoryItemEvidence,
-    MemoryMaintenanceJob,
-    MemoryScopeSettingModel,
-)
+from app.domains.memory.models.items import MemoryCandidate
+from app.domains.memory.models.items import MemoryHotBrief
+from app.domains.memory.models.items import MemoryHotBriefItem
+from app.domains.memory.models.items import MemoryItem
+from app.domains.memory.models.items import MemoryItemEvidence
+from app.domains.memory.models.items import MemoryMaintenanceJob
+from app.domains.memory.models.items import MemoryScopeSettingModel
 from app.domains.memory.models.batch import MemoryBatchProfile
 
 

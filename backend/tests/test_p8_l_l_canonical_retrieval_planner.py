@@ -20,25 +20,23 @@ from app.domains.chat.public import (
     parse_retrieval_intent_payload,
 )
 from app.domains.identity.public import CredentialMaterial, CredentialPurpose
-from app.domains.memory.public import (
-    CANONICAL_PRIMITIVE_REGISTRY,
-    CanonicalPlanContractError,
-    CanonicalPlanExecutionContext,
-    CanonicalPlannerEntity,
-    CanonicalPlannerOutputError,
-    CanonicalPlannerProviderResult,
-    CanonicalPlannerRequest,
-    CanonicalRecallOperation,
-    CanonicalRecallRecord,
-    CanonicalRecallResult,
-    CanonicalRecallStatus,
-    CanonicalRetrievalPlanExecutor,
-    CanonicalRetrievalPlanValidator,
-    MemoryScope,
-    RecallDocumentKind,
-    canonical_retrieval_plan_response_schema,
-    parse_canonical_retrieval_plan_payload,
-)
+from app.domains.memory.service.recall import CANONICAL_PRIMITIVE_REGISTRY
+from app.domains.memory.contracts.retrieval_plan import CanonicalPlanContractError
+from app.domains.memory.service.retrieval_plan import CanonicalPlanExecutionContext
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerEntity
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerOutputError
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerProviderResult
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerRequest
+from app.domains.memory.contracts.recall import CanonicalRecallOperation
+from app.domains.memory.contracts.recall import CanonicalRecallRecord
+from app.domains.memory.contracts.recall import CanonicalRecallResult
+from app.domains.memory.contracts.recall import CanonicalRecallStatus
+from app.domains.memory.service.retrieval_plan import CanonicalRetrievalPlanExecutor
+from app.domains.memory.service.retrieval_plan import CanonicalRetrievalPlanValidator
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.contracts.recall import RecallDocumentKind
+from app.domains.memory.policies.retrieval_planner import canonical_retrieval_plan_response_schema
+from app.domains.memory.policies.retrieval_planner import parse_canonical_retrieval_plan_payload
 from app.integrations.llm.canonical_retrieval_planner import (
     DirectLlmCanonicalRetrievalPlannerProvider,
 )

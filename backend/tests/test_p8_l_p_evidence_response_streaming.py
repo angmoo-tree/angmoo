@@ -97,11 +97,9 @@ from app.domains.chat.ports.retrieval_policy import RetrievalPreflightCommand
 from app.runtime.memory.composition import (
     memory_repository as SqlAlchemyMemoryRepository,
 )
-from app.domains.memory.public import (
-    CANONICAL_PRIMITIVE_REGISTRY,
-    MemoryScope,
-    MemoryScopeService,
-)
+from app.domains.memory.service.recall import CANONICAL_PRIMITIVE_REGISTRY
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.service.scope import MemoryScopeService
 from app.domains.relationships.public import GRAPH_RECALL_PRIMITIVE_REGISTRY
 from app.runtime.chat.world_generation import (
     accept_world_message,

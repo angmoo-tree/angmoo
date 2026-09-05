@@ -24,20 +24,18 @@ from app.domains.chat.domain.workflow_recipe import (
     WorkflowAxis,
     WorkflowDependencyBinding,
 )
-from app.domains.memory.public import (
-    CanonicalPlanContractError,
-    CanonicalPlanExecutionContext,
-    CanonicalPlanExecutionResult,
-    CanonicalPlannerEntity,
-    CanonicalPlannerOutputError,
-    CanonicalPlannerProviderPort,
-    CanonicalPlannerRelationship,
-    CanonicalPlannerRequest,
-    CanonicalRetrievalPlan,
-    CanonicalRetrievalPlanExecutor,
-    CanonicalRetrievalPlanValidator,
-    MemoryScope,
-)
+from app.domains.memory.contracts.retrieval_plan import CanonicalPlanContractError
+from app.domains.memory.service.retrieval_plan import CanonicalPlanExecutionContext
+from app.domains.memory.service.retrieval_plan import CanonicalPlanExecutionResult
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerEntity
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerOutputError
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerProviderPort
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerRelationship
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerRequest
+from app.domains.memory.contracts.retrieval_plan import CanonicalRetrievalPlan
+from app.domains.memory.service.retrieval_plan import CanonicalRetrievalPlanExecutor
+from app.domains.memory.service.retrieval_plan import CanonicalRetrievalPlanValidator
+from app.domains.memory.contracts.scope import MemoryScope
 
 
 @dataclass(frozen=True, slots=True)

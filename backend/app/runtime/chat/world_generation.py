@@ -55,15 +55,13 @@ from app.domains.identity.public import CredentialMaterial
 from app.runtime.memory.composition import (
     memory_repository as SqlAlchemyMemoryRepository,
 )
-from app.domains.memory.public import (
-    CanonicalRetrievalPlanExecutor,
-    MemoryEvidenceAvailability,
-    MemoryLifecycle,
-    MemoryNotFoundError,
-    MemoryReadService,
-    MemoryScope,
-    MemorySourceTypeV1,
-)
+from app.domains.memory.service.retrieval_plan import CanonicalRetrievalPlanExecutor
+from app.domains.memory.contracts.inspector import MemoryEvidenceAvailability
+from app.domains.memory.contracts.inspector import MemoryLifecycle
+from app.domains.memory.exceptions import MemoryNotFoundError
+from app.domains.memory.service.inspector import MemoryReadService
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
 from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
     RelationshipState,
 )

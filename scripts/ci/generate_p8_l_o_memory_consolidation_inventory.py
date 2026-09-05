@@ -20,19 +20,17 @@ OUTPUT_PATH = ROOT / "docs/architecture/p8-l-o-memory-consolidation-inventory.js
 N_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-n-both-workflow-coordinator-inventory.json"
 N_INVENTORY_SHA256 = "954bcadc40545da66342e4cbfc350b8e476278cac8c2a13fd0fb565cdf143058"
 
-from app.domains.memory.domain import (  # noqa: E402
-    MAINTENANCE_LEASE_DURATION,
-    MAX_HOT_BRIEF_SOURCE_ITEMS,
-    MAX_HOT_BRIEF_SUMMARY_LENGTH,
-    MAX_MAINTENANCE_ATTEMPTS,
-    MAX_MAINTENANCE_BATCH_CANDIDATES,
-    MAX_MAINTENANCE_PROVIDER_INPUT_CHARACTERS,
-    MAX_SHUTDOWN_DRAIN_JOBS,
-    MEMORY_CONSOLIDATION_CONTRACT_VERSION,
-    MEMORY_CONSOLIDATION_POLICY_V1,
-    MEMORY_CONSOLIDATION_PROVIDER_OUTPUT_VERSION,
-    MEMORY_HOT_BRIEF_CONTRACT_VERSION,
-)
+from app.domains.memory.policies.consolidation import MAINTENANCE_LEASE_DURATION
+from app.domains.memory.policies.consolidation import MAX_HOT_BRIEF_SOURCE_ITEMS
+from app.domains.memory.policies.consolidation import MAX_HOT_BRIEF_SUMMARY_LENGTH
+from app.domains.memory.policies.consolidation import MAX_MAINTENANCE_ATTEMPTS
+from app.domains.memory.policies.consolidation import MAX_MAINTENANCE_BATCH_CANDIDATES
+from app.domains.memory.policies.consolidation import MAX_MAINTENANCE_PROVIDER_INPUT_CHARACTERS
+from app.domains.memory.policies.consolidation import MAX_SHUTDOWN_DRAIN_JOBS
+from app.domains.memory.policies.consolidation import MEMORY_CONSOLIDATION_CONTRACT_VERSION
+from app.domains.memory.policies.consolidation import MEMORY_CONSOLIDATION_POLICY_V1
+from app.domains.memory.policies.consolidation_output import MEMORY_CONSOLIDATION_PROVIDER_OUTPUT_VERSION
+from app.domains.memory.policies.consolidation import MEMORY_HOT_BRIEF_CONTRACT_VERSION
 from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION  # noqa: E402
 
 

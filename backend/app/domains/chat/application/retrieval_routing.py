@@ -39,7 +39,7 @@ from app.domains.chat.ports.retrieval_router_provider import (
     RetrievalRouterProviderPort,
     RetrievalRouterRequest,
 )
-from app.domains.memory.public import CANONICAL_PRIMITIVE_REGISTRY
+from app.domains.memory.service.recall import CANONICAL_PRIMITIVE_REGISTRY
 from app.domains.relationships.public import GRAPH_RECALL_PRIMITIVE_REGISTRY
 
 

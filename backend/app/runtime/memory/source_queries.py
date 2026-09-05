@@ -15,11 +15,9 @@ from app.domains.chat.infrastructure.sqlalchemy_models import (
     MessageMessage,
     MessageThread,
 )
-from app.domains.memory.public import (
-    CanonicalMemoryEvidence,
-    MemoryScope,
-    MemorySourceTypeV1,
-)
+from app.domains.memory.contracts.source_evidence import CanonicalMemoryEvidence
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
 from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
     RelationshipStateChange,
     SocialEvent,

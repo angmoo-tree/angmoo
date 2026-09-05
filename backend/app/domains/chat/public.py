@@ -113,11 +113,9 @@ from app.domains.chat.ports import (
     RetrievalRouterProviderResult,
     RetrievalRouterRequest,
 )
-from app.domains.memory.public import (
-    CANONICAL_PLAN_VERSION,
-    CanonicalPlanStep,
-    CanonicalRetrievalPlan,
-)
+from app.domains.memory.contracts.retrieval_plan import CANONICAL_PLAN_VERSION
+from app.domains.memory.contracts.retrieval_plan import CanonicalPlanStep
+from app.domains.memory.contracts.retrieval_plan import CanonicalRetrievalPlan
 from app.domains.relationships.public import (
     GRAPH_PLAN_VERSION,
     GraphPlanStep,
