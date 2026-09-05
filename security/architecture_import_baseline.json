@@ -1,13 +1,23 @@
 {
-  "edge_count": 3179,
-  "external_import_count": 2632,
-  "module_count": 917,
+  "edge_count": 3227,
+  "external_import_count": 2652,
+  "module_count": 928,
   "modules": [
     {
       "external_imports": [],
       "imports": [],
       "module": "app",
       "path": "backend/app/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.api.authorization",
+      "path": "backend/app/api/authorization.py",
       "wildcard_imports": []
     },
     {
@@ -29,27 +39,12 @@
     },
     {
       "external_imports": [
-        "fastapi",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.core.db",
-        "app.domains.identity.dependencies",
-        "app.services.local_bot"
-      ],
-      "module": "app.api.v1.deps",
-      "path": "backend/app/api/v1/deps.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
         "collections.abc",
         "fastapi"
       ],
       "imports": [
         "app.api.v1.routes.agent_runs",
         "app.api.v1.routes.agents",
-        "app.api.v1.routes.bot",
         "app.api.v1.routes.community",
         "app.api.v1.routes.world_activity_runtime",
         "app.api.v1.routes.world_character_setup",
@@ -59,6 +54,7 @@
         "app.domains.chat.router.world_chat_response",
         "app.domains.device_home.router",
         "app.domains.identity.router.auth",
+        "app.domains.local_bot.router.bot",
         "app.domains.memory.router",
         "app.domains.tree.router",
         "app.domains.world_characters.router.entry",
@@ -79,7 +75,6 @@
       "imports": [
         "app.api.v1.routes.agent_runs",
         "app.api.v1.routes.agents",
-        "app.api.v1.routes.bot",
         "app.api.v1.routes.community",
         "app.api.v1.routes.world_activity_runtime",
         "app.api.v1.routes.world_character_setup",
@@ -90,6 +85,7 @@
         "app.domains.device_home.router",
         "app.domains.identity.router.auth",
         "app.domains.identity.router.local",
+        "app.domains.local_bot.router.bot",
         "app.domains.memory.router",
         "app.domains.runtime.router",
         "app.domains.social.router",
@@ -150,21 +146,6 @@
       ],
       "module": "app.api.v1.routes.agents",
       "path": "backend/app/api/v1/routes/agents.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "fastapi",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.api.v1.deps",
-        "app.schemas",
-        "app.services.community",
-        "app.services.local_bot"
-      ],
-      "module": "app.api.v1.routes.bot",
-      "path": "backend/app/api/v1/routes/bot.py",
       "wildcard_imports": []
     },
     {
@@ -2648,10 +2629,10 @@
       "external_imports": [
         "dataclasses",
         "fastapi",
-        "sqlalchemy.orm",
-        "typing"
+        "sqlalchemy.orm"
       ],
       "imports": [
+        "app.api.authorization",
         "app.core.db",
         "app.core.desktop_loopback",
         "app.domains.identity.browser_session",
@@ -3050,6 +3031,39 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.characters.schemas",
+        "app.domains.local_bot.contracts.authentication",
+        "app.domains.local_bot.contracts.rate_limits",
+        "app.domains.social.schemas.community"
+      ],
+      "module": "app.domains.local_bot.contracts.actions",
+      "path": "backend/app/domains/local_bot/contracts/actions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.local_bot.models"
+      ],
+      "module": "app.domains.local_bot.contracts.authentication",
+      "path": "backend/app/domains/local_bot/contracts/authentication.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "dataclasses",
         "sqlalchemy.orm",
         "typing"
@@ -3061,12 +3075,32 @@
     },
     {
       "external_imports": [
-        "fastapi"
+        "dataclasses",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
       ],
       "imports": [
+        "app.domains.local_bot.contracts.authentication"
+      ],
+      "module": "app.domains.local_bot.contracts.rate_limits",
+      "path": "backend/app/domains/local_bot/contracts/rate_limits.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.api.authorization",
         "app.api.identity_dependencies",
         "app.core.db",
-        "app.domains.local_bot.contracts.key_management"
+        "app.domains.local_bot.contracts.actions",
+        "app.domains.local_bot.contracts.authentication",
+        "app.domains.local_bot.contracts.key_management",
+        "app.domains.local_bot.exceptions",
+        "app.domains.local_bot.service.authentication"
       ],
       "module": "app.domains.local_bot.dependencies",
       "path": "backend/app/domains/local_bot/dependencies.py",
@@ -3092,6 +3126,18 @@
       ],
       "module": "app.domains.local_bot.models",
       "path": "backend/app/domains/local_bot/models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "math"
+      ],
+      "imports": [
+        "app.domains.routines.service.tick_schedule"
+      ],
+      "module": "app.domains.local_bot.policies.rate_limit_clock",
+      "path": "backend/app/domains/local_bot/policies/rate_limit_clock.py",
       "wildcard_imports": []
     },
     {
@@ -3140,6 +3186,25 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.domains.local_bot.contracts.actions",
+        "app.domains.local_bot.contracts.authentication",
+        "app.domains.local_bot.dependencies",
+        "app.domains.local_bot.exceptions",
+        "app.domains.local_bot.schemas",
+        "app.domains.local_bot.service.actions",
+        "app.domains.social.exceptions",
+        "app.domains.social.schemas.community"
+      ],
+      "module": "app.domains.local_bot.router.bot",
+      "path": "backend/app/domains/local_bot/router/bot.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
         "app.domains.characters.service.access",
         "app.domains.local_bot.contracts.key_management",
         "app.domains.local_bot.dependencies",
@@ -3153,11 +3218,13 @@
     {
       "external_imports": [
         "datetime",
-        "pydantic"
+        "pydantic",
+        "typing"
       ],
       "imports": [
         "app.core.response_schemas",
-        "app.domains.characters.schemas"
+        "app.domains.characters.schemas",
+        "app.domains.social.schemas.community"
       ],
       "module": "app.domains.local_bot.schemas",
       "path": "backend/app/domains/local_bot/schemas.py",
@@ -3168,6 +3235,44 @@
       "imports": [],
       "module": "app.domains.local_bot.service",
       "path": "backend/app/domains/local_bot/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.unit_of_work",
+        "app.domains.characters.schemas",
+        "app.domains.local_bot.constants",
+        "app.domains.local_bot.contracts.actions",
+        "app.domains.local_bot.contracts.authentication",
+        "app.domains.local_bot.schemas",
+        "app.domains.local_bot.service.presentation",
+        "app.domains.local_bot.service.rate_limits",
+        "app.domains.social.schemas.community"
+      ],
+      "module": "app.domains.local_bot.service.actions",
+      "path": "backend/app/domains/local_bot/service/actions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "logging",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.security",
+        "app.domains.identity.service.demo_access",
+        "app.domains.local_bot.constants",
+        "app.domains.local_bot.contracts.authentication",
+        "app.domains.local_bot.exceptions",
+        "app.domains.local_bot.repository.keys",
+        "app.domains.local_bot.service.key_records"
+      ],
+      "module": "app.domains.local_bot.service.authentication",
+      "path": "backend/app/domains/local_bot/service/authentication.py",
       "wildcard_imports": []
     },
     {
@@ -3204,6 +3309,17 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [
+        "app.core.profile_ref",
+        "app.domains.local_bot.schemas",
+        "app.domains.social.schemas.community"
+      ],
+      "module": "app.domains.local_bot.service.presentation",
+      "path": "backend/app/domains/local_bot/service/presentation.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "dataclasses",
         "datetime",
@@ -3218,6 +3334,24 @@
       ],
       "module": "app.domains.local_bot.service.quota",
       "path": "backend/app/domains/local_bot/service/quota.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.local_bot.constants",
+        "app.domains.local_bot.contracts.authentication",
+        "app.domains.local_bot.contracts.rate_limits",
+        "app.domains.local_bot.exceptions",
+        "app.domains.local_bot.policies.rate_limit_clock",
+        "app.domains.local_bot.schemas",
+        "app.domains.local_bot.service.quota"
+      ],
+      "module": "app.domains.local_bot.service.rate_limits",
+      "path": "backend/app/domains/local_bot/service/rate_limits.py",
       "wildcard_imports": []
     },
     {
@@ -10091,6 +10225,8 @@
         "app.runtime.configuration",
         "app.runtime.diagnostics.http",
         "app.runtime.graph_projection.composition",
+        "app.runtime.local_bot.authentication",
+        "app.runtime.local_bot.composition",
         "app.runtime.local_bot.keys",
         "app.runtime.logging_config",
         "app.runtime.memory.batch_runtime",
@@ -11175,11 +11311,64 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.characters.service.profile",
+        "app.domains.identity.service.profile",
+        "app.domains.local_bot.contracts.authentication"
+      ],
+      "module": "app.runtime.local_bot.authentication",
+      "path": "backend/app/runtime/local_bot/authentication.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.local_bot.contracts.actions",
+        "app.domains.routines.service.activity_logs",
+        "app.runtime.local_bot.queries",
+        "app.runtime.local_bot.rate_limits",
+        "app.runtime.social.image_generation",
+        "app.services.community"
+      ],
+      "module": "app.runtime.local_bot.composition",
+      "path": "backend/app/runtime/local_bot/composition.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
         "app.domains.local_bot.contracts.key_management",
         "app.domains.routines.service.activity_logs"
       ],
       "module": "app.runtime.local_bot.keys",
       "path": "backend/app/runtime/local_bot/keys.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.local_bot.constants",
+        "app.domains.local_bot.contracts.authentication",
+        "app.domains.routines.models.resident",
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.runtime.local_bot.queries",
+      "path": "backend/app/runtime/local_bot/queries.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.local_bot.contracts.rate_limits",
+        "app.domains.routines.service.activity_logs",
+        "app.runtime.local_bot.queries"
+      ],
+      "module": "app.runtime.local_bot.rate_limits",
+      "path": "backend/app/runtime/local_bot/rate_limits.py",
       "wildcard_imports": []
     },
     {
@@ -13025,6 +13214,7 @@
         "app.domains.character_lore.schemas",
         "app.domains.chat.schemas",
         "app.domains.identity.schemas",
+        "app.domains.local_bot.schemas",
         "app.domains.operations.schemas",
         "app.domains.relationships.schemas",
         "app.domains.routine_posts.schemas",
@@ -13449,34 +13639,6 @@
       ],
       "module": "app.services.langgraph_resident",
       "path": "backend/app/services/langgraph_resident.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "dataclasses",
-        "datetime",
-        "logging",
-        "math",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.core.security",
-        "app.core.unit_of_work",
-        "app.cruds.agents",
-        "app.domains.identity.service.demo_access",
-        "app.domains.local_bot.constants",
-        "app.domains.local_bot.exceptions",
-        "app.domains.local_bot.service.quota",
-        "app.models",
-        "app.runtime.characters.management",
-        "app.runtime.social.image_generation",
-        "app.schemas",
-        "app.services.agent_activity_policy",
-        "app.services.community"
-      ],
-      "module": "app.services.local_bot",
-      "path": "backend/app/services/local_bot.py",
       "wildcard_imports": []
     },
     {

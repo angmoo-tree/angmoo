@@ -1796,3 +1796,40 @@ Social의 source/notification 정책과 자기 ORM query/mutation, WC의 활성/
 첫 집중 검사 **167 PASS / 22 FAIL**의 원인은 수동 SNS router가 일반 router에 중복 연결된 오류와 이전 이미지 설정 getter 참조였다. 실제 두 연결을 수정한 뒤 실패 영역을 포함한 **60 PASS / 1 warning**을 확인했다. Chat/Social의 동명 `test_http_ownership.py`가 pytest 수집에서 충돌한 문제는 두 테스트 패키지의 namespace를 명시하여 해결했고, 함께 실행한 **8 PASS / 1 warning**과 전체 **2,365 node 수집**으로 확인했다. 원래 테스트 assertion과 skip은 변경하지 않았다.
 
 읽기 전용 보존 진단은 보호 대상 **2,201 nodes**, 원본·후속 API/schema/ORM·ASGI export·assertion·suppression·node 누락 모두 0이다. 이전 source·consumer·test 경로가 남아 발생한 source 1건 및 split 99건은 실제 최종 구현과 소비자 경로로 연결한 뒤 원래 source/split 검사 0으로 닫았다. 경계 **917 modules / 3,179 edges / legacy exact 139**, ER0 **86/87/24/44/7**이 통과했다. 최초 signed commit 증거 수집과 전체 stock/PR/merge/Installer는 아직 완료하지 않았으며, 이 준비 통합은 AR-G5 Base/database 전환이나 AR-B8-B 종료를 뜻하지 않는다.
+
+## AR-B8 LocalBot A2 — 인증·공개 응답의 실제 소유
+
+부모 source `3b547b2`의 키 repository/write/owner HTTP를 재사용했다. 실제 인증 판단·Context·로그·응답 projection·지역 날짜 경계18정의를 LocalBot 역할에 옮겼고 같은 소유 클래스/nullable caller-Session 조회·상수 경로만 복원하면 원문 전체 AST가 같다. LocalBot DTO19개의 전체 class AST와 JSON schema도 원문과 같다. Social `BotImageRequestRead`는 기존 실제 소유에 유지하며 두 도메인의 역참조 alias를 만들지 않는다.
+
+기존 키 테스트와 demo 인증 테스트의 준비 대상만 실제 repository/write/nullable 협력으로 연결했다. 기존 assertions는 유지한다. 새 회귀2개는 동일 Session·같은 attached 객체·조회 순서와 삭제/실행 모드/소유자 거절 후 키 사용 기록 미수정을 검사한다. 초기 기존 quota/응답/demo/key와 새 검사 **54 passed / 기존 warning1 /9.06초**. 확장·원래 보존 최종 검증은 아래에 추가하며 frozen/checkpoint/additions를 수정하거나 source 도입 증거를 직접 캡처하지 않는다.
+
+LocalBot A2 최종: 원래18정의와 Bot19전체 class AST/JSONschema 동일. 기존 수정2테스트 모듈의 모든 assertion/suppression도 동일하다. 확장 회귀 **71 passed / 기존 warning1 /10.15초**, 남은1실패는 이 slice에서 endpoint module을 바꾸지 않은 Character의 원래 route security inventory가 아직 옛 agents 모듈을 가리키는 G07 통합 항목이다. 실제경계776/2573/175legacy·L4 776/14/97·deferred22 PASS, 원래6보존진단은 모든항목0(protected2201/current2262)이다. 새 테스트2노드는 source 첫 도입 후 부모가 순차 캡처한다. 기존 key 관리5파일 및 모델/Base·frozen/additions는 수정하지 않았다.
+
+## AR-B8 LocalBot A3 — 다른 소유 데이터의 실제 조회
+
+기존 전체 조회5함수와 실제SQL10표현식을 `runtime/local_bot/queries.py`로 이전했다. 해당 표현식을 원래 호출자에 대입하면 남은35함수의 전체 AST가 동일하고, 구체 클래스는 실제 Character/Social/Routines 소유 정의와 같은 객체다. 조회 조건·정렬·한도·NULL·synthetic non-Session 경로를 유지하며 새조회나 저장을 추가하지 않는다. 기존테스트수정0·새노드0·신규제품1파일이다.
+
+집중 **54 passed / 기존warning1 /7.34초**, 원래6진단 전부0(protected2201/current2262), 경계777/2577/173legacy·L4 777/14/97·deferred22 PASS. 실제 rate-limit/행동/HTTP의 후속 역할 전환과 source 첫 도입 캡처는 별도로 남는다.
+
+## AR-B8 LocalBot A4 — 할당량·사용량·실패의 실제 정책
+
+12개 실제 판단/사용량/Retry-After/log/commit/rollback 함수를 LocalBot service로 옮겼다. 명시 workflow의 같은 조회·Routines 기록 함수를 복원하면 원래 남은30함수의 전체AST와 같다. 기존 rate-limit 테스트는 실제 소유 서비스와 workflow 준비만 바꾸고 모든 assertion/suppression은 유지했다. 옛 action 구현의 임시partial10개는 뒤따르는 실제 action/HTTP 이전에서 제거한다.
+
+집중 **54 passed / 기존warning1 /7.24초**, 원래6진단 모든항목0(protected2201/current2262), 경계780/2589/173legacy·L4 780/14/97·deferred22 PASS. 실제 신규3파일(service/rate_limits.py,contracts/rate_limits.py,runtime/local_bot/rate_limits.py), 새노드0이다. 원본 frozen·append-only 원장은 그대로이고 source도입 캡처는 부모의 순차 통합에서 수행한다.
+
+
+### AR-B8 LocalBot A5 — 실제 행동·HTTP·G07 연결
+
+`service/actions.py`가 원래 Bot 읽기·행동 18함수를 소유하고 `router/bot.py`가 HTTP 18개와 Retry-After helper를 소유한다. 인증은 요청의 같은 Session과 두 factory의 app.state builder를 사용한다. Authorization Header/parser 2개는 공통 HTTP에 원문 그대로 옮겨 Identity와 Bot이 같은 객체를 사용한다. 옛 전역 LocalBot service, Bot router와 마지막 api/v1/deps는 제거했다. 기존 dedicated test의 assertion/param/suppression은 그대로이며 test-only workflow binding이 새 실제 서비스에 같은 runtime 협력을 넣는다.
+
+원본 18action 전체 AST와 18route+오류helper AST는 명시적 workflow/DTO 경로를 역정규화한 뒤 동일하다. G07의 현재 module 26개만 변경했고 URL·endpoint·access 분류는 불변이다. shared errors는 정확한 exceptions entry만 허용하며, 미등록 sibling/하위/HTTP/storage 접근과 errors IO는 기존처럼 실패한다. 신규 HTTP 4개와 경계 3개 회귀 및 최종 보존 검증은 아래 확정 결과로 기록한다.
+
+남은 root 통합: B5의 실제 Social/image callable을 runtime composition에 연결하고, G5 모델 등록과 G06 단일 factory에 두 Bot builder를 유지한다. source 최초 도입 capture·Hosted CI·PR/merge 상태는 이 소스 준비와 별개다.
+
+확정 검증: Identity 전체·Bot 기존/새 HTTP·G07 전체·기존 partial/architecture/legacy 및 explicit error-entry 검사는 **287 PASS / 15 warnings / 16.77초**다. 원래6보존 진단은 source/split/assertion/suppression/APIORM/node 모두0오류이며 protected2201/current2269다. 진단의 exact signed869bae55 두 파일만 메모리에서 보충했고 frozen/additions는 변경하지 않았다. 전체 stock/source introduction gate를 통과했다고 표시하지 않는다. 현재 경계782modules/2605edges/168exactlegacy, Public route196, L4 current782modules/97parity, deferred runtime22files도 PASS다. 신규 테스트는 HTTP4+경계3이며 source 첫 도입은 이 signed source commit으로 root가 기록한다.
+
+## G5 준비 통합 — Local Bot 인증·행동·HTTP 실제 소유 연결
+
+Social/Relationships 통합 `8a4bb30`에 Bot source `1565688ffa8095b37ec8fb843f5547c6c87705ae`를 합류했다. `main.create_app`은 모든 profile에서 기존 key builder와 인증·행동 builder를 함께 연결한다. Bot image request는 `runtime/social/image_generation.py`의 실제 callable을 사용하며 옛 `services/local_bot.py`는 제거했다. 공통 bearer 해석은 `api/authorization.py`, Bot HTTP 18개는 실제 domain router가 소유한다.
+
+인증·키 관리·read/action quota·응답·실제 HTTP·허용/거부 경계 검사는 **61 PASS / 1 warning / 21.13초**다. 전체 수집은 **2,374 nodes**이며 원래 보호 대상2,201개와 API/schema/ORM·ASGI·assertion·suppression 누락이 모두0이다. 이미지 split 추적의 옛 Bot consumer47곳을 실제 `runtime/local_bot/composition.py`로 연결한 뒤 원래 source/split 검사도 모두0으로 종료했다. 경계 **928 modules / 3,227 edges / exact legacy129**, L4 **928/97**, ER0 **86/87/24/44/7**이 통과했다. 원본 도입 증거·전체 stock·PR·merge·설치 Gate와 AR-G5/AR-B8-B 전체 종료는 계속 별도 미완료다.

@@ -14,7 +14,8 @@ from app.domains.local_bot.repository.keys import get_active_local_key_by_hash
 from app.domains.local_bot.router.keys import router
 from app.domains.routines.models.resident import AgentActivityLog
 from app.runtime.local_bot.keys import build_local_key_workflows
-from app.services.local_bot import authenticate_local_bot
+from app.domains.local_bot.service.authentication import authenticate_local_bot
+from app.runtime.local_bot.authentication import build_authentication_workflows
 
 
 @pytest.fixture
@@ -55,7 +56,7 @@ def test_local_key_http_rotation_authentication_and_revocation_share_persisted_i
     key = get_active_local_key_by_hash(db, security.hash_token(token))
     assert key is not None and key.token_hash != token
     assert key.token_prefix == token[:24] + "..."
-    authenticated = authenticate_local_bot(db, token)
+    authenticated = authenticate_local_bot(db, token, workflows=build_authentication_workflows())
     assert authenticated.local_key is key
     assert key.last_used_at is not None
     read = client.get("/agents/local-bird/local-connection")

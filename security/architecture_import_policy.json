@@ -5,10 +5,6 @@
     {
       "edges": [
         {
-          "importer": "app.api.v1.deps",
-          "imported": "app.services.local_bot"
-        },
-        {
           "importer": "app.api.v1.routes.agent_runs",
           "imported": "app.models"
         },
@@ -51,18 +47,6 @@
         {
           "importer": "app.api.v1.routes.agents",
           "imported": "app.services.runtime_boundary"
-        },
-        {
-          "importer": "app.api.v1.routes.bot",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.api.v1.routes.bot",
-          "imported": "app.services.community"
-        },
-        {
-          "importer": "app.api.v1.routes.bot",
-          "imported": "app.services.local_bot"
         },
         {
           "importer": "app.api.v1.routes.world_character_setup",
@@ -207,6 +191,10 @@
         {
           "importer": "app.runtime.characters.management",
           "imported": "app.services.runtime_boundary"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.runtime.local_bot.composition"
         },
         {
           "importer": "app.runtime.social.image_job_worker",
@@ -427,34 +415,6 @@
         {
           "importer": "app.services.langgraph_resident",
           "imported": "app.services.world_feed_runtime"
-        },
-        {
-          "importer": "app.services.local_bot",
-          "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.services.local_bot",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.services.local_bot",
-          "imported": "app.runtime.characters.management"
-        },
-        {
-          "importer": "app.services.local_bot",
-          "imported": "app.runtime.social.image_generation"
-        },
-        {
-          "importer": "app.services.local_bot",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.local_bot",
-          "imported": "app.services.agent_activity_policy"
-        },
-        {
-          "importer": "app.services.local_bot",
-          "imported": "app.services.community"
         },
         {
           "importer": "app.services.world_feed_runtime",
@@ -1193,7 +1153,16 @@
       "app.domains.world_characters.service.action_scope",
       "app.domains.world_characters.service.event_scope",
       "app.domains.world_characters.service.projection_scope",
-      "app.domains.worlds.service.projection_sources"
+      "app.domains.worlds.service.projection_sources",
+      "app.domains.local_bot.contracts.actions",
+      "app.domains.local_bot.contracts.authentication",
+      "app.domains.local_bot.contracts.rate_limits",
+      "app.domains.local_bot.policies.rate_limit_clock",
+      "app.domains.local_bot.router.bot",
+      "app.domains.local_bot.service.actions",
+      "app.domains.local_bot.service.authentication",
+      "app.domains.local_bot.service.presentation",
+      "app.domains.local_bot.service.rate_limits"
     ],
     "entries": [
       "app.domains.character_lore.contracts",
@@ -1541,7 +1510,15 @@
       "app.domains.world_characters.service.action_scope",
       "app.domains.world_characters.service.event_scope",
       "app.domains.world_characters.service.projection_scope",
-      "app.domains.worlds.service.projection_sources"
+      "app.domains.worlds.service.projection_sources",
+      "app.domains.local_bot.contracts.actions",
+      "app.domains.local_bot.contracts.authentication",
+      "app.domains.local_bot.contracts.rate_limits",
+      "app.domains.local_bot.service.actions",
+      "app.domains.local_bot.service.authentication",
+      "app.domains.local_bot.service.presentation",
+      "app.domains.local_bot.service.rate_limits",
+      "app.domains.social.exceptions"
     ],
     "bridges": [
       {
@@ -2094,14 +2071,6 @@
         "owner_stage": "AR-B2",
         "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
         "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.local_bot",
-        "target": "app.domains.identity.service.demo_access",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
-        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
         "review_date": "2026-09-05"
       },
       {
@@ -3033,30 +3002,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.local_bot",
-        "target": "app.domains.local_bot.service.quota",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Remove original aggregate/workflow caller after remaining LocalBot roles and G5 registration transition; none remain at AR-B8-B.",
-        "reason": "Existing same-object value/model/quota caller during actual LocalBot source migration.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.local_bot",
-        "target": "app.domains.local_bot.exceptions",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Remove original aggregate/workflow caller after remaining LocalBot roles and G5 registration transition; none remain at AR-B8-B.",
-        "reason": "Existing same-object value/model/quota caller during actual LocalBot source migration.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.local_bot",
-        "target": "app.domains.local_bot.constants",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Remove original aggregate/workflow caller after remaining LocalBot roles and G5 registration transition; none remain at AR-B8-B.",
-        "reason": "Existing same-object value/model/quota caller during actual LocalBot source migration.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.cruds.agents",
         "target": "app.domains.identity.repository.credentials",
         "owner_stage": "AR-B4/AR-B8-A",
@@ -3590,6 +3535,14 @@
         "owner_stage": "AR-B5",
         "reason": "The exact still-supported source-write consumer uses the single transaction execution contract while callers move to the owning service/runtime executor.",
         "removal_condition": "Remove this exact application/ports consumer after its remaining calls and type exports use the canonical contract; no new implementation belongs in this compatibility path.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.local_bot.schemas",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove this exact existing consumer during remaining LocalBot HTTP/action ownership or G5 schema registration; no such bridge remains at AR-B8-B.",
+        "reason": "Actual original callback or same-object response/clock/context while the specific remaining source is migrated.",
         "review_date": "2026-09-06"
       }
     ]

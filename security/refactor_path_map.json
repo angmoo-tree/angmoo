@@ -539,7 +539,9 @@
     "backend/app/runtime/social/sqlalchemy_today_activity.py": "backend/app/runtime/social/today_activity.py",
     "backend/app/services/langgraph_social_apply.py": "backend/app/runtime/social/langgraph_actions.py",
     "backend/app/services/world_feed_social_apply.py": "backend/app/runtime/social/world_feed_actions.py",
-    "backend/app/runtime/relationships/sqlalchemy_social_read_repository.py": "backend/app/domains/relationships/repository/diagnostics.py"
+    "backend/app/runtime/relationships/sqlalchemy_social_read_repository.py": "backend/app/domains/relationships/repository/diagnostics.py",
+    "backend/app/services/local_bot.py": "backend/app/domains/local_bot/service/actions.py",
+    "backend/app/api/v1/routes/bot.py": "backend/app/domains/local_bot/router/bot.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -1853,8 +1855,9 @@
           "backend/app/domains/identity/exceptions.py"
         ],
         "backend/app/api/v1/deps.py": [
-          "backend/app/api/v1/deps.py",
-          "backend/app/domains/identity/dependencies.py"
+          "backend/app/api/authorization.py",
+          "backend/app/domains/identity/dependencies.py",
+          "backend/app/domains/local_bot/dependencies.py"
         ]
       },
       "split_symbols": [
@@ -4032,14 +4035,13 @@
         },
         {
           "old": "backend/app/api/v1/deps.py::AuthorizationHeader",
-          "new": "backend/app/domains/identity/dependencies.py::AuthorizationHeader",
+          "new": "backend/app/api/authorization.py::AuthorizationHeader",
           "direct_consumers": [
-            "backend/app/domains/identity/dependencies.py"
+            "backend/app/domains/identity/dependencies.py",
+            "backend/app/domains/local_bot/dependencies.py"
           ],
           "test_nodes": [
-            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
-            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
-            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_auth_errors_precede_quota_and_preserve_status_details"
           ]
         },
         {
@@ -4056,14 +4058,13 @@
         },
         {
           "old": "backend/app/api/v1/deps.py::_bearer_token",
-          "new": "backend/app/domains/identity/dependencies.py::_bearer_token",
+          "new": "backend/app/api/authorization.py::_bearer_token",
           "direct_consumers": [
-            "backend/app/domains/identity/dependencies.py"
+            "backend/app/domains/identity/dependencies.py",
+            "backend/app/domains/local_bot/dependencies.py"
           ],
           "test_nodes": [
-            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
-            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
-            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_auth_errors_precede_quota_and_preserve_status_details"
           ]
         },
         {
@@ -4188,14 +4189,13 @@
         },
         {
           "old": "backend/app/api/v1/deps.py::get_current_local_bot",
-          "new": "backend/app/api/v1/deps.py::get_current_local_bot",
+          "new": "backend/app/domains/local_bot/dependencies.py::get_current_local_bot",
           "direct_consumers": [
-            "backend/app/api/v1/deps.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
-            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
-            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/local_bot/test_http_workflows.py::test_bot_http_auth_errors_precede_quota_and_preserve_status_details"
           ]
         }
       ],
@@ -37587,9 +37587,15 @@
       "status": "SOURCE PREPARATION; original97 whole definitions/values AST identical after actual SQL expansion;50PASS/20.07s; boundary757/2495/182legacy; original source/assertion/suppression/APIORM/node diagnostics0 and final split0 after correcting two old Lore consumer entries; protected2201/current2255; source introduction pending",
       "split_files": {
         "backend/app/services/local_bot.py": [
-          "backend/app/services/local_bot.py",
           "backend/app/domains/local_bot/constants.py",
-          "backend/app/domains/local_bot/exceptions.py"
+          "backend/app/domains/local_bot/contracts/authentication.py",
+          "backend/app/domains/local_bot/exceptions.py",
+          "backend/app/domains/local_bot/policies/rate_limit_clock.py",
+          "backend/app/domains/local_bot/service/actions.py",
+          "backend/app/domains/local_bot/service/authentication.py",
+          "backend/app/domains/local_bot/service/presentation.py",
+          "backend/app/domains/local_bot/service/rate_limits.py",
+          "backend/app/runtime/local_bot/queries.py"
         ],
         "backend/app/schemas/agents.py": [
           "backend/app/schemas/agents.py",
@@ -37613,7 +37619,8 @@
           "old": "backend/app/services/local_bot.py::POST_COOLDOWN",
           "new": "backend/app/domains/local_bot/constants.py::POST_COOLDOWN",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py",
+            "backend/app/runtime/local_bot/queries.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37624,7 +37631,7 @@
           "old": "backend/app/services/local_bot.py::MAX_POSTS_PER_DAY",
           "new": "backend/app/domains/local_bot/constants.py::MAX_POSTS_PER_DAY",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
             "backend/app/domains/routines/schemas/resident.py"
           ],
           "test_nodes": [
@@ -37636,7 +37643,8 @@
           "old": "backend/app/services/local_bot.py::REPLY_COOLDOWN",
           "new": "backend/app/domains/local_bot/constants.py::REPLY_COOLDOWN",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37647,7 +37655,8 @@
           "old": "backend/app/services/local_bot.py::MAX_REPLIES_PER_DAY",
           "new": "backend/app/domains/local_bot/constants.py::MAX_REPLIES_PER_DAY",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37658,7 +37667,7 @@
           "old": "backend/app/services/local_bot.py::REACTION_COOLDOWN",
           "new": "backend/app/domains/local_bot/constants.py::REACTION_COOLDOWN",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37669,7 +37678,7 @@
           "old": "backend/app/services/local_bot.py::MAX_REACTIONS_PER_DAY",
           "new": "backend/app/domains/local_bot/constants.py::MAX_REACTIONS_PER_DAY",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37680,7 +37689,8 @@
           "old": "backend/app/services/local_bot.py::STATE_COOLDOWN",
           "new": "backend/app/domains/local_bot/constants.py::STATE_COOLDOWN",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37691,7 +37701,7 @@
           "old": "backend/app/services/local_bot.py::READ_WINDOW",
           "new": "backend/app/domains/local_bot/constants.py::READ_WINDOW",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37702,7 +37712,7 @@
           "old": "backend/app/services/local_bot.py::MAX_READS_PER_WINDOW",
           "new": "backend/app/domains/local_bot/constants.py::MAX_READS_PER_WINDOW",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37713,7 +37723,8 @@
           "old": "backend/app/services/local_bot.py::REACTION_ACTION_TYPES",
           "new": "backend/app/domains/local_bot/constants.py::REACTION_ACTION_TYPES",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py",
+            "backend/app/runtime/local_bot/queries.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37724,7 +37735,8 @@
           "old": "backend/app/services/local_bot.py::STATE_ACTION_TYPES",
           "new": "backend/app/domains/local_bot/constants.py::STATE_ACTION_TYPES",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37735,7 +37747,7 @@
           "old": "backend/app/services/local_bot.py::REACTION_COOLDOWN_ACTION_TYPES",
           "new": "backend/app/domains/local_bot/constants.py::REACTION_COOLDOWN_ACTION_TYPES",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37746,7 +37758,7 @@
           "old": "backend/app/services/local_bot.py::RATE_LIMIT_LOG_DEDUPE_WINDOW",
           "new": "backend/app/domains/local_bot/constants.py::RATE_LIMIT_LOG_DEDUPE_WINDOW",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/runtime/local_bot/queries.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37755,21 +37767,20 @@
         },
         {
           "old": "backend/app/services/local_bot.py::logger",
-          "new": "backend/app/services/local_bot.py::logger",
+          "new": "backend/app/domains/local_bot/service/authentication.py::logger",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/authentication.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_authentication.py::test_authentication_rejections_stop_reads_before_persisting_key_usage",
+            "tests/identity/test_demo_account_lock.py::test_locked_demo_local_bot_is_blocked_before_last_used_update"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::LocalBotError",
           "new": "backend/app/domains/local_bot/exceptions.py::LocalBotError",
           "direct_consumers": [
-            "backend/app/domains/local_bot/exceptions.py",
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/exceptions.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37780,7 +37791,8 @@
           "old": "backend/app/services/local_bot.py::LocalBotAuthError",
           "new": "backend/app/domains/local_bot/exceptions.py::LocalBotAuthError",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/dependencies.py",
+            "backend/app/domains/local_bot/service/authentication.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37791,7 +37803,8 @@
           "old": "backend/app/services/local_bot.py::LocalBotForbiddenError",
           "new": "backend/app/domains/local_bot/exceptions.py::LocalBotForbiddenError",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/dependencies.py",
+            "backend/app/domains/local_bot/service/authentication.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37802,7 +37815,8 @@
           "old": "backend/app/services/local_bot.py::LocalBotModeError",
           "new": "backend/app/domains/local_bot/exceptions.py::LocalBotModeError",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/dependencies.py",
+            "backend/app/domains/local_bot/service/authentication.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37813,7 +37827,8 @@
           "old": "backend/app/services/local_bot.py::LocalBotRateLimitError",
           "new": "backend/app/domains/local_bot/exceptions.py::LocalBotRateLimitError",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37822,386 +37837,406 @@
         },
         {
           "old": "backend/app/services/local_bot.py::LocalBotContext",
-          "new": "backend/app/services/local_bot.py::LocalBotContext",
+          "new": "backend/app/domains/local_bot/contracts/authentication.py::LocalBotContext",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/dependencies.py",
+            "backend/app/domains/local_bot/contracts/actions.py",
+            "backend/app/domains/local_bot/contracts/rate_limits.py",
+            "backend/app/domains/local_bot/router/bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/authentication.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
+            "backend/app/runtime/local_bot/queries.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::authenticate_local_bot",
-          "new": "backend/app/services/local_bot.py::authenticate_local_bot",
+          "new": "backend/app/domains/local_bot/service/authentication.py::authenticate_local_bot",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/dependencies.py",
+            "backend/tests/local_bot/test_key_management.py",
+            "backend/tests/identity/test_demo_account_lock.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_key_management.py::test_local_key_http_rotation_authentication_and_revocation_share_persisted_identity",
+            "tests/identity/test_demo_account_lock.py::test_locked_demo_local_bot_is_blocked_before_last_used_update"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::get_me",
-          "new": "backend/app/services/local_bot.py::get_me",
+          "new": "backend/app/domains/local_bot/service/actions.py::get_me",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::get_state",
-          "new": "backend/app/services/local_bot.py::get_state",
+          "new": "backend/app/domains/local_bot/service/actions.py::get_state",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::save_state",
-          "new": "backend/app/services/local_bot.py::save_state",
+          "new": "backend/app/domains/local_bot/service/actions.py::save_state",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::list_feed",
-          "new": "backend/app/services/local_bot.py::list_feed",
+          "new": "backend/app/domains/local_bot/service/actions.py::list_feed",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::list_following_feed",
-          "new": "backend/app/services/local_bot.py::list_following_feed",
+          "new": "backend/app/domains/local_bot/service/actions.py::list_following_feed",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::get_post_thread",
-          "new": "backend/app/services/local_bot.py::get_post_thread",
+          "new": "backend/app/domains/local_bot/service/actions.py::get_post_thread",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::list_notifications",
-          "new": "backend/app/services/local_bot.py::list_notifications",
+          "new": "backend/app/domains/local_bot/service/actions.py::list_notifications",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::get_character_profile",
-          "new": "backend/app/services/local_bot.py::get_character_profile",
+          "new": "backend/app/domains/local_bot/service/actions.py::get_character_profile",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::get_activity",
-          "new": "backend/app/services/local_bot.py::get_activity",
+          "new": "backend/app/domains/local_bot/service/actions.py::get_activity",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::mark_notification_read",
-          "new": "backend/app/services/local_bot.py::mark_notification_read",
+          "new": "backend/app/domains/local_bot/service/actions.py::mark_notification_read",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::create_post",
-          "new": "backend/app/services/local_bot.py::create_post",
+          "new": "backend/app/domains/local_bot/service/actions.py::create_post",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
-            "backend/tests/test_local_bot_atomic_quota.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::create_reply",
-          "new": "backend/app/services/local_bot.py::create_reply",
+          "new": "backend/app/domains/local_bot/service/actions.py::create_reply",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::like_post",
-          "new": "backend/app/services/local_bot.py::like_post",
+          "new": "backend/app/domains/local_bot/service/actions.py::like_post",
           "direct_consumers": [
-            "backend/tests/test_postgres_security_concurrency.py",
-            "backend/app/services/local_bot.py",
-            "backend/tests/test_local_bot_atomic_quota.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::unlike_post",
-          "new": "backend/app/services/local_bot.py::unlike_post",
+          "new": "backend/app/domains/local_bot/service/actions.py::unlike_post",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::repost_post",
-          "new": "backend/app/services/local_bot.py::repost_post",
+          "new": "backend/app/domains/local_bot/service/actions.py::repost_post",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::unrepost_post",
-          "new": "backend/app/services/local_bot.py::unrepost_post",
+          "new": "backend/app/domains/local_bot/service/actions.py::unrepost_post",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::follow_profile",
-          "new": "backend/app/services/local_bot.py::follow_profile",
+          "new": "backend/app/domains/local_bot/service/actions.py::follow_profile",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::unfollow_profile",
-          "new": "backend/app/services/local_bot.py::unfollow_profile",
+          "new": "backend/app/domains/local_bot/service/actions.py::unfollow_profile",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_bot_post_reference",
-          "new": "backend/app/services/local_bot.py::_bot_post_reference",
+          "new": "backend/app/domains/local_bot/service/presentation.py::_bot_post_reference",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_bot_post_summary",
-          "new": "backend/app/services/local_bot.py::_bot_post_summary",
+          "new": "backend/app/domains/local_bot/service/presentation.py::_bot_post_summary",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_bot_post_detail",
-          "new": "backend/app/services/local_bot.py::_bot_post_detail",
+          "new": "backend/app/domains/local_bot/service/presentation.py::_bot_post_detail",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_bot_feed_page",
-          "new": "backend/app/services/local_bot.py::_bot_feed_page",
+          "new": "backend/app/domains/local_bot/service/presentation.py::_bot_feed_page",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_bot_post_thread",
-          "new": "backend/app/services/local_bot.py::_bot_post_thread",
+          "new": "backend/app/domains/local_bot/service/presentation.py::_bot_post_thread",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_bot_notification_read",
-          "new": "backend/app/services/local_bot.py::_bot_notification_read",
+          "new": "backend/app/domains/local_bot/service/presentation.py::_bot_notification_read",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_bot_notification_page",
-          "new": "backend/app/services/local_bot.py::_bot_notification_page",
+          "new": "backend/app/domains/local_bot/service/presentation.py::_bot_notification_page",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_bot_profile_ref",
-          "new": "backend/app/services/local_bot.py::_bot_profile_ref",
+          "new": "backend/app/domains/local_bot/service/presentation.py::_bot_profile_ref",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_bot_follow_read",
-          "new": "backend/app/services/local_bot.py::_bot_follow_read",
+          "new": "backend/app/domains/local_bot/service/presentation.py::_bot_follow_read",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_bot_profile_read",
-          "new": "backend/app/services/local_bot.py::_bot_profile_read",
+          "new": "backend/app/domains/local_bot/service/presentation.py::_bot_profile_read",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_ensure_post_rate_limit",
-          "new": "backend/app/services/local_bot.py::_ensure_post_rate_limit",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_ensure_post_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_bot_activity_limits",
-          "new": "backend/app/services/local_bot.py::_bot_activity_limits",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_bot_activity_limits",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_post_limit_status",
-          "new": "backend/app/services/local_bot.py::_post_limit_status",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_post_limit_status",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_activity_limit_status",
-          "new": "backend/app/services/local_bot.py::_activity_limit_status",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_activity_limit_status",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_latest_activity_at",
-          "new": "backend/app/services/local_bot.py::_latest_activity_at",
+          "new": "backend/app/runtime/local_bot/queries.py::_latest_activity_at",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/contracts/rate_limits.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -38210,9 +38245,10 @@
         },
         {
           "old": "backend/app/services/local_bot.py::_count_activities_today",
-          "new": "backend/app/services/local_bot.py::_count_activities_today",
+          "new": "backend/app/runtime/local_bot/queries.py::_count_activities_today",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/contracts/rate_limits.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -38221,86 +38257,100 @@
         },
         {
           "old": "backend/app/services/local_bot.py::_remaining_seconds",
-          "new": "backend/app/services/local_bot.py::_remaining_seconds",
+          "new": "backend/app/domains/local_bot/policies/rate_limit_clock.py::_remaining_seconds",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/schemas.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
+            "backend/app/domains/local_bot/policies/rate_limit_clock.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_ensure_reaction_rate_limit",
-          "new": "backend/app/services/local_bot.py::_ensure_reaction_rate_limit",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_ensure_reaction_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_ensure_reaction_daily_limit",
-          "new": "backend/app/services/local_bot.py::_ensure_reaction_daily_limit",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_ensure_reaction_daily_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_ensure_activity_rate_limit",
-          "new": "backend/app/services/local_bot.py::_ensure_activity_rate_limit",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_ensure_activity_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_ensure_read_rate_limit",
-          "new": "backend/app/services/local_bot.py::_ensure_read_rate_limit",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_ensure_read_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_complete_action_quota",
-          "new": "backend/app/services/local_bot.py::_complete_action_quota",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_complete_action_quota",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_rollback_action_quota",
-          "new": "backend/app/services/local_bot.py::_rollback_action_quota",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_rollback_action_quota",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_post_like_exists",
-          "new": "backend/app/services/local_bot.py::_post_like_exists",
+          "new": "backend/app/runtime/local_bot/queries.py::_post_like_exists",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/contracts/actions.py",
+            "backend/app/domains/local_bot/service/actions.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -38309,9 +38359,10 @@
         },
         {
           "old": "backend/app/services/local_bot.py::_post_repost_exists",
-          "new": "backend/app/services/local_bot.py::_post_repost_exists",
+          "new": "backend/app/runtime/local_bot/queries.py::_post_repost_exists",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/contracts/actions.py",
+            "backend/app/domains/local_bot/service/actions.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -38320,9 +38371,10 @@
         },
         {
           "old": "backend/app/services/local_bot.py::_profile_follow_exists",
-          "new": "backend/app/services/local_bot.py::_profile_follow_exists",
+          "new": "backend/app/runtime/local_bot/queries.py::_profile_follow_exists",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/contracts/actions.py",
+            "backend/app/domains/local_bot/service/actions.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -38331,81 +38383,87 @@
         },
         {
           "old": "backend/app/services/local_bot.py::_local_day_start_utc",
-          "new": "backend/app/services/local_bot.py::_local_day_start_utc",
+          "new": "backend/app/domains/local_bot/policies/rate_limit_clock.py::_local_day_start_utc",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/quota.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
+            "backend/app/domains/local_bot/policies/rate_limit_clock.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_next_local_day_start_utc",
-          "new": "backend/app/services/local_bot.py::_next_local_day_start_utc",
+          "new": "backend/app/domains/local_bot/policies/rate_limit_clock.py::_next_local_day_start_utc",
           "direct_consumers": [
             "backend/app/domains/local_bot/service/quota.py",
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py",
+            "backend/app/domains/local_bot/policies/rate_limit_clock.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_seconds_until",
-          "new": "backend/app/services/local_bot.py::_seconds_until",
+          "new": "backend/app/domains/local_bot/policies/rate_limit_clock.py::_seconds_until",
           "direct_consumers": [
             "backend/app/domains/local_bot/service/quota.py",
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py",
+            "backend/app/domains/local_bot/policies/rate_limit_clock.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_raise_rate_limit",
-          "new": "backend/app/services/local_bot.py::_raise_rate_limit",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_raise_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_log_rate_limit",
-          "new": "backend/app/services/local_bot.py::_log_rate_limit",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_log_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_log_auth_failure",
-          "new": "backend/app/services/local_bot.py::_log_auth_failure",
+          "new": "backend/app/domains/local_bot/service/authentication.py::_log_auth_failure",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/authentication.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_authentication.py::test_authentication_rejections_stop_reads_before_persisting_key_usage",
+            "tests/identity/test_demo_account_lock.py::test_locked_demo_local_bot_is_blocked_before_last_used_update"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_redacted_token_prefix",
-          "new": "backend/app/services/local_bot.py::_redacted_token_prefix",
+          "new": "backend/app/domains/local_bot/service/authentication.py::_redacted_token_prefix",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/authentication.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_authentication.py::test_authentication_rejections_stop_reads_before_persisting_key_usage",
+            "tests/identity/test_demo_account_lock.py::test_locked_demo_local_bot_is_blocked_before_last_used_update"
           ]
         },
         {
@@ -38518,7 +38576,7 @@
           "direct_consumers": [
             "backend/app/schemas/agents.py",
             "backend/app/schemas/__init__.py",
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/schemas.py"
           ],
           "test_nodes": [
@@ -38532,7 +38590,8 @@
           "direct_consumers": [
             "backend/app/schemas/agents.py",
             "backend/app/schemas/__init__.py",
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py",
+            "backend/app/domains/local_bot/service/actions.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -38556,7 +38615,7 @@
           "direct_consumers": [
             "backend/tests/test_postgres_security_concurrency.py",
             "backend/app/domains/local_bot/service/quota.py",
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
             "backend/tests/test_local_bot_atomic_quota.py"
           ],
           "test_nodes": [
@@ -38569,7 +38628,9 @@
           "new": "backend/app/domains/local_bot/service/quota.py::ActionQuota",
           "direct_consumers": [
             "backend/app/domains/local_bot/service/quota.py",
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/models.py",
+            "backend/app/domains/local_bot/repository/quota.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -38581,7 +38642,7 @@
           "new": "backend/app/domains/local_bot/service/quota.py::lock_action_quota",
           "direct_consumers": [
             "backend/tests/test_postgres_security_concurrency.py",
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
             "backend/tests/test_local_bot_atomic_quota.py"
           ],
           "test_nodes": [
@@ -38594,7 +38655,7 @@
           "new": "backend/app/domains/local_bot/service/quota.py::consume_read",
           "direct_consumers": [
             "backend/tests/test_postgres_security_concurrency.py",
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
             "backend/tests/test_local_bot_atomic_quota.py"
           ],
           "test_nodes": [
@@ -38629,7 +38690,8 @@
           "new": "backend/app/domains/local_bot/service/quota.py::_next_local_day_start_utc",
           "direct_consumers": [
             "backend/app/domains/local_bot/service/quota.py",
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/policies/rate_limit_clock.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -38652,7 +38714,8 @@
           "new": "backend/app/domains/local_bot/service/quota.py::_seconds_until",
           "direct_consumers": [
             "backend/app/domains/local_bot/service/quota.py",
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/policies/rate_limit_clock.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -39159,7 +39222,7 @@
         "backend/tests/test_local_bot_atomic_quota.py",
         "backend/tests/test_postgres_security_concurrency.py",
         "backend/app/models/__init__.py",
-        "backend/app/services/local_bot.py"
+        "backend/app/runtime/local_bot/composition.py"
       ],
       "preserved": "Original quota row locks, nested insert/IntegrityError behavior, day reset/cooldown, caller-owned action completion and consume_read explicit commit. All DTO/ORM definitions unchanged.",
       "remaining": "LocalBot main workflow/auth/owner key/HTTP, Social DTO ownership, global aggregates and final boundary retirement."
@@ -59001,7 +59064,7 @@
           "old": "backend/app/services/post_image_generation.py::_ReferenceImage",
           "new": "backend/app/runtime/social/image_generation.py::_ReferenceImage",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -59388,7 +59451,7 @@
           "old": "backend/app/services/post_image_generation.py::_build_reference_image",
           "new": "backend/app/runtime/social/image_generation.py::_build_reference_image",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -59403,7 +59466,7 @@
           "old": "backend/app/services/post_image_generation.py::_public_media_url",
           "new": "backend/app/runtime/social/image_generation.py::_public_media_url",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -59418,7 +59481,7 @@
           "old": "backend/app/services/post_image_generation.py::_mime_type_from_url",
           "new": "backend/app/runtime/social/image_generation.py::_mime_type_from_url",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -59524,7 +59587,7 @@
           "old": "backend/app/services/post_image_generation.py::_image_key_for_source",
           "new": "backend/app/runtime/social/image_generation.py::_image_key_for_source",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -59617,7 +59680,7 @@
           "old": "backend/app/services/post_image_generation.py::_unsafe_image_text_reason",
           "new": "backend/app/runtime/social/image_generation.py::_unsafe_image_text_reason",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -59632,7 +59695,7 @@
           "old": "backend/app/services/post_image_generation.py::_log_local_api_image_rejected",
           "new": "backend/app/runtime/social/image_generation.py::_log_local_api_image_rejected",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -61158,7 +61221,7 @@
           "old": "backend/app/services/post_image_generation.py::_ReferenceImage",
           "new": "backend/app/runtime/social/image_generation.py::_ReferenceImage",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -61545,7 +61608,7 @@
           "old": "backend/app/services/post_image_generation.py::_build_reference_image",
           "new": "backend/app/runtime/social/image_generation.py::_build_reference_image",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -61560,7 +61623,7 @@
           "old": "backend/app/services/post_image_generation.py::_public_media_url",
           "new": "backend/app/runtime/social/image_generation.py::_public_media_url",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -61575,7 +61638,7 @@
           "old": "backend/app/services/post_image_generation.py::_mime_type_from_url",
           "new": "backend/app/runtime/social/image_generation.py::_mime_type_from_url",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -61681,7 +61744,7 @@
           "old": "backend/app/services/post_image_generation.py::_image_key_for_source",
           "new": "backend/app/runtime/social/image_generation.py::_image_key_for_source",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -61774,7 +61837,7 @@
           "old": "backend/app/services/post_image_generation.py::_unsafe_image_text_reason",
           "new": "backend/app/runtime/social/image_generation.py::_unsafe_image_text_reason",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -61789,7 +61852,7 @@
           "old": "backend/app/services/post_image_generation.py::_log_local_api_image_rejected",
           "new": "backend/app/runtime/social/image_generation.py::_log_local_api_image_rejected",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -62052,7 +62115,7 @@
           "old": "backend/app/services/post_image_generation.py::_ReferenceImage",
           "new": "backend/app/runtime/social/image_generation.py::_ReferenceImage",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -62439,7 +62502,7 @@
           "old": "backend/app/services/post_image_generation.py::_build_reference_image",
           "new": "backend/app/runtime/social/image_generation.py::_build_reference_image",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -62454,7 +62517,7 @@
           "old": "backend/app/services/post_image_generation.py::_public_media_url",
           "new": "backend/app/runtime/social/image_generation.py::_public_media_url",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -62469,7 +62532,7 @@
           "old": "backend/app/services/post_image_generation.py::_mime_type_from_url",
           "new": "backend/app/runtime/social/image_generation.py::_mime_type_from_url",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -62575,7 +62638,7 @@
           "old": "backend/app/services/post_image_generation.py::_image_key_for_source",
           "new": "backend/app/runtime/social/image_generation.py::_image_key_for_source",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -62668,7 +62731,7 @@
           "old": "backend/app/services/post_image_generation.py::_unsafe_image_text_reason",
           "new": "backend/app/runtime/social/image_generation.py::_unsafe_image_text_reason",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -62683,7 +62746,7 @@
           "old": "backend/app/services/post_image_generation.py::_log_local_api_image_rejected",
           "new": "backend/app/runtime/social/image_generation.py::_log_local_api_image_rejected",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -62867,7 +62930,7 @@
           "old": "backend/app/services/post_image_generation.py::prepare_post_image",
           "new": "backend/app/runtime/social/image_generation.py::prepare_post_image",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -62882,7 +62945,7 @@
           "old": "backend/app/services/post_image_generation.py::create_local_api_post_image_request",
           "new": "backend/app/runtime/social/image_generation.py::create_local_api_post_image_request",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -62897,7 +62960,7 @@
           "old": "backend/app/services/post_image_generation.py::prepare_local_api_post_image",
           "new": "backend/app/runtime/social/image_generation.py::prepare_local_api_post_image",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -62912,7 +62975,7 @@
           "old": "backend/app/services/post_image_generation.py::_image_model_for_key_source",
           "new": "backend/app/runtime/social/image_generation.py::_image_model_for_key_source",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -63074,7 +63137,7 @@
           "old": "backend/app/services/post_image_generation.py::_ReferenceImage",
           "new": "backend/app/runtime/social/image_generation.py::_ReferenceImage",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -63461,7 +63524,7 @@
           "old": "backend/app/services/post_image_generation.py::_build_reference_image",
           "new": "backend/app/runtime/social/image_generation.py::_build_reference_image",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -63476,7 +63539,7 @@
           "old": "backend/app/services/post_image_generation.py::_public_media_url",
           "new": "backend/app/runtime/social/image_generation.py::_public_media_url",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -63491,7 +63554,7 @@
           "old": "backend/app/services/post_image_generation.py::_mime_type_from_url",
           "new": "backend/app/runtime/social/image_generation.py::_mime_type_from_url",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -63597,7 +63660,7 @@
           "old": "backend/app/services/post_image_generation.py::_image_key_for_source",
           "new": "backend/app/runtime/social/image_generation.py::_image_key_for_source",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -63690,7 +63753,7 @@
           "old": "backend/app/services/post_image_generation.py::_unsafe_image_text_reason",
           "new": "backend/app/runtime/social/image_generation.py::_unsafe_image_text_reason",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -63705,7 +63768,7 @@
           "old": "backend/app/services/post_image_generation.py::_log_local_api_image_rejected",
           "new": "backend/app/runtime/social/image_generation.py::_log_local_api_image_rejected",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -63889,7 +63952,7 @@
           "old": "backend/app/services/post_image_generation.py::prepare_post_image",
           "new": "backend/app/runtime/social/image_generation.py::prepare_post_image",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -63904,7 +63967,7 @@
           "old": "backend/app/services/post_image_generation.py::create_local_api_post_image_request",
           "new": "backend/app/runtime/social/image_generation.py::create_local_api_post_image_request",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -63919,7 +63982,7 @@
           "old": "backend/app/services/post_image_generation.py::prepare_local_api_post_image",
           "new": "backend/app/runtime/social/image_generation.py::prepare_local_api_post_image",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -63934,7 +63997,7 @@
           "old": "backend/app/services/post_image_generation.py::_image_model_for_key_source",
           "new": "backend/app/runtime/social/image_generation.py::_image_model_for_key_source",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -64150,7 +64213,7 @@
           "old": "backend/app/services/post_image_generation.py::_ReferenceImage",
           "new": "backend/app/runtime/social/image_generation.py::_ReferenceImage",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -64537,7 +64600,7 @@
           "old": "backend/app/services/post_image_generation.py::_build_reference_image",
           "new": "backend/app/runtime/social/image_generation.py::_build_reference_image",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -64552,7 +64615,7 @@
           "old": "backend/app/services/post_image_generation.py::_public_media_url",
           "new": "backend/app/runtime/social/image_generation.py::_public_media_url",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -64567,7 +64630,7 @@
           "old": "backend/app/services/post_image_generation.py::_mime_type_from_url",
           "new": "backend/app/runtime/social/image_generation.py::_mime_type_from_url",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -64673,7 +64736,7 @@
           "old": "backend/app/services/post_image_generation.py::_image_key_for_source",
           "new": "backend/app/runtime/social/image_generation.py::_image_key_for_source",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -64766,7 +64829,7 @@
           "old": "backend/app/services/post_image_generation.py::_unsafe_image_text_reason",
           "new": "backend/app/runtime/social/image_generation.py::_unsafe_image_text_reason",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -64781,7 +64844,7 @@
           "old": "backend/app/services/post_image_generation.py::_log_local_api_image_rejected",
           "new": "backend/app/runtime/social/image_generation.py::_log_local_api_image_rejected",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -64965,7 +65028,7 @@
           "old": "backend/app/services/post_image_generation.py::prepare_post_image",
           "new": "backend/app/runtime/social/image_generation.py::prepare_post_image",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -64980,7 +65043,7 @@
           "old": "backend/app/services/post_image_generation.py::create_local_api_post_image_request",
           "new": "backend/app/runtime/social/image_generation.py::create_local_api_post_image_request",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -64995,7 +65058,7 @@
           "old": "backend/app/services/post_image_generation.py::prepare_local_api_post_image",
           "new": "backend/app/runtime/social/image_generation.py::prepare_local_api_post_image",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -65010,7 +65073,7 @@
           "old": "backend/app/services/post_image_generation.py::_image_model_for_key_source",
           "new": "backend/app/runtime/social/image_generation.py::_image_model_for_key_source",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/runtime/local_bot/composition.py",
             "backend/app/runtime/social/image_job_worker.py",
             "backend/app/runtime/characters/management.py"
           ],
@@ -67086,6 +67149,948 @@
       ],
       "same_session_evidence": "19 original policy/query/error/complete transaction bodies match after exact owner-call expansion. New SQLite2 prove fail-first invalid no-action SQL0, sameSession construction and attached result, no implicit commit/event/relationship, caller rollback, and reaction mutation without implicit flush. Existing reply/proposal/WorldFeed/LangGraph/RoutinePost behavior remains under focused regressions.",
       "remaining": "Community and WorldFeed runtime execution, parent-owned Search, remaining compatibility consumers and G07 test ownership are not complete. Capture, Hosted CI and integration are parent-owned."
+    },
+    "AR-B8-LOCAL-BOT-A2": {
+      "status": "SOURCE VERIFIED: 18 original definitions and 19 full schema AST/JSON identical;54 focused PASS; expanded71 PASS/1 pre-existing Character route module inventory mismatch; six preservation diagnostics0/protected2201/current2262; source introductions pending",
+      "actual_paths": [
+        "backend/app/domains/local_bot/contracts/authentication.py",
+        "backend/app/domains/local_bot/policies/rate_limit_clock.py",
+        "backend/app/domains/local_bot/service/authentication.py",
+        "backend/app/domains/local_bot/service/presentation.py",
+        "backend/app/runtime/local_bot/authentication.py"
+      ],
+      "split_files": {
+        "backend/app/schemas/community.py": [
+          "backend/app/domains/social/schemas/community.py",
+          "backend/app/domains/local_bot/schemas.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/schemas/community.py::FeedContentFilter",
+          "new": "backend/app/domains/social/schemas/community.py::FeedContentFilter",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::PostInfoKind",
+          "new": "backend/app/domains/social/schemas/community.py::PostInfoKind",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::PostInfoMetadata",
+          "new": "backend/app/domains/social/schemas/community.py::PostInfoMetadata",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::PostCreate",
+          "new": "backend/app/domains/social/schemas/community.py::PostCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotPostCreate",
+          "new": "backend/app/domains/local_bot/schemas.py::BotPostCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotReplyCreate",
+          "new": "backend/app/domains/local_bot/schemas.py::BotReplyCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotFollowCreate",
+          "new": "backend/app/domains/local_bot/schemas.py::BotFollowCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::PostLikeCreate",
+          "new": "backend/app/domains/social/schemas/community.py::PostLikeCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::PostReportCreate",
+          "new": "backend/app/domains/social/schemas/community.py::PostReportCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::PostReportRead",
+          "new": "backend/app/domains/social/schemas/community.py::PostReportRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::CommentCreate",
+          "new": "backend/app/domains/social/schemas/community.py::CommentCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::CommentRead",
+          "new": "backend/app/domains/social/schemas/community.py::CommentRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::TimelinePostCreate",
+          "new": "backend/app/domains/social/schemas/community.py::TimelinePostCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::TimelineReplyCreate",
+          "new": "backend/app/domains/social/schemas/community.py::TimelineReplyCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentPostBriefCreate",
+          "new": "backend/app/domains/social/schemas/community.py::AgentPostBriefCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentReplyBriefCreate",
+          "new": "backend/app/domains/social/schemas/community.py::AgentReplyBriefCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::TimelineQuoteCreate",
+          "new": "backend/app/domains/social/schemas/community.py::TimelineQuoteCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::MentionedCharacterRef",
+          "new": "backend/app/domains/social/schemas/community.py::MentionedCharacterRef",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::FollowCreate",
+          "new": "backend/app/domains/social/schemas/community.py::FollowCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::FollowRead",
+          "new": "backend/app/domains/social/schemas/community.py::FollowRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotProfileRef",
+          "new": "backend/app/domains/local_bot/schemas.py::BotProfileRef",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotFollowRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotFollowRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotProfileRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotProfileRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotStateSnapshot",
+          "new": "backend/app/domains/local_bot/schemas.py::BotStateSnapshot",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotStateRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotStateRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotStateWrite",
+          "new": "backend/app/domains/local_bot/schemas.py::BotStateWrite",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotActivityLogRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotActivityLogRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotActivityLimitRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotActivityLimitRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotActivityRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotActivityRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::FollowStatusRead",
+          "new": "backend/app/domains/social/schemas/community.py::FollowStatusRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::NotificationRead",
+          "new": "backend/app/domains/social/schemas/community.py::NotificationRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotNotificationRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotNotificationRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentToolNoteRead",
+          "new": "backend/app/domains/social/schemas/community.py::AgentToolNoteRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentFeedInterestItem",
+          "new": "backend/app/domains/social/schemas/community.py::AgentFeedInterestItem",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentFeedInterestsCreate",
+          "new": "backend/app/domains/social/schemas/community.py::AgentFeedInterestsCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentFeedHistorySanitizeItem",
+          "new": "backend/app/domains/social/schemas/community.py::AgentFeedHistorySanitizeItem",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentFeedHistorySanitizeCreate",
+          "new": "backend/app/domains/social/schemas/community.py::AgentFeedHistorySanitizeCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentInboxReviewCreate",
+          "new": "backend/app/domains/social/schemas/community.py::AgentInboxReviewCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentObserveCreate",
+          "new": "backend/app/domains/social/schemas/community.py::AgentObserveCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::PostMediaRead",
+          "new": "backend/app/domains/social/schemas/community.py::PostMediaRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::PostReference",
+          "new": "backend/app/domains/social/schemas/community.py::PostReference",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotPostReference",
+          "new": "backend/app/domains/local_bot/schemas.py::BotPostReference",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::PostSummary",
+          "new": "backend/app/domains/social/schemas/community.py::PostSummary",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotPostSummary",
+          "new": "backend/app/domains/local_bot/schemas.py::BotPostSummary",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::PostDetail",
+          "new": "backend/app/domains/social/schemas/community.py::PostDetail",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotImageRequestRead",
+          "new": "backend/app/domains/social/schemas/community.py::BotImageRequestRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotPostDetail",
+          "new": "backend/app/domains/local_bot/schemas.py::BotPostDetail",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentFeedPostSummary",
+          "new": "backend/app/domains/social/schemas/community.py::AgentFeedPostSummary",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentBriefWriteResult",
+          "new": "backend/app/domains/social/schemas/community.py::AgentBriefWriteResult",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::FeedPage",
+          "new": "backend/app/domains/social/schemas/community.py::FeedPage",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentFeedPage",
+          "new": "backend/app/domains/social/schemas/community.py::AgentFeedPage",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotFeedPage",
+          "new": "backend/app/domains/local_bot/schemas.py::BotFeedPage",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::TodayActivityRead",
+          "new": "backend/app/domains/social/schemas/community.py::TodayActivityRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::PostThreadRead",
+          "new": "backend/app/domains/social/schemas/community.py::PostThreadRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotPostThreadRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotPostThreadRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::ProfileRead",
+          "new": "backend/app/domains/social/schemas/community.py::ProfileRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::ProfileListItem",
+          "new": "backend/app/domains/social/schemas/community.py::ProfileListItem",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::ProfileListPage",
+          "new": "backend/app/domains/social/schemas/community.py::ProfileListPage",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::CharacterSearchResult",
+          "new": "backend/app/domains/social/schemas/community.py::CharacterSearchResult",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::SearchResults",
+          "new": "backend/app/domains/social/schemas/community.py::SearchResults",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::NotificationPage",
+          "new": "backend/app/domains/social/schemas/community.py::NotificationPage",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::BotNotificationPage",
+          "new": "backend/app/domains/local_bot/schemas.py::BotNotificationPage",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentTickStateWrite",
+          "new": "backend/app/domains/social/schemas/community.py::AgentTickStateWrite",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentTickStateRead",
+          "new": "backend/app/domains/social/schemas/community.py::AgentTickStateRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentCompleteTickAction",
+          "new": "backend/app/domains/social/schemas/community.py::AgentCompleteTickAction",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentCompleteTickCreate",
+          "new": "backend/app/domains/social/schemas/community.py::AgentCompleteTickCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/community.py::AgentCompleteTickRead",
+          "new": "backend/app/domains/social/schemas/community.py::AgentCompleteTickRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/social/schemas/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
+            "tests/test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation"
+          ]
+        }
+      ],
+      "preservation": "18 actual original definitions: authentication admission, unchanged last-used commit after owner/demo checks, public projections, clock and logging, plus 19 complete Bot schemas. Same attached values and caller Session supplied by actual Character/Identity nullable lookups. BotImageRequestRead remains its original Social image-result owner. No new logging/file/provider or transaction policy.",
+      "remaining": "Bot19 HTTP and actual actions/read/rate-limit/SQL remain in the original services.local_bot with exact current consumers until subsequent LocalBot slices; no copied implementation or default domain-to-runtime import. Parent key files are unchanged. Aggregate Bot DTO import is temporary G5/B8 consumer. Root performs first source introductions and final owner-source integration."
+    },
+    "AR-B8-LOCAL-BOT-A3": {
+      "status": "SOURCE VERIFIED;35 original complete functions identical after exact15 query expansion;54 focused PASS/7.34s; six diagnostics0/protected2201/current2262; boundary777/2577/173legacy; source introductions pending",
+      "actual_paths": [
+        "backend/app/runtime/local_bot/queries.py"
+      ],
+      "query_expressions": [
+        {
+          "owner": "get_state",
+          "variable": "state",
+          "query": "read_character_state"
+        },
+        {
+          "owner": "get_activity",
+          "variable": "rows",
+          "query": "list_activity"
+        },
+        {
+          "owner": "_ensure_post_rate_limit",
+          "variable": "recent_post",
+          "query": "recent_root_post_at"
+        },
+        {
+          "owner": "_ensure_post_rate_limit",
+          "variable": "today_count",
+          "query": "count_root_posts_since"
+        },
+        {
+          "owner": "_post_limit_status",
+          "variable": "latest",
+          "query": "latest_root_post_at"
+        },
+        {
+          "owner": "_post_limit_status",
+          "variable": "used_today",
+          "query": "root_post_usage_since"
+        },
+        {
+          "owner": "_ensure_reaction_daily_limit",
+          "variable": "today_count",
+          "query": "reaction_usage_since"
+        },
+        {
+          "owner": "_ensure_activity_rate_limit",
+          "variable": "recent_activity",
+          "query": "recent_activity_at"
+        },
+        {
+          "owner": "_ensure_activity_rate_limit",
+          "variable": "today_count",
+          "query": "activity_usage_since"
+        },
+        {
+          "owner": "_log_rate_limit",
+          "variable": "recent_log",
+          "query": "recent_rate_limit_log_id"
+        }
+      ],
+      "whole_queries": [
+        "_latest_activity_at",
+        "_count_activities_today",
+        "_post_like_exists",
+        "_post_repost_exists",
+        "_profile_follow_exists"
+      ],
+      "preservation": "Original five complete nullable/predicate queries and ten SQL expression bodies moved into same-Session runtime queries. All remaining original35 functions match after exact query body expansion; no query order/conditions/limit/sort or non-Session fallback altered. Own quota policy remains separate and read projections add no writes.",
+      "remaining": "Rate-limit and Bot actions/HTTP remain actual old service until follow-up LocalBot ownership; parent integrates canonical B4/B5 query/model paths and shared Character state helper without duplicating it."
+    },
+    "AR-B8-LOCAL-BOT-A4": {
+      "status": "SOURCE VERIFIED;30 complete original functions preserved after exact workflow binding;54 focused PASS/7.24s; all original assertions/suppression unchanged; six diagnostics0/protected2201/current2262; boundary780/2589/173legacy; source introductions pending",
+      "actual_paths": [
+        "backend/app/domains/local_bot/service/rate_limits.py",
+        "backend/app/domains/local_bot/contracts/rate_limits.py",
+        "backend/app/runtime/local_bot/rate_limits.py"
+      ],
+      "preservation": "12 actual admission/usage/retry/log/commit/rollback functions moved into LocalBot service. Runtime supplies only same Session query module and original Routines activity logger through typed contracts. Real Session quota lock path and synthetic fallback remain distinct; own read consume commits and action quota commit/rollback are unchanged. All30 original whole functions preserved after exact workflow binding.",
+      "temporary_bindings": [
+        "_activity_limit_status",
+        "_bot_activity_limits",
+        "_ensure_activity_rate_limit",
+        "_ensure_post_rate_limit",
+        "_ensure_reaction_daily_limit",
+        "_ensure_reaction_rate_limit",
+        "_ensure_read_rate_limit",
+        "_log_rate_limit",
+        "_post_limit_status",
+        "_raise_rate_limit"
+      ],
+      "remaining": "Exact partial bindings in the existing service connect its unconverted actual Bot actions; they retire with Bot action/service and HTTP slice, not as permanent parallel entrypoints. Original frozen/test assertions/suppression and no extra provider or owner mutation remain protected."
+    },
+    "AR-B8-LOCAL-BOT-A5": {
+      "status": "IMPLEMENTED SOURCE; 287 focused/Identity/G07/boundary tests PASS; original six preservation diagnostics 0 errors; root linear source introductions and hosted integration pending",
+      "actual_paths": [
+        "backend/app/domains/local_bot/service/actions.py",
+        "backend/app/domains/local_bot/contracts/actions.py",
+        "backend/app/runtime/local_bot/composition.py",
+        "backend/app/api/authorization.py",
+        "backend/app/domains/local_bot/router/bot.py",
+        "backend/app/domains/local_bot/dependencies.py"
+      ],
+      "original_action_source": "480426256302628c445b4ead07db4bdfd60c5e25:backend/app/services/local_bot.py",
+      "preservation": "18 actual Bot reads/actions with same-Session typed Social/read/log/image collaborations, original quota reservation/deferred commit/failure rollback and aftercommit image request. 18 HTTP operations and Retry-After helper keep original URL/order/status/operation names and public DTOs. Shared Authorization syntax is one actual common HTTP definition; Identity and Bot share its same object. Request app.state builders connect authentication/actions in both factories. Original dedicated assertions use test-only workflow binding; product code has no forwarding wrapper.",
+      "removed_paths": [
+        "backend/app/services/local_bot.py",
+        "backend/app/api/v1/routes/bot.py",
+        "backend/app/api/v1/deps.py"
+      ],
+      "remaining": "Root B5 final integration replaces exactly the community and post_image_generation callable bindings in runtime.local_bot.composition; current actual owners and their error wrappers remain unchanged. Root G5 handles the global same-model/schema export and historical migration registration. G06 keeps both factory registrations during final single-factory integration. Parent alone captures signed source introductions and performs hosted/merged gates.",
+      "verification": {
+        "pytest": "287 passed, 15 warnings in 16.77s",
+        "ast": "18 original complete action bodies and signatures after workflow binding normalization; 18 router functions plus error helper; shared Authorization 2 definitions; original Bot assertions and suppressions unchanged",
+        "typed_collaboration": "16 Social Protocol method annotations resolved",
+        "boundaries": "782 modules / 2605 edges / 168 exact legacy edges",
+        "g07": "Full original security harness PASS; 26 module-only inventory changes, same operation/endpoint/access; public inventory 196",
+        "preservation": "Sources/split/assertions/suppression/APIORM/missing_nodes each 0 errors; protected 2201/current 2269; immutable original snapshots and additions unchanged; exact signed 869bae55 source 2-file supplement in memory only",
+        "l4_er0": "L4 current inventory 782 modules / 97 parity nodes; deferred runtime 22 files",
+        "new_test_nodes": "4 actual HTTP tests + 3 explicit error-entry architecture regressions; source introduction SHA is this source commit"
+      }
     }
   },
   "asgi_exports": {

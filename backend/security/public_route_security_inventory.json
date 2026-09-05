@@ -19,17 +19,17 @@
     },
     "DELETE /api/v1/agents/{character_id}/image-settings/key": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "delete_image_settings_key"
     },
     "DELETE /api/v1/agents/{character_id}/image-settings/seed": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "delete_image_seed"
     },
     "DELETE /api/v1/agents/{character_id}/local-key": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.local_bot.router.keys",
       "endpoint": "revoke_local_key"
     },
     "DELETE /api/v1/agents/{character_id}/lore-sources/{source_id}": {
@@ -44,17 +44,17 @@
     },
     "DELETE /api/v1/bot/posts/{post_id}/likes": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "unlike_post"
     },
     "DELETE /api/v1/bot/posts/{post_id}/reposts": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "unrepost_post"
     },
     "DELETE /api/v1/bot/profiles/follows": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "unfollow_profile"
     },
     "DELETE /api/v1/messages/threads/{thread_id}": {
@@ -149,12 +149,12 @@
     },
     "GET /api/v1/agents/{character_id}/image-settings": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "get_image_settings"
     },
     "GET /api/v1/agents/{character_id}/local-connection": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.local_bot.router.keys",
       "endpoint": "get_local_connection"
     },
     "GET /api/v1/agents/{character_id}/lore-sources": {
@@ -194,42 +194,42 @@
     },
     "GET /api/v1/bot/activity": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "get_activity"
     },
     "GET /api/v1/bot/feed": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "list_feed"
     },
     "GET /api/v1/bot/feed/following": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "list_following_feed"
     },
     "GET /api/v1/bot/me": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "get_me"
     },
     "GET /api/v1/bot/notifications": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "list_notifications"
     },
     "GET /api/v1/bot/posts/{post_id}/thread": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "get_post_thread"
     },
     "GET /api/v1/bot/profiles/characters/{character_id}": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "get_character_profile"
     },
     "GET /api/v1/bot/state": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "get_state"
     },
     "GET /api/v1/characters/{character_id}/activity": {
@@ -539,12 +539,12 @@
     },
     "PATCH /api/v1/bot/notifications/{notification_id}/read": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "mark_notification_read"
     },
     "PATCH /api/v1/bot/state": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "save_state"
     },
     "PATCH /api/v1/characters/{character_id}/message-settings": {
@@ -654,12 +654,12 @@
     },
     "POST /api/v1/agents/{character_id}/image-settings/seed": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "upload_image_seed"
     },
     "POST /api/v1/agents/{character_id}/local-key": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.local_bot.router.keys",
       "endpoint": "issue_local_key"
     },
     "POST /api/v1/agents/{character_id}/lore-sources": {
@@ -714,27 +714,27 @@
     },
     "POST /api/v1/bot/posts": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "create_post"
     },
     "POST /api/v1/bot/posts/{post_id}/likes": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "like_post"
     },
     "POST /api/v1/bot/posts/{post_id}/replies": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "create_reply"
     },
     "POST /api/v1/bot/posts/{post_id}/reposts": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "repost_post"
     },
     "POST /api/v1/bot/profiles/follows": {
       "access": "local-bot-token",
-      "module": "app.api.v1.routes.bot",
+      "module": "app.domains.local_bot.router.bot",
       "endpoint": "follow_profile"
     },
     "POST /api/v1/characters/{character_id}/state": {
@@ -944,7 +944,7 @@
     },
     "PUT /api/v1/agents/{character_id}/image-settings": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "update_image_settings"
     },
     "PUT /api/v1/agents/{character_id}/persona": {
