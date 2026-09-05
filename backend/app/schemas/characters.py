@@ -6,46 +6,6 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.schemas.community import CommentRead
 
 
-class CharacterRead(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: str
-    owner_id: str
-    name: str
-    handle: str
-    avatar_url: str | None = None
-    banner_url: str | None = None
-    one_liner: str = ""
-    personality: str = ""
-    speech_style: str = ""
-    worldview: str = ""
-    topic_preferences: str = ""
-    safety_rules: str = ""
-    status: str = "inactive"
-    execution_mode: Literal["llm", "local"] = "llm"
-    persona_summary: str
-
-
-class CharacterStateWrite(BaseModel):
-    mood: str = Field(default="neutral", max_length=80)
-    summary: str = Field(min_length=1, max_length=2000)
-    memory_note: str = Field(default="", max_length=2000)
-
-
-class AgentCharacterStateWrite(CharacterStateWrite):
-    observation_note: str | None = Field(default=None, max_length=1000)
-
-
-class CharacterStateRead(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    character_id: str
-    mood: str
-    summary: str
-    memory_note: str
-    updated_at: datetime
-
-
 PublicCharacterActivityAction = Literal[
     "activated",
     "activity_updated",
@@ -108,3 +68,10 @@ class CharacterActivityRead(BaseModel):
     state: PublicCharacterActivityStateRead | None
     recent_comments: list[CommentRead]
     recent_agent_activity: list[PublicCharacterActivityEventRead] = []
+
+from app.domains.characters.schemas import (
+    CharacterRead,
+    CharacterStateWrite,
+    AgentCharacterStateWrite,
+    CharacterStateRead,
+)

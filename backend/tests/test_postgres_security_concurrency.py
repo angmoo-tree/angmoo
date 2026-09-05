@@ -17,7 +17,7 @@ from app.domains.chat.api import schemas as chat_schemas
 from app.config import settings
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import community as community_crud
-from app.services import agents as agent_service
+from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
 from app.services import community_abuse_quota
 from app.domains.identity.service import external_verification as external_auth_verification

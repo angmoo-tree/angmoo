@@ -9,16 +9,8 @@ import pytest
 
 from app import schemas
 from app.api.v1.routes import agents as agent_routes
-from app.services import (
-    agent_activity_policy,
-    agent_briefs,
-    agents as agent_service,
-    agent_runs,
-    agent_writing,
-    character_lore,
-    community as community_service,
-    direct_llm,
-)
+from app.services import (agent_activity_policy, agent_briefs, agent_runs, agent_writing, character_lore, community as community_service, direct_llm)
+from app.runtime.characters import management as agent_service
 
 
 def _activity_policy() -> agent_activity_policy.ActivityPolicy:

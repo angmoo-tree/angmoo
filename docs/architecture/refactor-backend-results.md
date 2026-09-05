@@ -13,7 +13,7 @@
 | AR-G2 | LOCAL VERIFIED · PR/MERGE PENDING | 공통 오류 4개·cursor bytes helper 2개·소비자/테스트 이전 |
 | AR-G3 | IMPLEMENTED · LOCAL VERIFICATION · PR/CI PENDING | logging.ini·초기화·배포 자원 연결 |
 | AR-G4 | LOCAL VERIFIED · PR PENDING | Alembic 물리 경로·역사 본문 보존; G5 최종 모델 등록 연결 대기 |
-| AR-B2 | IDENTITY IMPLEMENTED · FOCUSED CHECKS PASS · PR PENDING | identity 역할 이전; characters→worlds→world_characters 후속 |
+| AR-B2 | IN PROGRESS · Identity + Characters two source slices implemented | Character/Creator HTTP and workflow boundary completion pending |
 | AR-B3 | NOT STARTED | World Package→media |
 | AR-B4 | NOT STARTED | routines→routine_posts→활동 조립 |
 | AR-B5 | NOT STARTED | social→relationships→projection |
@@ -54,6 +54,7 @@
 ### PR 검증 중 발견한 inventory 누락
 
 [PR #265](https://github.com/angmoo-tree/angmoo/pull/265)의 첫 head `0a682d29fa8d99a208cf98dd59a8635781d82087`에서 architecture-boundary는 통과했지만 oss-boundary의 deferred runtime inventory 검사가 실패했다. 새 체크포인트가 보존한 제품 URL·privacy contact 문자열이 live inventory에 빠진 원인이었다. 기존 생성기로 `security/t2_deferred_runtime_inventory.json`을 갱신해 체크포인트 경로 1개를 추가했다. 검사 예외나 frozen 체크포인트 내용은 바꾸지 않았다. 수정 head의 전체 Actions 결과는 별도로 확인한다.
+
 
 다음 head `de83dae`에서는 위 inventory 검사가 통과한 뒤 secret scanner가 체크포인트의 기존 synthetic Google API key fixture를 감지했다. #263의 `test_langgraph_resident_engine.py::test_generate_json_records_postprocess_error_on_repaired_success` assertion 및 기존 allowlist 4개와 값이 정확히 일치함을 확인했다. 고정 체크포인트를 수정하지 않고 해당 경로·규칙·값에 한정한 예외 1개와 원본 commit/test/blob·값 hash 증거를 추가했다. 기존 24개 항목은 그대로 유지했다. 관련 검사 **21 passed**, metadata **exact_tuples=25 PASS**, 현재 트리와 전체 Git 이력 검사 **fatal=0**이었다. 다른 경로·규칙·값으로 예외가 확대되지 않는 회귀 검사도 포함한다.
 
@@ -156,6 +157,22 @@ G13은 물리 경로 이전까지 적용했으며 최종 완료가 아니다. AR
 
 Gitleaks의 기존 공개 World 고정 marker 허용에 새 `0072` revision 경로 하나를 추가했다. 옛 경로는 history 검사를 위해 유지했고 marker 값·검사 rule 범위는 넓히지 않았다. 실제 Gitleaks 8.30.1의 새 Alembic 디렉터리 `--redact` 검사는 **0 findings**였다. 작업 디렉터리 전체 scan의 66건은 G4 base에 남아 있는 G0 체크포인트 hash 오탐 65건과 생성된 테스트 pyc fixture 1건이었다. 이 결과를 전체 보안 검사 PASS로 표시하지 않으며, G0 수정 통합 후 추적 source·PR history 검사에서 다시 확인한다.
 
+
+## AR-B2-B1: Character 기반의 역할별 구현
+
+`characters/models.py`는 기존 Character·CharacterState의 동일 ORM class와 Base를 유지한다. `contracts.py`와 `service/seed.py`는 World Package 호출자의 Session에서 add·flush만 수행하는 seed 계약을 보존한다. `service/profile.py`에는 핸들 정규화·충돌 처리와 프로필 조회·생성·갱신의 실제 구현을, `service/state.py`에는 기존 deferred-commit 계약의 상태 저장을 옮겼다. 일반 생성·갱신의 기존 commit/refresh를 seed의 flush-only 경계와 합치지 않았다.
+
+`characters/schemas.py`가 Character 기본 입출력과 생성·프로필 입력 DTO를 소유한다. Public activity projection과 나머지 활동 DTO는 아직 기존 Social/활동 소유 파일에 있다. managed-media 경로 검증은 AR-B3 선행 의존성으로 `media/schemas.py`에 원문 그대로 옮겼으며 외부 URL·scheme·netloc 거절, `/media/` 경로 규칙과 오류 메시지를 보존한다. 기존 `schemas/media_security.py` 소비자는 동일 함수 객체를 제공하는 임시 호환 경로를 통해 유지하고 AR-B3에서 전환한다.
+
+기존 `models`, `schemas`, `cruds/community`는 기록된 잔여 소비자에 대해 동일 객체를 제공한다. 새로운 Character service가 기존 수평 service/CRUD 계층으로 돌아가지는 않는다. 기존 `characters/domain`·`infrastructure`의 실제 구현과 빈 marker는 제거했고 출발 경로와 목적지를 보존 지도에 등록했다. 완료 도메인은 계속 `device_home`만이며 Characters와 media는 옮긴 module/entry/bridge만 정확히 검사한다.
+
+현재 focused 검증은 **38 passed / 1 warning / 23.53초**다. 실제 SQLite에서 모델·schema 객체 동일성, 일반 생성 commit, seed caller rollback, 상태 저장의 deferred commit을 확인했고 기존 로컬 생성·프로모션·World Package import commit·owner-controlled WorldCharacter 및 media 참조 보안 검사를 함께 실행했다. API/ORM 계약·기존 assertion·node 보존에는 변화가 없었다. 이 작업 트리의 보존 명령 전체 exit 1은 선행 AR-G4 source commit의 신규 Alembic 테스트 8개 도입 증거가 아직 root 통합에 포함되지 않은 상태로 인한 것이며 전체 보존 PASS로 표시하지 않는다.
+
+`services/agents.py`의 다업무 조립과 Creator·실행·삭제 경로, 남은 소비자·API·테스트 이전은 계속 진행 중이다. 이 기반의 로컬 검증으로 Characters 전체, AR-B2, PR-head, merge 또는 Actions 완료를 선언하지 않는다.
+
+다음 head `de83dae`에서는 위 inventory 검사가 통과한 뒤 secret scanner가 체크포인트의 기존 synthetic Google API key fixture를 감지했다. #263의 `test_langgraph_resident_engine.py::test_generate_json_records_postprocess_error_on_repaired_success` assertion 및 기존 allowlist 4개와 값이 정확히 일치함을 확인했다. 고정 체크포인트를 수정하지 않고 해당 경로·규칙·값에 한정한 예외 1개와 원본 commit/test/blob·값 hash 증거를 추가했다. 기존 24개 항목은 그대로 유지했다. 관련 검사 **21 passed**, metadata **exact_tuples=25 PASS**, 현재 트리와 전체 Git 이력 검사 **fatal=0**이었다. 다른 경로·규칙·값으로 예외가 확대되지 않는 회귀 검사도 포함한다.
+
+
 G0~G3를 합친 고정 merge commit `381ef66`에서 migration layout·logging·설정·인증·World Package UoW·P8-A 검사는 **75 passed / 기존 1 skipped, 40.11초**였다. source commit `960fd4685179c2c48958f18eaa5a9a93d855064c`의 새 회귀 파일 1개·node 8개를 도입 증거에 추가했다. 통합 경계는 **594 modules / 1,838 internal edges / legacy exact edges 311**로 통과했다. `env.py`는 G1의 실제 `app.config`를 소비하며 Docker는 logging 자원과 루트 Alembic 양쪽을 포함한다.
 
 ## AR-B2 첫 PR: Identity 역할 이전
@@ -219,3 +236,44 @@ Worlds source `38c2610`에서 이어서 WC 6개 ORM을 단일 `models.py`로 모
 - Live architecture **605 modules / 1,883 internal edges / legacy exact 287 PASS**, ER0 **75 PostgreSQL source / 역사 migration subset 87 / Neo4j 24 / Next 44 / workload 7 PASS**, L4 parity **97 nodes**, Memory batch inventory current. PostgreSQL 파일 감소는 WC ORM 두 파일을 한 파일로 모은 결과이며 table 계약은 그대로다.
 
 이 source slice는 WC workflow·HTTP·readiness의 전체 전환 완료가 아니다. 다음 slice는 기존 트랜잭션·오류 순서·capacity lock·provider retry·budget 및 imported World 경계를 보존하여 실제 업무 구현과 소비자를 이전한다. PR·merge·post-merge와 최종 backend/installer gate는 별도다.
+
+## AR-B2-B2: Creator 정책과 다업무 조립의 분리
+
+Character 소유 `AgentCreationDraft`, `ProfileImageCandidate`, `ProfileImageQuotaReservation`을 `characters/models.py`에 옮기고 기존 집계 경로는 같은 class를 제공한다. Creator·프로모션 입출력도 `characters/schemas.py`로 옮겼다. 날짜 응답의 기존 `UtcInstantResponseModel`과 UTC 복원 함수는 `core/response_schemas.py`의 동일 구현을 공유한다.
+
+`service/access`는 owner/deleted/suspended/execution-mode 판단, `persona`는 입력 prompt 검사, `promotion`은 동의 시각·철회 시각, `mutations`는 Character 자체 생성·프로필·페르소나·동의 변경을 소유한다. `image_quota`에는 create/profile×avatar/banner bucket, Seoul 날짜와 자정 초기화, PostgreSQL advisory lock, reserved/generated/applied 집계·예약 commit·finalize flush가 있다. `creator`는 draft 응답·persona 결과 파싱·오류·쿨다운의 실제 구현을 소유한다. 모든 변경은 기존 값·오류·write 순서를 유지한다.
+
+기존 `services/agents.py`와 `services/agent_creation_drafts.py`의 나머지 실행 연결은 각각 `runtime/characters/management.py`와 `creator.py`로 이동했다. Character mutation 이후 활동 setting·credential·log·World binding·응답 조립, 파일/provider 작업과 성공/실패 cleanup 순서는 runtime에서 이어간다. 기존 import와 테스트 monkeypatch 대상도 같은 새 module로 바꿨으며 옛 service 경로의 사본이나 forwarding module을 남기지 않았다. exact legacy edge는 기존 importer의 경로만 전환했고 새로운 포괄 예외를 만들지 않았다.
+
+이것은 **중간 상태**다. `/agents`의 혼합 router, AgentDetailRead의 activity 응답 조립, 활성화/readiness/Local Bot의 후속 소유권과 Creator media/provider workflow를 정리해야 한다. B2 Character 전체의 router/service 분리가 끝났다고 표시하지 않는다. 특히 runtime의 남은 업무 판단을 후속 service로 옮길 목록과 B3 media·B4 activity·B8 Bot 담당을 보존 지도에 남긴다.
+
+기존 생성·프로모션·prompt·활동·로컬 생성과 foundation 검사는 **131 passed / 2 warnings / 12.94초**였고, credential privacy·private preview·post image·provider boundary·tendency·캐릭터/계정 삭제·World Package 검사는 **159 passed / 3 warnings / 24.64초**였다. 새 quota/UTC/owner/model/오류·mutation 검사는 **6 passed / 6.59초**다. 실제 activity/credential 테이블이 없는 SQLite에서 Character 자체의 두 생성 commit과 프로필 변경 commit도 검증했다. 기존 활성화 SQLite/PostgreSQL 분기·전역→World lock 순서와 기존 여러 commit을 바꾸지 않았다. 실제 PostgreSQL 환경 검증으로 확대하지 않는다.
+
+
+### Characters 두 번째 source의 잔여 경계
+
+| 현재 위치·책임 | 현재 구현 상태 | 후속 담당과 완료 조건 |
+| --- | --- | --- |
+| `characters/service/mutations.py`, profile/state/seed/access/persona/promotion | 실제 Character 모델 변경·판단을 소유. 생성 두 commit과 별도 seed flush-only 유지 | B2-B: 기존 호출자가 canonical 역할 함수를 사용하며 Character API 분리 후 완료 |
+| `characters/service/creator.py`, `image_quota.py` | Creator 응답·파싱·쿨다운과 생성 이미지 quota 정책·DB 저장을 소유 | B2-B: draft 생성/갱신/완료의 남은 admission과 DB mutation을 이 소유 서비스로 연결 |
+| `runtime/characters/creator.py` | draft/provider 검증·media 생성/적용·취소·만료 정리와 여러 commit을 보존한 실행 조립 | B2-B/B3: Creator 자신의 업무 판단은 service로 이동하고 파일·HTTP client는 B3 실제 소유 adapter로 연결; 기존 commit, 실패별 quota 처리, private preview 권한·cleanup 순서 유지 |
+| `runtime/characters/management.py`의 profile 계열 | Character mutation 뒤 activity setting·credential·log·detail을 같은 Session으로 연결 | B2-B: 필요한 callback/실행 의존성 연결을 분리하고 자기 Character 판단을 runtime에 다시 추가하지 않음 |
+| 같은 management의 activate/deactivate/run-now/first-greeting/tendency 및 기존 activity readiness | 전역·World capacity lock, SQLite 즉시 transaction, 기존 readiness와 retry를 유지 | B2-D/B4: WorldCharacter readiness·routine activity 정책은 각 소유 service로 이전하고 runtime은 다업무 실행만 연결 |
+| 같은 management의 Local key/Bot 연결 | 현재 credential·slot·Local Bot 계약 유지 | B8-A: Bot 실제 소유 모델·service로 분리하고 이전 consumer를 종료 |
+| 같은 management의 `_scrub_agent_data`와 quarantine/slot cleanup | Character 삭제가 여러 도메인 데이터·파일을 정리하는 기존 UoW와 실패 처리를 유지 | B2-B/B8-A: 자기 Character anonymize와 각 소유 데이터 cleanup을 역할 서비스로 분리하며 최종 다업무 삭제 순서는 runtime에 유지 |
+| `app/api/v1/routes/agents.py` | 지원 URL과 순서를 유지하는 Character·Creator·Activity·Bot의 기존 혼합 router | B2-B/B4/B8-A: 업무별 router와 dependencies로 분리. response/schema·오류·권한과 full/public route 계약을 함께 검증 |
+| `app/schemas/agents.py`의 `AgentDetailRead` 및 활동·credential/image DTO | Character·Creator DTO는 canonical로 이전, 나머지 조립 DTO는 기존 응답 유지 | B2-B/B4/B8-A: DTO 실제 소유권을 확정해 service/schema 공개 경로로 연결하며 JSON 모양 변경 없음 |
+| `app/services/profile_media.py`, provider/image transport | 공유 저장·private 파일·World/Post 소비자가 계속 사용하는 기존 단일 구현 | B3: 별도 media 감사에 따라 자기 업무의 policy와 공유 I/O를 분리; 같은 구현을 중복 복사하지 않음 |
+
+완료 `refactor.domains` 목록은 여전히 `device_home`만이다. Identity·Characters·media는 실제 옮긴 module/entry/exact bridge로 검사한다. 기존 287개 legacy edge에서 같은 importer의 물리 위치를 전환하고 실제 종료한 5개를 제거해 현재 **603 modules / 1,904 edges / 282 exact legacy edges**다.
+
+### 두 번째 source 검증과 한계
+
+추출한 **76개 class/function body·constant**는 #263 원문과 AST 비교에서 차이가 없었다. 독립 리뷰도 Character 생성/프로필/페르소나/동의의 commit→후속 조립 순서, quota 재조회→동일 lock key→예약 commit/finalize flush, provider 실패별 저장과 prompt 정책의 의미가 같음을 확인했다. 변경·신규 source 49개에 기존 exact secret allowlist를 적용한 검사는 findings 0이었다.
+
+첫 전체 실행은 **2,029 passed / 22 skipped / 8 failed / 26 warnings / 451.10초**였다. 실행 중 제품 코드는 바꾸지 않았지만 실패 테스트·지도·문서를 수정한 이력이 있어 최종 고정 tree의 전체 PASS로 사용하지 않는다. 실패 중 demo monkeypatch 1개·함수 내부 옛 import 1개·OSS 검사 경로 3개와 UTC helper의 core inventory 누락 1개를 보완했다. 해당 회귀와 새 Creator 검사 묶음은 **48 passed / 18.65초**였다. 기존 assertion·예외 기대를 유지했고, public Read schema의 secret-field 검사는 domain 역할 schema까지 확대했다.
+
+남은 2개는 이 준비 branch에 합류하지 않은 상위 통합 사항이다. L4의 live module 수를 과거 680과 비교하던 검사는 G2 source `581427a`에서 frozen/live를 구분하도록 보완됐으며 root에서 통합한다. route-security inventory의 Identity `api.local_routes → router.local` 대응도 Identity 통합에서 처리한다. frozen 수치 assertion이나 보안 분류를 이 Character 변경에서 임의로 약화하지 않는다. source introduction metadata는 root의 선형 통합에서 기존 고정 commit별로 캡처한다.
+
+
+최종 source 준비 상태의 보존 검사는 **#258 1,867 / #263 1,907 / 보호 계보 2,030 / 현재 2,059 nodes**였다. API·OpenAPI·ORM 계약, 기존 assertion·skip 상태, split symbol·대응표의 오류는 0개였고, 선행 고정 source의 아직 합류하지 않은 introduction metadata만 source 17개·test 23개로 보고됐다. 승인 public **604 / current 2,059 / new 1,485 PASS**이며 승인 목록과 고정 checkpoint는 바꾸지 않았다. 최종 경계 검사와 diff whitespace 검사도 통과했다. root의 G1/G2 통합에서는 두 새 runtime 파일의 `core.config`·SQLite error import를 이미 확정된 `app.config`·`app.exceptions` 경로와 맞춘 뒤 검증한다.
