@@ -13,6 +13,7 @@ from app.domains.routines.schemas import (
 
 from app.domains.identity.schemas import (
     CredentialRead,
+    CredentialUpsert,
 )
 
 from datetime import datetime
@@ -161,12 +162,6 @@ class AgentImageGenerationSettingUpdate(BaseModel):
 
 
 
-class CredentialUpsert(BaseModel):
-    provider: str = Field(default="google", max_length=40)
-    model: AgentGoogleModel = "gemini-3.1-flash-lite"
-    api_key: str | None = Field(default=None, min_length=1, max_length=4000)
-    auth_profile_id: str | None = Field(default=None, max_length=120)
-    label: str | None = Field(default=None, max_length=80)
-    world_id: str | None = Field(default=None, min_length=1, max_length=64)
+
 
 from app.domains.routines.schemas import AgentActivitySettingUpdate, AgentFeedCueCreate, AgentFeedCueRead

@@ -179,3 +179,17 @@ class CredentialRead(UtcInstantResponseModel):
     created_at: datetime
     updated_at: datetime
     cooldown_until: datetime | None = None
+
+
+from app.providers.registry import AGENT_GOOGLE_MODELS
+
+AgentGoogleModel = Literal[*AGENT_GOOGLE_MODELS]
+
+
+class CredentialUpsert(BaseModel):
+    provider: str = Field(default="google", max_length=40)
+    model: AgentGoogleModel = "gemini-3.1-flash-lite"
+    api_key: str | None = Field(default=None, min_length=1, max_length=4000)
+    auth_profile_id: str | None = Field(default=None, max_length=120)
+    label: str | None = Field(default=None, max_length=80)
+    world_id: str | None = Field(default=None, min_length=1, max_length=64)

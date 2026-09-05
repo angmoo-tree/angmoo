@@ -510,3 +510,88 @@ async def generate_profile_media(
         return await image_generation_service.generate_profile_media(db, user, character_id, data, workflows=workflows)
     except errors.AgentNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
+
+
+from app.domains.identity import schemas as identity_schemas
+from app.domains.identity.contracts import CharacterCredentialWorkflows
+from app.domains.identity.service import credential_management
+from app.domains.characters.dependencies import get_character_credential_workflows
+
+
+@router.put("/{character_id}/credential", response_model=identity_schemas.CredentialRead)
+def update_credential(
+    character_id: str,
+    data: identity_schemas.CredentialUpsert,
+    db: Session = Depends(get_db),
+    user: CharacterOwner = Depends(get_current_user),
+    workflows: CharacterCredentialWorkflows = Depends(get_character_credential_workflows),
+) -> identity_schemas.CredentialRead:
+    try:
+        return credential_management.update_credential(db, user, character_id, data, workflows=workflows)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+    except DemoAccountLockedError as exc:
+        _raise_demo_account_locked(exc)
+    except errors.ActiveSlotBusyError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except errors.CredentialRequiredError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except errors.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except errors.CredentialSyncError as exc:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+
+
+@router.get(
+    "/{character_id}/credential",
+    response_model=identity_schemas.CredentialRead | None,
+)
+def get_credential_metadata(
+    character_id: str,
+    world_id: str | None = None,
+    db: Session = Depends(get_db),
+    user: CharacterOwner = Depends(get_current_user),
+    workflows: CharacterCredentialWorkflows = Depends(get_character_credential_workflows),
+) -> identity_schemas.CredentialRead | None:
+    try:
+        return credential_management.get_credential_metadata(
+            db,
+            user,
+            character_id,
+            world_id=world_id,
+            workflows=workflows,
+        )
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+    except errors.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+
+
+@router.delete(
+    "/{character_id}/credential",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_credential(
+    character_id: str,
+    world_id: str | None = None,
+    db: Session = Depends(get_db),
+    user: CharacterOwner = Depends(get_current_user),
+    workflows: CharacterCredentialWorkflows = Depends(get_character_credential_workflows),
+) -> Response:
+    try:
+        credential_management.delete_credential(
+            db,
+            user,
+            character_id,
+            world_id=world_id,
+            workflows=workflows,
+        )
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+    except DemoAccountLockedError as exc:
+        _raise_demo_account_locked(exc)
+    except (errors.ActiveSlotBusyError, errors.AgentExecutionModeError) as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except errors.CredentialSyncError as exc:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

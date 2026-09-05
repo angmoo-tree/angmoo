@@ -7189,15 +7189,21 @@
         },
         {
           "old": "backend/app/schemas/agents.py::CredentialUpsert",
-          "new": "backend/app/schemas/agents.py::CredentialUpsert",
+          "new": "backend/app/domains/identity/schemas.py::CredentialUpsert",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/domains/identity/service/credential_management.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_byok_register_metadata_replace_and_idempotent_delete_are_owner_scoped",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_failed_replace_preserves_old_local_v2_material",
             "tests/test_google_model_selection.py::test_agent_google_models_are_allowed_in_agent_model_schemas",
             "tests/test_google_model_selection.py::test_agent_model_schemas_reject_removed_or_message_only_models",
             "tests/test_google_model_selection.py::test_api_key_credential_update_with_idle_slot_syncs_profile"
-          ]
+          ],
+          "source_member": "Original whole credential workflow/schema/error/HTTP definition. Identity owns authorization and key mutation; exact external SQL/slot/setting/profile/status operations are supplied from actual owners using the same Session. Expanding exact query/mutation members and restoring callback names reproduces all original statements and error/commit order."
         },
         {
           "old": "backend/app/schemas/agents.py::AgentDetailRead",
@@ -7252,6 +7258,7 @@
           "backend/app/domains/characters/service/mutations.py",
           "backend/app/domains/characters/service/persona.py",
           "backend/app/domains/characters/service/promotion.py",
+          "backend/app/domains/identity/service/credential_management.py",
           "backend/app/domains/routines/constants.py",
           "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/repository/autonomy.py",
@@ -7259,6 +7266,7 @@
           "backend/app/domains/routines/schemas/first_greeting.py",
           "backend/app/domains/routines/schemas/tendency.py",
           "backend/app/domains/routines/service/activity_management.py",
+          "backend/app/domains/routines/service/activity_settings.py",
           "backend/app/domains/routines/service/autonomy_management.py",
           "backend/app/domains/routines/service/feed_cues.py",
           "backend/app/domains/routines/service/first_greeting.py",
@@ -7267,6 +7275,8 @@
           "backend/app/domains/routines/service/tendency_analysis.py",
           "backend/app/domains/routines/service/tendency_settings.py",
           "backend/app/domains/routines/service/tick_schedule.py",
+          "backend/app/domains/world_characters/repository/credential_scope.py",
+          "backend/app/domains/worlds/repository/credential_scope.py",
           "backend/app/exceptions.py",
           "backend/app/runtime/characters/management.py",
           "backend/app/runtime/resident/autonomy_reads.py",
@@ -7927,15 +7937,20 @@
         },
         {
           "old": "backend/app/services/agents.py::ActiveSlotBusyError",
-          "new": "backend/app/runtime/characters/management.py::ActiveSlotBusyError",
+          "new": "backend/app/domains/characters/exceptions.py::ActiveSlotBusyError",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/domains/identity/service/credential_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_byok_register_metadata_replace_and_idempotent_delete_are_owner_scoped",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_failed_replace_preserves_old_local_v2_material",
             "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
             "tests/routines/test_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
             "tests/test_google_model_selection.py::test_model_only_credential_update_preserves_existing_key"
-          ]
+          ],
+          "source_member": "Original whole credential workflow/schema/error/HTTP definition. Identity owns authorization and key mutation; exact external SQL/slot/setting/profile/status operations are supplied from actual owners using the same Session. Expanding exact query/mutation members and restoring callback names reproduces all original statements and error/commit order."
         },
         {
           "old": "backend/app/services/agents.py::CredentialSyncError",
@@ -8581,47 +8596,67 @@
         },
         {
           "old": "backend/app/services/agents.py::update_credential",
-          "new": "backend/app/runtime/characters/management.py::update_credential",
+          "new": "backend/app/domains/identity/service/credential_management.py::update_credential",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/domains/identity/service/credential_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_google_model_selection.py::test_model_only_credential_update_preserves_existing_key",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_byok_register_metadata_replace_and_idempotent_delete_are_owner_scoped",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_failed_replace_preserves_old_local_v2_material",
+            "tests/test_google_model_selection.py::test_api_key_credential_update_with_idle_slot_syncs_profile",
             "tests/test_google_model_selection.py::test_api_key_credential_update_without_slot_commits_in_upsert",
-            "tests/test_google_model_selection.py::test_api_key_credential_update_with_idle_slot_syncs_profile"
-          ]
+            "tests/test_google_model_selection.py::test_model_only_credential_update_preserves_existing_key"
+          ],
+          "source_member": "Original whole credential workflow/schema/error/HTTP definition. Identity owns authorization and key mutation; exact external SQL/slot/setting/profile/status operations are supplied from actual owners using the same Session. Expanding exact query/mutation members and restoring callback names reproduces all original statements and error/commit order."
         },
         {
           "old": "backend/app/services/agents.py::get_credential_metadata",
-          "new": "backend/app/runtime/characters/management.py::get_credential_metadata",
+          "new": "backend/app/domains/identity/service/credential_management.py::get_credential_metadata",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/domains/identity/service/credential_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_byok_register_metadata_replace_and_idempotent_delete_are_owner_scoped",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_failed_replace_preserves_old_local_v2_material"
+          ],
+          "source_member": "Original whole credential workflow/schema/error/HTTP definition. Identity owns authorization and key mutation; exact external SQL/slot/setting/profile/status operations are supplied from actual owners using the same Session. Expanding exact query/mutation members and restoring callback names reproduces all original statements and error/commit order."
         },
         {
           "old": "backend/app/services/agents.py::delete_credential",
-          "new": "backend/app/runtime/characters/management.py::delete_credential",
+          "new": "backend/app/domains/identity/service/credential_management.py::delete_credential",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/domains/identity/service/credential_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_byok_register_metadata_replace_and_idempotent_delete_are_owner_scoped",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_failed_replace_preserves_old_local_v2_material"
+          ],
+          "source_member": "Original whole credential workflow/schema/error/HTTP definition. Identity owns authorization and key mutation; exact external SQL/slot/setting/profile/status operations are supplied from actual owners using the same Session. Expanding exact query/mutation members and restoring callback names reproduces all original statements and error/commit order."
         },
         {
           "old": "backend/app/services/agents.py::_ensure_credential_world_scope",
-          "new": "backend/app/runtime/characters/management.py::_ensure_credential_world_scope",
+          "new": "backend/app/domains/identity/service/credential_management.py::_ensure_credential_world_scope",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/domains/identity/service/credential_management.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_google_model_selection.py::test_model_only_credential_update_preserves_existing_key",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_byok_register_metadata_replace_and_idempotent_delete_are_owner_scoped",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_failed_replace_preserves_old_local_v2_material",
+            "tests/test_google_model_selection.py::test_api_key_credential_update_with_idle_slot_syncs_profile",
             "tests/test_google_model_selection.py::test_api_key_credential_update_without_slot_commits_in_upsert",
-            "tests/test_google_model_selection.py::test_api_key_credential_update_with_idle_slot_syncs_profile"
-          ]
+            "tests/test_google_model_selection.py::test_model_only_credential_update_preserves_existing_key"
+          ],
+          "source_member": "Original whole credential workflow/schema/error/HTTP definition. Identity owns authorization and key mutation; exact external SQL/slot/setting/profile/status operations are supplied from actual owners using the same Session. Expanding exact query/mutation members and restoring callback names reproduces all original statements and error/commit order."
         },
         {
           "old": "backend/app/services/agents.py::get_settings",
@@ -10575,6 +10610,56 @@
             "tests/routines/test_tendency_result_transaction.py::test_tendency_result_is_evaluated_after_setting_commit_before_activity_log[direct]",
             "tests/routines/test_tendency_result_transaction.py::test_tendency_result_is_evaluated_after_setting_commit_before_activity_log[openclaw]"
           ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_ensure_credential_world_scope",
+          "new": "backend/app/domains/worlds/repository/credential_scope.py::get_active_membership_id",
+          "source_member": "Exact first db.scalar select WorldMembership.id and world/user/status-active predicates. No changed query/flush/limit/commit; the original missing-member error remains in Identity before the next lookup.",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/domains/identity/service/credential_management.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_byok_register_metadata_replace_and_idempotent_delete_are_owner_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_ensure_credential_world_scope",
+          "new": "backend/app/domains/world_characters/repository/credential_scope.py::get_accessible_world_character_id",
+          "source_member": "Exact second db.scalar select WorldCharacter.id with original world/character/membership and pending,inactive,active filters. Original missing-character error stays in Identity, same Session/query order.",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/domains/identity/service/credential_management.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_byok_register_metadata_replace_and_idempotent_delete_are_owner_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::delete_credential",
+          "new": "backend/app/domains/routines/service/activity_settings.py::disable_auto_if_present",
+          "source_member": "Exact db.get AgentActivitySetting then optional attached auto_enabled=False, after original slot release(commit=False) and before World autonomy/Character status/credential disable. No new query/flush/commit.",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/domains/identity/service/credential_management.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_character_credential_transaction.py::test_credential_delete_keeps_shared_session_and_rolls_back_flushed_slot[commit]",
+            "tests/identity/test_character_credential_transaction.py::test_credential_delete_keeps_shared_session_and_rolls_back_flushed_slot[rollback]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::delete_credential",
+          "new": "backend/app/domains/characters/service/mutations.py::set_activity_status",
+          "source_member": "Original single attached character.status=inactive assignment, between World autonomy and credential field mutations; caller retains the final commit/rollback.",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/domains/identity/service/credential_management.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_character_credential_transaction.py::test_credential_delete_keeps_shared_session_and_rolls_back_flushed_slot[commit]",
+            "tests/identity/test_character_credential_transaction.py::test_credential_delete_keeps_shared_session_and_rolls_back_flushed_slot[rollback]"
+          ]
         }
       ],
       "full_file_moves": {
@@ -11096,33 +11181,51 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::update_credential",
-          "new": "backend/app/api/v1/routes/agents.py::update_credential",
+          "new": "backend/app/domains/characters/router.py::update_credential",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/domains/characters/router.py",
+            "backend/app/domains/identity/service/credential_management.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
-          ]
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_byok_register_metadata_replace_and_idempotent_delete_are_owner_scoped",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_failed_replace_preserves_old_local_v2_material"
+          ],
+          "source_member": "Original whole credential workflow/schema/error/HTTP definition. Identity owns authorization and key mutation; exact external SQL/slot/setting/profile/status operations are supplied from actual owners using the same Session. Expanding exact query/mutation members and restoring callback names reproduces all original statements and error/commit order."
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::get_credential_metadata",
-          "new": "backend/app/api/v1/routes/agents.py::get_credential_metadata",
+          "new": "backend/app/domains/characters/router.py::get_credential_metadata",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/domains/characters/router.py",
+            "backend/app/domains/identity/service/credential_management.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
-          ]
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_byok_register_metadata_replace_and_idempotent_delete_are_owner_scoped",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_failed_replace_preserves_old_local_v2_material"
+          ],
+          "source_member": "Original whole credential workflow/schema/error/HTTP definition. Identity owns authorization and key mutation; exact external SQL/slot/setting/profile/status operations are supplied from actual owners using the same Session. Expanding exact query/mutation members and restoring callback names reproduces all original statements and error/commit order."
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::delete_credential",
-          "new": "backend/app/api/v1/routes/agents.py::delete_credential",
+          "new": "backend/app/domains/characters/router.py::delete_credential",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/domains/characters/router.py",
+            "backend/app/domains/identity/service/credential_management.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
-          ]
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_byok_register_metadata_replace_and_idempotent_delete_are_owner_scoped",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_failed_replace_preserves_old_local_v2_material"
+          ],
+          "source_member": "Original whole credential workflow/schema/error/HTTP definition. Identity owns authorization and key mutation; exact external SQL/slot/setting/profile/status operations are supplied from actual owners using the same Session. Expanding exact query/mutation members and restoring callback names reproduces all original statements and error/commit order."
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::get_settings",
@@ -26503,15 +26606,21 @@
         },
         {
           "old": "backend/app/schemas/agents.py::CredentialUpsert",
-          "new": "backend/app/schemas/agents.py::CredentialUpsert",
+          "new": "backend/app/domains/identity/schemas.py::CredentialUpsert",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/domains/identity/service/credential_management.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_byok_register_metadata_replace_and_idempotent_delete_are_owner_scoped",
+            "tests/identity/test_l1_byok_ownership_privacy.py::test_failed_replace_preserves_old_local_v2_material",
             "tests/test_google_model_selection.py::test_agent_google_models_are_allowed_in_agent_model_schemas",
             "tests/test_google_model_selection.py::test_agent_model_schemas_reject_removed_or_message_only_models",
             "tests/test_google_model_selection.py::test_api_key_credential_update_with_idle_slot_syncs_profile"
-          ]
+          ],
+          "source_member": "Original whole credential workflow/schema/error/HTTP definition. Identity owns authorization and key mutation; exact external SQL/slot/setting/profile/status operations are supplied from actual owners using the same Session. Expanding exact query/mutation members and restoring callback names reproduces all original statements and error/commit order."
         },
         {
           "old": "backend/app/schemas/agents.py::AgentDetailRead",
@@ -33582,7 +33691,7 @@
       "remaining": "Current mixed management entry binds only actual service/provider functions until C7 HTTP/composition. Tendency and Character credential workflows remain next. Root later connects B5 canonical image generation and Identity lookup sources."
     },
     "AR-B4-C7-E-tendency-execution": {
-      "status": "IMPLEMENTED — focused68PASS then lazy expired-identity SQL/late result2PASS; final relevant/diagnostic pending",
+      "status": "IMPLEMENTED — final68PASS / original full AST identical / readonly six0 / protected2139,current2289; root stock introduction pending",
       "actual_paths": [
         "backend/app/domains/routines/contracts/tendency_analysis.py",
         "backend/app/domains/routines/service/tendency_analysis.py",
@@ -33597,6 +33706,26 @@
         "tests/routines/test_tendency_result_transaction.py::test_tendency_result_is_evaluated_after_setting_commit_before_activity_log[openclaw]"
       ],
       "remaining": "C7 actual HTTP/composition, credential owner4, final presentation and exact old aliases remain. Root joins Runtime actual gateway constructor source and removes this exact old runtime boundary edge before B8-A."
+    },
+    "AR-B4-C7-F-character-credential": {
+      "status": "IMPLEMENTED — final80PASS / full original workflow,SQL,HTTP AST identical / readonly six0 / protected2139,current2291; root stock introduction pending",
+      "actual_paths": [
+        "backend/app/domains/identity/service/credential_management.py",
+        "backend/app/domains/characters/router.py",
+        "backend/app/domains/worlds/repository/credential_scope.py",
+        "backend/app/domains/world_characters/repository/credential_scope.py",
+        "backend/app/domains/routines/service/activity_settings.py",
+        "backend/app/domains/identity/contracts.py",
+        "backend/app/domains/identity/schemas.py",
+        "backend/tests/identity/test_character_credential_transaction.py"
+      ],
+      "ownership": "Identity owns key/model update, owner metadata, idempotent delete, and World-scope authorization. Character owns resource HTTP3 and original ActiveSlotBusyError; World/WC own exact membership lookups, Routines owns setting and slot state, Character owns attached status. Runtime binds all collaborators and original profile IO in the same Session.",
+      "preservation": "Original complete 4 service bodies/HTTP3/schema/error and extracted SQL2/setting/status AST identical after exact callback expansion. Key-upsert commit flag, RUNNING denial, bind/reload/commit/refresh order, model-only key retention, nullable metadata and secret stripping remain. New SQLite2 demonstrates flushed slot remains invisible to observer before final commit and all owners roll back on a World failure.",
+      "new_regression": [
+        "tests/identity/test_character_credential_transaction.py::test_credential_delete_keeps_shared_session_and_rolls_back_flushed_slot[commit]",
+        "tests/identity/test_character_credential_transaction.py::test_credential_delete_keeps_shared_session_and_rolls_back_flushed_slot[rollback]"
+      ],
+      "remaining": "Root joins already-authored Identity credential repository/upsert source c2cd2a64 and updates the exact current runtime builder references. Final C7 closes remaining resource HTTP9 and mixed management presentation/composition; no old credential service function aliases remain."
     }
   },
   "test_symbols": {

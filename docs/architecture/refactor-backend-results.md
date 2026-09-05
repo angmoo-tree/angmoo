@@ -1164,3 +1164,10 @@ C7-D 최종 원래 six 읽기 전용 진단은 모두 오류0, 보호2139/현재
 기존 준비7문장과 양쪽 provider의 동일한 설정 저장/로그 부분을 Routines 실제 서비스로 이전했다. Direct/OpenClaw 호출·오류·profile release·slot release는 실제 runtime에 두었다. 원래 함수의 전체 AST는 추출된 두 구간을 되붙이고 callback을 복원하면 동일하며, 원래 오류 class와 tool allowlist도 같은 정의이다. 객체 ID를 선평가하지 않고 원래 붙어있는 User/Character를 전달하여 commit 뒤의 지연 SELECT를 유지했다. result_factory는 원래 마지막 log 인자 위치에서만 평가한다. 실제 SQLite의 Direct/OpenClaw 두 회귀는 setting commit → 만료된 User/Character 조회 → result → log 순서와 별도 connection의 durable 값을 검증한다.
 
 최종 관련 검증은 **68 passed / 기존 경고3 / 28.53초**이다. 현재 경계는 787 modules / 2764 edges / exact legacy204 / cycle0이며 L4 787/14/97, ER0 86/87/24/44/7, Memory inventory는 current이다. 원래 여섯 보존 검사의 읽기 전용 진단은 모두 오류0, 보호2139/현재2289이다. 실제 provider gateway의 정확한 기존 import1은 별도 작성된 Runtime 소유 source 합류 때 연결한다. 원래 frozen/checkpoint/additions는 수정하지 않았으며 stock gate는 root의 순차 도입 원장 연결 후 확인한다.
+
+
+## AR-B4-C7-F — 자격 증명 업무·World 권한·Character HTTP
+
+키와 모델 변경·metadata·삭제·World scope4를 Identity 실제 서비스로 이전하고, 기존 Character 리소스 HTTP3을 Character router에서 직접 연결했다. request schema와 원래 오류도 실제 소유에 두었다. World/WC의 원래 scalar 조회2, Routines의 optional 설정 disable, Character의 한 대입은 각 소유에 있으며 같은 Session으로 호출한다. 전체 원문4함수·HTTP3·DTO/오류 및 추출 SQL/대입은 정확 callback 복원 후 AST가 동일하다. 초기 기존49검사가 통과했으며 신규 SQLite2는 flush된 슬롯과 설정이 최종 commit까지 다른 Session에 보이지 않고, World 처리 실패 시 전체 rollback되는 것을 검증한다. 새 테스트의 필수 auth_profile_id fixture를 보완한 뒤 두 검사가 통과했다. 제품 동작·기존 assertion·원래 오류 순서는 변경하지 않았다.
+
+C7-F 최종 검증은 **80 passed / 기존 경고2 / 19.63초**이다. 경계792 modules /2778 edges / exact legacy204 / cycle0, L4 792/14/97, ER0 86/87/24/44/7, Memory current이다. 두 실제 앱 생성 함수는 같은 typed credential workflow를 연결한다. 처음 runtime.routines에서 Character factory를 역으로 조립하여 드러난 package cycle은 앱 생성의 기존 Character 조립 위치로 연결을 옮겨 해소했다. 경계 예외는 늘리지 않았다. 읽기 전용 원래6검사 모두 오류0(보호2139/current2291), frozen/checkpoint/additions 불변이다. stock gate는 root의 선형 최초 도입 연결 뒤 확인한다.

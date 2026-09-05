@@ -1,4 +1,9 @@
 from __future__ import annotations
+from app.domains.characters.exceptions import ActiveSlotBusyError
+from app.domains.identity.contracts import CharacterCredentialWorkflows
+from app.domains.worlds.repository import credential_scope as credential_worlds
+from app.domains.world_characters.repository import credential_scope as credential_world_characters
+from app.domains.routines.service import activity_settings
 from app.domains.routines.exceptions import LlmCredentialInvalidError
 from app.domains.routines.contracts.tendency_analysis import TendencyAnalysisWorkflows
 from app.domains.routines.constants import TENDENCY_LLM_TOOLS_ALLOW
@@ -241,8 +246,7 @@ class ImageSettingsInvalidError(AgentServiceError):
 
 
 
-class ActiveSlotBusyError(AgentServiceError):
-    pass
+
 
 
 
@@ -613,202 +617,16 @@ def delete_image_seed(
     return _image_generation_setting_read(db, setting)
 
 
-def update_credential(
-    db: Session,
-    user: models.User,
-    character_id: str,
-    data: schemas.CredentialUpsert,
-) -> schemas.CredentialRead:
-    character = _get_owned_character(db, user, character_id)
-    demo_lock.ensure_demo_user_mutable(user)
-    _ensure_llm_mode(character)
-    _ensure_credential_world_scope(
-        db,
-        user=user,
-        character=character,
-        world_id=data.world_id,
-    )
-    current_assigned_slot = slot_queries.get_assigned_slot(db, character.id)
-    if (
-        current_assigned_slot is not None
-        and current_assigned_slot.status == routine_constants.SLOT_STATUS_RUNNING
-    ):
-        raise ActiveSlotBusyError(
-            "앵무가 지금 활동 중이라 API key 또는 모델을 바꿀 수 없습니다. 활동이 끝난 뒤 다시 시도해주세요."
-        )
-    try:
-        if data.api_key is not None:
-            credential = agent_crud.upsert_credential(
-                db,
-                user=user,
-                character=character,
-                provider=data.provider,
-                model=data.model,
-                api_key=data.api_key,
-                auth_profile_id=None,
-                label=data.label,
-                commit=current_assigned_slot is None,
-            )
-            if current_assigned_slot is not None:
-                if _resident_openclaw_sync_enabled():
-                    _bind_slot_auth_profile(
-                        schemas.AgentSlotRead.model_validate(current_assigned_slot),
-                        user_id=user.id,
-                        character=character,
-                        credential=credential,
-                    )
-                    _reload_openclaw_secrets_sync()
-                db.commit()
-                db.refresh(credential)
-        else:
-            credential = agent_crud.get_character_credential(db, character.id)
-            if credential is None or not credential.encrypted_api_key:
-                raise CredentialRequiredError(
-                    "Agent credential key is required before changing the model"
-                )
-            if credential.provider != data.provider:
-                raise CredentialRequiredError(
-                    "API key is required before changing the credential provider"
-                )
-            credential.model = data.model
-            if data.label is not None:
-                credential.label = data.label
-            credential.enabled = True
-            db.commit()
-            db.refresh(credential)
-    except Exception:
-        db.rollback()
-        raise
-    agent_crud.log_activity(
-        db,
-        user_id=user.id,
-        character_id=character.id,
-        action_type="credential_saved",
-        target_post_id=None,
-        reason="credential_saved",
-        result="Credential profile was synchronized for this character.",
-    )
-    return schemas.CredentialRead.model_validate(credential)
 
 
-def get_credential_metadata(
-    db: Session,
-    user: models.User,
-    character_id: str,
-    *,
-    world_id: str | None = None,
-) -> schemas.CredentialRead | None:
-    character = _get_owned_character(db, user, character_id)
-    _ensure_llm_mode(character)
-    _ensure_credential_world_scope(
-        db,
-        user=user,
-        character=character,
-        world_id=world_id,
-    )
-    credential = agent_crud.get_character_credential(db, character.id)
-    if credential is None:
-        return None
-    if credential.owner_id != user.id:
-        raise AgentNotFoundError(character_id)
-    return schemas.CredentialRead.model_validate(credential)
 
 
-def delete_credential(
-    db: Session,
-    user: models.User,
-    character_id: str,
-    *,
-    world_id: str | None = None,
-) -> None:
-    character = _get_owned_character(db, user, character_id)
-    demo_lock.ensure_demo_user_mutable(user)
-    _ensure_llm_mode(character)
-    _ensure_credential_world_scope(
-        db,
-        user=user,
-        character=character,
-        world_id=world_id,
-    )
-    credential = agent_crud.get_character_credential(db, character.id)
-    if credential is None or (
-        not credential.enabled
-        and credential.encrypted_api_key is None
-        and credential.key_fingerprint is None
-    ):
-        return
-
-    assigned_slot = slot_queries.get_assigned_slot(db, character.id)
-    if (
-        assigned_slot is not None
-        and assigned_slot.status == routine_constants.SLOT_STATUS_RUNNING
-    ):
-        raise ActiveSlotBusyError(
-            "앵무가 지금 활동 중이라 API key를 삭제할 수 없습니다. 활동이 끝난 뒤 다시 시도해주세요."
-        )
-
-    try:
-        if assigned_slot is not None and _resident_openclaw_sync_enabled():
-            _release_slot_auth_profile(
-                assigned_slot,
-                user_id=user.id,
-                character_id=character.id,
-                credential=credential,
-            )
-            _reload_openclaw_secrets_sync()
-        slot_assignments.release_resident_slot_assignment(
-            db,
-            user_id=user.id,
-            character_id=character.id,
-            commit=False,
-        )
-        setting = db.get(models.AgentActivitySetting, character.id)
-        if setting is not None:
-            setting.auto_enabled = False
-        set_active_world_character_autonomy(
-            db,
-            character_id=character.id,
-            enabled=False,
-        )
-        character.status = "inactive"
-        credential.enabled = False
-        credential.encrypted_api_key = None
-        credential.key_fingerprint = None
-        credential.cooldown_until = None
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
 
 
-def _ensure_credential_world_scope(
-    db: Session,
-    *,
-    user: models.User,
-    character: character_models.Character,
-    world_id: str | None,
-) -> None:
-    if world_id is None:
-        return
-    membership_id = db.scalar(
-        select(models.WorldMembership.id).where(
-            models.WorldMembership.world_id == world_id,
-            models.WorldMembership.user_id == user.id,
-            models.WorldMembership.status == "active",
-        )
-    )
-    if membership_id is None:
-        raise AgentNotFoundError(character.id)
-    world_character_id = db.scalar(
-        select(models.WorldCharacter.id).where(
-            models.WorldCharacter.world_id == world_id,
-            models.WorldCharacter.character_id == character.id,
-            models.WorldCharacter.membership_id == membership_id,
-            models.WorldCharacter.status.in_(("pending", "inactive", "active")),
-        )
-    )
-    if world_character_id is None:
-        raise AgentNotFoundError(character.id)
+
+
+
+
 
 
 
@@ -1757,3 +1575,30 @@ def build_tendency_analysis_workflows() -> TendencyAnalysisWorkflows[schemas.Age
 
 async def analyze_tendency(db: Session, user: models.User, character_id: str) -> schemas.AgentDetailRead:
     return await tendency_analysis.analyze_tendency(db, user, character_id, workflows=build_tendency_analysis_workflows())
+
+
+def build_character_credential_workflows() -> CharacterCredentialWorkflows:
+    return CharacterCredentialWorkflows(
+        get_owned_character=_get_owned_character,
+        ensure_mutable=demo_lock.ensure_demo_user_mutable,
+        ensure_llm_mode=_ensure_llm_mode,
+        get_membership_id=credential_worlds.get_active_membership_id,
+        get_world_character_id=credential_world_characters.get_accessible_world_character_id,
+        get_assigned_slot=slot_queries.get_assigned_slot,
+        running_slot_status=routine_constants.SLOT_STATUS_RUNNING,
+        upsert_credential=agent_crud.upsert_credential,
+        get_credential=agent_crud.get_character_credential,
+        sync_enabled=_resident_openclaw_sync_enabled,
+        slot_read=schemas.AgentSlotRead.model_validate,
+        bind_profile=_bind_slot_auth_profile,
+        release_profile=_release_slot_auth_profile,
+        reload_secrets=_reload_openclaw_secrets_sync,
+        release_slot=slot_assignments.release_resident_slot_assignment,
+        disable_auto=activity_settings.disable_auto_if_present,
+        set_world_autonomy=set_active_world_character_autonomy,
+        set_character_status=character_mutations.set_activity_status,
+        log_activity=agent_crud.log_activity,
+        character_not_found_error=AgentNotFoundError,
+        slot_busy_error=ActiveSlotBusyError,
+        credential_required_error=CredentialRequiredError,
+    )

@@ -31,3 +31,13 @@ def get_image_generation_workflows(request: Request) -> CharacterImageGeneration
     if not callable(factory):
         raise RuntimeError("image generation workflows are not configured")
     return factory()
+
+
+from app.domains.identity.contracts import CharacterCredentialWorkflows
+
+
+def get_character_credential_workflows(request: Request) -> CharacterCredentialWorkflows:
+    factory = getattr(request.app.state, "character_credential_workflows", None)
+    if not callable(factory):
+        raise RuntimeError("character credential workflows are not configured")
+    return factory()
