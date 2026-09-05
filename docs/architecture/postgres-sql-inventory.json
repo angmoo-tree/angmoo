@@ -825,6 +825,31 @@
     },
     {
       "markers": {
+        "row_lock": [
+          70,
+          81
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/social/repository/world_feed.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "f51d3b1673a60ecac67e2c5f32ac35fe51582033ce5896e6b3088f13139ccd69",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          114
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/social/service/world_feed.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "69d98585cb9c11c50a102dc8e7ceb13f09f9657b7cbc2ab3d02273b568a970fe",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
         "driver_or_url": [
           24,
           30,
@@ -1175,24 +1200,6 @@
     },
     {
       "markers": {
-        "driver_or_url": [
-          172
-        ],
-        "row_lock": [
-          213,
-          233,
-          613,
-          806
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/services/world_feed_search.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "518a16b949e779976ae28bf844e0352f83cda273f50cf35d8d2d744567ca252c",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
         "pgvector": [
           30
         ]
@@ -1283,7 +1290,7 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 83,
+  "entry_count": 84,
   "marker_counts": {
     "advisory_lock": 10,
     "driver_or_url": 50,

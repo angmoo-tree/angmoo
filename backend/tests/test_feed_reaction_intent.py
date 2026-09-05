@@ -17,7 +17,7 @@ from app.domains.runtime.public import SearchIndexHit
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )
-from app.domains.social.public import SocialSearchState
+from app.domains.social.contracts.search_state import SocialSearchState
 from app.runtime.search import CallbackSearchIndexAdapter
 from app.services import (
     agent_activity_policy,

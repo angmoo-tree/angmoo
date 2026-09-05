@@ -101,10 +101,6 @@
           "imported": "app.schemas"
         },
         {
-          "importer": "app.api.v1.routes.world_character_setup",
-          "imported": "app.services.world_feed_search"
-        },
-        {
           "importer": "app.cruds.agent_runs",
           "imported": "app.models"
         },
@@ -533,10 +529,6 @@
           "imported": "app.services.direct_llm"
         },
         {
-          "importer": "app.services.feed_reaction_planner",
-          "imported": "app.services.world_feed_search"
-        },
-        {
           "importer": "app.services.langgraph_resident",
           "imported": "app.cruds.agent_runs"
         },
@@ -683,22 +675,6 @@
         {
           "importer": "app.services.world_feed_runtime",
           "imported": "app.services.feed_reaction_planner"
-        },
-        {
-          "importer": "app.services.world_feed_runtime",
-          "imported": "app.services.world_feed_search"
-        },
-        {
-          "importer": "app.services.world_feed_search",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.services.world_feed_search",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.world_feed_search",
-          "imported": "app.services.world_character_contracts"
         },
         {
           "importer": "app.services.world_foundation",
@@ -928,7 +904,6 @@
       "app.domains.media.schemas",
       "app.domains.relationships.constants",
       "app.domains.relationships.contracts",
-      "app.domains.relationships.contracts.action_response",
       "app.domains.relationships.contracts.diagnostics",
       "app.domains.relationships.contracts.events",
       "app.domains.relationships.contracts.graph_execution",
@@ -972,7 +947,6 @@
       "app.domains.relationships.router",
       "app.domains.relationships.schemas",
       "app.domains.relationships.service",
-      "app.domains.relationships.service.action_response",
       "app.domains.relationships.service.diagnostics",
       "app.domains.relationships.service.events",
       "app.domains.relationships.service.evidence",
@@ -1030,7 +1004,6 @@
       "app.domains.routines.repository.plans",
       "app.domains.routines.router",
       "app.domains.routines.schemas",
-      "app.domains.routines.schemas.feed_history",
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
       "app.domains.routines.schemas.runs",
@@ -1041,7 +1014,6 @@
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
-      "app.domains.routines.service.feed_history_values",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
       "app.domains.routines.service.joint_activity.execution",
@@ -1058,7 +1030,6 @@
       "app.domains.runtime.contracts",
       "app.domains.social.constants",
       "app.domains.social.contracts",
-      "app.domains.social.contracts.action_scope",
       "app.domains.social.contracts.activity",
       "app.domains.social.contracts.actors",
       "app.domains.social.contracts.discovery",
@@ -1099,7 +1070,6 @@
       "app.domains.social.repository.posts",
       "app.domains.social.repository.profiles",
       "app.domains.social.repository.reactions",
-      "app.domains.social.repository.resident_affordances",
       "app.domains.social.repository.subjective_context",
       "app.domains.social.repository.today_activity",
       "app.domains.social.repository.world_profile",
@@ -1111,11 +1081,7 @@
       "app.domains.social.schemas.image_generation",
       "app.domains.social.schemas.manual",
       "app.domains.social.service",
-      "app.domains.social.service.action_event_types",
-      "app.domains.social.service.action_notifications",
-      "app.domains.social.service.action_sources",
       "app.domains.social.service.activity_results",
-      "app.domains.social.service.agent_presentation",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
       "app.domains.social.service.image_attachment",
@@ -1137,7 +1103,6 @@
       "app.domains.social.service.profile_activity",
       "app.domains.social.service.profile_cursor",
       "app.domains.social.service.profiles",
-      "app.domains.social.service.resident_affordances",
       "app.domains.social.service.source_posts",
       "app.domains.social.service.source_writes",
       "app.domains.social.service.subjective_context",
@@ -1175,7 +1140,6 @@
       "app.domains.world_characters.schemas.identity",
       "app.domains.world_characters.schemas.setup",
       "app.domains.world_characters.service",
-      "app.domains.world_characters.service.action_scope",
       "app.domains.world_characters.service.autonomous_setup",
       "app.domains.world_characters.service.event_scope",
       "app.domains.world_characters.service.lifecycle",
@@ -1202,7 +1166,25 @@
       "app.domains.worlds.service.projection_sources",
       "app.domains.worlds.service.reserved_roles",
       "app.domains.worlds.service.scheduling",
-      "app.domains.worlds.storage"
+      "app.domains.worlds.storage",
+      "app.domains.relationships.contracts.action_response",
+      "app.domains.relationships.service.action_response",
+      "app.domains.routines.schemas.feed_history",
+      "app.domains.routines.service.feed_history_values",
+      "app.domains.social.contracts.action_scope",
+      "app.domains.social.repository.resident_affordances",
+      "app.domains.social.service.action_event_types",
+      "app.domains.social.service.action_notifications",
+      "app.domains.social.service.action_sources",
+      "app.domains.social.service.agent_presentation",
+      "app.domains.social.service.resident_affordances",
+      "app.domains.world_characters.service.action_scope",
+      "app.domains.social.contracts.search_index",
+      "app.domains.social.contracts.world_feed",
+      "app.domains.social.policies.world_feed",
+      "app.domains.social.repository.world_feed",
+      "app.domains.social.service.keyword_feed",
+      "app.domains.social.service.world_feed"
     ],
     "entries": [
       "app.domains.characters.contracts",
@@ -1239,7 +1221,6 @@
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
-      "app.domains.relationships.contracts.action_response",
       "app.domains.relationships.contracts.diagnostics",
       "app.domains.relationships.contracts.events",
       "app.domains.relationships.contracts.graph_execution",
@@ -1258,7 +1239,6 @@
       "app.domains.relationships.contracts.replay",
       "app.domains.relationships.contracts.source_posts",
       "app.domains.relationships.schemas",
-      "app.domains.relationships.service.action_response",
       "app.domains.relationships.service.diagnostics",
       "app.domains.relationships.service.events",
       "app.domains.relationships.service.graph_planning",
@@ -1293,7 +1273,6 @@
       "app.domains.routines.contracts.plans",
       "app.domains.routines.contracts.resident",
       "app.domains.routines.schemas",
-      "app.domains.routines.schemas.feed_history",
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
       "app.domains.routines.schemas.runs",
@@ -1304,7 +1283,6 @@
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
-      "app.domains.routines.service.feed_history_values",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
       "app.domains.routines.service.joint_activity.execution",
@@ -1318,7 +1296,6 @@
       "app.domains.routines.service.tick_schedule",
       "app.domains.runtime.contracts",
       "app.domains.social.contracts",
-      "app.domains.social.contracts.action_scope",
       "app.domains.social.contracts.activity",
       "app.domains.social.contracts.actors",
       "app.domains.social.contracts.discovery",
@@ -1346,11 +1323,7 @@
       "app.domains.social.schemas.feed",
       "app.domains.social.schemas.image_generation",
       "app.domains.social.schemas.manual",
-      "app.domains.social.service.action_event_types",
-      "app.domains.social.service.action_notifications",
-      "app.domains.social.service.action_sources",
       "app.domains.social.service.activity_results",
-      "app.domains.social.service.agent_presentation",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
       "app.domains.social.service.image_attachment",
@@ -1372,7 +1345,6 @@
       "app.domains.social.service.profile_activity",
       "app.domains.social.service.profile_cursor",
       "app.domains.social.service.profiles",
-      "app.domains.social.service.resident_affordances",
       "app.domains.social.service.source_posts",
       "app.domains.social.service.source_writes",
       "app.domains.social.service.subjective_context",
@@ -1397,7 +1369,6 @@
       "app.domains.world_characters.schemas.identity",
       "app.domains.world_characters.schemas.setup",
       "app.domains.world_characters.service",
-      "app.domains.world_characters.service.action_scope",
       "app.domains.world_characters.service.autonomous_setup",
       "app.domains.world_characters.service.event_scope",
       "app.domains.world_characters.service.lifecycle",
@@ -1436,7 +1407,22 @@
       "app.domains.worlds.service",
       "app.domains.worlds.service.character_entry",
       "app.domains.worlds.service.definition",
-      "app.domains.worlds.service.projection_sources"
+      "app.domains.worlds.service.projection_sources",
+      "app.domains.relationships.contracts.action_response",
+      "app.domains.relationships.service.action_response",
+      "app.domains.routines.schemas.feed_history",
+      "app.domains.routines.service.feed_history_values",
+      "app.domains.social.contracts.action_scope",
+      "app.domains.social.service.action_event_types",
+      "app.domains.social.service.action_notifications",
+      "app.domains.social.service.action_sources",
+      "app.domains.social.service.agent_presentation",
+      "app.domains.social.service.resident_affordances",
+      "app.domains.world_characters.service.action_scope",
+      "app.domains.social.contracts.search_index",
+      "app.domains.social.contracts.world_feed",
+      "app.domains.social.service.keyword_feed",
+      "app.domains.social.service.world_feed"
     ],
     "bridges": [
       {
@@ -2016,14 +2002,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.services.world_feed_search",
-        "target": "app.domains.world_characters.contracts.runtime_modes",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.services.world_foundation",
         "target": "app.domains.worlds.service.definition",
         "owner_stage": "AR-B8-A",
@@ -2136,24 +2114,8 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.social.application.keyword_feed",
-        "target": "app.domains.social.contracts",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.domains.social.application.observations",
         "target": "app.domains.social.contracts.observations",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.social.application.search_runtime",
-        "target": "app.domains.social.contracts",
         "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
         "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
         "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
@@ -3109,6 +3071,78 @@
         "owner_stage": "AR-B5 / AR-B4",
         "reason": "Existing resident history caller consumes actual Routines policy and original limits; no implementation remains in this old import surface for these symbols.",
         "removal_condition": "Finish Community/AgentRun runtime ownership and remove exact old consumer imports while retaining the actual Routines service/constant call.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.world_feed_runtime",
+        "target": "app.domains.social.contracts.search_state",
+        "owner_stage": "AR-B5",
+        "reason": "Existing WorldFeed execution now consumes actual search contract/error owners.",
+        "removal_condition": "Move the actual remaining WorldFeed execution to runtime/social in AR-B5; retain canonical contract/error imports.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.world_feed_runtime",
+        "target": "app.domains.social.exceptions",
+        "owner_stage": "AR-B5",
+        "reason": "Existing WorldFeed execution now consumes actual search contract/error owners.",
+        "removal_condition": "Move the actual remaining WorldFeed execution to runtime/social in AR-B5; retain canonical contract/error imports.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.social.application",
+        "target": "app.domains.social.service.keyword_feed",
+        "owner_stage": "AR-B5",
+        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
+        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.social.ports",
+        "target": "app.domains.social.contracts.search_index",
+        "owner_stage": "AR-B5",
+        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
+        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.social.public",
+        "target": "app.domains.social.contracts.search_index",
+        "owner_stage": "AR-B5",
+        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
+        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.social.public",
+        "target": "app.domains.social.service.keyword_feed",
+        "owner_stage": "AR-B5",
+        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
+        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.feed_reaction_planner",
+        "target": "app.domains.social.contracts.world_feed",
+        "owner_stage": "AR-B5",
+        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
+        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.world_feed_runtime",
+        "target": "app.domains.social.contracts.world_feed",
+        "owner_stage": "AR-B5",
+        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
+        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.world_feed_runtime",
+        "target": "app.domains.social.service.world_feed",
+        "owner_stage": "AR-B5",
+        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
+        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
         "review_date": "2026-09-06"
       }
     ]

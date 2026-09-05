@@ -20,7 +20,7 @@ from app.services.direct_llm import (
 )
 from app.core.context_text import neutralize_context_text
 from app.runtime.resident.context import LangGraphResidentContext
-from app.services.world_feed_search import ReadySearchProfile
+from app.domains.social.contracts.world_feed import ReadySearchProfile
 
 
 FEED_REACTION_CONTRACT_VERSION = "world-keyword-feed-intent-v1"

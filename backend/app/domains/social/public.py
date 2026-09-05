@@ -2,18 +2,8 @@
 
 from __future__ import annotations
 
-from app.domains.social.application import (
-    KeywordPostLookup,
-    SocialSearchBinding,
-    apply_validated_autonomous_result,
-    create_owner_post,
-    create_owner_reply,
-    current_social_search,
-    find_keyword_post_ids,
-    observe_social_source,
-    register_social_search,
-    unregister_social_search,
-)
+from app.domains.social.service.keyword_feed import KeywordPostLookup, find_keyword_post_ids
+from app.domains.social.application import apply_validated_autonomous_result, create_owner_post, create_owner_reply, observe_social_source
 from app.domains.social.contracts import (
     ACTION_SUBJECTIVE_CONTEXT_VERSION,
     ActionEmotionLabel,
@@ -54,11 +44,8 @@ from app.domains.social.contracts import (
     WorldCharacterSocialProfileValidationError,
 )
 from app.domains.social.contracts.inbox import ManualInboxInteractionCandidate
-from app.domains.social.ports import (
-    SocialObservationUnitOfWorkPort,
-    SocialSearchIndexPort,
-    SocialWriteUnitOfWorkPort,
-)
+from app.domains.social.ports import SocialObservationUnitOfWorkPort, SocialWriteUnitOfWorkPort
+from app.domains.social.contracts.search_index import SocialSearchIndexPort
 
 apply_validated_autonomous_social_result = apply_validated_autonomous_result
 
@@ -84,7 +71,6 @@ __all__ = [
     "SocialObservationError",
     "SocialObservationResult",
     "SocialObservationUnitOfWorkPort",
-    "SocialSearchBinding",
     "SocialSearchIndexPort",
     "SocialSearchState",
     "SocialSearchUnavailable",
@@ -110,9 +96,6 @@ __all__ = [
     "apply_validated_autonomous_social_result",
     "create_owner_post",
     "create_owner_reply",
-    "current_social_search",
     "find_keyword_post_ids",
     "observe_social_source",
-    "register_social_search",
-    "unregister_social_search",
 ]
