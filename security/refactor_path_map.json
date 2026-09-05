@@ -5071,8 +5071,7 @@
           "backend/app/domains/characters/schemas.py",
           "backend/app/domains/identity/schemas.py",
           "backend/app/domains/runtime/schemas.py",
-          "backend/app/schemas/agents.py",
-          "backend/app/domains/world_characters/schemas/readiness.py"
+          "backend/app/schemas/agents.py"
         ]
       },
       "split_symbols": [
