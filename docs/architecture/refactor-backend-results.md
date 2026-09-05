@@ -600,3 +600,5 @@ M6 고정 후보에서 `--contracts --nodes`는 현재 **2,151 nodes**를 수집
 전체 Memory 완료를 선언하지 않고 세 실제 역할 module만 partial scope로 추가했다. 미전환 Memory 서비스·repository·policy·HTTP의 정확 bridge 18개를 기록했다. Schema 두 module만 외부 entry이며 예외를 임의의 service entry로 올리지 않았다. 현재 architecture **640 modules / 2,087 internal edges / exact legacy 256 PASS**, L4 parity97 및 current Memory batch inventory를 갱신했다. Frozen predecessor inventory와 SQLite migration은 유지한다.
 
 실제 write/recall/consolidation/selection 정책과 SQL·FTS·maintenance queue, batch admission·예약·종료·provider 및 HTTP 서비스 소유권은 다음 B7 범위다. 이 기반 source의 집중 검증·원본 도입 계보 통합·순차 PR/merge는 별도로 기록하며 기존 구현 전체가 이전됐다는 의미가 아니다.
+
+Memory 기반 source `70b74395cb91f383c5f48a530af1cf2a173cb397`의 기존 write/recall inspector/consolidation/owner 제어·batch API/정책/안전·frozen inventory 집중은 **105 passed / 기존 2 warnings / 31.13초**다. 실제 Memory 정책과 SQL 구현은 이 세 파일 이동에서 바꾸지 않았다. 전체 source/node 계보는 선행 B4~B6와 함께 순차 통합하며 B7 전체 완료로 판정하지 않는다.
