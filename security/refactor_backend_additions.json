@@ -371,6 +371,154 @@
         "tests/test_refactor_backend_partial_scopes.py": {},
         "tests/test_refactor_public_node_moves.py": {}
       }
+    },
+    {
+      "commit": "5f7a184ecce29a06b5ef91b9521e9ec1945395a7",
+      "feature_id": "AR-G0",
+      "reason": "Protect exact synthetic checkpoint fixture exception and negative scanner regressions",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[checkpoint_git_blob-0000000000000000000000000000000000000000]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[evidence_commit-0000000000000000000000000000000000000000]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[path-security/*]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[rule-openai-api-key]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[value-different-fixture-value]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[value_sha256-0000000000000000000000000000000000000000000000000000000000000000]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_does_not_suppress_another_value_path_or_rule",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_matches_only_the_existing_frozen_synthetic_fixture"
+      ],
+      "test_assertions": {
+        "tests/test_t2_secret_allowlist.py": {
+          "test_current_exact_allowlist_metadata_passes": [
+            "assert checker.validate() == []"
+          ],
+          "test_broad_scope_and_missing_review_metadata_are_rejected": [
+            "assert any(('scope must stay exact' in error for error in errors))",
+            "assert any(('missing metadata fields' in error for error in errors))"
+          ],
+          "test_checkpoint_exception_matches_only_the_existing_frozen_synthetic_fixture": [
+            "assert entry['value'] == original['value']",
+            "assert hashlib.sha256(entry['value'].encode()).hexdigest() == checker.CHECKPOINT_FIXTURE_SHA256",
+            "assert any((entry['value'] in assertion for assertion in assertions))",
+            "assert checkpoint['commit'] == entry['evidence_commit']",
+            "assert hashlib.sha1(f'blob {len(checkpoint_bytes)}\\x00'.encode() + checkpoint_bytes).hexdigest() == entry['checkpoint_git_blob']"
+          ],
+          "test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence": [
+            "assert checker.validate(fixture)"
+          ],
+          "test_checkpoint_exception_does_not_suppress_another_value_path_or_rule": [
+            "assert list(scanner.scan_text(entry.path, entry.value, allowlist=allowlist)) == []",
+            "assert {finding.rule for finding in scanner.scan_text('security/another-checkpoint.json', entry.value, allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, entry.value + '1', allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, another_rule.value, allowlist=allowlist)} == {'openai-api-key'}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_t2_secret_allowlist.py": {}
+      }
+    },
+    {
+      "commit": "2583af6032d2d78632c78732ef0035fd88cc0580",
+      "feature_id": "AR-G0",
+      "reason": "Preserve exact Gitleaks fingerprint allowlist and negative scope regression coverage",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_t2_secret_allowlist.py::test_gitleaks_checkpoint_allowlist_contains_only_exact_frozen_fingerprints",
+        "tests/test_t2_secret_allowlist.py::test_gitleaks_checkpoint_fingerprints_do_not_allow_other_keys_values_paths_or_rules"
+      ],
+      "test_assertions": {
+        "tests/test_t2_secret_allowlist.py": {
+          "test_current_exact_allowlist_metadata_passes": [
+            "assert checker.validate() == []"
+          ],
+          "test_broad_scope_and_missing_review_metadata_are_rejected": [
+            "assert any(('scope must stay exact' in error for error in errors))",
+            "assert any(('missing metadata fields' in error for error in errors))"
+          ],
+          "test_checkpoint_exception_matches_only_the_existing_frozen_synthetic_fixture": [
+            "assert entry['value'] == original['value']",
+            "assert hashlib.sha256(entry['value'].encode()).hexdigest() == checker.CHECKPOINT_FIXTURE_SHA256",
+            "assert any((entry['value'] in assertion for assertion in assertions))",
+            "assert checkpoint['commit'] == entry['evidence_commit']",
+            "assert hashlib.sha1(f'blob {len(checkpoint_bytes)}\\x00'.encode() + checkpoint_bytes).hexdigest() == entry['checkpoint_git_blob']"
+          ],
+          "test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence": [
+            "assert checker.validate(fixture)"
+          ],
+          "test_checkpoint_exception_does_not_suppress_another_value_path_or_rule": [
+            "assert list(scanner.scan_text(entry.path, entry.value, allowlist=allowlist)) == []",
+            "assert {finding.rule for finding in scanner.scan_text('security/another-checkpoint.json', entry.value, allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, entry.value + '1', allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, another_rule.value, allowlist=allowlist)} == {'openai-api-key'}"
+          ],
+          "_checkpoint_gitleaks_fingerprints": [
+            "assert len(entries) == 1",
+            "assert all((re.fullmatch('[a-f0-9]{40}|[a-f0-9]{64}', value) for _, value in pairs))"
+          ],
+          "test_gitleaks_checkpoint_allowlist_contains_only_exact_frozen_fingerprints": [
+            "assert set(entry) == {'targetRules', 'description', 'condition', 'regexTarget', 'paths', 'regexes'}",
+            "assert entry['targetRules'] == ['generic-api-key']",
+            "assert entry['condition'] == 'AND'",
+            "assert entry['regexTarget'] == 'line'",
+            "assert entry['paths'] == ['(^|/)security/refactor_backend_checkpoint\\\\.json$']",
+            "assert len(entry['regexes']) == len(set(entry['regexes'])) == 55",
+            "assert set(entry['regexes']) <= reviewed.keys()"
+          ],
+          "test_gitleaks_checkpoint_fingerprints_do_not_allow_other_keys_values_paths_or_rules": [
+            "assert not allowed(checker.CHECKPOINT_PATH, f'''\"api_key\": \"{fixture['value']}\"''')",
+            "assert allowed(checker.CHECKPOINT_PATH, line)",
+            "assert allowed('/snapshot/' + checker.CHECKPOINT_PATH, line)",
+            "assert not allowed('security/another-checkpoint.json', line)",
+            "assert not allowed(checker.CHECKPOINT_PATH + '.bak', line)",
+            "assert not allowed('security/not_refactor_backend_checkpoint.json', line)",
+            "assert not allowed(checker.CHECKPOINT_PATH, f'\"{key}\": \"{changed}\"')",
+            "assert not allowed(checker.CHECKPOINT_PATH, f'\"api_key\": \"{value}\"')",
+            "assert not allowed(checker.CHECKPOINT_PATH, line + ' \"api_key\": \"another-value\"')",
+            "assert not allowed(checker.CHECKPOINT_PATH, line, 'openai-api-key')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_t2_secret_allowlist.py": {}
+      }
+    },
+    {
+      "commit": "fe7c4ef6fbd20603f469e4d55e4ad9adbc5aeacc",
+      "feature_id": "G01",
+      "reason": "Protect relocated settings path and cold runtime settings identity regression tests",
+      "tracked_files": {
+        "backend/tests/config/test_config_paths.py": "a2ee0369f9f1f493ac2a7002ceda9bf62e5534df"
+      },
+      "test_nodes": [
+        "tests/config/test_config_paths.py::test_cold_runtime_consumers_share_config_without_a_legacy_module",
+        "tests/config/test_config_paths.py::test_relocated_config_preserves_backend_paths_and_dotenv_precedence"
+      ],
+      "test_assertions": {
+        "tests/config/test_config_paths.py": {
+          "_clean_settings_environment": [],
+          "_run": [
+            "assert result.returncode == 0, result.stdout + result.stderr"
+          ],
+          "test_relocated_config_preserves_backend_paths_and_dotenv_precedence": [
+            "assert Path(actual['backend']) == backend",
+            "assert Path(actual['dotenv']) == backend / '.env'",
+            "assert actual['database'] == f\"sqlite+pysqlite:///{(backend / '.angmoo-dev/angmoo.sqlite3').as_posix()}\"",
+            "assert Path(actual['media']) == backend / 'uploads'",
+            "assert Path(actual['graph']) == backend / '.angmoo-dev/graph'",
+            "assert actual['selected'] == 'from-dotenv'",
+            "assert actual['explicit'] == 'explicit-constructor'",
+            "assert overridden['selected'] == 'from-environment'",
+            "assert overridden['explicit'] == 'explicit-constructor'"
+          ],
+          "test_cold_runtime_consumers_share_config_without_a_legacy_module": [
+            "assert actual == {'shared': True, 'type': True, 'legacy_spec': True, 'legacy_loaded': False, 'settings_module': 'app.config'}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/config/test_config_paths.py": {}
+      }
     }
   ]
 }

@@ -1,5 +1,5 @@
 from app import models
-from app.core.config import settings
+from app.config import settings
 
 
 DEMO_ACCOUNT_LOCKED_MESSAGE = "Demo account is locked for portfolio review."

@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.runtime.social.observations import observe_source
 from app.core import unit_of_work
-from app.core.config import settings
+from app.config import settings
 from app.core.redaction import redact_secret_text
 from app.credentials import (
     CredentialPurpose,

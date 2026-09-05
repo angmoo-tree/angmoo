@@ -9,7 +9,7 @@ from app.core.browser_session import (
     BrowserSessionConfigurationError,
     validate_browser_session_settings,
 )
-from app.core.config import DEFAULT_APP_SECRET, Settings, settings
+from app.config import DEFAULT_APP_SECRET, Settings, settings
 
 
 KmsRoundTrip = Callable[[str], str]

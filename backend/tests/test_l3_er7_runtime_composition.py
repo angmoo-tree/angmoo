@@ -11,7 +11,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.api.v1.routes import world_activity_runtime
-from app.core.config import Settings
+from app.config import Settings
 from app.public_main import create_app
 from app.runtime.configuration import (
     RuntimeConfigurationError,
@@ -137,7 +137,7 @@ def test_create_app_owns_explicit_embedded_session_and_runtime_state(
 def test_typed_runtime_materializes_secret_and_media_for_legacy_service_refs(
     tmp_path: Path,
 ) -> None:
-    from app.core.config import settings
+    from app.config import settings
 
     config = _embedded_config(tmp_path)
     app = create_app(runtime_config=config)

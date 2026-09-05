@@ -17,7 +17,7 @@
         "sqlalchemy"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.models"
       ],
@@ -1151,8 +1151,8 @@
       ],
       "imports": [
         "app.api.v1.deps",
+        "app.config",
         "app.core.browser_session",
-        "app.core.config",
         "app.models",
         "app.schemas",
         "app.services.auth",
@@ -1289,8 +1289,8 @@
       ],
       "imports": [
         "app.api.v1.deps",
+        "app.config",
         "app.core.browser_session",
-        "app.core.config",
         "app.core.db",
         "app.domains.identity.public",
         "app.domains.runtime.public"
@@ -1323,7 +1323,7 @@
       ],
       "imports": [
         "app.api.v1.deps",
-        "app.core.config",
+        "app.config",
         "app.domains.relationships.public",
         "app.domains.routines.public",
         "app.models",
@@ -1378,8 +1378,8 @@
       ],
       "imports": [
         "app.api.v1.deps",
+        "app.config",
         "app.core.browser_session",
-        "app.core.config",
         "app.domains.chat.public",
         "app.domains.identity.public",
         "app.runtime.chat.composition"
@@ -1467,6 +1467,18 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "pathlib",
+        "pydantic",
+        "pydantic_settings",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.config",
+      "path": "backend/app/config.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.contracts.core_experience"
@@ -1520,8 +1532,8 @@
         "zoneinfo"
       ],
       "imports": [
-        "app.core.active_hours",
-        "app.core.config"
+        "app.config",
+        "app.core.active_hours"
       ],
       "module": "app.core.agent_activity_schedule",
       "path": "backend/app/core/agent_activity_schedule.py",
@@ -1537,23 +1549,11 @@
         "urllib.parse"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.desktop_loopback"
       ],
       "module": "app.core.browser_session",
       "path": "backend/app/core/browser_session.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "pathlib",
-        "pydantic",
-        "pydantic_settings",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.core.config",
-      "path": "backend/app/core/config.py",
       "wildcard_imports": []
     },
     {
@@ -1564,7 +1564,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config"
+        "app.config"
       ],
       "module": "app.core.db",
       "path": "backend/app/core/db.py",
@@ -1632,7 +1632,7 @@
         "fastapi.staticfiles"
       ],
       "imports": [
-        "app.core.config"
+        "app.config"
       ],
       "module": "app.core.public_media",
       "path": "backend/app/core/public_media.py",
@@ -1696,7 +1696,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config"
+        "app.config"
       ],
       "module": "app.core.security",
       "path": "backend/app/core/security.py",
@@ -1731,8 +1731,8 @@
         "urllib.parse"
       ],
       "imports": [
+        "app.config",
         "app.core.browser_session",
-        "app.core.config",
         "app.core.security"
       ],
       "module": "app.core.startup_security",
@@ -1834,9 +1834,9 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.config",
         "app.core.active_hours",
         "app.core.agent_activity_limits",
-        "app.core.config",
         "app.core.search_text",
         "app.core.security",
         "app.core.unit_of_work",
@@ -2750,8 +2750,8 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.config",
         "app.core.browser_session",
-        "app.core.config",
         "app.core.db",
         "app.domains.identity.api.local_schemas",
         "app.domains.identity.api.schemas",
@@ -4499,7 +4499,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.runtime.domain.diagnostic_codes",
         "app.domains.runtime.domain.installation_state"
       ],
@@ -6372,7 +6372,7 @@
         "warnings"
       ],
       "imports": [
-        "app.core.config"
+        "app.config"
       ],
       "module": "app.domains.worlds.infrastructure.world_banner_storage",
       "path": "backend/app/domains/worlds/infrastructure/world_banner_storage.py",
@@ -6423,7 +6423,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.redaction",
         "app.providers.contracts",
         "app.providers.gemini",
@@ -6598,7 +6598,7 @@
       ],
       "imports": [
         "app.api.v1.public",
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.core.public_media",
         "app.core.request_limits",
@@ -6993,7 +6993,7 @@
       ],
       "imports": [
         "app.api.v1.public",
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.core.public_media",
         "app.core.request_limits",
@@ -7166,7 +7166,7 @@
         "uuid"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.chat.api.schemas",
         "app.domains.chat.application",
         "app.domains.chat.domain",
@@ -7202,7 +7202,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.domains.relationships.ports.projection",
         "app.runtime.graph_projection.process_client",
@@ -7223,7 +7223,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.domains.identity.application.local_owner",
         "app.domains.identity.infrastructure.sqlalchemy_identity_repository",
@@ -7318,7 +7318,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.relationships.ports.projection",
         "app.integrations.ladybug_projection"
       ],
@@ -7333,7 +7333,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.relationships.graph_read.errors",
         "app.domains.relationships.graph_read.repository",
         "app.domains.relationships.graph_read.schemas",
@@ -7380,7 +7380,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.relationships.public",
         "app.models",
         "app.runtime.graph_projection.relationship_graph_read",
@@ -8311,7 +8311,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.runtime.public",
         "app.runtime.component_workers"
       ],
@@ -8373,7 +8373,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.social.public",
         "app.domains.world_characters.public",
         "app.pagination",
@@ -8792,7 +8792,7 @@
         "uuid"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.redaction",
         "app.core.security",
         "app.credentials",
@@ -8839,8 +8839,8 @@
         "zoneinfo"
       ],
       "imports": [
+        "app.config",
         "app.core.agent_activity_schedule",
-        "app.core.config",
         "app.core.db",
         "app.core.redaction",
         "app.credentials",
@@ -8881,7 +8881,7 @@
         "zoneinfo"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
@@ -8910,8 +8910,8 @@
         "uuid"
       ],
       "imports": [
+        "app.config",
         "app.core.active_hours",
-        "app.core.config",
         "app.core.image_generation",
         "app.core.redaction",
         "app.core.security",
@@ -8966,7 +8966,7 @@
         "uuid"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.redaction",
         "app.core.security",
         "app.cruds.agent_runs",
@@ -9081,7 +9081,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.models"
       ],
       "module": "app.services.community_abuse_quota",
@@ -9100,7 +9100,7 @@
     {
       "external_imports": [],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.models"
       ],
       "module": "app.services.demo_lock",
@@ -9133,7 +9133,7 @@
         "uuid"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.models"
       ],
       "module": "app.services.external_auth_verification",
@@ -9252,7 +9252,7 @@
         "unicodedata"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.redaction",
         "app.core.unit_of_work",
         "app.credentials",
@@ -9366,7 +9366,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.models"
       ],
       "module": "app.services.login_throttle",
@@ -9388,7 +9388,7 @@
         "uuid"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.models"
       ],
       "module": "app.services.lore_parser_quota",
@@ -9400,7 +9400,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.models",
         "app.schemas"
       ],
@@ -9428,7 +9428,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.models"
       ],
       "module": "app.services.operation_settings",
@@ -9451,7 +9451,7 @@
         "urllib.request"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.services.bounded_http",
         "app.services.provider_http"
       ],
@@ -9473,7 +9473,7 @@
         "urllib.parse"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.image_generation",
         "app.core.security",
         "app.credentials",
@@ -9503,7 +9503,7 @@
         "logging"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.cruds.community",
         "app.models",
@@ -9526,7 +9526,7 @@
         "warnings"
       ],
       "imports": [
-        "app.core.config"
+        "app.config"
       ],
       "module": "app.services.profile_media",
       "path": "backend/app/services/profile_media.py",
@@ -9575,7 +9575,7 @@
         "urllib.request"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.services.bounded_http",
         "app.services.provider_http"
       ],
@@ -9616,7 +9616,7 @@
         "uuid"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.domains.runtime.public",
         "app.schemas",
@@ -9677,7 +9677,7 @@
         "__future__"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.image_generation",
         "app.core.security",
         "app.credentials"
@@ -9723,7 +9723,7 @@
         "urllib.request"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.services.bounded_http"
       ],
       "module": "app.services.turnstile",

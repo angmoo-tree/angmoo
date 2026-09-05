@@ -1345,6 +1345,7 @@
       "device_home"
     ],
     "globals": [
+      "app.config",
       "app.exceptions",
       "app.pagination"
     ]

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.api.v1.deps import get_current_user, get_db
-from app.core.config import settings
+from app.config import settings
 from app.domains.relationships import public as relationships
 from app.domains.routines import public as routines
 from app.runtime.graph_projection import social_memory_read

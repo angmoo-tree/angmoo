@@ -16,7 +16,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session, aliased
 
-from app.core.config import settings
+from app.config import settings
 from app.pagination import decode_cursor_bytes, encode_cursor_bytes
 from app.domains.social.public import (
     WorldCharacterSocialProfileCounts,

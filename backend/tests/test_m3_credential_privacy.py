@@ -7,7 +7,7 @@ import logging
 import pytest
 from pydantic import SecretStr
 
-from app.core.config import settings
+from app.config import settings
 from app.core.redaction import redact_exact_secret_text, redact_exact_secrets
 from app.credentials import CredentialMaterial, CredentialPurpose
 from app.providers.contracts import (

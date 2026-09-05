@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2288,
-      "internal_edge_count": 1837,
+      "external_import_count": 2287,
+      "internal_edge_count": 1844,
       "legacy_import_exception_count": 0,
-      "module_count": 680,
+      "module_count": 682,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -410,7 +410,7 @@
           },
           {
             "imports": [
-              "app.core.config",
+              "app.config",
               "app.domains.relationships.ports.projection",
               "app.integrations.ladybug_projection"
             ],
@@ -419,7 +419,7 @@
           },
           {
             "imports": [
-              "app.core.config",
+              "app.config",
               "app.domains.relationships.graph_read.errors",
               "app.domains.relationships.graph_read.repository",
               "app.domains.relationships.graph_read.schemas",
@@ -450,7 +450,7 @@
           },
           {
             "imports": [
-              "app.core.config",
+              "app.config",
               "app.domains.relationships.public",
               "app.models",
               "app.runtime.graph_projection.relationship_graph_read",
@@ -547,9 +547,10 @@
           },
           {
             "imports": [
-              "app.core.config",
+              "app.config",
               "app.domains.social.public",
               "app.domains.world_characters.public",
+              "app.pagination",
               "app.runtime.social.sqlalchemy_read_repository"
             ],
             "module": "app.runtime.social.sqlalchemy_profile_repository",
@@ -588,6 +589,7 @@
               "app.domains.social.domain.writes",
               "app.domains.social.infrastructure.sqlalchemy_models",
               "app.domains.world_characters.public",
+              "app.exceptions",
               "app.models",
               "app.schemas.community",
               "app.services.community"
@@ -611,9 +613,9 @@
         "legacy_horizontal": [
           {
             "imports": [
+              "app.config",
               "app.core.active_hours",
               "app.core.agent_activity_limits",
-              "app.core.config",
               "app.core.search_text",
               "app.core.security",
               "app.core.unit_of_work",
@@ -1093,7 +1095,7 @@
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
-        "sha256": "233f899f369dfe35660fb9c7b8c26a5db80f8e871dc10b4feafd826286ac6f0d"
+        "sha256": "f13a15f0b61096ea3de801d0575d356f6317f3b57b15beafb114afca34066f9e"
       },
       {
         "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
@@ -1105,7 +1107,7 @@
       },
       {
         "path": "backend/tests/test_relationship_graph_api.py",
-        "sha256": "fa0d1506946c515625f3da904fa5ccb80c3ead9ecef84a5985f68464185c3af6"
+        "sha256": "dd2d8cad0e58de251fa405caa9eb85432e7669c58dc55fa7eefe141a057af97c"
       },
       {
         "path": "backend/tests/test_relationship_graph_repository.py",

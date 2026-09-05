@@ -11,7 +11,7 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.config import Settings, settings
+from app.config import Settings, settings
 from app.domains.chat.api import schemas
 from app.domains.chat.application import (
     BothRetrievalWorkflowCoordinator,
