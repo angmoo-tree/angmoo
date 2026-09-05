@@ -1110,19 +1110,19 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/character_lore.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "976b9a4c3cc73e58d7ec0f8a42a63e2b89a99a22bafd70f3d0b9ee4ac8fefcf3",
+      "source_sha256": "48aba56ee542611e447d45dbbc516c69e7f4abfc6947b88ff39c80e4d3d259c8",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
         "row_lock": [
-          63
+          61
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/community_abuse_quota.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "7bc2eeb4617ed8987fc80dc97716b396be74286efc514f2006b77fab402b13e6",
+      "source_sha256": "c2e41950d1f32e95ae0c32ac57d3a5196abe6c42e1c6e6880edd422ee2e0fc51",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

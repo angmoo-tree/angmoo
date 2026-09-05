@@ -305,6 +305,7 @@
     "backend/tests/test_l3_5_world_package_closeout.py": "backend/tests/world_packages/test_closeout.py",
     "backend/tests/test_l3_5_world_package_closeout_contract.py": "backend/tests/world_packages/test_closeout_contract.py",
     "backend/tests/test_l3_5_world_package_ui_contract.py": "backend/tests/world_packages/test_ui_contract.py",
+    "backend/app/services/llm_context.py": "backend/app/core/context_text.py",
     "backend/app/domains/routines/api/schemas.py": "backend/app/domains/routines/schemas.py",
     "backend/app/domains/routines/domain/activity_state.py": "backend/app/domains/routines/policies/activity_state.py",
     "backend/app/domains/routines/infrastructure/sqlalchemy_models.py": "backend/app/domains/routines/models.py",
@@ -5293,7 +5294,9 @@
           "backend/app/domains/social/repository/media.py",
           "backend/app/domains/social/repository/posts.py",
           "backend/app/domains/social/repository/profiles.py",
+          "backend/app/domains/social/repository/reactions.py",
           "backend/app/domains/social/service/notifications.py",
+          "backend/app/domains/social/service/source_posts.py",
           "backend/app/domains/social/utils/cursors.py",
           "backend/app/domains/social/utils/text.py"
         ],
@@ -5730,12 +5733,12 @@
         },
         {
           "old": "backend/app/cruds/community.py::create_post_report",
-          "new": "backend/app/cruds/community.py::create_post_report",
+          "new": "backend/app/domains/social/repository/reactions.py::create_post_report",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/test_community_abuse_boundaries.py::test_three_reports_do_not_automatically_hide_post"
           ]
         },
         {
@@ -5959,46 +5962,42 @@
         },
         {
           "old": "backend/app/cruds/community.py::create_post",
-          "new": "backend/app/cruds/community.py::create_post",
+          "new": "backend/app/domains/social/service/source_posts.py::create_post",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_failed_domain_write_rolls_back_without_consuming_quota",
-            "tests/test_local_bot_response_contract.py::test_bot_create_post_does_not_store_metadata",
-            "tests/test_local_bot_response_contract.py::test_bot_create_post_queues_image_request"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::create_timeline_post",
-          "new": "backend/app/cruds/community.py::create_timeline_post",
+          "new": "backend/app/domains/social/service/source_posts.py::create_timeline_post",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/test_visible_post_text_sanitizer.py::test_create_timeline_post_sanitizes_reply_and_quote_body_boundary"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::create_comment",
-          "new": "backend/app/cruds/community.py::create_comment",
+          "new": "backend/app/domains/social/service/source_posts.py::create_comment",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_legacy_comment_retains_its_original_explicit_commit_boundary"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::like_post",
-          "new": "backend/app/cruds/community.py::like_post",
+          "new": "backend/app/domains/social/repository/reactions.py::like_post",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/test_direct_user_like_uniqueness.py::test_direct_user_like_is_idempotent_with_database_unique_boundary",
-            "tests/test_local_bot_atomic_quota.py::test_noop_like_commits_without_consuming_quota",
-            "tests/test_postgres_security_concurrency.py::test_direct_user_like_is_unique_across_postgres_sessions"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
@@ -6015,52 +6014,52 @@
         },
         {
           "old": "backend/app/cruds/community.py::unlike_post",
-          "new": "backend/app/cruds/community.py::unlike_post",
+          "new": "backend/app/domains/social/repository/reactions.py::unlike_post",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::create_repost",
-          "new": "backend/app/cruds/community.py::create_repost",
+          "new": "backend/app/domains/social/repository/reactions.py::create_repost",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::get_timeline_repost",
-          "new": "backend/app/cruds/community.py::get_timeline_repost",
+          "new": "backend/app/domains/social/repository/reactions.py::get_timeline_repost",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::delete_repost",
-          "new": "backend/app/cruds/community.py::delete_repost",
+          "new": "backend/app/domains/social/repository/reactions.py::delete_repost",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::delete_timeline_reposts",
-          "new": "backend/app/cruds/community.py::delete_timeline_reposts",
+          "new": "backend/app/domains/social/repository/reactions.py::delete_timeline_reposts",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
           ]
         },
         {
@@ -6136,32 +6135,32 @@
         },
         {
           "old": "backend/app/cruds/community.py::create_follow",
-          "new": "backend/app/cruds/community.py::create_follow",
+          "new": "backend/app/domains/social/repository/profiles.py::create_follow",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_follow_values_dedupe_without_foreign_queries_and_keep_caller_rollback"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::profile_follow_exists",
-          "new": "backend/app/cruds/community.py::profile_follow_exists",
+          "new": "backend/app/domains/social/repository/profiles.py::profile_follow_exists",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_follow_values_dedupe_without_foreign_queries_and_keep_caller_rollback"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::delete_follow",
-          "new": "backend/app/cruds/community.py::delete_follow",
+          "new": "backend/app/domains/social/repository/profiles.py::delete_follow",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_source_write_boundaries.py::test_follow_values_dedupe_without_foreign_queries_and_keep_caller_rollback"
           ]
         },
         {
@@ -13559,9 +13558,14 @@
           "backend/app/domains/characters/service/state.py",
           "backend/app/domains/social/constants.py",
           "backend/app/domains/social/exceptions.py",
+          "backend/app/domains/social/service/activity_results.py",
+          "backend/app/domains/social/service/notifications.py",
           "backend/app/domains/social/service/posts.py",
           "backend/app/domains/social/service/presentation.py",
+          "backend/app/domains/social/service/timeline.py",
           "backend/app/domains/social/service/visibility.py",
+          "backend/app/domains/world_characters/service/social_scope.py",
+          "backend/app/runtime/social/timeline.py",
           "backend/app/services/community.py"
         ],
         "backend/app/api/v1/routes/community.py": [
@@ -13733,12 +13737,13 @@
         },
         {
           "old": "backend/app/services/community.py::FEED_SCAN_BODY_PREVIEW_CHARS",
-          "new": "backend/app/services/community.py::FEED_SCAN_BODY_PREVIEW_CHARS",
+          "new": "backend/app/domains/social/constants.py::FEED_SCAN_BODY_PREVIEW_CHARS",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
           ]
         },
         {
@@ -13891,12 +13896,13 @@
         },
         {
           "old": "backend/app/services/community.py::_clip_text",
-          "new": "backend/app/services/community.py::_clip_text",
+          "new": "backend/app/domains/social/service/activity_results.py::_clip_text",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
           ]
         },
         {
@@ -13911,12 +13917,13 @@
         },
         {
           "old": "backend/app/services/community.py::_safe_topic_text",
-          "new": "backend/app/services/community.py::_safe_topic_text",
+          "new": "backend/app/domains/social/service/activity_results.py::_safe_topic_text",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
           ]
         },
         {
@@ -13931,22 +13938,24 @@
         },
         {
           "old": "backend/app/services/community.py::_body_preview",
-          "new": "backend/app/services/community.py::_body_preview",
+          "new": "backend/app/domains/social/service/activity_results.py::_body_preview",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
           ]
         },
         {
           "old": "backend/app/services/community.py::_fallback_topic_signature",
-          "new": "backend/app/services/community.py::_fallback_topic_signature",
+          "new": "backend/app/domains/social/service/activity_results.py::_fallback_topic_signature",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
           ]
         },
         {
@@ -13991,12 +14000,13 @@
         },
         {
           "old": "backend/app/services/community.py::build_post_created_activity_result",
-          "new": "backend/app/services/community.py::build_post_created_activity_result",
+          "new": "backend/app/domains/social/service/activity_results.py::build_post_created_activity_result",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
           ]
         },
         {
@@ -14641,113 +14651,141 @@
         },
         {
           "old": "backend/app/services/community.py::report_post",
-          "new": "backend/app/services/community.py::report_post",
+          "new": "backend/app/domains/social/service/timeline.py::SocialTimelineService",
           "direct_consumers": [
+            "backend/app/runtime/social/timeline.py",
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
-          ]
+            "tests/test_community_abuse_boundaries.py::test_three_reports_do_not_automatically_hide_post"
+          ],
+          "destination_member": "SocialTimelineService.report_post"
         },
         {
           "old": "backend/app/services/community.py::delete_post",
-          "new": "backend/app/services/community.py::delete_post",
+          "new": "backend/app/domains/social/service/timeline.py::SocialTimelineService",
           "direct_consumers": [
+            "backend/app/runtime/social/timeline.py",
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
-          ]
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ],
+          "destination_member": "SocialTimelineService.delete_post"
         },
         {
           "old": "backend/app/services/community.py::create_post",
-          "new": "backend/app/services/community.py::create_post",
+          "new": "backend/app/domains/social/service/timeline.py::SocialTimelineService",
           "direct_consumers": [
+            "backend/app/runtime/social/timeline.py",
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
-          ]
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ],
+          "destination_member": "SocialTimelineService.create_post"
         },
         {
           "old": "backend/app/services/community.py::_timeline_world_scope",
-          "new": "backend/app/services/community.py::_timeline_world_scope",
+          "new": "backend/app/domains/social/service/timeline.py::_timeline_world_scope",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_timeline_world_scope.py::test_timeline_scope_keeps_lookup_order_original_errors_and_same_session",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
           ]
         },
         {
           "old": "backend/app/services/community.py::create_reply",
-          "new": "backend/app/services/community.py::create_reply",
+          "new": "backend/app/domains/social/service/timeline.py::SocialTimelineService",
           "direct_consumers": [
+            "backend/app/runtime/social/timeline.py",
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
-          ]
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ],
+          "destination_member": "SocialTimelineService.create_reply"
         },
         {
           "old": "backend/app/services/community.py::create_quote",
-          "new": "backend/app/services/community.py::create_quote",
+          "new": "backend/app/domains/social/service/timeline.py::SocialTimelineService",
           "direct_consumers": [
+            "backend/app/runtime/social/timeline.py",
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
-          ]
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ],
+          "destination_member": "SocialTimelineService.create_quote"
         },
         {
           "old": "backend/app/services/community.py::create_comment",
-          "new": "backend/app/services/community.py::create_comment",
+          "new": "backend/app/domains/social/service/timeline.py::create_comment",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
           ]
         },
         {
           "old": "backend/app/services/community.py::like_post",
-          "new": "backend/app/services/community.py::like_post",
+          "new": "backend/app/domains/social/service/timeline.py::SocialTimelineService",
           "direct_consumers": [
+            "backend/app/runtime/social/timeline.py",
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
-          ]
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ],
+          "destination_member": "SocialTimelineService.like_post"
         },
         {
           "old": "backend/app/services/community.py::unlike_post",
-          "new": "backend/app/services/community.py::unlike_post",
+          "new": "backend/app/domains/social/service/timeline.py::SocialTimelineService",
           "direct_consumers": [
+            "backend/app/runtime/social/timeline.py",
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
-          ]
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ],
+          "destination_member": "SocialTimelineService.unlike_post"
         },
         {
           "old": "backend/app/services/community.py::repost_post",
-          "new": "backend/app/services/community.py::repost_post",
+          "new": "backend/app/domains/social/service/timeline.py::SocialTimelineService",
           "direct_consumers": [
+            "backend/app/runtime/social/timeline.py",
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
-          ]
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ],
+          "destination_member": "SocialTimelineService.repost_post"
         },
         {
           "old": "backend/app/services/community.py::unrepost_post",
-          "new": "backend/app/services/community.py::unrepost_post",
+          "new": "backend/app/domains/social/service/timeline.py::SocialTimelineService",
           "direct_consumers": [
+            "backend/app/runtime/social/timeline.py",
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
-          ]
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ],
+          "destination_member": "SocialTimelineService.unrepost_post"
         },
         {
           "old": "backend/app/services/community.py::follow_profile",
@@ -15591,32 +15629,35 @@
         },
         {
           "old": "backend/app/services/community.py::_resolve_author_character",
-          "new": "backend/app/services/community.py::_resolve_author_character",
+          "new": "backend/app/domains/social/service/timeline.py::_resolve_author_character",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
           ]
         },
         {
           "old": "backend/app/services/community.py::_reply_title",
-          "new": "backend/app/services/community.py::_reply_title",
+          "new": "backend/app/domains/social/service/timeline.py::_reply_title",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
           ]
         },
         {
           "old": "backend/app/services/community.py::_quote_title",
-          "new": "backend/app/services/community.py::_quote_title",
+          "new": "backend/app/domains/social/service/timeline.py::_quote_title",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
           ]
         },
         {
@@ -15755,22 +15796,24 @@
         },
         {
           "old": "backend/app/services/community.py::_notify_post_owner",
-          "new": "backend/app/services/community.py::_notify_post_owner",
+          "new": "backend/app/domains/social/service/notifications.py::_notify_post_owner",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_notify_mentioned_characters_creates_mention_notifications",
+            "tests/test_community_posts_route.py::test_notify_mentioned_characters_skips_actor_and_owner_duplicates"
           ]
         },
         {
           "old": "backend/app/services/community.py::_notify_mentioned_characters",
-          "new": "backend/app/services/community.py::_notify_mentioned_characters",
+          "new": "backend/app/domains/social/service/notifications.py::_notify_mentioned_characters",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_notify_mentioned_characters_creates_mention_notifications",
+            "tests/test_community_posts_route.py::test_notify_mentioned_characters_skips_actor_and_owner_duplicates"
           ]
         },
         {
@@ -15873,12 +15916,12 @@
         },
         {
           "old": "backend/app/services/community.py::_can_delete_post",
-          "new": "backend/app/services/community.py::_can_delete_post",
+          "new": "backend/app/domains/social/service/timeline.py::_can_delete_post",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_abuse_boundaries.py::test_three_reports_do_not_automatically_hide_post"
           ]
         },
         {
@@ -16221,6 +16264,68 @@
           "test_nodes": [
             "tests/social/test_identity_read_collaboration.py::test_mentions_use_one_owned_query_and_keep_input_order_and_visibility"
           ]
+        },
+        {
+          "old": "backend/app/services/community.py::create_post",
+          "new": "backend/app/domains/world_characters/service/social_scope.py::validate_social_author_scope",
+          "source_member": "Original WC lookup and world/character/status guard after author and paired-scope validation",
+          "direct_consumers": [
+            "backend/app/domains/social/service/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/services/community.py::_timeline_world_scope",
+          "new": "backend/app/domains/world_characters/service/social_scope.py::resolve_social_target_scope",
+          "source_member": "Original active world -> WC -> membership lookups and original fail-closed order",
+          "direct_consumers": [
+            "backend/app/domains/social/service/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_timeline_world_scope.py::test_timeline_scope_keeps_lookup_order_original_errors_and_same_session",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/services/community.py::create_post",
+          "new": "backend/app/runtime/social/timeline.py::RuntimeSocialWriteWorkflows",
+          "source_member": "Original agent_crud.log_activity call preserving exact arguments/Session/conditional invocation",
+          "direct_consumers": [
+            "backend/app/domains/social/service/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ],
+          "destination_member": "RuntimeSocialWriteWorkflows.log_activity"
+        },
+        {
+          "old": "backend/app/services/community.py::create_reply",
+          "new": "backend/app/runtime/social/timeline.py::RuntimeSocialWriteWorkflows",
+          "source_member": "Original reply quota call before author resolution with same Session",
+          "direct_consumers": [
+            "backend/app/domains/social/service/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/test_community_abuse_boundaries.py::test_reply_and_report_quotas_persist_only_hashed_subjects"
+          ],
+          "destination_member": "RuntimeSocialWriteWorkflows.consume_quota"
+        },
+        {
+          "old": "backend/app/services/community.py::delete_post",
+          "new": "backend/app/runtime/social/timeline.py::RuntimeSocialWriteWorkflows",
+          "source_member": "Original source-deletion callback immediately before caller commit",
+          "direct_consumers": [
+            "backend/app/domains/social/service/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion"
+          ],
+          "destination_member": "RuntimeSocialWriteWorkflows.exclude_events_for_posts"
         }
       ]
     },
@@ -18498,6 +18603,100 @@
           ]
         }
       ]
+    },
+    "AR-B5-B4": {
+      "status": "IMPLEMENTED; focused63 PASS; original13 body AST unchanged; exact API/ORM/split PASS before final metadata check",
+      "scope": "Actual13 Social source/reaction/follow functions retain their original bodies; foreign ORM type annotations become read-only actor values. Profiles/reaction queries do not query foreign actor tables.",
+      "source_split_owners": [
+        "AR-B2-B1 full103 original CRUD symbols retains all evidence"
+      ],
+      "new_contract": "backend/app/domains/social/contracts/actors.py: read-only id/name/display_name protocols for existing attached values; no object conversion",
+      "tests": [
+        "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction",
+        "tests/social/test_source_write_boundaries.py::test_follow_values_dedupe_without_foreign_queries_and_keep_caller_rollback",
+        "tests/social/test_source_write_boundaries.py::test_legacy_comment_retains_its_original_explicit_commit_boundary"
+      ],
+      "remaining": "Outer community mutation workflows, profile/inbox/agent services and Relationships/projection migration."
+    },
+    "AR-B5-B5": {
+      "status": "IMPLEMENTED; final focused107 PASS; owner-value timing regression4 FAIL to PASS; source introduction and integration pending",
+      "scope": "Actual timeline mutation/report/deletion workflow, Social notification admission, bounded post-result text; WC owns actual author/active-world/member validation, runtime only binds pre-existing same-Session collaborators.",
+      "split_files": {
+        "backend/app/services/community_abuse_quota.py": [
+          "backend/app/services/community_abuse_quota.py",
+          "backend/app/domains/social/exceptions.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/community_abuse_quota.py::CommunityQuotaExceeded",
+          "new": "backend/app/domains/social/exceptions.py::CommunityQuotaExceeded",
+          "direct_consumers": [
+            "backend/app/runtime/social/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/test_community_abuse_boundaries.py::test_reply_and_report_quotas_persist_only_hashed_subjects"
+          ]
+        },
+        {
+          "old": "backend/app/services/community_abuse_quota.py::consume",
+          "new": "backend/app/services/community_abuse_quota.py::consume",
+          "direct_consumers": [
+            "backend/app/runtime/social/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/test_community_abuse_boundaries.py::test_reply_and_report_quotas_persist_only_hashed_subjects"
+          ]
+        },
+        {
+          "old": "backend/app/services/community_abuse_quota.py::_ensure_bucket",
+          "new": "backend/app/services/community_abuse_quota.py::_ensure_bucket",
+          "direct_consumers": [
+            "backend/app/runtime/social/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/test_community_abuse_boundaries.py::test_reply_and_report_quotas_persist_only_hashed_subjects"
+          ]
+        },
+        {
+          "old": "backend/app/services/community_abuse_quota.py::_subject_hash",
+          "new": "backend/app/services/community_abuse_quota.py::_subject_hash",
+          "direct_consumers": [
+            "backend/app/runtime/social/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/test_community_abuse_boundaries.py::test_reply_and_report_quotas_persist_only_hashed_subjects"
+          ]
+        },
+        {
+          "old": "backend/app/services/community_abuse_quota.py::_aware_utc",
+          "new": "backend/app/services/community_abuse_quota.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/runtime/social/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/test_community_abuse_boundaries.py::test_reply_and_report_quotas_persist_only_hashed_subjects"
+          ]
+        },
+        {
+          "old": "backend/app/services/community_abuse_quota.py::_ACTION_POLICIES",
+          "new": "backend/app/services/community_abuse_quota.py::_ACTION_POLICIES",
+          "direct_consumers": [
+            "backend/app/runtime/social/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/test_community_abuse_boundaries.py::test_reply_and_report_quotas_persist_only_hashed_subjects"
+          ]
+        }
+      ],
+      "source_split_owners": [
+        "AR-B2-B6 retains full original228 Community symbols and exact extracted runtime/WC members"
+      ],
+      "new_tests": [
+        "backend/tests/social/test_timeline_world_scope.py"
+      ],
+      "deferred_quota_owner": "Root explicitly retains Identity CommunityMutationQuotaBucket and historical 3-way class identity assertions until G5/B8; no foreign ORM bridge or fake service ORM export. Existing quota remains a typed runtime collaboration.",
+      "remaining": "Profile/inbox/agent workflows, media jobs, Relationships/projection and HTTP ownership transition."
     },
     "AR-B4-A1-routines-foundation": {
       "status": "SOURCE IMPLEMENTED — foundation only; focused 50 passed, 1 existing PostgreSQL skip; metadata/integration pending",

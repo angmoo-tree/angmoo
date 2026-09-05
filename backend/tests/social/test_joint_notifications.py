@@ -1,3 +1,5 @@
+from app import models as _registered_models  # Register the current complete ORM metadata before partial DDL.
+
 from sqlalchemy import create_engine, event, select
 from sqlalchemy.orm import Session
 

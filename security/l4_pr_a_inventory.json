@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2138,
-      "internal_edge_count": 2222,
+      "external_import_count": 2161,
+      "internal_edge_count": 2265,
       "legacy_import_exception_count": 0,
-      "module_count": 674,
+      "module_count": 682,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -282,6 +282,11 @@
           },
           {
             "imports": [],
+            "module": "app.domains.social.contracts.actors",
+            "path": "backend/app/domains/social/contracts/actors.py"
+          },
+          {
+            "imports": [],
             "module": "app.domains.social.contracts.inbox",
             "path": "backend/app/domains/social/contracts/inbox.py"
           },
@@ -304,6 +309,11 @@
             "imports": [],
             "module": "app.domains.social.contracts.subjective_context",
             "path": "backend/app/domains/social/contracts/subjective_context.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.social.contracts.timeline",
+            "path": "backend/app/domains/social/contracts/timeline.py"
           },
           {
             "imports": [],
@@ -440,12 +450,25 @@
           },
           {
             "imports": [
+              "app.core.unit_of_work",
+              "app.domains.social.contracts.actors",
               "app.domains.social.models.posts",
               "app.domains.social.repository.posts",
               "app.domains.social.utils.cursors"
             ],
             "module": "app.domains.social.repository.profiles",
             "path": "backend/app/domains/social/repository/profiles.py"
+          },
+          {
+            "imports": [
+              "app.core.unit_of_work",
+              "app.domains.social.contracts.actors",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.posts",
+              "app.domains.social.schemas.community"
+            ],
+            "module": "app.domains.social.repository.reactions",
+            "path": "backend/app/domains/social/repository/reactions.py"
           },
           {
             "imports": [],
@@ -480,6 +503,14 @@
           },
           {
             "imports": [
+              "app.core.context_text",
+              "app.domains.social.constants"
+            ],
+            "module": "app.domains.social.service.activity_results",
+            "path": "backend/app/domains/social/service/activity_results.py"
+          },
+          {
+            "imports": [
               "app.domains.social.models.posts"
             ],
             "module": "app.domains.social.service.joint_posts",
@@ -497,7 +528,8 @@
           {
             "imports": [
               "app.core.unit_of_work",
-              "app.domains.social.models.posts"
+              "app.domains.social.models.posts",
+              "app.domains.social.service.presentation"
             ],
             "module": "app.domains.social.service.notifications",
             "path": "backend/app/domains/social/service/notifications.py"
@@ -527,6 +559,38 @@
             ],
             "module": "app.domains.social.service.presentation",
             "path": "backend/app/domains/social/service/presentation.py"
+          },
+          {
+            "imports": [
+              "app.core.search_text",
+              "app.core.unit_of_work",
+              "app.domains.social.contracts.actors",
+              "app.domains.social.models.posts",
+              "app.domains.social.schemas.community",
+              "app.domains.social.utils.text"
+            ],
+            "module": "app.domains.social.service.source_posts",
+            "path": "backend/app/domains/social/service/source_posts.py"
+          },
+          {
+            "imports": [
+              "app.domains.characters.service.profile",
+              "app.domains.social.contracts.actors",
+              "app.domains.social.contracts.timeline",
+              "app.domains.social.exceptions",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.posts",
+              "app.domains.social.repository.reactions",
+              "app.domains.social.schemas.community",
+              "app.domains.social.service.activity_results",
+              "app.domains.social.service.notifications",
+              "app.domains.social.service.presentation",
+              "app.domains.social.service.source_posts",
+              "app.domains.social.service.visibility",
+              "app.domains.world_characters.service.social_scope"
+            ],
+            "module": "app.domains.social.service.timeline",
+            "path": "backend/app/domains/social/service/timeline.py"
           },
           {
             "imports": [
@@ -787,6 +851,16 @@
             ],
             "module": "app.runtime.social.subjective_context",
             "path": "backend/app/runtime/social/subjective_context.py"
+          },
+          {
+            "imports": [
+              "app.cruds.agents",
+              "app.domains.social.service.timeline",
+              "app.runtime.relationships.sqlalchemy_social_event",
+              "app.services.community_abuse_quota"
+            ],
+            "module": "app.runtime.social.timeline",
+            "path": "backend/app/runtime/social/timeline.py"
           }
         ],
         "legacy_horizontal": [
@@ -807,7 +881,9 @@
               "app.domains.social.repository.media",
               "app.domains.social.repository.posts",
               "app.domains.social.repository.profiles",
+              "app.domains.social.repository.reactions",
               "app.domains.social.service.notifications",
+              "app.domains.social.service.source_posts",
               "app.domains.social.utils.cursors",
               "app.domains.social.utils.text",
               "app.models",
@@ -823,11 +899,11 @@
           },
           {
             "imports": [
+              "app.core.context_text",
               "app.credentials",
               "app.providers.gemini",
               "app.schemas",
               "app.services.direct_llm",
-              "app.services.llm_context",
               "app.services.resident_contracts",
               "app.services.world_feed_search"
             ],

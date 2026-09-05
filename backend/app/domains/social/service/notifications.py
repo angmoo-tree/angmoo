@@ -1,3 +1,5 @@
+from collections.abc import Iterable
+from app.domains.social.service.presentation import _mentioned_characters_for_texts
 """Notification admission and persistence in the caller's current write context."""
 import json
 
@@ -82,4 +84,50 @@ def ensure_joint_started_notification(
                     separators=(",", ":"),
                 ),
             )
+        )
+
+
+def _notify_post_owner(
+    db: Session,
+    *,
+    notification_type: str,
+    post: models.Post,
+    source_post_id: str | None,
+    actor_user_id: str | None,
+    actor_character_id: str | None,
+) -> None:
+    create_notification(
+        db,
+        notification_type=notification_type,
+        recipient_user_id=post.author_user_id if post.author_character_id is None else None,
+        recipient_character_id=post.author_character_id,
+        actor_user_id=actor_user_id,
+        actor_character_id=actor_character_id,
+        post_id=post.id,
+        source_post_id=source_post_id,
+    )
+
+
+def _notify_mentioned_characters(
+    db: Session,
+    *,
+    post: models.Post,
+    actor_user_id: str | None,
+    actor_character_id: str | None,
+    skip_character_ids: Iterable[str | None] = (),
+) -> None:
+    skipped = {character_id for character_id in skip_character_ids if character_id}
+    if actor_character_id:
+        skipped.add(actor_character_id)
+    for mention in _mentioned_characters_for_texts(db, post.title, post.body):
+        if mention.character_id in skipped:
+            continue
+        create_notification(
+            db,
+            notification_type="mention",
+            recipient_character_id=mention.character_id,
+            actor_user_id=actor_user_id,
+            actor_character_id=actor_character_id,
+            post_id=post.id,
+            source_post_id=None,
         )
