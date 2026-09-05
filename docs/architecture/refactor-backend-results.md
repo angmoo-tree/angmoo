@@ -1059,3 +1059,18 @@ Memory A9 기반과 B4 signed `6beec5d`를 병합한 뒤 AgentDaypartMemoryEvent
 Daypart 최종 고정 후보의 확대 회귀는 **265 passed / 66.73초**다. 실제 정의 16개 전체 AST와 명시적으로 분리한 본문·SQL 7개 모두 원문과 동치임을 확인했다. Stock 전체 보존은 아직 append하지 않은 선행 B4 두 파일의 최초 도입 경로에서 중단한다. 읽기 전용 진단은 signed `869bae55a2e5e665fb731396a7284b53dde8a104`의 정확한 두 blob만 메모리에 보충하여 원래 checker 함수를 실행했고 **source/split/assertion/suppression/API·ORM/node 각각 오류 0**, 보호 **2,201 / 현재 2,246 nodes**다. merge history simplification을 피한 `--full-history --no-merges`로 실제 최초 도입을 확인했다. 이 진단은 additions capture나 stock 전체 Gate PASS가 아니다.
 
 A9에서 이미 제거한 recall source를 가리키는 feature inventory의 K12/K15/K16/K22/K23 현재 경로 다섯 곳도 actual `repository/recall.py`·`recall_records.py`로 연결했다. Root의 후속 Memory current-path 정리와 동일한 소유 기준으로 통합한다. 이번 source에 처음 들어오는 파일은 제품 7개·회귀 1개, 신규 test는 4 nodes다. 각 source의 최초 SHA 및 capture는 signed source 고정 후 부모의 선형 통합에서 기록한다.
+
+
+### Memory Daypart/B4 합류의 관찰 fixture 순서 정합성
+
+Signed merge `299d7043a64e0eb888d3fc3fdf31af24ce8b1ef4`는 Daypart source `d83ef86c8c9e4acbec3c4d47b37b9738f7924fdf`와 선행 실제 Routines 타입·일부 Social 소유 source를 합류했다. A10 근거 판정은 그대로 두고 실제 외부 Routines 모델 import만 runtime source queries에 적용했다. 현재 source/table·서비스와 외부 SQL을 서로 반대로 덮어쓰지 않았다.
+
+첫 합류 회귀는 **44 passed/1 failed**로 기존 Memory source reader의 fixture commit이 FK 오류를 냈다. SQL trace는 `Post` INSERT 전에 `WorldCharacterFeedObservation` INSERT가 실행됨을 확인했다. 두 모델의 실제 module 위치가 분리되며 SQLAlchemy mapper 정렬이 바뀌었고, 원래 fixture가 관계 없는 두 mapper를 `add_all`로 동시에 저장하는 순서에 기대고 있었다. 해당 테스트는 게시물을 add/flush한 뒤 관찰을 add하도록 준비 순서만 명시했다. API/ORM/FK·기존 assertion은 유지한다. 실제 production 관찰 생성은 existing Post를 조회하고 `begin_nested()` 진입 시 pending flush 후 관찰 add/flush를 수행하므로 같은 simultaneous add_all 경로가 없다. 수정 후 같은 합류 묶음 **45 passed/16.06초**다.
+
+### AR-B7-A11 Memory 누락 원본 복구와 동의 epoch 소유
+
+Source `bc1a7c18997034b6f96965943323a617b3f9feef`에서 복구 순서·epoch 스캔 진행·최종 commit은 `memory/service/reconciliation.py`, 실제 Memory epoch/anti-join/delivery SQL은 `repository/reconciliation.py`가 소유한다. 외부 Post/Reaction/Social/Chat/Observation의 기존 다섯 source catalog는 `runtime/memory/source_catalogs.py`가 구성하고 Memory가 전달받아 같은 Session에서 조회한다. Runtime worker는 실제 서비스를 실행한다.
+
+최종 formatted 함수의 네 repository 본문과 foreign catalog를 다시 펼치면 **전체 원래 workflow AST와 정확히 동일**하다. missing epoch32·회전 scope16·source별32 제한, `[opened_at, closed_at)` 동의 기간, 원본별 누락 anti-join, late row 복구, 기존 kind/source ID·단일 commit을 보존했다. 이전에는 worker에 있던 같은 복구를 서비스가 실제 소유하며 새 policy나 provider 호출은 없다.
+
+배치 runtime/안전/API 및 rollback 회귀 **37 passed / 2 warnings / 14.97초**, 원래 전체 split 검사 **0 errors**, 경계 **726 modules/2442 edges/exact legacy222 PASS**, L4 parity97·current batch·ER0 81/87/24/44/7 PASS다. 초기 부분 scope 기록에서 repository를 외부 entry에 잘못 넣은 항목은 검사에 거부되어 제거했고, repository는 실제 내부 소유 모듈로만 검사한다. 검사 규칙을 완화하지 않았다. Source introduction capture와 B4~B6 순차 합류/전체 B7 Gate는 계속 남아 있다.
