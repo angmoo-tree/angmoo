@@ -32130,12 +32130,15 @@
           "backend/app/domains/routines/policies/topic_arc_roles.py",
           "backend/app/domains/routines/policies/topic_dates.py",
           "backend/app/domains/routines/policies/writer_outputs.py",
+          "backend/app/domains/routines/policies/writer_tasks.py",
           "backend/app/domains/routines/policies/writing_contract.py",
           "backend/app/domains/routines/repository/independent_topics.py",
           "backend/app/domains/routines/schemas/resident_planning.py",
           "backend/app/domains/routines/service/action_budgets.py",
           "backend/app/domains/routines/service/action_plans.py",
           "backend/app/domains/routines/service/independent_topics.py",
+          "backend/app/domains/routines/service/post_writer_results.py",
+          "backend/app/domains/routines/service/state_outputs.py",
           "backend/app/domains/routines/service/topic_arcs.py",
           "backend/app/domains/routines/service/writing_plans.py",
           "backend/app/services/langgraph_resident.py"
@@ -32701,15 +32704,13 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_STATE_WRITE_STRING_LIMITS",
-          "new": "backend/app/services/langgraph_resident.py::_STATE_WRITE_STRING_LIMITS",
+          "new": "backend/app/domains/routines/service/state_outputs.py::_STATE_WRITE_STRING_LIMITS",
           "direct_consumers": [
-            "backend/app/services/langgraph_resident.py"
+            "backend/app/domains/routines/service/state_outputs.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_clip",
@@ -34104,51 +34105,45 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_task_id_part",
-          "new": "backend/app/services/langgraph_resident.py::_task_id_part",
+          "new": "backend/app/domains/routines/policies/writer_tasks.py::_task_id_part",
           "direct_consumers": [
+            "backend/app/domains/routines/policies/writer_tasks.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_reply_task_id",
-          "new": "backend/app/services/langgraph_resident.py::_reply_task_id",
+          "new": "backend/app/domains/routines/policies/writer_tasks.py::_reply_task_id",
           "direct_consumers": [
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_post_task_id",
-          "new": "backend/app/services/langgraph_resident.py::_post_task_id",
+          "new": "backend/app/domains/routines/policies/writer_tasks.py::_post_task_id",
           "direct_consumers": [
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_clean_lore_chunk_ids",
-          "new": "backend/app/services/langgraph_resident.py::_clean_lore_chunk_ids",
+          "new": "backend/app/domains/routines/service/post_writer_results.py::_clean_lore_chunk_ids",
           "direct_consumers": [
+            "backend/app/domains/routines/service/post_writer_results.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_independent_topic_for_lore",
@@ -34358,51 +34353,46 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_POST_WRITER_PLAN_CONSTRAINTS",
-          "new": "backend/app/services/langgraph_resident.py::_POST_WRITER_PLAN_CONSTRAINTS",
+          "new": "backend/app/domains/routines/service/post_writer_results.py::_POST_WRITER_PLAN_CONSTRAINTS",
           "direct_consumers": [
-            "backend/app/services/langgraph_resident.py"
+            "backend/app/domains/routines/service/post_writer_results.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_dedupe_clipped_items",
-          "new": "backend/app/services/langgraph_resident.py::_dedupe_clipped_items",
+          "new": "backend/app/domains/routines/service/post_writer_results.py::_dedupe_clipped_items",
           "direct_consumers": [
+            "backend/app/domains/routines/service/post_writer_results.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_post_writer_plan_defaults",
-          "new": "backend/app/services/langgraph_resident.py::_post_writer_plan_defaults",
+          "new": "backend/app/domains/routines/service/post_writer_results.py::_post_writer_plan_defaults",
           "direct_consumers": [
+            "backend/app/domains/routines/service/post_writer_results.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_mandatory_post_writer_constraints",
-          "new": "backend/app/services/langgraph_resident.py::_mandatory_post_writer_constraints",
+          "new": "backend/app/domains/routines/service/post_writer_results.py::_mandatory_post_writer_constraints",
           "direct_consumers": [
+            "backend/app/domains/routines/service/post_writer_results.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_post_writer_plan_error_payload",
@@ -34418,39 +34408,35 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_post_writer_plan_result",
-          "new": "backend/app/services/langgraph_resident.py::_post_writer_plan_result",
+          "new": "backend/app/domains/routines/service/post_writer_results.py::_post_writer_plan_result",
           "direct_consumers": [
+            "backend/app/domains/routines/service/post_writer_results.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_fallback_post_writer_plan",
-          "new": "backend/app/services/langgraph_resident.py::_fallback_post_writer_plan",
+          "new": "backend/app/domains/routines/service/post_writer_results.py::_fallback_post_writer_plan",
           "direct_consumers": [
+            "backend/app/domains/routines/service/post_writer_results.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_normalize_post_writer_plan",
-          "new": "backend/app/services/langgraph_resident.py::_normalize_post_writer_plan",
+          "new": "backend/app/domains/routines/service/post_writer_results.py::_normalize_post_writer_plan",
           "direct_consumers": [
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_build_post_writer_planner_user_prompt",
@@ -34482,15 +34468,13 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_post_identity_for_prompt",
-          "new": "backend/app/services/langgraph_resident.py::_post_identity_for_prompt",
+          "new": "backend/app/domains/routines/service/post_writer_results.py::_post_identity_for_prompt",
           "direct_consumers": [
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_build_post_writer_user_prompt",
@@ -34518,15 +34502,13 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_apply_post_writer_output",
-          "new": "backend/app/services/langgraph_resident.py::_apply_post_writer_output",
+          "new": "backend/app/domains/routines/service/post_writer_results.py::_apply_post_writer_output",
           "direct_consumers": [
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_call_reply_writer",
@@ -34556,63 +34538,57 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_successful_publish_actions",
-          "new": "backend/app/services/langgraph_resident.py::_successful_publish_actions",
+          "new": "backend/app/domains/routines/service/state_outputs.py::_successful_publish_actions",
           "direct_consumers": [
+            "backend/app/domains/routines/service/state_outputs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_state_publish_context",
-          "new": "backend/app/services/langgraph_resident.py::_state_publish_context",
+          "new": "backend/app/domains/routines/service/state_outputs.py::_state_publish_context",
           "direct_consumers": [
+            "backend/app/domains/routines/service/state_outputs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_state_action_plan_context",
-          "new": "backend/app/services/langgraph_resident.py::_state_action_plan_context",
+          "new": "backend/app/domains/routines/service/state_outputs.py::_state_action_plan_context",
           "direct_consumers": [
+            "backend/app/domains/routines/service/state_outputs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_state_observation_context",
-          "new": "backend/app/services/langgraph_resident.py::_state_observation_context",
+          "new": "backend/app/domains/routines/service/state_outputs.py::_state_observation_context",
           "direct_consumers": [
+            "backend/app/domains/routines/service/state_outputs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_state_recorder_prompt_inputs",
-          "new": "backend/app/services/langgraph_resident.py::_state_recorder_prompt_inputs",
+          "new": "backend/app/domains/routines/service/state_outputs.py::_state_recorder_prompt_inputs",
           "direct_consumers": [
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_build_state_recorder_user_prompt",
@@ -34630,15 +34606,14 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_validation_summary_from_exception",
-          "new": "backend/app/services/langgraph_resident.py::_validation_summary_from_exception",
+          "new": "backend/app/domains/routines/service/state_outputs.py::_validation_summary_from_exception",
           "direct_consumers": [
+            "backend/app/domains/routines/service/state_outputs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_state_recorder_provider_error_hint",
@@ -34679,15 +34654,13 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_fallback_state_payload",
-          "new": "backend/app/services/langgraph_resident.py::_fallback_state_payload",
+          "new": "backend/app/domains/routines/service/state_outputs.py::_fallback_state_payload",
           "direct_consumers": [
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_state_recorder_length_validation_summary",
@@ -34703,40 +34676,35 @@
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_state_recorder_length_validation_fields",
-          "new": "backend/app/services/langgraph_resident.py::_state_recorder_length_validation_fields",
+          "new": "backend/app/domains/routines/service/state_outputs.py::_state_recorder_length_validation_fields",
           "direct_consumers": [
+            "backend/app/domains/routines/service/state_outputs.py",
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_state_recorder_should_retry_json_error",
-          "new": "backend/app/services/langgraph_resident.py::_state_recorder_should_retry_json_error",
+          "new": "backend/app/domains/routines/service/state_outputs.py::_state_recorder_should_retry_json_error",
           "direct_consumers": [
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_state_recorder_retry_policy_skips_length_only_schema_failure",
             "tests/test_langgraph_resident_engine.py::test_state_recorder_retry_policy_retries_parse_or_missing_payload"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_state_recorder_sanitized_payload_from_failure",
-          "new": "backend/app/services/langgraph_resident.py::_state_recorder_sanitized_payload_from_failure",
+          "new": "backend/app/domains/routines/service/state_outputs.py::_state_recorder_sanitized_payload_from_failure",
           "direct_consumers": [
             "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/test_langgraph_resident_engine.py::test_run_resident_langgraph_failed_result_includes_independent_roll"
-          ],
-          "remaining_owner": "AR-B4-LG-B/LG-C; Memory helpers AR-B7; RelationshipPoint AR-B5",
-          "removal_condition": "Move actual decision/query responsibility and runtime composition in subsequent signed slices; connect already prepared B7/B5 implementations during root integration without a second implementation."
+          ]
         },
         {
           "old": "backend/app/services/langgraph_resident.py::_log_state_save_suppressed",
@@ -35653,6 +35621,17 @@
       "preservation": "Actual25 action/writing/budget decision functions (original1359 lines) and3 constants preserve whole AST after exact context/explicit clip and read bindings. Original186 LangGraph cases pass. Same observed values, action/daily limit/bucket precedence, required writing restoration and same Session settings/count/source reads. Settings own callback is canonical activity_settings; no copied policy or added transaction.",
       "tests": "Existing8 setting monkeypatch setups now target the actual owner; original assertion/suppression contracts stay exact. New two budget binding cases preserve same Session/time/order and skip unlimited reply count without adding commits.",
       "remaining": "Social target/author and Memory unfollow/handoff reads remain existing exact same-Session runtime collaborators pending B5/B7 source integration. Provider/task-id/graph assembly and other clip-dependent writer/state rules remain subsequent LG slices; no whole B4 completion."
+    },
+    "AR-B4-LG-B4": {
+      "status": "IMPLEMENTED SOURCE; focused378 PASS; original six-guard diagnostic0; parent introduction pending",
+      "actual_paths": [
+        "backend/app/domains/routines/contracts/writer_results.py",
+        "backend/app/domains/routines/policies/writer_tasks.py",
+        "backend/app/domains/routines/service/post_writer_results.py",
+        "backend/app/domains/routines/service/state_outputs.py"
+      ],
+      "preservation": "Actual22 writer/task/state functions and2 constants retain whole original AST after narrow input annotation and exact pure clip/converter bindings. Complete original186 LangGraph tests pass; no old test change. Provider error type discrimination remains same runtime body; only successful/reused publish actions form fallback evidence, only allowed overlength state strings can be sanitized and the complete original StateWrite validates again.",
+      "remaining": "Existing clip/Memory and Social read implementations remain original runtime callbacks pending parent owner-source integration. Actual prompt selection and graph/provider runtime assembly remain subsequent LG slices; no complete B4 claim."
     }
   },
   "test_symbols": {

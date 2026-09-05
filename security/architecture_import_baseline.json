@@ -1,7 +1,7 @@
 {
-  "edge_count": 2507,
-  "external_import_count": 2356,
-  "module_count": 750,
+  "edge_count": 2519,
+  "external_import_count": 2367,
+  "module_count": 754,
   "modules": [
     {
       "external_imports": [],
@@ -3856,6 +3856,18 @@
     },
     {
       "external_imports": [
+        "collections.abc",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.prompt_context"
+      ],
+      "module": "app.domains.routines.contracts.writer_results",
+      "path": "backend/app/domains/routines/contracts/writer_results.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "fastapi",
         "sqlalchemy.orm"
       ],
@@ -4028,6 +4040,20 @@
       "imports": [],
       "module": "app.domains.routines.policies.writer_outputs",
       "path": "backend/app/domains/routines/policies/writer_outputs.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "re",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.planning_context",
+        "app.domains.routines.contracts.writer_results"
+      ],
+      "module": "app.domains.routines.policies.writer_tasks",
+      "path": "backend/app/domains/routines/policies/writer_tasks.py",
       "wildcard_imports": []
     },
     {
@@ -4724,6 +4750,20 @@
     {
       "external_imports": [
         "__future__",
+        "collections.abc",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.planning_context",
+        "app.domains.routines.policies.writing_contract"
+      ],
+      "module": "app.domains.routines.service.post_writer_results",
+      "path": "backend/app/domains/routines/service/post_writer_results.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "datetime"
       ],
       "imports": [
@@ -4905,6 +4945,22 @@
       ],
       "module": "app.domains.routines.service.slot_state",
       "path": "backend/app/domains/routines/service/slot_state.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.planning_context",
+        "app.domains.routines.contracts.resident",
+        "app.domains.routines.contracts.writer_results",
+        "app.domains.routines.schemas.resident_planning"
+      ],
+      "module": "app.domains.routines.service.state_outputs",
+      "path": "backend/app/domains/routines/service/state_outputs.py",
       "wildcard_imports": []
     },
     {
@@ -10830,6 +10886,7 @@
         "app.domains.routines.policies.topic_arc_roles",
         "app.domains.routines.policies.topic_dates",
         "app.domains.routines.policies.writer_outputs",
+        "app.domains.routines.policies.writer_tasks",
         "app.domains.routines.policies.writing_contract",
         "app.domains.routines.repository.independent_topics",
         "app.domains.routines.repository.public_action_executions",
@@ -10838,7 +10895,9 @@
         "app.domains.routines.service.action_plans",
         "app.domains.routines.service.activity_settings",
         "app.domains.routines.service.independent_topics",
+        "app.domains.routines.service.post_writer_results",
         "app.domains.routines.service.public_action_executions",
+        "app.domains.routines.service.state_outputs",
         "app.domains.routines.service.topic_arcs",
         "app.domains.routines.service.writing_plans",
         "app.domains.social.contracts.subjective_context",

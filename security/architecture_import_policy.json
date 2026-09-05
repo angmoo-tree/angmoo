@@ -1026,6 +1026,7 @@
       "app.domains.routines.contracts.resident",
       "app.domains.routines.contracts.slots",
       "app.domains.routines.contracts.topic_arcs",
+      "app.domains.routines.contracts.writer_results",
       "app.domains.routines.dependencies",
       "app.domains.routines.exceptions",
       "app.domains.routines.models",
@@ -1040,6 +1041,7 @@
       "app.domains.routines.policies.topic_arc_roles",
       "app.domains.routines.policies.topic_dates",
       "app.domains.routines.policies.writer_outputs",
+      "app.domains.routines.policies.writer_tasks",
       "app.domains.routines.policies.writing_contract",
       "app.domains.routines.repository",
       "app.domains.routines.repository.activity_counts",
@@ -1083,6 +1085,7 @@
       "app.domains.routines.service.lifecycle",
       "app.domains.routines.service.perception_prompts",
       "app.domains.routines.service.plans",
+      "app.domains.routines.service.post_writer_results",
       "app.domains.routines.service.prompt_context",
       "app.domains.routines.service.public_action_executions",
       "app.domains.routines.service.run_backoff",
@@ -1095,6 +1098,7 @@
       "app.domains.routines.service.slot_pool",
       "app.domains.routines.service.slot_recovery",
       "app.domains.routines.service.slot_state",
+      "app.domains.routines.service.state_outputs",
       "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tick_schedule",
       "app.domains.routines.service.topic_arcs",
@@ -1248,6 +1252,7 @@
       "app.domains.routines.contracts.plans",
       "app.domains.routines.contracts.resident",
       "app.domains.routines.contracts.topic_arcs",
+      "app.domains.routines.contracts.writer_results",
       "app.domains.routines.schemas",
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
@@ -1279,6 +1284,7 @@
       "app.domains.routines.service.lifecycle",
       "app.domains.routines.service.perception_prompts",
       "app.domains.routines.service.plans",
+      "app.domains.routines.service.post_writer_results",
       "app.domains.routines.service.prompt_context",
       "app.domains.routines.service.public_action_executions",
       "app.domains.routines.service.run_backoff",
@@ -1290,6 +1296,7 @@
       "app.domains.routines.service.slot_leases",
       "app.domains.routines.service.slot_pool",
       "app.domains.routines.service.slot_recovery",
+      "app.domains.routines.service.state_outputs",
       "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tick_schedule",
       "app.domains.routines.service.topic_arcs",
@@ -3026,6 +3033,30 @@
         "owner_stage": "AR-B4-LG-C",
         "reason": "Existing resident graph binds actual action/budget/writing services and their existing same-Session collaborators; no duplicate business body.",
         "removal_condition": "Move remaining graph/runtime workflow in LG-C; parent B5/B7 integration replaces only exact foreign read callbacks at their original call sites.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.policies.writer_tasks",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing resident execution binds actual writer/state result rules to same pure converters and exact provider-error summary handling.",
+        "removal_condition": "Move remaining graph/runtime workflow to LG-C without duplicated rule bodies; retain existing source-introduction and original behavior evidence.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.service.post_writer_results",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing resident execution binds actual writer/state result rules to same pure converters and exact provider-error summary handling.",
+        "removal_condition": "Move remaining graph/runtime workflow to LG-C without duplicated rule bodies; retain existing source-introduction and original behavior evidence.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.service.state_outputs",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing resident execution binds actual writer/state result rules to same pure converters and exact provider-error summary handling.",
+        "removal_condition": "Move remaining graph/runtime workflow to LG-C without duplicated rule bodies; retain existing source-introduction and original behavior evidence.",
         "review_date": "2026-09-06"
       }
     ]

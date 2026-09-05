@@ -1,4 +1,9 @@
 from __future__ import annotations
+from app.domains.routines.policies import writer_tasks as writer_tasks_service
+from app.domains.routines.service import post_writer_results as post_writer_results_service
+from app.domains.routines.service import state_outputs as state_outputs_service
+from app.domains.routines.service.post_writer_results import _POST_WRITER_PLAN_CONSTRAINTS
+from app.domains.routines.service.state_outputs import _STATE_WRITE_STRING_LIMITS
 from app.domains.routines.contracts.action_planning import ActionPlanningWorkflows, ActionBudgetWorkflows
 from app.domains.routines.service import activity_settings
 from app.domains.routines.service import action_plans as action_plans_service
@@ -200,12 +205,6 @@ _INBOX_DIRECT_EXCHANGE_TURN_LIMIT = 6
 def _langgraph_recursion_limit() -> int:
     return max(settings.langgraph_max_steps_per_run * 3, 48)
 
-_STATE_WRITE_STRING_LIMITS = {
-    "mood": 80,
-    "summary": 2000,
-    "memory_note": 2000,
-    "observation_note": 1000,
-}
 
 
 def _clip(value: Any, max_chars: int) -> str:
@@ -213,6 +212,30 @@ def _clip(value: Any, max_chars: int) -> str:
     if len(text) <= max_chars:
         return text
     return text[: max(0, max_chars - 3)].rstrip() + "..."
+
+
+_task_id_part = partial(writer_tasks_service._task_id_part, clip=_clip)
+_reply_task_id = partial(writer_tasks_service._reply_task_id, clip=_clip)
+_post_task_id = partial(writer_tasks_service._post_task_id, clip=_clip, coerce_topic_arc=lambda value: _coerce_topic_arc_payload(value))
+_clean_lore_chunk_ids = partial(post_writer_results_service._clean_lore_chunk_ids, clip=_clip)
+_dedupe_clipped_items = partial(post_writer_results_service._dedupe_clipped_items, clip=_clip)
+_post_writer_plan_defaults = partial(post_writer_results_service._post_writer_plan_defaults, clip=_clip)
+_mandatory_post_writer_constraints = partial(post_writer_results_service._mandatory_post_writer_constraints, clip=_clip)
+_post_writer_plan_result = post_writer_results_service._post_writer_plan_result
+_fallback_post_writer_plan = partial(post_writer_results_service._fallback_post_writer_plan, clip=_clip)
+_normalize_post_writer_plan = partial(post_writer_results_service._normalize_post_writer_plan, clip=_clip)
+_post_identity_for_prompt = post_writer_results_service._post_identity_for_prompt
+_apply_post_writer_output = partial(post_writer_results_service._apply_post_writer_output, clip=_clip)
+_successful_publish_actions = state_outputs_service._successful_publish_actions
+_state_publish_context = state_outputs_service._state_publish_context
+_state_action_plan_context = partial(state_outputs_service._state_action_plan_context, clip=_clip, topic_arc_for_prompt=lambda value: _topic_arc_for_prompt(value))
+_state_observation_context = partial(state_outputs_service._state_observation_context, clip=_clip)
+_state_recorder_prompt_inputs = partial(state_outputs_service._state_recorder_prompt_inputs, clip=_clip, topic_arc_for_prompt=lambda value: _topic_arc_for_prompt(value))
+_validation_summary_from_exception = partial(state_outputs_service._validation_summary_from_exception, clip=_clip)
+_fallback_state_payload = partial(state_outputs_service._fallback_state_payload, clip=_clip)
+_state_recorder_length_validation_fields = state_outputs_service._state_recorder_length_validation_fields
+_state_recorder_should_retry_json_error = partial(state_outputs_service._state_recorder_should_retry_json_error, clip=_clip)
+_state_recorder_sanitized_payload_from_failure = partial(state_outputs_service._state_recorder_sanitized_payload_from_failure, clip=_clip, length_summary=lambda exc: _state_recorder_length_validation_summary(exc))
 
 
 _action_planning_workflows = ActionPlanningWorkflows(
@@ -1887,43 +1910,12 @@ def _build_system_prompt(ctx: LangGraphResidentContext) -> str:
 
 
 
-def _task_id_part(value: Any, *, fallback: str = "none") -> str:
-    text = _clip(value, 120).strip()
-    if not text:
-        text = fallback
-    text = re.sub(r"\s+", "_", text)
-    text = text.replace(":", "_")
-    return text[:120]
 
 
-def _reply_task_id(*, scope: str, index: int, post_id: str) -> str:
-    return f"reply:{scope}:{index}:{_task_id_part(post_id, fallback='post')}"
 
 
-def _post_task_id(ctx: LangGraphResidentContext, writing: dict[str, Any]) -> str:
-    mode = _task_id_part(writing.get("mode"), fallback="post")
-    topic_arc = _coerce_topic_arc_payload(writing.get("topic_arc"))
-    if topic_arc:
-        raw_key = f"{topic_arc.get('arc_id')}:{topic_arc.get('next_step_index')}"
-    else:
-        raw_key = (
-            writing.get("feed_cue_id")
-            or writing.get("topic_key")
-            or writing.get("source_post_id")
-            or ctx.run_id
-        )
-    return f"post:{mode}:{_task_id_part(raw_key, fallback=ctx.run_id)}"
 
 
-def _clean_lore_chunk_ids(value: Any) -> list[str]:
-    if not isinstance(value, list):
-        return []
-    ids: list[str] = []
-    for item in value:
-        text = str(item or "").strip()
-        if text and text not in ids:
-            ids.append(_clip(text, 80))
-    return ids[:5]
 
 
 def _independent_topic_for_lore(
@@ -2273,95 +2265,12 @@ def _build_reply_writer_user_prompt(
     return "\n".join(lines)
 
 
-_POST_WRITER_PLAN_CONSTRAINTS = [
-    "Do not change the selected post_task topic, mode, action, or brief.",
-    "Use current_time_reference and arc_continuity_context to keep time framing coherent.",
-    "Treat topic_arc.active_step as continuation intent, not wording to copy.",
-    "For delayed gaps, acknowledge elapsed time without pretending the previous action is happening now.",
-    "Use carryover_time_context for today/future event framing when present.",
-    "Do not expose topic-arc structure labels such as standalone, setup, development, or conclusion.",
-    "Use character_lore_context only as private reference material.",
-    "Do not copy character_lore_context sentences verbatim.",
-    "Do not expose lore_chunk_id, retrieval_mode, lore_query_mode, or source filenames.",
-]
 
 
-def _dedupe_clipped_items(items: Iterable[Any], *, max_items: int, max_chars: int) -> list[str]:
-    result: list[str] = []
-    seen: set[str] = set()
-    for item in items:
-        clipped = _clip(item, max_chars)
-        if not clipped or clipped in seen:
-            continue
-        result.append(clipped)
-        seen.add(clipped)
-        if len(result) >= max_items:
-            break
-    return result
 
 
-def _post_writer_plan_defaults(post_task: dict[str, Any]) -> dict[str, Any]:
-    active_step = post_task.get("active_step")
-    active_step_brief = (
-        str(active_step.get("brief") or "").strip()
-        if isinstance(active_step, dict)
-        else ""
-    )
-    continuity_context = post_task.get("arc_continuity_context")
-    continuity_mode = (
-        str(continuity_context.get("continuity_mode") or "").strip()
-        if isinstance(continuity_context, dict)
-        else ""
-    )
-    carryover_context = post_task.get("carryover_time_context")
-    carryover_phase = (
-        str(carryover_context.get("phase") or "").strip()
-        if isinstance(carryover_context, dict)
-        else ""
-    )
-    carryover_label = (
-        str(carryover_context.get("label") or "").strip()
-        if isinstance(carryover_context, dict)
-        else ""
-    )
-    brief = str(post_task.get("brief") or "").strip()
-    topic_focus = _clip(active_step_brief or brief or post_task.get("topic_key"), 400)
-    time_framing = _clip(
-        carryover_label
-        or carryover_phase
-        or continuity_mode
-        or post_task.get("current_time_reference")
-        or "Use current_time_reference for final framing.",
-        160,
-    )
-    body_beats = _dedupe_clipped_items(
-        (
-            active_step_brief,
-            brief,
-            topic_focus,
-            carryover_label,
-            "Adapt relative time words to current_time_reference.",
-            "Keep lore private and avoid metadata leakage.",
-        ),
-        max_items=5,
-        max_chars=300,
-    )
-    return {
-        "time_framing": time_framing,
-        "topic_focus": topic_focus,
-        "title_direction": "Write a concise public title for the selected topic.",
-        "body_beats": body_beats,
-        "tone_notes": "Follow persona and established speech style.",
-        "constraints": list(_POST_WRITER_PLAN_CONSTRAINTS),
-    }
 
 
-def _mandatory_post_writer_constraints(raw_constraints: Iterable[Any]) -> list[str]:
-    return _dedupe_clipped_items(
-        [*raw_constraints, *_POST_WRITER_PLAN_CONSTRAINTS],
-        max_items=9,
-        max_chars=240,
-    )
 
 
 def _post_writer_plan_error_payload(
@@ -2383,109 +2292,10 @@ def _post_writer_plan_error_payload(
     return payload
 
 
-def _post_writer_plan_result(
-    *,
-    status: str,
-    task_id_matched: bool,
-    fallback_used: bool,
-    error: dict[str, Any] | None = None,
-    validation_summary: list[dict[str, Any]] | None = None,
-) -> dict[str, Any]:
-    result: dict[str, Any] = {
-        "status": status,
-        "task_id_matched": task_id_matched,
-        "fallback_used": fallback_used,
-        "failure_class": None,
-        "parse_error_type": None,
-        "attempt_count": None,
-        "validation_summary": validation_summary,
-    }
-    if error:
-        result["failure_class"] = error.get("failure_class")
-        result["parse_error_type"] = error.get("parse_error_type")
-        result["attempt_count"] = error.get("attempt_count")
-        result["validation_summary"] = error.get("validation_summary")
-        result["json_error_diagnostics"] = error.get("json_error_diagnostics")
-    return result
 
 
-def _fallback_post_writer_plan(
-    post_task: dict[str, Any],
-    *,
-    status: str,
-    error: dict[str, Any] | None = None,
-    validation_summary: list[dict[str, Any]] | None = None,
-) -> tuple[dict[str, Any], dict[str, Any]]:
-    expected_task_id = str(post_task.get("task_id") or "").strip()
-    defaults = _post_writer_plan_defaults(post_task)
-    plan = {
-        "task_id": expected_task_id or None,
-        "time_framing": defaults["time_framing"],
-        "topic_focus": defaults["topic_focus"],
-        "title_direction": defaults["title_direction"],
-        "body_beats": defaults["body_beats"],
-        "tone_notes": defaults["tone_notes"],
-        "constraints": defaults["constraints"],
-        "status": status,
-        "fallback_used": True,
-    }
-    return plan, _post_writer_plan_result(
-        status=status,
-        task_id_matched=True,
-        fallback_used=True,
-        error=error,
-        validation_summary=validation_summary,
-    )
 
 
-def _normalize_post_writer_plan(
-    output: dict[str, Any], post_task: dict[str, Any]
-) -> tuple[dict[str, Any], dict[str, Any]]:
-    expected_task_id = str(post_task.get("task_id") or "").strip()
-    returned_task_id = str(output.get("task_id") or "").strip()
-    if returned_task_id != expected_task_id:
-        validation_summary = [
-            {
-                "path": "task_id",
-                "type": "task_id_mismatch",
-                "message": "PostWriterPlanner returned a different task_id.",
-            }
-        ]
-        plan, result = _fallback_post_writer_plan(
-            post_task,
-            status="fallback_task_id_mismatch",
-            validation_summary=validation_summary,
-        )
-        result["task_id_matched"] = False
-        return plan, result
-    defaults = _post_writer_plan_defaults(post_task)
-    body_beats = _dedupe_clipped_items(
-        output.get("body_beats", []),
-        max_items=5,
-        max_chars=300,
-    ) or list(defaults["body_beats"])
-    plan = {
-        "task_id": expected_task_id,
-        "time_framing": _clip(output.get("time_framing"), 160)
-        or defaults["time_framing"],
-        "topic_focus": _clip(output.get("topic_focus"), 400)
-        or defaults["topic_focus"],
-        "title_direction": _clip(output.get("title_direction"), 240)
-        or defaults["title_direction"],
-        "body_beats": body_beats,
-        "tone_notes": _clip(output.get("tone_notes"), 300)
-        or defaults["tone_notes"],
-        "constraints": _mandatory_post_writer_constraints(
-            output.get("constraints", [])
-        ),
-        "status": "succeeded",
-        "fallback_used": False,
-    }
-    return plan, _post_writer_plan_result(
-        status="succeeded",
-        task_id_matched=True,
-        fallback_used=False,
-    )
 
 
 def _build_post_writer_planner_user_prompt(
@@ -2566,20 +2376,6 @@ async def _call_post_writer_planner(
     return _normalize_post_writer_plan(output, post_task)
 
 
-def _post_identity_for_prompt(post_task: dict[str, Any]) -> dict[str, Any]:
-    return {
-        "task_id": post_task.get("task_id"),
-        "mode": post_task.get("mode"),
-        "topic_key": post_task.get("topic_key"),
-        "source_post_id": post_task.get("source_post_id"),
-        "feed_cue_id": post_task.get("feed_cue_id"),
-        "relationship_point_id": post_task.get("relationship_point_id"),
-        "source_mix": post_task.get("source_mix"),
-        "mention_required": post_task.get("mention_required"),
-        "mention_target_handle": post_task.get("mention_target_handle"),
-        "writing_form": post_task.get("writing_form"),
-        "action_step_count": post_task.get("action_step_count"),
-    }
 
 
 def _build_post_writer_user_prompt(
@@ -2627,60 +2423,6 @@ def _build_post_writer_user_prompt(
 
 
 
-def _apply_post_writer_output(
-    action_plan: dict[str, Any],
-    writing: dict[str, Any],
-    post_task: dict[str, Any],
-    output: dict[str, Any],
-    *,
-    repair_attempted: bool,
-    writer_node: str,
-) -> tuple[dict[str, Any], dict[str, Any]]:
-    result = dict(writing) if isinstance(writing, dict) else {}
-    expected_task_id = str(post_task.get("task_id") or "")
-    returned_task_id = str(output.get("task_id") or "").strip() if isinstance(output, dict) else ""
-    title = str(output.get("post_title") or "").strip() if isinstance(output, dict) else ""
-    body = str(output.get("post_body") or "").strip() if isinstance(output, dict) else ""
-    matched = returned_task_id == expected_task_id and bool(title and body)
-    if matched:
-        result["post_title"] = title
-        result["post_body"] = body
-        lore_chunk_ids = _clean_lore_chunk_ids(post_task.get("lore_chunk_ids"))
-        retrieval_mode = _clip(post_task.get("retrieval_mode"), 80) or None
-        lore_query_mode = _clip(post_task.get("lore_query_mode"), 80) or None
-        if lore_chunk_ids:
-            result["lore_chunk_ids"] = lore_chunk_ids
-        if retrieval_mode:
-            result["retrieval_mode"] = retrieval_mode
-        if lore_query_mode:
-            result["lore_query_mode"] = lore_query_mode
-    result["post_task_result"] = {
-        "task_id": expected_task_id,
-        "returned_task_id": returned_task_id or None,
-        "post_title": title,
-        "post_body": body,
-        "writer_node": writer_node,
-        "repair_attempted": repair_attempted,
-        "repair_succeeded": repair_attempted and matched,
-        "task_id_matched": returned_task_id == expected_task_id,
-        "lore_chunk_ids": _clean_lore_chunk_ids(post_task.get("lore_chunk_ids")),
-        "retrieval_mode": _clip(post_task.get("retrieval_mode"), 80) or None,
-        "lore_query_mode": _clip(post_task.get("lore_query_mode"), 80) or None,
-    }
-    result = _with_persona_writer_validation(
-        action_plan,
-        result,
-        repair_attempted=repair_attempted,
-        repair_succeeded=matched,
-    )
-    writer_result = {
-        "writer_node": writer_node,
-        "task_id": expected_task_id,
-        "returned_task_id": returned_task_id or None,
-        "written": matched,
-        "repair_attempted": repair_attempted,
-    }
-    return result, writer_result
 
 
 async def _call_reply_writer(
@@ -2794,176 +2536,14 @@ async def _call_post_writer(
     )
 
 
-def _successful_publish_actions(state: _ResidentGraphState) -> list[dict[str, Any]]:
-    publish_result = state.get("publish_result", {})
-    actions = publish_result.get("actions") if isinstance(publish_result, dict) else []
-    if not isinstance(actions, list):
-        return []
-    return [
-        action
-        for action in actions
-        if isinstance(action, dict) and action.get("status") in {"succeeded", "reused"}
-    ]
 
 
-def _state_publish_context(state: _ResidentGraphState) -> dict[str, Any]:
-    publish_result = state.get("publish_result", {})
-    public_action_count = 0
-    if isinstance(publish_result, dict):
-        public_action_count = int(publish_result.get("public_action_count") or 0)
-    actions: list[dict[str, Any]] = []
-    for action in _successful_publish_actions(state):
-        result = action.get("result") if isinstance(action.get("result"), dict) else {}
-        compact_result = {
-            key: result.get(key)
-            for key in (
-                "post_id",
-                "reply_to_post_id",
-                "title",
-                "topic_key",
-                "target_type",
-                "target_id",
-            )
-            if result.get(key) is not None
-        }
-        item: dict[str, Any] = {
-            "action_type": action.get("action_type"),
-            "status": action.get("status"),
-            "result": compact_result,
-        }
-        if action.get("target_post_id"):
-            item["target_post_id"] = action.get("target_post_id")
-        if action.get("topic_key"):
-            item["topic_key"] = action.get("topic_key")
-        actions.append(item)
-    return {
-        "public_action_count": public_action_count,
-        "successful_actions": actions,
-    }
 
 
-def _state_action_plan_context(state: _ResidentGraphState) -> dict[str, Any]:
-    action_plan = state.get("action_plan", {})
-    if not isinstance(action_plan, dict):
-        return {}
-    planned_briefs: list[dict[str, Any]] = []
-    for scope, key in (("feed", "feed_actions"), ("inbox", "inbox_actions")):
-        actions = action_plan.get(key, [])
-        if not isinstance(actions, list):
-            continue
-        for action in actions:
-            if not isinstance(action, dict):
-                continue
-            brief = _clip(action.get("brief"), 400)
-            if not brief:
-                continue
-            planned_briefs.append(
-                {
-                    "scope": scope,
-                    "action_type": action.get("action_type"),
-                    "post_id": action.get("post_id"),
-                    "notification_id": action.get("notification_id"),
-                    "brief": brief,
-                }
-            )
-    writing = action_plan.get("writing")
-    writing_context = None
-    if isinstance(writing, dict) and writing.get("mode") != "none":
-        writing_context = {
-            "mode": writing.get("mode"),
-            "source_post_id": writing.get("source_post_id"),
-            "topic_key": writing.get("topic_key"),
-            "brief": _clip(writing.get("brief"), 500) or None,
-            "topic_arc": _topic_arc_for_prompt(writing.get("topic_arc")),
-            "active_step": writing.get("active_step"),
-        }
-        actual_writing = state.get("writing", {})
-        post_result = (
-            actual_writing.get("post_task_result")
-            if isinstance(actual_writing, dict)
-            else None
-        )
-        post_title = (
-            post_result.get("post_title")
-            if isinstance(post_result, dict)
-            else actual_writing.get("post_title")
-            if isinstance(actual_writing, dict)
-            else None
-        )
-        post_body = (
-            post_result.get("post_body")
-            if isinstance(post_result, dict)
-            else actual_writing.get("post_body")
-            if isinstance(actual_writing, dict)
-            else None
-        )
-        if _clip(post_title, 160) or _clip(post_body, 900):
-            writing_context["actual_written_post"] = {
-                "post_title": _clip(post_title, 160) or None,
-                "post_body": _clip(post_body, 900) or None,
-            }
-    return {
-        "selection_reason": _clip(action_plan.get("selection_reason"), 700),
-        "component_selection_reasons": action_plan.get(
-            "component_selection_reasons", {}
-        ),
-        "planned_action_briefs": planned_briefs[:8],
-        "writing": writing_context,
-    }
 
 
-def _state_observation_context(state: _ResidentGraphState) -> dict[str, Any]:
-    def _items(observation: Any, key: str) -> list[dict[str, Any]]:
-        raw_items = observation.get(key) if isinstance(observation, dict) else []
-        if not isinstance(raw_items, list):
-            return []
-        compact: list[dict[str, Any]] = []
-        for item in raw_items[:5]:
-            if not isinstance(item, dict):
-                continue
-            compact.append(
-                {
-                    "post_id": item.get("post_id"),
-                    "notification_id": item.get("notification_id"),
-                    "author": _clip(item.get("author"), 80) or None,
-                    "topic_signature": _clip(item.get("topic_signature"), 180) or None,
-                    "semantic_summary": _clip(
-                        item.get("semantic_summary") or item.get("preview"), 240
-                    )
-                    or None,
-                }
-            )
-        return compact
-
-    feed_observation = state.get("feed_observation", {})
-    inbox_observation = state.get("inbox_observation", {})
-    return {
-        "feed": {
-            "returned_count": feed_observation.get("returned_count")
-            if isinstance(feed_observation, dict)
-            else None,
-            "theme_topics": feed_observation.get("feed_theme_topics", [])
-            if isinstance(feed_observation, dict)
-            else [],
-            "items": _items(feed_observation, "selected_posts"),
-        },
-        "inbox": {
-            "returned_count": inbox_observation.get("returned_count")
-            if isinstance(inbox_observation, dict)
-            else None,
-            "items": _items(inbox_observation, "items"),
-        },
-    }
 
 
-def _state_recorder_prompt_inputs(state: _ResidentGraphState) -> dict[str, Any]:
-    return {
-        "daypart_context": state.get("daypart_context", {}),
-        "mandatory_post_context": state.get("mandatory_post_context", {}),
-        "publish_result": _state_publish_context(state),
-        "action_memory_context": _state_action_plan_context(state),
-        "observation_context": _state_observation_context(state),
-    }
 
 
 def _build_state_recorder_user_prompt(
@@ -3010,34 +2590,6 @@ def _build_state_recorder_user_prompt(
     )
 
 
-def _validation_summary_from_exception(exc: BaseException) -> list[dict[str, str]] | None:
-    errors = getattr(exc, "errors", None)
-    if not callable(errors):
-        return None
-    try:
-        raw_errors = errors()
-    except Exception:
-        return None
-    if not isinstance(raw_errors, list):
-        return None
-    summary: list[dict[str, str]] = []
-    for raw_error in raw_errors[:4]:
-        if not isinstance(raw_error, dict):
-            continue
-        loc = raw_error.get("loc")
-        if isinstance(loc, (list, tuple)):
-            path = ".".join(str(item) for item in loc)
-        else:
-            path = str(loc or "")
-        item = {
-            "path": _clip(path, 160),
-            "type": _clip(raw_error.get("type") or type(exc).__name__, 120),
-        }
-        msg = raw_error.get("msg")
-        if msg:
-            item["message"] = _clip(msg, 240)
-        summary.append(item)
-    return summary or None
 
 
 def _state_recorder_provider_error_hint(exc: BaseException) -> str:
@@ -3092,35 +2644,6 @@ def _llm_failure_meta(exc: BaseException) -> dict[str, Any]:
     return meta
 
 
-def _fallback_state_payload(
-    ctx: LangGraphResidentContext, state: _ResidentGraphState
-) -> dict[str, Any]:
-    successful_actions = _successful_publish_actions(state)
-    previous_mood = _clip(getattr(ctx.state, "mood", ""), 80) or "neutral"
-    if successful_actions:
-        counts: dict[str, int] = {}
-        for action in successful_actions:
-            action_type = str(action.get("action_type") or "action")
-            counts[action_type] = counts.get(action_type, 0) + 1
-        action_summary = ", ".join(
-            f"{action_type} {count}건" for action_type, count in sorted(counts.items())
-        )
-        summary = f"이번 활동에서 {action_summary}을 완료했다."
-        memory_note = (
-            f"이번 활동에서는 {action_summary}으로 실제 커뮤니티 흐름에 반응했다. "
-            "다음 활동에서는 이어지는 주제와 관계 신호를 살핀다."
-        )
-    else:
-        summary = "이번 활동에서 공개 행동 없이 커뮤니티 흐름을 관찰했다."
-        memory_note = (
-            "이번 활동에서는 공개 행동 없이 흐름을 관찰했다. "
-            "다음 활동에서는 새롭게 반응할 만한 주제와 관계 신호를 살핀다."
-        )
-    return {
-        "mood": previous_mood,
-        "summary": _clip(summary, 2000),
-        "memory_note": _clip(memory_note, 2000),
-    }
 
 
 def _state_recorder_length_validation_summary(
@@ -3132,63 +2655,10 @@ def _state_recorder_length_validation_summary(
     return _validation_summary_from_exception(exc)
 
 
-def _state_recorder_length_validation_fields(
-    summary: list[dict[str, str]] | None,
-) -> set[str] | None:
-    if not summary:
-        return None
-    fields_to_clip: set[str] = set()
-    for item in summary:
-        path = item.get("path") if isinstance(item, dict) else None
-        error_type = item.get("type") if isinstance(item, dict) else None
-        if path not in _STATE_WRITE_STRING_LIMITS or error_type != "string_too_long":
-            return None
-        fields_to_clip.add(path)
-    return fields_to_clip or None
 
 
-def _state_recorder_should_retry_json_error(
-    exc: BaseException,
-    payload: dict[str, Any] | None,
-    _diagnostic: dict[str, Any],
-    _attempt: int,
-) -> bool:
-    if not isinstance(payload, dict):
-        return True
-    fields_to_clip = _state_recorder_length_validation_fields(
-        _validation_summary_from_exception(exc)
-    )
-    return fields_to_clip is None
 
 
-def _state_recorder_sanitized_payload_from_failure(
-    exc: BaseException,
-) -> tuple[dict[str, Any], list[str]] | None:
-    payload = getattr(exc, "last_payload", None)
-    if not isinstance(payload, dict):
-        return None
-    fields_to_clip = _state_recorder_length_validation_fields(
-        _state_recorder_length_validation_summary(exc)
-    )
-    if fields_to_clip is None:
-        return None
-
-    sanitized = dict(payload)
-    sanitized_fields: list[str] = []
-    for field in sorted(fields_to_clip):
-        value = sanitized.get(field)
-        if not isinstance(value, str):
-            return None
-        clipped = _clip(value.strip(), _STATE_WRITE_STRING_LIMITS[field])
-        if clipped != value:
-            sanitized_fields.append(field)
-        sanitized[field] = clipped
-
-    try:
-        validated = _StateWrite.model_validate(sanitized).model_dump()
-    except ValidationError:
-        return None
-    return validated, sanitized_fields
 
 
 def _log_state_save_suppressed(

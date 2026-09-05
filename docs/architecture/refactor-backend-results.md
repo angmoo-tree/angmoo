@@ -1076,3 +1076,12 @@ LG-B3a 최종 후보 검증: **376 passed / 기존 warnings2 / 168.59초**. 원�
 설정 callback은 실제 Routines activity_settings로 연결하고 원래 테스트8개 mock 대상만 해당 모듈로 바꾼다. source/Memory 읽기는 기존 same-Session runtime 협력이며 부모 B5/B7에서 정확히 합류한다. 새 회귀2개는 같은 Session/시각/설정→count 순서, 무제한 count 생략, 추가 commit0을 검사한다. graph/provider 실행은 아직 LG-C의 남은 실제 소유 책임이다.
 
 LG-B3b 최종 고정 후보 검증: **378 passed / 기존 warnings2 / 176.55초**. 원래6보존진단 sources/split/assertions/suppressions/API·ORM/missing-nodes 모두0(protected2139/current2263), 경계750/2507/206legacy, L4 750/14/97, deferred22 PASS. 실제 서비스3개·협력 계약1개와 회귀1파일이 최초 도입되며 새 노드는2개다. 기존 assertion·suppression은 그대로이고 mock 준비 대상8곳만 실제 설정 소유자로 연결했다. 부모의 source 도입 증거 캡처와 B5/B7/runtime 최종 합류는 별도이다.
+
+
+## AR-B4 LG-B4 — 작성 결과와 상태 근거·복구 규칙
+
+원래22함수와 상수2개의 실제 본문을 writer task id, post writer plan/result, 상태 근거·복구 역할로 이전했다. 좁은 입력 타입과 같은 clip/순수 변환 함수 인자만 복원하면 원문 전체 AST가 같다. 원래186 LangGraph 검사 **186 passed / 6.07초**, 기존 테스트 수정0, 실행 전역 함수 누락0을 확인했다.
+
+DirectLlmJsonError인 경우만 자체 validation_summary를 읽는 원래 isinstance 분기는 runtime에 그대로 두며 실제 서비스가 명시적으로 연결된 변환기를 호출한다. 실제 성공·재사용 행동만 fallback 기억 근거에 쓰고, 허용된 필드의 길이 오류만 정제한 뒤 원래 StateWrite 전체 검증을 다시 통과해야 한다. provider 호출·재시도 횟수·기존 prompt payload는 변경하지 않았다. 남은 prompt 판단과 graph/provider 조립은 후속 LG 전환이다.
+
+LG-B4 최종 후보 검증: **378 passed / 기존 warnings2 / 125.78초**. 원래6보존진단 모두0(protected2139/current2263), 경계754/2519/206legacy, L4 754/14/97, deferred22 PASS. 신규 실제 제품4파일이며 새 테스트 노드0·기존 테스트 변경0이다. 원본 frozen과 append-only ledger를 변경하지 않았으며 부모의 source 첫 도입 캡처 후 stock 통합 검증을 진행한다.

@@ -691,3 +691,10 @@ Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥�
 `routines/service/action_plans.py`는 관찰한 항목에 맞게 feed·inbox·관계 행동을 정규화하고 하나의 계획으로 묶습니다. `writing_plans.py`는 유효한 글감과 필수 독립 글의 의도를 유지하고, `action_budgets.py`는 하루 한도·답글 묶음 한도·멘션/알림 우선순위와 unfollow 충돌을 적용합니다. 이곳에 실제 판단 본문이 있으며 실행부는 서비스를 호출할 협력만 구성합니다.
 
 설정은 기존 `activity_settings.ensure_setting`을 사용하며 그 함수의 원래 저장 계약을 바꾸지 않습니다. World 시각을 사용하는 실제 사용량 계산, nullable 게시자 조회, 기억의 unfollow 관찰은 원래 Session과 호출 순서로 연결합니다. 도메인은 외부 업무 ORM을 조회하지 않고 필요한 값만 받습니다. 설정이 무제한이면 해당 count를 호출하지 않는 조건, 전체 글쓰기 제한과 답글 bucket의 우선순위를 새 구조를 이유로 통합하거나 바꾸지 않습니다.
+
+
+### 작성 결과와 상태 기록의 복구
+
+`routines/policies/writer_tasks.py`는 실행·글감에서 같은 writer task id를 만듭니다. `service/post_writer_results.py`는 필수 작성 제약과 기본 계획을 유지하며, task id와 실제 제목·본문이 일치한 결과만 적용합니다. Lore id와 조회 방식은 원래 허용된 개수와 길이로 남깁니다.
+
+`service/state_outputs.py`는 성공·재사용된 공개 행동으로 기억 근거를 만들고, 글자 수 제한만 어긴 상태 응답을 정제한 뒤 전체 Pydantic 응답 검증을 다시 수행합니다. 오류 종류에 따른 provider 예외 해석은 runtime의 같은 분기로 연결합니다. 상태 정책 안에서 provider를 다시 호출하거나 가짜 성공 근거를 만들지 않습니다. 입력은 기존 saved state와 graph state를 그대로 사용하며 ORM 복제나 새 DB 접근을 추가하지 않습니다.
