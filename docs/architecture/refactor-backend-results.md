@@ -340,3 +340,9 @@ Creator 조회/수정 2개 endpoint가 canonical router에 추가되었다. 기�
 
 이번 감사에서 찾은 순수 B2 Character state 잔여는 본문처럼 해결했다. 위에 명시한 다른 업무/후속 단계와 별개로 남겨 둔 미분류 B2 Character 기본 구현은 없다. PR-head CI·전체 병합 후 검증과 후속 domain/bridge 종료는 root의 순차 통합 Gate에서 판정한다.
 - 마지막 고정 후보 `--contracts --nodes`는 현재 **2,118 nodes**를 수집했고, #258/#263 대비 API/OpenAPI/ORM·기존 assertion/suppression·source split 증거 오류는 없었다. 미합류 Identity/Character source 도입의 append-only 증거 오류만 root 선형 capture 대상으로 남았다. 이 기록을 전체 CI PASS로 확대하지 않는다.
+
+### Creator 완료 후보의 선형 통합 검증
+
+Creator lifecycle source `63034348e71ab4ae0bd0611a2ad04e1036244d42`와 HTTP/state source `81aa413abaf74655c3b3432a52ce10125d9aec53`를 하나의 후속 PR로 묶었다. 각 고정 source의 신규 파일·테스트 도입 증거를 선행 메타데이터 뒤에 추가했다. 고정 통합 후보 `49c4d214240b4c473eab3a6caf540f876625787d`에서 전체 backend suite는 **2,096 passed / 기존 22 skipped / 27 warnings, 450.38초**, 보존 검사는 **protected/current 2,118 nodes / items 37 PASS**였다. 이 실행 중 source·test·metadata를 수정하지 않았다.
+
+API/OpenAPI/ORM, 기존 assertion·suppression, 분할 source와 테스트 계보 검사가 모두 통과했다. 공통 CI 계약 7개와 architecture/deferred/L4/embedded/P8-R inventory도 통과했다. 실제 Gitleaks 8.30.1은 추적 archive 18.89MB와 후보의 전체 336 ancestor commits 20.83MB에서 findings 0이었다. 이 기록 뒤에는 문서만 추가한다. PR-head CI, 실제 Installer, 순차 병합과 post-merge는 각각 확인하며, 위 B3~B8의 남은 업무를 Character PR의 완료로 표시하지 않는다.
