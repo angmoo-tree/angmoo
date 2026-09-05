@@ -8,13 +8,13 @@ from enum import Enum
 import hashlib
 
 from app.domains.memory.exceptions import MemoryValidationError
-from app.domains.memory.domain.lifecycle import (
+from app.domains.memory.contracts.items import (
     MemoryCandidateRecord,
     MemoryItemRecord,
     as_utc,
     normalize_memory_summary,
 )
-from app.domains.memory.domain.scope import MemoryScopeSetting
+from app.domains.memory.contracts.scope import MemoryScopeSetting
 
 
 MEMORY_CONSOLIDATION_CONTRACT_VERSION = "memory-consolidation.v1"

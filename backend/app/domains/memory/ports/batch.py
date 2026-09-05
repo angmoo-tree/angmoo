@@ -4,9 +4,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
-from app.domains.memory.domain.lifecycle import MemoryCandidateRecord
-from app.domains.memory.domain.scope import MemoryScope, MemoryScopeSetting
-from app.domains.memory.domain.selection import (
+from app.domains.memory.contracts.items import MemoryCandidateRecord
+from app.domains.memory.contracts.scope import MemoryScope, MemoryScopeSetting
+from app.domains.memory.policies.selection_output import (
     MemorySelectionDecision,
     MemorySelectionSource,
 )

@@ -6,7 +6,7 @@ from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 
 from app.domains.memory.exceptions import MemoryValidationError
-from app.domains.memory.domain.recall import (
+from app.domains.memory.contracts.recall import (
     CanonicalRecallOperation,
     CanonicalRecallQuery,
     CanonicalRecallResult,

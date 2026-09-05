@@ -292,7 +292,20 @@
     "backend/app/domains/world_characters/schemas/readiness.py": "backend/app/domains/characters/schemas.py",
     "backend/app/domains/memory/api/schemas.py": "backend/app/domains/memory/schemas/__init__.py",
     "backend/app/domains/memory/api/batch_schemas.py": "backend/app/domains/memory/schemas/batch.py",
-    "backend/app/domains/memory/domain/errors.py": "backend/app/domains/memory/exceptions.py"
+    "backend/app/domains/memory/domain/errors.py": "backend/app/domains/memory/exceptions.py",
+    "backend/app/domains/memory/domain/provenance.py": "backend/app/domains/memory/contracts/provenance.py",
+    "backend/app/domains/memory/domain/scope.py": "backend/app/domains/memory/contracts/scope.py",
+    "backend/app/domains/memory/domain/lifecycle.py": "backend/app/domains/memory/contracts/items.py",
+    "backend/app/domains/memory/domain/recall.py": "backend/app/domains/memory/contracts/recall.py",
+    "backend/app/domains/memory/domain/read_surface.py": "backend/app/domains/memory/contracts/inspector.py",
+    "backend/app/domains/memory/domain/canonical_retrieval_plan.py": "backend/app/domains/memory/contracts/retrieval_plan.py",
+    "backend/app/domains/memory/domain/retention.py": "backend/app/domains/memory/policies/retention.py",
+    "backend/app/domains/memory/domain/policies.py": "backend/app/domains/memory/policies/validation.py",
+    "backend/app/domains/memory/domain/consolidation.py": "backend/app/domains/memory/policies/consolidation.py",
+    "backend/app/domains/memory/domain/canonical_retrieval_planner.py": "backend/app/domains/memory/policies/retrieval_planner.py",
+    "backend/app/domains/memory/domain/consolidation_provider.py": "backend/app/domains/memory/policies/consolidation_output.py",
+    "backend/app/domains/memory/domain/batch_policy.py": "backend/app/domains/memory/policies/batch.py",
+    "backend/app/domains/memory/domain/selection.py": "backend/app/domains/memory/policies/selection_output.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -17755,6 +17768,27 @@
         "app.domains.memory.public": "B7 actual external callers; remove obsolete exports only after their consumers transition",
         "app.api.v1.routes.memory": "B7 HTTP ownership after actual service and dependency composition transition"
       }
+    },
+    "AR-B7-A1": {
+      "status": "SOURCE PREPARATION; exact value/policy AST preserved; focused tests and B7 integration pending",
+      "scope": "Closed source kinds, owner/World/subject scope, item and recall values, retrieval plan validation; pure retention, source validation, consolidation eligibility/output and bounded selection/schedule policies. Existing domain aggregate is a temporary exact re-export consumer, not a second implementation.",
+      "moved_files": {
+        "backend/app/domains/memory/domain/provenance.py": "backend/app/domains/memory/contracts/provenance.py",
+        "backend/app/domains/memory/domain/scope.py": "backend/app/domains/memory/contracts/scope.py",
+        "backend/app/domains/memory/domain/lifecycle.py": "backend/app/domains/memory/contracts/items.py",
+        "backend/app/domains/memory/domain/recall.py": "backend/app/domains/memory/contracts/recall.py",
+        "backend/app/domains/memory/domain/read_surface.py": "backend/app/domains/memory/contracts/inspector.py",
+        "backend/app/domains/memory/domain/canonical_retrieval_plan.py": "backend/app/domains/memory/contracts/retrieval_plan.py",
+        "backend/app/domains/memory/domain/retention.py": "backend/app/domains/memory/policies/retention.py",
+        "backend/app/domains/memory/domain/policies.py": "backend/app/domains/memory/policies/validation.py",
+        "backend/app/domains/memory/domain/consolidation.py": "backend/app/domains/memory/policies/consolidation.py",
+        "backend/app/domains/memory/domain/canonical_retrieval_planner.py": "backend/app/domains/memory/policies/retrieval_planner.py",
+        "backend/app/domains/memory/domain/consolidation_provider.py": "backend/app/domains/memory/policies/consolidation_output.py",
+        "backend/app/domains/memory/domain/batch_policy.py": "backend/app/domains/memory/policies/batch.py",
+        "backend/app/domains/memory/domain/selection.py": "backend/app/domains/memory/policies/selection_output.py"
+      },
+      "preserved": "Exact class/function bodies, enum values, provider budget and JSON schema, deterministic ids, TTL, timezones, selection rejection, consolidation thresholds. No SQL, transaction, provider invocation or worker lifecycle change.",
+      "remaining": "Actual Memory services, owned SQL/FTS/queue, HTTP dependencies and runtime coordination continue in B7; aggregate compatibility retirement follows consumer transition."
     }
   }
 }

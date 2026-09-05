@@ -5,14 +5,14 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Protocol
 
-from app.domains.memory.domain.recall import (
+from app.domains.memory.contracts.recall import (
     CanonicalRecallQuery,
     CanonicalRecallRecord,
     MemoryRecallCandidate,
     MemoryRecallDoctor,
     MemoryRecallSearchQuery,
 )
-from app.domains.memory.domain.scope import MemoryScope
+from app.domains.memory.contracts.scope import MemoryScope
 
 
 class MemoryRecallIndexPort(Protocol):

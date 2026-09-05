@@ -30,7 +30,7 @@ E_INVENTORY_SHA256 = (
 
 from app import models as _models  # noqa: E402,F401 - register canonical metadata
 from app.core.db import Base  # noqa: E402
-from app.domains.memory.domain.provenance import MemoryKindV1  # noqa: E402
+from app.domains.memory.contracts.provenance import MemoryKindV1  # noqa: E402
 from app.domains.memory.infrastructure.sqlalchemy_models import (  # noqa: E402
     MEMORY_SCHEMA_V1_TABLES,
 )
@@ -53,9 +53,9 @@ class InventoryError(RuntimeError):
 
 REQUIRED_FILES = (
     "backend/app/domains/memory/public.py",
-    "backend/app/domains/memory/domain/provenance.py",
-    "backend/app/domains/memory/domain/retention.py",
-    "backend/app/domains/memory/domain/scope.py",
+    "backend/app/domains/memory/contracts/provenance.py",
+    "backend/app/domains/memory/policies/retention.py",
+    "backend/app/domains/memory/contracts/scope.py",
     "backend/app/domains/memory/ports/repository.py",
     "backend/app/domains/memory/ports/source_reader.py",
     "backend/app/domains/memory/ports/maintenance_queue.py",

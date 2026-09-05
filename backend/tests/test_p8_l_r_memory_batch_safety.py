@@ -9,7 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from app import models
 from app.domains.memory.application.batch_selection import MemoryBatchSelectionService
 from app.domains.memory.application.scope_control import MemoryScopeService
-from app.domains.memory.domain.batch_policy import MEMORY_CONSENT_VERSION
+from app.domains.memory.policies.batch import MEMORY_CONSENT_VERSION
 from app.domains.memory.exceptions import MemoryConflictError
 from app.domains.memory.infrastructure.batch_models import (
     MemoryActivationEpoch,
@@ -503,7 +503,7 @@ def test_character_scrub_removes_its_batches_and_preserves_other_character(
 ):
     from app.runtime.characters.management import _scrub_agent_data
     from app.domains.memory.infrastructure.batch_models import MemoryBatchProfile
-    from app.domains.memory.domain.scope import MemoryScope
+    from app.domains.memory.contracts.scope import MemoryScope
 
     scope, repo, _, _, service = batch_stack(memory_session)
     assert (
@@ -543,7 +543,7 @@ def test_character_scrub_removes_its_batches_and_preserves_other_character(
 def test_departed_scope_is_not_called_and_does_not_block_healthy_delivery(
     memory_session,
 ):
-    from app.domains.memory.domain.scope import MemoryScope
+    from app.domains.memory.contracts.scope import MemoryScope
 
     scope, repo, job_id, provider, service = batch_stack(memory_session)
     other_scope = MemoryScope(

@@ -15,11 +15,11 @@ from app.domains.memory.exceptions import (
     MemoryNotFoundError,
     MemoryScopeError,
 )
-from app.domains.memory.domain.lifecycle import (
+from app.domains.memory.contracts.items import (
     MemoryCandidateRecord,
     MemoryItemRecord,
 )
-from app.domains.memory.domain.provenance import (
+from app.domains.memory.contracts.provenance import (
     MemoryCandidateStatus,
     MemoryHotBriefStatus,
     MemoryItemStatus,
@@ -28,12 +28,12 @@ from app.domains.memory.domain.provenance import (
     MemoryProviderMode,
     MemorySourceTypeV1,
 )
-from app.domains.memory.domain.retention import (
+from app.domains.memory.policies.retention import (
     DEFAULT_MEMORY_RETENTION_DAYS,
     is_memory_expired,
 )
-from app.domains.memory.domain.scope import MemoryScope, MemoryScopeSetting
-from app.domains.memory.domain.read_surface import (
+from app.domains.memory.contracts.scope import MemoryScope, MemoryScopeSetting
+from app.domains.memory.contracts.inspector import (
     MAX_MEMORY_READ_EVIDENCE_ITEMS,
     MemoryItemEvidenceRecord,
     MemoryItemPage,

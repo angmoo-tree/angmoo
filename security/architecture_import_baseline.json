@@ -240,12 +240,12 @@
         "app.domains.memory.application.read_surface",
         "app.domains.memory.application.scope_control",
         "app.domains.memory.application.write_lifecycle",
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.retention",
-        "app.domains.memory.domain.scope",
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope",
         "app.domains.memory.exceptions",
         "app.domains.memory.infrastructure.batch_repository",
         "app.domains.memory.infrastructure.repository",
+        "app.domains.memory.policies.retention",
         "app.domains.memory.schemas",
         "app.domains.memory.schemas.batch",
         "app.providers.registry",
@@ -2450,9 +2450,9 @@
       ],
       "imports": [
         "app.domains.memory.application.write_lifecycle",
-        "app.domains.memory.domain.batch_policy",
-        "app.domains.memory.domain.selection",
         "app.domains.memory.exceptions",
+        "app.domains.memory.policies.batch",
+        "app.domains.memory.policies.selection_output",
         "app.domains.memory.ports.batch",
         "app.domains.memory.ports.source_reader"
       ],
@@ -2468,10 +2468,10 @@
       ],
       "imports": [
         "app.domains.memory.application.recall",
-        "app.domains.memory.domain.canonical_retrieval_plan",
-        "app.domains.memory.domain.canonical_retrieval_planner",
-        "app.domains.memory.domain.recall",
-        "app.domains.memory.domain.scope"
+        "app.domains.memory.contracts.recall",
+        "app.domains.memory.contracts.retrieval_plan",
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.policies.retrieval_planner"
       ],
       "module": "app.domains.memory.application.canonical_planning",
       "path": "backend/app/domains/memory/application/canonical_planning.py",
@@ -2486,11 +2486,11 @@
       ],
       "imports": [
         "app.domains.memory.application.write_lifecycle",
-        "app.domains.memory.domain.consolidation",
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.domain.policies",
-        "app.domains.memory.domain.provenance",
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.provenance",
         "app.domains.memory.exceptions",
+        "app.domains.memory.policies.consolidation",
+        "app.domains.memory.policies.validation",
         "app.domains.memory.ports.consolidation_provider",
         "app.domains.memory.ports.consolidation_repository",
         "app.domains.memory.ports.maintenance_queue",
@@ -2507,11 +2507,11 @@
         "datetime"
       ],
       "imports": [
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.read_surface",
-        "app.domains.memory.domain.retention",
-        "app.domains.memory.domain.scope",
+        "app.domains.memory.contracts.inspector",
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.policies.retention",
         "app.domains.memory.ports.repository",
         "app.domains.memory.ports.source_reader"
       ],
@@ -2526,7 +2526,7 @@
         "datetime"
       ],
       "imports": [
-        "app.domains.memory.domain.recall",
+        "app.domains.memory.contracts.recall",
         "app.domains.memory.exceptions",
         "app.domains.memory.ports.recall"
       ],
@@ -2537,11 +2537,11 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.retention",
-        "app.domains.memory.domain.scope",
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope",
         "app.domains.memory.exceptions",
+        "app.domains.memory.policies.retention",
         "app.domains.memory.ports.repository"
       ],
       "module": "app.domains.memory.application.scope_control",
@@ -2554,11 +2554,11 @@
         "datetime"
       ],
       "imports": [
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.domain.policies",
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.scope",
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope",
         "app.domains.memory.exceptions",
+        "app.domains.memory.policies.validation",
         "app.domains.memory.ports.repository",
         "app.domains.memory.ports.source_reader"
       ],
@@ -2567,96 +2567,18 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
-      "imports": [
-        "app.domains.memory.domain.canonical_retrieval_plan",
-        "app.domains.memory.domain.canonical_retrieval_planner",
-        "app.domains.memory.domain.consolidation",
-        "app.domains.memory.domain.consolidation_provider",
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.domain.policies",
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.read_surface",
-        "app.domains.memory.domain.recall",
-        "app.domains.memory.domain.retention",
-        "app.domains.memory.domain.scope",
-        "app.domains.memory.exceptions"
-      ],
-      "module": "app.domains.memory.domain",
-      "path": "backend/app/domains/memory/domain/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "re",
-        "unicodedata",
-        "zoneinfo"
-      ],
-      "imports": [
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.exceptions"
-      ],
-      "module": "app.domains.memory.domain.batch_policy",
-      "path": "backend/app/domains/memory/domain/batch_policy.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "re"
-      ],
-      "imports": [],
-      "module": "app.domains.memory.domain.canonical_retrieval_plan",
-      "path": "backend/app/domains/memory/domain/canonical_retrieval_plan.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "collections.abc",
-        "re",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.memory.domain.canonical_retrieval_plan",
-        "app.domains.memory.domain.recall"
-      ],
-      "module": "app.domains.memory.domain.canonical_retrieval_planner",
-      "path": "backend/app/domains/memory/domain/canonical_retrieval_planner.py",
-      "wildcard_imports": []
-    },
-    {
       "external_imports": [
         "__future__",
         "dataclasses",
         "datetime",
-        "enum",
-        "hashlib"
+        "enum"
       ],
       "imports": [
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.domain.scope",
-        "app.domains.memory.exceptions"
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.provenance"
       ],
-      "module": "app.domains.memory.domain.consolidation",
-      "path": "backend/app/domains/memory/domain/consolidation.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.memory.domain.consolidation",
-        "app.domains.memory.exceptions"
-      ],
-      "module": "app.domains.memory.domain.consolidation_provider",
-      "path": "backend/app/domains/memory/domain/consolidation_provider.py",
+      "module": "app.domains.memory.contracts.inspector",
+      "path": "backend/app/domains/memory/contracts/inspector.py",
       "wildcard_imports": []
     },
     {
@@ -2669,22 +2591,12 @@
         "re"
       ],
       "imports": [
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.scope",
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope",
         "app.domains.memory.exceptions"
       ],
-      "module": "app.domains.memory.domain.lifecycle",
-      "path": "backend/app/domains/memory/domain/lifecycle.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.exceptions"
-      ],
-      "module": "app.domains.memory.domain.policies",
-      "path": "backend/app/domains/memory/domain/policies.py",
+      "module": "app.domains.memory.contracts.items",
+      "path": "backend/app/domains/memory/contracts/items.py",
       "wildcard_imports": []
     },
     {
@@ -2692,23 +2604,8 @@
         "enum"
       ],
       "imports": [],
-      "module": "app.domains.memory.domain.provenance",
-      "path": "backend/app/domains/memory/domain/provenance.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "enum"
-      ],
-      "imports": [
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.domain.provenance"
-      ],
-      "module": "app.domains.memory.domain.read_surface",
-      "path": "backend/app/domains/memory/domain/read_surface.py",
+      "module": "app.domains.memory.contracts.provenance",
+      "path": "backend/app/domains/memory/contracts/provenance.py",
       "wildcard_imports": []
     },
     {
@@ -2720,23 +2617,22 @@
         "typing"
       ],
       "imports": [
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.scope"
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope"
       ],
-      "module": "app.domains.memory.domain.recall",
-      "path": "backend/app/domains/memory/domain/recall.py",
+      "module": "app.domains.memory.contracts.recall",
+      "path": "backend/app/domains/memory/contracts/recall.py",
       "wildcard_imports": []
     },
     {
       "external_imports": [
         "__future__",
-        "datetime"
+        "dataclasses",
+        "re"
       ],
-      "imports": [
-        "app.domains.memory.exceptions"
-      ],
-      "module": "app.domains.memory.domain.retention",
-      "path": "backend/app/domains/memory/domain/retention.py",
+      "imports": [],
+      "module": "app.domains.memory.contracts.retrieval_plan",
+      "path": "backend/app/domains/memory/contracts/retrieval_plan.py",
       "wildcard_imports": []
     },
     {
@@ -2746,26 +2642,32 @@
         "datetime"
       ],
       "imports": [
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.retention",
-        "app.domains.memory.exceptions"
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.exceptions",
+        "app.domains.memory.policies.retention"
       ],
-      "module": "app.domains.memory.domain.scope",
-      "path": "backend/app/domains/memory/domain/scope.py",
+      "module": "app.domains.memory.contracts.scope",
+      "path": "backend/app/domains/memory/contracts/scope.py",
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "typing"
-      ],
+      "external_imports": [],
       "imports": [
-        "app.domains.memory.domain.batch_policy",
-        "app.domains.memory.exceptions"
+        "app.domains.memory.contracts.inspector",
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.recall",
+        "app.domains.memory.contracts.retrieval_plan",
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.exceptions",
+        "app.domains.memory.policies.consolidation",
+        "app.domains.memory.policies.consolidation_output",
+        "app.domains.memory.policies.retention",
+        "app.domains.memory.policies.retrieval_planner",
+        "app.domains.memory.policies.validation"
       ],
-      "module": "app.domains.memory.domain.selection",
-      "path": "backend/app/domains/memory/domain/selection.py",
+      "module": "app.domains.memory.domain",
+      "path": "backend/app/domains/memory/domain/__init__.py",
       "wildcard_imports": []
     },
     {
@@ -2826,15 +2728,15 @@
       ],
       "imports": [
         "app.core.db",
-        "app.domains.memory.domain.batch_policy",
-        "app.domains.memory.domain.consolidation",
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.domain.scope",
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.scope",
         "app.domains.memory.exceptions",
         "app.domains.memory.infrastructure.batch_models",
         "app.domains.memory.infrastructure.maintenance_queue",
         "app.domains.memory.infrastructure.repository",
         "app.domains.memory.infrastructure.sqlalchemy_models",
+        "app.domains.memory.policies.batch",
+        "app.domains.memory.policies.consolidation",
         "app.domains.memory.ports.batch"
       ],
       "module": "app.domains.memory.infrastructure.batch_repository",
@@ -2850,13 +2752,13 @@
         "uuid"
       ],
       "imports": [
-        "app.domains.memory.domain.consolidation",
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.scope",
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope",
         "app.domains.memory.exceptions",
         "app.domains.memory.infrastructure.repository",
-        "app.domains.memory.infrastructure.sqlalchemy_models"
+        "app.domains.memory.infrastructure.sqlalchemy_models",
+        "app.domains.memory.policies.consolidation"
       ],
       "module": "app.domains.memory.infrastructure.consolidation_repository",
       "path": "backend/app/domains/memory/infrastructure/consolidation_repository.py",
@@ -2872,8 +2774,8 @@
         "uuid"
       ],
       "imports": [
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.domain.provenance",
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.provenance",
         "app.domains.memory.exceptions",
         "app.domains.memory.infrastructure.sqlalchemy_models",
         "app.domains.memory.ports.maintenance_queue"
@@ -2903,14 +2805,14 @@
       ],
       "imports": [
         "app.core.db",
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.read_surface",
-        "app.domains.memory.domain.retention",
-        "app.domains.memory.domain.scope",
+        "app.domains.memory.contracts.inspector",
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope",
         "app.domains.memory.exceptions",
         "app.domains.memory.infrastructure.activation",
         "app.domains.memory.infrastructure.sqlalchemy_models",
+        "app.domains.memory.policies.retention",
         "app.domains.memory.ports.source_reader"
       ],
       "module": "app.domains.memory.infrastructure.repository",
@@ -2927,11 +2829,109 @@
       ],
       "imports": [
         "app.core.db",
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.retention"
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.policies.retention"
       ],
       "module": "app.domains.memory.infrastructure.sqlalchemy_models",
       "path": "backend/app/domains/memory/infrastructure/sqlalchemy_models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "re",
+        "unicodedata",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.exceptions"
+      ],
+      "module": "app.domains.memory.policies.batch",
+      "path": "backend/app/domains/memory/policies/batch.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "enum",
+        "hashlib"
+      ],
+      "imports": [
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.exceptions"
+      ],
+      "module": "app.domains.memory.policies.consolidation",
+      "path": "backend/app/domains/memory/policies/consolidation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.memory.exceptions",
+        "app.domains.memory.policies.consolidation"
+      ],
+      "module": "app.domains.memory.policies.consolidation_output",
+      "path": "backend/app/domains/memory/policies/consolidation_output.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.memory.exceptions"
+      ],
+      "module": "app.domains.memory.policies.retention",
+      "path": "backend/app/domains/memory/policies/retention.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "re",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.memory.contracts.recall",
+        "app.domains.memory.contracts.retrieval_plan"
+      ],
+      "module": "app.domains.memory.policies.retrieval_planner",
+      "path": "backend/app/domains/memory/policies/retrieval_planner.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.memory.exceptions",
+        "app.domains.memory.policies.batch"
+      ],
+      "module": "app.domains.memory.policies.selection_output",
+      "path": "backend/app/domains/memory/policies/selection_output.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.exceptions"
+      ],
+      "module": "app.domains.memory.policies.validation",
+      "path": "backend/app/domains/memory/policies/validation.py",
       "wildcard_imports": []
     },
     {
@@ -2957,9 +2957,9 @@
         "typing"
       ],
       "imports": [
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.domain.scope",
-        "app.domains.memory.domain.selection"
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.policies.selection_output"
       ],
       "module": "app.domains.memory.ports.batch",
       "path": "backend/app/domains/memory/ports/batch.py",
@@ -2972,7 +2972,7 @@
         "typing"
       ],
       "imports": [
-        "app.domains.memory.domain.canonical_retrieval_plan"
+        "app.domains.memory.contracts.retrieval_plan"
       ],
       "module": "app.domains.memory.ports.canonical_planner_provider",
       "path": "backend/app/domains/memory/ports/canonical_planner_provider.py",
@@ -2985,8 +2985,8 @@
         "typing"
       ],
       "imports": [
-        "app.domains.memory.domain.consolidation",
-        "app.domains.memory.domain.consolidation_provider"
+        "app.domains.memory.policies.consolidation",
+        "app.domains.memory.policies.consolidation_output"
       ],
       "module": "app.domains.memory.ports.consolidation_provider",
       "path": "backend/app/domains/memory/ports/consolidation_provider.py",
@@ -2999,9 +2999,9 @@
         "typing"
       ],
       "imports": [
-        "app.domains.memory.domain.consolidation",
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.domain.scope"
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.policies.consolidation"
       ],
       "module": "app.domains.memory.ports.consolidation_repository",
       "path": "backend/app/domains/memory/ports/consolidation_repository.py",
@@ -3036,8 +3036,8 @@
         "typing"
       ],
       "imports": [
-        "app.domains.memory.domain.recall",
-        "app.domains.memory.domain.scope"
+        "app.domains.memory.contracts.recall",
+        "app.domains.memory.contracts.scope"
       ],
       "module": "app.domains.memory.ports.recall",
       "path": "backend/app/domains/memory/ports/recall.py",
@@ -3050,10 +3050,10 @@
         "typing"
       ],
       "imports": [
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.read_surface",
-        "app.domains.memory.domain.scope",
+        "app.domains.memory.contracts.inspector",
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope",
         "app.domains.memory.ports.source_reader"
       ],
       "module": "app.domains.memory.ports.repository",
@@ -3068,8 +3068,8 @@
         "typing"
       ],
       "imports": [
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.scope"
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope"
       ],
       "module": "app.domains.memory.ports.source_reader",
       "path": "backend/app/domains/memory/ports/source_reader.py",
@@ -6044,7 +6044,7 @@
       "imports": [
         "app.domains.chat.domain.policies",
         "app.domains.identity.public",
-        "app.domains.memory.domain.canonical_retrieval_planner",
+        "app.domains.memory.policies.retrieval_planner",
         "app.domains.memory.ports.canonical_planner_provider",
         "app.integrations.direct_llm"
       ],
@@ -6092,8 +6092,8 @@
       ],
       "imports": [
         "app.domains.identity.public",
-        "app.domains.memory.domain.consolidation_provider",
         "app.domains.memory.exceptions",
+        "app.domains.memory.policies.consolidation_output",
         "app.domains.memory.ports.consolidation_provider",
         "app.providers.contracts",
         "app.providers.registry"
@@ -6109,9 +6109,9 @@
       ],
       "imports": [
         "app.domains.identity.public",
-        "app.domains.memory.domain.batch_policy",
-        "app.domains.memory.domain.selection",
         "app.domains.memory.exceptions",
+        "app.domains.memory.policies.batch",
+        "app.domains.memory.policies.selection_output",
         "app.providers.contracts",
         "app.providers.registry"
       ],
@@ -7343,17 +7343,17 @@
         "app.core.db",
         "app.domains.memory.application.batch_selection",
         "app.domains.memory.application.write_lifecycle",
-        "app.domains.memory.domain.batch_policy",
-        "app.domains.memory.domain.consolidation",
-        "app.domains.memory.domain.lifecycle",
-        "app.domains.memory.domain.provenance",
-        "app.domains.memory.domain.scope",
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.provenance",
+        "app.domains.memory.contracts.scope",
         "app.domains.memory.exceptions",
         "app.domains.memory.infrastructure.batch_models",
         "app.domains.memory.infrastructure.batch_repository",
         "app.domains.memory.infrastructure.consolidation_repository",
         "app.domains.memory.infrastructure.repository",
         "app.domains.memory.infrastructure.sqlalchemy_models",
+        "app.domains.memory.policies.batch",
+        "app.domains.memory.policies.consolidation",
         "app.runtime.memory.source_delivery",
         "app.runtime.memory.sqlalchemy_source_reader"
       ],

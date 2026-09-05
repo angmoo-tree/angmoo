@@ -12,7 +12,7 @@ OUTPUT = ROOT / "docs/architecture/p8-l-r-memory-batch-inventory.json"
 PREDECESSOR = ROOT / "docs/architecture/p8-l-r-today-sns-activity-inventory.json"
 PREDECESSOR_SHA256 = "2120ef3cccb09753119deebd7025f1f9a01d316c518c5d2eda053c5221cbf5ec"
 
-from app.domains.memory.domain import batch_policy as policy
+from app.domains.memory.policies import batch as policy
 from app.domains.memory.infrastructure.batch_models import MEMORY_BATCH_TABLES
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
 

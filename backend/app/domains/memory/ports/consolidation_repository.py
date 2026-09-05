@@ -5,12 +5,12 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Protocol
 
-from app.domains.memory.domain.consolidation import (
+from app.domains.memory.policies.consolidation import (
     MemoryHotBriefRecord,
     MemoryMaintenanceSnapshot,
 )
-from app.domains.memory.domain.lifecycle import MemoryItemRecord
-from app.domains.memory.domain.scope import MemoryScopeSetting
+from app.domains.memory.contracts.items import MemoryItemRecord
+from app.domains.memory.contracts.scope import MemoryScopeSetting
 
 
 class MemoryConsolidationRepositoryPort(Protocol):

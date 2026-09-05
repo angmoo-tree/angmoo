@@ -7,8 +7,8 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Mapping
 
-from app.domains.memory.domain.provenance import MemorySourceTypeV1
-from app.domains.memory.domain.scope import MemoryScope
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+from app.domains.memory.contracts.scope import MemoryScope
 
 
 MEMORY_RECALL_CONTRACT_VERSION = "memory-recall.v1"

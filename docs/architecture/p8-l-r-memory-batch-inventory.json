@@ -28,7 +28,7 @@
     },
     {
       "path": "backend/app/api/v1/routes/memory.py",
-      "sha256": "e5c75477c0fa77b885b3fb2e9c13513663532f00a3a80418926d8ee71590aec3"
+      "sha256": "09556269c50a52196d2877499f8431b39a2bc12644a99e04758397e0a2cef1c9"
     },
     {
       "path": "backend/app/domains/memory/__init__.py",
@@ -44,87 +44,59 @@
     },
     {
       "path": "backend/app/domains/memory/application/batch_selection.py",
-      "sha256": "b2c79f8dd9664254eecc982df189b0f1ed57f9e2bfa674d400e86c4f78e4d3a1"
+      "sha256": "76c876299d8527c0ef9e334fdd7732613eed4c425b35e9cadc108933ea16d56e"
     },
     {
       "path": "backend/app/domains/memory/application/canonical_planning.py",
-      "sha256": "037caefd879c4db51bb7c6fbf071c254ceb5209238087e4ed55e6fdc45dd54c0"
+      "sha256": "548612818ed2e9b495dc7e2743221bceb9e32a6ea4c9532dc645d0bf9507b913"
     },
     {
       "path": "backend/app/domains/memory/application/consolidation.py",
-      "sha256": "3b9667fc10f2535df405f15070ba7364cddcffcb18b429efe8ad54f7b58a78d4"
+      "sha256": "5b8b3b8db8ecb4dbcd0df87bbc806b2fd2b3f076b5fa06ddbd82a9e760a15dcf"
     },
     {
       "path": "backend/app/domains/memory/application/read_surface.py",
-      "sha256": "6272324194a1e75ba4e42b34bc14992339da516b775dc5f7c305e6ff3851107c"
+      "sha256": "68a4985ecb3fbd72220f97961ea005a8d3bc69052921efcbd597ec91dad72a82"
     },
     {
       "path": "backend/app/domains/memory/application/recall.py",
-      "sha256": "8969efd49cf7823ac3c14b3785f45d90ba906a527fb6e777fe2d5358ab560e15"
+      "sha256": "2be5ab67d3fb636e8972dd4b3d2f0b5527d32fdd3a6b5f6f41287e8b23cdd414"
     },
     {
       "path": "backend/app/domains/memory/application/scope_control.py",
-      "sha256": "09408053b7d2fe191c5442d96bb2f45e2ae58e5e85f4bf4aaee6940fa11ddc46"
+      "sha256": "cbd6d753b394c998d7cba2153cb20e39c8b0064da97323655d8738950d64f65a"
     },
     {
       "path": "backend/app/domains/memory/application/write_lifecycle.py",
-      "sha256": "c23219637f89cbfded104f8309b891e846301285e9276f9f2b6ce8e3249a2f9d"
+      "sha256": "b5bfa925184987ad3c953dca244e75fb1210b17365b4dcedf7d39ebbf6a49013"
     },
     {
-      "path": "backend/app/domains/memory/domain/__init__.py",
-      "sha256": "62fc8cd44948bb01864955797d1bb0c67acd328d572c94323fcc2e2379c25b1a"
+      "path": "backend/app/domains/memory/contracts/inspector.py",
+      "sha256": "7377f4c3e050136856edef675924ddf73b9ff63bb4e5e0953a5390fbc9beebdb"
     },
     {
-      "path": "backend/app/domains/memory/domain/batch_policy.py",
-      "sha256": "8c841581e4871d6b0f76a5f7338722ccb20671b8889a981fc7e94ede2a2b4f10"
+      "path": "backend/app/domains/memory/contracts/items.py",
+      "sha256": "3788289bed3efa247b3a7cae0e27632c09890918cf6d232914b584384abbd8d1"
     },
     {
-      "path": "backend/app/domains/memory/domain/canonical_retrieval_plan.py",
-      "sha256": "a92ac065ebe3757f5f373a901fdd6d997c475b1070d4c105ae25f315aa185f99"
-    },
-    {
-      "path": "backend/app/domains/memory/domain/canonical_retrieval_planner.py",
-      "sha256": "025366dc2d2f0301d4d40e8bc9ee848a943f98f93bd4c883b6cb1965fbb6ceb9"
-    },
-    {
-      "path": "backend/app/domains/memory/domain/consolidation.py",
-      "sha256": "4205df07e9b29700a267e061a0eb353131c82cbed4b912fb78228ac08387d72a"
-    },
-    {
-      "path": "backend/app/domains/memory/domain/consolidation_provider.py",
-      "sha256": "89589176fe188dd4cce912f4c79a6367b46a130cdc909a7fc538ed49b30f4dac"
-    },
-    {
-      "path": "backend/app/domains/memory/domain/lifecycle.py",
-      "sha256": "192d5ef62fc63e185e1c0bd0a5c0078bfbd196389b82ae5c821abfc98632e7d6"
-    },
-    {
-      "path": "backend/app/domains/memory/domain/policies.py",
-      "sha256": "bdf474a9514552e86acec386b72cdea6a3df3ddba17d6ec95afbf3b3dd29a9e5"
-    },
-    {
-      "path": "backend/app/domains/memory/domain/provenance.py",
+      "path": "backend/app/domains/memory/contracts/provenance.py",
       "sha256": "0f33956478498e430c4c8bac1570723ca0ae86cb621aa566ce634d3f7a4e81a1"
     },
     {
-      "path": "backend/app/domains/memory/domain/read_surface.py",
-      "sha256": "445b4e326d57afc40278bff8a109939a65330a8a9b7c42daf8673705280bce70"
+      "path": "backend/app/domains/memory/contracts/recall.py",
+      "sha256": "e9d8f4aa53919c901f0fe74cc8f893d14b5b1b537a4382f1bc006b6b30385f20"
     },
     {
-      "path": "backend/app/domains/memory/domain/recall.py",
-      "sha256": "d18b1dbe96e0769e131dab383535897da9750f96e8569b295e99160fd78ae97b"
+      "path": "backend/app/domains/memory/contracts/retrieval_plan.py",
+      "sha256": "a92ac065ebe3757f5f373a901fdd6d997c475b1070d4c105ae25f315aa185f99"
     },
     {
-      "path": "backend/app/domains/memory/domain/retention.py",
-      "sha256": "a6dc04f54730d3fe44844eccfd589c0fecb8313603a66da875ed2a62c1cdb007"
+      "path": "backend/app/domains/memory/contracts/scope.py",
+      "sha256": "ef78f4dec7871f0066faa77eb823666016cc0a4a2e6e5af3ba96b4b424557a24"
     },
     {
-      "path": "backend/app/domains/memory/domain/scope.py",
-      "sha256": "9493631f3c65c523cd4e8972cff169b493771a0f683e2728c164eb2e3f723e76"
-    },
-    {
-      "path": "backend/app/domains/memory/domain/selection.py",
-      "sha256": "f08a01b2755d76a0404b8d908b70d5c404b112da596f3a0ba1402f6882fd41e0"
+      "path": "backend/app/domains/memory/domain/__init__.py",
+      "sha256": "c6192e6d09ecb1fdd6d2b5c30993e7770b7a08c20425b71abcdf52324f41a4d8"
     },
     {
       "path": "backend/app/domains/memory/exceptions.py",
@@ -144,15 +116,15 @@
     },
     {
       "path": "backend/app/domains/memory/infrastructure/batch_repository.py",
-      "sha256": "7bed4dec18dbfc1a1e5c9cae1f290009bea5f995a4774ffcc98e989b973c09d5"
+      "sha256": "ee5da696c90ca55501d5908cd3019f0523707f68ab51a46124488d862386331f"
     },
     {
       "path": "backend/app/domains/memory/infrastructure/consolidation_repository.py",
-      "sha256": "8629ec70c134ce45927342a7207be0d5480f3d992982725202a24e7b86673ff7"
+      "sha256": "41a878120775386c648356580f740449847d8143068d8b689d66c09ada907e1e"
     },
     {
       "path": "backend/app/domains/memory/infrastructure/maintenance_queue.py",
-      "sha256": "d1fd73b23ce872b91403c28245f14f36a711d28e4ea1c2e155de796cf5bdaff1"
+      "sha256": "03cce9ab3d7a62055e0b93ef0e2220321e59250da89b638b6070916351204445"
     },
     {
       "path": "backend/app/domains/memory/infrastructure/maintenance_unit_of_work.py",
@@ -160,11 +132,39 @@
     },
     {
       "path": "backend/app/domains/memory/infrastructure/repository.py",
-      "sha256": "423ac1ac8f7ebddc079e3c5ea308819a9e68a8f3cace6867028a4465489a1045"
+      "sha256": "72a3741804ea0e969b56216a06442d5d3844e4ef6241aa47cb5fecacce5a808a"
     },
     {
       "path": "backend/app/domains/memory/infrastructure/sqlalchemy_models.py",
-      "sha256": "cf376c34d23e56b0d657e17afe3baa8e229fb4181a8038d143b89149f28251c5"
+      "sha256": "8783d5a3889ae301b887752768531c56489308b7b37fa0eb273fd80ede5da242"
+    },
+    {
+      "path": "backend/app/domains/memory/policies/batch.py",
+      "sha256": "235fdb8e7d8e19a27f68b7d0b085f317e5ecd6aa2c2cdb5165815d65cb05e131"
+    },
+    {
+      "path": "backend/app/domains/memory/policies/consolidation.py",
+      "sha256": "da7dddbf201425c3930919bce264f22c4cce2fb3e35f199d6355230baafd3c60"
+    },
+    {
+      "path": "backend/app/domains/memory/policies/consolidation_output.py",
+      "sha256": "ea4948296d0c1b14c500a982e5569e4acb0afe1789fa8dbc51ae4824ae904165"
+    },
+    {
+      "path": "backend/app/domains/memory/policies/retention.py",
+      "sha256": "a6dc04f54730d3fe44844eccfd589c0fecb8313603a66da875ed2a62c1cdb007"
+    },
+    {
+      "path": "backend/app/domains/memory/policies/retrieval_planner.py",
+      "sha256": "66a1a0be094b9b928732e3c64faa8e560394c9597d8a3ce551238768444977ac"
+    },
+    {
+      "path": "backend/app/domains/memory/policies/selection_output.py",
+      "sha256": "dca37e90d4f2962614e4317dc215437473330c51005ff4bac27e5a06dd80a489"
+    },
+    {
+      "path": "backend/app/domains/memory/policies/validation.py",
+      "sha256": "4c5ffbfa335b77473549c1b07685bc368acc3e7e2c3e47182bd8cc55a1688d21"
     },
     {
       "path": "backend/app/domains/memory/ports/__init__.py",
@@ -172,19 +172,19 @@
     },
     {
       "path": "backend/app/domains/memory/ports/batch.py",
-      "sha256": "a75f4476ab9403ea19fe3e060c5d73a8159e554b0fe1f3ea1e314bb9d0291f85"
+      "sha256": "75f47624c29a3c1fbaba95e546f38c6c1c9858c4556f9398388b5c0c87fff539"
     },
     {
       "path": "backend/app/domains/memory/ports/canonical_planner_provider.py",
-      "sha256": "878a9b265545a8e9bc11bb313200ca7e275cd81bce52581bad4ca1cab324a991"
+      "sha256": "6dc5984738ca3af3fbd94688113a24be6c2c5ea3e90e6c2380983a9b174d5ffe"
     },
     {
       "path": "backend/app/domains/memory/ports/consolidation_provider.py",
-      "sha256": "bdef0e5beac8b5f0f524e64dbbf5197a330c9c79415cea163a9a667f2dd62d05"
+      "sha256": "3a11d8b8aea839d52442003bc15b1d81dcc8d11d2f5343aea7ef24b89aeed196"
     },
     {
       "path": "backend/app/domains/memory/ports/consolidation_repository.py",
-      "sha256": "3a0326f0a0512e2e54c53352a802e03952982dbffb1c7b44d569c45bfee050f2"
+      "sha256": "f03289f6c0ab0bb0e69e81852f9591c78693a38a99cc3a025144fe88da52ae04"
     },
     {
       "path": "backend/app/domains/memory/ports/maintenance_queue.py",
@@ -196,15 +196,15 @@
     },
     {
       "path": "backend/app/domains/memory/ports/recall.py",
-      "sha256": "8ca09016cec816860f98ab1e143e3a9a6ff338efb978c73788dfaad31342f495"
+      "sha256": "23a1e45fc306a31ad862eb46bd7097b625b5a68cc28ee04ea71bb87454c22c41"
     },
     {
       "path": "backend/app/domains/memory/ports/repository.py",
-      "sha256": "a496b92525ead54599a9b579760b6c2b614eff86b99eb4eb2ef7c6bbc2b0be37"
+      "sha256": "6fa86d2473be28439237d4b3159e13cf9104180644b86ba65c3e9d6ab74a0585"
     },
     {
       "path": "backend/app/domains/memory/ports/source_reader.py",
-      "sha256": "2876e6c8f3b84ed01f3647b02fb26b8d8bc11247bad417157740f1d07c275697"
+      "sha256": "60a63a5f5c5dc9963df5538a17f1356fca93f467dae7c3ca0ba57d9bf4bd7acc"
     },
     {
       "path": "backend/app/domains/memory/public.py",
@@ -220,7 +220,7 @@
     },
     {
       "path": "backend/app/integrations/llm/memory_selection.py",
-      "sha256": "3b30503ad9d5d57da7599e8c1016fb513e2765d2886edf4c870f3f313c6a4789"
+      "sha256": "1de42b7c01d84860bbe19ca8676ba5113cf0a308ddea1c8d3a9f080d01b1c8eb"
     },
     {
       "path": "backend/app/public_main.py",
@@ -244,7 +244,7 @@
     },
     {
       "path": "backend/app/runtime/memory/batch_runtime.py",
-      "sha256": "258a8e79d0fcc98ad15993a5a47e77ff9479ef8913453297dab45af657fa50e6"
+      "sha256": "4cb6db1f575ef7498c7131767e664a71f801b685890fa1e7fa94ec91d249efa9"
     },
     {
       "path": "backend/app/runtime/memory/recall_projection.py",
@@ -300,7 +300,7 @@
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_api.py",
-      "sha256": "a609a8fc9fdeb2e19b3110be8333f43538dfa57d3211611530980689909f9151"
+      "sha256": "e20020accfc91656530b3529cdf7e0a986708c637bad2fdfa78e0543c37b9aac"
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_migration.py",
@@ -308,15 +308,15 @@
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_policy.py",
-      "sha256": "541ae478eb93dd42d141b2a16178050cdcfc58a07b9c90b666d72943d3e8dc3a"
+      "sha256": "efa4f7e7e36cd4078de16872d0cdd5f55be18ce148f0543d8e1be27bf4c1d047"
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_runtime.py",
-      "sha256": "781c47944292b8563ce678f3dd0201f480710a0859421389681314fba731cb8f"
+      "sha256": "01e797734e6d9541451d6896f733e283d2fe14cf1e26db352ddf74997f674d4e"
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_safety.py",
-      "sha256": "c08544d2cef946f676ba1ffce3b7aa1b6ee2023e3c4b7707e38330b0d401930b"
+      "sha256": "9256946a7277e571954ea462dc132bd8cb99d648d2a6951ad2053f26f8fe4326"
     },
     {
       "path": "browser-tests/memory-batch-fixture.ts",
@@ -396,7 +396,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_r_memory_batch_inventory.py",
-      "sha256": "3efda78ecc55883f91723673c222d3b251ac5655ed8b0e243ab45d17df2e4a77"
+      "sha256": "e8ab8fbb011d5d7efb991f0ba65444a46ac408749569a2c05c53c521308240c3"
     },
     {
       "path": "scripts/ci/run_windows_installer_supported_upgrade.ps1",

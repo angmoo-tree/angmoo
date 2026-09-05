@@ -9,13 +9,13 @@ import hashlib
 import re
 
 from app.domains.memory.exceptions import MemoryValidationError
-from app.domains.memory.domain.provenance import (
+from app.domains.memory.contracts.provenance import (
     MemoryCandidateStatus,
     MemoryItemStatus,
     MemoryKindV1,
     MemorySourceTypeV1,
 )
-from app.domains.memory.domain.scope import MemoryScope
+from app.domains.memory.contracts.scope import MemoryScope
 
 
 MEMORY_WRITE_CONTRACT_VERSION = "memory-write.v1"

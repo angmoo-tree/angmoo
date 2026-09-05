@@ -12,8 +12,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
 
-from app.domains.memory.domain.lifecycle import MemoryItemRecord
-from app.domains.memory.domain.provenance import MemorySourceTypeV1
+from app.domains.memory.contracts.items import MemoryItemRecord
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
 
 
 MEMORY_READ_CONTRACT_VERSION = "memory-read.v1"

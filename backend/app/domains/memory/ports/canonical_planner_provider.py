@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from app.domains.memory.domain.canonical_retrieval_plan import (
+from app.domains.memory.contracts.retrieval_plan import (
     CanonicalPlanContractError,
     CanonicalRetrievalPlan,
 )

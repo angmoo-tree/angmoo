@@ -5,8 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from app.domains.memory.domain.consolidation import MemoryMaintenanceLane
-from app.domains.memory.domain.consolidation_provider import MemorySummaryProposal
+from app.domains.memory.policies.consolidation import MemoryMaintenanceLane
+from app.domains.memory.policies.consolidation_output import MemorySummaryProposal
 
 
 @dataclass(frozen=True, slots=True)

@@ -9,7 +9,7 @@ from sqlalchemy import case, exists, func, or_, select, update
 from sqlalchemy.orm import Session
 
 from app.core.db import Base
-from app.domains.memory.domain.batch_policy import (
+from app.domains.memory.policies.batch import (
     MEMORY_CONSENT_VERSION,
     MAX_BATCH_ATTEMPTS,
     next_daily_slot,
@@ -17,14 +17,14 @@ from app.domains.memory.domain.batch_policy import (
     schedule_time,
     schedule_timezone,
 )
-from app.domains.memory.domain.consolidation import MAINTENANCE_LEASE_DURATION
+from app.domains.memory.policies.consolidation import MAINTENANCE_LEASE_DURATION
 from app.domains.memory.exceptions import (
     MemoryConflictError,
     MemoryDomainError,
     MemoryValidationError,
 )
-from app.domains.memory.domain.lifecycle import as_utc, normalize_memory_idempotency_key
-from app.domains.memory.domain.scope import MemoryScope
+from app.domains.memory.contracts.items import as_utc, normalize_memory_idempotency_key
+from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.infrastructure.batch_models import (
     MemoryBatchProfile,
     MemoryBatchSetting,

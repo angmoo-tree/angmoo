@@ -10,7 +10,7 @@ from app.domains.memory.application.write_lifecycle import (
     MemoryWriteLifecycleService,
     memory_evidence_blocked_code,
 )
-from app.domains.memory.domain.consolidation import (
+from app.domains.memory.policies.consolidation import (
     MAINTENANCE_LEASE_DURATION,
     MAX_HOT_BRIEF_SOURCE_ITEMS,
     MAX_MAINTENANCE_ATTEMPTS,
@@ -31,13 +31,13 @@ from app.domains.memory.domain.consolidation import (
     validate_consolidation_summary,
 )
 from app.domains.memory.exceptions import MemoryConflictError, MemoryDomainError
-from app.domains.memory.domain.lifecycle import (
+from app.domains.memory.contracts.items import (
     as_utc,
     validate_source_digest,
     validate_source_kind,
 )
-from app.domains.memory.domain.policies import validate_memory_item_shape
-from app.domains.memory.domain.provenance import MemoryProviderMode
+from app.domains.memory.policies.validation import validate_memory_item_shape
+from app.domains.memory.contracts.provenance import MemoryProviderMode
 from app.domains.memory.ports.consolidation_provider import (
     MemoryConsolidationProviderError,
     MemoryConsolidationProviderPort,

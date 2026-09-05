@@ -23,7 +23,7 @@ P_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-p-evidence-response-streaming-
 P_INVENTORY_SHA256 = "c802ddb544291cb29b113cb3ab3aad80fdda67fdc96d621eadb820bf3abb8cca"
 
 from app.domains.chat.domain.evidence_bundle import MAX_EVIDENCE_ITEMS  # noqa: E402
-from app.domains.memory.domain.read_surface import (  # noqa: E402
+from app.domains.memory.contracts.inspector import (  # noqa: E402
     MAX_MEMORY_READ_EVIDENCE_ITEMS,
     MAX_MEMORY_READ_PAGE_SIZE,
     MEMORY_READ_CONTRACT_VERSION,
@@ -52,7 +52,7 @@ REQUIRED_FILES = (
     "backend/app/domains/chat/public.py",
     "backend/app/domains/memory/api/schemas.py",
     "backend/app/domains/memory/application/read_surface.py",
-    "backend/app/domains/memory/domain/read_surface.py",
+    "backend/app/domains/memory/contracts/inspector.py",
     "backend/app/domains/memory/infrastructure/repository.py",
     "backend/app/domains/memory/ports/repository.py",
     "backend/app/domains/memory/public.py",
@@ -163,7 +163,7 @@ def _forbid_imports(relative: str, prefixes: tuple[str, ...]) -> None:
 
 def _boundary_contract() -> dict[str, Any]:
     for relative in (
-        "backend/app/domains/memory/domain/read_surface.py",
+        "backend/app/domains/memory/contracts/inspector.py",
         "backend/app/domains/memory/application/read_surface.py",
     ):
         _forbid_imports(

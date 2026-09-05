@@ -9,21 +9,21 @@ from app.domains.memory.application.recall import (
     CANONICAL_PRIMITIVE_REGISTRY,
     CanonicalRecallService,
 )
-from app.domains.memory.domain.canonical_retrieval_plan import (
+from app.domains.memory.contracts.retrieval_plan import (
     CanonicalPlanContractError,
     CanonicalPlanStep,
     CanonicalRetrievalPlan,
 )
-from app.domains.memory.domain.canonical_retrieval_planner import (
+from app.domains.memory.policies.retrieval_planner import (
     parse_canonical_retrieval_plan_payload,
 )
-from app.domains.memory.domain.recall import (
+from app.domains.memory.contracts.recall import (
     CanonicalRecallOperation,
     CanonicalRecallQuery,
     CanonicalRecallResult,
     CanonicalRecallStatus,
 )
-from app.domains.memory.domain.scope import MemoryScope
+from app.domains.memory.contracts.scope import MemoryScope
 
 
 @dataclass(frozen=True, slots=True)

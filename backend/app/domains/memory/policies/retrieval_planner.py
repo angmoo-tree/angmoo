@@ -14,14 +14,14 @@ import re
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from app.domains.memory.domain.canonical_retrieval_plan import (
+from app.domains.memory.contracts.retrieval_plan import (
     CANONICAL_PLAN_VERSION,
     MAX_CANONICAL_PLAN_STEPS,
     CanonicalPlanContractError,
     CanonicalPlanStep,
     CanonicalRetrievalPlan,
 )
-from app.domains.memory.domain.recall import CanonicalRecallOperation
+from app.domains.memory.contracts.recall import CanonicalRecallOperation
 
 MAX_CANONICAL_SEARCH_TEXT_CHARACTERS = 160
 _OPAQUE_REF_RE = re.compile(r"^[a-z][a-z0-9-]{0,63}$")

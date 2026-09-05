@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Protocol
 
-from app.domains.memory.domain.provenance import MemorySourceTypeV1
-from app.domains.memory.domain.scope import MemoryScope
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+from app.domains.memory.contracts.scope import MemoryScope
 
 
 @dataclass(frozen=True, slots=True)

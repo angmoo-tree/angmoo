@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from app.domains.memory.domain.consolidation import (
+from app.domains.memory.policies.consolidation import (
     MAX_MAINTENANCE_BATCH_CANDIDATES,
     validate_consolidation_summary,
 )

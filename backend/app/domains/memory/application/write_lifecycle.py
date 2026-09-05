@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 
 from app.domains.memory.exceptions import MemoryConflictError, MemoryNotFoundError
-from app.domains.memory.domain.lifecycle import (
+from app.domains.memory.contracts.items import (
     MemoryItemRecord,
     MemoryWriteOutcome,
     MemoryWriteResult,
@@ -18,9 +18,9 @@ from app.domains.memory.domain.lifecycle import (
     validate_source_digest,
     validate_source_kind,
 )
-from app.domains.memory.domain.policies import validate_memory_item_shape
-from app.domains.memory.domain.provenance import MemoryKindV1, MemorySourceTypeV1
-from app.domains.memory.domain.scope import MemoryScope, MemoryScopeSetting
+from app.domains.memory.policies.validation import validate_memory_item_shape
+from app.domains.memory.contracts.provenance import MemoryKindV1, MemorySourceTypeV1
+from app.domains.memory.contracts.scope import MemoryScope, MemoryScopeSetting
 from app.domains.memory.ports.repository import MemoryRepositoryPort
 from app.domains.memory.ports.source_reader import (
     CanonicalMemoryEvidence,

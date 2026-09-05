@@ -5,17 +5,17 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Protocol
 
-from app.domains.memory.domain.lifecycle import (
+from app.domains.memory.contracts.items import (
     MemoryCandidateRecord,
     MemoryItemRecord,
 )
-from app.domains.memory.domain.provenance import (
+from app.domains.memory.contracts.provenance import (
     MemoryKindV1,
     MemoryProviderMode,
     MemorySourceTypeV1,
 )
-from app.domains.memory.domain.scope import MemoryScope, MemoryScopeSetting
-from app.domains.memory.domain.read_surface import (
+from app.domains.memory.contracts.scope import MemoryScope, MemoryScopeSetting
+from app.domains.memory.contracts.inspector import (
     MemoryItemEvidenceRecord,
     MemoryItemPage,
 )

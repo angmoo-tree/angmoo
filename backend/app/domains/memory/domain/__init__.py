@@ -7,7 +7,7 @@ from app.domains.memory.exceptions import (
     MemoryScopeError,
     MemoryValidationError,
 )
-from app.domains.memory.domain.lifecycle import (
+from app.domains.memory.contracts.items import (
     MAX_MEMORY_SUMMARY_LENGTH,
     MEMORY_WRITE_CONTRACT_VERSION,
     MemoryCandidateRecord,
@@ -23,8 +23,8 @@ from app.domains.memory.domain.lifecycle import (
     validate_source_digest,
     validate_source_kind,
 )
-from app.domains.memory.domain.policies import validate_memory_item_shape
-from app.domains.memory.domain.provenance import (
+from app.domains.memory.policies.validation import validate_memory_item_shape
+from app.domains.memory.contracts.provenance import (
     MemoryCandidateStatus,
     MemoryHotBriefStatus,
     MemoryItemStatus,
@@ -33,24 +33,24 @@ from app.domains.memory.domain.provenance import (
     MemoryProviderMode,
     MemorySourceTypeV1,
 )
-from app.domains.memory.domain.retention import (
+from app.domains.memory.policies.retention import (
     DEFAULT_MEMORY_RETENTION_DAYS,
     is_memory_expired,
     validate_retention_days,
 )
-from app.domains.memory.domain.canonical_retrieval_plan import (
+from app.domains.memory.contracts.retrieval_plan import (
     CANONICAL_PLAN_VERSION,
     MAX_CANONICAL_PLAN_STEPS,
     CanonicalPlanContractError,
     CanonicalPlanStep,
     CanonicalRetrievalPlan,
 )
-from app.domains.memory.domain.canonical_retrieval_planner import (
+from app.domains.memory.policies.retrieval_planner import (
     MAX_CANONICAL_SEARCH_TEXT_CHARACTERS,
     canonical_retrieval_plan_response_schema,
     parse_canonical_retrieval_plan_payload,
 )
-from app.domains.memory.domain.recall import (
+from app.domains.memory.contracts.recall import (
     CanonicalRecallOperation,
     CanonicalRecallQuery,
     CanonicalRecallRecord,
@@ -67,11 +67,11 @@ from app.domains.memory.domain.recall import (
     RecallDocumentKind,
     SOURCE_KIND_BY_TYPE,
 )
-from app.domains.memory.domain.scope import (
+from app.domains.memory.contracts.scope import (
     MemoryScope,
     MemoryScopeSetting,
 )
-from app.domains.memory.domain.read_surface import (
+from app.domains.memory.contracts.inspector import (
     MAX_MEMORY_READ_PAGE_SIZE,
     MEMORY_READ_CONTRACT_VERSION,
     MemoryEvidenceAvailability,
@@ -81,7 +81,7 @@ from app.domains.memory.domain.read_surface import (
     MemoryItemPage,
     MemoryLifecycle,
 )
-from app.domains.memory.domain.consolidation import (
+from app.domains.memory.policies.consolidation import (
     MAINTENANCE_LEASE_DURATION,
     MAX_HOT_BRIEF_SOURCE_ITEMS,
     MAX_HOT_BRIEF_SUMMARY_LENGTH,
@@ -107,7 +107,7 @@ from app.domains.memory.domain.consolidation import (
     memory_item_set_digest,
     validate_consolidation_summary,
 )
-from app.domains.memory.domain.consolidation_provider import (
+from app.domains.memory.policies.consolidation_output import (
     MEMORY_CONSOLIDATION_PROVIDER_OUTPUT_VERSION,
     MemorySummaryProposal,
     memory_consolidation_response_schema,

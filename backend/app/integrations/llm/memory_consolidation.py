@@ -7,7 +7,7 @@ import json
 import time
 
 from app.domains.identity.public import CredentialMaterial, CredentialPurpose
-from app.domains.memory.domain.consolidation_provider import (
+from app.domains.memory.policies.consolidation_output import (
     memory_consolidation_response_schema,
     parse_memory_consolidation_payload,
 )

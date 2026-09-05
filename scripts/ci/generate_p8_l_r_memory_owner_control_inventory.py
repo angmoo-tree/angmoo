@@ -22,11 +22,11 @@ FROZEN_OUTPUT_SHA256 = "c02287d0d563582522a58c0ca9fd217b6b6985a59eafafa7b6278b6f
 Q_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-q-memory-read-inspector-inventory.json"
 Q_INVENTORY_SHA256 = "543f8f2457abbc03f50b7e0cace5fa8edffe680c74df53379fa21da588da9611"
 
-from app.domains.memory.domain.lifecycle import (  # noqa: E402
+from app.domains.memory.contracts.items import (  # noqa: E402
     MAX_MEMORY_SUMMARY_LENGTH,
     MEMORY_WRITE_CONTRACT_VERSION,
 )
-from app.domains.memory.domain.read_surface import (  # noqa: E402
+from app.domains.memory.contracts.inspector import (  # noqa: E402
     MEMORY_READ_CONTRACT_VERSION,
 )
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest  # noqa: E402
@@ -42,7 +42,7 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/api/schemas.py",
     "backend/app/domains/memory/application/scope_control.py",
     "backend/app/domains/memory/application/write_lifecycle.py",
-    "backend/app/domains/memory/domain/lifecycle.py",
+    "backend/app/domains/memory/contracts/items.py",
     "backend/app/domains/memory/infrastructure/repository.py",
     "backend/app/domains/memory/ports/repository.py",
     "backend/app/domains/memory/public.py",
@@ -127,7 +127,7 @@ def _forbid_imports(relative: str, prefixes: tuple[str, ...]) -> None:
 
 def _boundary_contract() -> dict[str, Any]:
     for relative in (
-        "backend/app/domains/memory/domain/lifecycle.py",
+        "backend/app/domains/memory/contracts/items.py",
         "backend/app/domains/memory/application/scope_control.py",
         "backend/app/domains/memory/application/write_lifecycle.py",
     ):

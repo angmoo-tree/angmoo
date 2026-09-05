@@ -9,19 +9,19 @@ from uuid import uuid4
 from sqlalchemy import exists, func, insert, or_, select, update
 
 from app.core.db import Base
-from app.domains.memory.domain.batch_policy import (
+from app.domains.memory.policies.batch import (
     MAX_SELECTION_CANDIDATES,
     MAX_SELECTION_INPUT_UTF8_BYTES,
     next_daily_slot,
     schedule_timezone,
 )
-from app.domains.memory.domain.consolidation import (
+from app.domains.memory.policies.consolidation import (
     deterministic_hot_brief,
     MEMORY_HOT_BRIEF_CONTRACT_VERSION,
 )
-from app.domains.memory.domain.lifecycle import as_utc
-from app.domains.memory.domain.provenance import MemoryKindV1, MemorySourceTypeV1
-from app.domains.memory.domain.scope import MemoryScope
+from app.domains.memory.contracts.items import as_utc
+from app.domains.memory.contracts.provenance import MemoryKindV1, MemorySourceTypeV1
+from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.exceptions import MemoryDomainError
 from app.domains.memory.application.batch_selection import MemoryBatchSelectionService
 from app.domains.memory.application.write_lifecycle import (

@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from app.domains.memory.domain.batch_policy import (
+from app.domains.memory.policies.batch import (
     MAX_SELECTION_CANDIDATES,
     MAX_SELECTION_SUMMARY_CHARACTERS,
     MEMORY_SELECTION_VERSION,

@@ -10,8 +10,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.domains.memory.exceptions import MemoryConflictError, MemoryNotFoundError
-from app.domains.memory.domain.lifecycle import as_utc
-from app.domains.memory.domain.provenance import MemoryJobStatus
+from app.domains.memory.contracts.items import as_utc
+from app.domains.memory.contracts.provenance import MemoryJobStatus
 from app.domains.memory.infrastructure.sqlalchemy_models import (
     MemoryMaintenanceJob,
     MemoryScopeSettingModel,

@@ -8,7 +8,7 @@ from uuid import uuid4
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import Session
 
-from app.domains.memory.domain.consolidation import (
+from app.domains.memory.policies.consolidation import (
     MAX_HOT_BRIEF_SOURCE_ITEMS,
     MAX_HOT_BRIEF_SUMMARY_LENGTH,
     MEMORY_HOT_BRIEF_CONTRACT_VERSION,
@@ -21,13 +21,13 @@ from app.domains.memory.exceptions import (
     MemoryConflictError,
     MemoryNotFoundError,
 )
-from app.domains.memory.domain.lifecycle import MemoryItemRecord, as_utc
-from app.domains.memory.domain.provenance import (
+from app.domains.memory.contracts.items import MemoryItemRecord, as_utc
+from app.domains.memory.contracts.provenance import (
     MemoryCandidateStatus,
     MemoryHotBriefStatus,
     MemoryItemStatus,
 )
-from app.domains.memory.domain.scope import MemoryScopeSetting
+from app.domains.memory.contracts.scope import MemoryScopeSetting
 from app.domains.memory.infrastructure.repository import SqlAlchemyMemoryRepository
 from app.domains.memory.infrastructure.sqlalchemy_models import (
     MemoryCandidate,

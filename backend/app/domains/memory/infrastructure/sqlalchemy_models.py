@@ -23,7 +23,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
-from app.domains.memory.domain.provenance import (
+from app.domains.memory.contracts.provenance import (
     MemoryCandidateStatus,
     MemoryHotBriefStatus,
     MemoryItemStatus,
@@ -32,7 +32,7 @@ from app.domains.memory.domain.provenance import (
     MemoryProviderMode,
     MemorySourceTypeV1,
 )
-from app.domains.memory.domain.retention import DEFAULT_MEMORY_RETENTION_DAYS
+from app.domains.memory.policies.retention import DEFAULT_MEMORY_RETENTION_DAYS
 
 
 def _sql_values(values: tuple[str, ...]) -> str:

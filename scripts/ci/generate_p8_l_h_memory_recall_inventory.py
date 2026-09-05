@@ -25,7 +25,7 @@ G_INVENTORY_SHA256 = (
     "81a4b9691434e6ccb9a9a6a04ef198b27bcab0852a9e74496000829b81598562"
 )
 
-from app.domains.memory.domain.recall import (  # noqa: E402
+from app.domains.memory.contracts.recall import (  # noqa: E402
     CanonicalRecallOperation,
     MEMORY_RECALL_CONTRACT_VERSION,
     MEMORY_RECALL_GENERATION,
@@ -41,7 +41,7 @@ class InventoryError(RuntimeError):
 
 
 REQUIRED_FILES = (
-    "backend/app/domains/memory/domain/recall.py",
+    "backend/app/domains/memory/contracts/recall.py",
     "backend/app/domains/memory/application/recall.py",
     "backend/app/domains/memory/ports/recall.py",
     "backend/app/domains/memory/public.py",

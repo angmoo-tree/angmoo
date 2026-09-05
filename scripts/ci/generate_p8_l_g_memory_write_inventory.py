@@ -25,10 +25,10 @@ F_INVENTORY_SHA256 = (
     "3558e78857a0095664815cb1364044e0d063115f76eed976be981cba95a96aab"
 )
 
-from app.domains.memory.domain.lifecycle import (  # noqa: E402
+from app.domains.memory.contracts.items import (  # noqa: E402
     MEMORY_WRITE_CONTRACT_VERSION,
 )
-from app.domains.memory.domain.provenance import MemorySourceTypeV1  # noqa: E402
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1  # noqa: E402
 from app.domains.memory.infrastructure.sqlalchemy_models import (  # noqa: E402
     MEMORY_SCHEMA_V1_TABLES,
 )
@@ -39,7 +39,7 @@ class InventoryError(RuntimeError):
 
 
 REQUIRED_FILES = (
-    "backend/app/domains/memory/domain/lifecycle.py",
+    "backend/app/domains/memory/contracts/items.py",
     "backend/app/domains/memory/application/write_lifecycle.py",
     "backend/app/domains/memory/ports/repository.py",
     "backend/app/domains/memory/ports/source_reader.py",

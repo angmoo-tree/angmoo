@@ -44,7 +44,7 @@ from app.domains.chat.domain.workflow_recipe import (  # noqa: E402
 from app.domains.chat.infrastructure.sqlalchemy_models import (  # noqa: E402
     ChatResponseRequest,
 )
-from app.domains.memory.domain.canonical_retrieval_plan import (  # noqa: E402
+from app.domains.memory.contracts.retrieval_plan import (  # noqa: E402
     CANONICAL_PLAN_VERSION,
     MAX_CANONICAL_PLAN_STEPS,
 )
@@ -73,7 +73,7 @@ REQUIRED_FILES = (
     "backend/app/domains/chat/application/generation_lifecycle.py",
     "backend/app/domains/chat/ports/response_lifecycle.py",
     "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
-    "backend/app/domains/memory/domain/canonical_retrieval_plan.py",
+    "backend/app/domains/memory/contracts/retrieval_plan.py",
     "backend/app/domains/relationships/domain/graph_retrieval_plan.py",
     "backend/app/alembic/versions/20260831_0086_chat_response_request_lifecycle.py",
     "backend/app/runtime/migrations/sqlite_versions/v5_to_v6_chat_response_requests.py",

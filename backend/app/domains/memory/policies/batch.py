@@ -8,7 +8,7 @@ import unicodedata
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from app.domains.memory.exceptions import MemoryValidationError
-from app.domains.memory.domain.lifecycle import as_utc
+from app.domains.memory.contracts.items import as_utc
 
 
 MEMORY_BATCH_POLICY_VERSION = "memory-batch.v2"

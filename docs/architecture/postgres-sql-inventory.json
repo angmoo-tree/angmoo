@@ -445,7 +445,7 @@
       "owner": "P8-L-O",
       "path": "backend/app/domains/memory/infrastructure/consolidation_repository.py",
       "removal_condition": "retain while same-scope maintenance serialization and exact hot-brief source-version fencing are required",
-      "source_sha256": "a8fbe6cd8f984cd54ccacdb7ece16727cc9a6f48065756fd577f443a40754037",
+      "source_sha256": "41a878120775386c648356580f740449847d8143068d8b689d66c09ada907e1e",
       "transition_pr": "P8-L-O consolidation/hot brief"
     },
     {
@@ -460,7 +460,7 @@
       "owner": "P8-L-G",
       "path": "backend/app/domains/memory/infrastructure/maintenance_queue.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "bc0bc53a3e91b668b4c7fa08383f38043e6149ec3248605a9f66b0693170925e",
+      "source_sha256": "03cce9ab3d7a62055e0b93ef0e2220321e59250da89b638b6070916351204445",
       "transition_pr": "P8-L-G memory write/lifecycle"
     },
     {
@@ -475,7 +475,7 @@
       "owner": "P8-L-G",
       "path": "backend/app/domains/memory/infrastructure/repository.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "3136bc28ca01277a717e7e1d4ec55d32951dc956843ecec4370dd9d8d57f256e",
+      "source_sha256": "72a3741804ea0e969b56216a06442d5d3844e4ef6241aa47cb5fecacce5a808a",
       "transition_pr": "P8-L-G memory write/lifecycle"
     },
     {
@@ -1193,7 +1193,7 @@
       "owner": "P8-L-G",
       "path": "scripts/ci/generate_p8_l_g_memory_write_inventory.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "8879065e1085cd9b1c49141eb023e6f08223df3e75a97672c34e786f1adfc8f6",
+      "source_sha256": "6d4d37ce7b47924a6fcb050bd72467711a4fa89f0eb579225d6637f9e0a19f69",
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],

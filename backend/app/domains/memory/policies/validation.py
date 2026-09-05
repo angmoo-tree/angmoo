@@ -1,7 +1,7 @@
 """Memory-shape invariants that must be checked before persistence."""
 
 from app.domains.memory.exceptions import MemoryValidationError
-from app.domains.memory.domain.provenance import MemoryKindV1
+from app.domains.memory.contracts.provenance import MemoryKindV1
 
 
 def validate_memory_item_shape(

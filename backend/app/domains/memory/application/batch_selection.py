@@ -9,13 +9,13 @@ from app.domains.memory.application.write_lifecycle import (
     MemoryWriteLifecycleService,
     memory_evidence_blocked_code,
 )
-from app.domains.memory.domain.batch_policy import (
+from app.domains.memory.policies.batch import (
     MAX_SELECTION_INPUT_CHARACTERS,
     MAX_SELECTION_INPUT_UTF8_BYTES,
     MEMORY_PROVIDER_TIMEOUT_SECONDS,
 )
 from app.domains.memory.exceptions import MemoryDomainError, MemoryValidationError
-from app.domains.memory.domain.selection import MemorySelectionSource
+from app.domains.memory.policies.selection_output import MemorySelectionSource
 from app.domains.memory.ports.batch import (
     MemoryBatchRepositoryPort,
     MemorySelectionProviderPort,

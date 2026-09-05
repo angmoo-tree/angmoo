@@ -6,8 +6,8 @@ from sqlalchemy.orm import sessionmaker
 
 from app import models
 from app.domains.memory.application.batch_selection import MemoryBatchSelectionService
-from app.domains.memory.domain.batch_policy import MEMORY_CONSENT_VERSION
-from app.domains.memory.domain.selection import MemorySelectionDecision
+from app.domains.memory.policies.batch import MEMORY_CONSENT_VERSION
+from app.domains.memory.policies.selection_output import MemorySelectionDecision
 from app.domains.memory.infrastructure.batch_models import (
     MemoryBatchRun,
     MemorySelectionDecisionModel,

@@ -47,9 +47,9 @@ from app.domains.memory.exceptions import (
     MemoryScopeError,
     MemoryValidationError,
 )
-from app.domains.memory.domain.provenance import MemoryProviderMode, MemorySourceTypeV1
-from app.domains.memory.domain.retention import DEFAULT_MEMORY_RETENTION_DAYS
-from app.domains.memory.domain.scope import MemoryScope
+from app.domains.memory.contracts.provenance import MemoryProviderMode, MemorySourceTypeV1
+from app.domains.memory.policies.retention import DEFAULT_MEMORY_RETENTION_DAYS
+from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.infrastructure.repository import SqlAlchemyMemoryRepository
 from app.runtime.memory.sqlalchemy_source_reader import (
     SqlAlchemyMemorySourceEvidenceReader,
