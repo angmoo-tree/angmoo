@@ -373,20 +373,37 @@
       "markers": {
         "advisory_lock": [
           1,
-          59,
-          73
+          60,
+          74
         ],
         "driver_or_url": [
-          43,
-          63,
-          78,
-          80
+          44,
+          64,
+          79,
+          81
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/chat/repository/threads.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "da7172435743f8d4a95a9cd01607785f8346ab2c434f8412ff9d031ff9af2268",
+      "source_sha256": "5240f9b7ca9f31bfbec686868b2b7e7ea21921c7e3abcdecc6f13132c7f844dd",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          39,
+          73,
+          723
+        ],
+        "row_lock": [
+          724
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/chat/service/threads.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "6802c175b3edca367ff497eb21a5513c9cc00f8984dab0ad2d1cc874d22b01eb",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -788,30 +805,36 @@
     },
     {
       "markers": {
-        "advisory_lock": [
-          290
-        ],
         "driver_or_url": [
-          19,
-          289,
-          411,
-          421,
-          455,
-          1186,
-          1250
+          11,
+          44,
+          52,
+          81,
+          143
         ],
         "row_lock": [
-          412,
-          428,
-          456,
-          1187,
-          1251
+          45,
+          56,
+          82,
+          144
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/runtime/chat/scope_queries.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "21c9f2e04dfe969d875732a792a2d2c2663a872ef3b34baec126c783b18e5c58",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "driver_or_url": [
+          69
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/chat/sqlalchemy_service.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "f16ae36a9b8c311c6d22203ff050754b1c5810bb4332bc5c41f7aec64b27bd18",
+      "source_sha256": "4fff3808e339c1015e205bb51977319e5fb848f7f37ef6b81355fec496a48cb0",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1212,13 +1235,13 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 77,
+  "entry_count": 79,
   "marker_counts": {
-    "advisory_lock": 10,
-    "driver_or_url": 48,
+    "advisory_lock": 9,
+    "driver_or_url": 50,
     "jsonb": 9,
     "pgvector": 5,
-    "row_lock": 31,
+    "row_lock": 32,
     "skip_locked": 7
   },
   "purpose": "Residual PostgreSQL markers retained only as historical schema evidence, serialized compatibility values, and negative reintroduction guards",

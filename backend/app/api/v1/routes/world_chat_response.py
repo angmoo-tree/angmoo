@@ -13,7 +13,7 @@ from app.domains.identity import browser_session
 from app.config import settings
 from app.domains.chat import public as chat
 from app.domains.identity.public import User
-from app.runtime.chat.composition import chat_service
+from app.runtime.chat import world_generation as chat_service
 
 
 router = APIRouter(prefix="/worlds/{world_id}/chat", tags=["world-chat"])

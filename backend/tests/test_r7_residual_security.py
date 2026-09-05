@@ -12,7 +12,7 @@ from app import models
 from app.main import app as private_app
 from app.public_main import app as public_app
 from app.services import agent_runs as agent_run_service
-from app.services import messages as message_service
+from chat_service_support import messages as message_service
 
 
 @pytest.mark.parametrize("app", [private_app, public_app])

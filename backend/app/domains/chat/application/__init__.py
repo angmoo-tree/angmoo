@@ -19,7 +19,7 @@ from app.domains.chat.application.response_workflow import (
     ResponseGenerationWorkflowService,
     ResponseWorkflowCommand,
 )
-from app.domains.chat.application.messages import ChatService
+from app.compatibility.chat_service import ChatService
 from app.domains.chat.application.retrieval_routing import (
     ClarificationCandidate,
     ClarificationResolution,

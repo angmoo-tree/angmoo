@@ -15,7 +15,7 @@ from app.domains.chat.ports.retrieval_router_provider import (
     RetrievalRouterProviderResult,
     RetrievalRouterRequest,
 )
-from app.domains.chat.ports.runtime import ChatRuntimePort
+from app.compatibility.chat_runtime_contract import ChatRuntimePort
 from app.domains.chat.ports.response_workflow import ResponseWorkflowUnitOfWorkPort
 from app.domains.chat.ports.successful_chat_memory import (
     SuccessfulChatMemoryProducerPort,

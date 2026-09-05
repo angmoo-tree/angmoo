@@ -245,7 +245,11 @@
     "backend/app/domains/chat/domain/today_sns_activity.py": "backend/app/domains/chat/contracts/today_sns_activity.py",
     "backend/app/domains/chat/domain/workflow_recipe.py": "backend/app/domains/chat/contracts/workflow_recipe.py",
     "backend/app/domains/chat/domain/__init__.py": "backend/app/domains/chat/contracts/__init__.py",
-    "backend/app/domains/chat/infrastructure/sqlalchemy_models.py": "backend/app/domains/chat/models.py"
+    "backend/app/domains/chat/infrastructure/sqlalchemy_models.py": "backend/app/domains/chat/models.py",
+    "backend/app/domains/chat/application/messages.py": "backend/app/compatibility/chat_service.py",
+    "backend/app/domains/chat/ports/runtime.py": "backend/app/compatibility/chat_runtime_contract.py",
+    "backend/app/runtime/chat/composition.py": "backend/app/runtime/chat/message_composition.py",
+    "backend/app/runtime/chat/sqlalchemy_adapter.py": "backend/app/domains/chat/service/threads.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -661,9 +665,9 @@
           "new": "backend/app/exceptions.py::SqliteBusyRetryExhausted",
           "direct_consumers": [
             "backend/app/core/sqlite_concurrency.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/runtime/persistence/__init__.py",
             "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
-            "backend/app/runtime/characters/management.py",
             "backend/tests/test_l3_er2_sqlite_concurrency.py"
           ],
           "test_nodes": [
@@ -3682,8 +3686,8 @@
           "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldArchivedError",
           "new": "backend/app/domains/worlds/exceptions.py::WorldArchivedError",
           "direct_consumers": [
-            "backend/app/domains/worlds/service/creator.py",
-            "backend/app/domains/worlds/router.py"
+            "backend/app/domains/worlds/router.py",
+            "backend/app/domains/worlds/service/creator.py"
           ],
           "test_nodes": [
             "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
@@ -3693,8 +3697,8 @@
           "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldBannerValidationError",
           "new": "backend/app/domains/worlds/exceptions.py::WorldBannerValidationError",
           "direct_consumers": [
-            "backend/app/domains/worlds/service/creator.py",
-            "backend/app/domains/worlds/router.py"
+            "backend/app/domains/worlds/router.py",
+            "backend/app/domains/worlds/service/creator.py"
           ],
           "test_nodes": [
             "tests/worlds/test_creator_routes.py::test_world_banner_round_trip_stays_inside_worlds_domain_storage",
@@ -3705,8 +3709,8 @@
           "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldCreatorRoleRequiredError",
           "new": "backend/app/domains/worlds/exceptions.py::WorldCreatorRoleRequiredError",
           "direct_consumers": [
-            "backend/app/domains/worlds/service/creator.py",
-            "backend/app/domains/worlds/router.py"
+            "backend/app/domains/worlds/router.py",
+            "backend/app/domains/worlds/service/creator.py"
           ],
           "test_nodes": [
             "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
@@ -3716,8 +3720,8 @@
           "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldDefinitionIncompleteError",
           "new": "backend/app/domains/worlds/exceptions.py::WorldDefinitionIncompleteError",
           "direct_consumers": [
-            "backend/app/domains/worlds/service/creator.py",
-            "backend/app/domains/worlds/router.py"
+            "backend/app/domains/worlds/router.py",
+            "backend/app/domains/worlds/service/creator.py"
           ],
           "test_nodes": [
             "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
@@ -3727,8 +3731,8 @@
           "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldDefinitionValidationError",
           "new": "backend/app/domains/worlds/exceptions.py::WorldDefinitionValidationError",
           "direct_consumers": [
-            "backend/app/domains/worlds/service/creator.py",
-            "backend/app/domains/worlds/router.py"
+            "backend/app/domains/worlds/router.py",
+            "backend/app/domains/worlds/service/creator.py"
           ],
           "test_nodes": [
             "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
@@ -3738,8 +3742,8 @@
           "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldMembershipRequiredError",
           "new": "backend/app/domains/worlds/exceptions.py::WorldMembershipRequiredError",
           "direct_consumers": [
-            "backend/app/domains/worlds/service/creator.py",
-            "backend/app/domains/worlds/router.py"
+            "backend/app/domains/worlds/router.py",
+            "backend/app/domains/worlds/service/creator.py"
           ],
           "test_nodes": [
             "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
@@ -3749,8 +3753,8 @@
           "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldNotFoundError",
           "new": "backend/app/domains/worlds/exceptions.py::WorldNotFoundError",
           "direct_consumers": [
-            "backend/app/domains/worlds/service/creator.py",
-            "backend/app/domains/worlds/router.py"
+            "backend/app/domains/worlds/router.py",
+            "backend/app/domains/worlds/service/creator.py"
           ],
           "test_nodes": [
             "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
@@ -3760,8 +3764,8 @@
           "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldOwnerRoleRequiredError",
           "new": "backend/app/domains/worlds/exceptions.py::WorldOwnerRoleRequiredError",
           "direct_consumers": [
-            "backend/app/domains/worlds/service/creator.py",
-            "backend/app/domains/worlds/router.py"
+            "backend/app/domains/worlds/router.py",
+            "backend/app/domains/worlds/service/creator.py"
           ],
           "test_nodes": [
             "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
@@ -3771,8 +3775,8 @@
           "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldRowVersionConflictError",
           "new": "backend/app/domains/worlds/exceptions.py::WorldRowVersionConflictError",
           "direct_consumers": [
-            "backend/app/domains/worlds/service/creator.py",
-            "backend/app/domains/worlds/router.py"
+            "backend/app/domains/worlds/router.py",
+            "backend/app/domains/worlds/service/creator.py"
           ],
           "test_nodes": [
             "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
@@ -3792,8 +3796,8 @@
           "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldServiceError",
           "new": "backend/app/domains/worlds/exceptions.py::WorldServiceError",
           "direct_consumers": [
-            "backend/app/domains/worlds/service/creator.py",
-            "backend/app/domains/worlds/router.py"
+            "backend/app/domains/worlds/router.py",
+            "backend/app/domains/worlds/service/creator.py"
           ],
           "test_nodes": [
             "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
@@ -4147,8 +4151,8 @@
           "old": "backend/app/api/v1/routes/worlds.py::_raise_world_error",
           "new": "backend/app/domains/worlds/router.py::_raise_world_error",
           "direct_consumers": [
-            "backend/app/domains/worlds/router.py",
-            "backend/app/api/v1/routes/worlds.py"
+            "backend/app/api/v1/routes/worlds.py",
+            "backend/app/domains/worlds/router.py"
           ],
           "test_nodes": [
             "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict",
@@ -4454,8 +4458,8 @@
           "old": "backend/app/domains/world_characters/domain/public_profile.py::WorldCharacterControlMode",
           "new": "backend/app/domains/world_characters/contracts/public_profile.py::WorldCharacterControlMode",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/public_profile.py",
-            "backend/app/domains/world_characters/schemas/identity.py"
+            "backend/app/domains/world_characters/schemas/identity.py",
+            "backend/app/domains/world_characters/service/public_profile.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
@@ -4465,8 +4469,8 @@
           "old": "backend/app/domains/world_characters/domain/public_profile.py::WorldCharacterProfileError",
           "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterProfileError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/public_profile.py",
-            "backend/app/domains/world_characters/schemas/identity.py"
+            "backend/app/domains/world_characters/schemas/identity.py",
+            "backend/app/domains/world_characters/service/public_profile.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
@@ -4476,8 +4480,8 @@
           "old": "backend/app/domains/world_characters/domain/public_profile.py::WorldCharacterProfileForbiddenError",
           "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterProfileForbiddenError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/public_profile.py",
-            "backend/app/domains/world_characters/schemas/identity.py"
+            "backend/app/domains/world_characters/schemas/identity.py",
+            "backend/app/domains/world_characters/service/public_profile.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
@@ -4487,8 +4491,8 @@
           "old": "backend/app/domains/world_characters/domain/public_profile.py::WorldCharacterProfileNotFoundError",
           "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterProfileNotFoundError",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/public_profile.py",
-            "backend/app/domains/world_characters/schemas/identity.py"
+            "backend/app/domains/world_characters/schemas/identity.py",
+            "backend/app/domains/world_characters/service/public_profile.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
@@ -4498,8 +4502,8 @@
           "old": "backend/app/domains/world_characters/domain/public_profile.py::WorldCharacterPublicProfile",
           "new": "backend/app/domains/world_characters/contracts/public_profile.py::WorldCharacterPublicProfile",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/public_profile.py",
-            "backend/app/domains/world_characters/schemas/identity.py"
+            "backend/app/domains/world_characters/schemas/identity.py",
+            "backend/app/domains/world_characters/service/public_profile.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
@@ -4509,8 +4513,8 @@
           "old": "backend/app/domains/world_characters/domain/public_profile.py::__all__",
           "new": "backend/app/domains/world_characters/contracts/public_profile.py::__all__",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/public_profile.py",
-            "backend/app/domains/world_characters/schemas/identity.py"
+            "backend/app/domains/world_characters/schemas/identity.py",
+            "backend/app/domains/world_characters/service/public_profile.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_owner_identity.py::test_creator_studio_lists_existing_world_characters_without_writes"
@@ -4620,8 +4624,8 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::CHARACTER_CONTRACT_VERSION",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::CHARACTER_CONTRACT_VERSION",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/autonomous_setup.py",
-            "backend/app/domains/world_characters/client.py"
+            "backend/app/domains/world_characters/client.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
@@ -4632,8 +4636,8 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::DAYPARTS",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::DAYPARTS",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/autonomous_setup.py",
-            "backend/app/domains/world_characters/client.py"
+            "backend/app/domains/world_characters/client.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
@@ -4644,8 +4648,8 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::NEAR_DUPLICATE_JACCARD_THRESHOLD",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::NEAR_DUPLICATE_JACCARD_THRESHOLD",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/autonomous_setup.py",
-            "backend/app/domains/world_characters/client.py"
+            "backend/app/domains/world_characters/client.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
@@ -4656,8 +4660,8 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::REPERTOIRE_SCHEMA_VERSION",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::REPERTOIRE_SCHEMA_VERSION",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/autonomous_setup.py",
-            "backend/app/domains/world_characters/client.py"
+            "backend/app/domains/world_characters/client.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
@@ -4690,8 +4694,8 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::WORLD_CHARACTER_GENERATOR_VERSION",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::WORLD_CHARACTER_GENERATOR_VERSION",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/autonomous_setup.py",
-            "backend/app/domains/world_characters/client.py"
+            "backend/app/domains/world_characters/client.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
@@ -4823,8 +4827,8 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::build_character_contract",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::build_character_contract",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/autonomous_setup.py",
-            "backend/app/domains/world_characters/client.py"
+            "backend/app/domains/world_characters/client.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
@@ -4835,8 +4839,8 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::build_world_character_generation_input",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::build_world_character_generation_input",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/autonomous_setup.py",
-            "backend/app/domains/world_characters/client.py"
+            "backend/app/domains/world_characters/client.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
@@ -4847,8 +4851,8 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::canonical_candidate_signature",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::canonical_candidate_signature",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/autonomous_setup.py",
-            "backend/app/domains/world_characters/client.py"
+            "backend/app/domains/world_characters/client.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
@@ -4859,8 +4863,8 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::canonical_sha256",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::canonical_sha256",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/autonomous_setup.py",
-            "backend/app/domains/world_characters/client.py"
+            "backend/app/domains/world_characters/client.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
@@ -4871,8 +4875,8 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::character_contract_hash",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::character_contract_hash",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/autonomous_setup.py",
-            "backend/app/domains/world_characters/client.py"
+            "backend/app/domains/world_characters/client.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
@@ -4883,8 +4887,8 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::validate_activity_repertoire",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::validate_activity_repertoire",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/autonomous_setup.py",
-            "backend/app/domains/world_characters/client.py"
+            "backend/app/domains/world_characters/client.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
@@ -4895,8 +4899,8 @@
           "old": "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py::validate_community_profile",
           "new": "backend/app/domains/world_characters/service/setup_validation.py::validate_community_profile",
           "direct_consumers": [
-            "backend/app/domains/world_characters/service/autonomous_setup.py",
-            "backend/app/domains/world_characters/client.py"
+            "backend/app/domains/world_characters/client.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_setup_contracts.py::test_repertoire_contract_accepts_exact_4_by_10",
@@ -16830,896 +16834,942 @@
       "removed_aggregate": "autonomous_setup_models foreign ORM aggregation is removed. WC models are owned locally; Character profile and bounded World/Identity services perform actual cooperating lookups/writes. No service exports foreign ORM classes."
     },
     "AR-B6-A1": {
-      "status": "Chat contracts/five ORM classes and actual thread SQL/advisory locks have canonical roles. Thread admission, generation and cross-owner runtime composition continue in later Chat slices.",
+      "status": "A2 advances the complete original SQL workflow map to actual ThreadService, MessageSettingsService, MessageService, Character/Identity-owned helpers and exact same-Session joined queries. A1 repository extraction remains included.",
       "split_files": {
         "backend/app/runtime/chat/sqlalchemy_service.py": [
-          "backend/app/runtime/chat/sqlalchemy_service.py",
-          "backend/app/domains/chat/repository/threads.py"
+          "backend/app/domains/characters/service/profile.py",
+          "backend/app/domains/chat/repository/threads.py",
+          "backend/app/domains/chat/service/messages.py",
+          "backend/app/domains/chat/service/profiles.py",
+          "backend/app/domains/chat/service/settings.py",
+          "backend/app/domains/chat/service/threads.py",
+          "backend/app/domains/identity/service/message_credentials.py",
+          "backend/app/runtime/chat/scope_queries.py"
         ]
       },
       "split_symbols": [
         {
-          "old": "backend/app/runtime/chat/sqlalchemy_service.py::list_world_threads",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::list_world_threads",
+          "old": "backend/app/runtime/chat/sqlalchemy_service.py::logger",
+          "new": "backend/app/domains/chat/service/threads.py::logger",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ]
+        },
+        {
+          "old": "backend/app/runtime/chat/sqlalchemy_service.py::LEGACY_WORLD_THREAD_MUTATION_MESSAGE",
+          "new": "backend/app/domains/chat/service/threads.py::LEGACY_WORLD_THREAD_MUTATION_MESSAGE",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/sqlalchemy_service.py::LEGACY_LOCAL_THREAD_CREATION_MESSAGE",
+          "new": "backend/app/domains/chat/service/threads.py::LEGACY_LOCAL_THREAD_CREATION_MESSAGE",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/sqlalchemy_service.py::list_world_threads",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "list_world_threads"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::get_world_thread",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::get_world_thread",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "get_world_thread"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::get_world_chat_entry",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::get_world_chat_entry",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "get_world_chat_entry"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::create_or_get_world_thread",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::create_or_get_world_thread",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "create_or_get_world_thread"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::update_world_thread_model",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::update_world_thread_model",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "update_world_thread_model"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_ensure_no_active_world_response_request",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_ensure_no_active_world_response_request",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_ensure_no_active_world_response_request"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::resolve_world_thread_response_model",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::resolve_world_thread_response_model",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "resolve_world_thread_response_model"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_owner_controlled_world_characters",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_owner_controlled_world_characters",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_owner_controlled_world_characters"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_require_world_chat_owner_scope",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_require_world_chat_owner_scope",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_require_world_chat_owner_scope"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_active_responding_world_character",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_active_responding_world_character",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_active_responding_world_character"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_world_characters_are_blocked",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_world_characters_are_blocked",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_world_characters_are_blocked"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_find_active_world_thread",
           "new": "backend/app/domains/chat/repository/threads.py::_find_active_world_thread",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_service.py"
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/scope_queries.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ]
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_lock_world_thread_tuple",
           "new": "backend/app/domains/chat/repository/threads.py::_lock_world_thread_tuple",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_service.py"
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/scope_queries.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ]
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::list_threads",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::list_threads",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "list_threads"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::get_thread",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::get_thread",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "get_thread"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::create_or_get_thread",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::create_or_get_thread",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "create_or_get_thread"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_lock_message_thread_quota",
           "new": "backend/app/domains/chat/repository/threads.py::_lock_message_thread_quota",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_service.py"
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/scope_queries.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ]
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::update_thread",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::update_thread",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "update_thread"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::delete_thread",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::delete_thread",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "delete_thread"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::send_message",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::send_message",
+          "new": "backend/app/domains/chat/service/messages.py::MessageService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+          ],
+          "new_member": "send_message"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::retry_message",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::retry_message",
+          "new": "backend/app/domains/chat/service/messages.py::MessageService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+          ],
+          "new_member": "retry_message"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_acquire_response_lease",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_acquire_response_lease",
+          "new": "backend/app/domains/chat/service/messages.py::MessageService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+          ],
+          "new_member": "_acquire_response_lease"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_release_response_lease",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_release_response_lease",
+          "new": "backend/app/domains/chat/service/messages.py::MessageService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+          ],
+          "new_member": "_release_response_lease"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_send_message_locked",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_send_message_locked",
+          "new": "backend/app/domains/chat/service/messages.py::MessageService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+          ],
+          "new_member": "_send_message_locked"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_retry_message_locked",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_retry_message_locked",
+          "new": "backend/app/domains/chat/service/messages.py::MessageService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+          ],
+          "new_member": "_retry_message_locked"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_generate_message_answer",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_generate_message_answer",
+          "new": "backend/app/domains/chat/service/messages.py::MessageService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+          ],
+          "new_member": "_generate_message_answer"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::get_user_settings",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::get_user_settings",
+          "new": "backend/app/domains/chat/service/settings.py::MessageSettingsService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ],
+          "new_member": "get_user_settings"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::update_user_settings",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::update_user_settings",
+          "new": "backend/app/domains/chat/service/settings.py::MessageSettingsService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ],
+          "new_member": "update_user_settings"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::get_character_message_settings",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::get_character_message_settings",
+          "new": "backend/app/domains/chat/service/settings.py::MessageSettingsService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ],
+          "new_member": "get_character_message_settings"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::update_character_message_settings",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::update_character_message_settings",
+          "new": "backend/app/domains/chat/service/settings.py::MessageSettingsService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ],
+          "new_member": "update_character_message_settings"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::ensure_user_preference",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::ensure_user_preference",
+          "new": "backend/app/domains/chat/service/settings.py::MessageSettingsService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ],
+          "new_member": "ensure_user_preference"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::ensure_character_setting",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::ensure_character_setting",
+          "new": "backend/app/domains/chat/service/settings.py::MessageSettingsService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ],
+          "new_member": "ensure_character_setting"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_thread_read",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_thread_read",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_thread_read"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_legacy_thread_read",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_legacy_thread_read",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_legacy_thread_read"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_world_thread_read",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_world_thread_read",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_world_thread_read"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_thread_evidence_summaries",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_thread_evidence_summaries",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_thread_evidence_summaries"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_world_chat_role",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_world_chat_role",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_world_chat_role"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_thread_messages",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_thread_messages",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_thread_messages"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_latest_thread_message",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_latest_thread_message",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_latest_thread_message"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_get_owned_thread",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_get_owned_thread",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_get_owned_thread"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_get_owned_legacy_mutable_thread",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_get_owned_legacy_mutable_thread",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_get_owned_legacy_mutable_thread"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_get_owned_world_thread",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_get_owned_world_thread",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_get_owned_world_thread"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_claimed_local_installation_exists",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_claimed_local_installation_exists",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "new_member": "_claimed_local_installation_exists"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_is_postgresql_session",
           "new": "backend/app/domains/chat/repository/threads.py::_is_postgresql_session",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_service.py"
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/scope_queries.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
           ]
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_get_character",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_get_character",
+          "new": "backend/app/domains/chat/service/profiles.py::_get_character",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/settings.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
+            "tests/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
           ]
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_get_owned_character",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_get_owned_character",
+          "new": "backend/app/domains/chat/service/profiles.py::_get_owned_character",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/settings.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
+            "tests/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
           ]
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_ensure_character_available_for_messages",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_ensure_character_available_for_messages",
+          "new": "backend/app/domains/chat/service/settings.py::MessageSettingsService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ],
+          "new_member": "_ensure_character_available_for_messages"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_resolve_message_credential",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_resolve_message_credential",
+          "new": "backend/app/domains/chat/service/settings.py::MessageSettingsService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ],
+          "new_member": "_resolve_message_credential"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::resolve_message_credential_material",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::resolve_message_credential_material",
+          "new": "backend/app/domains/chat/service/settings.py::MessageSettingsService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ],
+          "new_member": "resolve_message_credential_material"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_get_message_credential",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_get_message_credential",
+          "new": "backend/app/domains/chat/service/settings.py::MessageSettingsService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ],
+          "new_member": "_get_message_credential"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_get_agent_source_credential",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_get_agent_source_credential",
+          "new": "backend/app/domains/chat/service/settings.py::MessageSettingsService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ],
+          "new_member": "_get_agent_source_credential"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_upsert_message_credential",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_upsert_message_credential",
+          "new": "backend/app/domains/chat/service/settings.py::MessageSettingsService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ],
+          "new_member": "_upsert_message_credential"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_has_usable_credential",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_has_usable_credential",
+          "new": "backend/app/domains/chat/service/settings.py::MessageSettingsService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ],
+          "new_member": "_has_usable_credential"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_owned_agent_refs",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_owned_agent_refs",
+          "new": "backend/app/domains/chat/service/profiles.py::_owned_agent_refs",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/settings.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
+            "tests/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
           ]
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_ensure_supported_model",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_ensure_supported_model",
+          "new": "backend/app/domains/chat/service/settings.py::MessageSettingsService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ],
+          "new_member": "_ensure_supported_model"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_build_system_prompt",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_build_system_prompt",
+          "new": "backend/app/domains/chat/service/messages.py::MessageService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+          ],
+          "new_member": "_build_system_prompt"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_build_user_prompt",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_build_user_prompt",
+          "new": "backend/app/domains/chat/service/messages.py::MessageService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+          ],
+          "new_member": "_build_user_prompt"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_message_output_prompt_injection_block",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_message_output_prompt_injection_block",
+          "new": "backend/app/domains/chat/service/messages.py::MessageService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+          ],
+          "new_member": "_message_output_prompt_injection_block"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_llm_failure_message",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_llm_failure_message",
+          "new": "backend/app/domains/chat/service/messages.py::MessageService",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
-          ]
+            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+          ],
+          "new_member": "_llm_failure_message"
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_user_ref",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_user_ref",
+          "new": "backend/app/domains/chat/service/profiles.py::_user_ref",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/settings.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
+            "tests/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
           ]
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_service.py::_character_ref",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::_character_ref",
+          "new": "backend/app/domains/chat/service/profiles.py::_character_ref",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/settings.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
+            "tests/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
           ]
         },
         {
-          "old": "backend/app/runtime/chat/sqlalchemy_service.py::logger",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::logger",
+          "old": "backend/app/runtime/chat/sqlalchemy_service.py::_owner_controlled_world_characters",
+          "new": "backend/app/runtime/chat/scope_queries.py::owner_controlled_world_characters",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
+            "tests/chat/test_service_ownership.py::test_joined_reads_keep_attached_identity_filters_and_single_queries"
           ]
         },
         {
-          "old": "backend/app/runtime/chat/sqlalchemy_service.py::LEGACY_WORLD_THREAD_MUTATION_MESSAGE",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::LEGACY_WORLD_THREAD_MUTATION_MESSAGE",
+          "old": "backend/app/runtime/chat/sqlalchemy_service.py::_require_world_chat_owner_scope",
+          "new": "backend/app/runtime/chat/scope_queries.py::local_installation",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
+            "tests/chat/test_service_ownership.py::test_joined_reads_keep_attached_identity_filters_and_single_queries"
           ]
         },
         {
-          "old": "backend/app/runtime/chat/sqlalchemy_service.py::LEGACY_LOCAL_THREAD_CREATION_MESSAGE",
-          "new": "backend/app/runtime/chat/sqlalchemy_service.py::LEGACY_LOCAL_THREAD_CREATION_MESSAGE",
+          "old": "backend/app/runtime/chat/sqlalchemy_service.py::_require_world_chat_owner_scope",
+          "new": "backend/app/runtime/chat/scope_queries.py::owned_world_id",
           "direct_consumers": [
-            "backend/app/runtime/chat/sqlalchemy_adapter.py",
-            "backend/app/runtime/chat/world_generation.py",
-            "backend/app/runtime/memory_selection_provider.py",
-            "backend/app/services/messages.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_messages_service.py::test_message_thread_limit_blocks_sixth_active_thread",
-            "tests/chat/test_thread_repository.py::test_thread_queries_preserve_owner_deleted_scope_order_and_same_session"
+            "tests/chat/test_service_ownership.py::test_joined_reads_keep_attached_identity_filters_and_single_queries"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/sqlalchemy_service.py::_active_responding_world_character",
+          "new": "backend/app/runtime/chat/scope_queries.py::responding_world_character",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_service_ownership.py::test_joined_reads_keep_attached_identity_filters_and_single_queries"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/sqlalchemy_service.py::_world_chat_role",
+          "new": "backend/app/runtime/chat/scope_queries.py::world_chat_role",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_service_ownership.py::test_joined_reads_keep_attached_identity_filters_and_single_queries"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/sqlalchemy_service.py::_claimed_local_installation_exists",
+          "new": "backend/app/runtime/chat/scope_queries.py::claimed_local_installation_exists",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_service_ownership.py::test_joined_reads_keep_attached_identity_filters_and_single_queries"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/sqlalchemy_service.py::_get_message_credential",
+          "new": "backend/app/domains/identity/service/message_credentials.py::get_message_credential",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/sqlalchemy_service.py::_upsert_message_credential",
+          "new": "backend/app/domains/identity/service/message_credentials.py::upsert_message_credential",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/sqlalchemy_service.py::_get_agent_source_credential",
+          "new": "backend/app/domains/identity/service/message_credentials.py::get_agent_credential",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/sqlalchemy_service.py::update_user_settings",
+          "new": "backend/app/domains/identity/service/message_credentials.py::clear_message_credential",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/settings.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/sqlalchemy_service.py::_owned_agent_refs",
+          "new": "backend/app/domains/characters/service/profile.py::list_message_source_characters",
+          "direct_consumers": [
+            "backend/app/cruds/community.py",
+            "backend/app/domains/characters/service/access.py",
+            "backend/app/domains/characters/service/drafts.py",
+            "backend/app/domains/characters/service/image_generation.py",
+            "backend/app/domains/characters/service/management.py",
+            "backend/app/domains/characters/service/media.py",
+            "backend/app/domains/characters/service/mutations.py",
+            "backend/app/domains/characters/service/state.py",
+            "backend/app/domains/chat/service/profiles.py",
+            "backend/app/domains/chat/service/settings.py",
+            "backend/app/domains/world_characters/service/autonomous_setup.py",
+            "backend/app/domains/world_characters/service/lifecycle.py",
+            "backend/app/domains/world_characters/service/owner_identity.py",
+            "backend/app/domains/world_characters/service/runtime_modes.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_messages_service.py::test_owner_can_start_self_message_when_setting_is_off"
           ]
         }
       ],
@@ -17893,6 +17943,86 @@
         "backend/tests/test_provider_boundary_security.py"
       ],
       "reviewed_test_patch_path": "test_m3_credential_privacy now patches creator.media_images.validate_profile_media_content, the actual shared validator since M1, preserving existing URL/header secrecy assertions."
+    },
+    "AR-B6-A2": {
+      "status": "Actual thread/settings/private-message services; no new HTTP/runtime-port/SQL adapter chain. Generation and retrieval still migrate in B6-B/C.",
+      "split_files": {
+        "backend/app/runtime/chat/sqlalchemy_adapter.py": [
+          "backend/app/domains/chat/service/messages.py",
+          "backend/app/domains/chat/service/settings.py",
+          "backend/app/domains/chat/service/threads.py",
+          "backend/app/runtime/chat/world_generation.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/chat/sqlalchemy_adapter.py::SqlAlchemyChatRuntime",
+          "new": "backend/app/domains/chat/service/threads.py::ThreadService",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_d_world_chat_identity.py::test_world_chat_create_or_get_binds_roles_and_reuses_active_tuple"
+          ],
+          "reason": "Remove the forwarding class; these methods are actual implementations called directly by the corresponding HTTP route."
+        },
+        {
+          "old": "backend/app/runtime/chat/sqlalchemy_adapter.py::SqlAlchemyChatRuntime",
+          "new": "backend/app/domains/chat/service/settings.py::MessageSettingsService",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/messages.py",
+            "backend/app/domains/chat/service/threads.py",
+            "backend/app/runtime/chat/message_composition.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_service_ownership.py::test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback"
+          ],
+          "reason": "Remove the forwarding class; these methods are actual implementations called directly by the corresponding HTTP route."
+        },
+        {
+          "old": "backend/app/runtime/chat/sqlalchemy_adapter.py::SqlAlchemyChatRuntime",
+          "new": "backend/app/domains/chat/service/messages.py::MessageService",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_messages_service.py::test_retry_model_busy_failure_keeps_single_error_message"
+          ],
+          "reason": "Remove the forwarding class; these methods are actual implementations called directly by the corresponding HTTP route."
+        },
+        {
+          "old": "backend/app/runtime/chat/sqlalchemy_adapter.py::SqlAlchemyChatRuntime",
+          "new": "backend/app/runtime/chat/world_generation.py::accept_world_message",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_j_response_generation_lifecycle.py::test_fenced_finalize_is_atomic_idempotent_and_stores_no_partial_delta",
+            "tests/chat/test_service_ownership.py::test_routes_call_actual_owner_services_without_runtime_port_chain"
+          ],
+          "reason": "Generation HTTP now calls the established concrete workflow directly; generation-role migration is the next B6 slice."
+        }
+      ],
+      "preserved_body_comparison": {
+        "owner_binding_normalized_identical": 46,
+        "cross_owner_query_or_mutation_extractions": 11,
+        "provider_send_retry_identical": 11
+      },
+      "structure_test_retirement": {
+        "old_node": "tests/test_p8_l_b_chat_domain.py::test_application_service_delegates_through_runtime_port",
+        "temporary_implementation": "backend/app/compatibility/chat_service.py",
+        "temporary_contract": "backend/app/compatibility/chat_runtime_contract.py",
+        "replacement_node": "tests/chat/test_service_ownership.py::test_routes_call_actual_owner_services_without_runtime_port_chain",
+        "removal_stage": "AR-B8: explicitly retire the old structure-only check with its frozen assertion correspondence; no new product caller may use the historical forwarding class."
+      },
+      "remaining_owners": {
+        "backend/app/runtime/chat/world_generation.py": "AR-B6-B durable accept/retry/stream/fence; currently calls actual service aliases with the same Session.",
+        "backend/app/runtime/chat/sqlalchemy_service.py": "AR-B6-C surviving generation/Memory credential consumer aliases; B8 structural-test compatibility only afterwards.",
+        "backend/app/domains/chat/application": "AR-B6-B/C actual lifecycle/retrieval/evidence services.",
+        "backend/app/runtime/chat/model_bindings.py": "AR-B6-B/C generation model consumption; no actual new Chat service imports this aggregate."
+      }
     }
   }
 }

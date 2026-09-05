@@ -519,3 +519,13 @@ WorldCharacter의 생성·재시도·승인·거절·입장 정책은 `service/a
 #### Chat 데이터와 thread 조회
 
 Chat의 ORM은 `chat/models.py`, 요청·응답/값·generation fence·retrieval plan·evidence 규칙은 `schemas.py`와 `contracts/`에 있다. `repository/threads.py`는 실제 Chat table 조회와 transaction-scoped advisory lock을 소유하며 commit/rollback을 수행하지 않는다. owner/scope 확인과 상태/오류·commit 순서는 서비스가 유지한다. 다른 업무 ORM을 repository에 가져와 Chat 소유처럼 확장하지 않는다. AR-B6-A1 현재 thread 실행 service와 교차 업무 조립의 이전은 진행 중이며 옛 runtime 경로와 API 전체가 이미 종료된 것으로 해석하지 않는다.
+
+### Chat 실제 서비스와 교차 업무 조회
+
+Chat 요청은 이제 역할이 있는 실제 서비스로 들어갑니다. `service/threads.py`의 `ThreadService`는 World 참여자 확인, 대화 목록·생성·변경, 기본/개별 모델 선택과 저장 직전 재검증을 담당합니다. `service/settings.py`의 `MessageSettingsService`는 사용자·캐릭터의 쪽지 설정과 credential 선택·오류 판단을 맡습니다. `service/messages.py`의 `MessageService`는 기존 쪽지의 lease, 단일 provider 호출, 답변 저장과 같은 실패 메시지 재시도를 실행합니다. HTTP는 각각의 서비스 인스턴스를 직접 사용합니다.
+
+`repository/threads.py`는 Chat 소유 SQL 조회·advisory lock을, `runtime/chat/scope_queries.py`는 World·WorldCharacter·Character·설치 정체성을 함께 읽어야 하는 기존 join을 소유합니다. `contracts/context.py`는 그 조회 결과와 같은 Session을 사용하는 협력 계약입니다. nullable 결과의 의미와 거부 오류는 Chat 서비스가 결정하며, 조회 협력 코드는 commit·rollback·권한 거부를 수행하지 않습니다. `MessageSettingsService`의 credential 행 저장과 암호화 envelope는 Identity의 `service/message_credentials.py`에 요청하며 flush-only 계약을 유지합니다.
+
+World 대화 생성의 tuple/quota lock, preference 생성의 flush-only 경로, 저장 직전 scope 재검증, 충돌 시 한 번의 재시도는 그대로입니다. 기존 쪽지는 user message commit 뒤 provider를 부르고, 재시도에서는 기존 실패 assistant 행 하나를 수정합니다. 새로운 공통 transaction 규칙으로 이 차이를 합치지 않습니다.
+
+과거 `ChatService → ChatRuntimePort → SqlAlchemyChatRuntime` 전달 체인은 HTTP 호출 경로에서 제거했습니다. 과거 구조 자체를 검증하는 승인 테스트 하나 때문에 이전 forwarder와 Protocol만 `app/compatibility/chat_service.py`·`chat_runtime_contract.py`에 임시 보존합니다. 이들은 신규 기능의 진입점이 아니며 B8에서 원래 node/assertion과 실제 서비스 회귀의 대응을 확인하고 퇴역합니다. `runtime/chat/sqlalchemy_service.py`에는 현재 generation·Memory 소비자가 쓰는 동일 인스턴스 메서드 alias만 남았으며, generation/retrieval 구현 자체는 뒤이은 B6-B/C 전환 범위입니다.

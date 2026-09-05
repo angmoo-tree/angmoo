@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.domains.chat.ports.runtime import ChatRuntimePort
+from app.compatibility.chat_runtime_contract import ChatRuntimePort
 
 
 class ChatService:

@@ -129,7 +129,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         },
         "services/feed_reaction_planner.py": {"_api_key"},
         "services/langgraph_resident.py": {"_decrypt_api_key"},
-        "runtime/chat/sqlalchemy_service.py": {"_resolve_message_credential"},
+        "domains/chat/service/settings.py": {"_resolve_message_credential"},
         "services/post_image_generation.py": {
             "_ensure_visual_identity",
             "_refine_image_prompt",
@@ -141,7 +141,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
             "get_replicate_image_api_key",
             "get_profile_image_api_key",
         },
-        "domains/world_characters/infrastructure/direct_llm_setup_provider.py": {
+        "domains/world_characters/client.py": {
             "generate_community_profile",
             "generate_repertoire",
         },

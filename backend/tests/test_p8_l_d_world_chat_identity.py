@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.domains.chat import schemas
-from app.runtime.chat import sqlalchemy_service as world_chat
+from chat_service_support import messages as world_chat
 
 
 def _create_tables(engine) -> None:

@@ -23,7 +23,7 @@ from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
 from app.services import character_lore as lore_service
 from app.services import community as community_service
-from app.services import messages as message_service
+from chat_service_support import messages as message_service
 
 
 PRIVACY_INVENTORY = (

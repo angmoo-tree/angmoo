@@ -8,7 +8,7 @@ from app.core.db import get_db
 from app.domains.identity import browser_session
 from app.domains.chat import public as chat
 from app.domains.identity.public import User
-from app.runtime.chat.composition import chat_service
+from app.runtime.chat.message_composition import thread_service as chat_service
 
 
 router = APIRouter(prefix="/worlds/{world_id}/chat", tags=["world-chat"])

@@ -5,7 +5,7 @@ from app.domains.identity.dependencies import get_current_user
 from app.core.db import get_db
 from app.domains.chat import public as chat
 from app.domains.identity.public import User
-from app.runtime.chat.composition import chat_service
+from app.runtime.chat.message_composition import message_service, settings_service, thread_service
 
 
 router = APIRouter(tags=["messages"])
@@ -19,7 +19,7 @@ def list_threads(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> chat.MessageThreadListRead:
-    return chat_service.list_threads(db, user)
+    return thread_service.list_threads(db, user)
 
 
 @router.post(
@@ -33,7 +33,7 @@ def create_thread(
     user: User = Depends(get_current_user),
 ) -> chat.MessageThreadRead:
     try:
-        return chat_service.create_or_get_thread(db, user, data)
+        return thread_service.create_or_get_thread(db, user, data)
     except chat.MessageThreadLimitError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except chat.MessageForbiddenError as exc:
@@ -56,7 +56,7 @@ def get_thread(
     user: User = Depends(get_current_user),
 ) -> chat.MessageThreadRead:
     try:
-        return chat_service.get_thread(db, user, thread_id)
+        return thread_service.get_thread(db, user, thread_id)
     except chat.MessageNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
 
@@ -72,7 +72,7 @@ def update_thread(
     user: User = Depends(get_current_user),
 ) -> chat.MessageThreadRead:
     try:
-        return chat_service.update_thread(db, user, thread_id, data)
+        return thread_service.update_thread(db, user, thread_id, data)
     except chat.MessageNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except chat.MessageValidationError as exc:
@@ -91,7 +91,7 @@ def delete_thread(
     user: User = Depends(get_current_user),
 ) -> Response:
     try:
-        chat_service.delete_thread(db, user, thread_id)
+        thread_service.delete_thread(db, user, thread_id)
     except chat.MessageNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except chat.MessageValidationError as exc:
@@ -112,7 +112,7 @@ async def send_message(
     user: User = Depends(get_current_user),
 ) -> chat.MessageSendRead:
     try:
-        return await chat_service.send_message(db, user, thread_id, data)
+        return await message_service.send_message(db, user, thread_id, data)
     except chat.MessageInFlightError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except chat.MessageCredentialRequiredError as exc:
@@ -142,7 +142,7 @@ async def retry_message(
     user: User = Depends(get_current_user),
 ) -> chat.MessageSendRead:
     try:
-        return await chat_service.retry_message(db, user, thread_id, message_id)
+        return await message_service.retry_message(db, user, thread_id, message_id)
     except chat.MessageInFlightError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except chat.MessageCredentialRequiredError as exc:
@@ -169,7 +169,7 @@ def get_message_settings(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ) -> chat.MessageSettingsRead:
-    return chat_service.get_user_settings(db, user)
+    return settings_service.get_user_settings(db, user)
 
 
 @router.patch(
@@ -182,7 +182,7 @@ def update_message_settings(
     user: User = Depends(get_current_user),
 ) -> chat.MessageSettingsRead:
     try:
-        return chat_service.update_user_settings(db, user, data)
+        return settings_service.update_user_settings(db, user, data)
     except chat.MessageCredentialRequiredError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except chat.MessageForbiddenError as exc:
@@ -205,7 +205,7 @@ def get_character_message_settings(
     user: User = Depends(get_current_user),
 ) -> chat.CharacterMessageSettingRead:
     try:
-        return chat_service.get_character_message_settings(db, user, character_id)
+        return settings_service.get_character_message_settings(db, user, character_id)
     except chat.MessageForbiddenError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
     except chat.MessageNotFoundError as exc:
@@ -223,7 +223,7 @@ def update_character_message_settings(
     user: User = Depends(get_current_user),
 ) -> chat.CharacterMessageSettingRead:
     try:
-        return chat_service.update_character_message_settings(
+        return settings_service.update_character_message_settings(
             db, user, character_id, data
         )
     except chat.MessageForbiddenError as exc:

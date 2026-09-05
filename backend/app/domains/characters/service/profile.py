@@ -199,3 +199,15 @@ def _raise_handle_conflict_from_integrity(exc: IntegrityError, handle: str) -> N
     message = str(exc.orig)
     if "uq_characters_handle" in message or "characters_handle_key" in message:
         raise CharacterHandleConflictError(f"@{handle} 핸들은 이미 사용 중입니다.") from exc
+
+
+def list_message_source_characters(
+    db: Session, owner_id: str
+) -> list[models.Character]:
+    characters = db.scalars(
+        select(models.Character)
+        .where(models.Character.owner_id == owner_id)
+        .where(models.Character.deleted_at.is_(None))
+        .order_by(models.Character.created_at.desc())
+    ).all()
+    return characters

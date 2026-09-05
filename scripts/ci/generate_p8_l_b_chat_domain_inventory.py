@@ -275,11 +275,11 @@ def build_inventory() -> dict[str, Any]:
             "app.domains.chat.api.schemas",
             "app.domains.chat.contracts.errors",
             "app.domains.chat.contracts.policies",
-            "app.domains.chat.application.messages",
-            "app.domains.chat.ports.runtime",
+            "app.compatibility.chat_service",
+            "app.compatibility.chat_runtime_contract",
             "app.domains.chat.models",
             "app.runtime.chat.sqlalchemy_service",
-            "app.runtime.chat.sqlalchemy_adapter",
+            "app.domains.chat.service.threads",
             "app.runtime.chat.model_bindings",
         }
     )

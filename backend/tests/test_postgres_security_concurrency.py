@@ -24,7 +24,7 @@ from app.domains.identity.service import external_verification as external_auth_
 from app.services import local_bot_quota
 from app.domains.identity.service import login_throttle
 from app.services import lore_parser_quota
-from app.services import messages as message_service
+from chat_service_support import messages as message_service
 from app.services import daily_activity_plans
 from app.services import worlds as world_service
 from app.services import world_character_contracts

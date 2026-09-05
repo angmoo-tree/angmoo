@@ -3,6 +3,7 @@
 These operations do not commit, roll back or reinterpret Chat admission errors.
 Services keep permission/state decisions and use the caller's Session.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -80,9 +81,10 @@ def _is_postgresql_session(db: Session) -> bool:
     return bind.dialect.name == "postgresql"
 
 
-def list_world_threads(db: Session, requester_id: str, world_id: str) -> list[models.MessageThread]:
-    return (
-        db.scalars(
+def list_world_threads(
+    db: Session, requester_id: str, world_id: str
+) -> list[models.MessageThread]:
+    return db.scalars(
         select(models.MessageThread)
         .where(
             models.MessageThread.requester_id == requester_id,
@@ -95,18 +97,20 @@ def list_world_threads(db: Session, requester_id: str, world_id: str) -> list[mo
             models.MessageThread.created_at.desc(),
         )
     ).all()
-    )
 
 
 def count_ambiguous_threads(db: Session, requester_id: str) -> int:
     return (
         db.scalar(
-        select(func.count(models.MessageThread.id)).where(
-            models.MessageThread.requester_id == requester_id,
-            models.MessageThread.world_scope_status.in_(("ambiguous", "quarantined")),
-            models.MessageThread.deleted_at.is_(None),
+            select(func.count(models.MessageThread.id)).where(
+                models.MessageThread.requester_id == requester_id,
+                models.MessageThread.world_scope_status.in_(
+                    ("ambiguous", "quarantined")
+                ),
+                models.MessageThread.deleted_at.is_(None),
+            )
         )
-    ) or 0
+        or 0
     )
 
 
@@ -127,9 +131,10 @@ def list_threads(db: Session, requester_id: str) -> list[models.MessageThread]:
     )
 
 
-def find_legacy_thread_candidates(db: Session, requester_id: str, character_id: str) -> list[models.MessageThread]:
-    return (
-        list(
+def find_legacy_thread_candidates(
+    db: Session, requester_id: str, character_id: str
+) -> list[models.MessageThread]:
+    return list(
         db.scalars(
             select(models.MessageThread)
             .where(models.MessageThread.requester_id == requester_id)
@@ -139,43 +144,42 @@ def find_legacy_thread_candidates(db: Session, requester_id: str, character_id: 
             .limit(2)
         )
     )
-    )
 
 
 def count_active_threads(db: Session, requester_id: str) -> int:
     return (
         db.scalar(
-        select(func.count(models.MessageThread.id))
-        .where(models.MessageThread.requester_id == requester_id)
-        .where(models.MessageThread.deleted_at.is_(None))
-    ) or 0
+            select(func.count(models.MessageThread.id))
+            .where(models.MessageThread.requester_id == requester_id)
+            .where(models.MessageThread.deleted_at.is_(None))
+        )
+        or 0
     )
 
 
 def list_thread_messages(db: Session, thread_id: str) -> list[models.MessageMessage]:
-    return (
-        db.scalars(
+    return db.scalars(
         select(models.MessageMessage)
         .where(models.MessageMessage.thread_id == thread_id)
         .order_by(models.MessageMessage.created_at, models.MessageMessage.id)
     ).all()
-    )
 
 
 def latest_thread_message(db: Session, thread_id: str) -> models.MessageMessage | None:
-    return (
-        db.scalar(
+    return db.scalar(
         select(models.MessageMessage)
         .where(models.MessageMessage.thread_id == thread_id)
-        .order_by(models.MessageMessage.created_at.desc(), models.MessageMessage.id.desc())
+        .order_by(
+            models.MessageMessage.created_at.desc(), models.MessageMessage.id.desc()
+        )
         .limit(1)
     )
-    )
 
 
-def get_owned_thread(db: Session, requester_id: str, thread_id: str) -> models.MessageThread | None:
-    return (
-        db.scalar(
+def get_owned_thread(
+    db: Session, requester_id: str, thread_id: str
+) -> models.MessageThread | None:
+    return db.scalar(
         select(models.MessageThread)
         .options(
             joinedload(models.MessageThread.requester),
@@ -185,12 +189,12 @@ def get_owned_thread(db: Session, requester_id: str, thread_id: str) -> models.M
         .where(models.MessageThread.requester_id == requester_id)
         .where(models.MessageThread.deleted_at.is_(None))
     )
-    )
 
 
-def list_committed_response_requests(db: Session, thread_id: str) -> list[models.ChatResponseRequest]:
-    return (
-        list(
+def list_committed_response_requests(
+    db: Session, thread_id: str
+) -> list[models.ChatResponseRequest]:
+    return list(
         db.scalars(
             select(models.ChatResponseRequest).where(
                 models.ChatResponseRequest.thread_id == thread_id,
@@ -198,5 +202,4 @@ def list_committed_response_requests(db: Session, thread_id: str) -> list[models
                 models.ChatResponseRequest.committed_assistant_message_id.is_not(None),
             )
         )
-    )
     )

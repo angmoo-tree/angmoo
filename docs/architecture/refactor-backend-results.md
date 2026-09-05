@@ -540,3 +540,17 @@ Media `dd78da66`에서 새 Chat 작업트리를 만들고 계약 준비 `4def2b5
 검사기 성능 수정은 root source `36fd4748cb55744d3effbcfb9d18eb921e0fd8d9`의 해당 파일 diff만 그대로 적용했다. 경로 순서와 정규식 경계는 유지하고 컴파일된 immutable pattern만 재사용한다. 기존 보존/partial-scope 회귀 **149 passed / 1.24초**를 통과했다. 이후 전체 보존 명령이 종료되어 source 목적지·split·assertion·skip/xfail 억제·API·ORM·수집 node 누락은 없음을 확인했다. 최초 실행에서 K17/K18/K20 등 중복 feature 행의 옛 계약 경로를 찾아 현재 경로만 정확히 수정했고 feature inventory 재검사는 차이 0이었다.
 
 보호 계보 **2,129 / 현재 2,158**이며 source 29개·node 29개는 선행 Media/WC 및 이번 A1의 실제 첫 도입 commit capture를 root에서 이어가야 하므로 명령 전체 exit 1을 완료 PASS로 바꾸지 않는다. 원래 frozen 기준과 승인 node는 그대로다.
+
+## AR-B6-A2 — 실제 스레드·설정·쪽지 서비스와 같은 Session 협력
+
+A1 `2f36a6af` 및 보존 보완 `abbf2647` 뒤 실제 runtime SQL 업무 57개를 `ThreadService` 27개, `MessageSettingsService` 14개, `MessageService` 11개, 프로필 변환·조회 5개로 분리했다. HTTP는 각 실제 소유 인스턴스를 직접 호출하며 Any port와 SQL forwarding adapter는 production 호출 경로에서 제거했다. 골격만 옮긴 것이 아니라 권한·model/quota·lease·provider/commit·재시도 구현이 서비스 파일에 있다.
+
+명시적 `self`·소유 service binding을 제외한 함수 본문은 **46/57 AST 동일**하다. 바뀐 11개는 같은 Session의 join 6개, Character nullable/profile picker 읽기, Identity credential 조회·flush-only 쓰기·clear 협력으로 분리한 부분이다. provider/send/retry 11개 함수는 모두 AST 본문이 같다. 기존 World/installation 확인과 오류 순서, PostgreSQL lock 조건·join·필터·정렬·limit, 재검증과 IntegrityError 1회 재시도, preference flush/commit 차이 및 plaintext reveal 지점은 유지한다.
+
+새 회귀는 실제 owning instance를 쓰는 HTTP 연결, 설치 owner 거부의 선행 순서와 lock 전달, 실제 SQLite join의 같은 attached 객체·단일 query·scope 필터, credential envelope scope·flush-only/caller rollback, 예기치 않은 전송 실패의 같은 lease 해제를 검증한다. 기존 tests의 assertion은 그대로 두고 test-only helper가 monkeypatch를 실제 소유 인스턴스로 전달한다. 옛 구조 전용 node는 원본 forwarder를 compatibility에 한 번만 보존하고 새 직접 서비스 경로 회귀와 B8 퇴역 조건을 정확히 지도에 적었다.
+
+첫 59개 집중 검사는 **58 passed / 1 failed**였고 실패는 선행 WC source의 이미 옮겨진 provider에 대한 reveal 허용 경로 한 건이었다. 해당 경로만 `world_characters/client.py`로 맞춘 뒤 신규 회귀·모델 Hotfix를 포함해 **74 passed / 기존 4 warnings / 19.01초**를 통과했다. 보존 기준선·허용 동작을 넓히지 않았다. 최종 inventory/보존·확장 집중 검사는 이 기록 이후 별도로 수행한다.
+
+최종 고정 tree의 Chat·World Chat·generation·Today SNS·credential/deletion 집중 묶음은 **170 passed / 기존 4 warnings / 38.56초**, 보존/부분 scope 회귀는 **149 passed / 0.97초**였다. 전체 보존 `--contracts --nodes`는 source 목적지·분리 symbol/소비자·assertion·억제 표시·API·ORM·기존 node에서 오류 0이며 보호 **2,129 / 현재 2,166**을 확인했다. 선행 Media/WC/A1의 아직 capture되지 않은 source 29개·node 29개 때문에 명령은 exit 1이다. 이번 미커밋 slice의 신규 node 8개와 helper/서비스 파일은 이 source의 첫 introduction SHA로 root에서 추가 증거를 남긴다.
+
+Live architecture **645 modules / 2,103 edges / exact legacy 265 PASS**, ER0 **79/87/24/44/7 PASS**, L4 parity **97**, Memory batch current, 공개 route inventory **196**이다. Root의 독립 읽기 리뷰에서도 query의 owner/World/WC/membership 조건·limit 2/FOR UPDATE·nullable 반환과 같은 Session, credential flush-only·clear/envelope 경계에서 추가 문제는 발견되지 않았다. 이 결과를 generation/retrieval 전체 전환이나 Hosted CI·설치 Gate 완료로 확대하지 않는다.

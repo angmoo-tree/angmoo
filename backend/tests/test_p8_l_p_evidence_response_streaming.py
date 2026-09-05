@@ -107,7 +107,7 @@ from app.runtime.chat.world_generation import (
     retry_world_response,
 )
 from app.runtime.chat.memory_producer import SqlAlchemySuccessfulChatMemoryProducer
-from app.runtime.chat import sqlalchemy_service as world_chat
+from chat_service_support import messages as world_chat
 
 
 NOW = datetime(2026, 9, 2, 12, tzinfo=UTC)
