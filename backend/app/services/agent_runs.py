@@ -1,3 +1,7 @@
+from app.runtime.resident.context_references import SqlAlchemyResidentActionReferences
+from app.domains.routines.service.action_menu import _format_v6_action_menu_table
+from app.domains.routines.service.action_candidates import _profile_display_name_for_action_menu
+from app.domains.routines.service.action_admission import _profile_following_status
 from app.domains.social.repository import resident_context as resident_context_queries
 from app.domains.social.repository.resident_context import _has_character_like
 from app.domains.social.repository.resident_context import _has_character_repost
@@ -209,27 +213,6 @@ COMPLETE_TICK_ACTION_TYPES = (
 )
 
 
-def _profile_following_status(
-    db: Session,
-    *,
-    follower_character_id: str,
-    target_user_id: str | None = None,
-    target_character_id: str | None = None,
-) -> str:
-    if target_character_id:
-        if target_character_id == follower_character_id:
-            return "self"
-        target_character = community_crud.get_character(db, target_character_id)
-        if target_character is None or target_character.deleted_at is not None:
-            return "not_applicable_deleted"
-        exists = resident_context_queries.find_follow_id(
-            db, follower_character_id=follower_character_id,
-            target_character_id=target_character_id,
-        )
-        return "yes" if exists is not None else "no"
-    if target_user_id:
-        return "not_applicable_user"
-    return "not_applicable_unknown"
 
 
 def _format_recent_feed_sections(
@@ -254,7 +237,7 @@ def _format_recent_feed_sections(
             db, post_id=post.id, character_id=character_id
         )
         already_following_author = _profile_following_status(
-            db,
+            SqlAlchemyResidentActionReferences(db),
             follower_character_id=character_id,
             target_user_id=post.author_user_id,
             target_character_id=post.author_character_id,
@@ -362,7 +345,7 @@ def _collect_v6_inbox_candidates(
                 "root_post_id": root_post_id,
                 "source_post_id": source_post_id,
                 "actor_name": _profile_display_name_for_action_menu(
-                    db,
+                    SqlAlchemyResidentActionReferences(db),
                     user_id=notification.actor_user_id,
                     character_id=notification.actor_character_id,
                 ),
@@ -382,20 +365,6 @@ def _collect_v6_inbox_candidates(
     return candidates
 
 
-def _profile_display_name_for_action_menu(
-    db: Session, *, user_id: str | None = None, character_id: str | None = None
-) -> str:
-    if character_id:
-        character = community_crud.get_character(db, character_id)
-        if character is not None:
-            return f"{character.name} (@{character.handle})"
-        return f"character:{character_id}"
-    if user_id:
-        user = community_crud.get_user(db, user_id)
-        if user is not None:
-            return user.display_name
-        return f"user:{user_id}"
-    return "unknown"
 
 
 def _v6_inbox_candidates_from_review(
@@ -435,7 +404,7 @@ def _v6_inbox_candidates_from_review(
             "root_post_id": root_post_id,
             "source_post_id": source_post_id,
             "actor_name": _profile_display_name_for_action_menu(
-                db,
+                SqlAlchemyResidentActionReferences(db),
                 user_id=notification.actor_user_id,
                 character_id=notification.actor_character_id,
             ),
@@ -497,7 +466,7 @@ def _format_v6_feed_interests(
             "\n".join(
                 [
                     f"{index}. post_id: {post.id}",
-                    f"   author: {_profile_display_name_for_action_menu(db, user_id=post.author_user_id, character_id=post.author_character_id)}",
+                    f"   author: {_profile_display_name_for_action_menu(SqlAlchemyResidentActionReferences(db), user_id=post.author_user_id, character_id=post.author_character_id)}",
                     f"   topic_signature: {topic_signature or '-'}",
                     f"   novelty_basis: {novelty_basis or '-'}",
                     f"   summary: {_clip_text(neutralize_context_text(str(item.get('summary') or post.title)), 240)}",
@@ -659,7 +628,7 @@ def _build_daypart_memory_note(
         post = community_crud.get_post(db, source_post_id) if source_post_id else None
         seen_person = (
             _profile_display_name_for_action_menu(
-                db, user_id=post.author_user_id, character_id=post.author_character_id
+                SqlAlchemyResidentActionReferences(db), user_id=post.author_user_id, character_id=post.author_character_id
             )
             if post is not None
             else "source author unknown"
@@ -776,7 +745,7 @@ def _record_provided_daypart_observations(
         post = community_crud.get_post(db, source_post_id) if source_post_id else None
         seen_person = (
             _profile_display_name_for_action_menu(
-                db, user_id=post.author_user_id, character_id=post.author_character_id
+                SqlAlchemyResidentActionReferences(db), user_id=post.author_user_id, character_id=post.author_character_id
             )
             if post is not None
             else None
@@ -894,7 +863,7 @@ def _format_v6_action_menu(
                     [
                         f"관심 글 {index}",
                         f"post_id: {post.id}",
-                        f"작성자: {_profile_display_name_for_action_menu(db, user_id=post.author_user_id, character_id=post.author_character_id)}",
+                        f"작성자: {_profile_display_name_for_action_menu(SqlAlchemyResidentActionReferences(db), user_id=post.author_user_id, character_id=post.author_character_id)}",
                         f"요약: {_clip_text(neutralize_context_text(str(item.get('summary') or post.title)), 240)}",
                         f"관심 이유: {_clip_text(neutralize_context_text(str(item.get('reason') or '')), 240)}",
                         f"짧은 대꾸 맥락: {_clip_text(neutralize_context_text(post.body), 500)}",
@@ -979,233 +948,6 @@ def _format_v6_action_menu(
     return "\n".join(sections)
 
 
-def _format_v6_action_menu_table(
-    db: Session,
-    *,
-    character_id: str,
-    allowed_actions: tuple[str, ...],
-    inbox_candidates: list[dict[str, Any]],
-    feed_interest_payload: dict[str, Any],
-    relationship_review_candidate: str = "- none",
-    feed_cue: models.AgentFeedCue | None = None,
-    prepared_create_post_brief: str | None = None,
-) -> str:
-    allowed = set(allowed_actions)
-    sections: list[str] = [
-        "Common rules:",
-        "- Use only tool + exact params pairs listed under allowed tool calls.",
-        "- tools_allow is run-wide; target-specific availability is this backend action menu.",
-        "- Do not infer a missing action only because the tool exists.",
-        "- Execute selected tool calls sequentially.",
-        f"- effective_tier: {GEMINI_FREE_POLICY_ID}",
-        f"- inbox public target max: {GEMINI_FREE_INBOX_CANDIDATE_MAX} thread",
-        f"- feed public target max: {GEMINI_FREE_FEED_CANDIDATE_MAX} post",
-        f"- inbox selected target action max: {GEMINI_FREE_INBOX_ACTION_MAX}",
-        f"- feed selected target action max: {GEMINI_FREE_FEED_ACTION_MAX}",
-    ]
-
-    inbox_sections: list[str] = []
-    inbox_allowed = allowed - {"post", "repost", "unfollow", "observe"}
-    for index, item in enumerate(
-        inbox_candidates[:GEMINI_FREE_INBOX_CANDIDATE_MAX], start=1
-    ):
-        post_id = str(item["source_post_id"])
-        root_post_id = str(item["root_post_id"])
-        tool_calls = _v6_allowed_tool_calls(
-            db,
-            character_id=character_id,
-            allowed=inbox_allowed,
-            post_id=post_id,
-            author_target_type=item.get("actor_target_type"),
-            author_target_id=item.get("actor_target_id"),
-            reply_root_post_id=root_post_id,
-            reply_label="reply",
-        )
-        if not tool_calls:
-            continue
-        unavailable = _v6_unavailable_post_actions(
-            db,
-            character_id=character_id,
-            allowed=inbox_allowed,
-            post_id=post_id,
-            author_target_type=item.get("actor_target_type"),
-            author_target_id=item.get("actor_target_id"),
-            reply_root_post_id=root_post_id,
-        )
-        inbox_sections.append(
-            "\n".join(
-                [
-                    f"Inbox candidate {index}",
-                    f"notification_id: {item['notification_id']}",
-                    f"root_post_id: {root_post_id}",
-                    f"source_post_id: {post_id}",
-                    f"actor: {item['actor_name']} ({item['actor_ref']})",
-                    f"reply_summary: {item['source_body']}",
-                    f"candidate_reason: {item.get('candidate_reason') or '-'}",
-                    f"reply_context: {item.get('reply_context') or '-'}",
-                    "allowed tool calls:",
-                    *tool_calls,
-                    "not available:",
-                    *(unavailable or ["- none"]),
-                ]
-            )
-        )
-    sections.append("\nInbox actions:")
-    sections.append("\n\n".join(inbox_sections) if inbox_sections else "- none")
-
-    feed_sections: list[str] = []
-    interests = feed_interest_payload.get("interests")
-    has_feed_interest_context = False
-    if isinstance(interests, list):
-        for index, item in enumerate(
-            interests[:GEMINI_FREE_FEED_CANDIDATE_MAX], start=1
-        ):
-            if not isinstance(item, dict):
-                continue
-            post_id = str(item.get("post_id") or "").strip()
-            if not post_id:
-                continue
-            post = community_crud.get_post(db, post_id)
-            if post is None or not community_service.is_post_public_context_visible(db, post):
-                continue
-            has_feed_interest_context = True
-            author_target_type, author_target_id = _profile_target_parts(
-                user_id=post.author_user_id,
-                character_id=post.author_character_id,
-            )
-            tool_calls = _v6_allowed_tool_calls(
-                db,
-                character_id=character_id,
-                allowed=allowed,
-                post_id=post.id,
-                author_target_type=author_target_type,
-                author_target_id=author_target_id,
-                reply_root_post_id=post.id,
-                reply_label="reply",
-            )
-            if not tool_calls:
-                continue
-            unavailable = _v6_unavailable_post_actions(
-                db,
-                character_id=character_id,
-                allowed=allowed,
-                post_id=post.id,
-                author_target_type=author_target_type,
-                author_target_id=author_target_id,
-                reply_root_post_id=post.id,
-            )
-            feed_sections.append(
-                "\n".join(
-                    [
-                        f"Feed candidate {index}",
-                        f"post_id: {post.id}",
-                        f"author: {_profile_display_name_for_action_menu(db, user_id=post.author_user_id, character_id=post.author_character_id)}",
-                        f"summary: {_clip_text(neutralize_context_text(str(item.get('summary') or post.title)), 240)}",
-                        f"interest_reason: {_clip_text(neutralize_context_text(str(item.get('reason') or '')), 240)}",
-                        f"short_reply_context: {_clip_text(neutralize_context_text(post.body), 500)}",
-                        "allowed tool calls:",
-                        *tool_calls,
-                        "not available:",
-                        *(unavailable or ["- none"]),
-                    ]
-                )
-            )
-    sections.append("\nFeed actions:")
-    sections.append("\n\n".join(feed_sections) if feed_sections else "- none")
-
-    writing_lines: list[str] = []
-    use_prepared_brief = bool((prepared_create_post_brief or "").strip())
-    if use_prepared_brief and is_feed_scan_community_theme_brief(
-        prepared_create_post_brief
-    ):
-        use_prepared_brief = has_feed_interest_context and not bool(
-            feed_interest_payload.get("no_relevant_signal")
-        )
-    if "post" in allowed and use_prepared_brief:
-        post_seed = _clip_text(
-            neutralize_context_text(str(feed_interest_payload.get("post_seed") or "")),
-            300,
-        )
-        topic_signature = _clip_text(
-            neutralize_context_text(
-                str(feed_interest_payload.get("topic_signature") or "")
-            ),
-            300,
-        )
-        novelty_basis = _clip_text(
-            neutralize_context_text(
-                str(feed_interest_payload.get("novelty_basis") or "")
-            ),
-            300,
-        )
-        cue_text = (
-            _clip_text(neutralize_context_text(feed_cue.topic), 300)
-            if feed_cue
-            else "-"
-        )
-        writing_lines.extend(
-            [
-                "Writing candidate 1",
-                "context:",
-                "  motivation: community-reactive or self-expression",
-                f"  owner_feed_cue: {cue_text}",
-                f"  post_seed: {post_seed or '-'}",
-                f"  topic_signature: {topic_signature or '-'}",
-                f"  novelty_basis: {novelty_basis or '-'}",
-                *(
-                    [
-                        "  prepared_create_post_brief:",
-                        *[
-                            f"    {line}"
-                            for line in prepared_create_post_brief.splitlines()
-                        ],
-                    ]
-                    if prepared_create_post_brief
-                    else []
-                ),
-                "allowed tool calls:",
-                "- tool: angmoo_create_post_from_brief",
-                f"  author_character_id: {character_id}",
-                f"  brief: {PREPARED_CREATE_POST_BRIEF_SENTINEL}",
-                "not available:",
-                "- none",
-            ]
-        )
-    sections.append("\nWriting actions:")
-    sections.append("\n".join(writing_lines) if writing_lines else "- none")
-
-    relationship_lines: list[str] = []
-    if "unfollow" in allowed and relationship_review_candidate.strip() != "- none":
-        target_type: str | None = None
-        target_id: str | None = None
-        for line in relationship_review_candidate.splitlines():
-            normalized = line.strip()
-            if normalized.startswith("- target_type:"):
-                target_type = normalized.split(":", 1)[1].strip() or None
-            elif normalized.startswith("- target_id:"):
-                target_id = normalized.split(":", 1)[1].strip() or None
-        if target_type and target_id:
-            relationship_lines.extend(
-                [
-                    "Relationship candidate 1",
-                    "allowed tool calls:",
-                    "- tool: angmoo_unfollow_profile",
-                    f"  target_type: {target_type}",
-                    f"  target_id: {target_id}",
-                    f"  follower_character_id: {character_id}",
-                    "not available:",
-                    "- none",
-                    "candidate_context:",
-                    "  limit: only choose when the relationship review target is explicit.",
-                    *[
-                        f"  {line}"
-                        for line in relationship_review_candidate.splitlines()
-                    ],
-                ]
-            )
-    sections.append("\nRelationship actions:")
-    sections.append("\n".join(relationship_lines) if relationship_lines else "- none")
-    return "\n".join(sections)
 
 
 def _v6_possible_post_actions(
@@ -1273,7 +1015,7 @@ def _v6_possible_post_actions(
         and author_target_id is not None
         and not (author_target_type == "character" and author_target_id == character_id)
         and _profile_following_status(
-            db,
+            SqlAlchemyResidentActionReferences(db),
             follower_character_id=character_id,
             target_user_id=None,
             target_character_id=author_target_id,
@@ -1292,139 +1034,8 @@ def _v6_possible_post_actions(
     return actions
 
 
-def _v6_allowed_tool_calls(
-    db: Session,
-    *,
-    character_id: str,
-    allowed: set[str],
-    post_id: str,
-    author_target_type: str | None,
-    author_target_id: str | None,
-    reply_root_post_id: str,
-    reply_label: str,
-) -> list[str]:
-    post = community_crud.get_post(db, post_id)
-    if post is None or not community_service.is_post_public_context_visible(db, post):
-        return []
-    actions: list[str] = []
-    self_authored = post.author_character_id == character_id
-    already_replied_to_thread = _has_character_replied_to_thread(
-        db, root_post_id=reply_root_post_id, character_id=character_id
-    )
-    direct_reply_to_character = _is_direct_reply_to_character_post_for_action_gate(
-        db, post_id=post_id, character_id=character_id
-    )
-    if "like" in allowed and not self_authored and not _has_character_like(
-        db, post_id=post_id, character_id=character_id
-    ):
-        actions.extend(
-            [
-                "- tool: angmoo_like_post",
-                f"  post_id: {post_id}",
-                f"  character_id: {character_id}",
-            ]
-        )
-    if (
-        "reply" in allowed
-        and not self_authored
-        and (not already_replied_to_thread or direct_reply_to_character)
-    ):
-        actions.extend(
-            [
-                "- tool: angmoo_reply_to_post_from_brief",
-                f"  post_id: {post_id}",
-                f"  author_character_id: {character_id}",
-                "  brief: write the reply intent, stance, and emotional angle only; do not write final body here.",
-            ]
-        )
-    if "repost" in allowed and not self_authored and not _has_character_repost(
-        db, post_id=post_id, character_id=character_id
-    ):
-        actions.extend(
-            [
-                "- tool: angmoo_repost_post",
-                f"  post_id: {post_id}",
-                f"  character_id: {character_id}",
-            ]
-        )
-    if (
-        "follow" in allowed
-        and author_target_type == "character"
-        and author_target_id is not None
-        and not (author_target_type == "character" and author_target_id == character_id)
-        and _profile_following_status(
-            db,
-            follower_character_id=character_id,
-            target_user_id=None,
-            target_character_id=author_target_id,
-        )
-        == "no"
-    ):
-        actions.extend(
-            [
-                "- tool: angmoo_follow_profile",
-                f"  target_type: {author_target_type}",
-                f"  target_id: {author_target_id}",
-                f"  follower_character_id: {character_id}",
-            ]
-        )
-    return actions
 
 
-def _v6_unavailable_post_actions(
-    db: Session,
-    *,
-    character_id: str,
-    allowed: set[str],
-    post_id: str,
-    author_target_type: str | None,
-    author_target_id: str | None,
-    reply_root_post_id: str,
-) -> list[str]:
-    post = community_crud.get_post(db, post_id)
-    if post is None or not community_service.is_post_public_context_visible(db, post):
-        return []
-    unavailable: list[str] = []
-    self_authored = post.author_character_id == character_id
-    if "like" in allowed:
-        if self_authored:
-            unavailable.append("- like: self-authored post")
-        elif _has_character_like(db, post_id=post_id, character_id=character_id):
-            unavailable.append("- like: already liked")
-    if "reply" in allowed:
-        already_replied_to_thread = _has_character_replied_to_thread(
-            db, root_post_id=reply_root_post_id, character_id=character_id
-        )
-        direct_reply_to_character = _is_direct_reply_to_character_post_for_action_gate(
-            db, post_id=post_id, character_id=character_id
-        )
-        if self_authored:
-            unavailable.append("- reply: self-authored post")
-        elif already_replied_to_thread and not direct_reply_to_character:
-            unavailable.append("- reply: already replied to this thread")
-    if "repost" in allowed:
-        if self_authored:
-            unavailable.append("- repost: self-authored post")
-        elif _has_character_repost(db, post_id=post_id, character_id=character_id):
-            unavailable.append("- repost: already reposted")
-    if "follow" in allowed:
-        if author_target_type is None or author_target_id is None:
-            unavailable.append("- follow: author profile target is unavailable")
-        elif author_target_type == "character" and author_target_id == character_id:
-            unavailable.append("- follow: own profile")
-        elif (
-            _profile_following_status(
-                db,
-                follower_character_id=character_id,
-                target_user_id=None,
-                target_character_id=author_target_id
-                if author_target_type == "character"
-                else None,
-            )
-            != "no"
-        ):
-            unavailable.append("- follow: already following author")
-    return unavailable
 
 
 def _format_recent_own_posts_to_avoid(db: Session, *, character_id: str) -> str:
@@ -1538,7 +1149,7 @@ def _format_inbox_threads(
                 user_id=item.actor_user_id, character_id=item.actor_character_id
             )
             actor_following_status = _profile_following_status(
-                db,
+                SqlAlchemyResidentActionReferences(db),
                 follower_character_id=character_id,
                 target_user_id=item.actor_user_id,
                 target_character_id=item.actor_character_id,
@@ -1612,7 +1223,7 @@ def _format_social_connection_candidate(
         if target_key in seen_targets:
             continue
         status = _profile_following_status(
-            db,
+            SqlAlchemyResidentActionReferences(db),
             follower_character_id=character_id,
             target_user_id=item.actor_user_id,
             target_character_id=item.actor_character_id,
@@ -1659,7 +1270,7 @@ def _format_social_connection_candidate(
             if target_key in seen_targets:
                 continue
             status = _profile_following_status(
-                db,
+                SqlAlchemyResidentActionReferences(db),
                 follower_character_id=character_id,
                 target_user_id=post.author_user_id,
                 target_character_id=post.author_character_id,
@@ -1825,7 +1436,7 @@ def _format_strong_social_connection_candidate(
         if target_type != "character":
             continue
         status = _profile_following_status(
-            db,
+            SqlAlchemyResidentActionReferences(db),
             follower_character_id=character_id,
             target_user_id=None,
             target_character_id=target_id,
@@ -3105,7 +2716,7 @@ async def _run_resident_individual_tool_flow(
         allowed_actions=allowed_actions,
     )
     action_menu = _format_v6_action_menu_table(
-        db,
+        SqlAlchemyResidentActionReferences(db),
         character_id=character.id,
         allowed_actions=allowed_actions,
         inbox_candidates=inbox_candidates,

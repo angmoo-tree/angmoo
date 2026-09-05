@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.domains.routines.contracts.action_context import ResidentActionReferences
+
 from app.core.context_text import neutralize_context_text
 from app.domains.routines.utils.context_text import _clip_text
 from typing import Any
@@ -191,3 +193,19 @@ def _format_actionable_feed_candidate(
     if action_candidates != "none":
         parts.append(f"   action_candidates: {action_candidates}")
     return "\n".join(parts)
+
+
+def _profile_display_name_for_action_menu(
+    references: ResidentActionReferences, *, user_id: str | None = None, character_id: str | None = None
+) -> str:
+    if character_id:
+        character = references.get_character(character_id)
+        if character is not None:
+            return f"{character.name} (@{character.handle})"
+        return f"character:{character_id}"
+    if user_id:
+        user = references.get_user(user_id)
+        if user is not None:
+            return user.display_name
+        return f"user:{user_id}"
+    return "unknown"

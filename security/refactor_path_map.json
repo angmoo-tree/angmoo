@@ -836,7 +836,9 @@
     "tests/test_tendency_note_action_selection.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing": "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
     "tests/test_daypart_persistent_session.py::test_daypart_main_session_key_changes_by_window": "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
     "tests/test_daypart_persistent_session.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick": "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
-    "tests/test_daypart_persistent_session.py::test_night_daypart_keeps_start_date_across_midnight": "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight"
+    "tests/test_daypart_persistent_session.py::test_night_daypart_keeps_start_date_across_midnight": "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+    "tests/test_tendency_note_action_selection.py::test_v6_action_menu_exposes_create_post_only_with_prepared_brief": "tests/routines/test_action_menu.py::test_v6_action_menu_exposes_create_post_only_with_prepared_brief",
+    "tests/test_tendency_note_action_selection.py::test_v6_action_menu_keeps_feed_actions_without_post_seed": "tests/routines/test_action_menu.py::test_v6_action_menu_keeps_feed_actions_without_post_seed"
   },
   "details": {
     "AR-B1": {
@@ -10899,8 +10901,10 @@
           "backend/app/domains/routines/repository/activity_evidence.py",
           "backend/app/domains/routines/repository/run_backoff.py",
           "backend/app/domains/routines/repository/runs.py",
+          "backend/app/domains/routines/service/action_admission.py",
           "backend/app/domains/routines/service/action_briefs.py",
           "backend/app/domains/routines/service/action_candidates.py",
+          "backend/app/domains/routines/service/action_menu.py",
           "backend/app/domains/routines/service/action_prompts.py",
           "backend/app/domains/routines/service/activity_evidence.py",
           "backend/app/domains/routines/service/decision_results.py",
@@ -11928,6 +11932,7 @@
           "old": "backend/app/services/agent_runs.py::_has_character_like",
           "new": "backend/app/domains/social/repository/resident_context.py::_has_character_like",
           "direct_consumers": [
+            "backend/app/runtime/resident/context_references.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -11940,6 +11945,7 @@
           "old": "backend/app/services/agent_runs.py::_has_character_repost",
           "new": "backend/app/domains/social/repository/resident_context.py::_has_character_repost",
           "direct_consumers": [
+            "backend/app/runtime/resident/context_references.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -11950,12 +11956,17 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_profile_following_status",
-          "new": "backend/app/services/agent_runs.py::_profile_following_status",
+          "new": "backend/app/domains/routines/service/action_admission.py::_profile_following_status",
           "direct_consumers": [
+            "backend/app/domains/routines/service/action_admission.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_menu.py::test_v6_action_menu_exposes_create_post_only_with_prepared_brief",
+            "tests/routines/test_action_menu.py::test_v6_action_menu_keeps_feed_actions_without_post_seed",
+            "tests/routines/test_action_admission.py::test_action_admission_uses_same_session_pending_reactions_and_caller_rollback",
+            "tests/routines/test_action_admission.py::test_action_menu_keeps_hidden_parent_context_out_without_committing_hide",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12134,12 +12145,17 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_profile_display_name_for_action_menu",
-          "new": "backend/app/services/agent_runs.py::_profile_display_name_for_action_menu",
+          "new": "backend/app/domains/routines/service/action_candidates.py::_profile_display_name_for_action_menu",
           "direct_consumers": [
+            "backend/app/domains/routines/service/action_menu.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_menu.py::test_v6_action_menu_exposes_create_post_only_with_prepared_brief",
+            "tests/routines/test_action_menu.py::test_v6_action_menu_keeps_feed_actions_without_post_seed",
+            "tests/routines/test_action_admission.py::test_action_admission_uses_same_session_pending_reactions_and_caller_rollback",
+            "tests/routines/test_action_admission.py::test_action_menu_keeps_hidden_parent_context_out_without_committing_hide",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12286,12 +12302,16 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_v6_action_menu_table",
-          "new": "backend/app/services/agent_runs.py::_format_v6_action_menu_table",
+          "new": "backend/app/domains/routines/service/action_menu.py::_format_v6_action_menu_table",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_menu.py::test_v6_action_menu_exposes_create_post_only_with_prepared_brief",
+            "tests/routines/test_action_menu.py::test_v6_action_menu_keeps_feed_actions_without_post_seed",
+            "tests/routines/test_action_admission.py::test_action_admission_uses_same_session_pending_reactions_and_caller_rollback",
+            "tests/routines/test_action_admission.py::test_action_menu_keeps_hidden_parent_context_out_without_committing_hide",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12328,6 +12348,7 @@
           "old": "backend/app/services/agent_runs.py::_has_character_replied_to_thread",
           "new": "backend/app/domains/social/repository/resident_context.py::_has_character_replied_to_thread",
           "direct_consumers": [
+            "backend/app/runtime/resident/context_references.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -12340,6 +12361,7 @@
           "old": "backend/app/services/agent_runs.py::_is_direct_reply_to_character_post_for_action_gate",
           "new": "backend/app/domains/social/repository/resident_context.py::_is_direct_reply_to_character_post_for_action_gate",
           "direct_consumers": [
+            "backend/app/runtime/resident/context_references.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
@@ -12360,22 +12382,30 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_v6_allowed_tool_calls",
-          "new": "backend/app/services/agent_runs.py::_v6_allowed_tool_calls",
+          "new": "backend/app/domains/routines/service/action_admission.py::_v6_allowed_tool_calls",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/action_menu.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_menu.py::test_v6_action_menu_exposes_create_post_only_with_prepared_brief",
+            "tests/routines/test_action_menu.py::test_v6_action_menu_keeps_feed_actions_without_post_seed",
+            "tests/routines/test_action_admission.py::test_action_admission_uses_same_session_pending_reactions_and_caller_rollback",
+            "tests/routines/test_action_admission.py::test_action_menu_keeps_hidden_parent_context_out_without_committing_hide",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_v6_unavailable_post_actions",
-          "new": "backend/app/services/agent_runs.py::_v6_unavailable_post_actions",
+          "new": "backend/app/domains/routines/service/action_admission.py::_v6_unavailable_post_actions",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/action_menu.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_menu.py::test_v6_action_menu_exposes_create_post_only_with_prepared_brief",
+            "tests/routines/test_action_menu.py::test_v6_action_menu_keeps_feed_actions_without_post_seed",
+            "tests/routines/test_action_admission.py::test_action_admission_uses_same_session_pending_reactions_and_caller_rollback",
+            "tests/routines/test_action_admission.py::test_action_menu_keeps_hidden_parent_context_out_without_committing_hide",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -14597,7 +14627,7 @@
           "new": "backend/app/domains/social/repository/resident_context.py::find_follow_id",
           "source_member": "Exact original exists=db.scalar(select(ProfileFollow.id).where(follower_character_id,target_character_id).limit(1)) expression only. Original policy retains self/deleted/target checks and nullable comparison in the same order; the existing attached Character read happens first.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/context_references.py"
           ],
           "test_nodes": [
             "tests/social/test_resident_context_queries.py::test_resident_reaction_queries_see_caller_pending_rows_and_preserve_rollback",
@@ -32451,6 +32481,30 @@
       "ownership": "The five actual PostLike/PostRepost/visible Post traversal and direct-reply query helpers plus original nullable ProfileFollow scalar now belong Social repository. B5 owner approved this non-overlapping path. Existing AgentRun composition imports the same functions while admission/menu policy moves in C6b2.",
       "preservation": "Five original function bodies and follow scalar AST exact. Canonical Social post_repository.get_post is the same original function formerly reexported by community CRUD. SQL predicates/limit1/traversal frontier/visibility/seen IDs and same Session/autoflush/no-commit are unchanged. Original policy remains at its original call site, with only the exact follow query redirected.",
       "remaining": "Actual admission/menu and all remaining context decisions still need Routines service plus typed same-Session runtime references in C6b2/C6c. This query-only slice does not claim full Resident completion; no future B5/B7 ancestry or duplicate implementations."
+    },
+    "AR-B4-C6b2-resident-action-admission": {
+      "status": "IMPLEMENTED — initial57 and final538 passed / existing PostgreSQL1 skipped; original read-only6checks0, stock gate awaits sequential introduction append",
+      "actual_paths": [
+        "backend/app/domains/routines/contracts/action_context.py",
+        "backend/app/domains/routines/service/action_admission.py",
+        "backend/app/domains/routines/service/action_candidates.py",
+        "backend/app/domains/routines/service/action_menu.py",
+        "backend/app/runtime/resident/context_references.py"
+      ],
+      "test_nodes": [
+        "tests/routines/test_action_menu.py::test_v6_action_menu_exposes_create_post_only_with_prepared_brief",
+        "tests/routines/test_action_menu.py::test_v6_action_menu_keeps_feed_actions_without_post_seed",
+        "tests/routines/test_action_admission.py::test_action_admission_uses_same_session_pending_reactions_and_caller_rollback",
+        "tests/routines/test_action_admission.py::test_action_menu_keeps_hidden_parent_context_out_without_committing_hide",
+        "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+      ],
+      "test_moves": {
+        "backend/tests/test_tendency_note_action_selection.py::test_v6_action_menu_exposes_create_post_only_with_prepared_brief": "backend/tests/routines/test_action_menu.py::test_v6_action_menu_exposes_create_post_only_with_prepared_brief",
+        "backend/tests/test_tendency_note_action_selection.py::test_v6_action_menu_keeps_feed_actions_without_post_seed": "backend/tests/routines/test_action_menu.py::test_v6_action_menu_keeps_feed_actions_without_post_seed"
+      },
+      "ownership": "Five actual action admission, profile label and active menu-table policies belong Routines. Nine bounded runtime reads bind canonical Social/Character/Identity owners on the original Session and return the original attached values. No eager reads, copied foreign models, new Session, commit or provider calls.",
+      "preservation": "Exact five original policy ASTs and all remaining AgentRun bodies after restoring only explicit collaborator calls/first input. Original two action-menu tests keep every assertion and adapt only dependency patch targets/reference input. Two SQLite tests cover pending reactions/follows, observer isolation, hidden ancestry and caller rollback.",
+      "remaining": "Other feed/inbox/relationship context and credential execution preparation remain C6c/C6d. Real mixed execution belongs runtime after owner policies are separated. Settings/autonomy/tendency/manual/first-greeting and HTTP remain C7, Memory daypart B7, operations and credential owners retain their source."
     }
   },
   "test_symbols": {

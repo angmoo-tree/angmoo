@@ -1,7 +1,7 @@
 {
-  "edge_count": 2498,
-  "external_import_count": 2320,
-  "module_count": 743,
+  "edge_count": 2520,
+  "external_import_count": 2327,
+  "module_count": 747,
   "modules": [
     {
       "external_imports": [],
@@ -3660,6 +3660,16 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.contracts.action_context",
+      "path": "backend/app/domains/routines/contracts/action_context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "typing"
       ],
       "imports": [],
@@ -4133,6 +4143,17 @@
     },
     {
       "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.action_context"
+      ],
+      "module": "app.domains.routines.service.action_admission",
+      "path": "backend/app/domains/routines/service/action_admission.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "typing"
       ],
@@ -4151,10 +4172,30 @@
       ],
       "imports": [
         "app.core.context_text",
+        "app.domains.routines.contracts.action_context",
         "app.domains.routines.utils.context_text"
       ],
       "module": "app.domains.routines.service.action_candidates",
       "path": "backend/app/domains/routines/service/action_candidates.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.core.context_text",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.action_context",
+        "app.domains.routines.models",
+        "app.domains.routines.service.action_admission",
+        "app.domains.routines.service.action_briefs",
+        "app.domains.routines.service.action_candidates",
+        "app.domains.routines.utils.context_text"
+      ],
+      "module": "app.domains.routines.service.action_menu",
+      "path": "backend/app/domains/routines/service/action_menu.py",
       "wildcard_imports": []
     },
     {
@@ -9469,6 +9510,26 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.characters.service.profile",
+        "app.domains.identity.models",
+        "app.domains.identity.service.profile",
+        "app.domains.routines.contracts.action_context",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.posts",
+        "app.domains.social.repository.resident_context",
+        "app.domains.social.service.visibility"
+      ],
+      "module": "app.runtime.resident.context_references",
+      "path": "backend/app/runtime/resident/context_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "typing"
       ],
@@ -10459,8 +10520,10 @@
         "app.domains.routines.exceptions",
         "app.domains.routines.repository.feed_cues",
         "app.domains.routines.repository.slots",
+        "app.domains.routines.service.action_admission",
         "app.domains.routines.service.action_briefs",
         "app.domains.routines.service.action_candidates",
+        "app.domains.routines.service.action_menu",
         "app.domains.routines.service.action_prompts",
         "app.domains.routines.service.activity_evidence",
         "app.domains.routines.service.execution_prompts",
@@ -10487,6 +10550,7 @@
         "app.domains.world_characters.service.readiness",
         "app.models",
         "app.runtime.resident.activity_policy",
+        "app.runtime.resident.context_references",
         "app.runtime.resident.decision_lanes",
         "app.runtime.resident.gateway_results",
         "app.runtime.resident.read_only_lanes",

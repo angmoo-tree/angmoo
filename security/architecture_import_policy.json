@@ -1010,6 +1010,7 @@
       "app.domains.routine_posts.utils.text",
       "app.domains.routines.constants",
       "app.domains.routines.contracts",
+      "app.domains.routines.contracts.action_context",
       "app.domains.routines.contracts.activity",
       "app.domains.routines.contracts.activity_policy",
       "app.domains.routines.contracts.activity_scope",
@@ -1047,8 +1048,10 @@
       "app.domains.routines.schemas.resident",
       "app.domains.routines.schemas.runs",
       "app.domains.routines.service",
+      "app.domains.routines.service.action_admission",
       "app.domains.routines.service.action_briefs",
       "app.domains.routines.service.action_candidates",
+      "app.domains.routines.service.action_menu",
       "app.domains.routines.service.action_prompts",
       "app.domains.routines.service.activity_evidence",
       "app.domains.routines.service.activity_logs",
@@ -1228,6 +1231,7 @@
       "app.domains.routine_posts.service.evidence",
       "app.domains.routine_posts.service.generation",
       "app.domains.routines.contracts",
+      "app.domains.routines.contracts.action_context",
       "app.domains.routines.contracts.activity",
       "app.domains.routines.contracts.activity_policy",
       "app.domains.routines.contracts.clock",
@@ -1241,8 +1245,10 @@
       "app.domains.routines.schemas.resident",
       "app.domains.routines.schemas.runs",
       "app.domains.routines.service",
+      "app.domains.routines.service.action_admission",
       "app.domains.routines.service.action_briefs",
       "app.domains.routines.service.action_candidates",
+      "app.domains.routines.service.action_menu",
       "app.domains.routines.service.action_prompts",
       "app.domains.routines.service.activity_evidence",
       "app.domains.routines.service.activity_logs",
@@ -2926,6 +2932,22 @@
         "owner_stage": "AR-B4-C",
         "reason": "Existing mixed Resident composition calls exactly the original query functions after Social-owned SQL extraction; no copied policy, query or wrapper.",
         "removal_condition": "Move actual admission/context composition to typed same-Session runtime collaborator in C6b2/C6c and retire exact legacy importer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.action_admission",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing actual execution calls the canonical original admission/menu policy with explicit same-Session read references; no forwarding facade or copied query.",
+        "removal_condition": "Move remaining actual execution composition in C6c/C6d and remove exact legacy importer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.action_menu",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing actual execution calls the canonical original admission/menu policy with explicit same-Session read references; no forwarding facade or copied query.",
+        "removal_condition": "Move remaining actual execution composition in C6c/C6d and remove exact legacy importer before B8-A.",
         "review_date": "2026-09-06"
       }
     ]

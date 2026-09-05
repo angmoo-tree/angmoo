@@ -1053,3 +1053,13 @@ C6a 초기 **142 passed /기존warnings6/12.42초**, 최종 고정 tree **441 pa
 
 
 C6b1 초기 **55 passed /기존 warnings2/25.07초**, 최종 고정 tree **443 passed /기존 PostgreSQL1 skipped/기존 warnings6/259.37초**. 실제5 query 함수와 follow scalar·주변 정책의 원래 AST를 확인했고, 경계 **743modules/2498edges/exact legacy206/cycle0**, L4 **743/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2262**다. 최초 signed869bae의2경로만 메모리에서 보충했으며 frozen/checkpoint/additions는 변경하지 않았다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 뒤 확인한다. C6 이후에도 settings/활성화·capacity/수동 실행/첫인사의 실제 Routines 정책과 HTTP 전환을 완료해야 하며, runtime/characters/management에 남은 업무를 완료로 간주하지 않는다.
+
+
+## AR-B4-C6b2 — Resident 행동 허용·실제 후보 표
+
+실제 정책5함수와 원래2개 메뉴 테스트를 Routines 소유로 이전했다. 조회9개는 caller의 같은 Session을 가진 runtime collaborator가 소유별 실제 함수로 연결하고, 원래 conditional 호출·autoflush·객체 identity·예외와 provider0을 유지한다. 정확 협력 인자를 복원하면 정책5개와 모든 남은 AgentRun 본문 AST가 같고 기존2테스트의 assertion도 같다. 초기57 PASS/기존warnings2/39.49초이며 추가2SQLite는 caller pending/observer/rollback 및 미커밋 숨김의 후보 제외를 검증한다.
+
+검사기는 parent가 검토한 signed6d9e342의 `check_split_evidence` 함수 본문만 반영했다. 각 검사 위치에서 파일을 계속 읽고 동일 invocation의 동일 source text parsing만 재사용한다. Memory 테스트2개·추가원장·제품 소스는 가져오지 않았다. 기존 검증 의미와 동결자료를 유지하며 최종 검증을 이어 기록한다.
+
+
+C6b2 최종 고정 tree는 **538 passed /기존 PostgreSQL1 skipped/기존warnings4/187.22초**이며 기존 checkpoint·node 검사도 포함했다. 경계 **747modules/2520edges/exact legacy206/cycle0**, L4 **747/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2264**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions 불변이다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 뒤 다시 확인한다. 호출 token만 바꾸어 원문의 여러 줄 서식을 유지했고 실제5정책과 남은 전체 AgentRun의 AST 및 원래2테스트 assertion을 대조했다.

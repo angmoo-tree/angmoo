@@ -677,3 +677,8 @@ Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥�
 ### Resident가 사용하는 Social 조회
 
 `social/repository/resident_context.py`는 좋아요·리포스트·팔로우 여부와 보이는 스레드 답글의 실제 조회를 소유합니다. 조회는 caller의 Session을 그대로 사용하며 visibility 조건·후속 조회 순서·미커밋 변경의 자동 반영·rollback 의미를 유지합니다. Routines는 이 결과를 활동 후보와 도구 허용 판단에 사용하며 Social ORM의 조회를 별도의 Routines repository에 복제하지 않습니다. 현재 남은 AgentRun 소비자는 C6b의 실행 협력 전환 대상으로 명시합니다.
+
+
+### Resident 행동 후보의 허용과 표현
+
+`routines/service/action_admission.py`는 자기 글·기존 반응·답글·팔로우 상태에 따라 허용 도구와 차단 이유를 정합니다. `action_menu.py`는 실제 후보 표를, `action_candidates.py`는 읽은 작성자 이름을 표현합니다. `contracts/action_context.py`의 제한된 읽기 협력을 `runtime/resident/context_references.py`가 같은 Session으로 연결합니다. 조건을 판단하기 전 모든 자료를 미리 읽지 않고, 원래 분기에서 필요한 조회만 수행하며 받은 ORM 객체를 복제하지 않습니다. Social SQL과 숨김 판단은 Social 소유 함수를 사용합니다.
