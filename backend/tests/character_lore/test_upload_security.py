@@ -8,7 +8,7 @@ import pytest
 from docx import Document
 from pypdf import PdfWriter
 
-from app.services import character_lore
+from app.domains.character_lore import parser as character_lore
 
 
 class _ChunkedUpload:

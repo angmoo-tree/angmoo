@@ -33839,6 +33839,10 @@
           "backend/app/domains/character_lore/constants.py",
           "backend/app/domains/character_lore/contracts.py",
           "backend/app/domains/character_lore/exceptions.py",
+          "backend/app/domains/character_lore/parser.py",
+          "backend/app/domains/character_lore/policies/chunking.py",
+          "backend/app/domains/character_lore/service/presentation.py",
+          "backend/app/domains/character_lore/utils.py",
           "backend/app/services/character_lore.py"
         ],
         "backend/app/services/lore_parser_quota.py": [
@@ -34276,7 +34280,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::read_lore_upload_bytes",
-          "new": "backend/app/services/character_lore.py::read_lore_upload_bytes",
+          "new": "backend/app/domains/character_lore/parser.py::read_lore_upload_bytes",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34340,7 +34344,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::chunk_lore_text",
-          "new": "backend/app/services/character_lore.py::chunk_lore_text",
+          "new": "backend/app/domains/character_lore/policies/chunking.py::chunk_lore_text",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34439,7 +34443,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::format_lore_prompt_context",
-          "new": "backend/app/services/character_lore.py::format_lore_prompt_context",
+          "new": "backend/app/domains/character_lore/service/presentation.py::format_lore_prompt_context",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34494,7 +34498,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_validated_extension",
-          "new": "backend/app/services/character_lore.py::_validated_extension",
+          "new": "backend/app/domains/character_lore/parser.py::_validated_extension",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34505,7 +34509,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_safe_filename",
-          "new": "backend/app/services/character_lore.py::_safe_filename",
+          "new": "backend/app/domains/character_lore/parser.py::_safe_filename",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34516,7 +34520,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::validate_lore_upload_contract",
-          "new": "backend/app/services/character_lore.py::validate_lore_upload_contract",
+          "new": "backend/app/domains/character_lore/parser.py::validate_lore_upload_contract",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34527,7 +34531,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_preflight_docx",
-          "new": "backend/app/services/character_lore.py::_preflight_docx",
+          "new": "backend/app/domains/character_lore/parser.py::_preflight_docx",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34538,7 +34542,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_extract_text",
-          "new": "backend/app/services/character_lore.py::_extract_text",
+          "new": "backend/app/domains/character_lore/parser.py::_extract_text",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34549,7 +34553,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_decode_text_file",
-          "new": "backend/app/services/character_lore.py::_decode_text_file",
+          "new": "backend/app/domains/character_lore/parser.py::_decode_text_file",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34560,7 +34564,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_extract_pdf_text",
-          "new": "backend/app/services/character_lore.py::_extract_pdf_text",
+          "new": "backend/app/domains/character_lore/parser.py::_extract_pdf_text",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34571,7 +34575,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_extract_docx_text",
-          "new": "backend/app/services/character_lore.py::_extract_docx_text",
+          "new": "backend/app/domains/character_lore/parser.py::_extract_docx_text",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34582,7 +34586,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_run_document_parser",
-          "new": "backend/app/services/character_lore.py::_run_document_parser",
+          "new": "backend/app/domains/character_lore/parser.py::_run_document_parser",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34593,7 +34597,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_run_worker_process",
-          "new": "backend/app/services/character_lore.py::_run_worker_process",
+          "new": "backend/app/domains/character_lore/parser.py::_run_worker_process",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34604,7 +34608,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_document_parser_worker",
-          "new": "backend/app/services/character_lore.py::_document_parser_worker",
+          "new": "backend/app/domains/character_lore/parser.py::_document_parser_worker",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34615,7 +34619,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_extract_pdf_text_in_process",
-          "new": "backend/app/services/character_lore.py::_extract_pdf_text_in_process",
+          "new": "backend/app/domains/character_lore/parser.py::_extract_pdf_text_in_process",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34626,7 +34630,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_extract_docx_text_in_process",
-          "new": "backend/app/services/character_lore.py::_extract_docx_text_in_process",
+          "new": "backend/app/domains/character_lore/parser.py::_extract_docx_text_in_process",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34637,7 +34641,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_apply_parser_resource_limits",
-          "new": "backend/app/services/character_lore.py::_apply_parser_resource_limits",
+          "new": "backend/app/domains/character_lore/parser.py::_apply_parser_resource_limits",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34648,7 +34652,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_apply_windows_parser_resource_limits",
-          "new": "backend/app/services/character_lore.py::_apply_windows_parser_resource_limits",
+          "new": "backend/app/domains/character_lore/parser.py::_apply_windows_parser_resource_limits",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34659,7 +34663,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_normalize_text",
-          "new": "backend/app/services/character_lore.py::_normalize_text",
+          "new": "backend/app/domains/character_lore/utils.py::_normalize_text",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34670,7 +34674,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_split_lore_units",
-          "new": "backend/app/services/character_lore.py::_split_lore_units",
+          "new": "backend/app/domains/character_lore/policies/chunking.py::_split_lore_units",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34681,7 +34685,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_looks_like_section_heading",
-          "new": "backend/app/services/character_lore.py::_looks_like_section_heading",
+          "new": "backend/app/domains/character_lore/policies/chunking.py::_looks_like_section_heading",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34692,7 +34696,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_clean_heading",
-          "new": "backend/app/services/character_lore.py::_clean_heading",
+          "new": "backend/app/domains/character_lore/policies/chunking.py::_clean_heading",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34703,7 +34707,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_looks_like_boundary_line",
-          "new": "backend/app/services/character_lore.py::_looks_like_boundary_line",
+          "new": "backend/app/domains/character_lore/policies/chunking.py::_looks_like_boundary_line",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34714,7 +34718,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_split_long_unit",
-          "new": "backend/app/services/character_lore.py::_split_long_unit",
+          "new": "backend/app/domains/character_lore/policies/chunking.py::_split_long_unit",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34823,7 +34827,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_chunk_embedding_input",
-          "new": "backend/app/services/character_lore.py::_chunk_embedding_input",
+          "new": "backend/app/domains/character_lore/service/presentation.py::_chunk_embedding_input",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34834,7 +34838,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_query_embedding_input",
-          "new": "backend/app/services/character_lore.py::_query_embedding_input",
+          "new": "backend/app/domains/character_lore/service/presentation.py::_query_embedding_input",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -34889,7 +34893,7 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_sha256_text",
-          "new": "backend/app/services/character_lore.py::_sha256_text",
+          "new": "backend/app/domains/character_lore/utils.py::_sha256_text",
           "direct_consumers": [
             "backend/app/services/character_lore.py"
           ],
@@ -35021,9 +35025,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_WINDOWS_PARSER_JOB_HANDLE",
-          "new": "backend/app/services/character_lore.py::_WINDOWS_PARSER_JOB_HANDLE",
+          "new": "backend/app/domains/character_lore/parser.py::_WINDOWS_PARSER_JOB_HANDLE",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process"
@@ -35033,6 +35037,161 @@
       "remaining": [
         "Legacy lore service and HTTP/provider/foreign context callers migrate next",
         "G5 explicit registry/aggregate retirement; immutable revisions untouched"
+      ]
+    },
+    "AR-B8-LORE-A2": {
+      "status": "SOURCE PREPARATION; focused245PASS; diagnostic source/split/assertion/suppression/APIORM/node0; stock pending linear introductions",
+      "scope": "Actual isolated document parser/upload byte bounds, deterministic chunking, text/hash helpers, and prompt/embedding input formatting; no forwarding implementations.",
+      "moved_symbols": [
+        {
+          "old": "backend/app/services/character_lore.py::read_lore_upload_bytes",
+          "new": "backend/app/domains/character_lore/parser.py::read_lore_upload_bytes",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_validated_extension",
+          "new": "backend/app/domains/character_lore/parser.py::_validated_extension",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_safe_filename",
+          "new": "backend/app/domains/character_lore/parser.py::_safe_filename",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::validate_lore_upload_contract",
+          "new": "backend/app/domains/character_lore/parser.py::validate_lore_upload_contract",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_preflight_docx",
+          "new": "backend/app/domains/character_lore/parser.py::_preflight_docx",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_extract_text",
+          "new": "backend/app/domains/character_lore/parser.py::_extract_text",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_decode_text_file",
+          "new": "backend/app/domains/character_lore/parser.py::_decode_text_file",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_extract_pdf_text",
+          "new": "backend/app/domains/character_lore/parser.py::_extract_pdf_text",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_extract_docx_text",
+          "new": "backend/app/domains/character_lore/parser.py::_extract_docx_text",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_run_document_parser",
+          "new": "backend/app/domains/character_lore/parser.py::_run_document_parser",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_run_worker_process",
+          "new": "backend/app/domains/character_lore/parser.py::_run_worker_process",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_document_parser_worker",
+          "new": "backend/app/domains/character_lore/parser.py::_document_parser_worker",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_extract_pdf_text_in_process",
+          "new": "backend/app/domains/character_lore/parser.py::_extract_pdf_text_in_process",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_extract_docx_text_in_process",
+          "new": "backend/app/domains/character_lore/parser.py::_extract_docx_text_in_process",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_WINDOWS_PARSER_JOB_HANDLE",
+          "new": "backend/app/domains/character_lore/parser.py::_WINDOWS_PARSER_JOB_HANDLE",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_apply_parser_resource_limits",
+          "new": "backend/app/domains/character_lore/parser.py::_apply_parser_resource_limits",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_apply_windows_parser_resource_limits",
+          "new": "backend/app/domains/character_lore/parser.py::_apply_windows_parser_resource_limits",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::chunk_lore_text",
+          "new": "backend/app/domains/character_lore/policies/chunking.py::chunk_lore_text",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_split_lore_units",
+          "new": "backend/app/domains/character_lore/policies/chunking.py::_split_lore_units",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_looks_like_section_heading",
+          "new": "backend/app/domains/character_lore/policies/chunking.py::_looks_like_section_heading",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_clean_heading",
+          "new": "backend/app/domains/character_lore/policies/chunking.py::_clean_heading",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_looks_like_boundary_line",
+          "new": "backend/app/domains/character_lore/policies/chunking.py::_looks_like_boundary_line",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_split_long_unit",
+          "new": "backend/app/domains/character_lore/policies/chunking.py::_split_long_unit",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_normalize_text",
+          "new": "backend/app/domains/character_lore/utils.py::_normalize_text",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_sha256_text",
+          "new": "backend/app/domains/character_lore/utils.py::_sha256_text",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::format_lore_prompt_context",
+          "new": "backend/app/domains/character_lore/service/presentation.py::format_lore_prompt_context",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_chunk_embedding_input",
+          "new": "backend/app/domains/character_lore/service/presentation.py::_chunk_embedding_input",
+          "same": true
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_query_embedding_input",
+          "new": "backend/app/domains/character_lore/service/presentation.py::_query_embedding_input",
+          "same": true
+        }
+      ],
+      "preserved": [
+        "All28 full AST definitions/state declarations unchanged",
+        "Spawn/Pipe/resource limits/timeout/terminate/kill/close sequence and PDF/DOCX bounds unchanged",
+        "Existing document workflow imports actual functions until A3 transition; security parser tests import defining module"
+      ],
+      "remaining": [
+        "Persistent source/chunk operations, retrieval/ranking, credential/provider tracking and HTTP composition are next actual slice",
+        "G5 registry/B8-B and source capture/CI remain pending"
       ]
     }
   }

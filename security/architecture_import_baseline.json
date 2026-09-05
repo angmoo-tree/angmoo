@@ -1,7 +1,7 @@
 {
-  "edge_count": 2438,
-  "external_import_count": 2261,
-  "module_count": 734,
+  "edge_count": 2450,
+  "external_import_count": 2266,
+  "module_count": 739,
   "modules": [
     {
       "external_imports": [],
@@ -848,6 +848,53 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "ctypes",
+        "docx",
+        "io",
+        "multiprocessing",
+        "os",
+        "pathlib",
+        "pypdf",
+        "resource",
+        "stat",
+        "sys",
+        "typing",
+        "zipfile"
+      ],
+      "imports": [
+        "app.domains.character_lore.constants",
+        "app.domains.character_lore.exceptions",
+        "app.domains.character_lore.utils"
+      ],
+      "module": "app.domains.character_lore.parser",
+      "path": "backend/app/domains/character_lore/parser.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.character_lore.policies",
+      "path": "backend/app/domains/character_lore/policies/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "re"
+      ],
+      "imports": [
+        "app.domains.character_lore.constants",
+        "app.domains.character_lore.contracts",
+        "app.domains.character_lore.exceptions",
+        "app.domains.character_lore.utils"
+      ],
+      "module": "app.domains.character_lore.policies.chunking",
+      "path": "backend/app/domains/character_lore/policies/chunking.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "datetime",
         "pydantic"
       ],
@@ -884,6 +931,29 @@
       ],
       "module": "app.domains.character_lore.service.parser_quota",
       "path": "backend/app/domains/character_lore/service/parser_quota.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.core.context_text",
+        "app.domains.character_lore.contracts"
+      ],
+      "module": "app.domains.character_lore.service.presentation",
+      "path": "backend/app/domains/character_lore/service/presentation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "hashlib",
+        "re"
+      ],
+      "imports": [],
+      "module": "app.domains.character_lore.utils",
+      "path": "backend/app/domains/character_lore/utils.py",
       "wildcard_imports": []
     },
     {
@@ -10371,36 +10441,25 @@
       "external_imports": [
         "__future__",
         "asyncio",
-        "ctypes",
         "datetime",
-        "docx",
-        "hashlib",
-        "io",
         "math",
-        "multiprocessing",
-        "os",
-        "pathlib",
-        "pypdf",
-        "re",
-        "resource",
         "sqlalchemy",
         "sqlalchemy.orm",
-        "stat",
-        "sys",
         "time",
-        "typing",
-        "uuid",
-        "zipfile"
+        "uuid"
       ],
       "imports": [
-        "app.core.context_text",
         "app.credentials",
         "app.cruds.agents",
         "app.cruds.community",
         "app.domains.character_lore.constants",
         "app.domains.character_lore.contracts",
         "app.domains.character_lore.exceptions",
+        "app.domains.character_lore.parser",
+        "app.domains.character_lore.policies.chunking",
         "app.domains.character_lore.service.parser_quota",
+        "app.domains.character_lore.service.presentation",
+        "app.domains.character_lore.utils",
         "app.models",
         "app.providers.contracts",
         "app.providers.registry",

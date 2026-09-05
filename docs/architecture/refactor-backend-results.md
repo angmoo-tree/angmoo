@@ -1110,3 +1110,11 @@ Tree `f52dbdb` 다음 source에서 `character_lore/models.py`로 실제 ORM3개�
 
 
 Lore A1의 정확 split symbol 재검사는 **0 errors**로 종료했다. 정의/행동 보존과 부분 scope 근거를 고정하며, pending 원장을 재생성하거나 검사 대상에서 제외하지 않았다.
+
+## AR-B8 Lore A2 문서 파서·청크·텍스트 표현 준비 — 2026-09-06
+
+Lore A1 `f7f303d`의 실제 문서 파서·청크 분할·정규화·해시·입력/결과 표현 28개 정의와 Windows parser job handle을 역할 파일로 옮겼다. 정의 전체 AST는 원래와 동일하다. 파일/MIME/ZIP 한도와 PDF/DOCX 자식 프로세스의 timeout·terminate/join/kill·리소스 제한, 섹션/문장 경계, 임베딩 prefix와 프롬프트 문자열을 유지한다. 기존 문서 서비스는 같은 함수 객체를 사용하고, parser 보안 회귀는 실제 canonical parser를 직접 검사한다.
+
+Lore/Tree/M3삭제/LangGraph resident **245 passed / 기존 warning1 / 14.74s**, 경계 **739 modules/2,450 edges/legacy208**, 현재 L4 **739/14/97**, deferred22다. 원장을 수정하지 않은 signed869bae55 두 source의 읽기 전용 supplement 진단은 protected2,201/current2,251이며 source/split/assertion/suppression/APIORM/node 손실 **0**이다. stock gate는 선행 source 도입 원장의 순차 통합 대기 상태로 남는다.
+
+새 실제 source 파일은 parser.py, policies/__init__.py·chunking.py, utils.py, service/presentation.py의 5개이며 새 test node는 없다. 문서 저장·검색·provider 추적·HTTP 소유 이전과 G5/G06/B8-B 및 Hosted CI/설치는 아직 다음 범위다.

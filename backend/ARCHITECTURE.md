@@ -114,7 +114,9 @@ backend/
 
 업로드한 캐릭터 참고 문서는 `character_lore/models.py`의 source/chunk/parser lease 모델과 JSON 임베딩 타입을 사용합니다. Memory의 사건 기억과 별도 업무입니다. HTTP 입출력은 `schemas.py`, chunk·검색 결과·embedding credential 값은 `contracts.py`, 제한과 오류는 `constants.py`·`exceptions.py`가 실제 정의를 소유합니다.
 
-`service/parser_quota.py`는 실제 parser 수용량 판단과 SQL·lock·lease 저장/해제를 담당합니다. SQLite 프로세스 lock, PostgreSQL advisory transaction lock, 전역/사용자 한도, HMAC subject hash와 commit/rollback 순서가 원래와 같습니다. 문서 파서와 업로드/검색/임베딩 조립은 아직 기존 lore service에 남은 다음 전환 범위입니다. 현재 부분 scope와 정확한 소비자 bridge가 이 차이를 표현하며 전체 lore 전환 완료를 뜻하지 않습니다.
+`service/parser_quota.py`는 실제 parser 수용량 판단과 SQL·lock·lease 저장/해제를 담당합니다. SQLite 프로세스 lock, PostgreSQL advisory transaction lock, 전역/사용자 한도, HMAC subject hash와 commit/rollback 순서가 원래와 같습니다. `parser.py`는 업로드 바이트·확장자·MIME·ZIP 검증, 제한된 자식 프로세스의 PDF/DOCX 추출과 종료를 실제 소유합니다. `policies/chunking.py`는 문장·섹션 경계를 보존하는 청크 분할, `service/presentation.py`는 검색 결과와 임베딩 입력의 텍스트 표현, `utils.py`는 정규화와 해시를 담당합니다.
+
+문서 저장·검색·임베딩 호출·HTTP 조립은 아직 기존 lore service에 남은 다음 전환 범위입니다. 해당 서비스는 이미 이전된 정의를 같은 함수 객체로 사용합니다. 현재 부분 scope와 정확한 소비자 bridge가 이 차이를 표현하며 전체 lore 전환 완료를 뜻하지 않습니다.
 
 ### Tree 게시판의 소유
 

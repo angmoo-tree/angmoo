@@ -2,21 +2,10 @@ from __future__ import annotations
 
 import asyncio
 from datetime import UTC, datetime
-from io import BytesIO
-import hashlib
 import math
-import multiprocessing
-import os
-from pathlib import PurePosixPath
-import re
-import stat
-import sys
 import time
-from typing import Any, Callable
 from uuid import uuid4
-from zipfile import BadZipFile, ZipFile
 
-from pypdf import PdfReader
 from sqlalchemy import func, select, update
 from sqlalchemy.orm import Session
 
@@ -37,7 +26,6 @@ from app.services.direct_llm import (
 )
 from app.services import community as community_service
 from app.domains.character_lore.service import parser_quota as lore_parser_quota
-from app.core.context_text import neutralize_context_text
 from app.domains.character_lore.constants import (
     SUPPORTED_EXTENSIONS,
     MAX_LORE_FILE_BYTES,
@@ -83,24 +71,41 @@ from app.domains.character_lore.contracts import (
     LoreRetrievalResult,
     _GoogleEmbeddingCredential,
 )
-
-
-async def read_lore_upload_bytes(upload_file: Any) -> bytes:
-    content = bytearray()
-    while True:
-        remaining = MAX_LORE_FILE_BYTES + 1 - len(content)
-        if remaining <= 0:
-            raise CharacterLoreFileTooLargeError(
-                "설정집 파일은 10 MiB 이하만 업로드할 수 있습니다."
-            )
-        chunk = await upload_file.read(min(LORE_UPLOAD_READ_CHUNK_BYTES, remaining))
-        if not chunk:
-            return bytes(content)
-        content.extend(chunk)
-        if len(content) > MAX_LORE_FILE_BYTES:
-            raise CharacterLoreFileTooLargeError(
-                "설정집 파일은 10 MiB 이하만 업로드할 수 있습니다."
-            )
+from app.domains.character_lore.parser import (
+    _apply_parser_resource_limits,
+    _apply_windows_parser_resource_limits,
+    _decode_text_file,
+    _document_parser_worker,
+    _extract_docx_text,
+    _extract_docx_text_in_process,
+    _extract_pdf_text,
+    _extract_pdf_text_in_process,
+    _extract_text,
+    _preflight_docx,
+    _run_document_parser,
+    _run_worker_process,
+    _safe_filename,
+    _validated_extension,
+    read_lore_upload_bytes,
+    validate_lore_upload_contract,
+)
+from app.domains.character_lore.policies.chunking import (
+    _clean_heading,
+    _looks_like_boundary_line,
+    _looks_like_section_heading,
+    _split_long_unit,
+    _split_lore_units,
+    chunk_lore_text,
+)
+from app.domains.character_lore.utils import (
+    _normalize_text,
+    _sha256_text,
+)
+from app.domains.character_lore.service.presentation import (
+    _chunk_embedding_input,
+    _query_embedding_input,
+    format_lore_prompt_context,
+)
 
 
 def list_lore_sources(
@@ -269,53 +274,6 @@ def rebuild_lore_source(
     return schemas.CharacterLoreSourceRead.model_validate(source)
 
 
-def chunk_lore_text(text: str) -> list[LoreChunkDraft]:
-    normalized = _normalize_text(text)
-    if not normalized:
-        raise CharacterLoreValidationError("설정집에서 텍스트를 추출하지 못했습니다.")
-    units = _split_lore_units(normalized)
-    chunks: list[tuple[str | None, str]] = []
-    current_section: str | None = None
-    current_parts: list[str] = []
-    current_length = 0
-
-    def flush_current() -> None:
-        nonlocal current_parts, current_length, current_section
-        if not current_parts:
-            return
-        chunks.append((current_section, "\n".join(current_parts).strip()))
-        current_parts = []
-        current_length = 0
-
-    for section_hint, unit in units:
-        for piece in _split_long_unit(unit):
-            piece_length = len(piece)
-            if current_parts:
-                next_length = current_length + piece_length + 1
-                if section_hint != current_section or next_length > TARGET_CHUNK_MAX_CHARS:
-                    flush_current()
-            if not current_parts:
-                current_section = section_hint
-            current_parts.append(piece)
-            current_length += piece_length + 1
-            if current_length >= TARGET_CHUNK_TARGET_CHARS:
-                flush_current()
-    flush_current()
-
-    drafts = [
-        LoreChunkDraft(
-            section_hint=section,
-            text=chunk_text,
-            content_hash=_sha256_text(chunk_text),
-        )
-        for section, chunk_text in chunks
-        if chunk_text
-    ]
-    if not drafts:
-        raise CharacterLoreValidationError("설정집에서 검색 가능한 chunk를 만들지 못했습니다.")
-    return drafts
-
-
 def retrieve_lore_for_self_update(
     db: Session,
     *,
@@ -475,39 +433,6 @@ def build_lore_search_query(
     )
 
 
-def format_lore_prompt_context(
-    result: LoreRetrievalResult,
-    *,
-    lore_query_mode: str | None = None,
-    max_chunks: int | None = None,
-    max_text_chars: int = 900,
-) -> str:
-    if not result.chunks:
-        return ""
-    chunks = result.chunks[:max_chunks] if max_chunks is not None else result.chunks
-    lines = [
-        "Character lore retrieval:",
-        f"- retrieval_mode: {result.mode}",
-        f"- lore_query_mode: {lore_query_mode}" if lore_query_mode else "",
-        "- These chunks are private reference material. Do not copy sentences from them into title/body.",
-        "- Use them only to choose a character-owned thought, memory, habit, taste, object, place, or worldview detail.",
-        "- Do not write as if replying to a specific community post or author.",
-        "- Do not expose lore_chunk_ids, retrieval_mode, lore_query_mode, or source filenames in visible title/body.",
-        "selected_lore_chunks:",
-    ]
-    lines = [line for line in lines if line]
-    for chunk in chunks:
-        lines.extend(
-            [
-                f"- lore_chunk_id: {chunk.id}",
-                f"  source: {neutralize_context_text(chunk.source_filename)}",
-                f"  section_hint: {neutralize_context_text(chunk.section_hint or '-')}",
-                "  text: " + neutralize_context_text(chunk.text)[:max_text_chars],
-            ]
-        )
-    return "\n".join(lines)
-
-
 def mark_lore_chunks_used(db: Session, *, chunk_ids: list[str]) -> None:
     if not chunk_ids:
         return
@@ -597,493 +522,6 @@ def _get_owned_source(
     if source is None or source.character_id != character_id:
         raise CharacterLoreNotFoundError(source_id)
     return source
-
-
-def _validated_extension(filename: str) -> str:
-    lower = filename.strip().lower()
-    if lower.endswith(".doc") and not lower.endswith(".docx"):
-        raise CharacterLoreValidationError("구형 .doc 파일은 v1에서 지원하지 않습니다.")
-    extension = "." + lower.rsplit(".", 1)[-1] if "." in lower else ""
-    if extension not in SUPPORTED_EXTENSIONS:
-        raise CharacterLoreValidationError("PDF, DOCX, TXT, MD 파일만 업로드할 수 있습니다.")
-    return extension
-
-
-def _safe_filename(filename: str) -> str:
-    value = filename.strip().replace("\\", "/").split("/")[-1]
-    return (value or "lore-file")[:240]
-
-
-def validate_lore_upload_contract(
-    *,
-    extension: str,
-    content_type: str | None,
-    file_bytes: bytes,
-) -> None:
-    normalized_content_type = (content_type or "").split(";", 1)[0].strip().lower()
-    allowed_content_types = {
-        ".pdf": {"application/pdf"},
-        ".docx": {DOCX_CONTENT_TYPE},
-        ".txt": {"text/plain"},
-        ".md": {"text/markdown", "text/plain", "text/x-markdown"},
-    }
-    if normalized_content_type not in allowed_content_types.get(extension, set()):
-        raise CharacterLoreValidationError(
-            "파일 확장자와 Content-Type이 일치하지 않습니다."
-        )
-    if not file_bytes:
-        raise CharacterLoreValidationError("빈 설정집 파일은 업로드할 수 없습니다.")
-    if extension == ".pdf":
-        if not file_bytes.startswith(b"%PDF-"):
-            raise CharacterLoreValidationError("유효한 PDF 파일이 아닙니다.")
-        return
-    if extension == ".docx":
-        if not file_bytes.startswith(b"PK\x03\x04"):
-            raise CharacterLoreValidationError("유효한 DOCX 파일이 아닙니다.")
-        _preflight_docx(file_bytes)
-        return
-    if b"\x00" in file_bytes or file_bytes.startswith((b"%PDF-", b"PK\x03\x04")):
-        raise CharacterLoreValidationError("텍스트 파일에서 바이너리 데이터가 감지됐습니다.")
-    control_bytes = sum(
-        byte < 32 and byte not in {9, 10, 13}
-        for byte in file_bytes[: min(len(file_bytes), 64 * 1024)]
-    )
-    if control_bytes > max(1, min(len(file_bytes), 64 * 1024) // 100):
-        raise CharacterLoreValidationError("유효한 텍스트 파일이 아닙니다.")
-
-
-def _preflight_docx(file_bytes: bytes) -> None:
-    try:
-        with ZipFile(BytesIO(file_bytes)) as archive:
-            entries = archive.infolist()
-            if len(entries) > MAX_DOCX_ENTRIES:
-                raise CharacterLoreValidationError("DOCX 내부 파일 수가 너무 많습니다.")
-            names = {entry.filename for entry in entries}
-            if "[Content_Types].xml" not in names or "word/document.xml" not in names:
-                raise CharacterLoreValidationError("DOCX 필수 문서 구조가 없습니다.")
-
-            total_uncompressed = 0
-            total_xml = 0
-            for entry in entries:
-                path = PurePosixPath(entry.filename.replace("\\", "/"))
-                if (
-                    not path.parts
-                    or path.is_absolute()
-                    or ".." in path.parts
-                    or ":" in path.parts[0]
-                    or "\x00" in entry.filename
-                ):
-                    raise CharacterLoreValidationError(
-                        "DOCX 내부 경로가 안전하지 않습니다."
-                    )
-                if entry.flag_bits & 0x1:
-                    raise CharacterLoreValidationError(
-                        "암호화된 DOCX 항목은 지원하지 않습니다."
-                    )
-                mode = entry.external_attr >> 16
-                if stat.S_ISLNK(mode):
-                    raise CharacterLoreValidationError(
-                        "DOCX 내부 심볼릭 링크는 허용하지 않습니다."
-                    )
-                if entry.file_size > MAX_DOCX_ENTRY_BYTES:
-                    raise CharacterLoreValidationError(
-                        "DOCX 내부 파일 크기가 제한을 초과했습니다."
-                    )
-                if entry.file_size and (
-                    entry.compress_size <= 0
-                    or entry.file_size
-                    > entry.compress_size * MAX_DOCX_COMPRESSION_RATIO
-                ):
-                    raise CharacterLoreValidationError(
-                        "DOCX 압축 비율이 안전 한도를 초과했습니다."
-                    )
-                total_uncompressed += entry.file_size
-                if total_uncompressed > MAX_DOCX_UNCOMPRESSED_BYTES:
-                    raise CharacterLoreValidationError(
-                        "DOCX 압축 해제 크기가 제한을 초과했습니다."
-                    )
-
-                if entry.filename.lower().endswith((".xml", ".rels")):
-                    total_xml += entry.file_size
-                    if total_xml > MAX_DOCX_XML_BYTES:
-                        raise CharacterLoreValidationError(
-                            "DOCX XML 크기가 제한을 초과했습니다."
-                        )
-                    xml_bytes = archive.read(entry)
-                    lowered = xml_bytes.lower()
-                    if b"<!doctype" in lowered or b"<!entity" in lowered:
-                        raise CharacterLoreValidationError(
-                            "DOCX 외부 엔터티 선언은 허용하지 않습니다."
-                        )
-    except CharacterLoreValidationError:
-        raise
-    except (BadZipFile, OSError, RuntimeError, ValueError) as exc:
-        raise CharacterLoreValidationError("유효한 DOCX 파일이 아닙니다.") from exc
-
-
-def _extract_text(
-    extension: str,
-    file_bytes: bytes,
-    *,
-    content_type: str | None = None,
-) -> str:
-    if content_type is not None:
-        validate_lore_upload_contract(
-            extension=extension,
-            content_type=content_type,
-            file_bytes=file_bytes,
-        )
-    if extension in {".txt", ".md"}:
-        text = _decode_text_file(file_bytes)
-    elif extension == ".pdf":
-        text = _extract_pdf_text(file_bytes)
-    elif extension == ".docx":
-        text = _extract_docx_text(file_bytes)
-    else:
-        raise CharacterLoreValidationError("지원하지 않는 설정집 파일 형식입니다.")
-    normalized = _normalize_text(text)
-    if not normalized:
-        raise CharacterLoreValidationError("설정집에서 텍스트를 추출하지 못했습니다.")
-    return normalized
-
-
-def _decode_text_file(file_bytes: bytes) -> str:
-    try:
-        return file_bytes.decode("utf-8-sig")
-    except UnicodeDecodeError:
-        return file_bytes.decode("cp949", errors="replace")
-
-
-def _extract_pdf_text(file_bytes: bytes) -> str:
-    return _run_document_parser(".pdf", file_bytes)
-
-
-def _extract_docx_text(file_bytes: bytes) -> str:
-    return _run_document_parser(".docx", file_bytes)
-
-
-def _run_document_parser(extension: str, file_bytes: bytes) -> str:
-    result = _run_worker_process(
-        _document_parser_worker,
-        (extension, file_bytes),
-        timeout_seconds=LORE_PARSER_TIMEOUT_SECONDS,
-    )
-    if not isinstance(result, str):
-        raise CharacterLoreValidationError("문서 파서가 잘못된 결과를 반환했습니다.")
-    return result
-
-
-def _run_worker_process(
-    target: Callable[..., None],
-    args: tuple[Any, ...],
-    *,
-    timeout_seconds: float,
-) -> Any:
-    context = multiprocessing.get_context("spawn")
-    parent_connection, child_connection = context.Pipe(duplex=False)
-    process = context.Process(
-        target=target,
-        args=(child_connection, *args),
-        daemon=True,
-    )
-    try:
-        process.start()
-        child_connection.close()
-        if not parent_connection.poll(timeout_seconds):
-            raise CharacterLoreValidationError(
-                "문서 처리 시간이 안전 제한을 초과했습니다."
-            )
-        try:
-            status_name, payload = parent_connection.recv()
-        except (EOFError, OSError, ValueError) as exc:
-            raise CharacterLoreValidationError(
-                "격리된 문서 파서가 비정상 종료됐습니다."
-            ) from exc
-        if status_name == "ok":
-            return payload
-        if status_name == "validation":
-            raise CharacterLoreValidationError(str(payload)[:500])
-        raise CharacterLoreValidationError("문서 파서가 파일을 처리하지 못했습니다.")
-    finally:
-        parent_connection.close()
-        child_connection.close()
-        if process.is_alive():
-            process.terminate()
-            process.join(timeout=1)
-        if process.is_alive():
-            process.kill()
-            process.join(timeout=1)
-        if process.pid is not None and not process.is_alive():
-            process.join(timeout=0.1)
-
-
-def _document_parser_worker(
-    connection: Any,
-    extension: str,
-    file_bytes: bytes,
-) -> None:
-    try:
-        _apply_parser_resource_limits()
-        if extension == ".pdf":
-            text = _extract_pdf_text_in_process(file_bytes)
-        elif extension == ".docx":
-            text = _extract_docx_text_in_process(file_bytes)
-        else:
-            raise CharacterLoreValidationError("지원하지 않는 문서 형식입니다.")
-        connection.send(("ok", text))
-    except CharacterLoreValidationError as exc:
-        connection.send(("validation", str(exc)[:500]))
-    except BaseException:
-        connection.send(("error", "document_parser_failed"))
-    finally:
-        connection.close()
-
-
-def _extract_pdf_text_in_process(file_bytes: bytes) -> str:
-    try:
-        reader = PdfReader(BytesIO(file_bytes))
-        if len(reader.pages) > MAX_PDF_PAGES:
-            raise CharacterLoreValidationError("PDF 페이지 수가 제한을 초과했습니다.")
-        object_count = reader.trailer.get("/Size", 0)
-        if isinstance(object_count, int) and object_count > MAX_PDF_OBJECTS:
-            raise CharacterLoreValidationError("PDF 객체 수가 제한을 초과했습니다.")
-        parts: list[str] = []
-        extracted_chars = 0
-        for page in reader.pages:
-            part = page.extract_text() or ""
-            extracted_chars += len(part)
-            if extracted_chars > MAX_PARSED_TEXT_CHARS:
-                raise CharacterLoreValidationError(
-                    "PDF 추출 텍스트가 제한을 초과했습니다."
-                )
-            if part.strip():
-                parts.append(part)
-    except CharacterLoreValidationError:
-        raise
-    except Exception as exc:
-        raise CharacterLoreValidationError("PDF 텍스트를 추출하지 못했습니다.") from exc
-    text = "\n\n".join(part.strip() for part in parts if part.strip())
-    if not text.strip():
-        raise CharacterLoreValidationError("스캔 이미지 PDF/OCR은 v1에서 지원하지 않습니다.")
-    return text
-
-
-def _extract_docx_text_in_process(file_bytes: bytes) -> str:
-    try:
-        from docx import Document
-
-        document = Document(BytesIO(file_bytes))
-    except Exception as exc:
-        raise CharacterLoreValidationError("DOCX 텍스트를 추출하지 못했습니다.") from exc
-    parts: list[str] = []
-    extracted_chars = 0
-    for paragraph in document.paragraphs:
-        if not paragraph.text.strip():
-            continue
-        extracted_chars += len(paragraph.text)
-        if extracted_chars > MAX_PARSED_TEXT_CHARS:
-            raise CharacterLoreValidationError(
-                "DOCX 추출 텍스트가 제한을 초과했습니다."
-            )
-        parts.append(paragraph.text)
-    for table in document.tables:
-        for row in table.rows:
-            cells = [cell.text.strip() for cell in row.cells if cell.text.strip()]
-            if cells:
-                row_text = " | ".join(cells)
-                extracted_chars += len(row_text)
-                if extracted_chars > MAX_PARSED_TEXT_CHARS:
-                    raise CharacterLoreValidationError(
-                        "DOCX 추출 텍스트가 제한을 초과했습니다."
-                    )
-                parts.append(row_text)
-    return "\n\n".join(parts)
-
-
-_WINDOWS_PARSER_JOB_HANDLE: int | None = None
-
-
-def _apply_parser_resource_limits() -> None:
-    if os.name == "nt":
-        _apply_windows_parser_resource_limits()
-        return
-    if os.name == "posix":
-        import resource
-
-        resource.setrlimit(
-            resource.RLIMIT_AS,
-            (LORE_PARSER_MEMORY_BYTES, LORE_PARSER_MEMORY_BYTES),
-        )
-        resource.setrlimit(
-            resource.RLIMIT_CPU,
-            (LORE_PARSER_CPU_SECONDS, LORE_PARSER_CPU_SECONDS),
-        )
-        return
-    raise RuntimeError(f"Unsupported parser isolation platform: {sys.platform}")
-
-
-def _apply_windows_parser_resource_limits() -> None:
-    import ctypes
-    from ctypes import wintypes
-
-    class IoCounters(ctypes.Structure):
-        _fields_ = [
-            ("ReadOperationCount", ctypes.c_ulonglong),
-            ("WriteOperationCount", ctypes.c_ulonglong),
-            ("OtherOperationCount", ctypes.c_ulonglong),
-            ("ReadTransferCount", ctypes.c_ulonglong),
-            ("WriteTransferCount", ctypes.c_ulonglong),
-            ("OtherTransferCount", ctypes.c_ulonglong),
-        ]
-
-    class BasicLimitInformation(ctypes.Structure):
-        _fields_ = [
-            ("PerProcessUserTimeLimit", ctypes.c_longlong),
-            ("PerJobUserTimeLimit", ctypes.c_longlong),
-            ("LimitFlags", wintypes.DWORD),
-            ("MinimumWorkingSetSize", ctypes.c_size_t),
-            ("MaximumWorkingSetSize", ctypes.c_size_t),
-            ("ActiveProcessLimit", wintypes.DWORD),
-            ("Affinity", ctypes.c_size_t),
-            ("PriorityClass", wintypes.DWORD),
-            ("SchedulingClass", wintypes.DWORD),
-        ]
-
-    class ExtendedLimitInformation(ctypes.Structure):
-        _fields_ = [
-            ("BasicLimitInformation", BasicLimitInformation),
-            ("IoInfo", IoCounters),
-            ("ProcessMemoryLimit", ctypes.c_size_t),
-            ("JobMemoryLimit", ctypes.c_size_t),
-            ("PeakProcessMemoryUsed", ctypes.c_size_t),
-            ("PeakJobMemoryUsed", ctypes.c_size_t),
-        ]
-
-    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
-    kernel32.CreateJobObjectW.argtypes = [ctypes.c_void_p, wintypes.LPCWSTR]
-    kernel32.CreateJobObjectW.restype = wintypes.HANDLE
-    kernel32.SetInformationJobObject.argtypes = [
-        wintypes.HANDLE,
-        ctypes.c_int,
-        ctypes.c_void_p,
-        wintypes.DWORD,
-    ]
-    kernel32.SetInformationJobObject.restype = wintypes.BOOL
-    kernel32.AssignProcessToJobObject.argtypes = [wintypes.HANDLE, wintypes.HANDLE]
-    kernel32.AssignProcessToJobObject.restype = wintypes.BOOL
-    kernel32.GetCurrentProcess.restype = wintypes.HANDLE
-
-    job = kernel32.CreateJobObjectW(None, None)
-    if not job:
-        raise OSError(ctypes.get_last_error(), "CreateJobObjectW failed")
-    information = ExtendedLimitInformation()
-    information.BasicLimitInformation.PerProcessUserTimeLimit = (
-        LORE_PARSER_CPU_SECONDS * 10_000_000
-    )
-    information.BasicLimitInformation.LimitFlags = 0x00000002 | 0x00000100 | 0x00002000
-    information.ProcessMemoryLimit = LORE_PARSER_MEMORY_BYTES
-    if not kernel32.SetInformationJobObject(
-        job,
-        9,
-        ctypes.byref(information),
-        ctypes.sizeof(information),
-    ):
-        error_code = ctypes.get_last_error()
-        kernel32.CloseHandle(job)
-        raise OSError(error_code, "SetInformationJobObject failed")
-    if not kernel32.AssignProcessToJobObject(job, kernel32.GetCurrentProcess()):
-        error_code = ctypes.get_last_error()
-        kernel32.CloseHandle(job)
-        raise OSError(error_code, "AssignProcessToJobObject failed")
-    global _WINDOWS_PARSER_JOB_HANDLE
-    _WINDOWS_PARSER_JOB_HANDLE = int(job)
-
-
-def _normalize_text(text: str) -> str:
-    value = text.replace("\r\n", "\n").replace("\r", "\n")
-    value = re.sub(r"[ \t]+", " ", value)
-    value = re.sub(r"\n{3,}", "\n\n", value)
-    return value.strip()
-
-
-def _split_lore_units(text: str) -> list[tuple[str | None, str]]:
-    units: list[tuple[str | None, str]] = []
-    section_hint: str | None = None
-    paragraph: list[str] = []
-
-    def flush_paragraph() -> None:
-        nonlocal paragraph
-        if paragraph:
-            units.append((section_hint, " ".join(paragraph).strip()))
-            paragraph = []
-
-    for raw_line in text.splitlines():
-        line = raw_line.strip()
-        if not line:
-            flush_paragraph()
-            continue
-        if _looks_like_section_heading(line):
-            flush_paragraph()
-            section_hint = _clean_heading(line)
-            continue
-        if _looks_like_boundary_line(line):
-            flush_paragraph()
-            units.append((section_hint, line))
-            continue
-        paragraph.append(line)
-    flush_paragraph()
-    return units
-
-
-def _looks_like_section_heading(line: str) -> bool:
-    stripped = line.strip().strip("#").strip()
-    if not stripped or len(stripped) > 80:
-        return False
-    if line.lstrip().startswith("#"):
-        return True
-    if stripped.endswith(":"):
-        return True
-    return bool(re.match(r"^[\[(<【].+[\])>】]$", stripped))
-
-
-def _clean_heading(line: str) -> str:
-    return line.strip().strip("#").strip().rstrip(":")[:200]
-
-
-def _looks_like_boundary_line(line: str) -> bool:
-    return bool(
-        re.match(r"^([-*•]|\d+[.)])\s+", line)
-        or re.match(r"^(Q|A|문|답)\s*[:：]", line, re.IGNORECASE)
-    )
-
-
-def _split_long_unit(unit: str) -> list[str]:
-    if len(unit) <= TARGET_CHUNK_MAX_CHARS:
-        return [unit]
-    sentences = re.split(r"(?<=[.!?。！？])\s+", unit)
-    pieces: list[str] = []
-    current = ""
-    for sentence in sentences:
-        sentence = sentence.strip()
-        if not sentence:
-            continue
-        if len(sentence) > TARGET_CHUNK_MAX_CHARS:
-            if current:
-                pieces.append(current)
-                current = ""
-            pieces.extend(
-                sentence[index : index + TARGET_CHUNK_MAX_CHARS]
-                for index in range(0, len(sentence), TARGET_CHUNK_MAX_CHARS)
-            )
-            continue
-        if current and len(current) + len(sentence) + 1 > TARGET_CHUNK_MAX_CHARS:
-            pieces.append(current)
-            current = sentence
-        else:
-            current = f"{current} {sentence}".strip()
-    if current:
-        pieces.append(current)
-    return pieces or [unit[:TARGET_CHUNK_MAX_CHARS]]
 
 
 def _ensure_character_limits(
@@ -1228,14 +666,6 @@ def _existing_embeddings_by_hash(db: Session, character_id: str) -> dict[str, li
     return result
 
 
-def _chunk_embedding_input(draft: LoreChunkDraft) -> str:
-    return f"title: {draft.section_hint or 'none'} | text: {draft.text}"
-
-
-def _query_embedding_input(query: str) -> str:
-    return f"task: search result | query: {query}"
-
-
 def _embed_text(api_key: str, text: str) -> list[float]:
     adapter = get_embedding_adapter("google", EMBEDDING_MODEL)
     try:
@@ -1369,5 +799,3 @@ def _rerank_lore_candidates(rows: list[tuple[models.CharacterLoreChunk, float]])
     return selected
 
 
-def _sha256_text(text: str) -> str:
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
