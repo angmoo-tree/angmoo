@@ -1,5 +1,5 @@
 {
-  "edge_count": 2002,
+  "edge_count": 2003,
   "external_import_count": 2059,
   "module_count": 626,
   "modules": [
@@ -5366,7 +5366,8 @@
       "imports": [
         "app.domains.world_packages.domain.seed",
         "app.domains.world_packages.infrastructure.sqlalchemy_destination_seed",
-        "app.domains.world_packages.infrastructure.sqlalchemy_registry"
+        "app.domains.world_packages.infrastructure.sqlalchemy_registry",
+        "app.domains.worlds.service"
       ],
       "module": "app.domains.world_packages.infrastructure.sqlalchemy_unit_of_work",
       "path": "backend/app/domains/world_packages/infrastructure/sqlalchemy_unit_of_work.py",
