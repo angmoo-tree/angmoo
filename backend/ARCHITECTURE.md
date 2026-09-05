@@ -690,3 +690,8 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 ### Resident의 피드·알림·관계 문맥
 
 `routines/service/feed_context.py`는 읽을 피드와 알림 후보를 선택하고 설명하며, `social_context.py`는 팔로우·상호 답글·관계 검토 후보를 판단합니다. 이 코드에서 다른 도메인의 ORM을 조회하지 않습니다. `contracts/context_reads.py`는 실제로 읽는 값과 조회 협력을 정의하고 `runtime/resident/feed_context_references.py`가 기존 Session에 연결합니다. 원래 Post class 확인은 runtime이 같은 class로 수행하여 정책의 strict assertion을 유지합니다. Feed/행동 가능 알림/결과 문장의 기존 Social workflow는 caller가 명시 전달하며, 같은 코드를 runtime 안에 다시 구현하지 않습니다.
+
+
+### 슬롯 상태와 실행 준비 확인
+
+`routines/service/slot_status.py`는 슬롯 목록의 공개 응답·소유자 필터와 UTC 실행시각 비교를 담당합니다. AgentRun의 기존 성향 helper는 제품 호출 없이 원래 테스트만 소비하므로 B8-A 검토 대상으로 보존하며, 실제 관리 흐름의 readiness 업무는 C7에서 별도로 이전합니다. `retry_schedule.py`는 수동 실행 시각과 재시도 시각의 우선순위를 정하고, 필요한 경우에만 기존 ActivityTimezoneReader로 World 시간을 읽습니다. 설정이 이미 주어졌을 때의 no-commit과 설정을 처음 만드는 ensure 경로의 원래 commit을 구분합니다. 슬롯 목록 HTTP도 이 실제 서비스와 같은 기존 응답 모델을 사용합니다.

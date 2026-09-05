@@ -842,30 +842,6 @@ def test_api_agent_instants_normalize_sqlite_naive_values_to_utc() -> None:
     assert '"next_tick_at":"2026-08-29T02:48:00Z"' in slot.model_dump_json()
 
 
-@pytest.mark.parametrize(
-    ("next_tick_at", "expected"),
-    [
-        (None, False),
-        (datetime(2026, 8, 29, 4, 59, 59), True),
-        (datetime(2026, 8, 29, 5, 0), True),
-        (datetime(2026, 8, 29, 5, 0, 1), False),
-        (datetime(2026, 8, 29, 4, 59, 59, tzinfo=UTC), True),
-        (
-            datetime(2026, 8, 29, 14, 0, 1, tzinfo=ZoneInfo("Asia/Seoul")),
-            False,
-        ),
-    ],
-)
-def test_resident_slot_due_comparison_normalizes_utc_instants(
-    next_tick_at: datetime | None,
-    expected: bool,
-) -> None:
-    slot = SimpleNamespace(next_tick_at=next_tick_at)
-
-    assert agent_run_service._resident_slot_is_due(
-        slot,
-        now=datetime(2026, 8, 29, 5, 0, tzinfo=UTC),
-    ) is expected
 
 
 def test_file_backed_sqlite_tick_claims_two_naive_due_slots(

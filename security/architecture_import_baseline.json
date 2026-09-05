@@ -1,7 +1,7 @@
 {
-  "edge_count": 2546,
-  "external_import_count": 2342,
-  "module_count": 752,
+  "edge_count": 2556,
+  "external_import_count": 2348,
+  "module_count": 754,
   "modules": [
     {
       "external_imports": [],
@@ -119,9 +119,9 @@
       "imports": [
         "app.core.db",
         "app.domains.identity.dependencies",
+        "app.domains.routines.service.slot_status",
         "app.models",
-        "app.schemas",
-        "app.services.agent_runs"
+        "app.schemas"
       ],
       "module": "app.api.v1.routes.agent_runs",
       "path": "backend/app/api/v1/routes/agent_runs.py",
@@ -4694,6 +4694,22 @@
       "external_imports": [
         "__future__",
         "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.models",
+        "app.domains.routines.service.activity_settings",
+        "app.domains.routines.service.tick_schedule"
+      ],
+      "module": "app.domains.routines.service.retry_schedule",
+      "path": "backend/app/domains/routines/service/retry_schedule.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
         "sqlalchemy.orm",
         "typing"
       ],
@@ -4857,6 +4873,22 @@
       ],
       "module": "app.domains.routines.service.slot_state",
       "path": "backend/app/domains/routines/service/slot_state.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.models",
+        "app.domains.routines.repository.slots",
+        "app.domains.routines.schemas",
+        "app.domains.routines.service.tick_schedule"
+      ],
+      "module": "app.domains.routines.service.slot_status",
+      "path": "backend/app/domains/routines/service/slot_status.py",
       "wildcard_imports": []
     },
     {
@@ -10616,6 +10648,7 @@
         "app.domains.routines.service.perception_diagnostics",
         "app.domains.routines.service.perception_prompts",
         "app.domains.routines.service.prompt_context",
+        "app.domains.routines.service.retry_schedule",
         "app.domains.routines.service.run_backoff",
         "app.domains.routines.service.run_results",
         "app.domains.routines.service.runs",
@@ -10624,6 +10657,7 @@
         "app.domains.routines.service.slot_leases",
         "app.domains.routines.service.slot_pool",
         "app.domains.routines.service.slot_recovery",
+        "app.domains.routines.service.slot_status",
         "app.domains.routines.service.social_context",
         "app.domains.routines.service.state_prompts",
         "app.domains.routines.service.tick_schedule",

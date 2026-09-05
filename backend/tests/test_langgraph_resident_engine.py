@@ -26,29 +26,6 @@ def test_langgraph_resident_does_not_call_agent_tools_http() -> None:
     assert "localhost" not in source
 
 
-def test_agent_run_readiness_requires_hidden_feed_seed_criteria() -> None:
-    base = {
-        "tendency_updated_at": datetime.now(UTC),
-        "tendency_summary": "This agent has a saved community tendency profile.",
-        "tendency_action_ranges": {
-            "post": {
-                "min": 0,
-                "max": 1,
-                "label": "Post",
-                "note": "Post only when the topic fits.",
-            }
-        },
-    }
-    legacy_profile = SimpleNamespace(**base, planner_tendency_profile={})
-    ready_profile = SimpleNamespace(
-        **base,
-        planner_tendency_profile={
-            "feed_seed_interest_criteria": "Prefer feed posts that fit the persona."
-        },
-    )
-
-    assert not agent_runs._has_tendency_analysis(legacy_profile)
-    assert agent_runs._has_tendency_analysis(ready_profile)
 
 
 def test_persona_context_labels_saved_state_as_previous() -> None:

@@ -1079,3 +1079,14 @@ C6c1 초기 **60 passed /기존warnings2/25.78초**, 최종 고정 tree **455 pa
 
 
 C6c2 최종 고정 tree **458 passed /기존 PostgreSQL1 skipped/기존warnings4/164.50초**. 경계 **752modules/2546edges/exact legacy206/cycle0**, L4 **752/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2270**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions는 수정하지 않았다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 이후 별도로 확인한다.
+
+
+## AR-B4-C6d1 — 슬롯 상태·준비 조건·예약 재시도
+
+실제4함수를 Routines 서비스로 옮기고 due6 parameter/readiness1 원문node를 원래decorator·본문·fixture·assertion 그대로 이전했다. LG 담당과 readiness1node의 정확 소유를 협의했다. 슬롯 목록 API는 실제owner service로 직접 연결했으며 원래route본문/응답은 같다. 첫264PASS/기존warnings2/19.04초와 route/transaction 집중10PASS/14.43초를 확인했다. 신규3SQLite는 early return에서 timezone 읽기0, 제공된setting의 pending/rollback과 없는setting의 원래ensure commit→timezone순서, 실제 API 함수의 소유자필터·공개형식·pending변경을 검증한다. 원문4함수와 전체남은AgentRun본문은 한정timezone callback만 복원하면 AST가 같고 원래7testnodes와 routebody도 정확동일하다.
+
+
+정확 소비자 확인 결과 AgentRun의 `_has_tendency_analysis`는 제품 호출이 없고 기존 테스트1개만 소비한다. 실제 관리 흐름의 동명 함수와 통합하지 않고 원래 AgentRun helper를 B8-A 검토 대상으로 보존했다. 이번 실제이전은 **4함수**이며 기존 readiness테스트는 소유 위치만 옮겨 원래 helper를 계속 검사한다. 허구 실행 소비자나 신규 지원 API를 추가하지 않았다.
+
+
+C6d1 최종 고정 tree **461 passed /기존 PostgreSQL1 skipped/기존warnings4/176.92초**. 경계 **754modules/2556edges/exact legacy205/cycle0**, L4 **754/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2273**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions 불변이다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 이후 별도로 확인한다.

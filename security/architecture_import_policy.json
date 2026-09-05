@@ -17,10 +17,6 @@
           "importer": "app.api.v1.routes.agent_runs"
         },
         {
-          "imported": "app.services.agent_runs",
-          "importer": "app.api.v1.routes.agent_runs"
-        },
-        {
           "imported": "app.models",
           "importer": "app.api.v1.routes.agents"
         },
@@ -1081,6 +1077,7 @@
       "app.domains.routines.service.plans",
       "app.domains.routines.service.prompt_context",
       "app.domains.routines.service.public_action_executions",
+      "app.domains.routines.service.retry_schedule",
       "app.domains.routines.service.run_backoff",
       "app.domains.routines.service.run_results",
       "app.domains.routines.service.runs",
@@ -1092,6 +1089,7 @@
       "app.domains.routines.service.slot_pool",
       "app.domains.routines.service.slot_recovery",
       "app.domains.routines.service.slot_state",
+      "app.domains.routines.service.slot_status",
       "app.domains.routines.service.social_context",
       "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tick_schedule",
@@ -1281,6 +1279,7 @@
       "app.domains.routines.service.plans",
       "app.domains.routines.service.prompt_context",
       "app.domains.routines.service.public_action_executions",
+      "app.domains.routines.service.retry_schedule",
       "app.domains.routines.service.run_backoff",
       "app.domains.routines.service.run_results",
       "app.domains.routines.service.runs",
@@ -1291,6 +1290,7 @@
       "app.domains.routines.service.slot_leases",
       "app.domains.routines.service.slot_pool",
       "app.domains.routines.service.slot_recovery",
+      "app.domains.routines.service.slot_status",
       "app.domains.routines.service.social_context",
       "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tick_schedule",
@@ -2971,6 +2971,30 @@
         "owner_stage": "AR-B4-C",
         "reason": "Existing actual execution calls canonical original context decisions with explicit same-Session typed references and existing Social workflow binding; no forwarding facade or copied query.",
         "removal_condition": "Move actual remaining execution composition in C6d and remove exact legacy importer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.api.v1.routes.agent_runs",
+        "target": "app.domains.routines.service.slot_status",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing exact execution/slot-route consumer calls the actual original owner policy after implementation move; no forwarding facade or copied query.",
+        "removal_condition": "Move actual execution in C6d and Slot HTTP in C7; remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.retry_schedule",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing exact execution/slot-route consumer calls the actual original owner policy after implementation move; no forwarding facade or copied query.",
+        "removal_condition": "Move actual execution in C6d and Slot HTTP in C7; remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.slot_status",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing exact execution/slot-route consumer calls the actual original owner policy after implementation move; no forwarding facade or copied query.",
+        "removal_condition": "Move actual execution in C6d and Slot HTTP in C7; remove exact legacy consumer before B8-A.",
         "review_date": "2026-09-06"
       }
     ]

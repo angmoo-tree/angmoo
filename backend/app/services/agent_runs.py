@@ -1,3 +1,6 @@
+from app.domains.routines.service.slot_status import list_resident_slots
+from app.domains.routines.service.slot_status import _resident_slot_is_due
+from app.domains.routines.service.retry_schedule import _scheduled_retry_next_tick_at
 from app.runtime.resident.feed_context_references import SqlAlchemyResidentContextReferences
 from app.domains.routines.service.tick_schedule import aware_utc as _aware_utc
 from app.domains.routines.service.feed_context import _collect_v6_inbox_candidates
@@ -932,21 +935,8 @@ async def _release_slot_auth_profile(
         raise CredentialSyncError(redact_secret_text(str(exc))) from exc
 
 
-def list_resident_slots(db: Session) -> list[schemas.AgentSlotRead]:
-    return [
-        schemas.AgentSlotRead.model_validate(slot)
-        for slot in slot_queries.list_agent_slots(db)
-    ]
 
 
-def list_resident_slots_for_user(
-    db: Session, user_id: str
-) -> list[schemas.AgentSlotPublicRead]:
-    return [
-        schemas.AgentSlotPublicRead.model_validate(slot)
-        for slot in slot_queries.list_agent_slots(db)
-        if slot.assigned_user_id == user_id
-    ]
 
 
 def assign_resident_slot(
@@ -1043,27 +1033,6 @@ def release_temporary_resident_slot(
     )
 
 
-def _scheduled_retry_next_tick_at(
-    db: Session,
-    *,
-    setting: models.AgentActivitySetting | None,
-    character_id: str,
-    retry_at: datetime,
-    manual_next_tick_at: datetime | None,
-) -> datetime:
-    if manual_next_tick_at is not None:
-        return manual_next_tick_at
-    if not character_id:
-        return retry_at
-    effective_setting = setting or agent_crud.ensure_setting(db, character_id)
-    return agent_activity_policy.retry_tick_schedule(
-        effective_setting,
-        character_id=character_id,
-        retry_at=retry_at,
-        timezone=agent_activity_policy.activity_timezone(
-            db, character_id=character_id
-        ),
-    ).next_tick_at
 
 
 async def run_community_once(
@@ -2345,6 +2314,7 @@ async def _run_resident_slot_once(
                     character_id=character.id,
                     retry_at=cooldown_until,
                     manual_next_tick_at=manual_next_tick_at,
+                    timezone_reader=agent_activity_policy.activity_timezone,
                 ),
                 last_error=_runtime_last_error(
                     kind="model_rate_limit",
@@ -2631,6 +2601,7 @@ async def _run_resident_slot_once(
                         character_id=character.id,
                         retry_at=exc.retry_at,
                         manual_next_tick_at=manual_next_tick_at,
+                        timezone_reader=agent_activity_policy.activity_timezone,
                     ),
                     last_error=_runtime_last_error(
                         kind="model_rate_limit",
@@ -2952,6 +2923,7 @@ async def _run_resident_slot_once(
                 character_id=character.id,
                 retry_at=exc.retry_at,
                 manual_next_tick_at=manual_next_tick_at,
+                timezone_reader=agent_activity_policy.activity_timezone,
             ),
             last_error=last_error,
         )
@@ -3005,6 +2977,7 @@ async def _run_resident_slot_once(
                 else slot.assigned_character_id or "",
                 retry_at=base_retry_at,
                 manual_next_tick_at=manual_next_tick_at,
+                timezone_reader=agent_activity_policy.activity_timezone,
             )
             last_error = _runtime_last_error(
                 kind=kind,
@@ -3616,12 +3589,6 @@ async def tick_resident_slots(
     )
 
 
-def _resident_slot_is_due(slot: models.AgentSlot, *, now: datetime) -> bool:
-    if slot.next_tick_at is None:
-        return False
-    return agent_activity_schedule.aware_utc(
-        slot.next_tick_at
-    ) <= agent_activity_schedule.aware_utc(now)
 
 
 async def _run_claimed_resident_slot_once(
@@ -3705,6 +3672,8 @@ def _select_resident_run_post_id(
     )
 
 
+
+
 def _has_tendency_analysis(setting: models.AgentActivitySetting | None) -> bool:
     if not setting:
         return False
@@ -3721,6 +3690,7 @@ def _has_tendency_analysis(setting: models.AgentActivitySetting | None) -> bool:
         and isinstance(criteria, str)
         and criteria.strip()
     )
+
 
 
 def _build_tool_recovery_message(*, character: models.Character) -> str:

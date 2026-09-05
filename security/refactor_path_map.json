@@ -761,12 +761,12 @@
     "tests/test_agent_activity_limits.py::test_physical_slot_capacity_does_not_disable_existing_agents": "tests/routines/test_activity_limits.py::test_physical_slot_capacity_does_not_disable_existing_agents",
     "tests/test_agent_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick": "tests/routines/test_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick",
     "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot": "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
-    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[None-False]": "tests/routines/test_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[None-False]",
-    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at1-True]": "tests/routines/test_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at1-True]",
-    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at2-True]": "tests/routines/test_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at2-True]",
-    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at3-False]": "tests/routines/test_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at3-False]",
-    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at4-True]": "tests/routines/test_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at4-True]",
-    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at5-False]": "tests/routines/test_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at5-False]",
+    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[None-False]": "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants[None-False]",
+    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at1-True]": "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at1-True]",
+    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at2-True]": "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at2-True]",
+    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at3-False]": "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at3-False]",
+    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at4-True]": "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at4-True]",
+    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at5-False]": "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at5-False]",
     "tests/test_agent_activity_limits.py::test_routine_runtime_does_not_invent_global_selected_post": "tests/routines/test_activity_limits.py::test_routine_runtime_does_not_invent_global_selected_post",
     "tests/test_agent_activity_limits.py::test_run_now_allows_other_imminent_slot": "tests/routines/test_activity_limits.py::test_run_now_allows_other_imminent_slot",
     "tests/test_agent_activity_limits.py::test_run_now_allows_target_due_slot": "tests/routines/test_activity_limits.py::test_run_now_allows_target_due_slot",
@@ -838,7 +838,8 @@
     "tests/test_daypart_persistent_session.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick": "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
     "tests/test_daypart_persistent_session.py::test_night_daypart_keeps_start_date_across_midnight": "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
     "tests/test_tendency_note_action_selection.py::test_v6_action_menu_exposes_create_post_only_with_prepared_brief": "tests/routines/test_action_menu.py::test_v6_action_menu_exposes_create_post_only_with_prepared_brief",
-    "tests/test_tendency_note_action_selection.py::test_v6_action_menu_keeps_feed_actions_without_post_seed": "tests/routines/test_action_menu.py::test_v6_action_menu_keeps_feed_actions_without_post_seed"
+    "tests/test_tendency_note_action_selection.py::test_v6_action_menu_keeps_feed_actions_without_post_seed": "tests/routines/test_action_menu.py::test_v6_action_menu_keeps_feed_actions_without_post_seed",
+    "tests/test_langgraph_resident_engine.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria": "tests/routines/test_execution_readiness.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria"
   },
   "details": {
     "AR-B1": {
@@ -8669,7 +8670,7 @@
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
-            "tests/test_langgraph_resident_engine.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria"
+            "tests/routines/test_execution_readiness.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria"
           ]
         },
         {
@@ -10915,9 +10916,11 @@
           "backend/app/domains/routines/service/perception_diagnostics.py",
           "backend/app/domains/routines/service/perception_prompts.py",
           "backend/app/domains/routines/service/prompt_context.py",
+          "backend/app/domains/routines/service/retry_schedule.py",
           "backend/app/domains/routines/service/run_backoff.py",
           "backend/app/domains/routines/service/run_results.py",
           "backend/app/domains/routines/service/session_keys.py",
+          "backend/app/domains/routines/service/slot_status.py",
           "backend/app/domains/routines/service/social_context.py",
           "backend/app/domains/routines/service/state_prompts.py",
           "backend/app/domains/routines/service/tick_schedule.py",
@@ -13803,22 +13806,32 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::list_resident_slots",
-          "new": "backend/app/services/agent_runs.py::list_resident_slots",
+          "new": "backend/app/domains/routines/service/slot_status.py::list_resident_slots",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants",
+            "tests/routines/test_execution_readiness.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria",
+            "tests/routines/test_retry_schedule_transaction.py::test_retry_schedule_preserves_early_returns_and_caller_pending_setting",
+            "tests/routines/test_retry_schedule_transaction.py::test_retry_missing_setting_keeps_original_ensure_commit_before_timezone",
+            "tests/routines/test_slot_status_route.py::test_slot_route_keeps_owner_filter_and_original_public_response",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::list_resident_slots_for_user",
-          "new": "backend/app/services/agent_runs.py::list_resident_slots_for_user",
+          "new": "backend/app/domains/routines/service/slot_status.py::list_resident_slots_for_user",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/api/v1/routes/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants",
+            "tests/routines/test_execution_readiness.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria",
+            "tests/routines/test_retry_schedule_transaction.py::test_retry_schedule_preserves_early_returns_and_caller_pending_setting",
+            "tests/routines/test_retry_schedule_transaction.py::test_retry_missing_setting_keeps_original_ensure_commit_before_timezone",
+            "tests/routines/test_slot_status_route.py::test_slot_route_keeps_owner_filter_and_original_public_response",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -13853,12 +13866,17 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_scheduled_retry_next_tick_at",
-          "new": "backend/app/services/agent_runs.py::_scheduled_retry_next_tick_at",
+          "new": "backend/app/domains/routines/service/retry_schedule.py::_scheduled_retry_next_tick_at",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants",
+            "tests/routines/test_execution_readiness.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria",
+            "tests/routines/test_retry_schedule_transaction.py::test_retry_schedule_preserves_early_returns_and_caller_pending_setting",
+            "tests/routines/test_retry_schedule_transaction.py::test_retry_missing_setting_keeps_original_ensure_commit_before_timezone",
+            "tests/routines/test_slot_status_route.py::test_slot_route_keeps_owner_filter_and_original_public_response",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -13923,12 +13941,17 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_resident_slot_is_due",
-          "new": "backend/app/services/agent_runs.py::_resident_slot_is_due",
+          "new": "backend/app/domains/routines/service/slot_status.py::_resident_slot_is_due",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants",
+            "tests/routines/test_execution_readiness.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria",
+            "tests/routines/test_retry_schedule_transaction.py::test_retry_schedule_preserves_early_returns_and_caller_pending_setting",
+            "tests/routines/test_retry_schedule_transaction.py::test_retry_missing_setting_keeps_original_ensure_commit_before_timezone",
+            "tests/routines/test_slot_status_route.py::test_slot_route_keeps_owner_filter_and_original_public_response",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -32682,6 +32705,29 @@
       "ownership": "Actual feed/inbox context selection and explanation live in Routines feed_context; follow/mutual-reply/relationship-review decisions live in social_context. Runtime binds canonical queries on the original Session and receives the three existing Social workflows explicitly from the existing caller, without a new legacy import.",
       "preservation": "Eleven original functions and all remaining AgentRun bodies are AST-identical after only exact read-collaborator restoration. Original strict Post isinstance is implemented by the runtime same-class type guard, not duck typing. Original UTC helper reuses existing tick_schedule.aware_utc with exact identical body. Three SQLite tests preserve original attached rows, pending visibility/recipient checks and mutual-reply candidate exclusion after pending follow with observer/rollback.",
       "remaining": "Existing Social list_feed/actionable inbox/result-text bindings become canonical after B5 merge. Credential/slot preparation and actual execution placement remain C6d; original Daypart functions await B7. C7 settings/autonomy/tendency/manual-first-greeting HTTP and actual policies remain pending."
+    },
+    "AR-B4-C6d1-resident-status-readiness-retry": {
+      "status": "SOURCE READY — 461 passed / existing PostgreSQL 1 skipped; read-only six preservation checks 0 errors, root linear source introductions pending",
+      "actual_paths": [
+        "backend/app/api/v1/routes/agent_runs.py",
+        "backend/app/domains/routines/service/retry_schedule.py",
+        "backend/app/domains/routines/service/slot_status.py"
+      ],
+      "test_nodes": [
+        "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants",
+        "tests/routines/test_execution_readiness.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria",
+        "tests/routines/test_retry_schedule_transaction.py::test_retry_schedule_preserves_early_returns_and_caller_pending_setting",
+        "tests/routines/test_retry_schedule_transaction.py::test_retry_missing_setting_keeps_original_ensure_commit_before_timezone",
+        "tests/routines/test_slot_status_route.py::test_slot_route_keeps_owner_filter_and_original_public_response",
+        "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+      ],
+      "test_moves": {
+        "backend/tests/routines/test_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants": "backend/tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants",
+        "backend/tests/test_langgraph_resident_engine.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria": "backend/tests/routines/test_execution_readiness.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria"
+      },
+      "ownership": "Routines slot_status owns existing Slot view/filter and due checks; retry_schedule owns original early return/ensure/retry timing. The existing timezone reader is injected at the exact original conditional point. Slot listing route calls the actual owner directly.",
+      "preservation": "Original four functions and every remaining AgentRun body are AST-exact after only timezone callback restoration. Original due6 parameter nodes and readiness1 node preserve whole decorated test bodies; LG owner agreed to the exact readiness split. Public route body/decorator and response classes are unchanged. New SQLite verifies original pending/ensure commit distinction, early read-free returns and slot owner/public-response filtering.",
+      "remaining": "HTTP file itself remains pending C7 route relocation. Credential validation and auth-profile wiring plus actual execution placement remain C6d2+, with Memory Daypart/B5/root Operations owners unchanged. Existing management readiness is independently owned C7 and is not unified merely by name."
     }
   },
   "test_symbols": {
