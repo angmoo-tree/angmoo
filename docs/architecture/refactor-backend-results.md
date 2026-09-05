@@ -1116,3 +1116,9 @@ Source `763375b69e10810743dc9bbad1f76d5d3bf340d6`는 SQLite acquire/heartbeat/be
 새 SQL에 실제 호출 인수를 대입하고 동일 ORM Table 상수 참조를 펼쳐 **16개 workflow/helper/executor 전체 AST**가 원본과 동일함을 확인했다. 생성 후 실제4개 callback, 읽기 with-context/행 조회/None 처리도 원래 구현과 대조했다. 10개 동시 claim·만료 재획득·오래된 epoch 거부·heartbeat/실패 유지·tick·BEGIN IMMEDIATE/복구·single-backend·ER7 회귀는 **42 PASS/1 warning/37.13초**다. 새 node는 없다.
 
 현재 경계737/2458/legacy222·L4 parity97·ER0 전체82/87/24/44/7 PASS, 원래 source/split/assertion/억제/APIORM/node 읽기 진단0(protected2201/current2252)이다. 앞선 지도 소비자9개를 실제 새 값 참조로 연결했다. Runtime HTTP/집합 export 제거, G5 등록, G06 파일 제거 및 선행 source/node 원장 합류/최종 통합은 남아 있다.
+
+### AR-B8 Runtime A5 소유자 진단 HTTP
+
+Runtime `/runtime/status`의 실제 handler는 `domains/runtime/router.py`가 소유한다. 기존 같은 Session의 InstallationIdentity 조회는 Identity repository, claimed-owner 판정은 Identity service에서 수행한다. 원래 origin/auth dependency와403 detail은 그대로이며 reader factory는 두 앱 생성 함수에서 DB 조회 없이 각각1회 설정한다. config가 있을 때만 명시 settings를 넘기는 분기, overlay/privacy/schema/profile/generation 표현을 보존했다. 기존 fake probe fixture는 동일 fake class를 test app의 주입 factory로 연결하고 assertion은 유지한다.
+
+실제 owner SQL·인수·predicate를 펼쳐 handler 전체 AST가 원본과 동일하며 기존 reader/coordinator 두 클래스도 실제 새 service의 전체 AST와 일치한다. Runtime diagnostics/domain/single-backend/ER7 **35 PASS/1 warning/25.91초**, 경계741/2469/legacy222·public196·L4 parity97·ER0 PASS다. 읽기 보존 진단은 source/split/assertion/억제/APIORM/node 모두0(protected2201/current2252). 새 node는 없다. 집합 import 제거와 G5/G06·순차 통합은 계속 남는다.
