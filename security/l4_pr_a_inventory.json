@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2293,
-      "internal_edge_count": 2558,
+      "external_import_count": 2292,
+      "internal_edge_count": 2562,
       "legacy_import_exception_count": 0,
-      "module_count": 751,
+      "module_count": 752,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -224,6 +224,13 @@
             "imports": [],
             "module": "app.domains.relationships.repository",
             "path": "backend/app/domains/relationships/repository/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.models"
+            ],
+            "module": "app.domains.relationships.repository.diagnostics",
+            "path": "backend/app/domains/relationships/repository/diagnostics.py"
           },
           {
             "imports": [
@@ -1112,12 +1119,14 @@
           {
             "imports": [
               "app.config",
+              "app.domains.relationships.exceptions",
               "app.domains.relationships.public",
+              "app.domains.relationships.repository.diagnostics",
               "app.domains.relationships.repository.projection_state",
+              "app.domains.relationships.schemas",
+              "app.domains.routines.repository.joint_diagnostics",
               "app.models",
-              "app.runtime.graph_projection.relationship_graph_read",
-              "app.runtime.relationships.sqlalchemy_social_read_repository",
-              "app.schemas"
+              "app.runtime.graph_projection.relationship_graph_read"
             ],
             "module": "app.runtime.graph_projection.social_memory_read",
             "path": "backend/app/runtime/graph_projection/social_memory_read.py"
@@ -1387,7 +1396,9 @@
             "path": "backend/app/cruds/community.py"
           },
           {
-            "imports": [],
+            "imports": [
+              "app.domains.relationships.schemas"
+            ],
             "module": "app.schemas.social_memory",
             "path": "backend/app/schemas/social_memory.py"
           },

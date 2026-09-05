@@ -383,7 +383,8 @@
     "backend/tests/test_activity_proposal_runtime.py": "backend/tests/relationships/test_activity_proposals.py",
     "backend/app/runtime/graph_projection/sqlalchemy_state.py": "backend/app/domains/relationships/service/projection_state.py",
     "backend/tests/test_graph_projection_commands.py": "backend/tests/relationships/test_projection_commands.py",
-    "backend/tests/test_graph_projection_replay.py": "backend/tests/relationships/test_projection_replay.py"
+    "backend/tests/test_graph_projection_replay.py": "backend/tests/relationships/test_projection_replay.py",
+    "backend/app/schemas/social_memory.py": "backend/app/domains/relationships/schemas.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -30490,6 +30491,472 @@
             "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
             "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
             "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+          ]
+        }
+      ],
+      "new_tests": []
+    },
+    "AR-B5-C6-A": {
+      "status": "IMPLEMENTED; focused24 PASS; original17 definition/query AST contracts PASS; source introduction pending",
+      "scope": "Own read queries5 and diagnostics response8/errors3 move to Relationships; exact Joint/participant query1 moves to Routines. Diagnostics runtime retains its remaining workflow until C6-B.",
+      "split_files": {
+        "backend/app/runtime/relationships/sqlalchemy_social_read_repository.py": [
+          "backend/app/domains/relationships/repository/diagnostics.py",
+          "backend/app/domains/routines/repository/joint_diagnostics.py"
+        ],
+        "backend/app/runtime/graph_projection/social_memory_read.py": [
+          "backend/app/runtime/graph_projection/social_memory_read.py",
+          "backend/app/domains/relationships/exceptions.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_read_repository.py::list_recent_events",
+          "new": "backend/app/domains/relationships/repository/diagnostics.py::list_recent_events",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_read_repository.py::list_event_evidence",
+          "new": "backend/app/domains/relationships/repository/diagnostics.py::list_event_evidence",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_read_repository.py::list_relationships",
+          "new": "backend/app/domains/relationships/repository/diagnostics.py::list_relationships",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_read_repository.py::list_open_proposals",
+          "new": "backend/app/domains/relationships/repository/diagnostics.py::list_open_proposals",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_read_repository.py::list_active_joint_activities",
+          "new": "backend/app/domains/routines/repository/joint_diagnostics.py::list_active_joint_activities",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/relationships/sqlalchemy_social_read_repository.py::pending_outbox_count",
+          "new": "backend/app/domains/relationships/repository/diagnostics.py::pending_outbox_count",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/social_memory.py::SocialMemorySchema",
+          "new": "backend/app/domains/relationships/schemas.py::SocialMemorySchema",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py",
+            "backend/app/schemas/social_memory.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/social_memory.py::SocialEventEvidenceRead",
+          "new": "backend/app/domains/relationships/schemas.py::SocialEventEvidenceRead",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py",
+            "backend/app/schemas/social_memory.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/social_memory.py::SocialEventRead",
+          "new": "backend/app/domains/relationships/schemas.py::SocialEventRead",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py",
+            "backend/app/schemas/social_memory.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/social_memory.py::RelationshipStateRead",
+          "new": "backend/app/domains/relationships/schemas.py::RelationshipStateRead",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py",
+            "backend/app/schemas/social_memory.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/social_memory.py::ActivityProposalRead",
+          "new": "backend/app/domains/relationships/schemas.py::ActivityProposalRead",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py",
+            "backend/app/schemas/social_memory.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/social_memory.py::JointActivityParticipantRead",
+          "new": "backend/app/domains/relationships/schemas.py::JointActivityParticipantRead",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py",
+            "backend/app/schemas/social_memory.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/social_memory.py::JointActivityRead",
+          "new": "backend/app/domains/relationships/schemas.py::JointActivityRead",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py",
+            "backend/app/schemas/social_memory.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/social_memory.py::SocialMemoryDiagnosticsRead",
+          "new": "backend/app/domains/relationships/schemas.py::SocialMemoryDiagnosticsRead",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py",
+            "backend/app/schemas/social_memory.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::SocialMemoryReadError",
+          "new": "backend/app/domains/relationships/exceptions.py::SocialMemoryReadError",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::SocialMemoryNotFoundError",
+          "new": "backend/app/domains/relationships/exceptions.py::SocialMemoryNotFoundError",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::SocialMemoryForbiddenError",
+          "new": "backend/app/domains/relationships/exceptions.py::SocialMemoryForbiddenError",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::_world_character_status",
+          "new": "backend/app/runtime/graph_projection/social_memory_read.py::_world_character_status",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::_pair_blocked",
+          "new": "backend/app/runtime/graph_projection/social_memory_read.py::_pair_blocked",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::_source_status",
+          "new": "backend/app/runtime/graph_projection/social_memory_read.py::_source_status",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::get_owner_diagnostics",
+          "new": "backend/app/runtime/graph_projection/social_memory_read.py::get_owner_diagnostics",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_comment_daily_cap_preserves_events_and_interaction_count_without_extra_delta",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up",
+            "tests/test_social_event_runtime.py::test_observation_revalidates_hidden_source_before_any_relationship_write",
+            "tests/test_social_event_runtime.py::test_read_revalidates_membership_and_block_before_exposing_evidence",
+            "tests/test_social_event_runtime.py::test_reverse_reply_creates_separate_directional_relationship",
+            "tests/test_social_event_runtime.py::test_same_character_pair_is_isolated_across_world_events_relationships_and_proposals",
+            "tests/test_social_event_runtime.py::test_self_target_and_cross_world_target_are_rejected",
+            "tests/test_social_event_runtime.py::test_source_deletion_retains_audit_rows_and_emits_one_exclusion",
+            "tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once",
+            "tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
           ]
         }
       ],

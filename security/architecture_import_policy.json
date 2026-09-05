@@ -851,14 +851,6 @@
         {
           "importer": "app.runtime.graph_projection.social_memory_read",
           "imported": "app.models"
-        },
-        {
-          "importer": "app.runtime.graph_projection.social_memory_read",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.runtime.relationships.sqlalchemy_social_read_repository",
-          "imported": "app.models"
         }
       ],
       "id": "l4-relationship-projection-runtime-persistence",
@@ -1038,6 +1030,7 @@
       "app.domains.relationships.policies.projection_commands",
       "app.domains.relationships.policies.proposals",
       "app.domains.relationships.repository",
+      "app.domains.relationships.repository.diagnostics",
       "app.domains.relationships.repository.events",
       "app.domains.relationships.repository.points",
       "app.domains.relationships.repository.projection_commands",
@@ -1098,6 +1091,7 @@
       "app.domains.routines.policies.planning",
       "app.domains.routines.repository",
       "app.domains.routines.repository.event_evidence",
+      "app.domains.routines.repository.joint_diagnostics",
       "app.domains.routines.repository.plans",
       "app.domains.routines.router",
       "app.domains.routines.schemas",
@@ -3006,6 +3000,14 @@
         "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
         "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
         "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas.social_memory",
+        "owner_stage": "AR-B5",
+        "removal_condition": "Redirect the remaining aggregate/schema callers to canonical Relationships response types in AR-B5-C6/B8, then remove this exact same-class alias.",
+        "reason": "Existing diagnostics schema export retains exactly the original class objects while current consumers follow the actual owner.",
+        "review_date": "2026-09-06",
+        "target": "app.domains.relationships.schemas"
       }
     ]
   }

@@ -673,3 +673,6 @@ Projection 명령의 버전·서명·payload 형식은 `relationships/policies/p
 
 
 Replay의 요청 검증·동시 실행 차단·lease·high-water 고정·완료 감사 기록은 `relationships/service/replay.py`가 소유하며 SQL은 `repository/replay.py`에 있다. 생성은 기존처럼 flush만 하고, start/renew/finalize는 기존 실행 경로의 commit 시점을 유지한다. `runtime/graph_projection/replay.py`는 Session 열기·clock·sidecar clear/apply/digest와 지표 기록을 조립한다. 복구 중 새로 들어온 outbox가 고정된 high-water 범위에 섞이지 않으며, 원래 오류와 재개·실패 상태를 유지한다. World의 전체 식별자는 World 소유 조회로 가져온다.
+
+
+Owner의 Social-memory 진단 응답은 Relationships `schemas.py`가 소유한다. 이 응답의 Joint 스냅샷은 진단 화면에서 보여 주는 형식이며 Routines의 실행 상태 쓰기를 소유하지 않는다. Event·evidence·방향별 관계·열린 제안·outbox 개수는 Relationships `repository/diagnostics.py`, Joint/participant 조회는 Routines `repository/joint_diagnostics.py`에 있다. 같은 Session에서 원래 join/filter/order와 활동별 참가자 조회를 유지하고 중간 commit을 만들지 않는다.

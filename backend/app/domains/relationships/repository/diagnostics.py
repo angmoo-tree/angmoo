@@ -1,11 +1,8 @@
-"""Runtime SQLAlchemy read adapter for canonical social-memory diagnostics."""
-
+"""Canonical owner diagnostic queries without commit or provider calls."""
 from __future__ import annotations
-
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
-
-from app import models
+from app.domains.relationships import models
 
 
 def list_recent_events(
@@ -99,44 +96,6 @@ def list_open_proposals(
             .order_by(models.ActivityProposal.created_at.desc())
         )
     )
-
-
-def list_active_joint_activities(
-    db: Session, *, world_id: str, world_character_id: str
-) -> list[tuple[models.JointActivity, list[models.JointActivityParticipant]]]:
-    activities = list(
-        db.scalars(
-            select(models.JointActivity)
-            .join(
-                models.JointActivityParticipant,
-                models.JointActivityParticipant.joint_activity_id
-                == models.JointActivity.id,
-            )
-            .where(
-                models.JointActivity.world_id == world_id,
-                models.JointActivityParticipant.world_character_id
-                == world_character_id,
-                models.JointActivity.status.in_(
-                    ("scheduled", "ready", "active")
-                ),
-            )
-            .order_by(models.JointActivity.scheduled_start_at.asc())
-        )
-    )
-    result = []
-    for activity in activities:
-        participants = list(
-            db.scalars(
-                select(models.JointActivityParticipant)
-                .where(
-                    models.JointActivityParticipant.joint_activity_id
-                    == activity.id
-                )
-                .order_by(models.JointActivityParticipant.role.asc())
-            )
-        )
-        result.append((activity, participants))
-    return result
 
 
 def pending_outbox_count(db: Session, *, world_id: str) -> int:

@@ -7,28 +7,19 @@ from datetime import UTC, datetime
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import models
+from app.domains.relationships import schemas
+from app.domains.relationships.exceptions import (
+    SocialMemoryReadError, SocialMemoryNotFoundError, SocialMemoryForbiddenError,
+)
 from app.domains.relationships.repository import projection_state as graph_projection_crud
 from app.runtime.graph_projection.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
 )
 from app.config import Settings, settings
-from app.runtime.relationships import (
-    sqlalchemy_social_read_repository as social_memory_crud,
-)
+from app.domains.relationships.repository import diagnostics as social_memory_crud
+from app.domains.routines.repository import joint_diagnostics
 from app.domains.relationships import public as relationships
-
-
-class SocialMemoryReadError(Exception):
-    reason_code = "social_memory_read_error"
-
-
-class SocialMemoryNotFoundError(SocialMemoryReadError):
-    reason_code = "world_character_not_found"
-
-
-class SocialMemoryForbiddenError(SocialMemoryReadError):
-    reason_code = "character_not_owned"
 
 
 def _world_character_status(
@@ -186,7 +177,7 @@ def get_owner_diagnostics(
         return schemas.RelationshipStateRead.model_validate(row)
 
     joint_reads = []
-    for activity, participants in social_memory_crud.list_active_joint_activities(
+    for activity, participants in joint_diagnostics.list_active_joint_activities(
         db,
         world_id=world_id,
         world_character_id=world_character.id,

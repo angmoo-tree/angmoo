@@ -1072,3 +1072,12 @@ Relationships의 service가 생성/시작/lease 갱신/실패/성공 다섯 실�
 원문 replay **5개 정의와 SQL 10개 및 outbox class 3개 AST 계약이 동일**하다. 집중 **39 passed / 18.74초**이며 기존 high-water 재개·delta tail 보존·삭제 원본 관계 복구·parity fail-closed·10-worker claim 경쟁을 유지한다. 새 node 없이 기존 replay 6개를 업무별 tests 경로로 옮겼으며 workflow/ER0 소비자와 full split 지도를 같이 갱신했다. 소유 코드에서 전역 model aggregate를 읽던 정확한 임시 edge 2개를 종료했다. Source capture/Hosted CI/installer와 잔여 Social/Relationship read·observation 전환은 부모 통합 및 다음 slice에서 진행한다.
 
 C5-D 최종 경계 **751 modules / 2,558 edges / exact legacy 210**, API·응답·ORM 및 full split evidence 오류 0을 확인했다. 이동한 기존 replay 6개 assertion도 직접 동일 비교했으며 최종 경로의 replay·구조 집중 **18 passed / 2.59초**다. L4 current inventory에서 옛 테스트 경로 한 건을 발견해 실제 policy 경로만 전환한 뒤 parity 97개를 유지하여 통과했다. ER0 current inventory도 통과했다.
+
+
+## AR-B5-C6-A — 진단 응답·오류와 실제 소유별 조회
+
+기존 canonical 진단 조회 다섯 개를 Relationships repository, Joint/participant 조회 하나를 Routines repository로 이전했다. join/행배수·방향·정렬·limit·참가자별 후속 조회를 그대로 보존하고 옛 혼합 repository 모듈을 제거했다. 진단 응답 여덟 class와 오류 세 class도 Relationships가 실제 소유한다. JointActivityRead는 진단 화면의 기존 투영 응답이며 실행 ORM/쓰기 소유는 Routines에 남는다. 전역 schema는 같은 class를 내보내는 정확한 임시 alias로 추적하며 runtime의 나머지 진단 workflow는 다음 C6-B에서 옮긴다.
+
+원문 **17개 정의/조회 AST 동일**, 기존 사건/World격리·현재 source 공개·소유 진단/그래프/replay 집중 **24 passed / 12.23초**다. 새 node나 기존 assertion 변경은 없다. Routines 담당과 실제 새 query 경로가 겹치지 않음을 확인했다. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C6-A 최종 경계 **752 modules / 2,562 edges / exact legacy 208**과 API·응답·ORM 및 full split evidence 오류 0을 확인했다. 단일 목적지 schema 이동은 full split 대신 실제 파일 이동 map으로 명시했다. 임시 bridge의 정확 target 필드도 검사 규약에 맞췄으며 검사 예외를 넓히지 않았다. L4·ER0 current inventory가 통과했다.

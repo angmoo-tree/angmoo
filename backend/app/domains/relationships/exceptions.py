@@ -45,3 +45,15 @@ class GraphReplayError(RuntimeError):
     def __init__(self, error_class: str) -> None:
         super().__init__(error_class)
         self.error_class = error_class
+
+
+class SocialMemoryReadError(Exception):
+    reason_code = "social_memory_read_error"
+
+
+class SocialMemoryNotFoundError(SocialMemoryReadError):
+    reason_code = "world_character_not_found"
+
+
+class SocialMemoryForbiddenError(SocialMemoryReadError):
+    reason_code = "character_not_owned"
