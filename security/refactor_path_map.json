@@ -18022,12 +18022,13 @@
       "remaining": "Post mutations, profile/follow/inbox read workflows, agent/resident coordination, Relationship and projection transitions."
     },
     "AR-B5-B3": {
-      "status": "IMPLEMENTED; 6 focused PASS; source introduction and B4 consumer integration pending",
+      "status": "IMPLEMENTED; staged Post links and exact joint notification query/add-only; 7 focused PASS; source introduction and B4 integration pending",
       "purpose": "Original Post link assignments remain staged inside the same caller joint transaction; Social owns each single-field mutation without extra validation, flush, commit or query.",
       "split_files": {
         "backend/app/services/joint_activity_runtime.py": [
           "backend/app/services/joint_activity_runtime.py",
-          "backend/app/domains/social/service/joint_posts.py"
+          "backend/app/domains/social/service/joint_posts.py",
+          "backend/app/domains/social/service/notifications.py"
         ]
       },
       "split_symbols": [
@@ -18420,6 +18421,22 @@
           ],
           "test_nodes": [
             "tests/social/test_joint_post_links.py::test_joint_links_keep_assignment_stages_and_caller_rollback",
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::apply_joint_post",
+          "new": "backend/app/domains/social/service/notifications.py::ensure_joint_started_notification",
+          "source_member": "existing_notification exact lookup and conditional db.add after other_wc/actor_wc validation; before caller db.flush",
+          "direct_consumers": [
+            "backend/app/services/joint_activity_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_joint_notifications.py::test_joint_notification_keeps_exact_dedupe_payload_and_caller_write_boundary",
             "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
             "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
             "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
