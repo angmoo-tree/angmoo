@@ -1074,3 +1074,12 @@ Source `bc1a7c18997034b6f96965943323a617b3f9feef`에서 복구 순서·epoch 스
 최종 formatted 함수의 네 repository 본문과 foreign catalog를 다시 펼치면 **전체 원래 workflow AST와 정확히 동일**하다. missing epoch32·회전 scope16·source별32 제한, `[opened_at, closed_at)` 동의 기간, 원본별 누락 anti-join, late row 복구, 기존 kind/source ID·단일 commit을 보존했다. 이전에는 worker에 있던 같은 복구를 서비스가 실제 소유하며 새 policy나 provider 호출은 없다.
 
 배치 runtime/안전/API 및 rollback 회귀 **37 passed / 2 warnings / 14.97초**, 원래 전체 split 검사 **0 errors**, 경계 **726 modules/2442 edges/exact legacy222 PASS**, L4 parity97·current batch·ER0 81/87/24/44/7 PASS다. 초기 부분 scope 기록에서 repository를 외부 entry에 잘못 넣은 항목은 검사에 거부되어 제거했고, repository는 실제 내부 소유 모듈로만 검사한다. 검사 규칙을 완화하지 않았다. Source introduction capture와 B4~B6 순차 합류/전체 B7 Gate는 계속 남아 있다.
+
+
+### AR-B8 Runtime A1 실제 값·오류·component 판정 소유
+
+Source `849d65968ec815353febdd50b6e975940ab81a8f`는 진단 코드·오류·상태/lease DTO·저장/검색 실행 계약·HTTP schema와 process-local component 관찰 판정을 각 constants/exceptions/contracts/schemas/service/policies 역할로 옮겼다. 최종 실제 클래스/함수 **65개 전체 AST가 원본과 동일**하다. Character가 받는 실행 오류는 세 이름의 명시적 계약을 통해 같은 실제 예외 class를 참조한다. 임시 Runtime 소비자24개는 실제 edge별 AR-B8-A 소유/제거 조건으로 추적하며 최종 B8 완료 시 제거해야 한다.
+
+최초 수집에서 옛 module namespace로 오류를 가져오던 기존 테스트 한 곳을 발견해 실제 exceptions 모듈에 같은 local alias로 연결했다. 이후 SQLite lease·FTS·single-backend·ER6 업그레이드·ER7 조립·Character 오류 회귀는 **89 passed/1 failed**였다. 실패한 테스트가 실제 파일을 옛 ports 경로로 읽고 있어 새 contracts 경로로 옮겼고, launcher diagnostic 코드 위치 및 기존 의존 방향 검사에도 새 계약 파일을 포함했다. 수정한 검사와 기존 Runtime 진단·HTTP 오류를 포함한 최종 묶음 **37 passed/2 warnings/7.26초**다. 기존 assertion이나 금지 import 규칙은 그대로다.
+
+경계 **727 modules/2434 edges/legacy222 PASS**, L4 parity97 및 L2 launcher6commands/2services PASS다. 원래 보존 함수의 읽기 진단은 source/split/assertion/억제/APIORM/기존 node 모두 **0 errors**, protected2201/current2246이다. Routines 최초 signed source의 두 blob을 메모리에서만 연결한 진단이며 frozen/checkpoint/additions를 갱신하거나 stock 전체 PASS를 선언하지 않았다. 실제 Runtime lease 저장/상태 판정과 외부 canonical 조회, aggregate 종료·G5·G06 제거는 후속 전환 범위다.
