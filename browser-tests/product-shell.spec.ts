@@ -719,6 +719,10 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
   let messageAccepted = false;
   let responseCommitted = false;
   let failNextModelUpdate = false;
+  let releaseResponseStream!: () => void;
+  const responseStreamRelease = new Promise<void>((resolve) => {
+    releaseResponseStream = resolve;
+  });
 
   await page.route(`**/api/backend/worlds/${worldId}/chat/**`, async (route) => {
     const request = route.request();
@@ -858,7 +862,8 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
       url.pathname ===
         `/api/backend/worlds/${worldId}/chat/threads/${threadId}/requests/${acceptedRequest.request_id}/events`
     ) {
-      await new Promise((resolve) => setTimeout(resolve, 650));
+      // Keep the in-flight state observable until its UI contract is checked.
+      await responseStreamRelease;
       responseCommitted = true;
       return route.fulfill({
         body: [
@@ -985,11 +990,15 @@ test("P8-L-D/P World Chat identity, composer, typing and CRG-only stream converg
   await expect(composer).toBeVisible();
   await composer.fill(sentUserMessage.content);
   await page.getByRole("button", { name: "메시지 보내기" }).click();
-  await expect(page.getByText(sentUserMessage.content, { exact: true })).toBeVisible();
-  await expect(
-    page.getByRole("status", { name: "친구 앵무가 응답을 입력하고 있습니다." }),
-  ).toBeVisible();
-  await expect(modelSelect).toBeDisabled();
+  try {
+    await expect(page.getByText(sentUserMessage.content, { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole("status", { name: "친구 앵무가 응답을 입력하고 있습니다." }),
+    ).toBeVisible();
+    await expect(modelSelect).toBeDisabled();
+  } finally {
+    releaseResponseStream();
+  }
   await expect(
     page.getByText(generatedAssistantMessage.content, { exact: true }),
   ).toBeVisible();

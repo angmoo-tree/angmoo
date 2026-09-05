@@ -1,7 +1,6 @@
 """Read-only identity/World/membership projection using the caller Session."""
 from __future__ import annotations
 
-import base64
 import binascii
 from datetime import datetime
 import json
@@ -19,6 +18,7 @@ from app.domains.device_home.contracts import (
 
 from app.domains.device_home.exceptions import InvalidWorldSurfaceCursorError
 from app.domains.device_home.policies import launchability
+from app.pagination import decode_cursor_bytes, encode_cursor_bytes
 
 
 LOCAL_INSTALLATION_KEY = "local-installation"
@@ -189,15 +189,14 @@ def _encode_cursor(updated_at: datetime | str, world_id: str) -> str:
         separators=(",", ":"),
         sort_keys=True,
     ).encode("utf-8")
-    return base64.urlsafe_b64encode(payload).decode("ascii").rstrip("=")
+    return encode_cursor_bytes(payload)
 
 
 def _decode_cursor(cursor: str | None) -> tuple[str | None, str | None]:
     if cursor is None:
         return None, None
     try:
-        padded = cursor + "=" * (-len(cursor) % 4)
-        value = json.loads(base64.urlsafe_b64decode(padded).decode("utf-8"))
+        value = json.loads(decode_cursor_bytes(cursor).decode("utf-8"))
         updated_at = value["updated_at"]
         world_id = value["world_id"]
         if not isinstance(updated_at, str) or not isinstance(world_id, str):

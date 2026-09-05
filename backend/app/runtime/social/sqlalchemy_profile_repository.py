@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import base64
 import binascii
 import hashlib
 import json
@@ -18,6 +17,7 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session, aliased
 
 from app.config import settings
+from app.pagination import decode_cursor_bytes, encode_cursor_bytes
 from app.domains.social.public import (
     WorldCharacterSocialProfileCounts,
     WorldCharacterSocialProfileForbiddenError,
@@ -604,8 +604,7 @@ def _encode_cursor(
         payload, ensure_ascii=True, separators=(",", ":"), sort_keys=True
     ).encode("utf-8")
     encrypted = AESGCM(_cursor_key()).encrypt(nonce, plaintext, _CURSOR_AAD)
-    encoded = base64.urlsafe_b64encode(nonce + encrypted).decode("ascii")
-    return encoded.rstrip("=")
+    return encode_cursor_bytes(nonce + encrypted)
 
 
 def _decode_cursor(
@@ -614,8 +613,7 @@ def _decode_cursor(
     if query.cursor is None:
         return None
     try:
-        padding = "=" * (-len(query.cursor) % 4)
-        encrypted = base64.urlsafe_b64decode(query.cursor + padding)
+        encrypted = decode_cursor_bytes(query.cursor)
         if len(encrypted) <= _CURSOR_NONCE_BYTES + 16:
             raise ValueError("cursor_length")
         plaintext = AESGCM(_cursor_key()).decrypt(

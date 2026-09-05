@@ -292,7 +292,7 @@
     },
     {
       "path": "backend/app/services/agents.py",
-      "sha256": "9b9e4c7653350d0a8fc6e5bb57811f44de6810f05995dcf30a6d7779ef82e314"
+      "sha256": "ac3847bb3a1bd0715ec4f7c04c3f07847be9b46ac4eac08e84ba67264712db44"
     },
     {
       "path": "backend/app/services/auth.py",

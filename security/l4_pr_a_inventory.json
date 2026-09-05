@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2288,
-      "internal_edge_count": 1837,
+      "external_import_count": 2287,
+      "internal_edge_count": 1844,
       "legacy_import_exception_count": 0,
-      "module_count": 680,
+      "module_count": 682,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -550,6 +550,7 @@
               "app.config",
               "app.domains.social.public",
               "app.domains.world_characters.public",
+              "app.pagination",
               "app.runtime.social.sqlalchemy_read_repository"
             ],
             "module": "app.runtime.social.sqlalchemy_profile_repository",
@@ -588,6 +589,7 @@
               "app.domains.social.domain.writes",
               "app.domains.social.infrastructure.sqlalchemy_models",
               "app.domains.world_characters.public",
+              "app.exceptions",
               "app.models",
               "app.schemas.community",
               "app.services.community"
