@@ -1,7 +1,7 @@
 {
-  "edge_count": 2691,
-  "external_import_count": 2400,
-  "module_count": 777,
+  "edge_count": 2735,
+  "external_import_count": 2420,
+  "module_count": 784,
   "modules": [
     {
       "external_imports": [],
@@ -18,6 +18,25 @@
       ],
       "module": "app.api.identity_dependencies",
       "path": "backend/app/api/identity_dependencies.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.api.schemas",
+      "path": "backend/app/api/schemas/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.routines.schemas.runs",
+        "app.domains.social.schemas.community"
+      ],
+      "module": "app.api.schemas.first_greeting",
+      "path": "backend/app/api/schemas/first_greeting.py",
       "wildcard_imports": []
     },
     {
@@ -3816,6 +3835,26 @@
         "__future__",
         "dataclasses",
         "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.autonomy_management",
+        "app.domains.routines.contracts.feed_cues",
+        "app.domains.routines.contracts.manual_activity",
+        "app.domains.routines.models",
+        "app.domains.routines.schemas.first_greeting"
+      ],
+      "module": "app.domains.routines.contracts.first_greeting",
+      "path": "backend/app/domains/routines/contracts/first_greeting.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
         "typing"
       ],
       "imports": [
@@ -4120,6 +4159,17 @@
     },
     {
       "external_imports": [
+        "hashlib",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.repository.first_greeting",
+      "path": "backend/app/domains/routines/repository/first_greeting.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "datetime",
         "sqlalchemy",
         "sqlalchemy.orm"
@@ -4229,6 +4279,15 @@
       ],
       "module": "app.domains.routines.schemas",
       "path": "backend/app/domains/routines/schemas/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "pydantic"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.schemas.first_greeting",
+      "path": "backend/app/domains/routines/schemas/first_greeting.py",
       "wildcard_imports": []
     },
     {
@@ -4656,6 +4715,34 @@
       ],
       "module": "app.domains.routines.service.feed_cues",
       "path": "backend/app/domains/routines/service/feed_cues.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing",
+        "uuid"
+      ],
+      "imports": [
+        "app.core.redaction",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.autonomy_management",
+        "app.domains.routines.contracts.first_greeting",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.repository.first_greeting",
+        "app.domains.routines.repository.runs",
+        "app.domains.routines.schemas.first_greeting",
+        "app.domains.routines.service.activity_logs",
+        "app.domains.routines.service.activity_settings",
+        "app.domains.routines.service.runs",
+        "app.domains.routines.service.tendency_settings"
+      ],
+      "module": "app.domains.routines.service.first_greeting",
+      "path": "backend/app/domains/routines/service/first_greeting.py",
       "wildcard_imports": []
     },
     {
@@ -8628,16 +8715,19 @@
         "app.domains.routines.contracts.activity_management",
         "app.domains.routines.contracts.autonomy_management",
         "app.domains.routines.contracts.feed_cues",
+        "app.domains.routines.contracts.first_greeting",
         "app.domains.routines.contracts.manual_activity",
         "app.domains.routines.exceptions",
         "app.domains.routines.repository.autonomy",
         "app.domains.routines.repository.feed_cues",
         "app.domains.routines.repository.runs",
         "app.domains.routines.repository.slots",
+        "app.domains.routines.schemas.first_greeting",
         "app.domains.routines.schemas.tendency",
         "app.domains.routines.service.activity_management",
         "app.domains.routines.service.autonomy_management",
         "app.domains.routines.service.feed_cues",
+        "app.domains.routines.service.first_greeting",
         "app.domains.routines.service.manual_activity",
         "app.domains.routines.service.runs",
         "app.domains.routines.service.slot_assignments",
@@ -8645,6 +8735,7 @@
         "app.domains.routines.service.tendency",
         "app.domains.routines.service.tendency_settings",
         "app.domains.routines.service.tick_schedule",
+        "app.domains.social.repository.posts",
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",
         "app.exceptions",
@@ -8656,6 +8747,7 @@
         "app.runtime.resident.activity_policy",
         "app.runtime.resident.autonomy_reads",
         "app.runtime.resident.execution",
+        "app.runtime.resident.first_greeting",
         "app.runtime.world_characters.cleanup",
         "app.runtime.world_characters.queries",
         "app.schemas",
@@ -10084,6 +10176,35 @@
     {
       "external_imports": [
         "__future__",
+        "datetime",
+        "json",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.config",
+        "app.core.redaction",
+        "app.domains.characters.exceptions",
+        "app.domains.characters.models",
+        "app.domains.identity.contracts",
+        "app.domains.identity.exceptions",
+        "app.domains.identity.models",
+        "app.domains.identity.service.credential_resolution",
+        "app.domains.routines.constants",
+        "app.domains.routines.models",
+        "app.domains.routines.schemas.first_greeting",
+        "app.domains.routines.service.first_greeting",
+        "app.domains.social.schemas.community",
+        "app.integrations.direct_llm",
+        "app.services.post_image_generation"
+      ],
+      "module": "app.runtime.resident.first_greeting",
+      "path": "backend/app/runtime/resident/first_greeting.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "typing"
       ],
       "imports": [],
@@ -10891,10 +11012,12 @@
         "typing"
       ],
       "imports": [
+        "app.api.schemas.first_greeting",
         "app.core.image_generation",
         "app.domains.characters.schemas",
         "app.domains.identity.schemas",
         "app.domains.routines.schemas",
+        "app.domains.routines.schemas.first_greeting",
         "app.domains.routines.schemas.runs",
         "app.domains.social.schemas.community",
         "app.providers.registry",

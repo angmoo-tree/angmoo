@@ -2565,6 +2565,8 @@ def test_first_greeting_cooldown_is_separate_from_run_now_cooldown() -> None:
 
 
 def test_first_greeting_claim_is_committed_before_provider_call() -> None:
+    from app.domains.routines.service import first_greeting as agent_service
+
     source = inspect.getsource(agent_service.run_first_greeting)
 
     assert source.index("_claim_first_greeting_run(") < source.index(

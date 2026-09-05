@@ -11,7 +11,7 @@ from app import schemas
 from app.api.v1.routes import agents as agent_routes
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
 from app.domains.routines.service import action_briefs as agent_briefs
-from app.domains.routines.service import autonomy_management, manual_activity, feed_cues
+from app.domains.routines.service import autonomy_management, manual_activity, feed_cues, first_greeting
 from app.services import agent_writing, character_lore, community as community_service, direct_llm
 from app.runtime.resident import execution as agent_runs
 from app.runtime.characters import management as agent_service
@@ -105,7 +105,7 @@ def test_public_activity_entrypoints_use_lane_specific_profile_readiness():
     # Inspect the real owner functions under the original assertion namespace.
     agent_service = SimpleNamespace(
         give_feed_cue=feed_cues.give_feed_cue,
-        run_first_greeting=management.run_first_greeting,
+        run_first_greeting=first_greeting.run_first_greeting,
         _activate_agent_uow=autonomy_management._activate_agent_uow,
         run_agent_now=manual_activity.run_agent_now,
     )
@@ -130,7 +130,7 @@ def test_public_activity_entrypoints_require_tendency_readiness():
 
     agent_service = SimpleNamespace(
         give_feed_cue=feed_cues.give_feed_cue,
-        run_first_greeting=management.run_first_greeting,
+        run_first_greeting=first_greeting.run_first_greeting,
     )
 
     feed_cue_source = inspect.getsource(agent_service.give_feed_cue)

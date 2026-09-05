@@ -881,6 +881,19 @@
       "owner_stage": "L4",
       "removal_condition": "Root sequential AR-B5/B7/B8/LG integration binds actual Social/Memory/Identity/Operations/Runtime and resident.langgraph/context owners, then removes these exact imports before AR-B8-B.",
       "review_date": "2026-09-06"
+    },
+    {
+      "id": "AR-B4-C7-D-first-greeting-image-io",
+      "reason": "Original post-image provider IO moved from mixed Character management to actual first-greeting runtime. B5 canonical image source is authored independently; root connects the same original functions during sequential integration, before B8-A.",
+      "edges": [
+        {
+          "importer": "app.runtime.resident.first_greeting",
+          "imported": "app.services.post_image_generation"
+        }
+      ],
+      "owner_stage": "L4",
+      "review_date": "2026-09-06",
+      "removal_condition": "Root sequential AR-B5 joins the already-authored actual Social image runtime and attachment service, replaces this exact moved IO import without a compatibility alias, and removes this edge before AR-B8-A."
     }
   ],
   "legacy_module_cycles": [],
@@ -1007,6 +1020,7 @@
       "app.domains.routines.contracts.decision_lanes",
       "app.domains.routines.contracts.execution_errors",
       "app.domains.routines.contracts.feed_cues",
+      "app.domains.routines.contracts.first_greeting",
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.manual_activity",
@@ -1030,6 +1044,7 @@
       "app.domains.routines.repository.activity_evidence",
       "app.domains.routines.repository.autonomy",
       "app.domains.routines.repository.feed_cues",
+      "app.domains.routines.repository.first_greeting",
       "app.domains.routines.repository.plans",
       "app.domains.routines.repository.public_action_executions",
       "app.domains.routines.repository.resident_context",
@@ -1038,6 +1053,7 @@
       "app.domains.routines.repository.slots",
       "app.domains.routines.router",
       "app.domains.routines.schemas",
+      "app.domains.routines.schemas.first_greeting",
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
       "app.domains.routines.schemas.runs",
@@ -1065,6 +1081,7 @@
       "app.domains.routines.service.execution_results",
       "app.domains.routines.service.feed_context",
       "app.domains.routines.service.feed_cues",
+      "app.domains.routines.service.first_greeting",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
       "app.domains.routines.service.joint_activity.execution",
@@ -1249,6 +1266,7 @@
       "app.domains.routines.contracts.context_reads",
       "app.domains.routines.contracts.execution_errors",
       "app.domains.routines.contracts.feed_cues",
+      "app.domains.routines.contracts.first_greeting",
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.manual_activity",
@@ -1258,6 +1276,7 @@
       "app.domains.routines.contracts.run_identity",
       "app.domains.routines.contracts.slot_requests",
       "app.domains.routines.schemas",
+      "app.domains.routines.schemas.first_greeting",
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
       "app.domains.routines.schemas.runs",
@@ -1285,6 +1304,7 @@
       "app.domains.routines.service.execution_results",
       "app.domains.routines.service.feed_context",
       "app.domains.routines.service.feed_cues",
+      "app.domains.routines.service.first_greeting",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
       "app.domains.routines.service.joint_activity.execution",
@@ -2803,6 +2823,14 @@
         "owner_stage": "AR-B4-C7",
         "reason": "Existing mixed HTTP route now imports actual same Routines error classes instead of removed execution re-exports.",
         "removal_condition": "Move actual activity/slot/first-greeting HTTP in C7 and remove legacy route consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.routines.schemas.first_greeting",
+        "owner_stage": "AR-B4 / AR-B8-A",
+        "reason": "Exact same request class temporarily reexported by the existing mixed schema aggregate while HTTP callers migrate. No additional implementation or backwards import.",
+        "removal_condition": "Complete C7 actual HTTP schema imports and remaining aggregate consumers during AR-B8-A, then remove this exact one-way class reexport.",
         "review_date": "2026-09-06"
       }
     ]

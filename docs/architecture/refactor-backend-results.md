@@ -1148,3 +1148,12 @@ B7 Memory 7개 실제 정의와 원래 미호출/검사용 5개 정의는 아직
 실제 수동 실행·슬롯 안전·쿨다운 10개, 모이 조회·입력·프롬프트 정책 3개, 수동 실행 상수 3개를 Routines로 이전했다. UTC 변환은 기존 동일한 3문장 함수 하나를 재사용했다. 정확한 callback·타입 연결을 원래 이름으로 복원하면 17개 본문/상수가 동일하다. 기존 배정 슬롯/임시 슬롯의 서로 다른 실행, claim 경쟁, provider profile의 cleanup, BaseException 원래 오류 우선순위를 보존했다. 관련 기존 회귀 154개가 통과했고, source inspection 2개도 원래 assertion을 실제 정의 함수로 연결했다. HTTP와 혼합 entry는 후속 C7에서 실제 조립 위치로 연결한다.
 
 C7-C 현재 경계는 777 modules / 2691 edges / exact legacy 202 / cycle0이다. L4는 777/14/97, ER0은 86/87/24/44/7, Memory inventory는 current이다. 원래 보존 진단은 source/assertion/suppression/API·ORM/node 오류0이다. 지도 갱신 때 불필요하게 재계산된 기존 AR-B1/AR-F1의 legacy split metadata 7개를 원래 HEAD 값으로 복구했고, 동일 원래 split 검사도 오류0으로 확인했다. 보호2139/현재2287이며 동결/검사기/additions 변경은 없다. stock 통과는 root의 순차 도입 연결 후 확인한다.
+
+
+## AR-B4-C7-D — 첫 인사 정책·실행 기록·provider IO
+
+첫인사 eligibility/claim/result/prompt4, PostgreSQL owner lock1, request/writer DTO2를 실제 Routines 역할로 이전했다. Social.PostDetail을 포함하는 복합 HTTP 응답 DTO1은 api/schemas에 실제 정의하고, 원래 두 생성자를 런타임에서 연결했다. writer/image IO2와 원래 credential resolution try1은 runtime에 두었다. 기존 14개 본문·상수는 원래 추출문을 정확히 되붙이고 callback/type을 복원하면 AST가 동일하다. 관련156회귀가 통과했고, 기존 claim-before-provider source assertion과 실제 PostgreSQL claim 호출은 actual service에 연결했다. 공개 응답 schema와 전체 secret reveal equality 검사도 통과했다. first greeting은 수동 실행과 별개 세션/쿨다운을 유지하며 이미지 실패를 전체 post 실패로 바꾸지 않는다.
+
+복합 응답의 직접 도메인 참조로 발견한 순환은 API 응답 조립과 typed value/factory로 제거했고 경계 예외는 추가하지 않았다. 최종 연결 후 같은 관련156회귀를 다시 통과했다. 현재784 modules / 2735 edges / exact legacy203 / cycle0이다. 추가 legacy1은 원래 image IO가 이동한 정확1 import이며, 이미 별도 작성된 B5 Social image source의 순차합류 때 제거한다. 새 API schema도 기존 모든 schemas 경로의 비밀 필드 검사 범위에 포함된다.
+
+C7-D 최종 원래 six 읽기 전용 진단은 모두 오류0, 보호2139/현재2287이다. API/ORM·원본 assertion·기존 노드가 보존됐고 검사기/동결/additions 변경은 없다. L4 784/14/97, ER0 86/87/24/44/7, Memory current이다. stock 증명은 root의 순차 source introduction 연결 뒤 확인한다.

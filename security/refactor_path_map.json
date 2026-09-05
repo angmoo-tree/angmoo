@@ -5520,8 +5520,10 @@
           "backend/app/schemas/characters.py"
         ],
         "backend/app/schemas/agents.py": [
+          "backend/app/api/schemas/first_greeting.py",
           "backend/app/domains/characters/schemas.py",
           "backend/app/domains/identity/schemas.py",
+          "backend/app/domains/routines/schemas/first_greeting.py",
           "backend/app/domains/routines/schemas/resident.py",
           "backend/app/schemas/agents.py"
         ]
@@ -6948,24 +6950,32 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentFirstGreetingCreate",
-          "new": "backend/app/schemas/agents.py::AgentFirstGreetingCreate",
+          "new": "backend/app/domains/routines/schemas/first_greeting.py::AgentFirstGreetingCreate",
           "direct_consumers": [
+            "backend/app/domains/routines/service/first_greeting.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/first_greeting.py",
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
-          ]
+          ],
+          "source_member": "Original complete policy/prompt/provider IO/schema/constant body after exact same-Session callback/type restoration and expansion of original credential-resolution try and PostgreSQL owner-lock blocks. Claim-before-provider, exact POST payload, usage/error/result and separate cooldown remain unchanged."
         },
         {
           "old": "backend/app/schemas/agents.py::AgentFirstGreetingRead",
-          "new": "backend/app/schemas/agents.py::AgentFirstGreetingRead",
+          "new": "backend/app/api/schemas/first_greeting.py::AgentFirstGreetingRead",
           "direct_consumers": [
+            "backend/app/domains/routines/service/first_greeting.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/first_greeting.py",
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
             "tests/test_provider_boundary_security.py::test_provider_failure_attempt_and_log_never_retain_raw_body"
-          ]
+          ],
+          "source_member": "Original full HTTP response class body. This actual composition schema combines Routines run metadata and Social.PostDetail without introducing reciprocal domain dependency; same class/fields/defaults passed by response factory."
         },
         {
           "old": "backend/app/schemas/agents.py::CredentialRead",
@@ -7245,17 +7255,21 @@
           "backend/app/domains/routines/constants.py",
           "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/repository/autonomy.py",
+          "backend/app/domains/routines/repository/first_greeting.py",
+          "backend/app/domains/routines/schemas/first_greeting.py",
           "backend/app/domains/routines/schemas/tendency.py",
           "backend/app/domains/routines/service/activity_management.py",
           "backend/app/domains/routines/service/autonomy_management.py",
           "backend/app/domains/routines/service/feed_cues.py",
+          "backend/app/domains/routines/service/first_greeting.py",
           "backend/app/domains/routines/service/manual_activity.py",
           "backend/app/domains/routines/service/tendency.py",
           "backend/app/domains/routines/service/tendency_settings.py",
           "backend/app/domains/routines/service/tick_schedule.py",
           "backend/app/exceptions.py",
           "backend/app/runtime/characters/management.py",
-          "backend/app/runtime/resident/autonomy_reads.py"
+          "backend/app/runtime/resident/autonomy_reads.py",
+          "backend/app/runtime/resident/first_greeting.py"
         ],
         "backend/app/services/agent_creation_drafts.py": [
           "backend/app/domains/characters/exceptions.py",
@@ -7436,35 +7450,44 @@
         },
         {
           "old": "backend/app/services/agents.py::FIRST_GREETING_COOLDOWN",
-          "new": "backend/app/runtime/characters/management.py::FIRST_GREETING_COOLDOWN",
+          "new": "backend/app/domains/routines/constants.py::FIRST_GREETING_COOLDOWN",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/domains/routines/service/first_greeting.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/first_greeting.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_first_greeting_cooldown_is_separate_from_run_now_cooldown"
-          ]
+          ],
+          "source_member": "Original complete policy/prompt/provider IO/schema/constant body after exact same-Session callback/type restoration and expansion of original credential-resolution try and PostgreSQL owner-lock blocks. Claim-before-provider, exact POST payload, usage/error/result and separate cooldown remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::FIRST_GREETING_SESSION_MARKER",
-          "new": "backend/app/runtime/characters/management.py::FIRST_GREETING_SESSION_MARKER",
+          "new": "backend/app/domains/routines/constants.py::FIRST_GREETING_SESSION_MARKER",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/domains/routines/service/first_greeting.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/first_greeting.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
-          ]
+          ],
+          "source_member": "Original complete policy/prompt/provider IO/schema/constant body after exact same-Session callback/type restoration and expansion of original credential-resolution try and PostgreSQL owner-lock blocks. Claim-before-provider, exact POST payload, usage/error/result and separate cooldown remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::FIRST_GREETING_WRITER_OUTPUT_TOKENS",
-          "new": "backend/app/runtime/characters/management.py::FIRST_GREETING_WRITER_OUTPUT_TOKENS",
+          "new": "backend/app/domains/routines/constants.py::FIRST_GREETING_WRITER_OUTPUT_TOKENS",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/domains/routines/service/first_greeting.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/first_greeting.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original complete policy/prompt/provider IO/schema/constant body after exact same-Session callback/type restoration and expansion of original credential-resolution try and PostgreSQL owner-lock blocks. Claim-before-provider, exact POST payload, usage/error/result and separate cooldown remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::RUN_NOW_SCHEDULER_GUARD_WINDOW",
@@ -7686,13 +7709,16 @@
         },
         {
           "old": "backend/app/services/agents.py::_FirstGreetingWriterPayload",
-          "new": "backend/app/runtime/characters/management.py::_FirstGreetingWriterPayload",
+          "new": "backend/app/domains/routines/schemas/first_greeting.py::_FirstGreetingWriterPayload",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/domains/routines/service/first_greeting.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/first_greeting.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident"
-          ]
+          ],
+          "source_member": "Original complete policy/prompt/provider IO/schema/constant body after exact same-Session callback/type restoration and expansion of original credential-resolution try and PostgreSQL owner-lock blocks. Claim-before-provider, exact POST payload, usage/error/result and separate cooldown remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::INDEPENDENT_POST_PROBABILITY_RANGES",
@@ -8403,49 +8429,61 @@
         },
         {
           "old": "backend/app/services/agents.py::run_first_greeting",
-          "new": "backend/app/runtime/characters/management.py::run_first_greeting",
+          "new": "backend/app/domains/routines/service/first_greeting.py::run_first_greeting",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/domains/routines/service/first_greeting.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/first_greeting.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
-          ]
+          ],
+          "source_member": "Original complete policy/prompt/provider IO/schema/constant body after exact same-Session callback/type restoration and expansion of original credential-resolution try and PostgreSQL owner-lock blocks. Claim-before-provider, exact POST payload, usage/error/result and separate cooldown remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_run_first_greeting_writer",
-          "new": "backend/app/runtime/characters/management.py::_run_first_greeting_writer",
+          "new": "backend/app/runtime/resident/first_greeting.py::_run_first_greeting_writer",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/domains/routines/service/first_greeting.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/first_greeting.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
-          ]
+          ],
+          "source_member": "Original complete policy/prompt/provider IO/schema/constant body after exact same-Session callback/type restoration and expansion of original credential-resolution try and PostgreSQL owner-lock blocks. Claim-before-provider, exact POST payload, usage/error/result and separate cooldown remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_build_first_greeting_writer_prompt",
-          "new": "backend/app/runtime/characters/management.py::_build_first_greeting_writer_prompt",
+          "new": "backend/app/domains/routines/service/first_greeting.py::_build_first_greeting_writer_prompt",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/domains/routines/service/first_greeting.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/first_greeting.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+          ],
+          "source_member": "Original complete policy/prompt/provider IO/schema/constant body after exact same-Session callback/type restoration and expansion of original credential-resolution try and PostgreSQL owner-lock blocks. Claim-before-provider, exact POST payload, usage/error/result and separate cooldown remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_attach_first_greeting_image",
-          "new": "backend/app/runtime/characters/management.py::_attach_first_greeting_image",
+          "new": "backend/app/runtime/resident/first_greeting.py::_attach_first_greeting_image",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/domains/routines/service/first_greeting.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/first_greeting.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
-          ]
+          ],
+          "source_member": "Original complete policy/prompt/provider IO/schema/constant body after exact same-Session callback/type restoration and expansion of original credential-resolution try and PostgreSQL owner-lock blocks. Claim-before-provider, exact POST payload, usage/error/result and separate cooldown remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::update_profile",
@@ -9226,27 +9264,33 @@
         },
         {
           "old": "backend/app/services/agents.py::_first_greeting_available_at",
-          "new": "backend/app/runtime/characters/management.py::_first_greeting_available_at",
+          "new": "backend/app/domains/routines/service/first_greeting.py::_first_greeting_available_at",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/domains/routines/service/first_greeting.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/first_greeting.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/routines/test_activity_limits.py::test_first_greeting_cooldown_is_separate_from_run_now_cooldown",
             "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call"
-          ]
+          ],
+          "source_member": "Original complete policy/prompt/provider IO/schema/constant body after exact same-Session callback/type restoration and expansion of original credential-resolution try and PostgreSQL owner-lock blocks. Claim-before-provider, exact POST payload, usage/error/result and separate cooldown remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_claim_first_greeting_run",
-          "new": "backend/app/runtime/characters/management.py::_claim_first_greeting_run",
+          "new": "backend/app/domains/routines/service/first_greeting.py::_claim_first_greeting_run",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/domains/routines/service/first_greeting.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/first_greeting.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
-          ]
+          ],
+          "source_member": "Original complete policy/prompt/provider IO/schema/constant body after exact same-Session callback/type restoration and expansion of original credential-resolution try and PostgreSQL owner-lock blocks. Claim-before-provider, exact POST payload, usage/error/result and separate cooldown remain unchanged."
         },
         {
           "old": "backend/app/services/agents.py::_visible_activity_actions",
@@ -10474,6 +10518,31 @@
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_sqlite_concurrent_world_activation_serializes_capacity_at_one",
             "tests/routines/test_activity_limits.py::test_effective_server_llm_autonomy_count_includes_auto_or_slot_unique"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::run_first_greeting",
+          "new": "backend/app/runtime/resident/first_greeting.py::resolve_first_greeting_key",
+          "source_member": "Only the original CredentialResolver.resolve_llm_credential -> material.reveal -> CredentialResolutionError raise-from try block, followed by returning the same api_key. No DB/provider invocation, altered purpose, error type/message, catch breadth or redaction. Caller invokes it at the original pre-run-id point.",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/first_greeting.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/test_oss_architecture_boundaries.py::test_plaintext_credential_reveal_calls_are_explicitly_allowlisted"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_claim_first_greeting_run",
+          "new": "backend/app/domains/routines/repository/first_greeting.py::lock_first_greeting_owner",
+          "source_member": "Only original PostgreSQL dialect if block, sha256 owner lock key and advisory SQL execute. Same Session before repeated authored-post/cooldown check; no flush/commit or altered lock scope. Service computes current before this call as originally.",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/first_greeting.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/test_postgres_security_concurrency.py::test_first_greeting_claim_is_single_flight_across_postgres_sessions"
           ]
         }
       ],
@@ -25246,8 +25315,10 @@
           "backend/app/runtime/resident/autonomy_reads.py"
         ],
         "backend/app/schemas/agents.py": [
+          "backend/app/api/schemas/first_greeting.py",
           "backend/app/domains/characters/schemas.py",
           "backend/app/domains/identity/schemas.py",
+          "backend/app/domains/routines/schemas/first_greeting.py",
           "backend/app/domains/routines/schemas/resident.py",
           "backend/app/schemas/agents.py"
         ]
@@ -26147,24 +26218,32 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentFirstGreetingCreate",
-          "new": "backend/app/schemas/agents.py::AgentFirstGreetingCreate",
+          "new": "backend/app/domains/routines/schemas/first_greeting.py::AgentFirstGreetingCreate",
           "direct_consumers": [
+            "backend/app/domains/routines/service/first_greeting.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/first_greeting.py",
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
-          ]
+          ],
+          "source_member": "Original complete policy/prompt/provider IO/schema/constant body after exact same-Session callback/type restoration and expansion of original credential-resolution try and PostgreSQL owner-lock blocks. Claim-before-provider, exact POST payload, usage/error/result and separate cooldown remain unchanged."
         },
         {
           "old": "backend/app/schemas/agents.py::AgentFirstGreetingRead",
-          "new": "backend/app/schemas/agents.py::AgentFirstGreetingRead",
+          "new": "backend/app/api/schemas/first_greeting.py::AgentFirstGreetingRead",
           "direct_consumers": [
+            "backend/app/domains/routines/service/first_greeting.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/first_greeting.py",
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
             "tests/test_provider_boundary_security.py::test_provider_failure_attempt_and_log_never_retain_raw_body"
-          ]
+          ],
+          "source_member": "Original full HTTP response class body. This actual composition schema combines Routines run metadata and Social.PostDetail without introducing reciprocal domain dependency; same class/fields/defaults passed by response factory."
         },
         {
           "old": "backend/app/schemas/agents.py::CredentialRead",
@@ -33454,6 +33533,22 @@
       "preservation": "Original fixed-error order, owner-controlled/imported-World restrictions, tendency-before-auto-enabled feed check, time/slot lookup order, returned run, temporary claim race and BaseException cleanup precedence preserved. No new commits/flushes, no provider fallback, no production aggregate alias.",
       "test_bindings": "Two source inspection tests explicitly bind the original namespace to the actual defining manual/feed/autonomy functions; all original assertions and collected nodes remain.",
       "remaining": "Existing mixed management entry wrappers bind these exact actual functions only until C7 HTTP/composition source. First greeting, tendency provider/state and credential owner4/HTTP remain next C7; B5/B7/Runtime/Operations canonical sources connect during root sequential integration."
+    },
+    "AR-B4-C7-D-first-greeting": {
+      "status": "IMPLEMENTED — final156PASS/5existingwarnings, exact originalAST14; boundary784/2735/legacy203/cycle0; original-six read-only diagnostics all zero, protected2139/current2287; stock introductions pending root.",
+      "actual_paths": [
+        "backend/app/domains/routines/contracts/first_greeting.py",
+        "backend/app/domains/routines/schemas/first_greeting.py",
+        "backend/app/domains/routines/service/first_greeting.py",
+        "backend/app/domains/routines/repository/first_greeting.py",
+        "backend/app/runtime/resident/first_greeting.py",
+        "backend/app/api/schemas/__init__.py",
+        "backend/app/api/schemas/first_greeting.py"
+      ],
+      "ownership": "Routines owns actual first-greeting flow/prompt4, owner lock1, request/writer schema2. API owns the actual composite response schema1 containing Social.PostDetail. Runtime binds the original PostCreate/AgentFirstGreetingRead constructors and sameSession Social/provider functions; service returns the exact constructed response through a typed factory. Provider IO2/secret try1 remain runtime.",
+      "preservation": "Original standalone first-greeting lane and owner30minute cooldown; commit claim before provider; duplicate authored-post recheck under original PostgreSQL lock; created-post log then image attempt then refreshed response; deferred-vs-failed run state and usage; exact secret purpose and raise-from are unchanged. Schema class names, fields/defaults and PostDetail reference remain identical. An initial reciprocal domain edge through Social.PostDetail was removed by the actual API response composition and typed value/factory contracts, not a boundary exception.",
+      "test_bindings": "Existing source inspection reads actual service functions; PostgreSQL same-Session claim invokes the actual service with original Social nullable/exists collaboration. Plaintext equality allowlist moves only original first-greeting reveal to its exact new runtime helper. No broad allowlist/checker exemption.",
+      "remaining": "Current mixed management entry binds only actual service/provider functions until C7 HTTP/composition. Tendency and Character credential workflows remain next. Root later connects B5 canonical image generation and Identity lookup sources."
     }
   },
   "test_symbols": {
