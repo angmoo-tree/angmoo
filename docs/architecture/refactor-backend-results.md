@@ -1897,3 +1897,7 @@ The original seven tests moved whole to `tests/worlds/test_foundation.py`; a new
 ### G5 integration of World foundation — 2026-09-06 08:45 KST
 
 Merged preparation source `447e3c1` into the current Social/Search/Chat/Memory/Runtime integration. Actual World foundation tests: **8 passed**. Original read-only preservation diagnostics remain **0 errors** across sources, split ownership, assertions, suppressions, ASGI exports, API/ORM and test nodes (**2201 protected / 2380 current**). Architecture boundaries pass at **948 modules / 3330 edges / 114 exact legacy edges**; L4 948/99 and ER0 87/87/24/44/7 pass. Full stock source introduction metadata and hosted/installer gates remain pending.
+
+### ER7 relationship runtime-provider test binding
+
+G5 foundation transition validation found **119 passed / 1 failed**: the existing ER7 test still patched a gateway on the removed mixed `world_activity_runtime` route owner. It now uses the actual Relationships router, request dependency factory and runtime graph reference owner. The original assertions and suppression contracts are identical. The complete ER7 file passes **12 tests / 1 warning** on the integration source; the failed case plus preservation/retirement checks passes **90 tests / 1 warning** on the G5 foundation candidate. This is a test binding correction; the product gateway/provider behavior did not change.

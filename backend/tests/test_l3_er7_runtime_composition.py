@@ -10,7 +10,9 @@ from types import SimpleNamespace
 import pytest
 from fastapi.testclient import TestClient
 
-from app.api.v1.routes import world_activity_runtime
+from app.domains.relationships import router as world_activity_runtime
+from app.domains.relationships.dependencies import get_read_references
+from app.runtime.graph_projection import diagnostic_references
 from app.config import Settings
 from app.main import create_public_app as create_app
 from app.runtime.configuration import (
@@ -246,7 +248,10 @@ def test_relationship_route_uses_runtime_provider_when_query_is_omitted(
         base=Settings(_env_file=None),
     )
     request = SimpleNamespace(
-        app=SimpleNamespace(state=SimpleNamespace(runtime_settings=runtime_settings))
+        app=SimpleNamespace(state=SimpleNamespace(
+            runtime_settings=runtime_settings,
+            relationships_read_references_factory=diagnostic_references.SqlAlchemyDiagnosticReferences,
+        ))
     )
     observed: dict[str, object] = {}
 
@@ -260,23 +265,25 @@ def test_relationship_route_uses_runtime_provider_when_query_is_omitted(
         return "ladybug-result"
 
     monkeypatch.setattr(
-        world_activity_runtime,
+        diagnostic_references,
         "SqlAlchemyRelationshipGraphReadGateway",
         Gateway,
     )
     monkeypatch.setattr(
-        world_activity_runtime.relationships,
+        world_activity_runtime.graph_read,
         "get_owner_relationship_graph",
         fake_read,
     )
 
+    db = object()
     result = world_activity_runtime.get_world_character_relationship_graph(
         request,
         "character",
         "world",
         provider=None,
-        db=object(),
+        db=db,
         user=SimpleNamespace(id="owner"),
+        references=get_read_references(request, db=db),
     )
 
     assert result == "ladybug-result"
