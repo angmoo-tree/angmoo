@@ -1148,6 +1148,7 @@
       "app.domains.social.service.image_attachment",
       "app.domains.social.service.image_attempts",
       "app.domains.social.service.image_generation",
+      "app.domains.social.service.image_identity",
       "app.domains.social.service.image_jobs",
       "app.domains.social.service.image_prompts",
       "app.domains.social.service.image_quota",
@@ -1362,6 +1363,7 @@
       "app.domains.social.service.image_attachment",
       "app.domains.social.service.image_attempts",
       "app.domains.social.service.image_generation",
+      "app.domains.social.service.image_identity",
       "app.domains.social.service.image_jobs",
       "app.domains.social.service.image_prompts",
       "app.domains.social.service.image_quota",
@@ -3139,6 +3141,14 @@
         "owner_stage": "AR-B5",
         "reason": "Remaining original Character/LLM/secret/settings binding constructs the real Social generation service calls while its last client responsibilities move.",
         "removal_condition": "Move the concrete binding to runtime/social and remove the old image generation module after all exact consumers/monkeypatch targets are canonical.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.social.service.image_identity",
+        "owner_stage": "AR-B5",
+        "reason": "Concrete image runtime binds owner persistence and raw LLM/file clients to actual Social identity policies.",
+        "removal_condition": "Move actual concrete binding to runtime/social and switch all callers/monkeypatches before removing the old image module.",
         "review_date": "2026-09-06"
       }
     ]

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.domains.social.service import image_generation as image_policy
+from app.domains.social.service import image_generation as image_policy, image_identity
 from app.domains.social.service.image_generation import _image_key_source, _has_user_image_key
 
 from app.domains.social.service.image_attachment import (
@@ -219,64 +219,7 @@ async def _ensure_visual_identity(
     on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
     model_override: str | None = None,
 ) -> str | None:
-    if setting.visual_identity_prompt and setting.visual_identity_source_hash is None:
-        return setting.visual_identity_prompt.strip() or None
-    if (
-        setting.visual_identity_prompt
-        and setting.visual_identity_source_hash == reference.source_hash
-    ):
-        return setting.visual_identity_prompt.strip() or None
-    try:
-        api_key = CredentialResolver.resolve_llm_credential(
-            credential,
-            purpose=CredentialPurpose.USER_IMAGE,
-            owner_id=character.owner_id,
-            character_id=character.id,
-            allowed_stored_purposes={"agent"},
-        ).reveal()
-    except CredentialResolutionError as exc:
-        raise DirectLlmError("text credential key cannot be resolved") from exc
-
-    def _validator(payload: dict[str, Any]) -> dict[str, Any]:
-        return _VisualIdentityPayload.model_validate(payload).model_dump()
-
-    payload = await generate_json(
-        api_key=api_key,
-        context=DirectLlmCallContext(
-            credential_id=credential.id,
-            character_id=character.id,
-            agent_run_id=run_id,
-            node="ImageVisualIdentity",
-            lane="image_visual_identity",
-            provider=credential.provider,
-            model=model_override or credential.model,
-            key_fingerprint=credential.key_fingerprint,
-        ),
-        tracker=tracker,
-        system_prompt=_visual_identity_system_prompt(character=character),
-        user_prompt=(
-            "Inspect the reference image and return JSON describing the stable visual "
-            "identity to preserve for future social post illustrations."
-        ),
-        response_schema=_VisualIdentityPayload,
-        validator=_validator,
-        max_output_tokens=800,
-        user_image_parts=[reference.llm_part],
-        on_rate_limit_wait=on_rate_limit_wait,
-    )
-    try:
-        identity = _VisualIdentityPayload.model_validate(payload)
-    except ValidationError:
-        return None
-    if not identity.usable_identity or not identity.identity_prompt.strip():
-        if reference.source == "banner":
-            return None
-        return None
-    setting.visual_identity_prompt = identity.identity_prompt.strip()
-    setting.visual_identity_source_hash = reference.source_hash
-    db.commit()
-    db.refresh(setting)
-    return setting.visual_identity_prompt
+    return await image_identity._ensure_visual_identity(workflows=RuntimeImageGenerationWorkflows(), db=db, setting=setting, character=character, credential=credential, reference=reference, tracker=tracker, run_id=run_id, on_rate_limit_wait=on_rate_limit_wait, model_override=model_override)
 
 
 async def _resolve_visual_identity(
@@ -291,22 +234,7 @@ async def _resolve_visual_identity(
     on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
     model_override: str | None = None,
 ) -> str:
-    if setting.visual_identity_prompt and setting.visual_identity_source_hash is None:
-        return setting.visual_identity_prompt.strip()
-    if reference is None:
-        return setting.visual_identity_prompt or _fallback_visual_identity(character)
-    visual_identity = await _ensure_visual_identity(
-        db=db,
-        setting=setting,
-        character=character,
-        credential=credential,
-        reference=reference,
-        tracker=tracker,
-        run_id=run_id,
-        on_rate_limit_wait=on_rate_limit_wait,
-        model_override=model_override,
-    )
-    return visual_identity or _fallback_visual_identity(character)
+    return await image_identity._resolve_visual_identity(workflows=RuntimeImageGenerationWorkflows(), db=db, setting=setting, character=character, credential=credential, reference=reference, tracker=tracker, run_id=run_id, on_rate_limit_wait=on_rate_limit_wait, model_override=model_override)
 
 
 async def _refine_image_prompt(
@@ -324,76 +252,14 @@ async def _refine_image_prompt(
     on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
     model_override: str | None = None,
 ) -> dict[str, str]:
-    try:
-        api_key = CredentialResolver.resolve_llm_credential(
-            credential,
-            purpose=CredentialPurpose.USER_IMAGE,
-            owner_id=character.owner_id,
-            character_id=character.id,
-            allowed_stored_purposes={"agent"},
-        ).reveal()
-    except CredentialResolutionError as exc:
-        raise DirectLlmError("text credential key cannot be resolved") from exc
-
-    def _validator(payload: dict[str, Any]) -> dict[str, Any]:
-        return _ImagePromptPayload.model_validate(payload).model_dump()
-
-    payload = await generate_json(
-        api_key=api_key,
-        context=DirectLlmCallContext(
-            credential_id=credential.id,
-            character_id=character.id,
-            agent_run_id=run_id,
-            node="ImagePromptRefiner",
-            lane="image_prompt_refiner",
-            provider=credential.provider,
-            model=model_override or credential.model,
-            key_fingerprint=credential.key_fingerprint,
-        ),
-        tracker=tracker,
-        system_prompt=_image_prompt_system_prompt(
-            character=character,
-            image_model=image_model,
-        ),
-        user_prompt=json_safe_prompt(
-            {
-                "current_time": current_time_text,
-                "post_title": post_title,
-                "post_body": post_body,
-                "writing_mode": writing_plan.get("mode"),
-                "writing_brief": writing_plan.get("brief"),
-                "active_step": writing_plan.get("active_step"),
-                "visual_identity": visual_identity,
-            }
-        ),
-        response_schema=_ImagePromptPayload,
-        validator=_validator,
-        max_output_tokens=1100,
-        on_rate_limit_wait=on_rate_limit_wait,
-    )
-    refined = _ImagePromptPayload.model_validate(payload).model_dump()
-    return {
-        "prompt": refined["prompt"].strip(),
-        "alt_text": refined["alt_text"].strip(),
-    }
+    return await image_identity._refine_image_prompt(workflows=RuntimeImageGenerationWorkflows(), character=character, credential=credential, tracker=tracker, run_id=run_id, image_model=image_model, current_time_text=current_time_text, post_title=post_title, post_body=post_body, writing_plan=writing_plan, visual_identity=visual_identity, on_rate_limit_wait=on_rate_limit_wait, model_override=model_override)
 
 
 def _select_reference_image(
     character: models.Character,
     setting: models.AgentImageGenerationSetting,
 ) -> _ReferenceImage | None:
-    candidates = [
-        ("seed", setting.seed_image_url),
-        ("avatar", character.avatar_url),
-        ("banner", character.banner_url),
-    ]
-    for source, url in candidates:
-        if not url:
-            continue
-        reference = _build_reference_image(source=source, url=url)
-        if reference is not None:
-            return reference
-    return None
+    return image_identity._select_reference_image(workflows=RuntimeImageGenerationWorkflows(), character=character, setting=setting)
 
 
 def _build_reference_image(*, source: str, url: str) -> _ReferenceImage | None:
@@ -549,89 +415,6 @@ class RuntimeImageGenerationWorkflows:
     def image_route_mode(self, db: Session) -> str:
         return operation_settings.get_pollinations_image_route_mode(db)
 
-    def select_reference_image(self,
-        character: models.Character,
-        setting: models.AgentImageGenerationSetting,
-    ) -> _ReferenceImage | None:
-        return _select_reference_image(character, setting)
-
-    async def ensure_visual_identity(self,
-        *,
-        db: Session,
-        setting: models.AgentImageGenerationSetting,
-        character: models.Character,
-        credential: models.LlmCredential,
-        reference: _ReferenceImage,
-        tracker: RunLlmTracker,
-        run_id: str,
-        on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
-        model_override: str | None = None,
-    ) -> str | None:
-        return await _ensure_visual_identity(
-            db=db,
-            setting=setting,
-            character=character,
-            credential=credential,
-            reference=reference,
-            tracker=tracker,
-            run_id=run_id,
-            on_rate_limit_wait=on_rate_limit_wait,
-            model_override=model_override,
-        )
-
-    async def resolve_visual_identity(self,
-        *,
-        db: Session,
-        setting: models.AgentImageGenerationSetting,
-        character: models.Character,
-        credential: models.LlmCredential,
-        reference: _ReferenceImage | None,
-        tracker: RunLlmTracker,
-        run_id: str,
-        on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
-        model_override: str | None = None,
-    ) -> str:
-        return await _resolve_visual_identity(
-            db=db,
-            setting=setting,
-            character=character,
-            credential=credential,
-            reference=reference,
-            tracker=tracker,
-            run_id=run_id,
-            on_rate_limit_wait=on_rate_limit_wait,
-            model_override=model_override,
-        )
-
-    async def refine_image_prompt(self,
-        *,
-        character: models.Character,
-        credential: models.LlmCredential,
-        tracker: RunLlmTracker,
-        run_id: str,
-        image_model: str,
-        current_time_text: str,
-        post_title: str,
-        post_body: str,
-        writing_plan: dict[str, Any],
-        visual_identity: str,
-        on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
-        model_override: str | None = None,
-    ) -> dict[str, str]:
-        return await _refine_image_prompt(
-            character=character,
-            credential=credential,
-            tracker=tracker,
-            run_id=run_id,
-            image_model=image_model,
-            current_time_text=current_time_text,
-            post_title=post_title,
-            post_body=post_body,
-            writing_plan=writing_plan,
-            visual_identity=visual_identity,
-            on_rate_limit_wait=on_rate_limit_wait,
-            model_override=model_override,
-        )
 
     def image_key_for_source(self,
         setting: models.AgentImageGenerationSetting,
@@ -654,3 +437,155 @@ class RuntimeImageGenerationWorkflows:
         local_key_prefix: str,
     ) -> None:
         return _log_local_api_image_rejected(db=db, user_id=user_id, character_id=character_id, post_id=post_id, local_key_prefix=local_key_prefix)
+
+    def build_reference_image(self, *, source: str, url: str) -> _ReferenceImage | None:
+        return _build_reference_image(source=source, url=url)
+
+    def store_image_visual_identity(self, db: Session, setting: models.AgentImageGenerationSetting, *, identity_prompt: str, source_hash: str) -> str:
+        # Preserve the attached setting and the caller's explicit commit/refresh.
+        setting.visual_identity_prompt = identity_prompt.strip()
+        setting.visual_identity_source_hash = source_hash
+        db.commit()
+        db.refresh(setting)
+        return setting.visual_identity_prompt
+
+    async def generate_visual_identity_payload(self,
+        *,
+        character: models.Character,
+        credential: models.LlmCredential,
+        reference: _ReferenceImage,
+        tracker: RunLlmTracker,
+        run_id: str,
+        on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
+        model_override: str | None = None,
+    ) -> dict[str, Any]:
+        return await _generate_visual_identity_payload(character=character, credential=credential, reference=reference, tracker=tracker, run_id=run_id, on_rate_limit_wait=on_rate_limit_wait, model_override=model_override)
+
+    async def generate_image_prompt_payload(self,
+        *,
+        character: models.Character,
+        credential: models.LlmCredential,
+        tracker: RunLlmTracker,
+        run_id: str,
+        image_model: str,
+        current_time_text: str,
+        post_title: str,
+        post_body: str,
+        writing_plan: dict[str, Any],
+        visual_identity: str,
+        on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
+        model_override: str | None = None,
+    ) -> dict[str, Any]:
+        return await _generate_image_prompt_payload(character=character, credential=credential, tracker=tracker, run_id=run_id, image_model=image_model, current_time_text=current_time_text, post_title=post_title, post_body=post_body, writing_plan=writing_plan, visual_identity=visual_identity, on_rate_limit_wait=on_rate_limit_wait, model_override=model_override)
+
+
+async def _generate_visual_identity_payload(
+    *,
+    character: models.Character,
+    credential: models.LlmCredential,
+    reference: _ReferenceImage,
+    tracker: RunLlmTracker,
+    run_id: str,
+    on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
+    model_override: str | None = None,
+) -> dict[str, Any]:
+    try:
+        api_key = CredentialResolver.resolve_llm_credential(
+            credential,
+            purpose=CredentialPurpose.USER_IMAGE,
+            owner_id=character.owner_id,
+            character_id=character.id,
+            allowed_stored_purposes={"agent"},
+        ).reveal()
+    except CredentialResolutionError as exc:
+        raise DirectLlmError("text credential key cannot be resolved") from exc
+    def _validator(payload: dict[str, Any]) -> dict[str, Any]:
+        return _VisualIdentityPayload.model_validate(payload).model_dump()
+    payload = await generate_json(
+        api_key=api_key,
+        context=DirectLlmCallContext(
+            credential_id=credential.id,
+            character_id=character.id,
+            agent_run_id=run_id,
+            node="ImageVisualIdentity",
+            lane="image_visual_identity",
+            provider=credential.provider,
+            model=model_override or credential.model,
+            key_fingerprint=credential.key_fingerprint,
+        ),
+        tracker=tracker,
+        system_prompt=_visual_identity_system_prompt(character=character),
+        user_prompt=(
+            "Inspect the reference image and return JSON describing the stable visual "
+            "identity to preserve for future social post illustrations."
+        ),
+        response_schema=_VisualIdentityPayload,
+        validator=_validator,
+        max_output_tokens=800,
+        user_image_parts=[reference.llm_part],
+        on_rate_limit_wait=on_rate_limit_wait,
+    )
+    return payload
+
+
+async def _generate_image_prompt_payload(
+    *,
+    character: models.Character,
+    credential: models.LlmCredential,
+    tracker: RunLlmTracker,
+    run_id: str,
+    image_model: str,
+    current_time_text: str,
+    post_title: str,
+    post_body: str,
+    writing_plan: dict[str, Any],
+    visual_identity: str,
+    on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
+    model_override: str | None = None,
+) -> dict[str, Any]:
+    try:
+        api_key = CredentialResolver.resolve_llm_credential(
+            credential,
+            purpose=CredentialPurpose.USER_IMAGE,
+            owner_id=character.owner_id,
+            character_id=character.id,
+            allowed_stored_purposes={"agent"},
+        ).reveal()
+    except CredentialResolutionError as exc:
+        raise DirectLlmError("text credential key cannot be resolved") from exc
+    def _validator(payload: dict[str, Any]) -> dict[str, Any]:
+        return _ImagePromptPayload.model_validate(payload).model_dump()
+    payload = await generate_json(
+        api_key=api_key,
+        context=DirectLlmCallContext(
+            credential_id=credential.id,
+            character_id=character.id,
+            agent_run_id=run_id,
+            node="ImagePromptRefiner",
+            lane="image_prompt_refiner",
+            provider=credential.provider,
+            model=model_override or credential.model,
+            key_fingerprint=credential.key_fingerprint,
+        ),
+        tracker=tracker,
+        system_prompt=_image_prompt_system_prompt(
+            character=character,
+            image_model=image_model,
+        ),
+        user_prompt=json_safe_prompt(
+            {
+                "current_time": current_time_text,
+                "post_title": post_title,
+                "post_body": post_body,
+                "writing_mode": writing_plan.get("mode"),
+                "writing_brief": writing_plan.get("brief"),
+                "active_step": writing_plan.get("active_step"),
+                "visual_identity": visual_identity,
+            }
+        ),
+        response_schema=_ImagePromptPayload,
+        validator=_validator,
+        max_output_tokens=1100,
+        on_rate_limit_wait=on_rate_limit_wait,
+    )
+    return payload

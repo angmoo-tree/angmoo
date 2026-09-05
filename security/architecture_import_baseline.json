@@ -1,7 +1,7 @@
 {
-  "edge_count": 2727,
-  "external_import_count": 2366,
-  "module_count": 787,
+  "edge_count": 2733,
+  "external_import_count": 2371,
+  "module_count": 788,
   "modules": [
     {
       "external_imports": [],
@@ -5360,7 +5360,6 @@
       "external_imports": [
         "__future__",
         "collections.abc",
-        "datetime",
         "sqlalchemy.orm",
         "typing"
       ],
@@ -6022,7 +6021,8 @@
         "collections.abc",
         "datetime",
         "hashlib",
-        "sqlalchemy.orm"
+        "sqlalchemy.orm",
+        "typing"
       ],
       "imports": [
         "app.core.image_generation",
@@ -6034,6 +6034,7 @@
         "app.domains.social.repository.media",
         "app.domains.social.schemas.community",
         "app.domains.social.service.image_attempts",
+        "app.domains.social.service.image_identity",
         "app.domains.social.service.image_prompts",
         "app.domains.social.service.image_quota",
         "app.domains.social.service.image_reference_policy",
@@ -6043,6 +6044,24 @@
       ],
       "module": "app.domains.social.service.image_generation",
       "path": "backend/app/domains/social/service/image_generation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "pydantic",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.image_generation",
+        "app.domains.social.contracts.image_workflows",
+        "app.domains.social.schemas.image_generation",
+        "app.domains.social.service.image_prompts"
+      ],
+      "module": "app.domains.social.service.image_identity",
+      "path": "backend/app/domains/social/service/image_identity.py",
       "wildcard_imports": []
     },
     {
@@ -11565,6 +11584,7 @@
         "app.domains.social.service.image_attachment",
         "app.domains.social.service.image_attempts",
         "app.domains.social.service.image_generation",
+        "app.domains.social.service.image_identity",
         "app.domains.social.service.image_prompts",
         "app.domains.social.service.image_quota",
         "app.domains.social.service.image_reference_policy",

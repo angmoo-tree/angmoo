@@ -2,6 +2,7 @@
 from __future__ import annotations
 from collections.abc import Awaitable, Callable
 from datetime import datetime
+from typing import Any
 import hashlib
 from app.domains.social.models import posts as models
 from app.domains.social.schemas import community as schemas
@@ -13,6 +14,7 @@ from app.domains.social.exceptions import ServiceImageQuotaError
 from app.domains.social.service.image_quota import _daily_image_usage, _reserve_service_image_quota, _finalize_service_image_quota
 from app.domains.social.service.image_prompts import _image_llm_model_for_writing_mode, _compose_pollinations_prompt, _compose_local_api_pollinations_prompt
 from app.domains.social.service.image_reference_policy import _reference_image_url, _requires_reference, _allows_reference_fallback
+from app.domains.social.service import image_identity
 from app.domains.social.service.image_attempts import _skipped, _failed, _pollinations_failed, _replicate_failed
 from app.core.image_generation import DEFAULT_POLLINATIONS_IMAGE_MODEL, IMAGE_MODEL_OPTIONS
 from app.integrations import image_provider, pollinations_image, replicate_image
@@ -67,7 +69,7 @@ async def prepare_post_image(
             )
         except ServiceImageQuotaError as exc:
             return _skipped(exc.reason, **base_attempt)
-    reference = workflows.select_reference_image(character, setting)
+    reference = image_identity._select_reference_image(character, setting, workflows=workflows)
     reference_source = reference.source if reference is not None else None
     reference_image_url = _reference_image_url(model, reference)
     if _requires_reference(model) and not reference_image_url:
@@ -85,7 +87,7 @@ async def prepare_post_image(
     try:
         if _requires_reference(model):
             assert reference is not None
-            visual_identity = await workflows.ensure_visual_identity(
+            visual_identity = await image_identity._ensure_visual_identity(workflows=workflows,
                 db=db,
                 setting=setting,
                 character=character,
@@ -108,7 +110,7 @@ async def prepare_post_image(
                 if setting.visual_identity_prompt and setting.visual_identity_source_hash is None:
                     visual_identity = setting.visual_identity_prompt.strip()
                 elif reference is not None:
-                    visual_identity = await workflows.ensure_visual_identity(
+                    visual_identity = await image_identity._ensure_visual_identity(workflows=workflows,
                         db=db,
                         setting=setting,
                         character=character,
@@ -122,7 +124,7 @@ async def prepare_post_image(
                 else:
                     visual_identity = None
             else:
-                visual_identity = await workflows.resolve_visual_identity(
+                visual_identity = await image_identity._resolve_visual_identity(workflows=workflows,
                     db=db,
                     setting=setting,
                     character=character,
@@ -140,7 +142,7 @@ async def prepare_post_image(
                     reference_source=reference_source,
                     **base_attempt,
                 )
-        refined = await workflows.refine_image_prompt(
+        refined = await image_identity._refine_image_prompt(workflows=workflows,
             character=character,
             credential=credential,
             tracker=tracker,
@@ -408,7 +410,7 @@ async def prepare_local_api_post_image(
         return _skipped("limit_exceeded", **base_attempt)
     if workflows.unsafe_image_text_reason(image_prompt) or workflows.unsafe_image_text_reason(visual_identity):
         return _skipped("unsafe_prompt", **base_attempt)
-    reference = workflows.select_reference_image(character, setting)
+    reference = image_identity._select_reference_image(character, setting, workflows=workflows)
     reference_source = reference.source if reference is not None else None
     reference_image_url = _reference_image_url(model, reference)
     if _requires_reference(model) and not reference_image_url:
@@ -579,7 +581,7 @@ def _local_api_image_skip_reason(
         return "limit_exceeded"
     if workflows.unsafe_image_text_reason(image_prompt) or workflows.unsafe_image_text_reason(visual_identity):
         return "unsafe_prompt"
-    reference = workflows.select_reference_image(character, setting)
+    reference = image_identity._select_reference_image(character, setting, workflows=workflows)
     reference_image_url = _reference_image_url(model, reference)
     if _requires_reference(model) and not reference_image_url:
         return "reference_required"

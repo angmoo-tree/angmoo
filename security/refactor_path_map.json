@@ -34028,6 +34028,7 @@
           "backend/app/domains/social/service/image_attachment.py",
           "backend/app/domains/social/service/image_attempts.py",
           "backend/app/domains/social/service/image_generation.py",
+          "backend/app/domains/social/service/image_identity.py",
           "backend/app/domains/social/service/image_prompts.py",
           "backend/app/domains/social/service/image_quota.py",
           "backend/app/domains/social/service/image_reference_policy.py",
@@ -34247,47 +34248,47 @@
         },
         {
           "old": "backend/app/services/post_image_generation.py::_ensure_visual_identity",
-          "new": "backend/app/services/post_image_generation.py::_ensure_visual_identity",
+          "new": "backend/app/domains/social/service/image_identity.py::_ensure_visual_identity",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
-            "backend/app/services/post_image_job_worker.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
           ],
           "test_nodes": [
-            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
-            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
-            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
-            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
           ]
         },
         {
           "old": "backend/app/services/post_image_generation.py::_resolve_visual_identity",
-          "new": "backend/app/services/post_image_generation.py::_resolve_visual_identity",
+          "new": "backend/app/domains/social/service/image_identity.py::_resolve_visual_identity",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
-            "backend/app/services/post_image_job_worker.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
           ],
           "test_nodes": [
-            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
-            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
-            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
-            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
           ]
         },
         {
           "old": "backend/app/services/post_image_generation.py::_refine_image_prompt",
-          "new": "backend/app/services/post_image_generation.py::_refine_image_prompt",
+          "new": "backend/app/domains/social/service/image_identity.py::_refine_image_prompt",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
-            "backend/app/services/post_image_job_worker.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
           ],
           "test_nodes": [
-            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
-            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
-            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
-            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
           ]
         },
         {
@@ -34526,17 +34527,17 @@
         },
         {
           "old": "backend/app/services/post_image_generation.py::_select_reference_image",
-          "new": "backend/app/services/post_image_generation.py::_select_reference_image",
+          "new": "backend/app/domains/social/service/image_identity.py::_select_reference_image",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
-            "backend/app/services/post_image_job_worker.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
           ],
           "test_nodes": [
-            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
-            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
-            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
-            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
           ]
         },
         {
@@ -36184,6 +36185,7 @@
           "backend/app/domains/social/service/image_attachment.py",
           "backend/app/domains/social/service/image_attempts.py",
           "backend/app/domains/social/service/image_generation.py",
+          "backend/app/domains/social/service/image_identity.py",
           "backend/app/domains/social/service/image_prompts.py",
           "backend/app/domains/social/service/image_quota.py",
           "backend/app/domains/social/service/image_reference_policy.py",
@@ -36403,47 +36405,47 @@
         },
         {
           "old": "backend/app/services/post_image_generation.py::_ensure_visual_identity",
-          "new": "backend/app/services/post_image_generation.py::_ensure_visual_identity",
+          "new": "backend/app/domains/social/service/image_identity.py::_ensure_visual_identity",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
-            "backend/app/services/post_image_job_worker.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
           ],
           "test_nodes": [
-            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
-            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
-            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
-            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
           ]
         },
         {
           "old": "backend/app/services/post_image_generation.py::_resolve_visual_identity",
-          "new": "backend/app/services/post_image_generation.py::_resolve_visual_identity",
+          "new": "backend/app/domains/social/service/image_identity.py::_resolve_visual_identity",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
-            "backend/app/services/post_image_job_worker.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
           ],
           "test_nodes": [
-            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
-            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
-            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
-            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
           ]
         },
         {
           "old": "backend/app/services/post_image_generation.py::_refine_image_prompt",
-          "new": "backend/app/services/post_image_generation.py::_refine_image_prompt",
+          "new": "backend/app/domains/social/service/image_identity.py::_refine_image_prompt",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
-            "backend/app/services/post_image_job_worker.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
           ],
           "test_nodes": [
-            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
-            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
-            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
-            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
           ]
         },
         {
@@ -36682,17 +36684,17 @@
         },
         {
           "old": "backend/app/services/post_image_generation.py::_select_reference_image",
-          "new": "backend/app/services/post_image_generation.py::_select_reference_image",
+          "new": "backend/app/domains/social/service/image_identity.py::_select_reference_image",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
-            "backend/app/services/post_image_job_worker.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
           ],
           "test_nodes": [
-            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
-            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
-            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
-            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
           ]
         },
         {
@@ -37077,6 +37079,7 @@
           "backend/app/domains/social/service/image_attachment.py",
           "backend/app/domains/social/service/image_attempts.py",
           "backend/app/domains/social/service/image_generation.py",
+          "backend/app/domains/social/service/image_identity.py",
           "backend/app/domains/social/service/image_prompts.py",
           "backend/app/domains/social/service/image_quota.py",
           "backend/app/domains/social/service/image_reference_policy.py",
@@ -37296,47 +37299,47 @@
         },
         {
           "old": "backend/app/services/post_image_generation.py::_ensure_visual_identity",
-          "new": "backend/app/services/post_image_generation.py::_ensure_visual_identity",
+          "new": "backend/app/domains/social/service/image_identity.py::_ensure_visual_identity",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
-            "backend/app/services/post_image_job_worker.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
           ],
           "test_nodes": [
-            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
-            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
-            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
-            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
           ]
         },
         {
           "old": "backend/app/services/post_image_generation.py::_resolve_visual_identity",
-          "new": "backend/app/services/post_image_generation.py::_resolve_visual_identity",
+          "new": "backend/app/domains/social/service/image_identity.py::_resolve_visual_identity",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
-            "backend/app/services/post_image_job_worker.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
           ],
           "test_nodes": [
-            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
-            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
-            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
-            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
           ]
         },
         {
           "old": "backend/app/services/post_image_generation.py::_refine_image_prompt",
-          "new": "backend/app/services/post_image_generation.py::_refine_image_prompt",
+          "new": "backend/app/domains/social/service/image_identity.py::_refine_image_prompt",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
-            "backend/app/services/post_image_job_worker.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
           ],
           "test_nodes": [
-            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
-            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
-            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
-            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
           ]
         },
         {
@@ -37575,17 +37578,17 @@
         },
         {
           "old": "backend/app/services/post_image_generation.py::_select_reference_image",
-          "new": "backend/app/services/post_image_generation.py::_select_reference_image",
+          "new": "backend/app/domains/social/service/image_identity.py::_select_reference_image",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
-            "backend/app/services/post_image_job_worker.py",
-            "backend/app/runtime/characters/management.py"
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
           ],
           "test_nodes": [
-            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
-            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
-            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
-            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
           ]
         },
         {
@@ -38098,6 +38101,1137 @@
       "existing_test_binding_changes": {
         "path": "backend/tests/test_post_image_generation.py",
         "change": "Only monkeypatch receiver for daily usage/reserve/finalize moved to actual image_policy module; original assertions and provider/mock intent remain unchanged. Runtime collaborator forwards original positional reference/key/text calls."
+      }
+    },
+    "AR-B5-C10-E": {
+      "status": "IMPLEMENTED; original policy4/rawLLM2/ownerwrite5 statement contracts preserved; source introduction pending",
+      "scope": "Social owns visual identity cache and output validation, fallback and ordered reference choice. The runtime supplies raw LLM payload, file reference loading and same-Session Character visual identity persistence. Character repository canonical binding is applied in linear integration with the separate Character owner source; no duplicate ORM or owner repository added here.",
+      "split_files": {
+        "backend/app/services/post_image_generation.py": [
+          "backend/app/domains/social/constants.py",
+          "backend/app/domains/social/contracts/image_generation.py",
+          "backend/app/domains/social/contracts/image_workflows.py",
+          "backend/app/domains/social/exceptions.py",
+          "backend/app/domains/social/schemas/image_generation.py",
+          "backend/app/domains/social/service/image_attachment.py",
+          "backend/app/domains/social/service/image_attempts.py",
+          "backend/app/domains/social/service/image_generation.py",
+          "backend/app/domains/social/service/image_identity.py",
+          "backend/app/domains/social/service/image_prompts.py",
+          "backend/app/domains/social/service/image_quota.py",
+          "backend/app/domains/social/service/image_reference_policy.py",
+          "backend/app/services/post_image_generation.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/post_image_generation.py::POLLINATIONS_IMAGE_TIMEOUT_SECONDS",
+          "new": "backend/app/domains/social/constants.py::POLLINATIONS_IMAGE_TIMEOUT_SECONDS",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::IMAGE_PROMPT_MAX_LENGTH",
+          "new": "backend/app/domains/social/constants.py::IMAGE_PROMPT_MAX_LENGTH",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::LOCAL_API_PROMPT_SAFETY_SUFFIX",
+          "new": "backend/app/domains/social/constants.py::LOCAL_API_PROMPT_SAFETY_SUFFIX",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::KLEIN_BODY_STRUCTURE_PROMPT_SUFFIX",
+          "new": "backend/app/domains/social/constants.py::KLEIN_BODY_STRUCTURE_PROMPT_SUFFIX",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::SERVICE_IMAGE_ACTIVE_RESERVATION_STATUSES",
+          "new": "backend/app/domains/social/constants.py::SERVICE_IMAGE_ACTIVE_RESERVATION_STATUSES",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::IMAGE_VISUAL_IDENTITY_FIRST_GREETING_MODEL",
+          "new": "backend/app/domains/social/constants.py::IMAGE_VISUAL_IDENTITY_FIRST_GREETING_MODEL",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::ServiceImageQuotaError",
+          "new": "backend/app/domains/social/exceptions.py::ServiceImageQuotaError",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_VisualIdentityPayload",
+          "new": "backend/app/domains/social/schemas/image_generation.py::_VisualIdentityPayload",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_ImagePromptPayload",
+          "new": "backend/app/domains/social/schemas/image_generation.py::_ImagePromptPayload",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_ReferenceImage",
+          "new": "backend/app/services/post_image_generation.py::_ReferenceImage",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py",
+            "backend/app/services/post_image_job_worker.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::PreparedPostImage",
+          "new": "backend/app/domains/social/contracts/image_generation.py::PreparedPostImage",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::prepare_post_image",
+          "new": "backend/app/domains/social/service/image_generation.py::prepare_post_image",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::create_local_api_post_image_request",
+          "new": "backend/app/domains/social/service/image_generation.py::create_local_api_post_image_request",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::prepare_local_api_post_image",
+          "new": "backend/app/domains/social/service/image_generation.py::prepare_local_api_post_image",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::attach_prepared_post_image",
+          "new": "backend/app/domains/social/service/image_attachment.py::attach_prepared_post_image",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[False]",
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[True]",
+            "tests/test_post_image_generation.py::test_pollinations_reference_policy_by_model",
+            "tests/test_post_image_generation.py::test_local_api_prepare_failure_propagates_attempt_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::release_prepared_post_image_quota",
+          "new": "backend/app/domains/social/service/image_attachment.py::release_prepared_post_image_quota",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[False]",
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[True]",
+            "tests/test_post_image_generation.py::test_pollinations_reference_policy_by_model",
+            "tests/test_post_image_generation.py::test_local_api_prepare_failure_propagates_attempt_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_ensure_visual_identity",
+          "new": "backend/app/domains/social/service/image_identity.py::_ensure_visual_identity",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_resolve_visual_identity",
+          "new": "backend/app/domains/social/service/image_identity.py::_resolve_visual_identity",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_refine_image_prompt",
+          "new": "backend/app/domains/social/service/image_identity.py::_refine_image_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_visual_identity_system_prompt",
+          "new": "backend/app/domains/social/service/image_prompts.py::_visual_identity_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_image_prompt_system_prompt",
+          "new": "backend/app/domains/social/service/image_prompts.py::_image_prompt_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_default_image_prompt_system_prompt",
+          "new": "backend/app/domains/social/service/image_prompts.py::_default_image_prompt_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_klein_image_prompt_system_prompt",
+          "new": "backend/app/domains/social/service/image_prompts.py::_klein_image_prompt_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_flux_schnell_image_prompt_system_prompt",
+          "new": "backend/app/domains/social/service/image_prompts.py::_flux_schnell_image_prompt_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_zimage_image_prompt_system_prompt",
+          "new": "backend/app/domains/social/service/image_prompts.py::_zimage_image_prompt_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_sana_image_prompt_system_prompt",
+          "new": "backend/app/domains/social/service/image_prompts.py::_sana_image_prompt_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_pruna_edit_image_prompt_system_prompt",
+          "new": "backend/app/domains/social/service/image_prompts.py::_pruna_edit_image_prompt_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_compose_pollinations_prompt",
+          "new": "backend/app/domains/social/service/image_prompts.py::_compose_pollinations_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_append_prompt_suffix",
+          "new": "backend/app/domains/social/service/image_prompts.py::_append_prompt_suffix",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_compose_local_api_pollinations_prompt",
+          "new": "backend/app/domains/social/service/image_prompts.py::_compose_local_api_pollinations_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_fallback_visual_identity",
+          "new": "backend/app/domains/social/service/image_prompts.py::_fallback_visual_identity",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_pollinations_reference_url",
+          "new": "backend/app/domains/social/service/image_reference_policy.py::_pollinations_reference_url",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[False]",
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[True]",
+            "tests/test_post_image_generation.py::test_pollinations_reference_policy_by_model",
+            "tests/test_post_image_generation.py::test_local_api_prepare_failure_propagates_attempt_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_reference_image_url",
+          "new": "backend/app/domains/social/service/image_reference_policy.py::_reference_image_url",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[False]",
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[True]",
+            "tests/test_post_image_generation.py::test_pollinations_reference_policy_by_model",
+            "tests/test_post_image_generation.py::test_local_api_prepare_failure_propagates_attempt_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_accepts_pollinations_reference",
+          "new": "backend/app/domains/social/service/image_reference_policy.py::_accepts_pollinations_reference",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[False]",
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[True]",
+            "tests/test_post_image_generation.py::test_pollinations_reference_policy_by_model",
+            "tests/test_post_image_generation.py::test_local_api_prepare_failure_propagates_attempt_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_requires_pollinations_reference",
+          "new": "backend/app/domains/social/service/image_reference_policy.py::_requires_pollinations_reference",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[False]",
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[True]",
+            "tests/test_post_image_generation.py::test_pollinations_reference_policy_by_model",
+            "tests/test_post_image_generation.py::test_local_api_prepare_failure_propagates_attempt_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_requires_reference",
+          "new": "backend/app/domains/social/service/image_reference_policy.py::_requires_reference",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[False]",
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[True]",
+            "tests/test_post_image_generation.py::test_pollinations_reference_policy_by_model",
+            "tests/test_post_image_generation.py::test_local_api_prepare_failure_propagates_attempt_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_allows_reference_fallback",
+          "new": "backend/app/domains/social/service/image_reference_policy.py::_allows_reference_fallback",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[False]",
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[True]",
+            "tests/test_post_image_generation.py::test_pollinations_reference_policy_by_model",
+            "tests/test_post_image_generation.py::test_local_api_prepare_failure_propagates_attempt_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_select_reference_image",
+          "new": "backend/app/domains/social/service/image_identity.py::_select_reference_image",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py",
+            "backend/app/domains/social/service/image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_build_reference_image",
+          "new": "backend/app/services/post_image_generation.py::_build_reference_image",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py",
+            "backend/app/services/post_image_job_worker.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_public_media_url",
+          "new": "backend/app/services/post_image_generation.py::_public_media_url",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py",
+            "backend/app/services/post_image_job_worker.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_mime_type_from_url",
+          "new": "backend/app/services/post_image_generation.py::_mime_type_from_url",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py",
+            "backend/app/services/post_image_job_worker.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_daily_image_count",
+          "new": "backend/app/domains/social/service/image_quota.py::_daily_image_count",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_daily_image_usage",
+          "new": "backend/app/domains/social/service/image_quota.py::_daily_image_usage",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_daily_image_window_count",
+          "new": "backend/app/domains/social/service/image_quota.py::_daily_image_window_count",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_daily_image_window",
+          "new": "backend/app/domains/social/service/image_quota.py::_daily_image_window",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_image_key_source",
+          "new": "backend/app/domains/social/service/image_generation.py::_image_key_source",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_has_user_image_key",
+          "new": "backend/app/domains/social/service/image_generation.py::_has_user_image_key",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_image_model_for_key_source",
+          "new": "backend/app/domains/social/service/image_generation.py::_image_model_for_key_source",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_image_key_for_source",
+          "new": "backend/app/services/post_image_generation.py::_image_key_for_source",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py",
+            "backend/app/services/post_image_job_worker.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_service_failure_class",
+          "new": "backend/app/domains/social/service/image_attempts.py::_service_failure_class",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_service_quota_date",
+          "new": "backend/app/domains/social/service/image_quota.py::_service_quota_date",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_reserve_service_image_quota",
+          "new": "backend/app/domains/social/service/image_quota.py::_reserve_service_image_quota",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_finalize_service_image_quota",
+          "new": "backend/app/domains/social/service/image_quota.py::_finalize_service_image_quota",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_image_llm_model_for_writing_mode",
+          "new": "backend/app/domains/social/service/image_prompts.py::_image_llm_model_for_writing_mode",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_local_api_image_skip_reason",
+          "new": "backend/app/domains/social/service/image_generation.py::_local_api_image_skip_reason",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_unsafe_image_text_reason",
+          "new": "backend/app/services/post_image_generation.py::_unsafe_image_text_reason",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py",
+            "backend/app/services/post_image_job_worker.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_log_local_api_image_rejected",
+          "new": "backend/app/services/post_image_generation.py::_log_local_api_image_rejected",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py",
+            "backend/app/services/post_image_job_worker.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::json_safe_prompt",
+          "new": "backend/app/domains/social/service/image_prompts.py::json_safe_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::json_dumps",
+          "new": "backend/app/domains/social/service/image_prompts.py::json_dumps",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_pollinations_failed",
+          "new": "backend/app/domains/social/service/image_attempts.py::_pollinations_failed",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[False]",
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[True]",
+            "tests/test_post_image_generation.py::test_pollinations_reference_policy_by_model",
+            "tests/test_post_image_generation.py::test_local_api_prepare_failure_propagates_attempt_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_replicate_failed",
+          "new": "backend/app/domains/social/service/image_attempts.py::_replicate_failed",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[False]",
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[True]",
+            "tests/test_post_image_generation.py::test_pollinations_reference_policy_by_model",
+            "tests/test_post_image_generation.py::test_local_api_prepare_failure_propagates_attempt_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_skipped",
+          "new": "backend/app/domains/social/service/image_attempts.py::_skipped",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_failed",
+          "new": "backend/app/domains/social/service/image_attempts.py::_failed",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_image_prompt_system_prompt",
+          "new": "backend/app/domains/social/contracts/image_generation.py::ImageCharacter",
+          "direct_consumers": [
+            "backend/app/domains/social/service/image_prompts.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_quota_ownership.py::test_image_quota_keeps_day_window_commit_and_release_accounting",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_mode_uses_service_key_and_reservation",
+            "tests/test_post_image_generation.py::test_klein_compose_prompt_preserves_suffix_under_length_limit"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_ReferenceImage",
+          "new": "backend/app/domains/social/contracts/image_generation.py::ImageReferenceLocation",
+          "direct_consumers": [
+            "backend/app/domains/social/service/image_reference_policy.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[False]",
+            "tests/social/test_image_attachment_ownership.py::test_attachment_keeps_media_commit_then_quota_finalization[True]",
+            "tests/test_post_image_generation.py::test_pollinations_reference_policy_by_model",
+            "tests/test_post_image_generation.py::test_local_api_prepare_failure_propagates_attempt_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::prepare_post_image",
+          "new": "backend/app/services/post_image_generation.py::RuntimeImageGenerationWorkflows",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::prepare_post_image",
+          "new": "backend/app/domains/social/contracts/image_workflows.py::ImageGenerationWorkflows",
+          "direct_consumers": [
+            "backend/app/domains/social/service/image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::prepare_post_image",
+          "new": "backend/app/domains/social/contracts/image_workflows.py::ImageSetting",
+          "direct_consumers": [
+            "backend/app/domains/social/service/image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::prepare_post_image",
+          "new": "backend/app/domains/social/contracts/image_workflows.py::ImageCredential",
+          "direct_consumers": [
+            "backend/app/domains/social/service/image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_ReferenceImage",
+          "new": "backend/app/domains/social/contracts/image_workflows.py::ImageReference",
+          "direct_consumers": [
+            "backend/app/domains/social/service/image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::prepare_post_image",
+          "new": "backend/app/services/post_image_generation.py::prepare_post_image",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py",
+            "backend/app/services/post_image_job_worker.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::create_local_api_post_image_request",
+          "new": "backend/app/services/post_image_generation.py::create_local_api_post_image_request",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py",
+            "backend/app/services/post_image_job_worker.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::prepare_local_api_post_image",
+          "new": "backend/app/services/post_image_generation.py::prepare_local_api_post_image",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py",
+            "backend/app/services/post_image_job_worker.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_image_model_for_key_source",
+          "new": "backend/app/services/post_image_generation.py::_image_model_for_key_source",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py",
+            "backend/app/services/post_image_job_worker.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_local_api_image_skip_reason",
+          "new": "backend/app/services/post_image_generation.py::_local_api_image_skip_reason",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py",
+            "backend/app/services/post_image_job_worker.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_request_ownership.py::test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm",
+            "tests/test_post_image_generation.py::test_prepare_post_image_reads_route_mode_at_processing_time",
+            "tests/test_post_image_generation.py::test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostics"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_ensure_visual_identity",
+          "new": "backend/app/services/post_image_generation.py::_generate_visual_identity_payload",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_refine_image_prompt",
+          "new": "backend/app/services/post_image_generation.py::_generate_image_prompt_payload",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_ensure_visual_identity",
+          "new": "backend/app/services/post_image_generation.py::_ensure_visual_identity",
+          "direct_consumers": [
+            "backend/tests/test_post_image_generation.py",
+            "backend/tests/social/test_image_identity_ownership.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_resolve_visual_identity",
+          "new": "backend/app/services/post_image_generation.py::_resolve_visual_identity",
+          "direct_consumers": [
+            "backend/tests/test_post_image_generation.py",
+            "backend/tests/social/test_image_identity_ownership.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_refine_image_prompt",
+          "new": "backend/app/services/post_image_generation.py::_refine_image_prompt",
+          "direct_consumers": [
+            "backend/tests/test_post_image_generation.py",
+            "backend/tests/social/test_image_identity_ownership.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_select_reference_image",
+          "new": "backend/app/services/post_image_generation.py::_select_reference_image",
+          "direct_consumers": [
+            "backend/tests/test_post_image_generation.py",
+            "backend/tests/social/test_image_identity_ownership.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+            "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]",
+            "tests/test_post_image_generation.py::test_pruna_edit_prepare_skips_unusable_reference",
+            "tests/test_post_image_generation.py::test_local_api_prepare_uses_deterministic_prompt_without_llm"
+          ]
+        }
+      ],
+      "new_tests": [
+        "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[unusable]",
+        "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[empty]",
+        "tests/social/test_image_identity_ownership.py::test_visual_identity_cache_and_rejection_preserve_same_session_write[invalid]"
+      ],
+      "existing_test_binding_changes": {
+        "paths": [
+          "backend/tests/test_post_image_generation.py",
+          "backend/tests/social/test_image_request_ownership.py",
+          "backend/tests/test_oss_architecture_boundaries.py"
+        ],
+        "change": "Monkeypatches target actual Social identity service; reference fake accepts injected workflow keyword. Plaintext exact allowlist function names now refer to raw client helpers in the same module. Existing assertions and strict observed == allowed remain unchanged."
       }
     }
   }

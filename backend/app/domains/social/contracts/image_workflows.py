@@ -5,7 +5,6 @@ runtime binding performs no query, credential resolution, or provider request.
 """
 from __future__ import annotations
 from collections.abc import Awaitable, Callable
-from datetime import datetime
 from typing import Any, Protocol
 from sqlalchemy.orm import Session
 from app.domains.social.contracts.image_generation import ImageCharacter, ImageReferenceLocation
@@ -70,54 +69,6 @@ class ImageGenerationWorkflows(Protocol):
     def service_image_available(self, model: str) -> bool: ...
     def free_image_model(self, db: Session | None) -> str: ...
     def image_route_mode(self, db: Session) -> str: ...
-
-    def select_reference_image(self,
-        character: ImageCharacter,
-        setting: ImageSetting,
-    ) -> ImageReference | None: ...
-
-    async def ensure_visual_identity(self,
-        *,
-        db: Session,
-        setting: ImageSetting,
-        character: ImageCharacter,
-        credential: ImageCredential,
-        reference: ImageReference,
-        tracker: object,
-        run_id: str,
-        on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
-        model_override: str | None = None,
-    ) -> str | None: ...
-
-    async def resolve_visual_identity(self,
-        *,
-        db: Session,
-        setting: ImageSetting,
-        character: ImageCharacter,
-        credential: ImageCredential,
-        reference: ImageReference | None,
-        tracker: object,
-        run_id: str,
-        on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
-        model_override: str | None = None,
-    ) -> str: ...
-
-    async def refine_image_prompt(self,
-        *,
-        character: ImageCharacter,
-        credential: ImageCredential,
-        tracker: object,
-        run_id: str,
-        image_model: str,
-        current_time_text: str,
-        post_title: str,
-        post_body: str,
-        writing_plan: dict[str, Any],
-        visual_identity: str,
-        on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
-        model_override: str | None = None,
-    ) -> dict[str, str]: ...
-
     def image_key_for_source(self,
         setting: ImageSetting,
         key_source: str,
@@ -136,3 +87,33 @@ class ImageGenerationWorkflows(Protocol):
         post_id: str,
         local_key_prefix: str,
     ) -> None: ...
+
+    def build_reference_image(self, *, source: str, url: str) -> ImageReference | None: ...
+    def store_image_visual_identity(self, db: Session, setting: ImageSetting, *, identity_prompt: str, source_hash: str) -> str: ...
+
+    async def generate_visual_identity_payload(self,
+        *,
+        character: ImageCharacter,
+        credential: ImageCredential,
+        reference: ImageReference,
+        tracker: object,
+        run_id: str,
+        on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
+        model_override: str | None = None,
+    ) -> dict[str, Any]: ...
+
+    async def generate_image_prompt_payload(self,
+        *,
+        character: ImageCharacter,
+        credential: ImageCredential,
+        tracker: object,
+        run_id: str,
+        image_model: str,
+        current_time_text: str,
+        post_title: str,
+        post_body: str,
+        writing_plan: dict[str, Any],
+        visual_identity: str,
+        on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
+        model_override: str | None = None,
+    ) -> dict[str, Any]: ...

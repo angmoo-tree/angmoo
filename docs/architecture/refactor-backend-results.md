@@ -1163,3 +1163,12 @@ claim/stale/완료 3개 원래 상태 정책을 Social service로 이동하고 �
 원래7 정책의 협력 호출을 확장한 AST 및 남은11 정의 본문 동일. 첫 생성 코드의 keyword 배치 문법 오류를 compile 단계에서 수정했다. 집중에서 원래 positional fake callback을 keyword로 바꾼 차이와 이전 quota monkeypatch 대상을 확인해 호출 형식과 실제 새 대상만 바로잡았다. 신규 request fixture는 Post당 job unique 제약을 유지하며 서로 다른 두 Post에 요청해 queued가 다음 요청 한도에 반영되는지를 검증한다. 기존 assert·DB 제약을 변경하지 않았다. 신규1 node는 실제 same-Session 설정·동일 응답 class·요청 AI0·queued job 집계와 commit을 확인한다. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
 
 C10-D 최종 집중 **80 PASS / 28.12초**. 원래7 실제 정책 확장 및 남은11 본문 AST 동일, API/schema/ORM·기존 test1 assertion·전체 split evidence PASS. 경계 787 modules / 2727 edges / legacy 200, L4/ER0 PASS.
+
+
+## AR-B5-C10-E — 시각 정체성 캐시·응답 검증·참조 선택
+
+원래4 정책을 Social 실제 service로 이전했다. Credential 해석과 raw LLM 요청2는 concrete runtime binding에 남고 Social은 동일 출력 schema로 검증한다. Character 저장은 원래 strip→hash 대입→commit→refresh→return5문장과 같은 attached Session을 유지한다. 별도 Character owner source의 실제 repository 함수에 선형 통합할 callback을 준비했으며 ORM/동일경로를 복제하지 않았다.
+
+원래4 정책을 협력 호출로 확장한 AST, raw LLM2 본문, owner write5문장, 남은 정의 본문 동일 PASS. 새 SQLite3node는 정상 저장/observer 가시성·cache provider0·unusable/empty/invalid 응답의 저장0/추가 commit0을 검증한다. 기존 image 및 OSS 경계 집중 **68 PASS / 33.75초**. 기존 테스트의 monkeypatch 실제 대상 및 plaintext reveal의 정확 client 함수명만 바꿨으며 assertion과 strict allowlist 비교는 보존했다. 전체 B5/source capture/Hosted/installer 완료를 뜻하지 않는다.
+
+API/schema/ORM·기존 protected test2 assertion·전체 split evidence PASS. 경계 **788 modules / 2733 edges / legacy 200**, L4/ER0 PASS. 별도 Character owner source `734492bf6551fdb5dea24d2b9140e4ac2d97ef18`의 `repository/image_settings.store_image_visual_identity`에 같은 callback을 연결하는 선형 통합이 남아 있다.

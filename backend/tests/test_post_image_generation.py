@@ -1,3 +1,4 @@
+from app.domains.social.service import image_identity
 import asyncio
 import base64
 from datetime import UTC, datetime
@@ -1102,7 +1103,7 @@ def test_prepare_post_image_does_not_skip_new_root_post_modes(
     monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(
-        post_image_generation,
+        image_identity,
         "_refine_image_prompt",
         fake_refine_image_prompt,
     )
@@ -1179,7 +1180,7 @@ def test_prepare_post_image_flux_uses_visual_identity_without_reference(monkeypa
     )
     monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
-    monkeypatch.setattr(post_image_generation, "_refine_image_prompt", fake_refine_image_prompt)
+    monkeypatch.setattr(image_identity, "_refine_image_prompt", fake_refine_image_prompt)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
 
     result = asyncio.run(
@@ -1259,7 +1260,7 @@ def test_prepare_post_image_reads_route_mode_at_processing_time(monkeypatch) -> 
     )
     monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
-    monkeypatch.setattr(post_image_generation, "_refine_image_prompt", fake_refine_image_prompt)
+    monkeypatch.setattr(image_identity, "_refine_image_prompt", fake_refine_image_prompt)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
 
     result = asyncio.run(
@@ -1333,7 +1334,7 @@ def test_prepare_post_image_flux_failure_keeps_pollinations_diagnostics(
     )
     monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
-    monkeypatch.setattr(post_image_generation, "_refine_image_prompt", fake_refine_image_prompt)
+    monkeypatch.setattr(image_identity, "_refine_image_prompt", fake_refine_image_prompt)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
 
     result = asyncio.run(
@@ -1409,8 +1410,8 @@ def test_local_api_prepare_uses_deterministic_prompt_without_llm(monkeypatch) ->
     monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
-    monkeypatch.setattr(post_image_generation, "_refine_image_prompt", fail_refiner)
-    monkeypatch.setattr(post_image_generation, "_ensure_visual_identity", fail_identity)
+    monkeypatch.setattr(image_identity, "_refine_image_prompt", fail_refiner)
+    monkeypatch.setattr(image_identity, "_ensure_visual_identity", fail_identity)
 
     result = asyncio.run(
         post_image_generation.prepare_local_api_post_image(
@@ -1675,7 +1676,7 @@ def test_prepare_post_image_service_mode_uses_service_key_and_reservation(
         fake_reserve,
     )
     monkeypatch.setattr(
-        post_image_generation,
+        image_identity,
         "_refine_image_prompt",
         fake_refine_image_prompt,
     )
@@ -1781,7 +1782,7 @@ def test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostic
         "_finalize_service_image_quota",
         lambda *_args, **_kwargs: None,
     )
-    monkeypatch.setattr(post_image_generation, "_refine_image_prompt", fake_refine_image_prompt)
+    monkeypatch.setattr(image_identity, "_refine_image_prompt", fake_refine_image_prompt)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
 
     result = asyncio.run(
@@ -1885,9 +1886,9 @@ def test_pruna_edit_prepare_skips_without_public_reference_url(monkeypatch) -> N
     )
     monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(
-        post_image_generation,
+        image_identity,
         "_select_reference_image",
-        lambda _character, _setting: reference,
+        lambda _character, _setting, **_kwargs: reference,
     )
 
     result = asyncio.run(
@@ -1944,12 +1945,12 @@ def test_pruna_edit_prepare_skips_unusable_reference(monkeypatch) -> None:
     )
     monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(
-        post_image_generation,
+        image_identity,
         "_select_reference_image",
-        lambda _character, _setting: reference,
+        lambda _character, _setting, **_kwargs: reference,
     )
-    monkeypatch.setattr(post_image_generation, "_ensure_visual_identity", unusable_identity)
-    monkeypatch.setattr(post_image_generation, "_refine_image_prompt", fail_refine)
+    monkeypatch.setattr(image_identity, "_ensure_visual_identity", unusable_identity)
+    monkeypatch.setattr(image_identity, "_refine_image_prompt", fail_refine)
 
     result = asyncio.run(
         post_image_generation.prepare_post_image(

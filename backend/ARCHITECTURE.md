@@ -706,3 +706,6 @@ Social 임시 `_SocialPersistenceModels`/`social_persistence_models` export는 �
 
 
 이미지 요청 수락과 resident/local 생성 준비의 실제 판단은 `social/service/image_generation.py`가 담당한다. 키 mode·지원 모델·사용량·reference·시각 정체성·생성 실패와 quota 종료 순서를 여기서 읽는다. Character 설정/LLM/운영 설정/비밀 해석/활동 로그는 하나의 `ImageGenerationWorkflows` 협력으로 구체 구현을 연결하며 같은 Session과 tracker 객체를 유지한다. `BotImageRequestRead`는 기존 Social schema의 동일 class이다. 수동 이미지 요청은 job만 기록하고 즉시 LLM/이미지 provider를 호출하지 않는다.
+
+
+시각 정체성의 수동 값·이미지 hash 캐시, 생성 응답 검증, fallback과 seed→avatar→banner 참조 선택은 `social/service/image_identity.py`가 담당한다. `ImageGenerationWorkflows`는 원시 LLM 응답과 파일 참조 로딩 및 Character의 실제 저장 협력을 제공한다. 정상 검증을 통과한 값만 같은 attached 설정 객체에 저장하며, 캐시 적중·잘못된 응답에 저장을 추가하지 않는다. HTTP DTO와 LLM 출력 schema의 기존 검증 규칙도 유지한다.

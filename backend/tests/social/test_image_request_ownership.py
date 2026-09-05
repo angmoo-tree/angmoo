@@ -1,3 +1,4 @@
+from app.domains.social.service import image_identity
 from datetime import UTC, datetime
 
 from sqlalchemy import event, select
@@ -44,8 +45,8 @@ def test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai
             raise AssertionError("request admission must not call LLM or image provider")
 
         monkeypatch.setattr(post_image_generation.agent_crud, "get_image_generation_setting", get_setting)
-        monkeypatch.setattr(post_image_generation, "_ensure_visual_identity", forbidden)
-        monkeypatch.setattr(post_image_generation, "_refine_image_prompt", forbidden)
+        monkeypatch.setattr(image_identity, "_ensure_visual_identity", forbidden)
+        monkeypatch.setattr(image_identity, "_refine_image_prompt", forbidden)
         monkeypatch.setattr(post_image_generation.image_provider, "generate_image", forbidden)
         event.listen(db, "before_commit", lambda *_: commits.append("commit"))
         args = dict(db=db, user_id="social-uow-owner", local_key_prefix="fixture",
