@@ -396,3 +396,9 @@ Foundation 이후 Character source `fe022c3`를 merge `7bc58b1`로 합쳤다. �
 기존 owner identity 6개 node를 `tests/world_characters/test_owner_identity.py`로 이동했다. 새 seed/update 회귀는 실제 Session의 flush/commit 횟수, attached identity, rollback 후 행 제거·이전 값 복구 및 unrelated field 보존을 검증한다. Owner·Package UoW·manual Social 묶음은 **24 passed / 기존 1 warning / 17.97초**였다. 현재 API/ORM 계약은 frozen 기준과 같다. Character 합류로 옛 `app/services/agents.py` direct consumer 한 건이 없어져 G2 split의 현재 소비자를 실제 `runtime/characters/management.py`로 연결했다. Frozen 기준선이나 승인 node는 바꾸지 않았다.
 
 Live architecture는 **618 modules / 1,937 edges / legacy exact 281 PASS**, ER0 **75/87/24/44/7 PASS**, L4 parity **97**, Memory batch current이다. Owner 서비스 3개 exact module만 추가하고 기존 임시 bridge 중 실제로 사라진 연결을 제거했다. WC profile/Studio/entry/setup/runtime repair/readiness와 최종 HTTP 이전은 다음 slice다.
+
+### WorldCharacter 기반·owner 통합 검증
+
+Foundation source `64537c7694819f5840aab9106f969f80c6c82d53`의 신규 파일 7개·회귀 2개, owner source `cb9b18d67daf42fd8c9d93c68108e27a7cbc08e1`의 신규 파일 3개·회귀 2개를 선행 Character/Worlds 뒤에 캡처했다. 고정 후보 `81724a5`에서 WorldCharacter owner/setup, Package import/UoW, runtime-mode repair, 권한/삭제 검사는 **63 passed / 2 warnings, 39.83초**였다. 전체 보존 검사는 **2,129 protected/current nodes / items 37 PASS**이며 API/OpenAPI/ORM·기존 assertion·suppression·source split도 유지했다. 검사 중 source·test·metadata는 수정하지 않았다.
+
+공통 CI 계약 7개, architecture **625 modules / 1,993 edges / exact legacy 281**, deferred 22, L4 parity 97, ER0 **76/87/24/44/7**, P8-R 및 public **196 operations**가 통과했다. 실제 Gitleaks 추적 archive **19.06MB**와 전체 **341 ancestor commits / 21.13MB**도 findings 0이었다. 이후 선행 Worlds PR의 결과를 통합한 차이는 문서 한 파일이다. Profile/Studio/setup workflow·entry/readiness HTTP는 다음 독립 범위이며, PR-head CI·설치·순차 merge/post-merge를 확인하기 전 전체 B2 완료로 표시하지 않는다.
