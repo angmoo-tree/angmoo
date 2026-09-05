@@ -839,6 +839,301 @@
       "test_suppressions": {
         "tests/migrations/test_alembic_layout.py": {}
       }
+    },
+    {
+      "commit": "9841bdff3c226a1bc9a07a0246b31dda8e8be87b",
+      "feature_id": "AR-B2",
+      "reason": "Preserve identity role implementation, same-session deletion regressions and exact package spelling guards after linear G0-G4 evidence.",
+      "tracked_files": {
+        "backend/app/api/identity_dependencies.py": "f5e1a72444545f8c3ea6cf46ec7f85ef95877771",
+        "backend/app/domains/identity/constants.py": "5edde8b5bff0cf0196e9827bab93a4be2e57e9f7",
+        "backend/app/domains/identity/exceptions.py": "d1436c6daab27ac404453107f9fb0e6d0afc4d5f",
+        "backend/app/domains/identity/policies.py": "69b813c6c957fbbef8925132a962b3c8ceaaa07e",
+        "backend/app/domains/identity/router/__init__.py": "7dd3259e1f22472cf8d1f50545bcd725e48d1eb9",
+        "backend/app/domains/identity/service/__init__.py": "b7ad566ad1a8c32a37b3a1c25f809b6351e26549",
+        "backend/app/integrations/google_identity.py": "80da86ff457b775cae4bf2a9165b79fb028b64c8",
+        "backend/app/runtime/account_deletion.py": "dc75269ac511a2bf6c0be7b6daf14227973db8ab",
+        "backend/tests/identity/test_account_deletion_composition.py": "503d68c6471073ed6bfaa0b1b974d66121c333ba"
+      },
+      "test_nodes": [
+        "tests/identity/test_account_deletion_composition.py::test_app_factory_supplies_the_runtime_account_deletion_workflow[create_app0]",
+        "tests/identity/test_account_deletion_composition.py::test_app_factory_supplies_the_runtime_account_deletion_workflow[create_app1]",
+        "tests/identity/test_account_deletion_composition.py::test_identity_admission_and_real_deletion_share_the_session_and_one_commit",
+        "tests/test_refactor_backend_checkpoint.py::test_package_initializer_move_does_not_normalize_unmapped_descendants",
+        "tests/test_refactor_backend_checkpoint.py::test_package_initializer_move_normalizes_its_exact_import_spelling"
+      ],
+      "test_assertions": {
+        "tests/identity/test_account_deletion_composition.py": {
+          "test_app_factory_supplies_the_runtime_account_deletion_workflow": [
+            "assert dependencies.get_account_deletion_workflow(request) is account_deletion.delete_current_user_account"
+          ],
+          "test_identity_admission_and_real_deletion_share_the_session_and_one_commit": [
+            "assert committed == [db]",
+            "assert db.get(models.User, user.id).deleted_at is not None",
+            "assert db.get(models.Character, character.id).deleted_at is not None",
+            "assert session is db",
+            "assert principal is user"
+          ]
+        },
+        "tests/test_refactor_backend_checkpoint.py": {
+          "test_pr263_checkpoint_preserves_hotfix_regressions_beyond_pr258": [
+            "assert p.checkpoint_errors(checkpoint, p.BASELINE.read_bytes()) == []",
+            "assert hotfix",
+            "assert p.missing_nodes(approved, remaining, moves, node_snapshots=[baseline['test_nodes'], checkpoint['test_nodes']]) == [deleted]"
+          ],
+          "test_checkpoint_cannot_be_recaptured_to_hide_a_regression": [
+            "assert any(('checkpoint mutated' in error for error in p.checkpoint_errors(checkpoint, p.BASELINE.read_bytes())))"
+          ],
+          "test_original_baseline_and_wrong_checkpoint_commit_are_rejected": [
+            "assert any(('exact PR263 commit' in error for error in errors))",
+            "assert any(('PR258 source baseline mutated' in error for error in errors))"
+          ],
+          "test_nodes_follow_second_move_and_count_checkpoint_lineage_once": [
+            "assert p.missing_nodes(['old::test', 'pilot::test', 'hotfix::test'], ['final::test', 'hotfix::test', 'new::test'], {'old::test': 'pilot::test', 'pilot::test': 'final::test'}, node_snapshots=[['old::test'], ['pilot::test', 'hotfix::test']]) == []"
+          ],
+          "test_move_cannot_swallow_an_independent_existing_destination": [
+            "pytest.raises(ValueError, match='independent cases cannot collapse')"
+          ],
+          "test_unexplained_missing_renamed_or_merged_test_nodes_are_rejected": [
+            "pytest.raises(ValueError, match=match)"
+          ],
+          "write": [],
+          "snapshot": [],
+          "test_moved_test_cannot_keep_its_name_and_delete_assertion_or_raises": [
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: target}, {}, tmp_path)))"
+          ],
+          "test_assertions_inside_local_test_helpers_cannot_disappear": [
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: node}, {}, tmp_path)))"
+          ],
+          "test_new_skip_or_xfail_cannot_hide_a_collected_regression": [
+            "assert any(('skip/xfail suppression changed' in error for error in p.check_suppressions([expected], {}, tmp_path)))"
+          ],
+          "test_existing_skips_are_preserved_and_collection_hook_suppression_is_guarded": [
+            "assert p.check_suppressions([expected], {}, tmp_path) == []",
+            "assert p.check_suppressions([expected], {}, tmp_path)"
+          ],
+          "test_assertions_accept_explicit_path_move_and_additional_checks": [
+            "assert p.check_assertions([expected], {node: target}, {'backend/app/core/config.py': 'backend/app/config.py'}, tmp_path) == []",
+            "assert p.check_assertions([expected], {node: target}, {}, tmp_path)"
+          ],
+          "test_unchanged_synthetic_legacy_path_fixture_survives_real_move_without_weakening_expectations": [
+            "assert p.check_assertions([expected], {node: node}, files, tmp_path) == []",
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: node}, files, tmp_path)))"
+          ],
+          "test_parameterized_nodes_preserve_the_underlying_class_assertions": [
+            "assert p.check_assertions([expected], {node: target}, {}, tmp_path) == []",
+            "assert p.missing_nodes([node], [target.replace('[v8]', '[v9]')], {node: target}) == [target]"
+          ],
+          "test_missing_or_empty_marker_cannot_preserve_a_source_implementation": [
+            "assert any(('empty package marker' in error for error in p.check_sources([old], {old: target}, tmp_path)))",
+            "assert any(('source missing' in error for error in p.check_sources([old], {old: 'backend/app/missing.py'}, tmp_path)))",
+            "pytest.raises(ValueError, match='absent from frozen')"
+          ],
+          "test_source_moves_follow_multiple_steps_and_reject_unsafe_destination": [
+            "assert p.check_sources(['backend/app/old.py'], {'backend/app/old.py': 'backend/app/intermediate.py', 'backend/app/intermediate.py': 'backend/app/current.py'}, tmp_path) == []",
+            "assert p.check_sources(['backend/app/old.py'], {'backend/app/old.py': '../outside.py'}, tmp_path)"
+          ],
+          "test_addition_records_require_commit_feature_and_reason": [
+            "assert any(('exact introduction commit' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_addition_history_cannot_be_removed_or_rewritten": [
+            "assert any(('history was changed or removed' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_addition_commit_source_and_assertion_provenance_are_checked": [
+            "assert p.addition_errors(additions, checkpoint, tmp_path) == []",
+            "assert any(('source provenance changed' in error for error in errors))",
+            "assert any(('assertion provenance changed' in error for error in errors))"
+          ],
+          "test_later_commit_cannot_claim_it_introduced_an_older_unrecorded_source": [
+            "assert any(('first introduction commit' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_new_committed_source_requires_record_and_mapped_destinations_are_not_new_work": [
+            "assert p.unrecorded_committed_sources(checkpoint, [], targets, tmp_path) == ['committed source lacks append-only introduction evidence: backend/app/new.py']",
+            "assert p.unrecorded_committed_sources(checkpoint, [{'tracked_files': {'backend/app/new.py': 'blob'}}], targets, tmp_path) == []"
+          ],
+          "test_capture_does_not_call_surviving_frozen_bridge_a_new_source": [
+            "assert capture.unprotected_files(tracked, [old], {old: new}) == {added: 'new-test-blob'}"
+          ],
+          "test_new_split_requires_real_symbols_consumers_and_behavior_test_evidence": [
+            "assert p.check_split_evidence({'details': {'AR-B2': detail}}, snapshots, tmp_path) == []",
+            "assert any(('split omits' in error for error in p.check_split_evidence({'details': {'AR-B2': broken}}, snapshots, tmp_path)))",
+            "assert any(('does not define' in error for error in p.check_split_evidence({'details': {'AR-B2': broken}}, snapshots, tmp_path)))"
+          ],
+          "test_package_initializer_move_normalizes_its_exact_import_spelling": [
+            "assert p.normalized_assertion(\"assert 'app.domains.identity.infrastructure' in imports\", literals) == p.normalized_assertion(\"assert 'app.domains.identity.models' in imports\", literals)",
+            "assert p.normalized_assertion(\"assert 'from app.domains.identity.infrastructure import User' in source\", literals) == p.normalized_assertion(\"assert 'from app.domains.identity.models import User' in source\", literals)"
+          ],
+          "test_package_initializer_move_does_not_normalize_unmapped_descendants": [
+            "assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])",
+            "assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/identity/test_account_deletion_composition.py": {},
+        "tests/test_refactor_backend_checkpoint.py": {}
+      }
+    },
+    {
+      "commit": "91c10c6c76728c89e9c5b6a251542a2d723dd511",
+      "feature_id": "AR-B2",
+      "reason": "Preserve canonical Character seed/profile/state implementation and eight foundation regressions after identity evidence.",
+      "tracked_files": {
+        "backend/app/domains/characters/exceptions.py": "97ee14d24c84a75b01af76c9c3cfcf9703ac47f6",
+        "backend/app/domains/characters/schemas.py": "8c9c8eb3f2f3a5de89eae807aa9c4ec9ad7f6713",
+        "backend/app/domains/characters/service/__init__.py": "8c883efd9728e81a9e9a5d0cc494ce3079d61c7e",
+        "backend/app/domains/characters/service/profile.py": "8657310dcb62dc65c983df70ed92a87cab3b3dff",
+        "backend/app/domains/characters/service/state.py": "96d87592a382c5cdb3f10bb98c2a3de8fb8e593d",
+        "backend/app/domains/media/__init__.py": "a76635050e25af749dc2f51c6bd1a08d79e3344a",
+        "backend/tests/characters/test_character_foundation.py": "d57f88d2a9d590cd5c1dfbf2681921264efd3731"
+      },
+      "test_nodes": [
+        "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media[values0]",
+        "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media[values1]",
+        "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media[values2]",
+        "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
+        "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults",
+        "tests/characters/test_character_foundation.py::test_seed_flushes_in_the_callers_transaction_and_rolls_back",
+        "tests/characters/test_character_foundation.py::test_seed_keeps_suffix_and_planned_handle_contracts",
+        "tests/characters/test_character_foundation.py::test_state_write_keeps_deferred_commit_participation"
+      ],
+      "test_assertions": {
+        "tests/characters/test_character_foundation.py": {
+          "engine": [],
+          "seed_data": [],
+          "test_model_and_schema_compatibility_exports_have_one_identity": [
+            "assert public.seed_autonomous_character is seed.seed_autonomous_character",
+            "assert legacy_repository.create_character is profile.create_character",
+            "assert legacy_repository.upsert_character_state is state.upsert_character_state",
+            "assert legacy_media_schemas.validate_profile_media_reference is media_schemas.validate_profile_media_reference",
+            "assert canonical is getattr(registered_models, name)",
+            "assert canonical is getattr(legacy_models, name)",
+            "assert canonical is getattr(public, name)",
+            "assert canonical.metadata is Base.metadata",
+            "assert getattr(schemas, name) is getattr(registered_schemas, name)",
+            "assert getattr(schemas, name) is getattr(legacy_character_schemas, name)",
+            "assert getattr(schemas, name) is getattr(legacy_agent_schemas, name)"
+          ],
+          "test_seed_flushes_in_the_callers_transaction_and_rolls_back": [
+            "assert db.get(models.Character, character.id) is character",
+            "assert character.handle == 'cafe_bird'",
+            "assert character.status == 'active'",
+            "assert character.topic_preferences == 'gardens, tea'",
+            "assert commits == []",
+            "assert check.scalars(select(models.Character)).all() == []"
+          ],
+          "test_seed_keeps_suffix_and_planned_handle_contracts": [
+            "assert (first.handle, second.handle, planned.handle) == ('cafe_bird', 'cafe_bird_2', 'planned_bird')",
+            "pytest.raises(ValueError, match='character_handle_unavailable')"
+          ],
+          "test_profile_create_keeps_its_existing_commit_and_inactive_defaults": [
+            "assert character.handle == 'caf_bird'",
+            "assert character.status == 'inactive'",
+            "assert character.name == 'Café Bird'",
+            "assert character.execution_mode == 'local'",
+            "assert check.get(models.Character, 'char-fixed123').handle == 'caf_bird'"
+          ],
+          "test_state_write_keeps_deferred_commit_participation": [
+            "assert db.get(models.CharacterState, character_id) is None",
+            "assert commits == [db]",
+            "assert check.get(models.CharacterState, character_id).summary == 'persisted'",
+            "assert written.character_id == character.id",
+            "assert commits == []"
+          ],
+          "test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media": [
+            "pytest.raises(ValueError)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/characters/test_character_foundation.py": {}
+      }
+    },
+    {
+      "commit": "d8780945ecd3de7135f7950aaf5e8e5f2cd68a4c",
+      "feature_id": "AR-B2",
+      "reason": "Preserve Creator policy, Character mutations, runtime composition and six policy regressions after Character foundation source.",
+      "tracked_files": {
+        "backend/app/core/response_schemas.py": "e77cc429fc2c66da9e2f2f97deb7d948f88c8a8e",
+        "backend/app/domains/characters/service/access.py": "b060e60b24d5ca01a9f212bb7769de189c1b5dbd",
+        "backend/app/domains/characters/service/creator.py": "eb4b8b41cc47be028fb98ad2187e6471ae13db66",
+        "backend/app/domains/characters/service/image_quota.py": "88590c4f0b3092ea534e727ff3238f29bb55a7a7",
+        "backend/app/domains/characters/service/mutations.py": "37e9843f6766d0206ee0ee45f511e2d26ba562ba",
+        "backend/app/domains/characters/service/persona.py": "d0ac970505e452a72f739d2406d492358daaa3ad",
+        "backend/app/domains/characters/service/promotion.py": "40d09311b3c09384a2734438bdbaad583b54811a",
+        "backend/app/runtime/characters/__init__.py": "874b4cf75131e9aaa33d1152d41422fbbd29e3ab",
+        "backend/tests/characters/test_creator_policies.py": "b1606d7d065e0a9ce4655fd996b77902e02e6804"
+      },
+      "test_nodes": [
+        "tests/characters/test_creator_policies.py::test_creator_json_and_cooldown_keep_their_error_contract",
+        "tests/characters/test_creator_policies.py::test_creator_models_errors_and_utc_base_keep_their_identity",
+        "tests/characters/test_creator_policies.py::test_owned_profile_mutations_preserve_commits_without_activity_or_credential_tables",
+        "tests/characters/test_creator_policies.py::test_owner_admission_hides_foreign_and_deleted_characters_before_mode_gates",
+        "tests/characters/test_creator_policies.py::test_quota_window_treats_naive_input_as_utc_and_resets_at_seoul_midnight",
+        "tests/characters/test_creator_policies.py::test_reservation_commits_but_finalization_only_flushes_in_the_same_session"
+      ],
+      "test_assertions": {
+        "tests/characters/test_creator_policies.py": {
+          "engine": [],
+          "test_creator_models_errors_and_utc_base_keep_their_identity": [
+            "assert creator_runtime.AgentCreationDraftError is exceptions.AgentCreationDraftError",
+            "assert management.AgentServiceError is exceptions.AgentServiceError",
+            "assert issubclass(management.AgentAutonomyCapacityError, exceptions.AgentServiceError)",
+            "assert old_response_base is UtcInstantResponseModel",
+            "assert result.promotion_usage_agreed_at == datetime(2026, 9, 5, 2, 3, tzinfo=UTC)",
+            "assert canonical is getattr(registered_models, name)",
+            "assert canonical.metadata is Base.metadata"
+          ],
+          "test_quota_window_treats_naive_input_as_utc_and_resets_at_seoul_midnight": [
+            "pytest.raises(exceptions.AgentCreationDraftMediaError, match='invalid_profile_image_scope')",
+            "pytest.raises(exceptions.AgentCreationDraftMediaError, match='invalid_profile_image_media_type')",
+            "assert image_quota._profile_image_quota_date(at).isoformat() == '2026-09-05'",
+            "assert image_quota._profile_image_reset_at(at) == datetime(2026, 9, 6, tzinfo=ZoneInfo('Asia/Seoul'))"
+          ],
+          "test_reservation_commits_but_finalization_only_flushes_in_the_same_session": [
+            "assert commits == [db]",
+            "assert image_quota._profile_image_usage_status(db, user=owner, scope='create', media_type='avatar').remaining == 0",
+            "assert image_quota._profile_image_usage_status(db, user=owner, scope='profile', media_type='avatar').remaining == 1",
+            "assert image_quota._profile_image_usage_status(db, user=owner, scope='create', media_type='banner').remaining == 1",
+            "pytest.raises(exceptions.AgentProfileImageQuotaExceededError)",
+            "assert error.value.usage_status.remaining == 0",
+            "assert reservation.status == 'applied'",
+            "assert commits == [db]",
+            "assert stored.status == 'reserved'",
+            "assert stored.candidate_id is None"
+          ],
+          "test_owner_admission_hides_foreign_and_deleted_characters_before_mode_gates": [
+            "assert access._get_owned_character(db, SimpleNamespace(id='owner'), character.id) is character",
+            "pytest.raises(exceptions.AgentNotFoundError)",
+            "pytest.raises(exceptions.AgentExecutionModeError, match='서버 LLM')",
+            "pytest.raises(exceptions.AgentSuspendedError, match='character_suspended')",
+            "pytest.raises(exceptions.AgentNotFoundError)"
+          ],
+          "test_creator_json_and_cooldown_keep_their_error_contract": [
+            "assert creator._parse_json_object('```json\\n{\"personality\":\"quiet\"}\\n```') == {'personality': 'quiet'}",
+            "assert creator._safe_payload_text([' tea ', 2, {'ignored': True}], 30) == 'tea\\n2'",
+            "pytest.raises(exceptions.AgentCreationDraftParseError)",
+            "pytest.raises(exceptions.AgentCreationDraftParseError)",
+            "pytest.raises(exceptions.AgentCreationDraftCooldownError)",
+            "assert error.value.available_at is future"
+          ],
+          "test_owned_profile_mutations_preserve_commits_without_activity_or_credential_tables": [
+            "assert commits == [db, db]",
+            "assert character.status == 'inactive'",
+            "assert character.promotion_usage_allowed is True",
+            "assert character.promotion_usage_agreed_at is not None",
+            "assert result is character",
+            "assert media_changed is True",
+            "assert character.one_liner == 'new'",
+            "assert commits == [db, db, db]",
+            "pytest.raises(exceptions.AgentNotFoundError)",
+            "assert len(commits) == 3"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/characters/test_creator_policies.py": {}
+      }
     }
   ]
 }
