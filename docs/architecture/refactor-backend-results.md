@@ -1188,3 +1188,12 @@ API/schema/ORM·기존 protected test2 assertion·전체 split evidence PASS. �
 원래 runtime profile reader에서 cursor3함수·상수3을 실제 Social service로 이전했다. 전체 함수/상수 AST와 나머지 reader 본문이 동일하다. G2의 동결 AESGCM ciphertext 및 잘못된 key/tag/scope, World별 프로필 탭·count 회귀 **24 PASS / 7.61초**, 기존 Starlette 경고1. 새 node는 없고 기존 테스트는 동일 alias로 실제 cursor 모듈을 import한다. 이 단계는 커서의 실제 소유만 전환했으며 profile 조회 정책·SQL 분리는 다음 단계다.
 
 API/schema/ORM·기존 protected test1 assertion·전체 split evidence PASS. 경계 **789 modules / 2728 edges / legacy 197**, L4/ER0 PASS.
+
+
+## AR-B5-C11-B — World 프로필의 실제 정책·조회 소유
+
+Social 실제 service는 원래 입력4검증·프로필/차단/탭/페이지 판단 및 snapshot/mention 정책3을 소유한다. 원래 own-query4와 분리한 reply/like/media SQL3은 Social repository가, mixed Character/WC/World query5는 runtime이 소유한다. 같은 Session·attached 행·query 실행 순서와 tuple/nullable/cardinality를 보존했다. 별도 application/reader port와 옛 runtime reader를 제거하고 유일한 HTTP caller를 실제 service로 연결했다.
+
+확장 AST 전부 동일. 원문 reader와 현 실제 서비스의 실행 SQL·bound parameter·순서는 posts16/replies15/likes15 각각 동일하며 동일 snapshot/cursor를 반환했다. 신규 SQLite1node는 입력 오류 SQL0, pending WC 로컬 프로필의 즉시 반영, commit0 및 rollback을 검증한다. 기존 프로필/Chat entry/cursor/역사 inventory와 함께 **33 PASS / 9.36초**(기존 Starlette 경고1). P8-L-E 현재 source 검사만 실제 역할 경로로 연결했으며 frozen JSON은 변경하지 않았다. 전체 B5 및 source capture/Hosted/installer 종료는 후속 단계다.
+
+API/schema/ORM·기존 protected assertion·전체 split evidence PASS. 경계 **791 modules / 2733 edges / legacy 197**, L4/ER0 PASS. 새6 파일의 읽기 편의를 위해 임시 도구 환경의 Ruff 0.12.0으로 포맷했으며 저장소 의존성 파일은 바꾸지 않았다.

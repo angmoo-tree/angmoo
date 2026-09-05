@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2372,
-      "internal_edge_count": 2728,
+      "external_import_count": 2379,
+      "internal_edge_count": 2733,
       "legacy_import_exception_count": 0,
-      "module_count": 789,
+      "module_count": 791,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -570,7 +570,6 @@
             "imports": [
               "app.domains.social.application.keyword_feed",
               "app.domains.social.application.observations",
-              "app.domains.social.application.profile_activity",
               "app.domains.social.application.search_runtime",
               "app.domains.social.application.writes"
             ],
@@ -592,14 +591,6 @@
             ],
             "module": "app.domains.social.application.observations",
             "path": "backend/app/domains/social/application/observations.py"
-          },
-          {
-            "imports": [
-              "app.domains.social.contracts.profile_activity",
-              "app.domains.social.ports.profile_activity"
-            ],
-            "module": "app.domains.social.application.profile_activity",
-            "path": "backend/app/domains/social/application/profile_activity.py"
           },
           {
             "imports": [
@@ -707,6 +698,13 @@
             "path": "backend/app/domains/social/contracts/profile_activity.py"
           },
           {
+            "imports": [
+              "app.domains.social.contracts.profile_activity"
+            ],
+            "module": "app.domains.social.contracts.profile_references",
+            "path": "backend/app/domains/social/contracts/profile_references.py"
+          },
+          {
             "imports": [],
             "module": "app.domains.social.contracts.search_state",
             "path": "backend/app/domains/social/contracts/search_state.py"
@@ -801,7 +799,6 @@
           {
             "imports": [
               "app.domains.social.ports.observation_unit_of_work",
-              "app.domains.social.ports.profile_activity",
               "app.domains.social.ports.search_index",
               "app.domains.social.ports.write_unit_of_work"
             ],
@@ -814,13 +811,6 @@
             ],
             "module": "app.domains.social.ports.observation_unit_of_work",
             "path": "backend/app/domains/social/ports/observation_unit_of_work.py"
-          },
-          {
-            "imports": [
-              "app.domains.social.contracts.profile_activity"
-            ],
-            "module": "app.domains.social.ports.profile_activity",
-            "path": "backend/app/domains/social/ports/profile_activity.py"
           },
           {
             "imports": [
@@ -938,6 +928,16 @@
             ],
             "module": "app.domains.social.repository.reactions",
             "path": "backend/app/domains/social/repository/reactions.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.profile_activity",
+              "app.domains.social.models.feed",
+              "app.domains.social.models.posts",
+              "app.domains.social.service.profile_cursor"
+            ],
+            "module": "app.domains.social.repository.world_profile",
+            "path": "backend/app/domains/social/repository/world_profile.py"
           },
           {
             "imports": [
@@ -1318,6 +1318,18 @@
             "path": "backend/app/domains/social/service/visibility.py"
           },
           {
+            "imports": [
+              "app.domains.social.contracts.profile_activity",
+              "app.domains.social.contracts.profile_references",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.world_profile",
+              "app.domains.social.service.profile_cursor",
+              "app.domains.world_characters.contracts.public_profile"
+            ],
+            "module": "app.domains.social.service.world_profile",
+            "path": "backend/app/domains/social/service/world_profile.py"
+          },
+          {
             "imports": [],
             "module": "app.domains.social.utils",
             "path": "backend/app/domains/social/utils/__init__.py"
@@ -1657,6 +1669,26 @@
           },
           {
             "imports": [
+              "app.domains.social.service.world_profile",
+              "app.runtime.social.profile_references"
+            ],
+            "module": "app.runtime.social.profile_composition",
+            "path": "backend/app/runtime/social/profile_composition.py"
+          },
+          {
+            "imports": [
+              "app.domains.characters.models",
+              "app.domains.social.contracts.profile_activity",
+              "app.domains.social.contracts.profile_references",
+              "app.domains.world_characters.models",
+              "app.domains.worlds.models",
+              "app.runtime.world_characters.composition"
+            ],
+            "module": "app.runtime.social.profile_references",
+            "path": "backend/app/runtime/social/profile_references.py"
+          },
+          {
+            "imports": [
               "app.domains.characters.service.profile",
               "app.domains.identity.service.profile",
               "app.domains.relationships.service.source_posts",
@@ -1679,21 +1711,6 @@
             ],
             "module": "app.runtime.social.sqlalchemy_inbox",
             "path": "backend/app/runtime/social/sqlalchemy_inbox.py"
-          },
-          {
-            "imports": [
-              "app.domains.characters.models",
-              "app.domains.social.models.feed",
-              "app.domains.social.models.posts",
-              "app.domains.social.public",
-              "app.domains.social.service.profile_cursor",
-              "app.domains.world_characters.models",
-              "app.domains.world_characters.public",
-              "app.domains.worlds.models",
-              "app.runtime.world_characters.composition"
-            ],
-            "module": "app.runtime.social.sqlalchemy_profile_repository",
-            "path": "backend/app/runtime/social/sqlalchemy_profile_repository.py"
           },
           {
             "imports": [

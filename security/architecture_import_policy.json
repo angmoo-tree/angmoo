@@ -1097,6 +1097,7 @@
       "app.domains.social.contracts.manual_feed",
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
+      "app.domains.social.contracts.profile_references",
       "app.domains.social.contracts.search_state",
       "app.domains.social.contracts.source_writes",
       "app.domains.social.contracts.subjective_context",
@@ -1122,6 +1123,7 @@
       "app.domains.social.repository.posts",
       "app.domains.social.repository.profiles",
       "app.domains.social.repository.reactions",
+      "app.domains.social.repository.world_profile",
       "app.domains.social.router",
       "app.domains.social.schemas",
       "app.domains.social.schemas.activity",
@@ -1156,6 +1158,7 @@
       "app.domains.social.service.source_writes",
       "app.domains.social.service.timeline",
       "app.domains.social.service.visibility",
+      "app.domains.social.service.world_profile",
       "app.domains.social.utils",
       "app.domains.social.utils.cursors",
       "app.domains.social.utils.limits",
@@ -1334,6 +1337,7 @@
       "app.domains.social.contracts.manual_feed",
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
+      "app.domains.social.contracts.profile_references",
       "app.domains.social.contracts.search_state",
       "app.domains.social.contracts.source_writes",
       "app.domains.social.contracts.subjective_context",
@@ -1372,6 +1376,7 @@
       "app.domains.social.service.source_writes",
       "app.domains.social.service.timeline",
       "app.domains.social.service.visibility",
+      "app.domains.social.service.world_profile",
       "app.domains.world_characters.contracts",
       "app.domains.world_characters.contracts.lifecycle",
       "app.domains.world_characters.contracts.owner_identity",
@@ -2142,14 +2147,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.social.application.profile_activity",
-        "target": "app.domains.social.contracts.profile_activity",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.domains.social.application.search_runtime",
         "target": "app.domains.social.contracts",
         "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
@@ -2176,14 +2173,6 @@
       {
         "importer": "app.domains.social.ports.observation_unit_of_work",
         "target": "app.domains.social.contracts.observations",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.social.ports.profile_activity",
-        "target": "app.domains.social.contracts.profile_activity",
         "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
         "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
         "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",

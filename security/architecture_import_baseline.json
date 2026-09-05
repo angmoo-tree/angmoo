@@ -1,7 +1,7 @@
 {
-  "edge_count": 2728,
-  "external_import_count": 2372,
-  "module_count": 789,
+  "edge_count": 2733,
+  "external_import_count": 2379,
+  "module_count": 791,
   "modules": [
     {
       "external_imports": [],
@@ -209,7 +209,7 @@
         "app.domains.social.schemas.manual",
         "app.domains.world_characters.public",
         "app.domains.worlds.public",
-        "app.runtime.social.sqlalchemy_profile_repository",
+        "app.runtime.social.profile_composition",
         "app.runtime.social.sqlalchemy_read_repository",
         "app.runtime.social.sqlalchemy_unit_of_work"
       ],
@@ -5200,7 +5200,6 @@
       "imports": [
         "app.domains.social.application.keyword_feed",
         "app.domains.social.application.observations",
-        "app.domains.social.application.profile_activity",
         "app.domains.social.application.search_runtime",
         "app.domains.social.application.writes"
       ],
@@ -5231,18 +5230,6 @@
       ],
       "module": "app.domains.social.application.observations",
       "path": "backend/app/domains/social/application/observations.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__"
-      ],
-      "imports": [
-        "app.domains.social.contracts.profile_activity",
-        "app.domains.social.ports.profile_activity"
-      ],
-      "module": "app.domains.social.application.profile_activity",
-      "path": "backend/app/domains/social/application/profile_activity.py",
       "wildcard_imports": []
     },
     {
@@ -5434,6 +5421,18 @@
     {
       "external_imports": [
         "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.profile_activity"
+      ],
+      "module": "app.domains.social.contracts.profile_references",
+      "path": "backend/app/domains/social/contracts/profile_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "enum"
       ],
       "imports": [],
@@ -5607,7 +5606,6 @@
       "external_imports": [],
       "imports": [
         "app.domains.social.ports.observation_unit_of_work",
-        "app.domains.social.ports.profile_activity",
         "app.domains.social.ports.search_index",
         "app.domains.social.ports.write_unit_of_work"
       ],
@@ -5625,18 +5623,6 @@
       ],
       "module": "app.domains.social.ports.observation_unit_of_work",
       "path": "backend/app/domains/social/ports/observation_unit_of_work.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.social.contracts.profile_activity"
-      ],
-      "module": "app.domains.social.ports.profile_activity",
-      "path": "backend/app/domains/social/ports/profile_activity.py",
       "wildcard_imports": []
     },
     {
@@ -5830,6 +5816,24 @@
       ],
       "module": "app.domains.social.repository.reactions",
       "path": "backend/app/domains/social/repository/reactions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.contracts.profile_activity",
+        "app.domains.social.models.feed",
+        "app.domains.social.models.posts",
+        "app.domains.social.service.profile_cursor"
+      ],
+      "module": "app.domains.social.repository.world_profile",
+      "path": "backend/app/domains/social/repository/world_profile.py",
       "wildcard_imports": []
     },
     {
@@ -6390,6 +6394,26 @@
       ],
       "module": "app.domains.social.service.visibility",
       "path": "backend/app/domains/social/service/visibility.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections",
+        "datetime",
+        "re",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.contracts.profile_activity",
+        "app.domains.social.contracts.profile_references",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.world_profile",
+        "app.domains.social.service.profile_cursor",
+        "app.domains.world_characters.contracts.public_profile"
+      ],
+      "module": "app.domains.social.service.world_profile",
+      "path": "backend/app/domains/social/service/world_profile.py",
       "wildcard_imports": []
     },
     {
@@ -10619,6 +10643,36 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.service.world_profile",
+        "app.runtime.social.profile_references"
+      ],
+      "module": "app.runtime.social.profile_composition",
+      "path": "backend/app/runtime/social/profile_composition.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.social.contracts.profile_activity",
+        "app.domains.social.contracts.profile_references",
+        "app.domains.world_characters.models",
+        "app.domains.worlds.models",
+        "app.runtime.world_characters.composition"
+      ],
+      "module": "app.runtime.social.profile_references",
+      "path": "backend/app/runtime/social/profile_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "collections.abc",
         "sqlalchemy.orm"
       ],
@@ -10652,30 +10706,6 @@
       ],
       "module": "app.runtime.social.sqlalchemy_inbox",
       "path": "backend/app/runtime/social/sqlalchemy_inbox.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "collections",
-        "datetime",
-        "re",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.domains.characters.models",
-        "app.domains.social.models.feed",
-        "app.domains.social.models.posts",
-        "app.domains.social.public",
-        "app.domains.social.service.profile_cursor",
-        "app.domains.world_characters.models",
-        "app.domains.world_characters.public",
-        "app.domains.worlds.models",
-        "app.runtime.world_characters.composition"
-      ],
-      "module": "app.runtime.social.sqlalchemy_profile_repository",
-      "path": "backend/app/runtime/social/sqlalchemy_profile_repository.py",
       "wildcard_imports": []
     },
     {

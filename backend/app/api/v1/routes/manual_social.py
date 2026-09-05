@@ -30,15 +30,12 @@ from app.domains.social.public import (
     WorldCharacterSocialProfileValidationError,
     create_owner_post,
     create_owner_reply,
-    read_world_character_social_profile,
 )
 from app.domains.world_characters.public import (
     OwnerControlledIdentityError,
 )
 from app.domains.worlds import public as world_service
-from app.runtime.social.sqlalchemy_profile_repository import (
-    SqlAlchemyWorldCharacterSocialProfileReader,
-)
+from app.runtime.social.profile_composition import world_character_social_profile_service
 from app.runtime.social.sqlalchemy_read_repository import (
     get_owner_world_post_thread,
     list_owner_world_feed,
@@ -104,8 +101,7 @@ def read_world_character_social_activity(
 ) -> WorldCharacterSocialProfileRead:
     browser_session.require_local_frontend_request(request, mutation=False)
     try:
-        page = read_world_character_social_profile(
-            SqlAlchemyWorldCharacterSocialProfileReader(db),
+        page = world_character_social_profile_service(db).read(
             WorldCharacterSocialProfileQuery(
                 world_id=world_id,
                 world_character_id=world_character_id,

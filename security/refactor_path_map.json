@@ -386,7 +386,10 @@
     "backend/tests/test_graph_projection_replay.py": "backend/tests/relationships/test_projection_replay.py",
     "backend/app/schemas/social_memory.py": "backend/app/domains/relationships/schemas.py",
     "backend/app/services/post_image_generation.py": "backend/app/runtime/social/image_generation.py",
-    "backend/app/services/post_image_job_worker.py": "backend/app/runtime/social/image_job_worker.py"
+    "backend/app/services/post_image_job_worker.py": "backend/app/runtime/social/image_job_worker.py",
+    "backend/app/runtime/social/sqlalchemy_profile_repository.py": "backend/app/runtime/social/profile_composition.py",
+    "backend/app/domains/social/application/profile_activity.py": "backend/app/domains/social/service/world_profile.py",
+    "backend/app/domains/social/ports/profile_activity.py": "backend/app/domains/social/contracts/profile_references.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -1000,8 +1003,8 @@
         ],
         "backend/app/runtime/social/sqlalchemy_profile_repository.py": [
           "backend/app/domains/social/service/profile_cursor.py",
-          "backend/app/pagination.py",
-          "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          "backend/app/domains/social/service/world_profile.py",
+          "backend/app/pagination.py"
         ]
       },
       "split_symbols": [
@@ -1371,8 +1374,8 @@
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_CURSOR_VERSION",
           "new": "backend/app/domains/social/service/profile_cursor.py::_CURSOR_VERSION",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/tests/common/test_errors_pagination.py"
+            "backend/tests/common/test_errors_pagination.py",
+            "backend/app/domains/social/service/profile_cursor.py"
           ],
           "test_nodes": [
             "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque",
@@ -1386,8 +1389,8 @@
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_CURSOR_AAD",
           "new": "backend/app/domains/social/service/profile_cursor.py::_CURSOR_AAD",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/tests/common/test_errors_pagination.py"
+            "backend/tests/common/test_errors_pagination.py",
+            "backend/app/domains/social/service/profile_cursor.py"
           ],
           "test_nodes": [
             "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque",
@@ -1401,8 +1404,8 @@
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_CURSOR_NONCE_BYTES",
           "new": "backend/app/domains/social/service/profile_cursor.py::_CURSOR_NONCE_BYTES",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/tests/common/test_errors_pagination.py"
+            "backend/tests/common/test_errors_pagination.py",
+            "backend/app/domains/social/service/profile_cursor.py"
           ],
           "test_nodes": [
             "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque",
@@ -1414,24 +1417,32 @@
         },
         {
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_MENTION_HANDLE_RE",
-          "new": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_MENTION_HANDLE_RE",
+          "new": "backend/app/domains/social/service/world_profile.py::_MENTION_HANDLE_RE",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+            "backend/app/domains/social/service/world_profile.py"
           ],
           "test_nodes": [
-            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
           ],
           "disposition": "retained in existing concrete owner"
         },
         {
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
-          "new": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
+          "new": "backend/app/domains/social/service/world_profile.py::WorldSocialProfileService",
           "direct_consumers": [
             "backend/app/api/v1/routes/manual_social.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+            "backend/app/runtime/social/profile_composition.py"
           ],
           "test_nodes": [
-            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
           ],
           "disposition": "retained in existing concrete owner"
         },
@@ -1439,8 +1450,8 @@
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_encode_cursor",
           "new": "backend/app/domains/social/service/profile_cursor.py::_encode_cursor",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/tests/common/test_errors_pagination.py"
+            "backend/tests/common/test_errors_pagination.py",
+            "backend/app/domains/social/service/world_profile.py"
           ],
           "test_nodes": [
             "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque",
@@ -1454,8 +1465,8 @@
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_decode_cursor",
           "new": "backend/app/domains/social/service/profile_cursor.py::_decode_cursor",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/tests/common/test_errors_pagination.py"
+            "backend/tests/common/test_errors_pagination.py",
+            "backend/app/domains/social/repository/world_profile.py"
           ],
           "test_nodes": [
             "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque",
@@ -1469,8 +1480,8 @@
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_cursor_key",
           "new": "backend/app/domains/social/service/profile_cursor.py::_cursor_key",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/tests/common/test_errors_pagination.py"
+            "backend/tests/common/test_errors_pagination.py",
+            "backend/app/domains/social/service/profile_cursor.py"
           ],
           "test_nodes": [
             "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque",
@@ -1482,12 +1493,16 @@
         },
         {
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::__all__",
-          "new": "backend/app/runtime/social/sqlalchemy_profile_repository.py::__all__",
+          "new": "backend/app/domains/social/service/world_profile.py::WorldSocialProfileService",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+            "backend/app/runtime/social/profile_composition.py"
           ],
           "test_nodes": [
-            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
           ],
           "disposition": "retained in existing concrete owner"
         },
@@ -1495,7 +1510,9 @@
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_encode_cursor",
           "new": "backend/app/pagination.py::encode_cursor_bytes",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+            "backend/app/domains/social/service/world_profile.py",
+            "backend/app/domains/social/repository/world_profile.py",
+            "backend/app/runtime/social/profile_references.py"
           ],
           "test_nodes": [
             "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
@@ -1506,7 +1523,9 @@
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_decode_cursor",
           "new": "backend/app/pagination.py::decode_cursor_bytes",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+            "backend/app/domains/social/service/world_profile.py",
+            "backend/app/domains/social/repository/world_profile.py",
+            "backend/app/runtime/social/profile_references.py"
           ],
           "test_nodes": [
             "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
@@ -33170,7 +33189,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_SocialPersistenceModels",
           "new": "backend/app/domains/characters/models.py::Character",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+            "backend/app/runtime/social/profile_references.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33186,8 +33205,9 @@
           "direct_consumers": [
             "backend/app/runtime/social/subjective_context.py",
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/domains/social/repository/world_profile.py",
+            "backend/app/domains/social/service/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33201,9 +33221,9 @@
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_SocialPersistenceModels",
           "new": "backend/app/domains/social/models/posts.py::PostLike",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
             "backend/app/runtime/memory/subjective_source.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/domains/social/repository/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33217,7 +33237,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_SocialPersistenceModels",
           "new": "backend/app/domains/social/models/posts.py::PostMedia",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+            "backend/app/domains/social/repository/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33233,8 +33253,8 @@
           "direct_consumers": [
             "backend/app/runtime/social/subjective_context.py",
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/runtime/social/profile_references.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33249,8 +33269,8 @@
           "new": "backend/app/domains/social/models/feed.py::WorldCharacterBlock",
           "direct_consumers": [
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/domains/social/repository/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33279,8 +33299,8 @@
           "new": "backend/app/domains/worlds/models.py::WorldMembership",
           "direct_consumers": [
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/runtime/social/profile_references.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33310,7 +33330,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::social_persistence_models",
           "new": "backend/app/domains/characters/models.py::Character",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+            "backend/app/runtime/social/profile_references.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33326,8 +33346,9 @@
           "direct_consumers": [
             "backend/app/runtime/social/subjective_context.py",
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/domains/social/repository/world_profile.py",
+            "backend/app/domains/social/service/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33341,9 +33362,9 @@
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::social_persistence_models",
           "new": "backend/app/domains/social/models/posts.py::PostLike",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
             "backend/app/runtime/memory/subjective_source.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/domains/social/repository/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33357,7 +33378,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::social_persistence_models",
           "new": "backend/app/domains/social/models/posts.py::PostMedia",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+            "backend/app/domains/social/repository/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33373,8 +33394,8 @@
           "direct_consumers": [
             "backend/app/runtime/social/subjective_context.py",
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/runtime/social/profile_references.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33389,8 +33410,8 @@
           "new": "backend/app/domains/social/models/feed.py::WorldCharacterBlock",
           "direct_consumers": [
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/domains/social/repository/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33419,8 +33440,8 @@
           "new": "backend/app/domains/worlds/models.py::WorldMembership",
           "direct_consumers": [
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/runtime/social/profile_references.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33589,7 +33610,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_SocialPersistenceModels",
           "new": "backend/app/domains/characters/models.py::Character",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+            "backend/app/runtime/social/profile_references.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33605,8 +33626,9 @@
           "direct_consumers": [
             "backend/app/runtime/social/subjective_context.py",
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/domains/social/repository/world_profile.py",
+            "backend/app/domains/social/service/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33620,9 +33642,9 @@
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_SocialPersistenceModels",
           "new": "backend/app/domains/social/models/posts.py::PostLike",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
             "backend/app/runtime/memory/subjective_source.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/domains/social/repository/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33636,7 +33658,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_SocialPersistenceModels",
           "new": "backend/app/domains/social/models/posts.py::PostMedia",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+            "backend/app/domains/social/repository/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33652,8 +33674,8 @@
           "direct_consumers": [
             "backend/app/runtime/social/subjective_context.py",
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/runtime/social/profile_references.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33668,8 +33690,8 @@
           "new": "backend/app/domains/social/models/feed.py::WorldCharacterBlock",
           "direct_consumers": [
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/domains/social/repository/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33698,8 +33720,8 @@
           "new": "backend/app/domains/worlds/models.py::WorldMembership",
           "direct_consumers": [
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/runtime/social/profile_references.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33729,7 +33751,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::social_persistence_models",
           "new": "backend/app/domains/characters/models.py::Character",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+            "backend/app/runtime/social/profile_references.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33745,8 +33767,9 @@
           "direct_consumers": [
             "backend/app/runtime/social/subjective_context.py",
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/domains/social/repository/world_profile.py",
+            "backend/app/domains/social/service/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33760,9 +33783,9 @@
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::social_persistence_models",
           "new": "backend/app/domains/social/models/posts.py::PostLike",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
             "backend/app/runtime/memory/subjective_source.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/domains/social/repository/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33776,7 +33799,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::social_persistence_models",
           "new": "backend/app/domains/social/models/posts.py::PostMedia",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+            "backend/app/domains/social/repository/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33792,8 +33815,8 @@
           "direct_consumers": [
             "backend/app/runtime/social/subjective_context.py",
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/runtime/social/profile_references.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33808,8 +33831,8 @@
           "new": "backend/app/domains/social/models/feed.py::WorldCharacterBlock",
           "direct_consumers": [
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/domains/social/repository/world_profile.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -33838,8 +33861,8 @@
           "new": "backend/app/domains/worlds/models.py::WorldMembership",
           "direct_consumers": [
             "backend/app/runtime/social/sqlalchemy_today_activity.py",
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+            "backend/app/runtime/social/profile_references.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
@@ -40342,7 +40365,7 @@
       "split_files": {
         "backend/app/runtime/social/sqlalchemy_profile_repository.py": [
           "backend/app/domains/social/service/profile_cursor.py",
-          "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          "backend/app/domains/social/service/world_profile.py"
         ]
       },
       "split_symbols": [
@@ -40350,7 +40373,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_CURSOR_VERSION",
           "new": "backend/app/domains/social/service/profile_cursor.py::_CURSOR_VERSION",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/domains/social/service/profile_cursor.py",
             "backend/tests/common/test_errors_pagination.py"
           ],
           "test_nodes": [
@@ -40364,7 +40387,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_CURSOR_AAD",
           "new": "backend/app/domains/social/service/profile_cursor.py::_CURSOR_AAD",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/domains/social/service/profile_cursor.py",
             "backend/tests/common/test_errors_pagination.py"
           ],
           "test_nodes": [
@@ -40378,7 +40401,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_CURSOR_NONCE_BYTES",
           "new": "backend/app/domains/social/service/profile_cursor.py::_CURSOR_NONCE_BYTES",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/domains/social/service/profile_cursor.py",
             "backend/tests/common/test_errors_pagination.py"
           ],
           "test_nodes": [
@@ -40390,35 +40413,37 @@
         },
         {
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_MENTION_HANDLE_RE",
-          "new": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_MENTION_HANDLE_RE",
+          "new": "backend/app/domains/social/service/world_profile.py::_MENTION_HANDLE_RE",
           "direct_consumers": [
-            "backend/app/api/v1/routes/manual_social.py"
+            "backend/app/domains/social/service/world_profile.py"
           ],
           "test_nodes": [
-            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque",
-            "tests/common/test_errors_pagination.py::test_social_cursor_rejects_changed_ciphertext_and_wrong_secret",
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
-            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
           ]
         },
         {
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
-          "new": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
+          "new": "backend/app/domains/social/service/world_profile.py::WorldSocialProfileService",
           "direct_consumers": [
-            "backend/app/api/v1/routes/manual_social.py"
+            "backend/app/runtime/social/profile_composition.py"
           ],
           "test_nodes": [
-            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque",
-            "tests/common/test_errors_pagination.py::test_social_cursor_rejects_changed_ciphertext_and_wrong_secret",
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
-            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
           ]
         },
         {
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_encode_cursor",
           "new": "backend/app/domains/social/service/profile_cursor.py::_encode_cursor",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/domains/social/service/world_profile.py",
             "backend/tests/common/test_errors_pagination.py"
           ],
           "test_nodes": [
@@ -40432,7 +40457,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_decode_cursor",
           "new": "backend/app/domains/social/service/profile_cursor.py::_decode_cursor",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/domains/social/repository/world_profile.py",
             "backend/tests/common/test_errors_pagination.py"
           ],
           "test_nodes": [
@@ -40446,7 +40471,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_cursor_key",
           "new": "backend/app/domains/social/service/profile_cursor.py::_cursor_key",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/domains/social/service/profile_cursor.py",
             "backend/tests/common/test_errors_pagination.py"
           ],
           "test_nodes": [
@@ -40458,9 +40483,42 @@
         },
         {
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::__all__",
-          "new": "backend/app/runtime/social/sqlalchemy_profile_repository.py::__all__",
+          "new": "backend/app/domains/social/service/world_profile.py::WorldSocialProfileService",
           "direct_consumers": [
-            "backend/app/api/v1/routes/manual_social.py"
+            "backend/app/runtime/social/profile_composition.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
+          ]
+        }
+      ],
+      "new_tests": [],
+      "existing_test_binding_changes": "Common byte/cursor compatibility test imports actual Social profile_cursor under the same social alias; all frozen ciphertext, negative scope/tag/key and exception assertions unchanged."
+    },
+    "AR-B5-C11-B": {
+      "status": "IMPLEMENTED; actual profile workflow/queries/facts; old reader/use-case/port removed; source introduction pending",
+      "scope": "Actual service contains original four input guards, owner-profile failure mapping, block policy, tab/page decisions, scoped presentation and mention rules. Social repository owns original four queries plus extracted reply/like/media queries. Runtime owns five mixed Character/World/WC reads using the same Session and attached results; construction performs no IO. Existing HTTP origin/error/response behavior preserved.",
+      "split_files": {
+        "backend/app/runtime/social/sqlalchemy_profile_repository.py": [
+          "backend/app/domains/social/contracts/profile_references.py",
+          "backend/app/domains/social/repository/world_profile.py",
+          "backend/app/domains/social/service/profile_cursor.py",
+          "backend/app/domains/social/service/world_profile.py",
+          "backend/app/runtime/social/profile_composition.py",
+          "backend/app/runtime/social/profile_references.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_CURSOR_VERSION",
+          "new": "backend/app/domains/social/service/profile_cursor.py::_CURSOR_VERSION",
+          "direct_consumers": [
+            "backend/app/domains/social/service/profile_cursor.py",
+            "backend/tests/common/test_errors_pagination.py"
           ],
           "test_nodes": [
             "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque",
@@ -40468,10 +40526,290 @@
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
             "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
           ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_CURSOR_AAD",
+          "new": "backend/app/domains/social/service/profile_cursor.py::_CURSOR_AAD",
+          "direct_consumers": [
+            "backend/app/domains/social/service/profile_cursor.py",
+            "backend/tests/common/test_errors_pagination.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque",
+            "tests/common/test_errors_pagination.py::test_social_cursor_rejects_changed_ciphertext_and_wrong_secret",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_CURSOR_NONCE_BYTES",
+          "new": "backend/app/domains/social/service/profile_cursor.py::_CURSOR_NONCE_BYTES",
+          "direct_consumers": [
+            "backend/app/domains/social/service/profile_cursor.py",
+            "backend/tests/common/test_errors_pagination.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque",
+            "tests/common/test_errors_pagination.py::test_social_cursor_rejects_changed_ciphertext_and_wrong_secret",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_MENTION_HANDLE_RE",
+          "new": "backend/app/domains/social/service/world_profile.py::_MENTION_HANDLE_RE",
+          "direct_consumers": [
+            "backend/app/domains/social/service/world_profile.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
+          "new": "backend/app/domains/social/service/world_profile.py::WorldSocialProfileService",
+          "direct_consumers": [
+            "backend/app/runtime/social/profile_composition.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_encode_cursor",
+          "new": "backend/app/domains/social/service/profile_cursor.py::_encode_cursor",
+          "direct_consumers": [
+            "backend/app/domains/social/service/world_profile.py",
+            "backend/tests/common/test_errors_pagination.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque",
+            "tests/common/test_errors_pagination.py::test_social_cursor_rejects_changed_ciphertext_and_wrong_secret",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_decode_cursor",
+          "new": "backend/app/domains/social/service/profile_cursor.py::_decode_cursor",
+          "direct_consumers": [
+            "backend/app/domains/social/repository/world_profile.py",
+            "backend/tests/common/test_errors_pagination.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque",
+            "tests/common/test_errors_pagination.py::test_social_cursor_rejects_changed_ciphertext_and_wrong_secret",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_cursor_key",
+          "new": "backend/app/domains/social/service/profile_cursor.py::_cursor_key",
+          "direct_consumers": [
+            "backend/app/domains/social/service/profile_cursor.py",
+            "backend/tests/common/test_errors_pagination.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque",
+            "tests/common/test_errors_pagination.py::test_social_cursor_rejects_changed_ciphertext_and_wrong_secret",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::__all__",
+          "new": "backend/app/domains/social/service/world_profile.py::WorldSocialProfileService",
+          "direct_consumers": [
+            "backend/app/runtime/social/profile_composition.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
+          "new": "backend/app/domains/social/repository/world_profile.py::WorldProfileRepository",
+          "direct_consumers": [
+            "backend/app/domains/social/service/world_profile.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
+          "new": "backend/app/runtime/social/profile_references.py::RuntimeProfileReferences",
+          "direct_consumers": [
+            "backend/app/runtime/social/profile_composition.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
+          "new": "backend/app/runtime/social/profile_composition.py::world_character_social_profile_service",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/manual_social.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
+          "new": "backend/app/domains/social/contracts/profile_references.py::ProfileIdentity",
+          "direct_consumers": [
+            "backend/app/domains/social/service/world_profile.py",
+            "backend/app/runtime/social/profile_references.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
+          "new": "backend/app/domains/social/contracts/profile_references.py::ProfileCharacter",
+          "direct_consumers": [
+            "backend/app/domains/social/service/world_profile.py",
+            "backend/app/runtime/social/profile_references.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
+          "new": "backend/app/domains/social/contracts/profile_references.py::ProfileWorldCharacter",
+          "direct_consumers": [
+            "backend/app/domains/social/service/world_profile.py",
+            "backend/app/runtime/social/profile_references.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
+          "new": "backend/app/domains/social/contracts/profile_references.py::ProfileActivityReferences",
+          "direct_consumers": [
+            "backend/app/domains/social/service/world_profile.py",
+            "backend/app/runtime/social/profile_references.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
+          ]
+        },
+        {
+          "old": "backend/app/domains/social/application/profile_activity.py::read_world_character_social_profile",
+          "new": "backend/app/domains/social/service/world_profile.py::WorldSocialProfileService",
+          "direct_consumers": [
+            "backend/app/runtime/social/profile_composition.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
+          ]
+        },
+        {
+          "old": "backend/app/domains/social/application/profile_activity.py::__all__",
+          "new": "backend/app/domains/social/service/world_profile.py::WorldSocialProfileService",
+          "direct_consumers": [
+            "backend/app/runtime/social/profile_composition.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
+          ]
+        },
+        {
+          "old": "backend/app/domains/social/ports/profile_activity.py::WorldCharacterSocialProfileReader",
+          "new": "backend/app/domains/social/contracts/profile_references.py::ProfileActivityReferences",
+          "direct_consumers": [
+            "backend/app/runtime/social/profile_composition.py",
+            "backend/app/domains/social/service/world_profile.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
+          ]
+        },
+        {
+          "old": "backend/app/domains/social/ports/profile_activity.py::__all__",
+          "new": "backend/app/domains/social/contracts/profile_references.py::ProfileActivityReferences",
+          "direct_consumers": [
+            "backend/app/runtime/social/profile_composition.py",
+            "backend/app/domains/social/service/world_profile.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_inactive_cross_world_and_block_fail_closed",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_excludes_activity_on_blocked_parent_source"
+          ]
         }
       ],
-      "new_tests": [],
-      "existing_test_binding_changes": "Common byte/cursor compatibility test imports actual Social profile_cursor under the same social alias; all frozen ciphertext, negative scope/tag/key and exception assertions unchanged."
+      "new_tests": [
+        "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit"
+      ],
+      "retired_compatibility_files": [
+        "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+        "backend/app/domains/social/application/profile_activity.py",
+        "backend/app/domains/social/ports/profile_activity.py"
+      ],
+      "same_session_evidence": "Original vs current exact statements, bound parameters and order match: posts16/replies15/likes15. Exact result and deterministic existing ciphertext match in all three tabs. New SQLite regression covers pending WC profile change, input-rejection SQL0, no commit and rollback.",
+      "inventory_consumer": "P8-L-E _require_text reads actual manual-feed/profile-service/query/cursor owners; returned frozen inventory bytes and assertions remain unchanged."
     }
   }
 }

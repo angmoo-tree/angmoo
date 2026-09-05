@@ -715,3 +715,6 @@ Social 임시 `_SocialPersistenceModels`/`social_persistence_models` export는 �
 
 
 World 캐릭터 소셜 프로필의 불투명 커서는 `social/service/profile_cursor.py`가 소유한다. `app/pagination.py`의 공통 bytes 인코딩과 달리 이 파일은 기존 version·AESGCM AAD/nonce·secret 유도 key·payload shape·World/캐릭터/탭 범위를 정한다. 암호화 성공만으로 게시물 공개 판단을 대신하지 않으며 실제 조회는 현재 공개·차단 조건을 적용한다.
+
+
+World 캐릭터의 게시물·대꾸·좋아요 프로필은 `social/service/world_profile.py`가 입력 검증, 소유 프로필 오류, 차단, 탭/페이지 선택과 응답 조립을 소유한다. 같은 업무 테이블의 count·posts·likes·media SQL은 `repository/world_profile.py`, 여러 업무의 Character·World 멤버십 join은 `runtime/social/profile_references.py`에 있다. `profile_composition.py`가 같은 Session을 연결하며 구성만으로 DB를 읽지 않는다. 전체 reader 인터페이스와 별도 profile application은 실제 서비스에 통합했고 옛 runtime reader 파일을 제거했다.

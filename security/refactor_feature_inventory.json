@@ -42,15 +42,15 @@
         "backend/app/domains/identity/service/external_verification.py",
         "backend/app/domains/identity/service/local_owner.py",
         "backend/app/domains/identity/service/login_throttle.py",
-        "backend/app/domains/social/application/profile_activity.py",
+        "backend/app/domains/social/service/world_profile.py",
         "backend/app/domains/social/contracts/profile_activity.py",
-        "backend/app/domains/social/ports/profile_activity.py",
+        "backend/app/domains/social/contracts/profile_references.py",
         "backend/app/domains/world_characters/service/public_profile.py",
         "backend/app/domains/world_characters/contracts/public_profile.py",
         "backend/app/models/auth.py",
         "backend/app/models/profile_images.py",
         "backend/app/runtime/account_deletion.py",
-        "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+        "backend/app/runtime/social/profile_composition.py",
         "backend/app/schemas/auth.py",
         "backend/app/domains/world_characters/service/readiness.py",
         "backend/app/services/profile_media.py",
@@ -84,7 +84,9 @@
         "frontend/src/shared/auth/auth-provider.tsx",
         "frontend/src/shared/ui/profile-avatar.tsx",
         "frontend/src/shared/ui/profile-presentation.ts",
-        "backend/app/domains/social/service/profile_cursor.py"
+        "backend/app/domains/social/service/profile_cursor.py",
+        "backend/app/domains/social/repository/world_profile.py",
+        "backend/app/runtime/social/profile_references.py"
       ],
       "target_paths": [
         "backend/app/domains/identity/__init__.py",
@@ -530,7 +532,7 @@
         "identity_transition": "171 focused behavior tests and 55 guard/boundary tests PASS; public approved604/current2037 preserved. Partial scope closes when 22 documented public compatibility consumers migrate. Integrated G0-G4 evidence, CI and merge remain separate."
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet. AR-B5-C11-A: actual Social encrypted profile cursor owns unchanged ciphertext and scope contract.",
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet. AR-B5-C11-A: actual Social encrypted profile cursor owns unchanged ciphertext and scope contract. AR-B5-C11-B: actual exact-World profile service/queries/read collaboration; old application/port/runtime reader removed; same Session and SQL order preserved.",
       "backend_status": "MOVED",
       "frontend_status": "MAPPED"
     },
@@ -1580,7 +1582,7 @@
         "backend/app/domains/social/application/__init__.py",
         "backend/app/domains/social/application/keyword_feed.py",
         "backend/app/domains/social/application/observations.py",
-        "backend/app/domains/social/application/profile_activity.py",
+        "backend/app/domains/social/service/world_profile.py",
         "backend/app/domains/social/application/search_runtime.py",
         "backend/app/domains/social/application/writes.py",
         "backend/app/domains/social/constants.py",
@@ -1599,7 +1601,7 @@
         "backend/app/domains/social/models/subjective_context.py",
         "backend/app/domains/social/ports/__init__.py",
         "backend/app/domains/social/ports/observation_unit_of_work.py",
-        "backend/app/domains/social/ports/profile_activity.py",
+        "backend/app/domains/social/contracts/profile_references.py",
         "backend/app/domains/social/ports/search_index.py",
         "backend/app/domains/social/ports/write_unit_of_work.py",
         "backend/app/domains/social/public.py",
@@ -1622,7 +1624,7 @@
         "backend/app/runtime/social/__init__.py",
         "backend/app/runtime/social/observations.py",
         "backend/app/runtime/social/sqlalchemy_inbox.py",
-        "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+        "backend/app/runtime/social/profile_composition.py",
         "backend/app/runtime/social/sqlalchemy_read_repository.py",
         "backend/app/runtime/social/sqlalchemy_today_activity.py",
         "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
@@ -1704,7 +1706,9 @@
         "backend/app/domains/social/service/image_identity.py",
         "backend/app/runtime/social/image_generation.py",
         "backend/app/runtime/social/image_job_worker.py",
-        "backend/app/domains/social/service/profile_cursor.py"
+        "backend/app/domains/social/service/profile_cursor.py",
+        "backend/app/domains/social/repository/world_profile.py",
+        "backend/app/runtime/social/profile_references.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",
@@ -1854,7 +1858,7 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Current backend navigation synchronized through AR-B5-C5-B: actual Social model/contract, source persistence, timeline mutation, profile/feed/inbox/discovery/activity response and 31 HTTP ownership; Relationships models/points/graph contracts, event/evidence/state, proposal workflow and projection outbox state/CAS ownership are moved. Existing Session/commit, current-source authorization, evidence ordering and assertions are retained. Agent feed/observation UoW, media jobs, remaining graph command/replay/read composition and exact compatibility cleanup remain pending. This is a partial backend transition; frontend, integrated capture/Hosted CI/installer and whole B5 completion are not promoted. Identity-owned CommunityMutationQuotaBucket and historical class identity remain a G5/B8 owner review item. AR-B5-C8-A moves audit-only source/evidence and Social replay/root visibility checks to their actual owners, preserving provider-free immediate write and no unobserved relationship/projection delta. AR-B5-C8-B places actual source admissibility/replay/write/response policy in SocialSourceWriteService, while the original runtime owns immediate transaction/retry and same-Session references. Actor rows are never copied or queried before BEGIN. AR-B5-C9-A removes the temporary Social model aggregate after all five actual runtime consumers import their owner classes; query bodies/row ordering/visibility/digests/AESGCM cursor semantics stay unchanged. Memory source_reader import patch maps to source_queries during root integration. AR-B5-C9-B: actual manual feed/thread service and own query repository; runtime owner facts/mixed profile join preserve same Session, read order and zero commits. AR-B5-C10-A: actual Social image prompt/result/schema and daily quota reservation/finalization owners. Provider/Character settings orchestration remains the next slice. AR-B5-C10-B: actual queued/processing/failure/completion policy and worker validation in Social; exact SQL and same-Session concrete callbacks keep original claim commit/refresh and stale cutoff. AR-B5-C10-C: actual attachment/reference/failure result owners retain media commit then quota finalization and provider diagnostic fields. AR-B5-C10-D: actual resident/local image generation and request admission; typed same-Session owner/client binding preserves model/time/reference/error order and local request AI0. AR-B5-C10-E: actual identity cache/output validation/reference order with same-Session owner write and raw LLM binding; invalid output never persists. AR-B5-C10-F: actual runtime image clients/worker moved; obsolete image service modules and unconsumed policy exports removed after caller switching. AR-B5-C11-A: actual Social encrypted profile cursor owns unchanged ciphertext and scope contract.",
+      "notes": "Current backend navigation synchronized through AR-B5-C5-B: actual Social model/contract, source persistence, timeline mutation, profile/feed/inbox/discovery/activity response and 31 HTTP ownership; Relationships models/points/graph contracts, event/evidence/state, proposal workflow and projection outbox state/CAS ownership are moved. Existing Session/commit, current-source authorization, evidence ordering and assertions are retained. Agent feed/observation UoW, media jobs, remaining graph command/replay/read composition and exact compatibility cleanup remain pending. This is a partial backend transition; frontend, integrated capture/Hosted CI/installer and whole B5 completion are not promoted. Identity-owned CommunityMutationQuotaBucket and historical class identity remain a G5/B8 owner review item. AR-B5-C8-A moves audit-only source/evidence and Social replay/root visibility checks to their actual owners, preserving provider-free immediate write and no unobserved relationship/projection delta. AR-B5-C8-B places actual source admissibility/replay/write/response policy in SocialSourceWriteService, while the original runtime owns immediate transaction/retry and same-Session references. Actor rows are never copied or queried before BEGIN. AR-B5-C9-A removes the temporary Social model aggregate after all five actual runtime consumers import their owner classes; query bodies/row ordering/visibility/digests/AESGCM cursor semantics stay unchanged. Memory source_reader import patch maps to source_queries during root integration. AR-B5-C9-B: actual manual feed/thread service and own query repository; runtime owner facts/mixed profile join preserve same Session, read order and zero commits. AR-B5-C10-A: actual Social image prompt/result/schema and daily quota reservation/finalization owners. Provider/Character settings orchestration remains the next slice. AR-B5-C10-B: actual queued/processing/failure/completion policy and worker validation in Social; exact SQL and same-Session concrete callbacks keep original claim commit/refresh and stale cutoff. AR-B5-C10-C: actual attachment/reference/failure result owners retain media commit then quota finalization and provider diagnostic fields. AR-B5-C10-D: actual resident/local image generation and request admission; typed same-Session owner/client binding preserves model/time/reference/error order and local request AI0. AR-B5-C10-E: actual identity cache/output validation/reference order with same-Session owner write and raw LLM binding; invalid output never persists. AR-B5-C10-F: actual runtime image clients/worker moved; obsolete image service modules and unconsumed policy exports removed after caller switching. AR-B5-C11-A: actual Social encrypted profile cursor owns unchanged ciphertext and scope contract. AR-B5-C11-B: actual exact-World profile service/queries/read collaboration; old application/port/runtime reader removed; same Session and SQL order preserved.",
       "backend_status": "MAPPED",
       "frontend_status": "MAPPED"
     },
@@ -2011,7 +2015,7 @@
         "backend/app/domains/social/application/__init__.py",
         "backend/app/domains/social/application/keyword_feed.py",
         "backend/app/domains/social/application/observations.py",
-        "backend/app/domains/social/application/profile_activity.py",
+        "backend/app/domains/social/service/world_profile.py",
         "backend/app/domains/social/application/search_runtime.py",
         "backend/app/domains/social/application/writes.py",
         "backend/app/domains/social/contracts/__init__.py",
@@ -2026,7 +2030,7 @@
         "backend/app/domains/social/models/subjective_context.py",
         "backend/app/domains/social/ports/__init__.py",
         "backend/app/domains/social/ports/observation_unit_of_work.py",
-        "backend/app/domains/social/ports/profile_activity.py",
+        "backend/app/domains/social/contracts/profile_references.py",
         "backend/app/domains/social/ports/search_index.py",
         "backend/app/domains/social/ports/write_unit_of_work.py",
         "backend/app/domains/social/public.py",
@@ -2051,7 +2055,7 @@
         "backend/app/runtime/social/__init__.py",
         "backend/app/runtime/social/observations.py",
         "backend/app/runtime/social/sqlalchemy_inbox.py",
-        "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+        "backend/app/runtime/social/profile_composition.py",
         "backend/app/runtime/social/sqlalchemy_read_repository.py",
         "backend/app/runtime/social/sqlalchemy_today_activity.py",
         "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
@@ -2113,7 +2117,9 @@
         "backend/app/domains/social/service/image_identity.py",
         "backend/app/runtime/social/image_generation.py",
         "backend/app/runtime/social/image_job_worker.py",
-        "backend/app/domains/social/service/profile_cursor.py"
+        "backend/app/domains/social/service/profile_cursor.py",
+        "backend/app/domains/social/repository/world_profile.py",
+        "backend/app/runtime/social/profile_references.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",
@@ -2253,7 +2259,7 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Current backend navigation synchronized through AR-B5-C5-B: actual Social model/contract, source persistence, timeline mutation, profile/feed/inbox/discovery/activity response and 31 HTTP ownership; Relationships models/points/graph contracts, event/evidence/state, proposal workflow and projection outbox state/CAS ownership are moved. Existing Session/commit, current-source authorization, evidence ordering and assertions are retained. Agent feed/observation UoW, media jobs, remaining graph command/replay/read composition and exact compatibility cleanup remain pending. This is a partial backend transition; frontend, integrated capture/Hosted CI/installer and whole B5 completion are not promoted. Identity-owned CommunityMutationQuotaBucket and historical class identity remain a G5/B8 owner review item. AR-B5-C5-C also moves actual projection command admission/signatures/current-source exclusion and historical WC membership to owners. Replay operations, observation UoW and remaining live source compositions are still pending. AR-B5-C5-D owns replay admission, lease, high-water and completion records plus ordered canonical source queries. Existing runtime retains actual sidecar execution/session/clock/metrics orchestration. Relationship read/observation and remaining Social workflows are pending. AR-B5-C6-A owns diagnostics canonical queries/schema/errors; Joint read SQL belongs to Routines. Remaining diagnostics orchestration follows in C6-B. AR-B5-C6-B moves the remaining owner diagnostics workflow and two HTTP endpoints; app factories bind same-Session runtime collaborators. Source eligibility and active membership differ intentionally from historical projection reconstruction. AR-B5-C7 moves deterministic observed-source receipt/directional state/outbox into Relationships, own SQL and same-Session WC/Social reads; original zero provider, one familiarity delta, dedupe and caller rollback preserved. AR-B5-C8-A moves audit-only source/evidence and Social replay/root visibility checks to their actual owners, preserving provider-free immediate write and no unobserved relationship/projection delta. AR-B5-C8-B places actual source admissibility/replay/write/response policy in SocialSourceWriteService, while the original runtime owns immediate transaction/retry and same-Session references. Actor rows are never copied or queried before BEGIN. AR-B5-C9-A removes the temporary Social model aggregate after all five actual runtime consumers import their owner classes; query bodies/row ordering/visibility/digests/AESGCM cursor semantics stay unchanged. Memory source_reader import patch maps to source_queries during root integration. AR-B5-C9-B: actual manual feed/thread service and own query repository; runtime owner facts/mixed profile join preserve same Session, read order and zero commits. AR-B5-C10-A: actual Social image prompt/result/schema and daily quota reservation/finalization owners. Provider/Character settings orchestration remains the next slice. AR-B5-C10-B: actual queued/processing/failure/completion policy and worker validation in Social; exact SQL and same-Session concrete callbacks keep original claim commit/refresh and stale cutoff. AR-B5-C10-C: actual attachment/reference/failure result owners retain media commit then quota finalization and provider diagnostic fields. AR-B5-C10-D: actual resident/local image generation and request admission; typed same-Session owner/client binding preserves model/time/reference/error order and local request AI0. AR-B5-C10-E: actual identity cache/output validation/reference order with same-Session owner write and raw LLM binding; invalid output never persists. AR-B5-C10-F: actual runtime image clients/worker moved; obsolete image service modules and unconsumed policy exports removed after caller switching. AR-B5-C11-A: actual Social encrypted profile cursor owns unchanged ciphertext and scope contract.",
+      "notes": "Current backend navigation synchronized through AR-B5-C5-B: actual Social model/contract, source persistence, timeline mutation, profile/feed/inbox/discovery/activity response and 31 HTTP ownership; Relationships models/points/graph contracts, event/evidence/state, proposal workflow and projection outbox state/CAS ownership are moved. Existing Session/commit, current-source authorization, evidence ordering and assertions are retained. Agent feed/observation UoW, media jobs, remaining graph command/replay/read composition and exact compatibility cleanup remain pending. This is a partial backend transition; frontend, integrated capture/Hosted CI/installer and whole B5 completion are not promoted. Identity-owned CommunityMutationQuotaBucket and historical class identity remain a G5/B8 owner review item. AR-B5-C5-C also moves actual projection command admission/signatures/current-source exclusion and historical WC membership to owners. Replay operations, observation UoW and remaining live source compositions are still pending. AR-B5-C5-D owns replay admission, lease, high-water and completion records plus ordered canonical source queries. Existing runtime retains actual sidecar execution/session/clock/metrics orchestration. Relationship read/observation and remaining Social workflows are pending. AR-B5-C6-A owns diagnostics canonical queries/schema/errors; Joint read SQL belongs to Routines. Remaining diagnostics orchestration follows in C6-B. AR-B5-C6-B moves the remaining owner diagnostics workflow and two HTTP endpoints; app factories bind same-Session runtime collaborators. Source eligibility and active membership differ intentionally from historical projection reconstruction. AR-B5-C7 moves deterministic observed-source receipt/directional state/outbox into Relationships, own SQL and same-Session WC/Social reads; original zero provider, one familiarity delta, dedupe and caller rollback preserved. AR-B5-C8-A moves audit-only source/evidence and Social replay/root visibility checks to their actual owners, preserving provider-free immediate write and no unobserved relationship/projection delta. AR-B5-C8-B places actual source admissibility/replay/write/response policy in SocialSourceWriteService, while the original runtime owns immediate transaction/retry and same-Session references. Actor rows are never copied or queried before BEGIN. AR-B5-C9-A removes the temporary Social model aggregate after all five actual runtime consumers import their owner classes; query bodies/row ordering/visibility/digests/AESGCM cursor semantics stay unchanged. Memory source_reader import patch maps to source_queries during root integration. AR-B5-C9-B: actual manual feed/thread service and own query repository; runtime owner facts/mixed profile join preserve same Session, read order and zero commits. AR-B5-C10-A: actual Social image prompt/result/schema and daily quota reservation/finalization owners. Provider/Character settings orchestration remains the next slice. AR-B5-C10-B: actual queued/processing/failure/completion policy and worker validation in Social; exact SQL and same-Session concrete callbacks keep original claim commit/refresh and stale cutoff. AR-B5-C10-C: actual attachment/reference/failure result owners retain media commit then quota finalization and provider diagnostic fields. AR-B5-C10-D: actual resident/local image generation and request admission; typed same-Session owner/client binding preserves model/time/reference/error order and local request AI0. AR-B5-C10-E: actual identity cache/output validation/reference order with same-Session owner write and raw LLM binding; invalid output never persists. AR-B5-C10-F: actual runtime image clients/worker moved; obsolete image service modules and unconsumed policy exports removed after caller switching. AR-B5-C11-A: actual Social encrypted profile cursor owns unchanged ciphertext and scope contract. AR-B5-C11-B: actual exact-World profile service/queries/read collaboration; old application/port/runtime reader removed; same Session and SQL order preserved.",
       "backend_status": "MAPPED",
       "frontend_status": "MAPPED"
     },
@@ -3499,7 +3505,7 @@
         "backend/app/runtime/social/__init__.py",
         "backend/app/runtime/social/observations.py",
         "backend/app/runtime/social/sqlalchemy_inbox.py",
-        "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+        "backend/app/runtime/social/profile_composition.py",
         "backend/app/runtime/social/sqlalchemy_read_repository.py",
         "backend/app/runtime/social/sqlalchemy_today_activity.py",
         "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
@@ -3554,7 +3560,11 @@
         "spikes/l3-er1-native-runtime/tauri/src-tauri/src/main.rs",
         "spikes/l3-er1-native-runtime/tauri/src-tauri/tauri.conf.json",
         "spikes/l3-er1-native-runtime/tauri/web/index.html",
-        "backend/app/domains/social/service/profile_cursor.py"
+        "backend/app/domains/social/service/profile_cursor.py",
+        "backend/app/domains/social/service/world_profile.py",
+        "backend/app/domains/social/repository/world_profile.py",
+        "backend/app/runtime/social/profile_references.py",
+        "backend/app/domains/social/contracts/profile_references.py"
       ],
       "target_paths": [
         "backend/app/runtime",
@@ -3767,7 +3777,7 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet. AR-B5-C11-A: actual Social encrypted profile cursor owns unchanged ciphertext and scope contract.",
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet. AR-B5-C11-A: actual Social encrypted profile cursor owns unchanged ciphertext and scope contract. AR-B5-C11-B: actual exact-World profile service/queries/read collaboration; old application/port/runtime reader removed; same Session and SQL order preserved.",
       "backend_status": "MAPPED",
       "frontend_status": "MAPPED"
     },
@@ -5479,7 +5489,7 @@
         "backend/app/domains/social/application/__init__.py",
         "backend/app/domains/social/application/keyword_feed.py",
         "backend/app/domains/social/application/observations.py",
-        "backend/app/domains/social/application/profile_activity.py",
+        "backend/app/domains/social/service/world_profile.py",
         "backend/app/domains/social/application/search_runtime.py",
         "backend/app/domains/social/application/writes.py",
         "backend/app/domains/social/contracts/__init__.py",
@@ -5494,7 +5504,7 @@
         "backend/app/domains/social/models/subjective_context.py",
         "backend/app/domains/social/ports/__init__.py",
         "backend/app/domains/social/ports/observation_unit_of_work.py",
-        "backend/app/domains/social/ports/profile_activity.py",
+        "backend/app/domains/social/contracts/profile_references.py",
         "backend/app/domains/social/ports/search_index.py",
         "backend/app/domains/social/ports/write_unit_of_work.py",
         "backend/app/domains/social/public.py",
@@ -5504,7 +5514,10 @@
         "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
         "backend/app/runtime/social/sqlalchemy_today_activity.py",
         "backend/tests/social/test_foundation_contracts.py",
-        "scripts/ci/generate_p8_l_r_today_sns_activity_inventory.py"
+        "scripts/ci/generate_p8_l_r_today_sns_activity_inventory.py",
+        "backend/app/domains/social/repository/world_profile.py",
+        "backend/app/runtime/social/profile_references.py",
+        "backend/app/runtime/social/profile_composition.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",
@@ -5623,7 +5636,7 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Current backend navigation synchronized through AR-B5-C5-B: actual Social model/contract, source persistence, timeline mutation, profile/feed/inbox/discovery/activity response and 31 HTTP ownership; Relationships models/points/graph contracts, event/evidence/state, proposal workflow and projection outbox state/CAS ownership are moved. Existing Session/commit, current-source authorization, evidence ordering and assertions are retained. Agent feed/observation UoW, media jobs, remaining graph command/replay/read composition and exact compatibility cleanup remain pending. This is a partial backend transition; frontend, integrated capture/Hosted CI/installer and whole B5 completion are not promoted. Identity-owned CommunityMutationQuotaBucket and historical class identity remain a G5/B8 owner review item. AR-B5-C9-A removes the temporary Social model aggregate after all five actual runtime consumers import their owner classes; query bodies/row ordering/visibility/digests/AESGCM cursor semantics stay unchanged. Memory source_reader import patch maps to source_queries during root integration.",
+      "notes": "Current backend navigation synchronized through AR-B5-C5-B: actual Social model/contract, source persistence, timeline mutation, profile/feed/inbox/discovery/activity response and 31 HTTP ownership; Relationships models/points/graph contracts, event/evidence/state, proposal workflow and projection outbox state/CAS ownership are moved. Existing Session/commit, current-source authorization, evidence ordering and assertions are retained. Agent feed/observation UoW, media jobs, remaining graph command/replay/read composition and exact compatibility cleanup remain pending. This is a partial backend transition; frontend, integrated capture/Hosted CI/installer and whole B5 completion are not promoted. Identity-owned CommunityMutationQuotaBucket and historical class identity remain a G5/B8 owner review item. AR-B5-C9-A removes the temporary Social model aggregate after all five actual runtime consumers import their owner classes; query bodies/row ordering/visibility/digests/AESGCM cursor semantics stay unchanged. Memory source_reader import patch maps to source_queries during root integration. AR-B5-C11-B: actual exact-World profile service/queries/read collaboration; old application/port/runtime reader removed; same Session and SQL order preserved.",
       "backend_status": "MAPPED"
     },
     {
@@ -6865,9 +6878,13 @@
         "backend/app/domains/device_home/schemas.py",
         "backend/app/domains/device_home/service.py",
         "backend/app/pagination.py",
-        "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+        "backend/app/runtime/social/profile_composition.py",
         "backend/app/services/world_feed_search.py",
-        "backend/app/domains/social/service/profile_cursor.py"
+        "backend/app/domains/social/service/profile_cursor.py",
+        "backend/app/domains/social/service/world_profile.py",
+        "backend/app/domains/social/repository/world_profile.py",
+        "backend/app/runtime/social/profile_references.py",
+        "backend/app/domains/social/contracts/profile_references.py"
       ],
       "target_paths": [
         "backend/app/pagination.py"
@@ -6955,7 +6972,7 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet. AR-G2 extracts the shared foundation only; concrete retry/HTTP/domain cursor payload/scope/query owners survive. Domain-specific error migrations remain owned by later domain PRs. See details.AR-G2 split symbol evidence. AR-B5-C11-A: actual Social encrypted profile cursor owns unchanged ciphertext and scope contract.",
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet. AR-G2 extracts the shared foundation only; concrete retry/HTTP/domain cursor payload/scope/query owners survive. Domain-specific error migrations remain owned by later domain PRs. See details.AR-G2 split symbol evidence. AR-B5-C11-A: actual Social encrypted profile cursor owns unchanged ciphertext and scope contract. AR-B5-C11-B: actual exact-World profile service/queries/read collaboration; old application/port/runtime reader removed; same Session and SQL order preserved.",
       "backend_status": "MAPPED",
       "global_foundation_status": "LOCAL_VERIFIED_PR_PENDING"
     },
