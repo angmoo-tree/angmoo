@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import ast
 from collections import Counter
+from functools import lru_cache
 import hashlib
 import json
 from pathlib import Path
@@ -194,27 +195,29 @@ def path_literals(files: dict[str, str]) -> list[tuple[str, str]]:
     return sorted(pairs, key=lambda pair: -len(pair[0]))
 
 
+@lru_cache(maxsize=8)
+def _compiled_path_literals(literals: tuple[tuple[str, str], ...]):
+    """Reuse patterns for this complete ordered map; never cache source facts."""
+    compiled = []
+    for old, new in literals:
+        compiled.append((re.compile(r"(?<![\w./])" + re.escape(old) + r"(?![\w])"), new))
+        if old.startswith("app.") and old.endswith(".__init__"):
+            package = old.removesuffix(".__init__")
+            target = new.removesuffix(".__init__")
+            compiled.append((re.compile(r"(?<![\w./])" + re.escape(package) + r"(?![\w./])"), target))
+    return tuple(compiled)
+
+
 def normalized_assertion(fragment: str, literals: list[tuple[str, str]]) -> str:
+    compiled_literals = _compiled_path_literals(tuple(literals))
     class Paths(ast.NodeTransformer):
         def visit_Constant(self, node):
             if isinstance(node.value, str):
                 original = node.value
-                for old, new in literals:
-                    # Match the exact mapped path/module, including a literal
-                    # import statement used by source-contract tests. No numeric
-                    # expectations, predicates, or other text is exempted.
-                    original = re.sub(r"(?<![\w./])" + re.escape(old) + r"(?![\w])", lambda _: new, original)
-                    if old.startswith("app.") and old.endswith(".__init__"):
-                        # A mapped package initializer also has this exact import
-                        # spelling. Do not extend the map to sibling modules or
-                        # arbitrary directory-prefix descendants.
-                        package = old.removesuffix(".__init__")
-                        target = new.removesuffix(".__init__")
-                        original = re.sub(
-                            r"(?<![\w./])" + re.escape(package) + r"(?![\w./])",
-                            lambda _: target,
-                            original,
-                        )
+                # Preserve every boundary and replacement in the ordered map.
+                # Only immutable regex compilation is reused, never assertions.
+                for pattern, replacement in compiled_literals:
+                    original = pattern.sub(lambda _, value=replacement: value, original)
                 node.value = original
             return node
 

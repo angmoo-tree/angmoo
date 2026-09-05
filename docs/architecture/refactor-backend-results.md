@@ -536,3 +536,7 @@ Media `dd78da66`에서 새 Chat 작업트리를 만들고 계약 준비 `4def2b5
 고정 tree 재실행은 **134 passed / 기존 4 warnings / 22.26초**였다. 모델/계약 85개와 원문에서 온 lock/lookup 함수 4개의 AST가 같고 현재 API·ORM 계약은 원래 baseline와 후속 checkpoint 모두 차이가 없었다. Live architecture는 **638 modules / 2,064 edges / exact legacy 265 PASS**, ER0 **77/87/24/44/7 PASS**, L4 parity **97**, Memory batch 및 World Chat identity inventory current다.
 
 전체 assertion 보존 검사는 많은 이동 경로의 정규식 재컴파일 병목으로 종료 전에 중단했으므로 PASS로 표시하지 않는다. 별도 검증된 검사기 성능 수정의 적용 뒤 source·assertion·node 통합 검사를 다시 실행한다. 신규 source/test introduction capture와 PR·merge·설치 Gate는 root의 선형 통합에서 진행한다.
+
+검사기 성능 수정은 root source `36fd4748cb55744d3effbcfb9d18eb921e0fd8d9`의 해당 파일 diff만 그대로 적용했다. 경로 순서와 정규식 경계는 유지하고 컴파일된 immutable pattern만 재사용한다. 기존 보존/partial-scope 회귀 **149 passed / 1.24초**를 통과했다. 이후 전체 보존 명령이 종료되어 source 목적지·split·assertion·skip/xfail 억제·API·ORM·수집 node 누락은 없음을 확인했다. 최초 실행에서 K17/K18/K20 등 중복 feature 행의 옛 계약 경로를 찾아 현재 경로만 정확히 수정했고 feature inventory 재검사는 차이 0이었다.
+
+보호 계보 **2,129 / 현재 2,158**이며 source 29개·node 29개는 선행 Media/WC 및 이번 A1의 실제 첫 도입 commit capture를 root에서 이어가야 하므로 명령 전체 exit 1을 완료 PASS로 바꾸지 않는다. 원래 frozen 기준과 승인 node는 그대로다.
