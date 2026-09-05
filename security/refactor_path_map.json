@@ -7162,7 +7162,7 @@
           ],
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -7265,7 +7265,7 @@
           ],
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -7635,7 +7635,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -7718,7 +7718,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -7751,7 +7751,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -7845,7 +7845,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -8047,7 +8047,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_keeps_non_json_errors"
           ]
@@ -8071,7 +8071,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
@@ -8132,7 +8132,7 @@
           ],
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
         },
@@ -8144,7 +8144,7 @@
           ],
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
         },
@@ -8233,7 +8233,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -8245,7 +8245,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -8311,7 +8311,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -8335,7 +8335,7 @@
           ],
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
         },
@@ -8521,7 +8521,7 @@
           ],
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
         },
@@ -8534,7 +8534,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -8546,7 +8546,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -8568,7 +8568,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -8729,7 +8729,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -8795,7 +8795,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
@@ -8807,7 +8807,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -8818,7 +8818,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -8829,7 +8829,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
             "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics"
           ]
@@ -8907,7 +8907,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -8919,7 +8919,7 @@
           ],
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_langgraph_resident_engine.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria"
           ]
         },
@@ -8932,7 +8932,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -9309,7 +9309,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
