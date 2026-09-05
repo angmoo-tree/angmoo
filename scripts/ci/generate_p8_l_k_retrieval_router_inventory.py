@@ -25,14 +25,14 @@ CORPUS_PATH = (
     ROOT / "backend/tests/fixtures/p8_l/retrieval_topology_v1/held_out_ko.jsonl"
 )
 
-from app.domains.chat.domain import (  # noqa: E402
+from app.domains.chat.contracts import (  # noqa: E402
     RESOLVED_RETRIEVAL_VERSION,
     RETRIEVAL_INTENT_VERSION,
     RetrievalHardCaps,
     RetrievalRoute,
     retrieval_router_response_schema,
 )
-from app.domains.chat.domain.retrieval_router import (  # noqa: E402
+from app.domains.chat.contracts.retrieval_router import (  # noqa: E402
     ROUTER_DIAGNOSTIC_VERSION,
     ROUTER_AGGREGATION_TARGETS,
     ROUTER_CLARIFICATION_SLOTS,
@@ -57,10 +57,10 @@ class InventoryError(RuntimeError):
 
 
 REQUIRED_FILES = (
-    "backend/app/domains/chat/domain/retrieval_router.py",
-    "backend/app/domains/chat/ports/retrieval_router_provider.py",
-    "backend/app/domains/chat/ports/retrieval_policy.py",
-    "backend/app/domains/chat/application/retrieval_routing.py",
+    "backend/app/domains/chat/contracts/retrieval_router.py",
+    "backend/app/domains/chat/contracts/retrieval_router_provider.py",
+    "backend/app/domains/chat/contracts/retrieval_policy.py",
+    "backend/app/domains/chat/service/retrieval_routing.py",
     "backend/app/integrations/llm/retrieval_router.py",
     "backend/app/runtime/chat/retrieval_policy.py",
     "backend/tests/test_p8_l_k_retrieval_router.py",
@@ -123,7 +123,7 @@ def _corpus_contract() -> dict[str, Any]:
 
 def _boundary_contract() -> dict[str, Any]:
     _require_text(
-        "backend/app/domains/chat/domain/retrieval_router.py",
+        "backend/app/domains/chat/contracts/retrieval_router.py",
         (
             "parse_retrieval_intent_payload",
             "_require_exact_keys",
@@ -135,7 +135,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/chat/application/retrieval_routing.py",
+        "backend/app/domains/chat/service/retrieval_routing.py",
         (
             "RetrievalRoutingService",
             "RetrievalRouterOutputError",

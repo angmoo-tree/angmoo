@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session
 
-from app.domains.chat.ports import SuccessfulChatMemorySource
+from app.domains.chat.contracts import SuccessfulChatMemorySource
 from app.runtime.memory.composition import (
     memory_repository as SqlAlchemyMemoryRepository,
 )

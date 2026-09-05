@@ -22,7 +22,7 @@ FROZEN_OUTPUT_SHA256 = "543f8f2457abbc03f50b7e0cace5fa8edffe680c74df53379fa21da5
 P_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-p-evidence-response-streaming-inventory.json"
 P_INVENTORY_SHA256 = "c802ddb544291cb29b113cb3ab3aad80fdda67fdc96d621eadb820bf3abb8cca"
 
-from app.domains.chat.domain.evidence_bundle import MAX_EVIDENCE_ITEMS  # noqa: E402
+from app.domains.chat.contracts.evidence_bundle import MAX_EVIDENCE_ITEMS  # noqa: E402
 from app.domains.memory.contracts.inspector import (  # noqa: E402
     MAX_MEMORY_READ_EVIDENCE_ITEMS,
     MAX_MEMORY_READ_PAGE_SIZE,
@@ -41,14 +41,14 @@ REQUIRED_FILES = (
     "backend/app/api/v1/public.py",
     "backend/app/domains/memory/router.py",
     "backend/app/api/v1/routes/world_chat_response.py",
-    "backend/app/domains/chat/api/schemas.py",
-    "backend/app/domains/chat/application/evidence_assembly.py",
-    "backend/app/domains/chat/application/messages.py",
-    "backend/app/domains/chat/application/response_workflow.py",
-    "backend/app/domains/chat/domain/evidence_bundle.py",
-    "backend/app/domains/chat/domain/response_request.py",
-    "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
-    "backend/app/domains/chat/ports/runtime.py",
+    "backend/app/domains/chat/schemas.py",
+    "backend/app/domains/chat/service/evidence_assembly.py",
+    "backend/app/compatibility/chat_service.py",
+    "backend/app/domains/chat/service/response_workflow.py",
+    "backend/app/domains/chat/contracts/evidence_bundle.py",
+    "backend/app/domains/chat/contracts/response_request.py",
+    "backend/app/domains/chat/repository/response_lifecycle.py",
+    "backend/app/compatibility/chat_runtime_contract.py",
     "backend/app/domains/chat/public.py",
     "backend/app/domains/memory/api/schemas.py",
     "backend/app/domains/memory/service/inspector.py",
@@ -56,7 +56,7 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/repository/items.py",
     "backend/app/domains/memory/contracts/item_store.py",
     "backend/app/domains/memory/public.py",
-    "backend/app/runtime/chat/sqlalchemy_adapter.py",
+    "backend/app/domains/chat/service/threads.py",
     "backend/app/runtime/chat/sqlalchemy_service.py",
     "backend/app/runtime/chat/world_generation.py",
     "backend/security/public_route_security_inventory.json",
@@ -196,7 +196,7 @@ def _boundary_contract() -> dict[str, Any]:
         ("@router.post", "@router.patch", "@router.put", "@router.delete"),
     )
     _require_text(
-        "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
+        "backend/app/domains/chat/repository/response_lifecycle.py",
         ('metadata_payload["_evidence_inspector_v1"]', "len(items) > 12"),
     )
     _require_text(

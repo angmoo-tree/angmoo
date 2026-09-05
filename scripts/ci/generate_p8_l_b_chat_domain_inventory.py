@@ -128,7 +128,7 @@ def _pure_layer_violations(
 
 
 def _route_operations() -> list[str]:
-    path = ROOT / "backend/app/api/v1/routes/messages.py"
+    path = ROOT / "backend/app/domains/chat/router/messages.py"
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     operations: set[str] = set()
     for node in ast.walk(tree):
@@ -152,7 +152,7 @@ def _route_operations() -> list[str]:
 
 
 def _tables() -> list[str]:
-    path = ROOT / "backend/app/domains/chat/infrastructure/sqlalchemy_models.py"
+    path = ROOT / "backend/app/domains/chat/models.py"
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     tables = []
     for node in tree.body:
@@ -273,13 +273,13 @@ def build_inventory() -> dict[str, Any]:
         | {
             "app.domains.chat.public",
             "app.domains.chat.api.schemas",
-            "app.domains.chat.domain.errors",
-            "app.domains.chat.domain.policies",
-            "app.domains.chat.application.messages",
-            "app.domains.chat.ports.runtime",
-            "app.domains.chat.infrastructure.sqlalchemy_models",
+            "app.domains.chat.contracts.errors",
+            "app.domains.chat.contracts.policies",
+            "app.compatibility.chat_service",
+            "app.compatibility.chat_runtime_contract",
+            "app.domains.chat.models",
             "app.runtime.chat.sqlalchemy_service",
-            "app.runtime.chat.sqlalchemy_adapter",
+            "app.domains.chat.service.threads",
             "app.runtime.chat.model_bindings",
         }
     )

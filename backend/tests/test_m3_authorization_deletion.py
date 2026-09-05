@@ -24,7 +24,7 @@ from app.domains.identity.service import auth as auth_service
 from app.domains.character_lore.service import documents as lore_service
 from app.runtime.character_lore import build_lore_workflows
 from app.services import community as community_service
-from app.services import messages as message_service
+from chat_service_support import messages as message_service
 
 
 PRIVACY_INVENTORY = (

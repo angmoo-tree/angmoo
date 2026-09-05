@@ -8,11 +8,12 @@ from sqlalchemy import create_engine, event, select, text
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
+from app.runtime.chat.message_composition import configure_chat_services
 from app import models
 from app.domains.identity.dependencies import get_current_user
 from app.api.v1.routes.manual_social import router as manual_social_router
-from app.api.v1.routes.world_chat import entry_router
-from app.api.v1.routes.world_chat import router as world_chat_router
+from app.domains.chat.router.world_chat import entry_router
+from app.domains.chat.router.world_chat import router as world_chat_router
 from app.core.db import Base, get_db
 from app.domains.world_characters.router.profile import router as world_character_router
 
@@ -70,6 +71,7 @@ def _fixture() -> tuple[TestClient, object, dict[str, models.User | None]]:
     Base.metadata.create_all(engine)
     principal: dict[str, models.User | None] = {"user": None}
     app = FastAPI()
+    configure_chat_services(app)
     app.include_router(world_character_router, prefix="/api/v1")
     app.include_router(entry_router, prefix="/api/v1")
     app.include_router(world_chat_router, prefix="/api/v1")

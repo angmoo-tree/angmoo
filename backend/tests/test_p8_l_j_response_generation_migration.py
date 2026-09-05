@@ -8,7 +8,7 @@ import sqlite3
 from sqlalchemy import URL, create_engine
 
 from app import models as _models  # noqa: F401
-from app.domains.chat.infrastructure.sqlalchemy_models import (
+from app.domains.chat.models import (
     RESPONSE_REQUEST_SCHEMA_TABLES,
     drop_response_request_schema,
 )

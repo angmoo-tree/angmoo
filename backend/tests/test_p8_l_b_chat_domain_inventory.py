@@ -73,10 +73,10 @@ def test_p8_l_b_preserves_v1_transport_storage_and_call_contracts() -> None:
 def test_p8_l_b_compatibility_facades_preserve_object_identity() -> None:
     legacy_models = importlib.import_module("app.models.messages")
     canonical_models = importlib.import_module(
-        "app.domains.chat.infrastructure.sqlalchemy_models"
+        "app.domains.chat.models"
     )
     legacy_schemas = importlib.import_module("app.schemas.messages")
-    canonical_schemas = importlib.import_module("app.domains.chat.api.schemas")
+    canonical_schemas = importlib.import_module("app.domains.chat.schemas")
     community_schemas = importlib.import_module("app.domains.social.schemas.community")
     core_profile_ref = importlib.import_module("app.core.profile_ref")
     policy = _json("security/p8_l_b_chat_domain_policy.json")

@@ -591,6 +591,7 @@ Portable ref/profile 변환은 `service/export_projection.py`, 로컬 export 근
 
 `contracts/__init__.py`는 v1의 순수 공개 타입을 모으며 `contracts/interfaces.py`는 실제 fake·archive·storage·UoW 교체 지점을 정의한다. 런타임 factory 계약은 `contracts/runtime.py`에 있다. 모든 함수에 별도 포트를 생성하지 않으며 같은 역할의 구현을 public 호환 파일로 복제하지 않는다. 아직 전환되지 않은 Worlds/Characters의 지원 계약을 사용하는 runtime 소비자는 해당 B2 source 합류 시 canonical 경로로 연결한다.
 
+
 ### Media의 공유 처리와 업무 소유
 
 `integrations/media/images.py`는 제한된 이미지 해석과 WebP 변환, `files.py`는 관리 경로와 삭제 복구용 quarantine을 담당합니다. 소유자 승인이나 공개 여부, 후보 만료와 quota는 결정하지 않습니다. Character의 profile/draft/candidate/seed 저장은 `characters/service/media_storage.py`, 생성된 Post 파일 저장은 `social/service/media_storage.py`에서 찾습니다. 두 서비스는 해당 업무가 전달한 ID·용도에 맞는 파일을 만들며 기존 호출자가 인증과 DB transaction을 계속 소유합니다.
@@ -673,3 +674,78 @@ Operations는 `domains/operations/models.py`의 설정·공지·감사 모델, `
 `characters/service/image_settings_owner.py`는 소유자 검증, 공유/개인/비활성 키 모드, 외형 설명의 수동·자동 상태, 기준 이미지 교체·삭제 및 quota 응답을 결정합니다. 실제 저장은 `repository/image_settings.py`, 키 암호화·설정 갱신은 `service/image_settings.py`가 소유합니다. 다섯 이미지 설정 HTTP 경로는 Character router를 사용합니다.
 
 Runtime은 기존 서비스 키 가용성과 Social quota 조회를 같은 Session으로 연결합니다. 공통 텍스트 검증 `core/image_prompt_safety.py`는 외부 통신 없이 Character와 Social에서 같은 정의를 사용합니다. 기준 이미지 저장→기존 파일 삭제→setting 변경→commit/refresh 순서와 사용자가 직접 작성한 외형 설명의 보존 조건은 그대로입니다. 남은 management caller의 짧은 runtime 연결은 해당 업무 이동과 함께 종료합니다.
+
+WorldCharacter의 소유자 identity는 `service/owner_identity.py`의 실제 조회·생성·수정 서비스가 담당합니다. 설치 소유자 확인은 Identity의 `service/owner_context.py`, 특수 Character seed·프로필 쓰기는 Character의 `service/owner_controlled.py`에 요청합니다. 일반 create/update의 commit/rollback/refresh는 WC 서비스가 유지하고 Package seed는 같은 Session에서 flush만 합니다. 이전 application forwarding 함수와 repository Protocol은 실제 호출 전환 후 제거했습니다.
+
+
+WorldCharacter의 공개 프로필·Studio·후보 조회와 퇴장 정책은 `service/public_profile.py`, `service/studio.py`, `service/lifecycle.py`에 있습니다. World 권한 확인·프로필 표현·퇴장 버전 및 상태 판단은 이 서비스가 소유합니다. Character/WorldMembership을 함께 읽는 기존 SQL은 `runtime/world_characters/queries.py`가 같은 Session에서 실행하며 `contracts/queries.py` 계약으로 주입됩니다. API와 다른 runtime 소비자는 `runtime/world_characters/composition.py` 또는 공통 HTTP 연결 `app/api/world_character_dependencies.py`에서 조립합니다. 서비스가 runtime을 역으로 import하지 않으며 row 개수·DB 정렬·조회 횟수를 바꾸지 않습니다.
+
+기존 프로필·Studio·소유자 HTTP 7개 경로는 `router/profile.py`에 있습니다. 단순 application forwarding 함수와 repository Protocol은 실제 호출을 옮긴 뒤 제거했으며, 퇴장 runtime guard는 `contracts/lifecycle.py`에 실제 협력 계약으로 남습니다. 선택된 World에서 퇴장할 때 Character의 비활성화도 Character 서비스의 같은 attached 객체 쓰기로 연결하고 commit/rollback은 원래 WC 트랜잭션이 수행합니다.
+
+
+WorldCharacter의 생성·재시도·승인·거절·입장 정책은 `service/autonomous_setup.py`에 있습니다. Character 조회, nullable World/membership 조회·입장 membership seed·World contract version 쓰기, agent-purpose credential 조회는 각 소유 서비스와 같은 Session으로 협력합니다. `infrastructure/autonomous_setup_models.py`의 외부 ORM 집합은 제거했습니다. Provider budget·쿼터·실패 상태 기록과 commit 경계는 WC 서비스에 유지합니다. Runtime mode의 실제 repair 정책은 `service/runtime_modes.py`, 시작 시 Session factory·SQLite immediate 실행은 `runtime/world_characters/recovery.py`가 소유합니다. Runtime의 capacity query는 원래 WC/Character join을 그대로 유지합니다.
+
+#### Chat 모델 정책과 요청 계약
+
+채팅의 HTTP 입출력은 `domains/chat/schemas.py`, 공통 업무 오류는 `exceptions.py`, 모델 선택·reasoning·토큰 및 generation lease 규칙은 `policies.py`에 있습니다. `contracts/model_binding.py`는 thread 모델 연결 방식과 값의 계약을 소유합니다. 소비자는 이 실제 파일을 import하며 옛 `api/schemas.py`와 `domain/` 계약 파일의 재수출 경로는 두지 않습니다.
+
+Thread SQL, generation 시작·재연결·취소·최종 저장과 provider 실행은 아래의 실제 service/repository 및 runtime 협력으로 연결됩니다. B5/B7의 미합류 계약과 B8의 호환 종료는 부분 scope의 정확한 소비자로 기록합니다.
+
+
+#### Chat 데이터와 thread 조회
+
+Chat의 ORM은 `chat/models.py`, 요청·응답/값·generation fence·retrieval plan·evidence 규칙은 `schemas.py`와 `contracts/`에 있다. `repository/threads.py`는 실제 Chat table 조회와 transaction-scoped advisory lock을 소유하며 commit/rollback을 수행하지 않는다. owner/scope 확인과 상태/오류·commit 순서는 서비스가 유지한다. 다른 업무 ORM을 repository에 가져와 Chat 소유처럼 확장하지 않는다. 실제 실행 service와 교차 업무 조립은 아래 역할을 따르며 옛 runtime 이름은 기록된 호환 소비자만 지원한다.
+
+### Chat 실제 서비스와 교차 업무 조회
+
+Chat 요청은 이제 역할이 있는 실제 서비스로 들어갑니다. `service/threads.py`의 `ThreadService`는 World 참여자 확인, 대화 목록·생성·변경, 기본/개별 모델 선택과 저장 직전 재검증을 담당합니다. `service/settings.py`의 `MessageSettingsService`는 사용자·캐릭터의 쪽지 설정과 credential 선택·오류 판단을 맡습니다. `service/messages.py`의 `MessageService`는 기존 쪽지의 lease, 단일 provider 호출, 답변 저장과 같은 실패 메시지 재시도를 실행합니다. HTTP는 각각의 서비스 인스턴스를 직접 사용합니다.
+
+`repository/threads.py`는 Chat 소유 SQL 조회·advisory lock을, `runtime/chat/scope_queries.py`는 World·WorldCharacter·Character·설치 정체성을 함께 읽어야 하는 기존 join을 소유합니다. `contracts/context.py`는 그 조회 결과와 같은 Session을 사용하는 협력 계약입니다. nullable 결과의 의미와 거부 오류는 Chat 서비스가 결정하며, 조회 협력 코드는 commit·rollback·권한 거부를 수행하지 않습니다. `MessageSettingsService`의 credential 행 저장과 암호화 envelope는 Identity의 `service/message_credentials.py`에 요청하며 flush-only 계약을 유지합니다.
+
+World 대화 생성의 tuple/quota lock, preference 생성의 flush-only 경로, 저장 직전 scope 재검증, 충돌 시 한 번의 재시도는 그대로입니다. 기존 쪽지는 user message commit 뒤 provider를 부르고, 재시도에서는 기존 실패 assistant 행 하나를 수정합니다. 새로운 공통 transaction 규칙으로 이 차이를 합치지 않습니다.
+
+과거 `ChatService → ChatRuntimePort → SqlAlchemyChatRuntime` 전달 체인은 HTTP 호출 경로에서 제거했습니다. 과거 구조 자체를 검증하는 승인 테스트 하나 때문에 이전 forwarder와 Protocol만 `app/compatibility/chat_service.py`·`chat_runtime_contract.py`에 임시 보존합니다. 이들은 신규 기능의 진입점이 아니며 B8에서 원래 node/assertion과 실제 서비스 회귀의 대응을 확인하고 퇴역합니다. `runtime/chat/sqlalchemy_service.py`에는 Memory 선택과 이전 테스트가 쓰는 동일 인스턴스 메서드 alias만 남습니다. 실제 generation/retrieval은 아래 서비스와 runtime 협력이 소유합니다.
+
+### Chat 검색·응답 생성과 저장 책임
+
+검색 경로 선택, canonical/graph/both 계획 실행, 근거 조립과 응답 생성은 `chat/service/`의 역할별 모듈에 있습니다. `contracts/`는 요청·값·불변 Today SNS snapshot과 실제 provider/저장/Memory 협력의 형식을 설명합니다. 모든 서비스에 새로운 전달 계층을 추가하지 않습니다.
+
+`repository/response_lifecycle.py`는 응답 요청의 lease·상태 전이·sequence·최종 답변의 원자적 저장을 담당합니다. `accept`와 `finalize`는 원래 `create_request`와 `finalize_response`의 동일 함수 이름이며 추가 저장 정책이 아닙니다. 실행 경로는 이 저장소를 직접 사용하므로 단순 전달만 하던 `GenerationLifecycleService` 인스턴스를 생성하지 않습니다. 오래된 fence의 거부, 완료 응답 재실행 시 중복 방지, 부분 delta 비저장, 성공 이후 Memory 후보 생성 순서는 유지합니다.
+
+이전 생성 클래스는 기존 공개 계약과 승인 테스트를 보존하기 위해 `compatibility/chat_generation_lifecycle.py` 한 곳에 남습니다. 새 기능의 진입점으로 사용하지 않으며 B8에서 원래 테스트와 실제 저장소 회귀의 대응을 확인한 뒤 제거합니다. 실제 생성 입장 판단은 GenerationService, 여러 업무를 읽는 조립은 아래 runtime 협력이 소유합니다. `runtime/chat/world_generation.py`는 기존 검사 alias이며 전체 B6 통합 검증과 호환 종료는 별도입니다.
+
+### World Chat 요청의 실제 서비스
+
+`service/generation.py`의 `GenerationService`가 접수·같은 요청 재실행·실패 응답 재시도·상태 읽기·기한 만료 복구·시작 전 실패 기록을 구현합니다. HTTP의 접수·재시도·요청 조회 네 동작은 이 실제 인스턴스를 호출합니다. ThreadService의 소유권·잠금·World 재검증과 모델 snapshot을 같은 Session으로 사용하고, 사용자 메시지 flush 이후 요청 생성·commit·refresh 순서를 유지합니다. 요청이 이미 존재하면 원래 내용과 키를 확인해 기존 요청을 반환하며 새 메시지를 만들지 않습니다.
+
+`repository/response_requests.py`는 같은 thread의 진행 중·최신 요청을 원래 조건과 순서로 조회합니다. 조회는 commit하지 않습니다. 기한 만료 복구의 commit, 실패 stream의 accepted/failed 이벤트 sequence와 fence 확인은 GenerationService가 소유합니다. Stream/provider·근거 inspector의 실제 구현은 아래 service와 외부 협력 조립에 있으며, 옛 runtime 이름은 같은 메서드만 연결합니다.
+
+### 근거 inspector의 공개 상태 재확인
+
+`service/evidence.py`의 `EvidenceService`는 저장된 근거 snapshot을 현재 원본과 대조합니다. World·원본 revision·성공 여부·공개 여부·주체의 관찰·참여·차단 상태가 맞아야 과거 본문을 최대 500자로 보여줍니다. Today SNS는 원본과 조상 내용을 포함한 revision을, 저장된 Memory는 활성 상태와 현재 evidence를, 관계 근거는 방향·version·참여자 및 차단 상태를 다시 확인합니다. 삭제·변경된 근거의 옛 본문을 그대로 반환하지 않습니다.
+
+`contracts/evidence_reads.py`는 이 판단에 필요한 같은 Session의 읽기 형식을 명시합니다. `runtime/chat/evidence_reads.py`는 기존 Memory/Today reader를 조립하고 nullable Relationship 조회와 World 범위의 이름 join을 수행합니다. 공개 가능 여부나 오류 정책을 다시 구현하지 않으며 commit을 추가하지 않습니다. HTTP의 근거 조회는 실제 EvidenceService에 연결됩니다.
+
+### Streaming과 provider 실행 조립
+
+`GenerationService.stream_world_response`는 현재 요청의 thread·기한·상태, 사용자 메시지와 응답 Character, 로컬 Memory 실행 가능 여부, credential 오류를 확인합니다. 허용된 요청의 모델 snapshot을 credential에 적용한 뒤 실행 조립에 전달하며 실패 종류·재시도 가능 여부·이벤트와 저장 순서는 이 서비스에 있습니다. Character와 World는 소유 서비스의 nullable 조회를 같은 Session으로 사용합니다.
+
+`contracts/execution.py`는 실제 실행 조립 결과와 입력을 명시합니다. `runtime/chat/generation_workflows.py`는 기존 canonical provider/executor, graph gateway/provider/executor, World 이름 목록, router·응답·UoW·성공 Memory 후보·Today validator를 그 순서로 연결합니다. 조립은 새로운 provider 호출이나 권한 판단을 추가하지 않습니다. 서비스는 이어서 기존 20개/8,000자 recent-context 규칙과 optional Today snapshot 실패 처리를 적용하고 실제 response workflow를 실행합니다. recent-context SQL은 repository, 선택·본문 한도와 요청 구성은 서비스에 있습니다.
+
+`runtime/chat/world_generation.py`는 이제 기존 테스트·계약을 위한 동일 인스턴스 이름만 남았습니다. 새 HTTP 동작은 실제 generation/evidence 서비스에 연결됩니다. A2 구조 확인 테스트가 보는 module attribute는 B8의 명시적 퇴역 대상이며 제품 동작의 호출 체인에 포함되지 않습니다. Canonical preflight/entity resolution·Today snapshot 검증과 Request 기반 HTTP 의존성은 아래 역할로 연결됩니다.
+
+
+### 검색 사전 검사와 Today snapshot 판단
+
+`service/retrieval_policy.py`는 설치 소유자 → World → thread → 활성 참여자 → 소유자 제어 requester → 차단 → Memory 설정 순서로 canonical scope를 판단합니다. Entity 이름은 SQL 결과에 다시 Unicode casefold를 적용해 같은 이름인지 확인하고, 같은 World의 활성 상태·공개·차단 여부를 결정합니다. `contracts/retrieval_reads.py`로 받는 교차 업무 조회는 같은 Session의 기존 SQL이며, Chat thread 조회는 자신의 repository에 있습니다.
+
+`service/today_sns_activity.py`의 snapshot validator는 응답 생성 중 Today 원본의 complete-through와 snapshot hash가 유지되는지 판단합니다. Runtime의 retrieval/Today factory는 실제 SQL reader와 차단 조회를 조립합니다. 이 factory는 정책이나 commit을 추가하지 않으며, 기존 constructor 이름은 같은 factory의 임시 alias입니다. Memory와 Social의 미합류 경로는 해당 단계의 canonical 계약으로 순차 연결합니다.
+
+
+### Chat HTTP와 앱 연결
+
+쪽지·설정 HTTP는 `router/messages.py`, World thread/진입은 `router/world_chat.py`, 생성 접수·재시도·상태·근거·NDJSON은 `router/world_chat_response.py`에 있습니다. Router는 자기 schemas와 exceptions를 사용하고 HTTP 오류·응답 형식만 처리합니다. 실제 thread/settings/message/generation/evidence 업무는 `dependencies.py`가 Request의 앱 상태에서 제공하는 typed 서비스로 호출합니다.
+
+두 앱 factory는 `runtime/chat/message_composition.configure_chat_services`로 기존의 같은 인스턴스를 등록합니다. 요청마다 provider나 Session을 다시 만들지 않습니다. DB와 인증 dependency는 원래 동일 함수이므로 기존 override 및 사용자 검증 경계가 유지됩니다. Standalone router 실행도 같은 명시적 구성을 사용합니다. 서비스 미등록 상태에서는 숨은 기본 인스턴스를 생성하지 않습니다.
+
+이전 HTTP 모듈 3개는 A2 구조 검사 한 곳을 위한 동일 함수/router alias로만 남습니다. 실제 API 조립과 동작 테스트는 canonical router를 사용하고, 이 alias는 B8에서 원래 구조 node를 실제 서비스·전송 회귀와 대응해 제거합니다. Generation의 NDJSON 이벤트 필드·UTF-8 직렬화·no-store/nosniff, route 등록 순서와 operation ID는 변경하지 않습니다.

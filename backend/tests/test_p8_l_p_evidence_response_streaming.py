@@ -10,90 +10,90 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.db import Base
-from app.domains.chat.api.schemas import (
+from app.domains.chat.schemas import (
     MessageSettingsUpdate,
     WorldChatMessageCreate,
     WorldChatRetryCreate,
 )
-from app.domains.chat.application.both_retrieval import (
+from app.domains.chat.service.both_retrieval import (
     BothRetrievalResult,
     WorkflowCoordinatorMetrics,
 )
-from app.domains.chat.application.canonical_retrieval import (
+from app.domains.chat.service.canonical_retrieval import (
     CanonicalPlanningMetrics,
     CanonicalPlanningResult,
 )
-from app.domains.chat.application.character_response import (
+from app.domains.chat.service.character_response import (
     CharacterResponseGenerationService,
 )
-from app.domains.chat.application.evidence_assembly import EvidenceBundleAssembler
-from app.domains.chat.application.generation_lifecycle import GenerationLifecycleService
-from app.domains.chat.application.graph_retrieval import (
+from app.domains.chat.service.evidence_assembly import EvidenceBundleAssembler
+from app.compatibility.chat_generation_lifecycle import GenerationLifecycleService
+from app.domains.chat.service.graph_retrieval import (
     GraphPlanningMetrics,
     GraphPlanningResult,
 )
-from app.domains.chat.application.response_workflow import (
+from app.domains.chat.service.response_workflow import (
     ResponseGenerationWorkflowService,
     ResponseWorkflowCommand,
 )
-from app.domains.chat.application.retrieval_routing import (
+from app.domains.chat.service.retrieval_routing import (
     ClarificationCandidate,
     ClarificationResolution,
     RetrievalRoutingMetrics,
     RetrievalRoutingResult,
 )
-from app.domains.chat.domain.call_tracker import (
+from app.domains.chat.contracts.call_tracker import (
     LlmNode,
     RouteAwareCallTracker,
     restore_call_tracker_snapshot,
 )
-from app.domains.chat.domain.evidence_bundle import (
+from app.domains.chat.contracts.evidence_bundle import (
     EVIDENCE_BUNDLE_VERSION,
     EvidenceItem,
     EvidenceKind,
     opaque_evidence_reference,
 )
-from app.domains.chat.domain.generation_lifecycle import (
+from app.domains.chat.contracts.generation_lifecycle import (
     GenerationEventType,
     GenerationFence,
     ResponseRequestState,
     ResponseTerminalReason,
 )
-from app.domains.chat.domain.resolved_envelope import (
+from app.domains.chat.contracts.resolved_envelope import (
     ResolvedRetrievalEnvelope,
     RetrievalHardCaps,
 )
-from app.domains.chat.domain.response_request import (
+from app.domains.chat.contracts.response_request import (
     CreateResponseRequest,
     EvidenceCapability,
     RetrievalAxis,
     RetrievalOutcome,
     build_request_scope_hash,
 )
-from app.domains.chat.domain.retrieval_intent import (
+from app.domains.chat.contracts.retrieval_intent import (
     RetrievalDecision,
     RetrievalIntentEnvelope,
     RetrievalRoute,
 )
-from app.domains.chat.domain.retrieval_router import (
+from app.domains.chat.contracts.retrieval_router import (
     RetrievalRouterRepairExhaustedError,
     RouterFailureDiagnostic,
 )
-from app.domains.chat.domain.workflow_recipe import (
+from app.domains.chat.contracts.workflow_recipe import (
     WorkflowAxis,
     WorkflowRecipe,
     select_workflow_recipe,
 )
-from app.domains.chat.infrastructure.response_lifecycle_repository import (
+from app.domains.chat.repository.response_lifecycle import (
     SqlAlchemyResponseLifecycleRepository,
 )
-from app.domains.chat.ports.character_response_generator import (
+from app.domains.chat.contracts.character_response_generator import (
     CharacterResponseGeneratorError,
     CharacterResponseGeneratorResult,
     CharacterResponseProfile,
 )
-from app.domains.chat.ports.successful_chat_memory import SuccessfulChatMemorySource
-from app.domains.chat.ports.retrieval_policy import RetrievalPreflightCommand
+from app.domains.chat.contracts.successful_chat_memory import SuccessfulChatMemorySource
+from app.domains.chat.contracts.retrieval_policy import RetrievalPreflightCommand
 from app.runtime.memory.composition import (
     memory_repository as SqlAlchemyMemoryRepository,
 )
@@ -107,7 +107,7 @@ from app.runtime.chat.world_generation import (
     retry_world_response,
 )
 from app.runtime.chat.memory_producer import SqlAlchemySuccessfulChatMemoryProducer
-from app.runtime.chat import sqlalchemy_service as world_chat
+from chat_service_support import messages as world_chat
 
 
 NOW = datetime(2026, 9, 2, 12, tzinfo=UTC)
@@ -719,8 +719,8 @@ def test_all_routes_emit_only_crg_deltas_and_commit_once(
 def test_today_snapshot_reaches_both_providers_without_extra_calls(
     response_session, route, expected_calls,
 ):
-    from app.domains.chat.application.today_sns_activity import TodaySnsActivityAssembler
-    from app.domains.chat.domain.retrieval_intent import RetrievalContractError
+    from app.domains.chat.service.today_sns_activity import TodaySnsActivityAssembler
+    from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
     from app.runtime.social.sqlalchemy_today_activity import SqlAlchemyTodaySocialActivityReader
     from app.runtime.chat.today_sns_activity import SqlAlchemyTodaySnsSnapshotValidator
 

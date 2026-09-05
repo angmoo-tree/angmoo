@@ -1,0 +1,403 @@
+"""CANONICAL-route orchestration for the P8-L-L specialist Planner."""
+
+from __future__ import annotations
+
+import asyncio
+from collections.abc import Mapping
+from dataclasses import dataclass, replace
+from datetime import UTC, datetime
+from time import monotonic
+from typing import Any
+
+from app.domains.chat.contracts.call_tracker import (
+    LlmNode,
+    RouteAwareCallTracker,
+    restore_call_tracker_snapshot,
+)
+from app.domains.chat.contracts.resolved_envelope import ResolvedRetrievalEnvelope
+from app.domains.chat.contracts.retrieval_intent import (
+    RetrievalContractError,
+    RetrievalIntentEnvelope,
+    RetrievalRoute,
+)
+from app.domains.chat.contracts.workflow_recipe import (
+    WorkflowAxis,
+    WorkflowDependencyBinding,
+)
+from app.domains.memory.contracts.retrieval_plan import CanonicalPlanContractError
+from app.domains.memory.service.retrieval_plan import CanonicalPlanExecutionContext
+from app.domains.memory.service.retrieval_plan import CanonicalPlanExecutionResult
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerEntity
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerOutputError
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerProviderPort
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerRelationship
+from app.domains.memory.contracts.planner_provider import CanonicalPlannerRequest
+from app.domains.memory.contracts.retrieval_plan import CanonicalRetrievalPlan
+from app.domains.memory.service.retrieval_plan import CanonicalRetrievalPlanExecutor
+from app.domains.memory.service.retrieval_plan import CanonicalRetrievalPlanValidator
+from app.domains.memory.contracts.scope import MemoryScope
+
+
+@dataclass(frozen=True, slots=True)
+class CanonicalRetrievalCommand:
+    user_message: str
+    thread_id: str
+    intent: RetrievalIntentEnvelope
+    resolved: ResolvedRetrievalEnvelope
+    call_tracker: Mapping[str, Any]
+    workflow_dependency: WorkflowDependencyBinding | None = None
+
+    def __post_init__(self) -> None:
+        if not self.user_message.strip() or len(self.user_message) > 4_000:
+            raise RetrievalContractError("canonical_retrieval_message_invalid")
+        if not self.thread_id:
+            raise RetrievalContractError("canonical_retrieval_thread_id_invalid")
+        if self.workflow_dependency is not None and (
+            self.intent.route is not RetrievalRoute.BOTH
+            or self.workflow_dependency.target_axis is not WorkflowAxis.CANONICAL
+        ):
+            raise RetrievalContractError(
+                "canonical_retrieval_workflow_dependency_invalid"
+            )
+
+
+@dataclass(frozen=True, slots=True)
+class CanonicalPlanningMetrics:
+    first_pass_valid: bool
+    repair_used: bool
+    short_circuited: bool
+    short_circuit_reason: str | None
+    planner_logical_calls: int
+    planner_physical_attempts: int
+    executable_step_count: int
+    limit_clamped_step_count: int
+    result_record_count: int
+    provider: str | None
+    model: str | None
+    prompt_token_count: int | None = None
+    output_token_count: int | None = None
+    thought_token_count: int | None = None
+    total_token_count: int | None = None
+    latency_ms: int | None = None
+    thinking_level: str | None = None
+    max_output_tokens: int | None = None
+    finish_reason: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class CanonicalPlanningResult:
+    request_id: str
+    plan: CanonicalRetrievalPlan | None
+    execution: CanonicalPlanExecutionResult | None
+    metrics: CanonicalPlanningMetrics
+    call_tracker: dict[str, Any]
+
+
+class CanonicalRetrievalPlanningService:
+    """Call one specialist Planner, validate it and execute only typed reads."""
+
+    def __init__(
+        self,
+        *,
+        planner: CanonicalPlannerProviderPort,
+        executor: CanonicalRetrievalPlanExecutor,
+        validator: CanonicalRetrievalPlanValidator | None = None,
+    ) -> None:
+        self._planner = planner
+        self._executor = executor
+        self._validator = validator or CanonicalRetrievalPlanValidator()
+
+    async def plan_and_execute(
+        self,
+        command: CanonicalRetrievalCommand,
+        *,
+        now: datetime,
+        deadline_at: datetime,
+        _tracker: RouteAwareCallTracker | None = None,
+    ) -> CanonicalPlanningResult:
+        if now.tzinfo is None or deadline_at.tzinfo is None:
+            raise RetrievalContractError(
+                "canonical_retrieval_deadline_timezone_required"
+            )
+        if now >= deadline_at:
+            raise RetrievalContractError("canonical_retrieval_deadline_exceeded")
+        coordinator_owned = _tracker is not None
+        self._validate_command(command, allow_both=coordinator_owned)
+        tracker = (
+            _tracker
+            if _tracker is not None
+            else restore_call_tracker_snapshot(
+                command.call_tracker,
+                deadline_at=deadline_at,
+            )
+        )
+        if tracker.route is not command.intent.route:
+            raise RetrievalContractError("canonical_retrieval_tracker_route_mismatch")
+
+        if not command.resolved.memory_enabled:
+            return self._short_circuit(
+                command,
+                tracker,
+                reason="memory_opt_out",
+            )
+        if not command.resolved.canonical_operation_allowlist:
+            return self._short_circuit(
+                command,
+                tracker,
+                reason="canonical_operation_allowlist_empty",
+            )
+
+        context = self._execution_context(command)
+        request = self._provider_request(command)
+        remaining_seconds = (deadline_at - now).total_seconds()
+        started = monotonic()
+        repair_used = False
+        first_physical = 0
+        repair_physical = 0
+
+        tracker.record_logical_call(LlmNode.CANONICAL_PLANNER, now=now)
+        try:
+            provider_result = await self._invoke_planner(
+                request,
+                timeout_seconds=remaining_seconds,
+            )
+            first_physical = provider_result.physical_attempt_count
+            for _ in range(first_physical):
+                tracker.record_physical_attempt(LlmNode.CANONICAL_PLANNER, now=now)
+            validated = self._validator.validate(provider_result.plan, context)
+        except (CanonicalPlannerOutputError, CanonicalPlanContractError) as exc:
+            if isinstance(exc, CanonicalPlannerOutputError):
+                first_physical = exc.physical_attempt_count
+                for _ in range(first_physical):
+                    tracker.record_physical_attempt(
+                        LlmNode.CANONICAL_PLANNER,
+                        now=now,
+                    )
+            repair_used = True
+            remaining_seconds -= monotonic() - started
+            if remaining_seconds <= 0:
+                raise RetrievalContractError(
+                    "canonical_retrieval_deadline_exceeded"
+                ) from exc
+            try:
+                tracker.record_logical_call(
+                    LlmNode.CANONICAL_PLANNER,
+                    now=now,
+                    repair=True,
+                )
+            except RetrievalContractError as budget_exc:
+                raise RetrievalContractError(
+                    "canonical_planner_request_wide_repair_exhausted"
+                ) from budget_exc
+            diagnostic = getattr(exc, "diagnostic", str(exc))
+            repaired_request = replace(
+                request,
+                repair_diagnostic=diagnostic[:160],
+            )
+            try:
+                provider_result = await self._invoke_planner(
+                    repaired_request,
+                    timeout_seconds=remaining_seconds,
+                )
+                repair_physical = provider_result.physical_attempt_count
+                for _ in range(repair_physical):
+                    tracker.record_physical_attempt(
+                        LlmNode.CANONICAL_PLANNER,
+                        now=now,
+                    )
+                validated = self._validator.validate(provider_result.plan, context)
+            except (CanonicalPlannerOutputError, CanonicalPlanContractError) as repaired:
+                if isinstance(repaired, CanonicalPlannerOutputError):
+                    repair_physical = repaired.physical_attempt_count
+                    for _ in range(repair_physical):
+                        tracker.record_physical_attempt(
+                            LlmNode.CANONICAL_PLANNER,
+                            now=now,
+                        )
+                raise RetrievalContractError(
+                    "canonical_planner_request_wide_repair_exhausted"
+                ) from repaired
+
+        execution = self._executor.execute(validated.plan, context, now=now)
+        return CanonicalPlanningResult(
+            request_id=command.resolved.request_id,
+            plan=execution.plan,
+            execution=execution,
+            metrics=CanonicalPlanningMetrics(
+                first_pass_valid=not repair_used,
+                repair_used=repair_used,
+                short_circuited=False,
+                short_circuit_reason=None,
+                planner_logical_calls=1 + int(repair_used),
+                planner_physical_attempts=first_physical + repair_physical,
+                executable_step_count=len(execution.steps),
+                limit_clamped_step_count=len(execution.limit_clamped_steps),
+                result_record_count=len(execution.records),
+                provider=provider_result.provider,
+                model=provider_result.model,
+                prompt_token_count=provider_result.prompt_token_count,
+                output_token_count=provider_result.output_token_count,
+                thought_token_count=provider_result.thought_token_count,
+                total_token_count=provider_result.total_token_count,
+                latency_ms=provider_result.latency_ms,
+                thinking_level=provider_result.thinking_level,
+                max_output_tokens=provider_result.max_output_tokens,
+                finish_reason=provider_result.finish_reason,
+            ),
+            call_tracker=tracker.snapshot(),
+        )
+
+    async def _invoke_planner(
+        self,
+        request: CanonicalPlannerRequest,
+        *,
+        timeout_seconds: float,
+    ):
+        try:
+            async with asyncio.timeout(timeout_seconds):
+                return await self._planner.plan(request)
+        except TimeoutError as exc:
+            raise RetrievalContractError(
+                "canonical_retrieval_deadline_exceeded"
+            ) from exc
+
+    @staticmethod
+    def _validate_command(
+        command: CanonicalRetrievalCommand,
+        *,
+        allow_both: bool = False,
+    ) -> None:
+        allowed_routes = {RetrievalRoute.CANONICAL}
+        if allow_both:
+            allowed_routes.add(RetrievalRoute.BOTH)
+        if command.intent.route not in allowed_routes:
+            raise RetrievalContractError("canonical_retrieval_route_invalid")
+        if command.intent.envelope_hash != command.resolved.intent_hash:
+            raise RetrievalContractError("canonical_retrieval_intent_hash_mismatch")
+        intent_refs = {entity.ref for entity in command.intent.entities}
+        resolved_refs = {binding.ref for binding in command.resolved.entity_bindings}
+        if intent_refs != resolved_refs:
+            raise RetrievalContractError("canonical_retrieval_entity_binding_mismatch")
+        if (
+            command.intent.route is RetrievalRoute.CANONICAL
+            and command.resolved.graph_operation_allowlist
+        ):
+            raise RetrievalContractError(
+                "canonical_retrieval_graph_allowlist_forbidden"
+            )
+
+    @staticmethod
+    def _provider_request(
+        command: CanonicalRetrievalCommand,
+    ) -> CanonicalPlannerRequest:
+        relationship = command.intent.relationship
+        aggregation = command.intent.aggregation
+        return CanonicalPlannerRequest(
+            request_id=command.resolved.request_id,
+            envelope_version=command.resolved.version,
+            envelope_hash=command.resolved.envelope_hash,
+            user_message=command.user_message,
+            intent=command.intent.intent,
+            entities=tuple(
+                CanonicalPlannerEntity(
+                    ref=entity.ref,
+                    mention=entity.mention,
+                    role=entity.role,
+                )
+                for entity in command.intent.entities
+            ),
+            relationship=(
+                None
+                if relationship is None
+                else CanonicalPlannerRelationship(
+                    from_ref=relationship.from_ref,
+                    to_ref=relationship.to_ref,
+                    dimension=relationship.dimension,
+                    requested_polarity=relationship.requested_polarity,
+                )
+            ),
+            resolved_time_available=(
+                command.resolved.absolute_time_from is not None
+                and command.resolved.absolute_time_to is not None
+            ),
+            aggregation_kind=(None if aggregation is None else aggregation.kind.value),
+            aggregation_target=(
+                None if aggregation is None else aggregation.target_role
+            ),
+        )
+
+    @staticmethod
+    def _execution_context(
+        command: CanonicalRetrievalCommand,
+    ) -> CanonicalPlanExecutionContext:
+        resolved = command.resolved
+        if (resolved.absolute_time_from is None) != (
+            resolved.absolute_time_to is None
+        ):
+            raise RetrievalContractError("canonical_retrieval_time_binding_incomplete")
+        return CanonicalPlanExecutionContext(
+            request_id=resolved.request_id,
+            envelope_version=resolved.version,
+            envelope_hash=resolved.envelope_hash,
+            scope=MemoryScope(
+                owner_id=resolved.owner_id,
+                world_id=resolved.world_id,
+                subject_world_character_id=resolved.responding_world_character_id,
+            ),
+            thread_id=command.thread_id,
+            entity_bindings=tuple(
+                (binding.ref, binding.world_character_id)
+                for binding in resolved.entity_bindings
+            ),
+            operation_allowlist=resolved.canonical_operation_allowlist,
+            row_limit=resolved.caps.row_limit,
+            occurred_from=_optional_utc(resolved.absolute_time_from),
+            occurred_to=_optional_utc(resolved.absolute_time_to),
+        )
+
+    @staticmethod
+    def _short_circuit(
+        command: CanonicalRetrievalCommand,
+        tracker: RouteAwareCallTracker,
+        *,
+        reason: str,
+    ) -> CanonicalPlanningResult:
+        return CanonicalPlanningResult(
+            request_id=command.resolved.request_id,
+            plan=None,
+            execution=None,
+            metrics=CanonicalPlanningMetrics(
+                first_pass_valid=True,
+                repair_used=False,
+                short_circuited=True,
+                short_circuit_reason=reason,
+                planner_logical_calls=0,
+                planner_physical_attempts=0,
+                executable_step_count=0,
+                limit_clamped_step_count=0,
+                result_record_count=0,
+                provider=None,
+                model=None,
+            ),
+            call_tracker=tracker.snapshot(),
+        )
+
+
+def _optional_utc(value: str | None) -> datetime | None:
+    if value is None:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise RetrievalContractError("canonical_retrieval_time_binding_invalid") from exc
+    if parsed.tzinfo is None:
+        raise RetrievalContractError("canonical_retrieval_time_binding_invalid")
+    return parsed.astimezone(UTC)
+
+
+__all__ = [
+    "CanonicalPlanningMetrics",
+    "CanonicalPlanningResult",
+    "CanonicalRetrievalCommand",
+    "CanonicalRetrievalPlanningService",
+]

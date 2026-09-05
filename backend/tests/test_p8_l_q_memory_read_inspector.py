@@ -9,6 +9,7 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
+from app.runtime.chat.message_composition import configure_chat_services
 from app import models
 from app.domains.identity.dependencies import get_current_user
 from app.domains.memory.router import router as memory_router
@@ -100,6 +101,7 @@ def _fixture() -> tuple[TestClient, object, dict[str, models.User | None]]:
     app = FastAPI()
     from app.runtime.memory_http import build_memory_workflows
     app.state.memory_workflows = build_memory_workflows
+    configure_chat_services(app)
     app.include_router(memory_router, prefix="/api/v1")
     app.include_router(response_router, prefix="/api/v1")
 

@@ -10,18 +10,18 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.db import Base
-from app.domains.chat.application.evidence_assembly import EvidenceBundleAssembler
-from app.domains.chat.application.retrieval_routing import (
+from app.domains.chat.service.evidence_assembly import EvidenceBundleAssembler
+from app.domains.chat.service.retrieval_routing import (
     _apply_today_sns_sufficiency_guard,
 )
-from app.domains.chat.application.today_sns_activity import TodaySnsActivityAssembler
-from app.domains.chat.domain.evidence_bundle import EvidenceKind
-from app.domains.chat.domain.retrieval_intent import (
+from app.domains.chat.service.today_sns_activity import TodaySnsActivityAssembler
+from app.domains.chat.contracts.evidence_bundle import EvidenceKind
+from app.domains.chat.contracts.retrieval_intent import (
     RetrievalDecision,
     RetrievalIntentEnvelope,
     RetrievalRoute,
 )
-from app.domains.chat.ports.character_response_generator import (
+from app.domains.chat.contracts.character_response_generator import (
     CharacterResponseGeneratorRequest,
     CharacterResponseProfile,
 )
@@ -40,7 +40,7 @@ from app.runtime.social.subjective_context import (
     record_declared_subjective_context,
 )
 from app.runtime.chat.today_sns_activity import SqlAlchemyTodaySnsSnapshotValidator
-from app.domains.chat.ports.today_sns_activity import TodaySnsSnapshotChangedError
+from app.domains.chat.contracts.today_sns_activity import TodaySnsSnapshotChangedError
 
 
 NOW = datetime(2026, 9, 4, 5, 0, tzinfo=UTC)
@@ -624,7 +624,7 @@ def test_snapshot_router_guard_and_character_context_share_one_fence(today_sessi
 
     changed = replace(snapshot.entries[0], actor_label="이름 변경")
     changed_entries = (changed, *snapshot.entries[1:])
-    from app.domains.chat.domain.today_sns_activity import build_today_sns_hash
+    from app.domains.chat.contracts.today_sns_activity import build_today_sns_hash
 
     changed_hash = build_today_sns_hash(
         owner_id=snapshot.owner_id,

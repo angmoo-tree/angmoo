@@ -29,7 +29,7 @@ from app.domains.chat.infrastructure.world_scope_migration import (
 from app.domains.chat.infrastructure.model_binding_migration import (
     rebuild_message_threads_v6,
 )
-from app.domains.chat.infrastructure.sqlalchemy_models import (
+from app.domains.chat.models import (
     drop_response_request_schema,
 )
 from app.domains.memory.models.items import (

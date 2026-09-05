@@ -25,7 +25,7 @@ L_INVENTORY_SHA256 = (
 )
 CORPUS_PATH = ROOT / "backend/tests/fixtures/p8_l/graph_planner_v1/held_out_ko.jsonl"
 
-from app.domains.chat.domain import RetrievalRoute  # noqa: E402
+from app.domains.chat.contracts import RetrievalRoute  # noqa: E402
 from app.domains.relationships.public import (  # noqa: E402
     GRAPH_PLAN_VERSION,
     GRAPH_RECALL_PRIMITIVE_REGISTRY,
@@ -47,8 +47,8 @@ REQUIRED_FILES = (
     "backend/app/domains/relationships/domain/graph_retrieval_planner.py",
     "backend/app/domains/relationships/ports/graph_planner_provider.py",
     "backend/app/domains/relationships/application/graph_planning.py",
-    "backend/app/domains/chat/application/graph_retrieval.py",
-    "backend/app/domains/chat/domain/call_tracker.py",
+    "backend/app/domains/chat/service/graph_retrieval.py",
+    "backend/app/domains/chat/contracts/call_tracker.py",
     "backend/app/integrations/llm/graph_retrieval_planner.py",
     "backend/tests/fixtures/p8_l/graph_planner_v1/held_out_ko.jsonl",
     "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
@@ -136,7 +136,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/chat/application/graph_retrieval.py",
+        "backend/app/domains/chat/service/graph_retrieval.py",
         (
             "GraphRetrievalPlanningService",
             "restore_call_tracker_snapshot",

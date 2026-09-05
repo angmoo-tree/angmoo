@@ -130,7 +130,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         },
         "services/feed_reaction_planner.py": {"_api_key"},
         "services/langgraph_resident.py": {"_decrypt_api_key"},
-        "runtime/chat/sqlalchemy_service.py": {"_resolve_message_credential"},
+        "domains/chat/service/settings.py": {"_resolve_message_credential"},
         "services/post_image_generation.py": {
             "_ensure_visual_identity",
             "_refine_image_prompt",
@@ -152,7 +152,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         "integrations/llm/memory_consolidation.py": {"consolidate"},
         "integrations/llm/memory_selection.py": {"select"},
         "integrations/llm/retrieval_router.py": {"route"},
-        "runtime/chat/world_generation.py": {"stream_world_response"},
+        "domains/chat/service/generation.py": {"stream_world_response"},
     }
     observed: dict[str, set[str]] = {}
 
