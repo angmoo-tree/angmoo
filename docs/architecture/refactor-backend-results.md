@@ -1130,3 +1130,12 @@ Lore/Tree/M3삭제/LangGraph resident **245 passed / 기존 warning1 / 14.74s**,
 Lore A3 최종 확대 묶음은 **326 passed / 기존 warnings3 / 23.51s**다. 경계743modules/2475edges/legacy199, L4 743/14/97, 공개 inventory196operations가 통과했다. signed869bae55 두 원본 source를 읽기 메모리에서만 보충한 진단은 protected2201/current2255의 source/assertion/suppression/APIORM/node 손실0이다. 첫 split 검사에 남아 있던 parser quota 선행 symbol의 옛 Lore service 소비 경로11개를 실제 현재 호출 파일로 연결했고, 원래 split 검사 재실행은 **0 errors**다. 검사 규칙/동결 원장은 수정하지 않았다. 선행 원장 연결을 포함한 stock 전체 보존은 root 순차 통합 단계의 pending Gate다.
 
 새 회귀는 tests/character_lore/test_lore_role_contracts.py의 4 nodes다. 기존 Tree 회귀 파일과 동일 basename이어서 발생한 pytest 수집 충돌은 새 파일의 최초 source 고정 전에 고유 basename으로 정리했다. 기존 테스트 node/본문은 퇴역시키지 않았으며 최종 확대 묶음에서 함께 실행했다.
+
+
+### AR-B8 Operations A1 실제 설정·점검·감사 책임 이전
+
+Source `5fb092b2f97b7027f19e8c1d1653929d9ffeec8e`는 실제3 ORM/응답/설정값·오류와 DB→환경→기본값 선택, notice/maintenance 우선순위, auto/run/feed 차단·allowlist를 Operations 역할로 옮겼다. 같은 Session에서 실행하던 account deletion의3개 개인정보 UPDATE를 원래 순서 그대로 repository로 분리하고 호출자 transaction/commit을 유지했다. 기존4개 구현 파일을 제거했다.
+
+추출한 query/call 인수를 원래 AST로 펼쳐 전체62개 정의·상수·account 함수가 동일함을 확인했다. 기존 관련150 테스트 PASS/2 datetime warnings/13.11s, 경계749modules/2482edges/188exact legacy, L4와 ER0 inventory PASS다. 원래 source/split/assertion/suppression/APIORM/node6진단은0오류/protected2201/current2255다. 새 test node는 없다. 삭제된11개 exact legacy edge만 제거하고 아직 이전 중인 실제 Routines/Social 호출2개는 owner·제거조건이 있는 exact bridge로 기록했다. Global model/schema 별칭은 G5에서 제거한다.
+
+선행 실제 source/node 원장 통합 전이므로 이 결과는 source 준비 검증이며 B8 전체 PR/merge/Installer PASS가 아니다.
