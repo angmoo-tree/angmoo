@@ -9,16 +9,16 @@ from pathlib import Path
 import shutil
 import threading
 
-from app.domains.world_packages.domain.canonical import canonical_json_bytes
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.utils.canonical import canonical_json_bytes
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.preview import (
+from app.domains.world_packages.contracts.preview import (
     WorldPackageNormalizedAsset,
     WorldPackageNormalizedAssetPayload,
 )
-from app.domains.world_packages.domain.seed import WorldPackageImportedAsset
+from app.domains.world_packages.contracts.seed import WorldPackageImportedAsset
 
 
 _FILESYSTEM_LOCK = threading.RLock()

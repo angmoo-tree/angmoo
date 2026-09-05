@@ -11,7 +11,7 @@ import re
 import unicodedata
 from typing import ClassVar, Iterable, Literal
 
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )

@@ -29,10 +29,10 @@ from app.domains.world_packages.public import (
 )
 
 
-BACKEND_ROOT = Path(__file__).resolve().parents[1]
+BACKEND_ROOT = Path(__file__).resolve().parents[2]
 REPO_ROOT = BACKEND_ROOT.parent
 APP_ROOT = BACKEND_ROOT / "app"
-FIXTURE_ROOT = Path(__file__).parent / "fixtures" / "world_packages" / "v1"
+FIXTURE_ROOT = Path(__file__).parents[1] / "fixtures" / "world_packages" / "v1"
 VALID_ROOT = FIXTURE_ROOT / "valid"
 SCHEMA_ROOT = APP_ROOT / "domains" / "world_packages" / "schemas" / "v1"
 GENERATOR_PATH = REPO_ROOT / "scripts" / "ci" / "generate_world_package_schemas.py"
@@ -379,6 +379,12 @@ def test_world_package_domain_and_ports_have_no_framework_dependency() -> None:
         root / "public.py",
         *sorted((root / "domain").rglob("*.py")),
         *sorted((root / "ports").rglob("*.py")),
+        root / "constants.py",
+        root / "exceptions.py",
+        *sorted((root / "schemas").rglob("*.py")),
+        *sorted((root / "contracts").rglob("*.py")),
+        *sorted((root / "policies").rglob("*.py")),
+        *sorted((root / "utils").rglob("*.py")),
     ]
     for path in pure_paths:
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
@@ -409,6 +415,18 @@ def test_public_boundary_exports_only_world_package_domain_modules() -> None:
         for node in ast.walk(tree)
         if isinstance(node, ast.ImportFrom) and node.module
     }
+
+    # The source contract remains pure after its exact role paths move. Unknown
+    # names cannot be converted by a prefix replacement or pass as a new role.
+    moves = _json(REPO_ROOT / "security" / "refactor_path_map.json")["files"]
+    historical_modules = {
+        new.removeprefix("backend/").removesuffix(".py").replace("/", "."):
+        old.removeprefix("backend/").removesuffix(".py").replace("/", ".")
+        for old, new in moves.items()
+        if old.startswith("backend/app/domains/world_packages/domain/")
+    }
+    assert imported <= historical_modules.keys()
+    imported = {historical_modules[name] for name in imported}
 
     assert imported
     assert all(name.startswith("app.domains.world_packages.domain") for name in imported)

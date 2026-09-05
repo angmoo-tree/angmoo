@@ -24,42 +24,42 @@ from app.domains.world_packages.api.routes import router
 from app.domains.world_packages.application.stage_world_package import (
     StageWorldPackage,
 )
-from app.domains.world_packages.domain.canonical import (
+from app.domains.world_packages.utils.canonical import (
     canonical_entry_index_digest,
     canonical_json_bytes,
 )
-from app.domains.world_packages.domain.collision_policy import (
+from app.domains.world_packages.policies.collision import (
     WorldPackageDuplicateState,
     plan_world_package_collisions,
 )
-from app.domains.world_packages.domain.content import (
+from app.domains.world_packages.schemas.content import (
     AssetIndexDocument,
     CharactersDocument,
     ManagedImageAsset,
     PortableWorldDefinition,
     WorldCharactersDocument,
 )
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.export import (
+from app.domains.world_packages.contracts.export import (
     WorldPackageResolvedAsset,
     WorldPackageResolvedAssets,
     WorldPackageSourceIdentity,
 )
-from app.domains.world_packages.domain.import_state import (
+from app.domains.world_packages.constants import (
     WorldPackageImportState,
     WorldPackageTrustState,
 )
-from app.domains.world_packages.domain.manifest import WorldPackageLicense
-from app.domains.world_packages.domain.preview import (
+from app.domains.world_packages.schemas.manifest import WorldPackageLicense
+from app.domains.world_packages.contracts.preview import (
     WorldPackagePreviewAssessment,
 )
 from app.domains.world_packages.infrastructure.filesystem_staging import (
     FilesystemWorldPackageStaging,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_models import (
+from app.domains.world_packages.models import (
     WorldPackageExport,
     WorldPackageImport,
     WorldPackageSource,

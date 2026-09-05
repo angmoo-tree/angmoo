@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from app.domains.world_packages.domain.seed import WorldPackageSourceSnapshot
+from app.domains.world_packages.contracts.seed import WorldPackageSourceSnapshot
 
 
 class WorldPackageSourceSnapshotPort(Protocol):

@@ -10,17 +10,17 @@ from pathlib import PurePosixPath
 
 from PIL import Image, UnidentifiedImageError
 
-from app.domains.world_packages.domain.content import ManagedImageAsset
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.schemas.content import ManagedImageAsset
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.export import (
+from app.domains.world_packages.contracts.export import (
     WorldPackageMediaCandidate,
     WorldPackageResolvedAsset,
     WorldPackageResolvedAssets,
 )
-from app.domains.world_packages.domain.package_policy import WorldPackagePolicy
+from app.domains.world_packages.policies.archive import WorldPackagePolicy
 
 
 class ManagedMediaPackageAssets:

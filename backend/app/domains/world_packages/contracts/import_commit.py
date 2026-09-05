@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from app.domains.world_packages.domain.preview import (
+from app.domains.world_packages.contracts.preview import (
     ValidatedWorldPackage,
     WorldPackageImportPreview,
 )

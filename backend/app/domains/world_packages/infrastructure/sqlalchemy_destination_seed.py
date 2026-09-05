@@ -15,14 +15,14 @@ from app.domains.world_characters.public import (
     AutonomousWorldCharacterSeedData,
     seed_autonomous_world_character,
 )
-from app.domains.world_packages.domain.seed import (
+from app.domains.world_packages.contracts.seed import (
     WorldPackageDestinationSeedRequest,
     WorldPackageDestinationSeedResult,
     WorldPackageImportIdMapping,
     WorldPackageImportRegistryRecord,
     resolve_world_package_import_replay,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_registry import (
+from app.domains.world_packages.service.registry import (
     SqlAlchemyWorldPackageRegistry,
 )
 from app.domains.worlds.public import (

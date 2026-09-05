@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from app.domains.world_packages.domain.export import (
+from app.domains.world_packages.contracts.export import (
     WorldPackageExportRegistryRecord,
     WorldPackageSourceIdentity,
     WorldPackageVersionPreview,
 )
-from app.domains.world_packages.domain.seed import WorldPackageImportRegistryRecord
+from app.domains.world_packages.contracts.seed import WorldPackageImportRegistryRecord
 
 
 class WorldPackageRegistryPort(Protocol):

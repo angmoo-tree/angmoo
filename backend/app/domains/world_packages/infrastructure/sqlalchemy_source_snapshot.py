@@ -13,8 +13,8 @@ from app.domains.world_characters.public import (
     WorldCharacter,
     character_contract_hash,
 )
-from app.domains.world_packages.domain.canonical import canonical_sha256
-from app.domains.world_packages.domain.content import (
+from app.domains.world_packages.utils.canonical import canonical_sha256
+from app.domains.world_packages.schemas.content import (
     AutonomousCharacterTemplate,
     PortableDaypartProfile,
     PortableGlossaryTerm,
@@ -24,12 +24,12 @@ from app.domains.world_packages.domain.content import (
     PortableWorldCharacterSeed,
     PortableWorldDefinition,
 )
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.export import WorldPackageMediaCandidate
-from app.domains.world_packages.domain.seed import WorldPackageSourceSnapshot
+from app.domains.world_packages.contracts.export import WorldPackageMediaCandidate
+from app.domains.world_packages.contracts.seed import WorldPackageSourceSnapshot
 from app.domains.worlds.public import (
     NO_SPECIFIC_ROLE_KEY,
     WorldMembershipRequiredError,

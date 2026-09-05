@@ -111,7 +111,7 @@ bounded staging, atomic commit/recovery, and independent target evolution:
 ```powershell
 docker compose -f compose.yml -f compose.dev.yml exec -T backend `
   uv run python -m pytest -q `
-  tests/test_l3_5_world_package_v1_contract.py `
+  tests/world_packages/test_v1_contract.py `
   tests/test_l3_5_world_package_export.py `
   tests/test_l3_5_world_package_preview.py `
   tests/test_l3_5_world_package_import_commit.py `

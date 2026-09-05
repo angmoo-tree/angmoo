@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from app.domains.world_packages.domain.seed import (
+from app.domains.world_packages.contracts.seed import (
     WorldPackageDestinationSeedRequest,
     WorldPackageDestinationSeedResult,
 )

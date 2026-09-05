@@ -23,17 +23,17 @@ from app.domains.world_packages.application.exclusion_scan import (
     WorldPackageExclusionError,
     scan_world_package_bytes,
 )
-from app.domains.world_packages.domain.content import (
+from app.domains.world_packages.schemas.content import (
     AssetIndexDocument,
     CharactersDocument,
     PortableWorldDefinition,
     WorldCharactersDocument,
 )
-from app.domains.world_packages.domain.export import (
+from app.domains.world_packages.contracts.export import (
     WorldPackageResolvedAssets,
     WorldPackageSourceIdentity,
 )
-from app.domains.world_packages.domain.manifest import WorldPackageLicense
+from app.domains.world_packages.schemas.manifest import WorldPackageLicense
 from app.domains.world_packages.infrastructure.filesystem_import_media import (
     FilesystemWorldPackageImportMedia,
 )

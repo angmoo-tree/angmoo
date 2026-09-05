@@ -13,15 +13,15 @@ from app.core.ids import uuid7_string
 from app.domains.characters.public import Character
 from app.domains.device_home.service import get_device_home_world
 from app.domains.world_characters.public import WorldCharacter
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.import_commit import (
+from app.domains.world_packages.contracts.import_commit import (
     WorldPackageImportCommitRequest,
     WorldPackageImportCommitResult,
 )
-from app.domains.world_packages.domain.seed import (
+from app.domains.world_packages.contracts.seed import (
     WorldPackageDestinationSeedRequest,
 )
 from app.domains.world_packages.infrastructure.filesystem_import_media import (
@@ -33,7 +33,7 @@ from app.domains.world_packages.infrastructure.sqlalchemy_destination_seed impor
 from app.domains.world_packages.infrastructure.sqlalchemy_preview_probe import (
     SqlAlchemyWorldPackagePreviewProbe,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_registry import (
+from app.domains.world_packages.service.registry import (
     SqlAlchemyWorldPackageRegistry,
 )
 from app.domains.worlds.public import (

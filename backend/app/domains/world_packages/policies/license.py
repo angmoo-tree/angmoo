@@ -5,12 +5,12 @@ from __future__ import annotations
 from dataclasses import dataclass
 import re
 
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.manifest import WorldPackageLicense
-from app.domains.world_packages.domain.package_policy import WorldPackagePolicy
+from app.domains.world_packages.schemas.manifest import WorldPackageLicense
+from app.domains.world_packages.policies.archive import WorldPackagePolicy
 
 
 SUPPORTED_LICENSE_EXPRESSIONS = frozenset(

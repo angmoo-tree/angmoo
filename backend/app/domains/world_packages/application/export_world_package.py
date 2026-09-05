@@ -4,17 +4,17 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.domains.world_packages.domain.content import (
+from app.domains.world_packages.schemas.content import (
     AssetIndexDocument,
     CharactersDocument,
     PortableWorldDefinition,
     WorldCharactersDocument,
 )
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.export import (
+from app.domains.world_packages.contracts.export import (
     WorldPackageBuiltArchive,
     WorldPackageExportPreview,
     WorldPackageResolvedAssets,
@@ -22,13 +22,13 @@ from app.domains.world_packages.domain.export import (
     recommended_world_package_filename,
     world_package_seed_digest,
 )
-from app.domains.world_packages.domain.manifest import WorldPackageLicense
-from app.domains.world_packages.domain.license_policy import (
+from app.domains.world_packages.schemas.manifest import WorldPackageLicense
+from app.domains.world_packages.policies.license import (
     SUPPORTED_LICENSE_EXPRESSIONS,
     validate_world_package_license,
 )
-from app.domains.world_packages.domain.package_policy import WorldPackagePolicy
-from app.domains.world_packages.domain.seed import WorldPackageSourceSnapshot
+from app.domains.world_packages.policies.archive import WorldPackagePolicy
+from app.domains.world_packages.contracts.seed import WorldPackageSourceSnapshot
 from app.domains.world_packages.ports.managed_assets import ManagedPackageAssetPort
 from app.domains.world_packages.ports.package_archive import WorldPackageArchivePort
 from app.domains.world_packages.ports.registry import WorldPackageRegistryPort

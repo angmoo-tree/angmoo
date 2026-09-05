@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from app.domains.world_packages.domain.import_commit import (
+from app.domains.world_packages.contracts.import_commit import (
     WorldPackageImportCommitRequest,
     WorldPackageImportCommitResult,
 )

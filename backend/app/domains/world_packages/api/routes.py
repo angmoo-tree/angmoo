@@ -29,7 +29,7 @@ from app.api.identity_dependencies import get_current_user
 from app.api.identity_dependencies import browser_session
 from app.core.db import get_db
 from app.core.ids import uuid7_string
-from app.domains.world_packages.api.schemas import (
+from app.domains.world_packages.schemas.http import (
     WorldPackageExportPreviewRead,
     WorldPackageExportRequest,
     WorldPackageImportPreviewRead,
@@ -47,14 +47,14 @@ from app.domains.world_packages.application.stage_world_package import (
 from app.domains.world_packages.application.commit_world_package import (
     CommitWorldPackageImport,
 )
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.export import (
+from app.domains.world_packages.contracts.export import (
     WorldPackageExportRegistryRecord,
 )
-from app.domains.world_packages.domain.package_policy import WorldPackagePolicy
+from app.domains.world_packages.policies.archive import WorldPackagePolicy
 from app.domains.world_packages.infrastructure.filesystem_export_artifacts import (
     ExportArtifact,
     FilesystemWorldPackageExportArtifacts,
@@ -68,7 +68,7 @@ from app.domains.world_packages.infrastructure.filesystem_import_media import (
 from app.domains.world_packages.infrastructure.managed_media_assets import (
     ManagedMediaPackageAssets,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_registry import (
+from app.domains.world_packages.service.registry import (
     SqlAlchemyWorldPackageRegistry,
 )
 from app.domains.world_packages.infrastructure.sqlalchemy_preview_probe import (

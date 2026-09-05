@@ -13,14 +13,14 @@ import secrets
 import shutil
 import threading
 
-from app.domains.world_packages.domain.canonical import canonical_json_bytes
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.utils.canonical import canonical_json_bytes
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.import_state import WorldPackageImportState
-from app.domains.world_packages.domain.package_policy import WorldPackagePolicy
-from app.domains.world_packages.domain.preview import (
+from app.domains.world_packages.constants import WorldPackageImportState
+from app.domains.world_packages.policies.archive import WorldPackagePolicy
+from app.domains.world_packages.contracts.preview import (
     WorldPackageImportPreview,
     WorldPackagePreparedPreview,
 )

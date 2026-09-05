@@ -6,21 +6,21 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.domains.characters.public import Character
-from app.domains.world_packages.domain.canonical import canonical_sha256
-from app.domains.world_packages.domain.collision_policy import (
+from app.domains.world_packages.utils.canonical import canonical_sha256
+from app.domains.world_packages.policies.collision import (
     WorldPackageDuplicateState,
     plan_world_package_collisions,
 )
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.import_state import WorldPackageTrustState
-from app.domains.world_packages.domain.preview import (
+from app.domains.world_packages.constants import WorldPackageTrustState
+from app.domains.world_packages.contracts.preview import (
     ValidatedWorldPackage,
     WorldPackagePreviewAssessment,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_models import (
+from app.domains.world_packages.models import (
     WorldPackageExport,
     WorldPackageImport,
 )

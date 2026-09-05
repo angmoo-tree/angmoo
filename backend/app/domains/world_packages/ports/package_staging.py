@@ -5,8 +5,8 @@ from __future__ import annotations
 from collections.abc import AsyncIterable
 from typing import Protocol
 
-from app.domains.world_packages.domain.import_state import WorldPackageImportState
-from app.domains.world_packages.domain.preview import (
+from app.domains.world_packages.constants import WorldPackageImportState
+from app.domains.world_packages.contracts.preview import (
     WorldPackageImportPreview,
     WorldPackagePreparedPreview,
 )

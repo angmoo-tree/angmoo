@@ -1,0 +1,1 @@
+"""World Package contracts ownership."""

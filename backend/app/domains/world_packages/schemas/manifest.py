@@ -8,7 +8,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, UUID7, field_validator, model_validator
 
-from app.domains.world_packages.domain.canonical import canonical_entry_index_digest
+from app.domains.world_packages.utils.canonical import canonical_entry_index_digest
 
 
 SHA256_PATTERN = r"^[0-9a-f]{64}$"

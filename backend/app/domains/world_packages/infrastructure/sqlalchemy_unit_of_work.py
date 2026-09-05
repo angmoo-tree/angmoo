@@ -8,7 +8,7 @@ from collections.abc import Callable
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
 
-from app.domains.world_packages.domain.seed import (
+from app.domains.world_packages.contracts.seed import (
     WorldPackageDestinationSeedRequest,
     WorldPackageDestinationSeedResult,
     resolve_world_package_import_replay,
@@ -16,7 +16,7 @@ from app.domains.world_packages.domain.seed import (
 from app.domains.world_packages.infrastructure.sqlalchemy_destination_seed import (
     SqlAlchemyWorldPackageDestinationSeed,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_registry import (
+from app.domains.world_packages.service.registry import (
     SqlAlchemyWorldPackageRegistry,
 )
 

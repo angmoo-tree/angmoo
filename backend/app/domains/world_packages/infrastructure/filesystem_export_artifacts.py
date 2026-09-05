@@ -11,11 +11,11 @@ import secrets
 import shutil
 import threading
 
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.export import EXPORT_TOKEN_TTL_SECONDS
+from app.domains.world_packages.contracts.export import EXPORT_TOKEN_TTL_SECONDS
 
 
 @dataclass(frozen=True, slots=True)

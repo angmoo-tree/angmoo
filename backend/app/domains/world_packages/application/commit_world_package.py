@@ -2,16 +2,16 @@
 
 from __future__ import annotations
 
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.import_commit import (
+from app.domains.world_packages.contracts.import_commit import (
     WorldPackageDuplicateStrategy,
     WorldPackageImportCommitRequest,
     WorldPackageImportCommitResult,
 )
-from app.domains.world_packages.domain.preview import (
+from app.domains.world_packages.contracts.preview import (
     ValidatedWorldPackage,
     WorldPackageImportPreview,
 )

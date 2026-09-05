@@ -414,3 +414,12 @@ Import inventory는 현재 사실을 기록하고 import policy는 허용 경계
 - [프론트엔드 아키텍처](../frontend/ARCHITECTURE.md), [디자인 기준](../frontend/DESIGN.md)
 
 안정적인 소유권·호출 방향·공통 파일 책임이 바뀌면 이 문서를 갱신합니다. 개별 모델 옵션·모든 파일 목록·PR 진행률은 상세 계약과 실제 코드에서 관리합니다. 기능 하나의 동작 변경 때문에 전체 아키텍처 설명을 매번 다시 작성할 필요는 없습니다.
+
+
+### World Package의 계약과 lineage 저장
+
+World Package v1의 Python 입력·출력은 `world_packages/schemas/{http,content,manifest}.py`에 있다. 배포되는 JSON schema는 기존 `schemas/v1/`에 그대로 두므로 `schemas.py` 파일을 동시에 만들지 않는다. 불변 export·preview·seed 기록은 `contracts/`, 오류는 `exceptions.py`, 상태 enum은 `constants.py`, archive·license·collision 판단은 `policies/`가 소유한다. JSON 정규화와 digest bytes는 `utils/canonical.py`에서 정의한다.
+
+네 개 lineage ORM은 `models.py`에서 기존 단일 Base를 공유한다. `service/registry.py`는 같은 seed의 version 재사용, 실제 전달 기록의 충돌, 다음 version 소비를 판단하며 `repository/registry.py`가 동일 Session으로 SQL과 flush를 수행한다. 이 둘은 commit하지 않는다. HTTP export 준비·전달 및 import의 기존 transaction 소유자가 commit/rollback을 결정한다. 특히 native download만으로 전달을 확정하지 않으며 Tauri의 저장 완료 acknowledgment까지 기다린다.
+
+이 첫 범위의 이전 뒤에도 export·staging·import 실행 조립은 다음 AR-B3 slice에서 전환한다. 현재 `public.py`와 옛 역할에서 새 계약을 읽는 정확한 호환 edge는 이동표에 기록되어 있고, 새 구현이 옛 역할을 다시 호출하는 것은 허용하지 않는다. 다른 업무와 함께 생성하는 seed/commit은 최종적으로 `runtime/world_packages`에서 같은 Session으로 조립한다. 전체 Package나 shared media 전환 완료를 뜻하지 않는다.

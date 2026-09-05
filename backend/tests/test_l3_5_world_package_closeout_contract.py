@@ -34,7 +34,7 @@ PROXY_SMOKE = REPO_ROOT / "frontend" / "scripts" / "test-world-package-proxy.mjs
 
 
 WORLD_PACKAGE_SUITES = (
-    "tests/test_l3_5_world_package_v1_contract.py",
+    "tests/world_packages/test_v1_contract.py",
     "tests/test_l3_5_world_package_export.py",
     "tests/test_l3_5_world_package_preview.py",
     "tests/test_l3_5_world_package_import_commit.py",
@@ -50,7 +50,7 @@ def test_required_linux_workflows_pin_the_closeout_suite() -> None:
     for test_file in WORLD_PACKAGE_SUITES:
         assert test_file in local_smoke
     for test_file in (
-        "tests/test_l3_5_world_package_v1_contract.py",
+        "tests/world_packages/test_v1_contract.py",
         "tests/test_l3_5_world_package_preview.py",
         "tests/test_l3_5_world_package_closeout.py",
         "tests/test_l3_5_world_package_closeout_contract.py",

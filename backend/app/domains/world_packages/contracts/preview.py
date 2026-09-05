@@ -5,23 +5,23 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from app.domains.world_packages.domain.collision_policy import (
+from app.domains.world_packages.policies.collision import (
     WorldPackageCollisionPlan,
 )
-from app.domains.world_packages.domain.content import (
+from app.domains.world_packages.schemas.content import (
     AssetIndexDocument,
     CharactersDocument,
     PortableWorldDefinition,
     WorldCharactersDocument,
 )
-from app.domains.world_packages.domain.import_state import (
+from app.domains.world_packages.constants import (
     WorldPackageImportState,
     WorldPackageTrustState,
 )
-from app.domains.world_packages.domain.license_policy import (
+from app.domains.world_packages.policies.license import (
     WorldPackageLicenseAssessment,
 )
-from app.domains.world_packages.domain.manifest import (
+from app.domains.world_packages.schemas.manifest import (
     WorldPackageLicense,
     WorldPackageManifest,
 )

@@ -6,12 +6,12 @@ import asyncio
 from collections.abc import AsyncIterable, Callable
 from datetime import UTC, datetime, timedelta
 
-from app.domains.world_packages.domain.collision_policy import (
+from app.domains.world_packages.policies.collision import (
     WorldPackageDuplicateState,
 )
-from app.domains.world_packages.domain.errors import WorldPackageContractError
-from app.domains.world_packages.domain.import_state import WorldPackageImportState
-from app.domains.world_packages.domain.preview import (
+from app.domains.world_packages.exceptions import WorldPackageContractError
+from app.domains.world_packages.constants import WorldPackageImportState
+from app.domains.world_packages.contracts.preview import (
     IMPORT_PREVIEW_SCHEMA_VERSION,
     IMPORT_PREVIEW_TOKEN_TTL_SECONDS,
     WorldPackageImportPreview,

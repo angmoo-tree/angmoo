@@ -7,13 +7,13 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.domains.world_packages.domain.export import WorldPackageExportPreview
-from app.domains.world_packages.domain.manifest import WorldPackageLicense
-from app.domains.world_packages.domain.preview import (
+from app.domains.world_packages.contracts.export import WorldPackageExportPreview
+from app.domains.world_packages.schemas.manifest import WorldPackageLicense
+from app.domains.world_packages.contracts.preview import (
     WorldPackageImportPreview,
     WorldPackagePreparedPreview,
 )
-from app.domains.world_packages.domain.import_commit import (
+from app.domains.world_packages.contracts.import_commit import (
     WorldPackageImportCommitResult,
 )
 

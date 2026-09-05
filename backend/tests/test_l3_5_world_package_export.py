@@ -25,32 +25,32 @@ from app.domains.world_packages.api.routes import (
 from app.domains.world_packages.application.export_world_package import (
     ExportWorldPackage,
 )
-from app.domains.world_packages.domain.canonical import canonical_sha256
-from app.domains.world_packages.domain.content import (
+from app.domains.world_packages.utils.canonical import canonical_sha256
+from app.domains.world_packages.schemas.content import (
     AssetIndexDocument,
     CharactersDocument,
     PortableWorldDefinition,
     WorldCharactersDocument,
 )
-from app.domains.world_packages.domain.export import (
+from app.domains.world_packages.contracts.export import (
     WorldPackageExportRegistryRecord,
     WorldPackageResolvedAssets,
     WorldPackageSourceIdentity,
     WorldPackageVersionPreview,
 )
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.manifest import WorldPackageLicense
-from app.domains.world_packages.domain.seed import WorldPackageSourceSnapshot
+from app.domains.world_packages.schemas.manifest import WorldPackageLicense
+from app.domains.world_packages.contracts.seed import WorldPackageSourceSnapshot
 from app.domains.world_packages.infrastructure.filesystem_export_artifacts import (
     FilesystemWorldPackageExportArtifacts,
 )
 from app.domains.world_packages.infrastructure.managed_media_assets import (
     ManagedMediaPackageAssets,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_models import (
+from app.domains.world_packages.models import (
     WorldPackageExport,
     WorldPackageSource,
 )
@@ -270,7 +270,7 @@ def test_managed_media_is_content_addressed_and_external_media_is_not_fetched(
     image = Image.new("RGB", (12, 8), (12, 34, 56))
     image.save(image_path, format="WEBP", lossless=True)
 
-    from app.domains.world_packages.domain.export import WorldPackageMediaCandidate
+    from app.domains.world_packages.contracts.export import WorldPackageMediaCandidate
 
     candidates = (
         WorldPackageMediaCandidate(

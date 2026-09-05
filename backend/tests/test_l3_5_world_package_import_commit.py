@@ -27,24 +27,24 @@ from app.domains.device_home.repository import (
 from app.domains.runtime.public import SearchIndexHit
 from app.domains.social.public import SocialSearchState
 from app.domains.world_packages.api.routes import router
-from app.domains.world_packages.domain.content import (
+from app.domains.world_packages.schemas.content import (
     AssetIndexDocument,
     CharactersDocument,
     ManagedImageAsset,
     PortableWorldDefinition,
     WorldCharactersDocument,
 )
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.export import (
+from app.domains.world_packages.contracts.export import (
     WorldPackageResolvedAsset,
     WorldPackageResolvedAssets,
     WorldPackageSourceIdentity,
 )
-from app.domains.world_packages.domain.manifest import WorldPackageLicense
-from app.domains.world_packages.domain.preview import (
+from app.domains.world_packages.schemas.manifest import WorldPackageLicense
+from app.domains.world_packages.contracts.preview import (
     WorldPackageNormalizedAsset,
     WorldPackageNormalizedAssetPayload,
 )

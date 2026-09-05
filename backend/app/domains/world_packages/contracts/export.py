@@ -8,9 +8,9 @@ import re
 import unicodedata
 from typing import Literal
 
-from app.domains.world_packages.domain.content import ManagedImageAsset
-from app.domains.world_packages.domain.canonical import canonical_sha256
-from app.domains.world_packages.domain.manifest import (
+from app.domains.world_packages.schemas.content import ManagedImageAsset
+from app.domains.world_packages.utils.canonical import canonical_sha256
+from app.domains.world_packages.schemas.manifest import (
     WorldPackageLicense,
     WorldPackageManifest,
 )

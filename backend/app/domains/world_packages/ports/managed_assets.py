@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from app.domains.world_packages.domain.export import (
+from app.domains.world_packages.contracts.export import (
     WorldPackageMediaCandidate,
     WorldPackageResolvedAssets,
 )

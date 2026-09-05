@@ -4,18 +4,18 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from app.domains.world_packages.domain.content import (
+from app.domains.world_packages.schemas.content import (
     AssetIndexDocument,
     CharactersDocument,
     PortableWorldDefinition,
     WorldCharactersDocument,
 )
-from app.domains.world_packages.domain.export import (
+from app.domains.world_packages.contracts.export import (
     WorldPackageBuiltArchive,
     WorldPackageResolvedAssets,
     WorldPackageSourceIdentity,
 )
-from app.domains.world_packages.domain.manifest import WorldPackageLicense
+from app.domains.world_packages.schemas.manifest import WorldPackageLicense
 
 
 class WorldPackageArchivePort(Protocol):

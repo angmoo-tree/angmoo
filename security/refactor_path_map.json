@@ -164,7 +164,24 @@
     "backend/tests/test_login_throttle_security.py": "backend/tests/identity/test_login_throttle_security.py",
     "backend/tests/test_public_signup_policy.py": "backend/tests/identity/test_public_signup_policy.py",
     "backend/tests/test_session_logout_security.py": "backend/tests/identity/test_session_logout_security.py",
-    "backend/tests/test_turnstile.py": "backend/tests/identity/test_turnstile.py"
+    "backend/tests/test_turnstile.py": "backend/tests/identity/test_turnstile.py",
+    "backend/app/domains/world_packages/api/schemas.py": "backend/app/domains/world_packages/schemas/http.py",
+    "backend/app/domains/world_packages/domain/content.py": "backend/app/domains/world_packages/schemas/content.py",
+    "backend/app/domains/world_packages/domain/manifest.py": "backend/app/domains/world_packages/schemas/manifest.py",
+    "backend/app/domains/world_packages/domain/errors.py": "backend/app/domains/world_packages/exceptions.py",
+    "backend/app/domains/world_packages/domain/package_policy.py": "backend/app/domains/world_packages/policies/archive.py",
+    "backend/app/domains/world_packages/domain/license_policy.py": "backend/app/domains/world_packages/policies/license.py",
+    "backend/app/domains/world_packages/domain/collision_policy.py": "backend/app/domains/world_packages/policies/collision.py",
+    "backend/app/domains/world_packages/domain/canonical.py": "backend/app/domains/world_packages/utils/canonical.py",
+    "backend/app/domains/world_packages/domain/export.py": "backend/app/domains/world_packages/contracts/export.py",
+    "backend/app/domains/world_packages/domain/seed.py": "backend/app/domains/world_packages/contracts/seed.py",
+    "backend/app/domains/world_packages/domain/preview.py": "backend/app/domains/world_packages/contracts/preview.py",
+    "backend/app/domains/world_packages/domain/import_commit.py": "backend/app/domains/world_packages/contracts/import_commit.py",
+    "backend/app/domains/world_packages/domain/import_state.py": "backend/app/domains/world_packages/constants.py",
+    "backend/app/domains/world_packages/infrastructure/sqlalchemy_models.py": "backend/app/domains/world_packages/models.py",
+    "backend/app/domains/world_packages/infrastructure/sqlalchemy_registry.py": "backend/app/domains/world_packages/service/registry.py",
+    "backend/tests/test_l3_5_world_package_v1_contract.py": "backend/tests/world_packages/test_v1_contract.py",
+    "backend/tests/test_l3_5_world_package_uow_registry.py": "backend/tests/world_packages/test_uow_registry.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -335,7 +352,46 @@
     "tests/test_google_verification_throttle.py::test_google_link_rate_limit_prevents_credential_verification": "tests/identity/test_google_verification_throttle.py::test_google_link_rate_limit_prevents_credential_verification",
     "tests/test_l1_local_owner_session.py::test_bootstrap_closes_after_claim_and_replayed_challenge_loses_race": "tests/identity/test_l1_local_owner_session.py::test_bootstrap_closes_after_claim_and_replayed_challenge_loses_race",
     "tests/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods[HEAD]": "tests/identity/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods[HEAD]",
-    "tests/test_turnstile.py::test_siteverify_timeout_is_unavailable": "tests/identity/test_turnstile.py::test_siteverify_timeout_is_unavailable"
+    "tests/test_turnstile.py::test_siteverify_timeout_is_unavailable": "tests/identity/test_turnstile.py::test_siteverify_timeout_is_unavailable",
+    "tests/test_l3_5_world_package_v1_contract.py::test_archive_metadata_policy_accepts_the_synthetic_fixture": "tests/world_packages/test_v1_contract.py::test_archive_metadata_policy_accepts_the_synthetic_fixture",
+    "tests/test_l3_5_world_package_v1_contract.py::test_canonical_json_digest_is_order_independent_and_nfc_normalized": "tests/world_packages/test_v1_contract.py::test_canonical_json_digest_is_order_independent_and_nfc_normalized",
+    "tests/test_l3_5_world_package_v1_contract.py::test_checked_in_json_schemas_are_deterministic_goldens": "tests/world_packages/test_v1_contract.py::test_checked_in_json_schemas_are_deterministic_goldens",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[absolute_path-entries1-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[absolute_path-entries1-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[backslash_path-entries4-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[backslash_path-entries4-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[compression_bomb-entries10-world_package_archive_limit_exceeded]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[compression_bomb-entries10-world_package_archive_limit_exceeded]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[device_entry-entries8-world_package_archive_invalid]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[device_entry-entries8-world_package_archive_invalid]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[encrypted-entries9-world_package_archive_invalid]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[encrypted-entries9-world_package_archive_invalid]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[hardlink-entries7-world_package_archive_invalid]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[hardlink-entries7-world_package_archive_invalid]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[negative_forged_size-entries11-world_package_archive_invalid]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[negative_forged_size-entries11-world_package_archive_invalid]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[nested_archive-entries15-world_package_archive_invalid]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[nested_archive-entries15-world_package_archive_invalid]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[path_depth_limit-entries13-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[path_depth_limit-entries13-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[path_traversal-entries0-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[path_traversal-entries0-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[symlink-entries6-world_package_archive_invalid]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[symlink-entries6-world_package_archive_invalid]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[too_many_entries-entries12-world_package_archive_limit_exceeded]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[too_many_entries-entries12-world_package_archive_limit_exceeded]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[unc_path-entries3-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[unc_path-entries3-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[unknown_root_entry-entries16-world_package_archive_invalid]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[unknown_root_entry-entries16-world_package_archive_invalid]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[windows_casefold_collision-entries5-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[windows_casefold_collision-entries5-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[windows_device_name-entries14-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[windows_device_name-entries14-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[windows_drive_path-entries2-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[windows_drive_path-entries2-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_manifest_rejects_unknown_fields_and_tampered_digest": "tests/world_packages/test_v1_contract.py::test_manifest_rejects_unknown_fields_and_tampered_digest",
+    "tests/test_l3_5_world_package_v1_contract.py::test_optional_unknown_extension_does_not_change_v1_required_gate": "tests/world_packages/test_v1_contract.py::test_optional_unknown_extension_does_not_change_v1_required_gate",
+    "tests/test_l3_5_world_package_v1_contract.py::test_portable_schemas_exclude_runtime_private_and_source_identity_fields": "tests/world_packages/test_v1_contract.py::test_portable_schemas_exclude_runtime_private_and_source_identity_fields",
+    "tests/test_l3_5_world_package_v1_contract.py::test_public_boundary_exports_only_world_package_domain_modules": "tests/world_packages/test_v1_contract.py::test_public_boundary_exports_only_world_package_domain_modules",
+    "tests/test_l3_5_world_package_v1_contract.py::test_synthetic_fixture_validates_and_entry_digests_match": "tests/world_packages/test_v1_contract.py::test_synthetic_fixture_validates_and_entry_digests_match",
+    "tests/test_l3_5_world_package_v1_contract.py::test_unicode_nfc_and_casefold_path_collisions_fail_closed": "tests/world_packages/test_v1_contract.py::test_unicode_nfc_and_casefold_path_collisions_fail_closed",
+    "tests/test_l3_5_world_package_v1_contract.py::test_unknown_required_extension_fails_closed": "tests/world_packages/test_v1_contract.py::test_unknown_required_extension_fails_closed",
+    "tests/test_l3_5_world_package_v1_contract.py::test_v1_trust_labels_do_not_claim_a_verified_author": "tests/world_packages/test_v1_contract.py::test_v1_trust_labels_do_not_claim_a_verified_author",
+    "tests/test_l3_5_world_package_v1_contract.py::test_world_package_domain_and_ports_have_no_framework_dependency": "tests/world_packages/test_v1_contract.py::test_world_package_domain_and_ports_have_no_framework_dependency",
+    "tests/test_l3_5_world_package_uow_registry.py::test_alembic_0082_upgrade_downgrade_upgrade_on_sqlite": "tests/world_packages/test_uow_registry.py::test_alembic_0082_upgrade_downgrade_upgrade_on_sqlite",
+    "tests/test_l3_5_world_package_uow_registry.py::test_caller_rollback_removes_every_seeded_domain_row": "tests/world_packages/test_uow_registry.py::test_caller_rollback_removes_every_seeded_domain_row",
+    "tests/test_l3_5_world_package_uow_registry.py::test_committed_idempotency_replays_without_duplicate_rows": "tests/world_packages/test_uow_registry.py::test_committed_idempotency_replays_without_duplicate_rows",
+    "tests/test_l3_5_world_package_uow_registry.py::test_concurrent_same_idempotency_key_commits_one_import": "tests/world_packages/test_uow_registry.py::test_concurrent_same_idempotency_key_commits_one_import",
+    "tests/test_l3_5_world_package_uow_registry.py::test_destination_seed_is_a_caller_owned_port_and_commit_is_atomic": "tests/world_packages/test_uow_registry.py::test_destination_seed_is_a_caller_owned_port_and_commit_is_atomic",
+    "tests/test_l3_5_world_package_uow_registry.py::test_idempotency_key_cannot_replay_different_package_content": "tests/world_packages/test_uow_registry.py::test_idempotency_key_cannot_replay_different_package_content",
+    "tests/test_l3_5_world_package_uow_registry.py::test_package_routes_do_not_reenter_the_legacy_api_route_folder": "tests/world_packages/test_uow_registry.py::test_package_routes_do_not_reenter_the_legacy_api_route_folder",
+    "tests/test_l3_5_world_package_uow_registry.py::test_registry_schema_freezes_fk_check_unique_and_guarded_downgrade": "tests/world_packages/test_uow_registry.py::test_registry_schema_freezes_fk_check_unique_and_guarded_downgrade",
+    "tests/test_l3_5_world_package_uow_registry.py::test_replay_resolves_when_registry_becomes_visible_after_world_lookup": "tests/world_packages/test_uow_registry.py::test_replay_resolves_when_registry_becomes_visible_after_world_lookup",
+    "tests/test_l3_5_world_package_uow_registry.py::test_unknown_world_character_reference_rolls_back_without_partial_rows": "tests/world_packages/test_uow_registry.py::test_unknown_world_character_reference_rolls_back_without_partial_rows"
   },
   "details": {
     "AR-B1": {
@@ -3478,6 +3534,79 @@
         "public_node_baseline": "approved=604 current=2037 new=1463 PASS; no approved list edits",
         "preservation": "PR258=1867 PR263=1907 protected_lineages=2030 current=2037; assertions/splits/API/ORM preserved; only two inherited G0 introduction metadata errors pending merge of latest G0 evidence",
         "remaining": "Root integrates G1-G4 and latest G0, commits source, appends introduction metadata, refreshes git-tracked inventory and runs integrated/CI checks. No checkpoint is regenerated."
+      }
+    },
+    "AR-B3-package-foundation": {
+      "status": "SOURCE READY — first slice only; export/staging/import runtime migration continues",
+      "owners": {
+        "schemas/": "HTTP and portable v1 schemas; schemas/v1 JSON resources unchanged",
+        "contracts/": "immutable export/preview/seed request and result records",
+        "policies/": "archive/license/collision deterministic decisions",
+        "models.py": "the same four ORM classes and shared Base",
+        "service/registry.py": "lineage version/replay/delivery decisions",
+        "repository/registry.py": "same-session SQL and flush-only persistence"
+      },
+      "remaining": "AR-B3 export/staging then import/runtime slices remove the temporary same-domain bridges. Other domains public contracts remain until B2 canonical consumers merge. G5 owns final Base registration.",
+      "test_ownership": {
+        "moved_files": 2,
+        "moved_nodes": 39
+      },
+      "split_files": {
+        "backend/app/domains/world_packages/infrastructure/sqlalchemy_registry.py": [
+          "backend/app/domains/world_packages/service/registry.py",
+          "backend/app/domains/world_packages/repository/registry.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_registry.py::SqlAlchemyWorldPackageRegistry",
+          "new": "backend/app/domains/world_packages/service/registry.py::SqlAlchemyWorldPackageRegistry",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/api/routes.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_5_world_package_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_uow_registry.py::test_caller_rollback_removes_every_seeded_domain_row"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_registry.py::SqlAlchemyWorldPackageRegistry",
+          "new": "backend/app/domains/world_packages/repository/registry.py::WorldPackageRegistryRepository",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/service/registry.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_5_world_package_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_uow_registry.py::test_caller_rollback_removes_every_seeded_domain_row"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_registry.py::_export_record",
+          "new": "backend/app/domains/world_packages/repository/registry.py::_export_record",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/service/registry.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_5_world_package_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_uow_registry.py::test_caller_rollback_removes_every_seeded_domain_row"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_registry.py::__all__",
+          "new": "backend/app/domains/world_packages/service/registry.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/api/routes.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_5_world_package_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_uow_registry.py::test_caller_rollback_removes_every_seeded_domain_row"
+          ]
+        }
+      ],
+      "validation": {
+        "package_suites": "89 passed / 1 warning / 46.50 seconds; v1 goldens, UoW, export/ack/cancel, preview, import/recovery, closeout/UI contracts",
+        "scope": "exact modules only; temporary same-domain legacy consumers retire in next AR-B3 slices",
+        "provenance": "source commit first; root appends introduction records after linear integration"
       }
     }
   }

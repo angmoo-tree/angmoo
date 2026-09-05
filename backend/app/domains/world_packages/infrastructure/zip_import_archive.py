@@ -16,11 +16,11 @@ from zipfile import ZIP_DEFLATED, ZIP_STORED, BadZipFile, ZipFile, ZipInfo
 from PIL import Image, UnidentifiedImageError
 from pydantic import ValidationError
 
-from app.domains.world_packages.domain.canonical import (
+from app.domains.world_packages.utils.canonical import (
     canonical_json_bytes,
     canonical_sha256,
 )
-from app.domains.world_packages.domain.content import (
+from app.domains.world_packages.schemas.content import (
     AssetIndexDocument,
     CharactersDocument,
     PortableWorldDefinition,
@@ -31,22 +31,22 @@ from app.domains.worlds.public import (
     NO_SPECIFIC_ROLE_NAME,
     NO_SPECIFIC_ROLE_PORTABLE_REF,
 )
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.export import (
+from app.domains.world_packages.contracts.export import (
     WORLD_PACKAGE_PRODUCER_VERSION,
 )
-from app.domains.world_packages.domain.license_policy import (
+from app.domains.world_packages.policies.license import (
     validate_world_package_license,
 )
-from app.domains.world_packages.domain.manifest import WorldPackageManifest
-from app.domains.world_packages.domain.package_policy import (
+from app.domains.world_packages.schemas.manifest import WorldPackageManifest
+from app.domains.world_packages.policies.archive import (
     ArchiveEntryDescriptor,
     WorldPackagePolicy,
 )
-from app.domains.world_packages.domain.preview import (
+from app.domains.world_packages.contracts.preview import (
     ValidatedWorldPackage,
     WorldPackageNormalizedAsset,
     WorldPackageNormalizedAssetPayload,

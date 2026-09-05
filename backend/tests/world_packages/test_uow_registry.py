@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app import models
 from app.core.db import Base
-from app.domains.world_packages.domain.errors import WorldPackageContractError
+from app.domains.world_packages.exceptions import WorldPackageContractError
 from app.domains.world_packages.infrastructure.sqlalchemy_destination_seed import (
     SqlAlchemyWorldPackageDestinationSeed,
 )
@@ -33,7 +33,7 @@ from app.domains.world_packages.ports import (
 
 
 FIXTURE_ROOT = (
-    Path(__file__).parent / "fixtures" / "world_packages" / "v1" / "valid"
+    Path(__file__).parents[1] / "fixtures" / "world_packages" / "v1" / "valid"
 )
 
 
@@ -299,7 +299,7 @@ def test_registry_schema_freezes_fk_check_unique_and_guarded_downgrade() -> None
     }
 
     migration = (
-        Path(__file__).resolve().parents[1]
+        Path(__file__).resolve().parents[2]
         / "alembic/versions/20260825_0083_world_package_registry.py"
     ).read_text(encoding="utf-8")
     assert 'down_revision: str | None = "20260819_0082"' in migration
@@ -330,7 +330,7 @@ def test_alembic_0082_upgrade_downgrade_upgrade_on_sqlite(
     engine.dispose()
 
     migration_path = (
-        Path(__file__).resolve().parents[1]
+        Path(__file__).resolve().parents[2]
         / "alembic/versions/20260825_0083_world_package_registry.py"
     )
     spec = importlib.util.spec_from_file_location(
@@ -394,10 +394,10 @@ def test_alembic_0082_upgrade_downgrade_upgrade_on_sqlite(
 
 
 def test_package_routes_do_not_reenter_the_legacy_api_route_folder() -> None:
-    route_root = Path(__file__).resolve().parents[1] / "app/api/v1/routes"
+    route_root = Path(__file__).resolve().parents[2] / "app/api/v1/routes"
     assert not any("world_package" in path.name for path in route_root.glob("*.py"))
     domain_route = (
-        Path(__file__).resolve().parents[1]
+        Path(__file__).resolve().parents[2]
         / "app/domains/world_packages/api/routes.py"
     )
     assert domain_route.is_file()

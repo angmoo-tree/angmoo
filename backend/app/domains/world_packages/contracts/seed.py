@@ -5,17 +5,17 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Literal
 
-from app.domains.world_packages.domain.content import (
+from app.domains.world_packages.schemas.content import (
     AutonomousCharacterTemplate,
     PortableWorldCharacterSeed,
     PortableWorldDefinition,
 )
-from app.domains.world_packages.domain.export import WorldPackageMediaCandidate
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.contracts.export import WorldPackageMediaCandidate
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.collision_policy import (
+from app.domains.world_packages.policies.collision import (
     WorldPackageCollisionPlan,
 )
 

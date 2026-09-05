@@ -6,22 +6,22 @@ from io import BytesIO
 import hashlib
 from zipfile import ZIP_STORED, ZipFile, ZipInfo
 
-from app.domains.world_packages.domain.canonical import (
+from app.domains.world_packages.utils.canonical import (
     canonical_entry_index_digest,
     canonical_json_bytes,
     canonical_sha256,
 )
-from app.domains.world_packages.domain.content import (
+from app.domains.world_packages.schemas.content import (
     AssetIndexDocument,
     CharactersDocument,
     PortableWorldDefinition,
     WorldCharactersDocument,
 )
-from app.domains.world_packages.domain.errors import (
+from app.domains.world_packages.exceptions import (
     WorldPackageContractError,
     WorldPackageReasonCode,
 )
-from app.domains.world_packages.domain.export import (
+from app.domains.world_packages.contracts.export import (
     WORLD_PACKAGE_MIN_READER_VERSION,
     WORLD_PACKAGE_PRODUCER_NAME,
     WORLD_PACKAGE_PRODUCER_VERSION,
@@ -30,14 +30,14 @@ from app.domains.world_packages.domain.export import (
     WorldPackageSourceIdentity,
     world_package_seed_digest,
 )
-from app.domains.world_packages.domain.manifest import (
+from app.domains.world_packages.schemas.manifest import (
     WorldPackageCompatibility,
     WorldPackageEntry,
     WorldPackageLicense,
     WorldPackageManifest,
     WorldPackageProducer,
 )
-from app.domains.world_packages.domain.package_policy import (
+from app.domains.world_packages.policies.archive import (
     ArchiveEntryDescriptor,
     WorldPackagePolicy,
 )
