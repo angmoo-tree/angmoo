@@ -3,10 +3,10 @@ from app.domains.identity.schemas import CredentialRead
 from app.domains.runtime.schemas import (
     AgentActivitySettingRead,
     AgentActivitySummaryRead,
-    AgentActivityProfileReadinessRead,
     AgentActivityLogRead,
     AgentSlotRead,
 )
+from app.domains.world_characters.schemas.readiness import AgentActivityProfileReadinessRead
 from datetime import datetime
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator

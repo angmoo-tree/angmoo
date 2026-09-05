@@ -3,11 +3,14 @@ from __future__ import annotations
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app import models, schemas
-from app.services import world_character_contracts
+from app.domains.world_characters import models
+from app.domains.world_characters.schemas import readiness as schemas
+from app.domains.world_characters.contracts.readiness import ReadinessCharacter, ReadinessSetting
+from app.domains.worlds.service import character_entry as world_entry
+from app.domains.world_characters.service import setup_validation as world_character_contracts
 
 
-def _has_legacy_tendency_analysis(setting: models.AgentActivitySetting) -> bool:
+def _has_legacy_tendency_analysis(setting: ReadinessSetting) -> bool:
     profile = (
         setting.planner_tendency_profile
         if isinstance(setting.planner_tendency_profile, dict)
@@ -26,8 +29,8 @@ def _has_legacy_tendency_analysis(setting: models.AgentActivitySetting) -> bool:
 def evaluate(
     db: Session,
     *,
-    character: models.Character,
-    setting: models.AgentActivitySetting,
+    character: ReadinessCharacter,
+    setting: ReadinessSetting,
 ) -> schemas.AgentActivityProfileReadinessRead:
     """Return the single readiness contract used by UI and resident execution."""
 
@@ -66,8 +69,8 @@ def evaluate(
             reason_code="world_character_not_ready",
             **base,
         )
-    world = db.get(models.World, world_character.world_id)
-    membership = db.get(models.WorldMembership, world_character.membership_id)
+    world = world_entry.get_character_entry_world(db, world_character.world_id)
+    membership = world_entry.get_character_entry_membership(db, world_character.membership_id)
     if (
         world is None
         or world.status != "published"

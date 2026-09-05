@@ -66,12 +66,7 @@ class AgentActivitySummaryRead(UtcInstantResponseModel):
 
 
 
-class AgentActivityProfileReadinessRead(BaseModel):
-    ready: bool
-    source: Literal["legacy_tendency", "world_community_profile"]
-    reason_code: str | None = None
-    world_id: str | None = None
-    world_character_id: str | None = None
+from app.domains.world_characters.schemas.readiness import AgentActivityProfileReadinessRead
 
 
 class AgentActivityLogRead(UtcInstantResponseModel):

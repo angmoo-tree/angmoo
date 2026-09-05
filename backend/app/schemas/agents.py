@@ -37,6 +37,8 @@ from app.domains.characters.schemas import (
     AgentPromotionUsageRead,
 )
 
+from app.domains.world_characters.schemas.readiness import AgentActivityProfileReadinessRead
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.core.agent_activity_limits import MAX_COMMENTS_PER_DAY, MAX_POSTS_PER_DAY

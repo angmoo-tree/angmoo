@@ -432,3 +432,21 @@ runtime mode repair 정책은 WC service, 시작 시 session_factory/SQLite imme
 Setup·runtime repair·Agent capacity/동시 활성화·Package UoW는 **101 passed / 기존 3 warnings / 22.44초**였다. 기존 setup/runtime repair 테스트 두 파일을 `tests/world_characters/`로 옮겼고 assertion을 유지한다. 4개 정확한 module을 scope에 추가하고 실제 사라진 bridge를 제거했다. 현재 architecture **619 modules / 1,946 edges / exact legacy 281 PASS**, ER0 **75/87/24/44/7 PASS**, L4 parity **97**, Memory batch current이다. 잔여 setup/entry HTTP, readiness와 여러 업무 cleanup의 최종 소유 전환은 다음 slice다.
 
 Setup slice의 최종 현재 API·ORM 및 전체 split evidence 검사도 PASS였다. immutable Git blob 읽기 memoization만 사용했고 frozen source/checkpoint 내용은 변경하지 않았다.
+
+
+### AR-B2 WC entry/setup HTTP·readiness·혼합 삭제 소유권 종료
+
+`router/entry.py`에 입장·역할·퇴장 4개 HTTP를, `router/setup.py`에 설정 6개 HTTP를 이전했다. 기존 setup route는 피드 상태 1개만 계속 소유하고, main/public route 조립은 feed→setup 순서와 WC entry→World Creator의 기존 순서를 보존한다. World 접근 오류의 변환 구현은 `app/api/world_errors.py` 한 곳에 두며 두 도메인 router가 소비한다. Scheduler/AgentRun/Slot/setup busy 판단은 runtime guard로 같은 Session에서 조립한다.
+
+활동 준비 상태는 WC `service/readiness.py`, 공유 응답의 실제 정의는 `schemas/readiness.py`로 이전했다. 기존 schema는 동일 class alias다. Character 후속 HTTP source가 추가한 `runtime.schemas`의 동일 DTO는 root 통합 시 WC 정의의 alias로 맞춘다. World/membership nullable 조회 순서, profile/hash/repertoire/daypart 판단 순서와 읽기 전용 동작을 보존했다. 남은 WC membership helper의 오류는 원래 WorldServiceError 계층을 유지한다.
+
+Character·Account 삭제가 함께 사용하는 여러 업무 SQL은 `runtime/world_characters/cleanup.py`로 이전했다. 해당 함수와 공통 World HTTP mapper는 이전 함수 본문 AST와 정확히 같다. 기존 joint participant ID materialization→관련 행 삭제 순서와 caller commit 계약을 유지했다. 실제 소비자 전환 뒤 옛 World/Setup/Readiness 서비스 파일과 옛 Worlds HTTP 파일을 삭제했다. WC의 frozen SQLite ORM alias와 미전환 외부 public/모델 소비자는 정확한 후속 G5/B4–B8-A 경계로 남긴다.
+
+- World/WC·활동 계획·피드·Today SNS·Agent 한도·Package UoW 및 현재 inventory 묶음: **234 passed / 기존 1 skipped / 기존 6 warnings / 73.34초**.
+- 전체 수집이 Package import 테스트의 여러 줄 legacy import 한 건을 발견했다. canonical setup service로 연결한 뒤 해당 Package 회귀 **10 passed / 기존 1 warning / 20.48초**, public 승인 **604 유지 / 현재 2,114 PASS**였다.
+- HTTP 설정은 실제 WC 오류 모듈을 직접 사용하며 기존 architecture assertion과 예외 기대를 유지한다. 마지막 설정·membership·경계 회귀 **30 passed / 기존 1 warning / 11.97초**. 이번 변경 test 파일의 모든 이전 assertion/예외 기대를 frozen 및 추가 snapshot에 대조한 검사 **PASS**다.
+- 현재 API·OpenAPI·ORM 및 모든 split symbol/직접 소비자/행위 test 증거 **PASS**. 기존 World 14개 route와 Character schema의 전체 split 지도를 최종 실제 소유자에 연결했다. 새 부분 split으로 이전 symbol을 누락하지 않는다.
+- 새 readiness 회귀는 동일 DTO identity, World scope 오류가 stale profile보다 먼저 나오는 순서, no flush/commit 및 legacy tendency fallback을 검증한다. B4에 제공한 `set_activity_runtime_mode`의 두 대입 helper는 source `0c76205`이며 실제 Session rollback/no flush/no commit 회귀 **1 passed / 4.11초**다.
+- 최종 현재 architecture **624 modules / 1,963 internal edges / exact legacy 272 PASS**. ER0 **75/87/24/44/7**, L4 parity **97**, Memory batch current를 유지한다. Frozen migration/승인 baseline/checkpoint는 변경하지 않았다.
+
+장시간 전체 보존 명령은 위 수집 오류를 발견한 상태에서 중단하고, 수정 후 전체 수집·계약/split·변경 assertion 검사를 개별 완료했다. 모든 선행 source의 introduction capture, 전체 assertion/node 계보 검사와 PR/merge/설치 검증은 root의 순차 통합 단계에서 이어진다. 이 소스의 집중 검증을 전체 AR-B2 또는 §8.2 완료로 확대하지 않는다.

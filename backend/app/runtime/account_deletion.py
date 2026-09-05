@@ -200,7 +200,7 @@ def _scrub_account_data(
     now = auth_service._utcnow()
     character_condition = _character_id_condition
 
-    from app.services import world_character_setup
+    from app.runtime.world_characters import cleanup as world_character_setup
 
     from app.runtime.memory_privacy import scrub_memory_data
 

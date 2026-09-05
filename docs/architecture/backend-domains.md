@@ -1,6 +1,6 @@
 # Backend domain map and import contract
 
-> **Architecture refactor, 2026-09-05:** The target is described in [ARCHITECTURE](../../backend/ARCHITECTURE.md). This document continues to describe the unmigrated code. The `refactor` section in the architecture policy activates new rules only for listed scopes; it is empty during AR-1 preparation. See [feature preservation](refactor-feature-preservation.md) for baseline, consumer mapping and validation. Existing public/layer rules below apply outside migrated scopes.
+> **Architecture refactor, 2026-09-05:** The target is described in [ARCHITECTURE](../../backend/ARCHITECTURE.md). This document continues to describe the unmigrated code. The `refactor` section in the architecture policy activates new rules only for listed scopes; the current role modules are explicitly enumerated during the AR-G/AR-B transition. See [feature preservation](refactor-feature-preservation.md) for baseline, consumer mapping and validation. Existing public/layer rules below apply outside migrated scopes.
 
 This document is the contributor-facing architecture contract for Angmoo's
 incremental domain-first refactor. It describes the target direction; it does
@@ -925,3 +925,20 @@ a supported predecessor and is rebuilt from SQLite canonical evidence into a
 staging v2 generation before promotion. Typed six-query parity, World replay
 and outage recovery are required regression contracts. Neo4j is retained only
 as static fixture evidence.
+
+
+## Current AR-B2 WorldCharacter role ownership
+
+WorldCharacter model/schema/contract/validation/provider, owner identity, profile,
+Studio, entry/setup approval, lifecycle and runtime-mode/readiness policies now
+live in the flat role modules documented in backend/ARCHITECTURE.md. These current
+paths supersede the older L3/P2 infrastructure/application descriptions above.
+The remaining public model exports and immutable SQLite alias paths are exact
+transition consumers, not an endorsement of new cross-owner ORM imports.
+
+The same-Session runtime adapters own joined reads, scheduler busy checks and
+cross-domain cleanup. WC service does not import runtime or expose another
+owner's ORM class as a service contract. Entry/setup HTTP owns no runtime state
+mutation policy. app/api/world_errors.py translates the same World error objects
+for both World and WC routers; the readiness response remains one WC-defined
+Pydantic class with the old schema path reexporting that identical object.

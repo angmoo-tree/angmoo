@@ -763,7 +763,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/characters/management.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "7edb753f42d55f62f6b98efd94fc609f1a924efd82a35e553b1c8ddfbda4a64d",
+      "source_sha256": "a984d3eb5149d2e4660867454c569c4b14cf89f9e4c223a83faa970df3fac5d8",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
