@@ -423,3 +423,8 @@ World Package v1의 Python 입력·출력은 `world_packages/schemas/{http,conte
 네 개 lineage ORM은 `models.py`에서 기존 단일 Base를 공유한다. `service/registry.py`는 같은 seed의 version 재사용, 실제 전달 기록의 충돌, 다음 version 소비를 판단하며 `repository/registry.py`가 동일 Session으로 SQL과 flush를 수행한다. 이 둘은 commit하지 않는다. HTTP export 준비·전달 및 import의 기존 transaction 소유자가 commit/rollback을 결정한다. 특히 native download만으로 전달을 확정하지 않으며 Tauri의 저장 완료 acknowledgment까지 기다린다.
 
 이 첫 범위의 이전 뒤에도 export·staging·import 실행 조립은 다음 AR-B3 slice에서 전환한다. 현재 `public.py`와 옛 역할에서 새 계약을 읽는 정확한 호환 edge는 이동표에 기록되어 있고, 새 구현이 옛 역할을 다시 호출하는 것은 허용하지 않는다. 다른 업무와 함께 생성하는 seed/commit은 최종적으로 `runtime/world_packages`에서 같은 Session으로 조립한다. 전체 Package나 shared media 전환 완료를 뜻하지 않는다.
+
+
+Package 처리 구현은 `service/export.py`·`staging.py`, `archive/{export,validation,exclusions}.py`, `storage/{staging,exports,export_assets}.py`에서 찾는다. 파일을 읽고 정제하는 codec과 저장 수명 관리는 업무별 하위 package로 구분하며, ZIP 검사를 HTTP나 공용 utils로 복제하지 않는다. 사용 중인 fake/storage/UoW 계약 10개는 `contracts/interfaces.py`로 합쳤다. export-only asset 인터페이스에 있던 세 미구현 import 메서드는 호출자가 없었으며 제거했고, 실제 import media 구현은 별도 계약을 유지한다.
+
+Portable ref/profile 변환은 `service/export_projection.py`, 로컬 export 근거·중복·변조·충돌 판단은 `service/preview.py`가 소유한다. World slug와 Character handle의 충돌 범위는 설치 전체다. 두 읽기 projection의 물리 runtime 이전은 아직 옛 router와 import committer가 직접 만들고 있으므로 마지막 Package 조립 전환과 묶는다. 이 순서를 통해 도메인이 runtime을 import하는 임시 역방향이나 넓은 경계 예외를 만들지 않는다.

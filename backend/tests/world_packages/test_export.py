@@ -22,7 +22,7 @@ from app.domains.world_packages.api.routes import (
     _stream_and_record_delivery,
     router,
 )
-from app.domains.world_packages.application.export_world_package import (
+from app.domains.world_packages.service.export import (
     ExportWorldPackage,
 )
 from app.domains.world_packages.utils.canonical import canonical_sha256
@@ -44,10 +44,10 @@ from app.domains.world_packages.exceptions import (
 )
 from app.domains.world_packages.schemas.manifest import WorldPackageLicense
 from app.domains.world_packages.contracts.seed import WorldPackageSourceSnapshot
-from app.domains.world_packages.infrastructure.filesystem_export_artifacts import (
+from app.domains.world_packages.storage.exports import (
     FilesystemWorldPackageExportArtifacts,
 )
-from app.domains.world_packages.infrastructure.managed_media_assets import (
+from app.domains.world_packages.storage.export_assets import (
     ManagedMediaPackageAssets,
 )
 from app.domains.world_packages.models import (
@@ -57,7 +57,7 @@ from app.domains.world_packages.models import (
 from app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot import (
     SqlAlchemyWorldPackageSourceSnapshot,
 )
-from app.domains.world_packages.infrastructure.zip_archive import (
+from app.domains.world_packages.archive.export import (
     DeterministicWorldPackageZipArchive,
 )
 from app.domains.worlds.domain.reserved_roles import (
@@ -70,7 +70,7 @@ from app.domains.worlds.public import world_contract_hash
 
 
 FIXTURE_ROOT = (
-    Path(__file__).parent / "fixtures" / "world_packages" / "v1" / "valid"
+    Path(__file__).parents[1] / "fixtures" / "world_packages" / "v1" / "valid"
 )
 FRONTEND_HEADERS = {"Origin": "http://127.0.0.1:3000"}
 LICENSE_REQUEST = {

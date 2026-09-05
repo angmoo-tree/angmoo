@@ -29,10 +29,10 @@ from app.domains.world_packages.policies.license import (
 )
 from app.domains.world_packages.policies.archive import WorldPackagePolicy
 from app.domains.world_packages.contracts.seed import WorldPackageSourceSnapshot
-from app.domains.world_packages.ports.managed_assets import ManagedPackageAssetPort
-from app.domains.world_packages.ports.package_archive import WorldPackageArchivePort
-from app.domains.world_packages.ports.registry import WorldPackageRegistryPort
-from app.domains.world_packages.ports.source_snapshot import (
+from app.domains.world_packages.contracts.interfaces import ManagedPackageAssetPort
+from app.domains.world_packages.contracts.interfaces import WorldPackageArchivePort
+from app.domains.world_packages.contracts.interfaces import WorldPackageRegistryPort
+from app.domains.world_packages.contracts.interfaces import (
     WorldPackageSourceSnapshotPort,
 )
 

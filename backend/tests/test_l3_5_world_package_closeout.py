@@ -19,7 +19,7 @@ from app.domains.device_home.repository import (
     SqlAlchemyWorldSurfaceRepository,
 )
 from app.domains.world_packages.api.routes import router
-from app.domains.world_packages.application.exclusion_scan import (
+from app.domains.world_packages.archive.exclusions import (
     WorldPackageExclusionError,
     scan_world_package_bytes,
 )
@@ -40,7 +40,7 @@ from app.domains.world_packages.infrastructure.filesystem_import_media import (
 from app.domains.world_packages.infrastructure.sqlalchemy_import_commit import (
     SqlAlchemyWorldPackageImportCommitter,
 )
-from app.domains.world_packages.infrastructure.zip_archive import (
+from app.domains.world_packages.archive.export import (
     DeterministicWorldPackageZipArchive,
 )
 

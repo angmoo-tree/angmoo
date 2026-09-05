@@ -26,7 +26,7 @@ from app.domains.world_packages.public import (
     WorldCharactersDocument,
     WorldPackageDestinationSeedRequest,
 )
-from app.domains.world_packages.ports import (
+from app.domains.world_packages.contracts.interfaces import (
     WorldPackageDestinationSeedPort,
     WorldPackageSeedUnitOfWorkPort,
 )

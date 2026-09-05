@@ -57,7 +57,7 @@ from app.domains.world_packages.infrastructure.sqlalchemy_import_commit import (
 from app.domains.world_packages.infrastructure.sqlalchemy_destination_seed import (
     SqlAlchemyWorldPackageDestinationSeed,
 )
-from app.domains.world_packages.infrastructure.zip_archive import (
+from app.domains.world_packages.archive.export import (
     DeterministicWorldPackageZipArchive,
 )
 from app.runtime.routine_posts.sqlalchemy_runtime import run_routine_post_runtime

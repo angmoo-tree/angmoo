@@ -51,7 +51,7 @@ from app.domains.world_packages.contracts.preview import (
     WorldPackageNormalizedAsset,
     WorldPackageNormalizedAssetPayload,
 )
-from app.domains.world_packages.infrastructure.filesystem_staging import (
+from app.domains.world_packages.storage.staging import (
     FilesystemWorldPackageStaging,
 )
 from app.domains.worlds.public import (

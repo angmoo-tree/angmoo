@@ -38,10 +38,10 @@ from app.domains.world_packages.schemas.http import (
     WorldPackagePreparedExportRead,
     WorldPackagePreparedImportPreviewRead,
 )
-from app.domains.world_packages.application.export_world_package import (
+from app.domains.world_packages.service.export import (
     ExportWorldPackage,
 )
-from app.domains.world_packages.application.stage_world_package import (
+from app.domains.world_packages.service.staging import (
     StageWorldPackage,
 )
 from app.domains.world_packages.application.commit_world_package import (
@@ -55,17 +55,17 @@ from app.domains.world_packages.contracts.export import (
     WorldPackageExportRegistryRecord,
 )
 from app.domains.world_packages.policies.archive import WorldPackagePolicy
-from app.domains.world_packages.infrastructure.filesystem_export_artifacts import (
+from app.domains.world_packages.storage.exports import (
     ExportArtifact,
     FilesystemWorldPackageExportArtifacts,
 )
-from app.domains.world_packages.infrastructure.filesystem_staging import (
+from app.domains.world_packages.storage.staging import (
     FilesystemWorldPackageStaging,
 )
 from app.domains.world_packages.infrastructure.filesystem_import_media import (
     FilesystemWorldPackageImportMedia,
 )
-from app.domains.world_packages.infrastructure.managed_media_assets import (
+from app.domains.world_packages.storage.export_assets import (
     ManagedMediaPackageAssets,
 )
 from app.domains.world_packages.service.registry import (
@@ -80,10 +80,10 @@ from app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot import
 from app.domains.world_packages.infrastructure.sqlalchemy_import_commit import (
     SqlAlchemyWorldPackageImportCommitter,
 )
-from app.domains.world_packages.infrastructure.zip_archive import (
+from app.domains.world_packages.archive.export import (
     DeterministicWorldPackageZipArchive,
 )
-from app.domains.world_packages.infrastructure.zip_import_archive import (
+from app.domains.world_packages.archive.validation import (
     ZipWorldPackageImportValidator,
 )
 

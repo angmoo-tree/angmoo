@@ -21,7 +21,7 @@ from app import models
 from app.domains.identity.dependencies import get_current_user
 from app.core.db import Base, get_db
 from app.domains.world_packages.api.routes import router
-from app.domains.world_packages.application.stage_world_package import (
+from app.domains.world_packages.service.staging import (
     StageWorldPackage,
 )
 from app.domains.world_packages.utils.canonical import (
@@ -56,7 +56,7 @@ from app.domains.world_packages.schemas.manifest import WorldPackageLicense
 from app.domains.world_packages.contracts.preview import (
     WorldPackagePreviewAssessment,
 )
-from app.domains.world_packages.infrastructure.filesystem_staging import (
+from app.domains.world_packages.storage.staging import (
     FilesystemWorldPackageStaging,
 )
 from app.domains.world_packages.models import (
@@ -67,16 +67,16 @@ from app.domains.world_packages.models import (
 from app.domains.world_packages.infrastructure.sqlalchemy_preview_probe import (
     SqlAlchemyWorldPackagePreviewProbe,
 )
-from app.domains.world_packages.infrastructure.zip_archive import (
+from app.domains.world_packages.archive.export import (
     DeterministicWorldPackageZipArchive,
 )
-from app.domains.world_packages.infrastructure.zip_import_archive import (
+from app.domains.world_packages.archive.validation import (
     ZipWorldPackageImportValidator,
 )
 
 
 FIXTURE_ROOT = (
-    Path(__file__).parent / "fixtures" / "world_packages" / "v1" / "valid"
+    Path(__file__).parents[1] / "fixtures" / "world_packages" / "v1" / "valid"
 )
 FRONTEND_HEADERS = {"Origin": "http://127.0.0.1:3000"}
 OPERATION_ID = "019ff9d5-559d-7452-b0f5-68f4964a2d47"

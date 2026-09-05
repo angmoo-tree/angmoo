@@ -19,8 +19,8 @@ SCANNER_CORE = (
     / "app"
     / "domains"
     / "world_packages"
-    / "application"
-    / "exclusion_scan.py"
+    / "archive"
+    / "exclusions.py"
 )
 EVIDENCE = (
     REPO_ROOT / "docs" / "architecture" / "l3-5-world-package-closeout.md"
@@ -35,8 +35,8 @@ PROXY_SMOKE = REPO_ROOT / "frontend" / "scripts" / "test-world-package-proxy.mjs
 
 WORLD_PACKAGE_SUITES = (
     "tests/world_packages/test_v1_contract.py",
-    "tests/test_l3_5_world_package_export.py",
-    "tests/test_l3_5_world_package_preview.py",
+    "tests/world_packages/test_export.py",
+    "tests/world_packages/test_preview.py",
     "tests/test_l3_5_world_package_import_commit.py",
     "tests/test_l3_5_world_package_ui_contract.py",
     "tests/test_l3_5_world_package_closeout.py",
@@ -51,7 +51,7 @@ def test_required_linux_workflows_pin_the_closeout_suite() -> None:
         assert test_file in local_smoke
     for test_file in (
         "tests/world_packages/test_v1_contract.py",
-        "tests/test_l3_5_world_package_preview.py",
+        "tests/world_packages/test_preview.py",
         "tests/test_l3_5_world_package_closeout.py",
         "tests/test_l3_5_world_package_closeout_contract.py",
     ):

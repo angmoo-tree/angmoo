@@ -127,19 +127,8 @@ class ManagedMediaPackageAssets:
             excluded_external_candidate_keys=tuple(sorted(external)),
         )
 
-    def stage_verified_asset(
-        self, *, content: bytes, sha256: str, media_type: str
-    ) -> str:
-        del content, sha256, media_type
-        raise NotImplementedError("import asset staging belongs to PR D/E")
 
-    def promote_staged_assets(self, *, import_id: str) -> tuple[str, ...]:
-        del import_id
-        raise NotImplementedError("import asset promotion belongs to PR E")
 
-    def discard_staged_assets(self, *, import_id: str) -> None:
-        del import_id
-        raise NotImplementedError("import asset cleanup belongs to PR D/E")
 
     def _resolve_managed_path(self, candidate: WorldPackageMediaCandidate) -> Path:
         source_url = (candidate.source_url or "").strip()

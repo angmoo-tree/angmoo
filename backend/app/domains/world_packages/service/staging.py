@@ -17,11 +17,11 @@ from app.domains.world_packages.contracts.preview import (
     WorldPackageImportPreview,
     WorldPackagePreparedPreview,
 )
-from app.domains.world_packages.ports.import_preview import (
+from app.domains.world_packages.contracts.interfaces import (
     WorldPackageArchiveValidationPort,
     WorldPackagePreviewProbePort,
 )
-from app.domains.world_packages.ports.package_staging import (
+from app.domains.world_packages.contracts.interfaces import (
     WorldPackageStagingPort,
 )
 
