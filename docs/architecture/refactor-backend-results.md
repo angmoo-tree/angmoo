@@ -1327,3 +1327,9 @@ C7-C 현재 경계는 777 modules / 2691 edges / exact legacy 202 / cycle0이다
 ### C7-C의 후속 통합 검증
 
 `339cda2`에 원래 signed C7-C `05691bb`를 병합했다. 수동 실행·모이 요청·활동 한도·tendency·실행 바인딩 회귀 **117 passed / 4 warnings / 18.28초**, 경계 **808modules / 2813edges / exactlegacy201**, L4 **808modules / 97parity**를 확인했다. 처음 검사 명령은 존재하지 않는 `test_run_observations.py` 경로를 지정해 테스트를 실행하지 못했고, 실제 `test_activity_management.py`를 포함한 위 명령으로 수정했다. 선행 C7-B tree에서는 CI 구조·보존 회귀 **209 passed / 21.13초**, public route **196operations**와 Memory·deferred inventory도 통과했다. 이 통합은 원래 소스 증거 수집과 뒤따르는 전체 stock·전체 backend·최종 C7 HTTP 검증을 대신하지 않는다.
+
+### B4 후속 원본 도입 증거 연결
+
+`a93e724`까지 들어온 원래 signed 소스 22개를 각각 독립 Git archive에서 기존 `committed_snapshot`으로 수집했다. 저장한 commit과 tree ID를 대조하고 기존 main `0e50e0c`의 원장 64개를 불변 prefix로 유지한 채, 원래 **91개 파일과 33개 추가 노드**의 증거를 최초 도입 순서대로 기록해 원장을 **64→86개**로 확장했다. 추가 노드의 함수가 처음 정의된 source SHA도 각 기록과 일치했다. 임시 중간 목적지가 뒤의 split 원본이 되는 경우도 그 첫 blob을 기록했다.
+
+원장 쓰기 전 변경 없는 production `checkpoint_errors`와 `addition_errors`가 원래 blob·단언·suppression·첫 source 도입·append-only 이력을 검증해 통과했다. 기준 baseline/checkpoint는 변경하지 않았다. 이후 현재 코드의 전체 stock 보존·전체 backend 및 남은 C7 실제 HTTP/실행 조립 검증은 별도 진행 상태다. DCO·CI 정책·OSS 경계·비밀 예외 metadata25개·컨테이너/launcher/설치/Tauri 개발 계약도 이 통합본에서 통과했다.
