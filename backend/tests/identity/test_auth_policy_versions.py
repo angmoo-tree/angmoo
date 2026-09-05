@@ -346,6 +346,9 @@ def test_google_account_can_signup_again_after_deleted_user_scrubbed() -> None:
 
 
 def test_google_signup_pending_token_is_consumed_once() -> None:
+    import hashlib
+    import hmac
+
     engine = create_engine("sqlite:///:memory:")
     _create_tables(engine)
 
@@ -356,6 +359,24 @@ def test_google_signup_pending_token_is_consumed_once() -> None:
             email="one-time@example.test",
             expires_at=auth._utcnow() + timedelta(minutes=5),
         )
+        # An issued token retains the original keyed-MAC wire format. These
+        # expected bytes deliberately use the previous HMAC constructor API.
+        original_key = hmac.new(
+            auth.settings.app_secret.encode("utf-8"),
+            b"angmoo-google-signup-pending-key-v1",
+            hashlib.sha256,
+        ).digest()
+        signed, signature = pending_token.rsplit(".", 1)
+        assert auth._pending_signup_key() == original_key
+        assert auth._b64url_decode(signature) == hmac.new(
+            original_key, signed.encode("ascii"), hashlib.sha256,
+        ).digest()
+        payload = auth._read_pending_google_signup_token(pending_token)
+        assert auth._pending_signup_jti_hash(payload["jti"]) == hmac.new(
+            original_key,
+            f"google-signup-jti-v1:{payload['jti']}".encode("utf-8"),
+            hashlib.sha256,
+        ).hexdigest()
         first = auth.complete_google_signup(
             db,
             schemas.GoogleSignupCompleteCreate(
