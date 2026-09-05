@@ -18117,11 +18117,13 @@
       }
     },
     "AR-B6-B2A": {
-      "status": "Actual generation admission/replay/retry/status/terminal failure workflow moved to GenerationService. Provider streaming and live evidence remain exact B6-B2B/C runtime-owned remainder.",
+      "status": "B2B advances evidence visibility/revision policy to the actual EvidenceService and same-Session reader composition. Generation admission stays in its actual service; streaming/provider composition remains B6-B2C.",
       "split_files": {
         "backend/app/runtime/chat/world_generation.py": [
-          "backend/app/domains/chat/service/generation.py",
           "backend/app/domains/chat/repository/response_requests.py",
+          "backend/app/domains/chat/service/evidence.py",
+          "backend/app/domains/chat/service/generation.py",
+          "backend/app/runtime/chat/evidence_reads.py",
           "backend/app/runtime/chat/world_generation.py"
         ]
       },
@@ -18236,14 +18238,15 @@
         },
         {
           "old": "backend/app/runtime/chat/world_generation.py::get_world_response_evidence",
-          "new": "backend/app/runtime/chat/world_generation.py::get_world_response_evidence",
+          "new": "backend/app/domains/chat/service/evidence.py::EvidenceService",
           "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
-          ]
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_inspector_revalidates_exact_revision_after_edit"
+          ],
+          "new_member": "get_world_response_evidence"
         },
         {
           "old": "backend/app/runtime/chat/world_generation.py::stream_world_response",
@@ -18332,57 +18335,55 @@
         },
         {
           "old": "backend/app/runtime/chat/world_generation.py::_chat_evidence_item",
-          "new": "backend/app/runtime/chat/world_generation.py::_chat_evidence_item",
+          "new": "backend/app/domains/chat/service/evidence.py::EvidenceService",
           "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
-          ]
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_inspector_revalidates_exact_revision_after_edit"
+          ],
+          "new_member": "_chat_evidence_item"
         },
         {
           "old": "backend/app/runtime/chat/world_generation.py::_optional_datetime",
-          "new": "backend/app/runtime/chat/world_generation.py::_optional_datetime",
+          "new": "backend/app/domains/chat/service/evidence.py::_optional_datetime",
           "direct_consumers": [
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/domains/chat/service/evidence.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_inspector_revalidates_exact_revision_after_edit"
           ]
         },
         {
           "old": "backend/app/runtime/chat/world_generation.py::_related_direction",
-          "new": "backend/app/runtime/chat/world_generation.py::_related_direction",
+          "new": "backend/app/domains/chat/service/evidence.py::_related_direction",
           "direct_consumers": [
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/domains/chat/service/evidence.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_inspector_revalidates_exact_revision_after_edit"
           ]
         },
         {
           "old": "backend/app/runtime/chat/world_generation.py::_world_character_name",
-          "new": "backend/app/runtime/chat/world_generation.py::_world_character_name",
+          "new": "backend/app/runtime/chat/evidence_reads.py::world_character_name",
           "direct_consumers": [
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/domains/chat/service/evidence.py",
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_inspector_revalidates_exact_revision_after_edit"
           ]
         },
         {
           "old": "backend/app/runtime/chat/world_generation.py::_chat_source_label",
-          "new": "backend/app/runtime/chat/world_generation.py::_chat_source_label",
+          "new": "backend/app/domains/chat/service/evidence.py::_chat_source_label",
           "direct_consumers": [
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/domains/chat/service/evidence.py"
           ],
           "test_nodes": [
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
-            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_inspector_revalidates_exact_revision_after_edit"
           ]
         },
         {
@@ -18480,6 +18481,54 @@
             "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
             "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::get_world_response_evidence",
+          "new": "backend/app/runtime/chat/evidence_reads.py::source_reader",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/evidence.py",
+            "backend/app/runtime/chat/message_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_inspector_revalidates_exact_revision_after_edit"
+          ],
+          "reason": "Exact original reader construction/nullable lookup at the same Session; policy and exception handling remain in EvidenceService."
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_chat_evidence_item",
+          "new": "backend/app/runtime/chat/evidence_reads.py::today_reader",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/evidence.py",
+            "backend/app/runtime/chat/message_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_inspector_revalidates_exact_revision_after_edit"
+          ],
+          "reason": "Exact original reader construction/nullable lookup at the same Session; policy and exception handling remain in EvidenceService."
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_chat_evidence_item",
+          "new": "backend/app/runtime/chat/evidence_reads.py::memory_detail",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/evidence.py",
+            "backend/app/runtime/chat/message_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_inspector_revalidates_exact_revision_after_edit"
+          ],
+          "reason": "Exact original reader construction/nullable lookup at the same Session; policy and exception handling remain in EvidenceService."
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_chat_evidence_item",
+          "new": "backend/app/runtime/chat/evidence_reads.py::relationship_state",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/evidence.py",
+            "backend/app/runtime/chat/message_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_today_inspector_revalidates_exact_revision_after_edit"
+          ],
+          "reason": "Exact original reader construction/nullable lookup at the same Session; policy and exception handling remain in EvidenceService."
         }
       ],
       "preserved_body_comparison": {
@@ -18489,6 +18538,18 @@
       "consumer_contract": "Four HTTP operations call the GenerationService instance directly. Existing runtime generation helpers temporarily alias the same instance for remaining streaming/evidence and historical tests.",
       "remaining_owners": {
         "backend/app/runtime/chat/world_generation.py": "B6-B2B/C streaming provider/Memory/graph/Today composition and evidence visibility revalidation; keep their same-Session/commit and live-source checks."
+      }
+    },
+    "AR-B6-B2B": {
+      "status": "Actual inspector eligibility rules reside in Chat EvidenceService; runtime only constructs existing Memory/Today readers or performs the original nullable Relationship/name lookup.",
+      "source_split_evidence": "AR-B6-B2A contains the complete evolving original world_generation.py symbol map including these reader expressions.",
+      "same_session_contract": "backend/app/domains/chat/contracts/evidence_reads.py",
+      "implementation_files": [
+        "backend/app/domains/chat/service/evidence.py",
+        "backend/app/runtime/chat/evidence_reads.py"
+      ],
+      "remaining_owner": {
+        "backend/app/runtime/chat/world_generation.py": "B6-B2C stream admission/provider construction, recent-context SQL, Today optional context and exact workflow invocation."
       }
     }
   }

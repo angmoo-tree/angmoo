@@ -543,3 +543,9 @@ World 대화 생성의 tuple/quota lock, preference 생성의 flush-only 경로,
 `service/generation.py`의 `GenerationService`가 접수·같은 요청 재실행·실패 응답 재시도·상태 읽기·기한 만료 복구·시작 전 실패 기록을 구현합니다. HTTP의 접수·재시도·요청 조회 네 동작은 이 실제 인스턴스를 호출합니다. ThreadService의 소유권·잠금·World 재검증과 모델 snapshot을 같은 Session으로 사용하고, 사용자 메시지 flush 이후 요청 생성·commit·refresh 순서를 유지합니다. 요청이 이미 존재하면 원래 내용과 키를 확인해 기존 요청을 반환하며 새 메시지를 만들지 않습니다.
 
 `repository/response_requests.py`는 같은 thread의 진행 중·최신 요청을 원래 조건과 순서로 조회합니다. 조회는 commit하지 않습니다. 기한 만료 복구의 commit, 실패 stream의 accepted/failed 이벤트 sequence와 fence 확인은 GenerationService가 소유합니다. `runtime/chat/world_generation.py`의 남은 stream/provider·근거 inspector는 이 서비스의 동일 메서드를 연결하며, 다음 단계에서 실제 외부 협력 조립과 정책을 더 분리합니다.
+
+### 근거 inspector의 공개 상태 재확인
+
+`service/evidence.py`의 `EvidenceService`는 저장된 근거 snapshot을 현재 원본과 대조합니다. World·원본 revision·성공 여부·공개 여부·주체의 관찰·참여·차단 상태가 맞아야 과거 본문을 최대 500자로 보여줍니다. Today SNS는 원본과 조상 내용을 포함한 revision을, 저장된 Memory는 활성 상태와 현재 evidence를, 관계 근거는 방향·version·참여자 및 차단 상태를 다시 확인합니다. 삭제·변경된 근거의 옛 본문을 그대로 반환하지 않습니다.
+
+`contracts/evidence_reads.py`는 이 판단에 필요한 같은 Session의 읽기 형식을 명시합니다. `runtime/chat/evidence_reads.py`는 기존 Memory/Today reader를 조립하고 nullable Relationship 조회와 World 범위의 이름 join을 수행합니다. 공개 가능 여부나 오류 정책을 다시 구현하지 않으며 commit을 추가하지 않습니다. HTTP의 근거 조회는 실제 EvidenceService에 연결됩니다.

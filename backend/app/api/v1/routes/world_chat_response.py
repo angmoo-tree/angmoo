@@ -14,7 +14,7 @@ from app.config import settings
 from app.domains.chat import public as chat
 from app.domains.identity.public import User
 from app.runtime.chat import world_generation as chat_service
-from app.runtime.chat.message_composition import generation_service
+from app.runtime.chat.message_composition import evidence_service, generation_service
 
 
 router = APIRouter(prefix="/worlds/{world_id}/chat", tags=["world-chat"])
@@ -130,7 +130,7 @@ def get_world_response_evidence(
 ) -> chat.WorldChatEvidenceRead:
     browser_session.require_local_frontend_request(request, mutation=False)
     try:
-        return chat_service.get_world_response_evidence(
+        return evidence_service.get_world_response_evidence(
             db, user, world_id, thread_id, request_id
         )
     except chat.MessageNotFoundError as exc:

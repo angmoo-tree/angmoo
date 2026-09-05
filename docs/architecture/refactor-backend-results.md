@@ -578,3 +578,15 @@ B1 `408a29e0306aa9b95b08e3ed383032eebf4c6f8c` 뒤 runtime의 실제 업무 12개
 전체 보존 검사에서 source/split/assertion/억제 표시/API/ORM/기존 node 오류 0, 보호 **2,129 / 현재 2,168**을 확인했다. 선행 source 37개·node 39개의 append-only capture가 root 순차 통합에 남아 있어 명령 전체는 exit 1이다. 이번 실제 service/repository 2개 파일의 첫 도입 SHA도 그 순서로 캡처한다. Live architecture **643 modules / 2,109 edges / exact legacy 265 PASS**, ER0 **79/87/24/44/7 PASS**, L4 **97**, Memory batch current, public **196**이다.
 
 근거 inspector의 현재 원본·revision/공개 상태 재검증과 provider/Memory/graph/Today 실행 조립은 후속 B2B/C 범위다. 전체 Chat·B5 순차 통합·CI·설치 완료로 표시하지 않는다.
+
+## AR-B6-B2B — 근거 공개 상태·revision 정책과 같은 Session 읽기 협력
+
+B2A `f4a5ddc74eb7651d91a100272a21dc26cb41543c` 뒤 근거 inspector의 실제 정책을 `service/evidence.py`로 이전했다. `contracts/evidence_reads.py`는 필요한 Memory/Today/관계/이름 읽기 결과를 명시하며, runtime의 `evidence_reads.py`는 기존 reader 구성·nullable Relationship 조회·World 이름 join만 수행한다. HTTP 근거 조회는 실제 EvidenceService 인스턴스를 직접 사용한다.
+
+두 업무 메서드는 self 및 명시된 reader 협력을 원래 표현으로 복원하면 **전체 AST 동일**하고 순수 helper 3개 본문도 동일하다. source reader는 요청에서 한 번 만들고 같은 객체와 Session을 Memory detail에 넘긴다. Today의 ±1초 구간과 composite revision, canonical 원본의 World/revision/성공/공개/관찰/참여/차단, Memory 활성·version·현재 evidence, 관계 version/방향/참여·차단 검증과 기존 오류 catch 순서를 유지했다.
+
+새 회귀 5개는 정상·다른 World·비공개·비활성 참여·revision 변경의 현재 원본을 재조회해, 허용된 경우에만 500자 excerpt와 연결을 반환하고 그렇지 않으면 과거 본문과 이름을 노출하지 않음을 확인한다. 최초 근거/Memory/Today/stream 집중 묶음은 **44 passed / 기존 1 warning / 12.39초**, 고정 tree 확장 묶음은 **199 passed / 기존 4 warnings / 23.75초**다.
+
+전체 보존 검사는 source/split/assertion/억제 표시/API/ORM/기존 node 오류 0, 보호 **2,129 / 현재 2,173**이다. 선행 committed source 38개·node 39개의 append-only capture가 남아 명령 전체는 exit 1이다. 이번 신규 5 nodes의 첫 도입 파일은 `tests/chat/test_evidence_ownership.py`이며 실제 service/contracts/runtime 읽기 3개 파일과 함께 source SHA별로 root에서 캡처한다. Live architecture **646 modules / 2,133 edges / exact legacy 265 PASS**, ER0 **78/87/24/44/7 PASS**, L4 **97**, Memory batch current, public **196**이다.
+
+남은 provider/Memory/graph/Today 생성 조립, recent-context SQL과 실제 streaming 입장 판단은 B2C에서 이어간다. 전체 B6·B5 합류·CI·설치 완료는 별개다.

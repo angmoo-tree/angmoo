@@ -1,7 +1,7 @@
 {
-  "edge_count": 2109,
-  "external_import_count": 2106,
-  "module_count": 643,
+  "edge_count": 2133,
+  "external_import_count": 2116,
+  "module_count": 646,
   "modules": [
     {
       "external_imports": [],
@@ -1390,6 +1390,20 @@
     {
       "external_imports": [
         "__future__",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.chat.contracts.today_sns_activity",
+        "app.domains.memory.public"
+      ],
+      "module": "app.domains.chat.contracts.evidence_reads",
+      "path": "backend/app/domains/chat/contracts/evidence_reads.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "dataclasses",
         "datetime",
         "enum",
@@ -1837,6 +1851,28 @@
       ],
       "module": "app.domains.chat.service.character_response",
       "path": "backend/app/domains/chat/service/character_response.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.chat.contracts",
+        "app.domains.chat.contracts.context",
+        "app.domains.chat.contracts.evidence_reads",
+        "app.domains.chat.exceptions",
+        "app.domains.chat.models",
+        "app.domains.chat.repository.response_lifecycle",
+        "app.domains.chat.schemas",
+        "app.domains.chat.service.threads",
+        "app.domains.memory.public"
+      ],
+      "module": "app.domains.chat.service.evidence",
+      "path": "backend/app/domains/chat/service/evidence.py",
       "wildcard_imports": []
     },
     {
@@ -7062,6 +7098,27 @@
     {
       "external_imports": [
         "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.chat.contracts.evidence_reads",
+        "app.domains.chat.contracts.today_sns_activity",
+        "app.domains.memory.infrastructure",
+        "app.domains.memory.public",
+        "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+        "app.domains.world_characters.models",
+        "app.runtime.memory.sqlalchemy_source_reader",
+        "app.runtime.social.sqlalchemy_today_activity"
+      ],
+      "module": "app.runtime.chat.evidence_reads",
+      "path": "backend/app/runtime/chat/evidence_reads.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -7077,10 +7134,12 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.chat.service.evidence",
         "app.domains.chat.service.generation",
         "app.domains.chat.service.messages",
         "app.domains.chat.service.settings",
         "app.domains.chat.service.threads",
+        "app.runtime.chat.evidence_reads",
         "app.runtime.chat.scope_queries",
         "app.runtime.relationships.sqlalchemy_social_event"
       ],
@@ -7189,6 +7248,7 @@
         "app.domains.chat.repository.response_requests",
         "app.domains.chat.schemas",
         "app.domains.chat.service",
+        "app.domains.chat.service.evidence",
         "app.domains.chat.service.generation",
         "app.domains.identity.public",
         "app.domains.memory.infrastructure",
@@ -7196,6 +7256,7 @@
         "app.domains.relationships.infrastructure.sqlalchemy_social_models",
         "app.domains.relationships.public",
         "app.integrations.llm",
+        "app.runtime.chat.evidence_reads",
         "app.runtime.chat.memory_producer",
         "app.runtime.chat.message_composition",
         "app.runtime.chat.model_bindings",

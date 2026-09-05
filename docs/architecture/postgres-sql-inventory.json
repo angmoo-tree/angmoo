@@ -839,18 +839,6 @@
     },
     {
       "markers": {
-        "driver_or_url": [
-          129
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/runtime/chat/world_generation.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "fd09e3a2fdccf67c47ccff031587e9d3d665c05684788a876bcee536fa085794",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
         "row_lock": [
           118,
           198
@@ -1234,10 +1222,10 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 79,
+  "entry_count": 78,
   "marker_counts": {
     "advisory_lock": 9,
-    "driver_or_url": 50,
+    "driver_or_url": 49,
     "jsonb": 9,
     "pgvector": 5,
     "row_lock": 32,
