@@ -224,7 +224,12 @@
     "backend/app/domains/world_characters/infrastructure/sqlalchemy_runtime_modes.py": "backend/app/domains/world_characters/service/runtime_modes.py",
     "backend/app/domains/world_characters/infrastructure/autonomous_setup_models.py": "backend/app/domains/world_characters/models.py",
     "backend/tests/test_world_character_setup_service.py": "backend/tests/world_characters/test_setup_service.py",
-    "backend/tests/test_l4_pr_g_runtime_mode_repair.py": "backend/tests/world_characters/test_runtime_mode_repair.py"
+    "backend/tests/test_l4_pr_g_runtime_mode_repair.py": "backend/tests/world_characters/test_runtime_mode_repair.py",
+    "backend/app/api/v1/routes/worlds.py": "backend/app/domains/world_characters/router/entry.py",
+    "backend/app/services/world_character_setup.py": "backend/app/runtime/world_characters/cleanup.py",
+    "backend/app/services/worlds.py": "backend/app/domains/world_characters/service/membership.py",
+    "backend/app/services/activity_profile_readiness.py": "backend/app/domains/world_characters/service/readiness.py",
+    "backend/app/domains/world_characters/schemas/readiness.py": "backend/app/domains/characters/schemas.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -3613,8 +3618,10 @@
           "backend/app/domains/worlds/exceptions.py"
         ],
         "backend/app/api/v1/routes/worlds.py": [
-          "backend/app/api/v1/routes/worlds.py",
-          "backend/app/domains/worlds/router.py"
+          "backend/app/domains/world_characters/router/entry.py",
+          "backend/app/domains/worlds/router.py",
+          "backend/app/runtime/world_characters/lifecycle.py",
+          "backend/app/api/world_errors.py"
         ]
       },
       "split_symbols": [
@@ -4072,9 +4079,9 @@
         },
         {
           "old": "backend/app/api/v1/routes/worlds.py::_WorldCharacterLeaveRuntimeGuard",
-          "new": "backend/app/api/v1/routes/worlds.py::_WorldCharacterLeaveRuntimeGuard",
+          "new": "backend/app/runtime/world_characters/lifecycle.py::WorldCharacterLeaveRuntimeGuard",
           "direct_consumers": [
-            "backend/app/api/v1/routes/worlds.py"
+            "backend/app/runtime/world_characters/composition.py"
           ],
           "test_nodes": [
             "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
@@ -4083,9 +4090,9 @@
         },
         {
           "old": "backend/app/api/v1/routes/worlds.py::_raise_world_character_error",
-          "new": "backend/app/api/v1/routes/worlds.py::_raise_world_character_error",
+          "new": "backend/app/domains/world_characters/router/entry.py::_raise_world_character_error",
           "direct_consumers": [
-            "backend/app/api/v1/routes/worlds.py"
+            "backend/app/domains/world_characters/router/entry.py"
           ],
           "test_nodes": [
             "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
@@ -4094,9 +4101,9 @@
         },
         {
           "old": "backend/app/api/v1/routes/worlds.py::_raise_world_character_lifecycle_error",
-          "new": "backend/app/api/v1/routes/worlds.py::_raise_world_character_lifecycle_error",
+          "new": "backend/app/domains/world_characters/router/entry.py::_raise_world_character_lifecycle_error",
           "direct_consumers": [
-            "backend/app/api/v1/routes/worlds.py"
+            "backend/app/domains/world_characters/router/entry.py"
           ],
           "test_nodes": [
             "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
@@ -4105,10 +4112,10 @@
         },
         {
           "old": "backend/app/api/v1/routes/worlds.py::_raise_world_error",
-          "new": "backend/app/domains/worlds/router.py::_raise_world_error",
+          "new": "backend/app/api/world_errors.py::_raise_world_error",
           "direct_consumers": [
             "backend/app/domains/worlds/router.py",
-            "backend/app/api/v1/routes/worlds.py"
+            "backend/app/domains/world_characters/router/entry.py"
           ],
           "test_nodes": [
             "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict",
@@ -4137,9 +4144,9 @@
         },
         {
           "old": "backend/app/api/v1/routes/worlds.py::enter_world_with_character",
-          "new": "backend/app/api/v1/routes/worlds.py::enter_world_with_character",
+          "new": "backend/app/domains/world_characters/router/entry.py::enter_world_with_character",
           "direct_consumers": [
-            "backend/app/api/v1/routes/worlds.py"
+            "backend/app/domains/world_characters/router/entry.py"
           ],
           "test_nodes": [
             "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
@@ -4158,9 +4165,9 @@
         },
         {
           "old": "backend/app/api/v1/routes/worlds.py::get_world_character_entry",
-          "new": "backend/app/api/v1/routes/worlds.py::get_world_character_entry",
+          "new": "backend/app/domains/world_characters/router/entry.py::get_world_character_entry",
           "direct_consumers": [
-            "backend/app/api/v1/routes/worlds.py"
+            "backend/app/domains/world_characters/router/entry.py"
           ],
           "test_nodes": [
             "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
@@ -4189,9 +4196,9 @@
         },
         {
           "old": "backend/app/api/v1/routes/worlds.py::leave_world_with_character",
-          "new": "backend/app/api/v1/routes/worlds.py::leave_world_with_character",
+          "new": "backend/app/domains/world_characters/router/entry.py::leave_world_with_character",
           "direct_consumers": [
-            "backend/app/api/v1/routes/worlds.py"
+            "backend/app/domains/world_characters/router/entry.py"
           ],
           "test_nodes": [
             "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
@@ -4220,7 +4227,7 @@
         },
         {
           "old": "backend/app/api/v1/routes/worlds.py::router",
-          "new": "backend/app/api/v1/routes/worlds.py::router",
+          "new": "backend/app/domains/world_characters/router/entry.py::router",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
             "backend/app/api/v1/public.py"
@@ -4242,9 +4249,9 @@
         },
         {
           "old": "backend/app/api/v1/routes/worlds.py::update_world_character_role",
-          "new": "backend/app/api/v1/routes/worlds.py::update_world_character_role",
+          "new": "backend/app/domains/world_characters/router/entry.py::update_world_character_role",
           "direct_consumers": [
-            "backend/app/api/v1/routes/worlds.py"
+            "backend/app/domains/world_characters/router/entry.py"
           ],
           "test_nodes": [
             "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
@@ -6712,14 +6719,13 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentActivityProfileReadinessRead",
-          "new": "backend/app/domains/runtime/schemas.py::AgentActivityProfileReadinessRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentActivityProfileReadinessRead",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/domains/world_characters/service/readiness.py",
+            "backend/app/schemas/agents.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
-            "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
-            "tests/test_postgres_security_concurrency.py::test_world_autonomy_capacity_is_atomic_across_postgres_sessions"
+            "tests/world_characters/test_readiness_contract.py::test_readiness_keeps_shared_dto_and_world_scope_before_stale_profile"
           ]
         },
         {
@@ -16579,6 +16585,161 @@
       "preserved_flow": "Original preflight/generate/retry/approve/reject and exact error hierarchy, logical/physical provider counters, reload hashes, quota/locks, transaction/commit order retained. World entry lookups preserve db.get vs scalar. Identity query stays before the resolver try boundary.",
       "runtime_split": "Only cross-owner capacity SQL and startup session_factory/SQLite immediate wrapper move runtime. Same-Session repair policy remains WC; imported-world exclusions and fail-closed reasons retained.",
       "removed_aggregate": "autonomous_setup_models foreign ORM aggregation is removed. WC models are owned locally; Character profile and bounded World/Identity services perform actual cooperating lookups/writes. No service exports foreign ORM classes."
+    },
+    "AR-B2-WC-entry-readiness-cleanup": {
+      "status": "IMPLEMENTED; focused 234 passed/1 skipped, Package 10 passed, final setup/membership/boundary 30 passed; API/ORM/split and changed assertion expectations PASS; public604/current2114 PASS; source introduction and full integration remain root-owned",
+      "split_files": {
+        "backend/app/api/v1/routes/world_character_setup.py": [
+          "backend/app/api/v1/routes/world_character_setup.py",
+          "backend/app/domains/world_characters/router/setup.py"
+        ],
+        "backend/app/services/worlds.py": [
+          "backend/app/domains/world_characters/service/membership.py",
+          "backend/app/domains/world_characters/exceptions.py",
+          "backend/app/domains/worlds/service/__init__.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/api/v1/routes/world_character_setup.py::router",
+          "new": "backend/app/api/v1/routes/world_character_setup.py::router",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_character_setup.py::get_world_feed_status",
+          "new": "backend/app/api/v1/routes/world_character_setup.py::get_world_feed_status",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_character_setup.py::_raise_setup_error",
+          "new": "backend/app/domains/world_characters/router/setup.py::_raise_setup_error",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_character_setup.py::get_autonomy_setup",
+          "new": "backend/app/domains/world_characters/router/setup.py::get_autonomy_setup",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_character_setup.py::preflight_autonomy_setup",
+          "new": "backend/app/domains/world_characters/router/setup.py::preflight_autonomy_setup",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_character_setup.py::generate_autonomy_setup",
+          "new": "backend/app/domains/world_characters/router/setup.py::generate_autonomy_setup",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_character_setup.py::retry_autonomy_setup",
+          "new": "backend/app/domains/world_characters/router/setup.py::retry_autonomy_setup",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_character_setup.py::approve_autonomy_setup",
+          "new": "backend/app/domains/world_characters/router/setup.py::approve_autonomy_setup",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_character_setup.py::reject_autonomy_setup",
+          "new": "backend/app/domains/world_characters/router/setup.py::reject_autonomy_setup",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_setup_service.py::test_routes_expose_preflight_generate_and_approve_without_enabling_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/services/worlds.py::WorldCharacterOwnershipError",
+          "new": "backend/app/domains/world_characters/exceptions.py::WorldCharacterOwnershipError",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/membership.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_foundation.py::test_world_character_requires_membership_in_same_world_and_owner"
+          ]
+        },
+        {
+          "old": "backend/app/services/worlds.py::validate_world_character_membership",
+          "new": "backend/app/domains/world_characters/service/membership.py::validate_world_character_membership",
+          "direct_consumers": [
+            "backend/tests/test_world_foundation.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_foundation.py::test_world_character_requires_membership_in_same_world_and_owner"
+          ]
+        },
+        {
+          "old": "backend/app/services/worlds.py::__all__",
+          "new": "backend/app/domains/worlds/service/__init__.py::__all__",
+          "direct_consumers": [
+            "backend/tests/test_postgres_security_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_foundation.py::test_world_character_requires_membership_in_same_world_and_owner"
+          ]
+        }
+      ],
+      "whole_file_moves": {
+        "backend/app/api/v1/routes/worlds.py": "backend/app/domains/world_characters/router/entry.py",
+        "backend/app/services/world_character_setup.py": "backend/app/runtime/world_characters/cleanup.py",
+        "backend/app/services/worlds.py": "backend/app/domains/world_characters/service/membership.py",
+        "backend/app/services/activity_profile_readiness.py": "backend/app/domains/world_characters/service/readiness.py"
+      },
+      "readiness": "Same nullable db.get World and membership queries remain before the World scope decision; profile/hash/daypart counts and latest-ready ordering unchanged. The readiness DTO is defined once in WC and old schemas.agents reexports the same class. Final Character HTTP merge must alias its runtime.schemas copy to this WC class.",
+      "cleanup": "delete_setup_data_for_characters SQL AST is unchanged; mixed owners, joint participant identity materialization before deletes, same caller Session and no added commit are retained in runtime/world_characters/cleanup.py.",
+      "http": "Four entry/leave endpoints and six autonomy setup endpoints move into WC router modules. The old setup route retains only the feed status endpoint. Assembly retains feed-before-setup order in both apps. Runtime scheduler busy checks are composed through app.api dependencies.",
+      "membership": "Same Character and membership nullable read order, WorldServiceError hierarchy, owner/world/status checks and attached return rows; no new flush/commit.",
+      "remaining": "Only exact historical SQLite model aliases and actual cross-owner legacy aggregate/public consumers remain until G5/B4-B8-A; no complete-domain scope activation.",
+      "existing_splits_updated": [
+        "AR-B2-worlds: all original 14 routes plus guard/error mapping now point at actual current owners",
+        "AR-B2-B1: all Character/shared response symbols retained; readiness DTO has its actual WC schema owner"
+      ]
+    },
+    "AR-B2-WC-readiness-owner": {
+      "reason": "The Character detail HTTP response owns its readiness DTO. WC policy consumes that same class; removing the unused Runtime alias and WC schema fragment breaks the reverse package dependency without a policy exception.",
+      "source_owner": "AR-B2"
     }
   }
 }

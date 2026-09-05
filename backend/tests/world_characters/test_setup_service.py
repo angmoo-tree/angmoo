@@ -12,9 +12,10 @@ from sqlalchemy.pool import StaticPool
 
 from app import models, schemas
 from app.domains.identity import dependencies as api_deps
-from app.api.v1.routes import worlds as world_routes
+from app.domains.world_characters.router import entry as world_routes
 from app.domains.worlds import router as world_creator_routes
-from app.api.v1.routes import world_character_setup as setup_routes
+from app.domains.world_characters.router import setup as setup_routes
+from app.api.v1.routes import world_character_setup as feed_status_routes
 from app.core import security
 from app.core.db import Base
 from app.domains.worlds.contracts import (
@@ -25,7 +26,9 @@ from app.domains.worlds.contracts import (
 from app.runtime.migrations.sqlite_versions.v2_to_v3_no_specific_role import (
     upgrade_v2_to_v3,
 )
-from app.services import world_character_provider, world_character_setup
+from app.services import world_character_provider
+from app.domains.world_characters.service import autonomous_setup as world_character_setup
+from app.runtime.world_characters import cleanup as setup_cleanup
 
 
 DAYPARTS = ("dawn", "morning", "afternoon", "evening")
@@ -92,6 +95,7 @@ def _app(engine, principal: dict[str, models.User | None]) -> FastAPI:
     app = FastAPI()
     app.include_router(world_routes.router, prefix="/api/v1")
     app.include_router(world_creator_routes.router, prefix="/api/v1")
+    app.include_router(feed_status_routes.router, prefix="/api/v1")
     app.include_router(setup_routes.router, prefix="/api/v1")
 
     def get_db():
@@ -509,7 +513,7 @@ def test_character_privacy_cleanup_removes_setup_outputs_only() -> None:
         assert generated.profile is not None
         assert generated.repertoire is not None
 
-        world_character_setup.delete_setup_data_for_characters(
+        setup_cleanup.delete_setup_data_for_characters(
             db, character_ids=["character-a"]
         )
         db.commit()

@@ -157,7 +157,7 @@ def test_seed_flushes_without_owning_the_callers_commit(world_session) -> None:
 
 
 def test_split_router_preserves_all_fourteen_world_and_resident_endpoints() -> None:
-    from app.api.v1.routes.worlds import router as resident_router
+    from app.domains.world_characters.router.entry import router as resident_router
     from app.domains.worlds.router import router as creator_router
     from app.api.v1 import main, public
 
@@ -175,7 +175,7 @@ def test_split_router_preserves_all_fourteen_world_and_resident_endpoints() -> N
 def test_resident_leave_still_translates_errors_from_the_world_service(world_session, monkeypatch) -> None:
     from fastapi import FastAPI
     from fastapi.testclient import TestClient
-    from app.api.v1.routes import worlds as resident_routes
+    from app.domains.world_characters.router import entry as resident_routes
     from app.api.identity_dependencies import get_current_user
     from app.core.db import get_db
 

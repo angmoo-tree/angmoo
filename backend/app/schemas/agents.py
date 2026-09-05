@@ -7,7 +7,6 @@ from app.domains.runtime.schemas import (
     AgentActionRangeRead,
     AgentActivitySettingRead,
     AgentActivitySummaryRead,
-    AgentActivityProfileReadinessRead,
 )
 
 from app.domains.identity.schemas import (
@@ -36,6 +35,8 @@ from app.domains.characters.schemas import (
     AgentCreationDraftRead,
     AgentPromotionUsageRead,
 )
+
+from app.domains.characters.schemas import AgentActivityProfileReadinessRead
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 

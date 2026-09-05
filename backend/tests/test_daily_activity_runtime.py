@@ -23,7 +23,7 @@ from app.services import activity_state_contracts
 from app.services import daily_activity_plans
 from app.services import joint_activity_scheduling
 from app.services import routine_post_runtime
-from app.services import world_character_setup
+from app.runtime.world_characters import cleanup as world_character_setup
 from app.services import world_character_contracts
 
 

@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2058,
-      "internal_edge_count": 2003,
+      "external_import_count": 2064,
+      "internal_edge_count": 2019,
       "legacy_import_exception_count": 0,
-      "module_count": 626,
+      "module_count": 630,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1095,7 +1095,7 @@
       },
       {
         "path": "backend/tests/test_l3_5_world_package_import_commit.py",
-        "sha256": "f4d21b04484d0971c2119f5059da4597c24b466e7e50080f780474fcffa6b198"
+        "sha256": "ba20e3dd1873fe036f55e665dd0de403556af9dde32f23465852a78bb925bd91"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
@@ -1131,7 +1131,7 @@
       },
       {
         "path": "backend/tests/test_world_feed_search.py",
-        "sha256": "7ae830d9ecd1ae54ac8026ba2eae5904420d4d718148237eec63b2ddeb6e66ed"
+        "sha256": "20065d06bae69007cc64172269888d6f1671b16ec8373ce0b5b966d4322352cd"
       }
     ],
     "parity_test_node_count": 97,

@@ -11,9 +11,10 @@ from app.api.v1.routes import community
 from app.api.v1.routes import messages
 from app.api.v1.routes import memory
 from app.api.v1.routes import tree
-from app.api.v1.routes import worlds
+from app.domains.world_characters.router import entry as worlds
 from app.domains.worlds import router as world_creator
 from app.api.v1.routes import world_character_setup
+from app.domains.world_characters.router import setup as autonomy_setup
 from app.api.v1.routes import world_activity_runtime
 from app.api.v1.routes import world_chat
 from app.api.v1.routes import world_chat_response
@@ -45,6 +46,7 @@ PUBLIC_ROUTERS = (
     worlds.router,
     world_creator.router,
     world_character_setup.router,
+    autonomy_setup.router,
     world_activity_runtime.router,
 )
 

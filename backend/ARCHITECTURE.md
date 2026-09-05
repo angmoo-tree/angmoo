@@ -8,9 +8,9 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 
 > **AR-G2 적용 범위:** 공통 오류 4개는 `app/exceptions.py`, Device Home·Social profile이 함께 사용하는 cursor bytes 변환은 `app/pagination.py`가 소유합니다. 기존 core 모듈은 동시성·middleware 구현과 동일 오류 객체의 export를 유지합니다. 다른 업무 오류·cursor payload·query·실행 계약은 기존 소유 모듈에서 계속 관리합니다. 병합 및 통합 검증 상태는 위 실행 결과 문서에서 구분합니다.
 
-> **AR-B2 Worlds 적용 범위:** World 정의·readiness·생성·배너와 10개 HTTP 경로는 `worlds/models.py`, `schemas.py`, `contracts.py`, `exceptions.py`, `storage.py`, `service/`, `router.py`가 소유합니다. WorldCharacter의 4개 기존 HTTP 경로와 setup/lifecycle은 다음 B2 PR 범위입니다. Worlds 전체를 완료 scope로 올리지 않고 실제 새 역할 12개 module만 검사합니다. `worlds.public` 및 frozen SQLite v2→v3가 사용하는 옛 경로 4개는 같은 객체를 제공하는 추적된 호환 경로입니다.
+> **AR-B2 Worlds 적용 범위:** World 정의·readiness·생성·배너와 10개 HTTP 경로는 `worlds/models.py`, `schemas.py`, `contracts.py`, `exceptions.py`, `storage.py`, `service/`, `router.py`가 소유합니다. WorldCharacter의 입장·퇴장 HTTP는 WC router가 소유하고, 입장에 필요한 World/membership 조회·seed·정의 version 변경은 Worlds service가 같은 Session으로 협력합니다. Worlds 전체를 완료 scope로 올리지 않고 실제 이전된 역할 module만 검사합니다. `worlds.public` 및 frozen SQLite v2→v3가 사용하는 옛 경로 4개는 같은 객체를 제공하는 추적된 호환 경로입니다.
 
-> **AR-B2 WorldCharacter 기반 적용 범위:** 6개 ORM은 `world_characters/models.py`, 입출력은 `schemas/identity.py`·`schemas/setup.py`, 순수 업무 계약은 `contracts/`, 오류는 `exceptions.py`가 소유합니다. 생성기 통신은 `client.py`, 응답 검증은 `service/setup_validation.py`, Package용 seed는 `service/seed.py`에 있습니다. 소유자·입장·승인·Studio 실행 흐름의 실제 이전은 다음 slice이며, 현재 기존 workflow가 새 기반을 소비하는 정확한 bridge만 허용합니다. immutable SQLite migration이 사용하는 옛 ORM 경로 두 개는 같은 class 객체의 alias로 유지합니다.
+> **AR-B2 WorldCharacter 기반 적용 범위:** 6개 ORM은 `world_characters/models.py`, 입출력은 `schemas/identity.py`·`schemas/setup.py`, 순수 업무 계약은 `contracts/`, 오류는 `exceptions.py`가 소유합니다. 생성기 통신은 `client.py`, 응답 검증은 `service/setup_validation.py`, Package용 seed는 `service/seed.py`에 있습니다. 소유자·입장·승인·Studio·퇴장·runtime mode·readiness의 실제 업무 흐름은 `service/`, HTTP는 `router/profile.py`·`entry.py`·`setup.py`가 소유합니다. 여러 업무 join과 삭제·runtime busy 검사 및 시작 조립은 `runtime/world_characters/`에 있습니다. 미전환 외부 소비자는 정확한 bridge만 허용합니다. immutable SQLite migration이 사용하는 옛 ORM 경로 두 개는 같은 class 객체의 alias로 유지합니다.
 
 
 ## 목차
@@ -468,3 +468,10 @@ WorldCharacter의 공개 프로필·Studio·후보 조회와 퇴장 정책은 `s
 
 
 WorldCharacter의 생성·재시도·승인·거절·입장 정책은 `service/autonomous_setup.py`에 있습니다. Character 조회, nullable World/membership 조회·입장 membership seed·World contract version 쓰기, agent-purpose credential 조회는 각 소유 서비스와 같은 Session으로 협력합니다. `infrastructure/autonomous_setup_models.py`의 외부 ORM 집합은 제거했습니다. Provider budget·쿼터·실패 상태 기록과 commit 경계는 WC 서비스에 유지합니다. Runtime mode의 실제 repair 정책은 `service/runtime_modes.py`, 시작 시 Session factory·SQLite immediate 실행은 `runtime/world_characters/recovery.py`가 소유합니다. Runtime의 capacity query는 원래 WC/Character join을 그대로 유지합니다.
+
+
+WorldCharacter의 활동 준비 상태는 `service/readiness.py`가 판단합니다. Character 상세 API에 들어가는 `AgentActivityProfileReadinessRead`는 `characters/schemas.py`에서 한 번만 정의하며 WC 준비 상태 서비스와 이전 `app.schemas.agents`가 같은 class를 사용합니다. Character 응답 조립이 WC 서비스를 역으로 import하지 않도록 사용하지 않는 Runtime alias와 WC 응답 파일은 제거했습니다. 준비 상태를 판단할 때 World 접근·profile hash·최신 ready repertoire·daypart별 후보 수의 기존 우선순위는 유지합니다.
+
+입장·퇴장 HTTP 4개와 설정 HTTP 6개는 WC router가 소유합니다. 피드 상태 HTTP는 현재 feed 소유 경로에 남고, 두 앱의 route 조립은 기존 feed→setup 순서를 유지합니다. World 접근 오류의 HTTP 변환은 공통 `app/api/world_errors.py`가 소유하므로 한 도메인의 router가 다른 router를 호출하지 않습니다. Scheduler/AgentRun/Slot과 setup의 퇴장 busy 조회는 runtime guard를 공통 HTTP 연결에서 주입합니다.
+
+여러 업무의 Character 데이터 삭제는 `runtime/world_characters/cleanup.py`가 원래 트랜잭션 안에서 조립합니다. Joint activity 참여자 ID를 먼저 읽는 순서와 원래 SQL delete/update 범위를 보존하며 새 commit을 추가하지 않습니다. 단순 옛 `app/services/worlds.py`, `world_character_setup.py`, `activity_profile_readiness.py`는 실제 소비자를 전환한 뒤 제거했습니다. `set_activity_runtime_mode`는 Routine의 기존 검증을 통과한 같은 WC 객체에 mode/version만 기록하고, 권한·readiness 검사와 commit은 호출하던 Routine 작업이 유지합니다.
