@@ -541,7 +541,9 @@
     "backend/app/services/world_feed_social_apply.py": "backend/app/runtime/social/world_feed_actions.py",
     "backend/app/runtime/relationships/sqlalchemy_social_read_repository.py": "backend/app/domains/relationships/repository/diagnostics.py",
     "backend/app/services/local_bot.py": "backend/app/domains/local_bot/service/actions.py",
-    "backend/app/api/v1/routes/bot.py": "backend/app/domains/local_bot/router/bot.py"
+    "backend/app/api/v1/routes/bot.py": "backend/app/domains/local_bot/router/bot.py",
+    "backend/app/services/world_foundation.py": "backend/app/runtime/worlds/foundation.py",
+    "backend/tests/test_world_foundation.py": "backend/tests/worlds/test_foundation.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -1044,7 +1046,14 @@
     "tests/test_graph_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches": "tests/relationships/test_projection_replay.py::test_world_rebuild_fails_closed_when_graph_parity_mismatches",
     "tests/test_graph_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden": "tests/relationships/test_projection_replay.py::test_world_rebuild_preserves_relationship_when_source_is_hidden",
     "tests/test_graph_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set": "tests/relationships/test_projection_replay.py::test_world_rebuild_records_audit_and_replays_high_water_set",
-    "tests/test_graph_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail": "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail"
+    "tests/test_graph_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail": "tests/relationships/test_projection_replay.py::test_world_rebuild_resume_keeps_original_high_water_and_leaves_delta_tail",
+    "tests/test_world_foundation.py::test_uuid7_string_has_expected_version_and_variant": "tests/worlds/test_foundation.py::test_uuid7_string_has_expected_version_and_variant",
+    "tests/test_world_foundation.py::test_world_slug_and_membership_are_unique": "tests/worlds/test_foundation.py::test_world_slug_and_membership_are_unique",
+    "tests/test_world_foundation.py::test_world_character_requires_membership_in_same_world_and_owner": "tests/worlds/test_foundation.py::test_world_character_requires_membership_in_same_world_and_owner",
+    "tests/test_world_foundation.py::test_active_mapping_must_reference_same_character": "tests/worlds/test_foundation.py::test_active_mapping_must_reference_same_character",
+    "tests/test_world_foundation.py::test_private_world_is_hidden_and_creator_roles_are_enforced": "tests/worlds/test_foundation.py::test_private_world_is_hidden_and_creator_roles_are_enforced",
+    "tests/test_world_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows": "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+    "tests/test_world_foundation.py::test_angmoo_global_backfill_waits_for_first_owner_on_empty_database": "tests/worlds/test_foundation.py::test_angmoo_global_backfill_waits_for_first_owner_on_empty_database"
   },
   "details": {
     "AR-B1": {
@@ -17965,17 +17974,17 @@
             "backend/app/domains/world_characters/service/membership.py"
           ],
           "test_nodes": [
-            "tests/test_world_foundation.py::test_world_character_requires_membership_in_same_world_and_owner"
+            "tests/worlds/test_foundation.py::test_world_character_requires_membership_in_same_world_and_owner"
           ]
         },
         {
           "old": "backend/app/services/worlds.py::validate_world_character_membership",
           "new": "backend/app/domains/world_characters/service/membership.py::validate_world_character_membership",
           "direct_consumers": [
-            "backend/tests/test_world_foundation.py"
+            "backend/tests/worlds/test_foundation.py"
           ],
           "test_nodes": [
-            "tests/test_world_foundation.py::test_world_character_requires_membership_in_same_world_and_owner"
+            "tests/worlds/test_foundation.py::test_world_character_requires_membership_in_same_world_and_owner"
           ]
         },
         {
@@ -17985,7 +17994,7 @@
             "backend/tests/test_postgres_security_concurrency.py"
           ],
           "test_nodes": [
-            "tests/test_world_foundation.py::test_world_character_requires_membership_in_same_world_and_owner"
+            "tests/worlds/test_foundation.py::test_world_character_requires_membership_in_same_world_and_owner"
           ]
         }
       ],
@@ -68091,9 +68100,262 @@
         "l4_er0": "L4 current inventory 782 modules / 97 parity nodes; deferred runtime 22 files",
         "new_test_nodes": "4 actual HTTP tests + 3 explicit error-entry architecture regressions; source introduction SHA is this source commit"
       }
+    },
+    "AR-B8-WORLD-FOUNDATION": {
+      "status": "SOURCE PREPARATION; original 5 definitions and 9 constants AST identical after expanding 6 actual owner functions; original 7 tests and new caller transaction rollback test PASS; stock source introduction pending",
+      "split_files": {
+        "backend/app/services/world_foundation.py": [
+          "backend/app/domains/worlds/service/foundation.py",
+          "backend/app/domains/world_characters/service/foundation.py",
+          "backend/app/runtime/worlds/foundation.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/world_foundation.py::ANGMOO_GLOBAL_WORLD_ID",
+          "new": "backend/app/domains/worlds/service/foundation.py::ANGMOO_GLOBAL_WORLD_ID",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::ANGMOO_GLOBAL_WORLD_SLUG",
+          "new": "backend/app/domains/worlds/service/foundation.py::ANGMOO_GLOBAL_WORLD_SLUG",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::ANGMOO_GLOBAL_NAME",
+          "new": "backend/app/domains/worlds/service/foundation.py::ANGMOO_GLOBAL_NAME",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::ANGMOO_GLOBAL_TAGLINE",
+          "new": "backend/app/domains/worlds/service/foundation.py::ANGMOO_GLOBAL_TAGLINE",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::ANGMOO_GLOBAL_SETTING_DESCRIPTION",
+          "new": "backend/app/domains/worlds/service/foundation.py::ANGMOO_GLOBAL_SETTING_DESCRIPTION",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::ANGMOO_GLOBAL_DAILY_LIFE_DESCRIPTION",
+          "new": "backend/app/domains/worlds/service/foundation.py::ANGMOO_GLOBAL_DAILY_LIFE_DESCRIPTION",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::ANGMOO_GLOBAL_GENRE_TAGS",
+          "new": "backend/app/domains/worlds/service/foundation.py::ANGMOO_GLOBAL_GENRE_TAGS",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::ANGMOO_GLOBAL_TONE_TAGS",
+          "new": "backend/app/domains/worlds/service/foundation.py::ANGMOO_GLOBAL_TONE_TAGS",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::_BACKFILL_TIMESTAMP_MS",
+          "new": "backend/app/domains/worlds/service/foundation.py::_BACKFILL_TIMESTAMP_MS",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::GlobalFoundationReport",
+          "new": "backend/app/domains/worlds/service/foundation.py::GlobalFoundationReport",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::stable_backfill_uuid7",
+          "new": "backend/app/domains/worlds/service/foundation.py::stable_backfill_uuid7",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::choose_global_owner_user_id",
+          "new": "backend/app/runtime/worlds/foundation.py::choose_global_owner_user_id",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::_new_global_world",
+          "new": "backend/app/domains/worlds/service/foundation.py::_new_global_world",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::ensure_angmoo_global_foundation",
+          "new": "backend/app/runtime/worlds/foundation.py::ensure_angmoo_global_foundation",
+          "direct_consumers": [
+            "backend/scripts/seed_p1_world_fixture.py",
+            "backend/tests/worlds/test_foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::ensure_angmoo_global_foundation",
+          "new": "backend/app/domains/worlds/service/foundation.py::ensure_global_world",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::ensure_angmoo_global_foundation",
+          "new": "backend/app/domains/worlds/service/foundation.py::ensure_global_memberships",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::ensure_angmoo_global_foundation",
+          "new": "backend/app/domains/worlds/service/foundation.py::count_global_memberships",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::ensure_angmoo_global_foundation",
+          "new": "backend/app/domains/world_characters/service/foundation.py::find_global_world_character",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::ensure_angmoo_global_foundation",
+          "new": "backend/app/domains/world_characters/service/foundation.py::add_global_world_character",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_foundation.py::ensure_angmoo_global_foundation",
+          "new": "backend/app/domains/world_characters/service/foundation.py::count_global_world_characters",
+          "direct_consumers": [
+            "backend/app/runtime/worlds/foundation.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+            "tests/worlds/test_foundation_transaction.py::test_foundation_flushes_within_the_callers_transaction_without_committing"
+          ]
+        }
+      ],
+      "transaction": "Same Session; preserve admin/character/first-user selection, World contract refresh, membership flushes, final WorldCharacter flush and count order; no commit; seven existing whole test functions moved unchanged.",
+      "direct_consumers": [
+        "backend/scripts/seed_p1_world_fixture.py",
+        "backend/tests/worlds/test_foundation.py"
+      ]
     }
   },
   "asgi_exports": {
     "app.public_main:app": "app.main:public_app"
+  },
+  "test_symbols": {
+    "backend/tests/test_world_foundation.py::_engine": "backend/tests/worlds/test_foundation.py::_engine",
+    "backend/tests/test_world_foundation.py::_user": "backend/tests/worlds/test_foundation.py::_user",
+    "backend/tests/test_world_foundation.py::_character": "backend/tests/worlds/test_foundation.py::_character",
+    "backend/tests/test_world_foundation.py::_world": "backend/tests/worlds/test_foundation.py::_world",
+    "backend/tests/test_world_foundation.py::_membership": "backend/tests/worlds/test_foundation.py::_membership",
+    "backend/tests/test_world_foundation.py::test_uuid7_string_has_expected_version_and_variant": "backend/tests/worlds/test_foundation.py::test_uuid7_string_has_expected_version_and_variant",
+    "backend/tests/test_world_foundation.py::test_world_slug_and_membership_are_unique": "backend/tests/worlds/test_foundation.py::test_world_slug_and_membership_are_unique",
+    "backend/tests/test_world_foundation.py::test_world_character_requires_membership_in_same_world_and_owner": "backend/tests/worlds/test_foundation.py::test_world_character_requires_membership_in_same_world_and_owner",
+    "backend/tests/test_world_foundation.py::test_active_mapping_must_reference_same_character": "backend/tests/worlds/test_foundation.py::test_active_mapping_must_reference_same_character",
+    "backend/tests/test_world_foundation.py::test_private_world_is_hidden_and_creator_roles_are_enforced": "backend/tests/worlds/test_foundation.py::test_private_world_is_hidden_and_creator_roles_are_enforced",
+    "backend/tests/test_world_foundation.py::_legacy_hash": "backend/tests/worlds/test_foundation.py::_legacy_hash",
+    "backend/tests/test_world_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows": "backend/tests/worlds/test_foundation.py::test_angmoo_global_backfill_is_idempotent_and_preserves_legacy_rows",
+    "backend/tests/test_world_foundation.py::test_angmoo_global_backfill_waits_for_first_owner_on_empty_database": "backend/tests/worlds/test_foundation.py::test_angmoo_global_backfill_waits_for_first_owner_on_empty_database"
   }
 }

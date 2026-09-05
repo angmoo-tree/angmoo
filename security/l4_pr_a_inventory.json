@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2652,
-      "internal_edge_count": 3227,
+      "external_import_count": 2659,
+      "internal_edge_count": 3232,
       "legacy_import_exception_count": 0,
-      "module_count": 928,
+      "module_count": 931,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [

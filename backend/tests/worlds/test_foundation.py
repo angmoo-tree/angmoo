@@ -12,7 +12,7 @@ from app import models
 from app.core.db import Base
 from app.core.ids import uuid7_string
 from app.domains.worlds import service as world_service
-from app.services import world_foundation
+from app.runtime.worlds import foundation as world_foundation
 
 
 def _engine():
