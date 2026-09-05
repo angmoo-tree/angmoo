@@ -80,7 +80,7 @@ backend/
 ├── .python-version
 ├── .env.example                    # 비밀 없는 개발 설정 예시
 ├── .env                            # 선택적 개발 설정·Git/제품 배포 제외
-├── logging.ini                     # 목표: 앱 로그 설정
+├── logging.ini                     # 앱 기본 level·Uvicorn console 설정
 └── alembic.ini                     # 목표: backend/alembic 연결
 
 저장소 root/
@@ -304,9 +304,11 @@ Streaming에서는 사용자에게 허용된 응답 event만 전달합니다. �
 
 ### 로그와 배포 파일
 
-목표 `backend/logging.ini`는 앱 로그 level·format·handler 설정을 담고, 각 진입점이 자신의 실행 profile에 맞춰 명시적으로 연결합니다. Python filter의 redaction이나 동적 경로 처리까지 INI만으로 대체한다고 가정하지 않습니다. Import만으로 handler·engine·worker를 시작하지 않습니다.
+[`backend/logging.ini`](logging.ini)는 기존 root `WARNING` 기본값과 Uvicorn `INFO`·format·console stream 설정을 담습니다. [`runtime/logging_config.py`](app/runtime/logging_config.py)가 파일을 읽고, 앱 factory는 자원을 검증하면서 기존 root handler와 명시적 level을 보존합니다. Factory를 반복 호출해도 `fileConfig`·`dictConfig`로 외부 handler·pytest caplog를 닫거나 새 handler를 설치하지 않습니다. Uvicorn CLI와 contributor reloader는 기존 server 시작 지점에서 같은 설정 dictionary를 사용합니다. 기존 Python redaction 처리는 그대로 유지합니다.
 
-Sidecar의 stdout/stderr·handshake·진단 필드와 중복 handler 방지를 유지합니다. Alembic 자체의 logging section은 `alembic.ini`에 있으며 앱 로그 설정과 역할이 다릅니다. 두 파일은 내용뿐 아니라 실행 디렉터리·패키징에 포함되는 경로도 중요합니다.
+Sidecar는 `log_config=None`·`access_log=False`를 유지합니다. 설치 작업의 JSON stdout, content-free fatal stderr, endpoint 파일과 종료 handshake를 일반 server access log로 바꾸지 않습니다. GUI 프로세스에서 stdout/stderr가 없더라도 logging 설정을 읽을 수 있습니다. 기존 앱에 파일 로그·rotation handler가 없었으므로 이 변경에서도 새 파일 저장 정책을 도입하지 않습니다.
+
+소스 실행은 `backend/logging.ini`, PyInstaller OneFile·OneDir 실행은 `sys._MEIPASS/logging.ini`를 읽습니다. Docker `COPY`와 sidecar `--add-data`에 이 자원이 포함되며, 누락 시 다른 작업 디렉터리의 파일로 대체하지 않고 시작을 실패시킵니다. Alembic 자체의 logging section은 `alembic.ini`에 있으며 앱 설정과 역할이 다릅니다. AR-G3의 로컬 검증과 실제 제품 bundle·설치·CI 판정은 [백엔드 전환 결과](../docs/architecture/refactor-backend-results.md)에서 구분합니다.
 
 현재 의존성은 [pyproject.toml](pyproject.toml)과 [uv.lock](uv.lock)이 관리합니다. `requirements/*.txt` 방식을 별도로 채택하기 전에는 수동 관리 원본을 둘로 만들지 않습니다. 개발·CI·sidecar 빌드의 필요한 의존성을 보존하며 구조 변경에 라이브러리 업그레이드를 섞지 않습니다. `.gitignore`는 저장소 루트의 파일을 사용하고, Git 제외와 Docker·installer 배포 제외를 각각 확인합니다.
 

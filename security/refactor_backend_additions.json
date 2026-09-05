@@ -683,6 +683,116 @@
       "test_suppressions": {
         "tests/test_l4_pr_a_inventory.py": {}
       }
+    },
+    {
+      "commit": "6cd99aa41da5f9b411a7efc31d6a1f90b211cf57",
+      "feature_id": "AR-G3",
+      "reason": "Preserve packaged logging resource and host-handler, reloader, no-console sidecar regression coverage.",
+      "tracked_files": {
+        "backend/app/runtime/logging_config.py": "26bccb4b33c3ef611a3143a4897190aab49da016",
+        "backend/logging.ini": "6375154bc97770702aa4969aefd34b01780a0b1d",
+        "backend/tests/logging/test_runtime_logging.py": "5008b6adeba827e22948419c49fc0f08f0c1c6d3"
+      },
+      "test_nodes": [
+        "tests/logging/test_runtime_logging.py::test_container_and_both_pyinstaller_layouts_include_logging_resource",
+        "tests/logging/test_runtime_logging.py::test_contributor_server_and_reload_child_receive_the_same_logging_configuration[False]",
+        "tests/logging/test_runtime_logging.py::test_contributor_server_and_reload_child_receive_the_same_logging_configuration[True]",
+        "tests/logging/test_runtime_logging.py::test_explicit_root_level_without_handlers_is_preserved",
+        "tests/logging/test_runtime_logging.py::test_frozen_onefile_and_onedir_read_only_the_bundle_resource[_MEI12345]",
+        "tests/logging/test_runtime_logging.py::test_frozen_onefile_and_onedir_read_only_the_bundle_resource[sidecar/_internal]",
+        "tests/logging/test_runtime_logging.py::test_ini_is_consumed_and_invalid_configuration_fails_before_startup",
+        "tests/logging/test_runtime_logging.py::test_ini_preserves_uvicorn_defaults_and_root_warning_without_handlers",
+        "tests/logging/test_runtime_logging.py::test_installer_json_stdout_and_existing_redaction_are_unchanged",
+        "tests/logging/test_runtime_logging.py::test_missing_bundle_resource_keeps_content_free_sidecar_fatal_protocol",
+        "tests/logging/test_runtime_logging.py::test_noconsole_subprocess_with_missing_stdio_has_no_formatter_crash",
+        "tests/logging/test_runtime_logging.py::test_public_and_legacy_cli_keep_their_existing_asgi_target",
+        "tests/logging/test_runtime_logging.py::test_repeated_factories_preserve_embedding_handlers_levels_and_caplog",
+        "tests/logging/test_runtime_logging.py::test_sidecar_serve_health_and_shutdown_preserve_silent_streams_and_endpoint_protocol",
+        "tests/logging/test_runtime_logging.py::test_source_resource_is_independent_of_working_directory"
+      ],
+      "test_assertions": {
+        "tests/logging/test_runtime_logging.py": {
+          "process": [],
+          "test_ini_preserves_uvicorn_defaults_and_root_warning_without_handlers": [
+            "assert logging_config.uvicorn_logging_config() == LOGGING_CONFIG",
+            "assert result.returncode == 0, result.stderr",
+            "assert result.stdout == ''",
+            "assert result.stderr == ''"
+          ],
+          "test_repeated_factories_preserve_embedding_handlers_levels_and_caplog": [
+            "assert root.handlers == handlers",
+            "assert [handler.level for handler in root.handlers] == levels",
+            "assert [handler.formatter for handler in root.handlers] == formatters",
+            "assert root.level == logging.INFO",
+            "assert caplog.messages.count('retained diagnostic') == 1"
+          ],
+          "test_explicit_root_level_without_handlers_is_preserved": [
+            "assert root.level == logging.DEBUG",
+            "assert root.handlers == []"
+          ],
+          "test_source_resource_is_independent_of_working_directory": [
+            "assert logging_config.logging_config_path() == BACKEND / 'logging.ini'",
+            "assert logging_config.uvicorn_logging_config() == LOGGING_CONFIG"
+          ],
+          "test_frozen_onefile_and_onedir_read_only_the_bundle_resource": [
+            "assert logging_config.logging_config_path() == bundle / 'logging.ini'",
+            "assert logging_config.uvicorn_logging_config() == LOGGING_CONFIG",
+            "pytest.raises(logging_config.RuntimeLoggingConfigurationError, match='runtime_logging_configuration_missing')"
+          ],
+          "test_ini_is_consumed_and_invalid_configuration_fails_before_startup": [
+            "assert root.level == logging.ERROR",
+            "pytest.raises(logging_config.RuntimeLoggingConfigurationError, match='runtime_logging_configuration_invalid')"
+          ],
+          "test_noconsole_subprocess_with_missing_stdio_has_no_formatter_crash": [
+            "assert result.returncode == 0, result.stderr",
+            "assert result.stdout == 'completed\\n'",
+            "assert result.stderr == ''"
+          ],
+          "test_missing_bundle_resource_keeps_content_free_sidecar_fatal_protocol": [
+            "assert result.returncode == 1",
+            "assert result.stdout == ''",
+            "assert json.loads(result.stderr) == {'event': 'fatal', 'code': 'desktop_sidecar_startup_failed'}",
+            "assert str(tmp_path) not in result.stderr"
+          ],
+          "test_contributor_server_and_reload_child_receive_the_same_logging_configuration": [
+            "assert len(calls) == 1",
+            "assert kwargs['log_config'] == LOGGING_CONFIG",
+            "assert positional == ('app.runtime.contributor_backend:create_contributor_runtime_app_from_environment',)",
+            "assert kwargs['factory'] is True",
+            "assert kwargs['reload'] is True",
+            "assert positional == (app,)"
+          ],
+          "test_public_and_legacy_cli_keep_their_existing_asgi_target": [
+            "assert len(calls) == 2",
+            "assert args == ('app.public_main:app',)",
+            "assert kwargs == {'host': '0.0.0.0', 'port': 8080, 'reload': True, 'log_config': LOGGING_CONFIG}"
+          ],
+          "test_installer_json_stdout_and_existing_redaction_are_unchanged": [
+            "assert result.returncode == 0, result.stderr",
+            "assert json.loads(result.stdout) == expected",
+            "assert json.loads((tmp_path / 'runtime/installer-data-upgrade-result.json').read_text(encoding='utf-8')) == expected",
+            "assert '[REDACTED_OPENAI_API_KEY]' in result.stderr",
+            "assert 'x' * 24 not in result.stderr"
+          ],
+          "test_sidecar_serve_health_and_shutdown_preserve_silent_streams_and_endpoint_protocol": [
+            "assert result.returncode == 0, result.stderr",
+            "assert json.loads(result.stdout) == {'health': {'status': 'ok'}, 'shutdown': {'status': 'stopping'}, 'exit_code': 0, 'endpoint_removed': True}",
+            "assert result.stderr == ''"
+          ],
+          "test_container_and_both_pyinstaller_layouts_include_logging_resource": [
+            "assert 'COPY --chown=angmoo:angmoo backend/logging.ini ./' in dockerfile",
+            "assert '$loggingConfig = Join-Path $backendRoot \"logging.ini\"' in build",
+            "assert '$loggingConfigData = \"$loggingConfig;.\"' in build",
+            "assert '--add-data $loggingConfigData' in build",
+            "assert '$Layout -eq \"OneFile\"' in build",
+            "assert '\"--onefile\"' in build and '\"--onedir\"' in build",
+            "assert '--noconsole' in build"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/logging/test_runtime_logging.py": {}
+      }
     }
   ]
 }

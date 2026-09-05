@@ -1,7 +1,7 @@
 {
-  "edge_count": 1844,
-  "external_import_count": 2287,
-  "module_count": 682,
+  "edge_count": 1848,
+  "external_import_count": 2292,
+  "module_count": 683,
   "modules": [
     {
       "external_imports": [],
@@ -6604,6 +6604,7 @@
         "app.core.request_limits",
         "app.core.startup_security",
         "app.cruds.community",
+        "app.runtime.logging_config",
         "app.runtime.single_backend_components",
         "app.services.hosted_configuration"
       ],
@@ -7005,6 +7006,7 @@
         "app.domains.world_packages.infrastructure.sqlalchemy_import_commit",
         "app.runtime.component_workers",
         "app.runtime.configuration",
+        "app.runtime.logging_config",
         "app.runtime.memory.batch_runtime",
         "app.runtime.memory.shutdown",
         "app.runtime.memory_selection_provider",
@@ -7253,6 +7255,7 @@
         "app.domains.runtime.public",
         "app.public_main",
         "app.runtime.configuration",
+        "app.runtime.logging_config",
         "app.runtime.migrations.embedded_data",
         "app.runtime.persistence.runtime_data_path"
       ],
@@ -7282,6 +7285,7 @@
         "app.public_main",
         "app.runtime.configuration",
         "app.runtime.installer_update",
+        "app.runtime.logging_config",
         "app.runtime.migrations.embedded_data",
         "app.runtime.migrations.local_app_data",
         "app.runtime.persistence.runtime_data_path"
@@ -7485,6 +7489,19 @@
       ],
       "module": "app.runtime.installer_update",
       "path": "backend/app/runtime/installer_update.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "configparser",
+        "logging",
+        "pathlib",
+        "sys"
+      ],
+      "imports": [],
+      "module": "app.runtime.logging_config",
+      "path": "backend/app/runtime/logging_config.py",
       "wildcard_imports": []
     },
     {

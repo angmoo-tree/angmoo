@@ -15,7 +15,7 @@
     },
     {
       "path": "Dockerfile.backend",
-      "sha256": "c9e5c9cd974cd4f4d401f7c6dfd73e8aa63c9e0f5e71bb4f4688d93aaa7ecc47"
+      "sha256": "13be61204b3b075a14b2df40751fc5b3788408a9d22d30b7afe34447bec588f2"
     },
     {
       "path": "Dockerfile.frontend",
@@ -27,7 +27,7 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "8c92d99ebde0f706795f863823c415224d5bec037496e2d12ff1632b1ab2247d"
+      "sha256": "1e5388f75c4d7be751731c465be95ef3319264ebc08caf0103dca75ee442d221"
     },
     {
       "path": "backend/app/services/resident_tick_scheduler.py",
@@ -287,7 +287,7 @@
       "owner": "ER4",
       "path": "backend/app/public_main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "263cf711318879655e243a085e16175017dac657ff500a202b90d25934f434ab",
+      "source_sha256": "1e6d8acbb9534fe004ebe0e31e35c10827cc60a8d3a791a30545036739c8904b",
       "transition_pr": "ER4 PR J"
     },
     {
