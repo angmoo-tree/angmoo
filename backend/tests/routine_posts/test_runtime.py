@@ -24,13 +24,8 @@ from app.runtime.social.sqlalchemy_unit_of_work import (
 )
 from app.domains.social.public import OwnerReplyCommand, create_owner_reply
 from app.providers.gemini import build_generate_content_config
-from app.services import (
-    activity_state_contracts,
-    daily_activity_plans,
-    langgraph_resident,
-    routine_post_runtime,
-    world_character_contracts,
-)
+from app.services import activity_state_contracts, daily_activity_plans, routine_post_runtime, world_character_contracts
+from app.runtime.resident import langgraph as langgraph_resident
 from app.runtime.characters import management as agent_service
 from app.services import community as community_service
 from app.domains.routines.contracts.activity_policy import ActivityPolicy

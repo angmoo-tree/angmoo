@@ -123,10 +123,8 @@ from app.services import community as community_service
 from app.core.context_text import neutralize_context_text
 from app.services import maintenance as maintenance_service
 from app.services.direct_llm import DirectLlmDeferred
-from app.services.langgraph_resident import (
-    LangGraphResidentContext,
-    run_resident_langgraph,
-)
+from app.runtime.resident.context import LangGraphResidentContext
+from app.runtime.resident.langgraph import run_resident_langgraph
 from app.services.runtime_boundary import (
     OpenClawGatewayClient,
     OpenClawGatewayError,

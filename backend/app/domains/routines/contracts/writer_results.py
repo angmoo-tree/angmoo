@@ -16,3 +16,7 @@ class SavedStateContext(Protocol):
 
 JsonContextBuilder = Callable[[Any], dict[str, Any] | None]
 ValidationSummaryReader = Callable[[BaseException], list[dict[str, str]] | None]
+
+
+class ExecutionCallTrace(Protocol):
+    calls: list[dict[str, Any]]

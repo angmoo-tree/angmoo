@@ -1,4 +1,6 @@
 from __future__ import annotations
+from app.runtime.resident import langgraph_queries
+from app.domains.routines.policies import execution_results
 from app.domains.routines.contracts.context_reads import RelationshipContextWorkflows, WritingContextWorkflows, ConversationWorkflows
 from app.domains.routines.service import relationship_context as relationship_context_service
 from app.domains.routines.service import writing_context as writing_context_service
@@ -196,7 +198,7 @@ from app.domains.routines.contracts.resident import ResidentGraphState as _Resid
 from app.services.world_feed_runtime import run_world_keyword_feed
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("app.services.langgraph_resident")
 
 
 _PUBLIC_ACTIONS = {"post", "reply", "like", "repost", "follow", "unfollow"}
@@ -212,12 +214,33 @@ def _langgraph_recursion_limit() -> int:
     return max(settings.langgraph_max_steps_per_run * 3, 48)
 
 
-
 def _clip(value: Any, max_chars: int) -> str:
     text = neutralize_context_text(str(value or "")).strip()
     if len(text) <= max_chars:
         return text
     return text[: max(0, max_chars - 3)].rstrip() + "..."
+
+
+_topic_arc_last_post_created_at = langgraph_queries._topic_arc_last_post_created_at
+_target_character_following = langgraph_queries._target_character_following
+_today_own_root_posts_for_coverage = partial(langgraph_queries._today_own_root_posts_for_coverage, clip=_clip)
+_today_root_writing_memory_for_prompt = partial(langgraph_queries._today_root_writing_memory_for_prompt, clip=_clip)
+_recent_own_root_posts = partial(langgraph_queries._recent_own_root_posts, clip=_clip)
+_conversation_context_post = langgraph_queries._conversation_context_post
+_character_handle_by_id = partial(langgraph_queries._character_handle_by_id, clip=_clip)
+_character_for_handle = langgraph_queries._character_for_handle
+_relationship_source_post_available = langgraph_queries._relationship_source_post_available
+_character_already_replied_to_target = langgraph_queries._character_already_replied_to_target
+_brief_hash = execution_results._brief_hash
+_action_signature = execution_results._action_signature
+_normalize_reply_body_for_duplicate = execution_results._normalize_reply_body_for_duplicate
+_skipped_public_action = execution_results._skipped_public_action
+_record_topic_arc_progress = partial(execution_results._record_topic_arc_progress, coerce_topic_arc=lambda value: _coerce_topic_arc_payload(value))
+_reply_body = partial(execution_results._reply_body, reply_task_id=lambda **kwargs: _reply_task_id(**kwargs))
+_successful_action_results = execution_results._successful_action_results
+_writing_success_post_id = execution_results._writing_success_post_id
+_inbox_lane_planner_invoked = execution_results._inbox_lane_planner_invoked
+_inbox_lane_target_post_id = execution_results._inbox_lane_target_post_id
 
 
 _relationship_context_workflows = RelationshipContextWorkflows(
@@ -376,54 +399,6 @@ _planner_results_summary = partial(planner_results_service._planner_results_summ
 _compile_write_tasks = partial(writing_tasks_service._compile_write_tasks, clip=_clip, topic_workflows=_topic_arc_workflows)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def _decrypt_api_key(credential: models.LlmCredential) -> str:
     try:
         return CredentialResolver.resolve_llm_credential(
@@ -432,12 +407,6 @@ def _decrypt_api_key(credential: models.LlmCredential) -> str:
         ).reveal()
     except CredentialResolutionError as exc:
         raise DirectLlmError("credential key cannot be decrypted") from exc
-
-
-
-
-
-
 
 
 def _latest_topic_arc_event(
@@ -475,32 +444,6 @@ def _latest_topic_arc_event(
         if payload and payload.get("arc_id") == arc_id:
             return event
     return None
-
-
-def _topic_arc_last_post_created_at(
-    ctx: LangGraphResidentContext, last_post_id: str | None
-) -> datetime | None:
-    if not last_post_id:
-        return None
-    db_get = getattr(getattr(ctx, "db", None), "get", None)
-    if not callable(db_get):
-        return None
-    try:
-        post = db_get(models.Post, last_post_id)
-    except Exception:
-        logger.debug(
-            "Failed to load topic arc last post for continuity context",
-            exc_info=True,
-            extra={"last_post_id": last_post_id, "character_id": ctx.character.id},
-        )
-        return None
-    if post is None or getattr(post, "author_character_id", None) != ctx.character.id:
-        return None
-    return _aware_datetime(getattr(post, "created_at", None))
-
-
-
-
 
 
 def _daypart_history(ctx: LangGraphResidentContext) -> list[dict[str, Any]]:
@@ -547,181 +490,6 @@ def _daypart_history_for_prompt(ctx: LangGraphResidentContext) -> list[dict[str,
         }
         for event in _daypart_history(ctx)
     ]
-
-
-
-
-
-
-def _target_character_following(
-    ctx: LangGraphResidentContext, target_character_id: str | None
-) -> bool:
-    target_id = str(target_character_id or "").strip()
-    if not target_id:
-        return False
-    return (
-        ctx.db.scalar(
-            select(models.ProfileFollow.id)
-            .where(
-                models.ProfileFollow.follower_character_id == ctx.character.id,
-                models.ProfileFollow.target_character_id == target_id,
-            )
-            .limit(1)
-        )
-        is not None
-    )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def _today_own_root_posts_for_coverage(
-    ctx: LangGraphResidentContext,
-) -> list[dict[str, Any]]:
-    db_scalars = getattr(getattr(ctx, "db", None), "scalars", None)
-    if not callable(db_scalars):
-        return []
-    current_kst = ctx.run_started_at.astimezone(agent_activity_policy.APP_TIMEZONE)
-    start_kst = datetime.combine(
-        current_kst.date(),
-        datetime.min.time(),
-        tzinfo=agent_activity_policy.APP_TIMEZONE,
-    )
-    start_utc = start_kst.astimezone(UTC)
-    end_utc = ctx.run_started_at.astimezone(UTC)
-    try:
-        posts = list(
-            db_scalars(
-                select(models.Post)
-                .where(models.Post.author_character_id == ctx.character.id)
-                .where(models.Post.created_at >= start_utc)
-                .where(models.Post.created_at <= end_utc)
-                .where(models.Post.reply_to_post_id.is_(None))
-                .where(models.Post.repost_of_post_id.is_(None))
-                .where(models.Post.post_type == "post")
-                .where(models.Post.deleted_at.is_(None))
-                .where(models.Post.report_hidden_at.is_(None))
-                .order_by(models.Post.created_at.desc(), models.Post.id.desc())
-                .limit(20)
-            )
-        )
-    except Exception:
-        logger.debug(
-            "Failed to load today own root posts for coverage",
-            exc_info=True,
-            extra={"character_id": ctx.character.id},
-        )
-        return []
-    return [
-        {
-            "post_id": post.id,
-            "coverage_text": " ".join(
-                part
-                for part in (
-                    _clip(post.title, 240),
-                    _clip(post.topic_signature, 500),
-                    _clip(post.novelty_basis, 500),
-                    _clip(post.body, 1200),
-                )
-                if part
-            ),
-        }
-        for post in posts
-    ]
-
-
-def _today_root_writing_memory_for_prompt(
-    ctx: LangGraphResidentContext,
-) -> list[dict[str, Any]]:
-    db_scalars = getattr(getattr(ctx, "db", None), "scalars", None)
-    if not callable(db_scalars):
-        return []
-    start_utc, end_utc = _today_kst_window(ctx)
-    items: list[dict[str, Any]] = []
-    try:
-        posts = list(
-            db_scalars(
-                select(models.Post)
-                .where(models.Post.author_character_id == ctx.character.id)
-                .where(models.Post.created_at >= start_utc)
-                .where(models.Post.created_at <= end_utc)
-                .where(models.Post.reply_to_post_id.is_(None))
-                .where(models.Post.repost_of_post_id.is_(None))
-                .where(models.Post.post_type == "post")
-                .where(models.Post.deleted_at.is_(None))
-                .where(models.Post.report_hidden_at.is_(None))
-                .order_by(models.Post.created_at.desc(), models.Post.id.desc())
-                .limit(12)
-            )
-        )
-    except Exception:
-        logger.debug(
-            "Failed to load today root posts for writing memory",
-            exc_info=True,
-            extra={"character_id": ctx.character.id},
-        )
-        posts = []
-    for post in posts:
-        created_at = _aware_datetime(getattr(post, "created_at", None))
-        items.append(
-            {
-                "kind": "root_post",
-                "post_id": post.id,
-                "created_at": created_at.isoformat() if created_at else None,
-                "title": _clip(post.title, 160),
-                "summary": _clip(post.novelty_basis or post.topic_signature, 300),
-                "topic_signature": _clip(post.topic_signature, 300),
-                "topic_key": None,
-                "source_post_id": None,
-                "_sort_at": created_at or datetime.min.replace(tzinfo=UTC),
-            }
-        )
-    items.sort(key=lambda item: item.get("_sort_at"), reverse=True)
-    return [
-        {key: value for key, value in item.items() if key != "_sort_at"}
-        for item in items[:12]
-    ]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def _yesterday_handoff_context(ctx: LangGraphResidentContext) -> list[dict[str, Any]]:
@@ -772,63 +540,6 @@ def _yesterday_handoff_context(ctx: LangGraphResidentContext) -> list[dict[str, 
         if len(items) >= 8:
             break
     return items
-
-
-
-
-
-
-
-
-def _recent_own_root_posts(ctx: LangGraphResidentContext) -> list[dict[str, Any]]:
-    posts = list(
-        ctx.db.scalars(
-            select(models.Post)
-            .where(models.Post.author_character_id == ctx.character.id)
-            .where(models.Post.reply_to_post_id.is_(None))
-            .where(models.Post.repost_of_post_id.is_(None))
-            .where(models.Post.post_type == "post")
-            .where(models.Post.deleted_at.is_(None))
-            .order_by(models.Post.created_at.desc(), models.Post.id.desc())
-            .limit(8)
-        )
-    )
-    return [
-        {
-            "post_id": post.id,
-            "title": _clip(post.title, 160),
-            "topic_signature": _clip(post.topic_signature, 240),
-            "novelty_basis": _clip(post.novelty_basis, 240),
-            "created_at": post.created_at.isoformat(),
-        }
-        for post in posts
-    ]
-
-
-
-
-def _conversation_context_post(db: Session, post_id: str | None) -> models.Post | None:
-    if not post_id:
-        return None
-    return db.scalar(
-        select(models.Post)
-        .where(
-            models.Post.id == post_id,
-            models.Post.deleted_at.is_(None),
-            models.Post.report_hidden_at.is_(None),
-        )
-        .limit(1)
-    )
-
-
-
-
-
-
-
-
-
-
 
 
 def _compact_daypart_summary_event(
@@ -1102,47 +813,6 @@ def _finalize_closed_dayparts(ctx: LangGraphResidentContext) -> dict[str, Any]:
     return result
 
 
-def _character_handle_by_id(ctx: LangGraphResidentContext, character_id: str | None) -> str | None:
-    if not character_id:
-        return None
-    character = community_crud.get_character(ctx.db, character_id)
-    if character is None:
-        return None
-    return _clip(getattr(character, "handle", ""), 80) or None
-
-
-def _character_for_handle(ctx: LangGraphResidentContext, handle: str | None) -> models.Character | None:
-    normalized = str(handle or "").strip().removeprefix("@").lower()
-    if not normalized:
-        return None
-    return ctx.db.scalar(
-        select(models.Character)
-        .where(
-            models.Character.handle == normalized,
-            models.Character.deleted_at.is_(None),
-            models.Character.moderation_status != "suspended",
-        )
-        .limit(1)
-    )
-
-
-def _relationship_source_post_available(
-    ctx: LangGraphResidentContext, source_post_id: str | None
-) -> models.Post | None:
-    if not source_post_id:
-        return None
-    return ctx.db.scalar(
-        select(models.Post)
-        .where(
-            models.Post.id == source_post_id,
-            models.Post.deleted_at.is_(None),
-            models.Post.report_hidden_at.is_(None),
-            models.Post.visibility == "public",
-        )
-        .limit(1)
-    )
-
-
 def _relationship_point_to_state(
     ctx: LangGraphResidentContext,
     point: models.AgentRelationshipPoint,
@@ -1215,10 +885,6 @@ def _pending_relationship_points_for_state(
     return result
 
 
-
-
-
-
 def _record_feed_seed_selected(
     ctx: LangGraphResidentContext, selected_feed_seed: dict[str, Any]
 ) -> None:
@@ -1232,26 +898,6 @@ def _record_feed_seed_selected(
         or "feed seed selected",
         payload=selected_feed_seed,
     )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def _seen_daypart_feed_post_ids(ctx: LangGraphResidentContext) -> set[str]:
@@ -1319,12 +965,6 @@ def _record_daypart_event(
     )
     ctx.db.add(event)
     ctx.db.commit()
-
-
-
-
-
-
 
 
 def _llm_context(
@@ -1427,32 +1067,6 @@ async def _call_json(
         raise
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 async def _build_lore_query_result(
     ctx: LangGraphResidentContext,
     tracker: RunLlmTracker,
@@ -1548,40 +1162,6 @@ async def _build_lore_query_result(
     return result
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def _post_writer_plan_error_payload(
     exc: DirectLlmJsonError, *, node: str, lane: str
 ) -> dict[str, Any]:
@@ -1599,14 +1179,6 @@ def _post_writer_plan_error_payload(
     if diagnostics:
         payload["json_error_diagnostics"] = diagnostics
     return payload
-
-
-
-
-
-
-
-
 
 
 async def _call_post_writer_planner(
@@ -1636,14 +1208,6 @@ async def _call_post_writer_planner(
             error=error,
         )
     return _normalize_post_writer_plan(output, post_task)
-
-
-
-
-
-
-
-
 
 
 async def _call_reply_writer(
@@ -1757,20 +1321,6 @@ async def _call_post_writer(
     )
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def _state_recorder_provider_error_hint(exc: BaseException) -> str:
     existing = getattr(exc, "provider_error_hint", None)
     if isinstance(existing, str) and existing.strip():
@@ -1823,8 +1373,6 @@ def _llm_failure_meta(exc: BaseException) -> dict[str, Any]:
     return meta
 
 
-
-
 def _state_recorder_length_validation_summary(
     exc: BaseException,
 ) -> list[dict[str, str]] | None:
@@ -1832,12 +1380,6 @@ def _state_recorder_length_validation_summary(
         summary = getattr(exc, "validation_summary", None)
         return summary if isinstance(summary, list) else None
     return _validation_summary_from_exception(exc)
-
-
-
-
-
-
 
 
 def _log_state_save_suppressed(
@@ -1852,8 +1394,6 @@ def _log_state_save_suppressed(
         reason=reason,
         result=_clip(result, 1000),
     )
-
-
 
 
 async def _run_state_recorder(
@@ -2007,49 +1547,6 @@ async def _run_state_recorder(
     }
 
 
-
-
-
-
-
-
-
-
-def _character_already_replied_to_target(
-    db: Session, *, character_id: str, post_id: str | None
-) -> bool:
-    if not post_id:
-        return False
-    existing_reply_id = db.scalar(
-        select(models.Post.id)
-        .where(
-            models.Post.author_character_id == character_id,
-            models.Post.reply_to_post_id == post_id,
-            models.Post.post_type == "reply",
-            models.Post.deleted_at.is_(None),
-            models.Post.report_hidden_at.is_(None),
-        )
-        .limit(1)
-    )
-    return existing_reply_id is not None
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def _planner_error_payload(
     exc: DirectLlmJsonError, *, node: str, lane: str
 ) -> dict[str, Any]:
@@ -2078,40 +1575,6 @@ def _planner_json_failed_plan(
     plan["planner_error"] = _planner_error_payload(exc, node=node, lane=lane)
     plan["writing"]["skip_reason"] = "planner_json_failed"
     return plan
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def _supervisor_route(state: _ResidentGraphState) -> str:
@@ -3560,23 +3023,6 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
     return workflow.compile()
 
 
-def _brief_hash(*parts: Any) -> str:
-    text = "|".join(str(part or "") for part in parts)
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:32]
-
-
-def _action_signature(
-    *,
-    run_id: str,
-    scope: str,
-    action_type: str,
-    target_id: str | None,
-    brief_hash: str | None,
-) -> str:
-    raw = "|".join([run_id, scope, action_type, target_id or "", brief_hash or ""])
-    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
-
-
 def _reserve_public_action(
     ctx: LangGraphResidentContext,
     *,
@@ -3703,40 +3149,6 @@ def _declared_action_subjective_context(
     )
 
 
-def _normalize_reply_body_for_duplicate(value: str) -> str:
-    text = re.sub(r"\s+", " ", value.strip())
-    text = re.sub(r"([.!?…~ㅋㅎㅠㅜ])\1+", r"\1", text)
-    return text.casefold()
-
-
-def _skipped_public_action(
-    *,
-    action_type: str,
-    target_post_id: str | None,
-    failure_class: str,
-    writer_validation: dict[str, Any] | None = None,
-    blocked_field: str | None = None,
-    blocked_category: str | None = None,
-    message: str | None = None,
-) -> dict[str, Any]:
-    payload = {
-        "status": "skipped",
-        "action_type": action_type,
-        "target_post_id": target_post_id,
-        "result": {},
-        "failure_class": failure_class,
-    }
-    if writer_validation is not None:
-        payload["writer_validation"] = writer_validation
-    if blocked_field is not None:
-        payload["blocked_field"] = blocked_field
-    if blocked_category is not None:
-        payload["blocked_category"] = blocked_category
-    if message is not None:
-        payload["message"] = message
-    return payload
-
-
 def _prompt_injection_output_block(
     fields: dict[str, str],
 ) -> tuple[str, prompt_safety.PromptSafetyResult] | None:
@@ -3746,71 +3158,6 @@ def _prompt_injection_output_block(
             return field, result
     return None
 
-
-def _record_topic_arc_progress(
-    ctx: LangGraphResidentContext,
-    *,
-    writing_plan: dict[str, Any],
-    post_id: str,
-) -> dict[str, Any] | None:
-    topic_arc = _coerce_topic_arc_payload(writing_plan.get("topic_arc"))
-    if not topic_arc:
-        return None
-    return {
-        "status": "ignored",
-        "reason": "topic_arc_disabled_v8",
-        "arc_id": topic_arc.get("arc_id"),
-    }
-
-
-def _reply_body(
-    writing: dict[str, Any], *, scope: str, index: int, post_id: str
-) -> tuple[str | None, str | None, dict[str, Any]]:
-    task_id = _reply_task_id(scope=scope, index=index, post_id=post_id)
-    writer_validation: dict[str, Any] = {
-        "task_id": task_id,
-        "target_post_id": post_id,
-        "repair_attempted": False,
-        "repair_succeeded": False,
-    }
-    task_result = _reply_task_results_by_id(writing).get(task_id)
-    if isinstance(task_result, dict):
-        writer_validation.update(
-            {
-                "writer_node": task_result.get("writer_node"),
-                "repair_attempted": bool(task_result.get("repair_attempted")),
-                "repair_succeeded": bool(task_result.get("repair_succeeded")),
-            }
-        )
-        if str(task_result.get("post_id") or "").strip() != post_id:
-            return None, "reply_body_post_id_mismatch", writer_validation
-        body = str(task_result.get("body") or "").strip()
-        if body:
-            return body, None, writer_validation
-        return None, "reply_body_missing", writer_validation
-
-    matched_scope_index = False
-    for item in writing.get("reply_bodies", []) if isinstance(writing, dict) else []:
-        if (
-            isinstance(item, dict)
-            and item.get("scope") == scope
-            and int(item.get("index", -1)) == index
-        ):
-            matched_scope_index = True
-            if str(item.get("post_id") or "").strip() != post_id:
-                continue
-            body = str(item.get("body") or "").strip()
-            if body:
-                writer_validation.update(
-                    {
-                        "task_id": item.get("task_id") or task_id,
-                        "writer_node": item.get("writer_node") or "legacy_reply_bodies",
-                    }
-                )
-                return body, None, writer_validation
-    if matched_scope_index:
-        return None, "reply_body_post_id_mismatch", writer_validation
-    return None, "reply_body_missing", writer_validation
 
 def _reply_proposal_response(
     writing: dict[str, Any], *, scope: str, index: int, post_id: str
@@ -3853,7 +3200,6 @@ def _reply_proposal_response(
         ),
         None,
     )
-
 
 
 def _execute_planned_action(
@@ -4355,21 +3701,6 @@ def _execute_writing_plan(
         )
 
 
-def _successful_action_results(state: _ResidentGraphState, action_type: str) -> list[dict[str, Any]]:
-    publish_result = state.get("publish_result", {})
-    actions = publish_result.get("actions") if isinstance(publish_result, dict) else []
-    if not isinstance(actions, list):
-        return []
-    return [
-        action
-        for action in actions
-        if isinstance(action, dict)
-        and action.get("action_type") == action_type
-        and action.get("status") in {"succeeded", "reused"}
-        and isinstance(action.get("result"), dict)
-    ]
-
-
 def _relationship_point_expiry(ctx: LangGraphResidentContext, kind: str) -> datetime:
     hours = 72
     if kind == "mention_received":
@@ -4467,14 +3798,6 @@ def _create_relationship_point_from_post(
         "source_character_id": source_character_id,
         "source_post_id": source_post_id,
     }
-
-
-def _writing_success_post_id(state: _ResidentGraphState) -> str | None:
-    for action in _successful_action_results(state, "post"):
-        result = action.get("result")
-        if isinstance(result, dict) and result.get("post_id"):
-            return str(result["post_id"])
-    return None
 
 
 def _record_relationship_points_after_publish(
@@ -4609,44 +3932,6 @@ _INBOX_LANE_PRECOMPLETED_NODES = [
     "RelationshipPointRecorder",
     "StateRecorder",
 ]
-
-
-
-
-def _inbox_lane_planner_invoked(tracker: RunLlmTracker) -> bool:
-    return any(
-        call.get("lane") == "inbox_action_planner" for call in tracker.calls
-    )
-
-
-def _inbox_lane_target_post_id(
-    *,
-    selected_actions: list[dict[str, Any]],
-    action_results: list[dict[str, Any]],
-    observation_items: list[dict[str, Any]],
-) -> str | None:
-    item_by_notification_id = {
-        int(item["notification_id"]): item
-        for item in observation_items
-        if item.get("notification_id") is not None
-    }
-    for index, result in enumerate(action_results):
-        if result.get("status") not in {"succeeded", "reused"}:
-            continue
-        action = selected_actions[index] if index < len(selected_actions) else {}
-        post_id = str(action.get("post_id") or "").strip()
-        if post_id:
-            return post_id
-        notification_id = action.get("notification_id")
-        try:
-            item = item_by_notification_id.get(int(notification_id))
-        except (TypeError, ValueError):
-            item = None
-        if isinstance(item, dict):
-            source_post_id = str(item.get("source_post_id") or "").strip()
-            if source_post_id:
-                return source_post_id
-    return None
 
 
 async def _run_combined_inbox_lane(

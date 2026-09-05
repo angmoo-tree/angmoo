@@ -1103,3 +1103,16 @@ LG-B5 최종 후보 검증: **378 passed / 기존 warnings2 / 115.77초**. 원�
 읽기는 원래 판단 지점에서 수행하며 follow가 허용되지 않거나 source가 없으면 후속 읽기를 생략한다. 대화 부모 순환 차단·조회 실패·마지막6turn과 전날문맥 충족은 원래의 실제 함수에 남는다. B5 Point 상태와 B7 Memory 저장/조회 구현은 복제하지 않고 부모 통합 대상이다. nullable state의 타입만 기존 getattr 동작에 맞게 표현했다. 남은 foreign SQL projection과 graph/provider 조립은 LG-C 실제 소유 전환에서 마무리한다.
 
 LG-B6 최종 후보 검증: **378 passed / 기존 warnings2 / 113.50초**. 원래6보존진단 모두0(protected2139/current2263), 경계762/2564/206legacy, L4 762/14/97, deferred22 PASS. 최초 도입은 실제 제품4파일이며 신규 노드0·기존 테스트 변경0이다. 원본 frozen과 source ledger는 그대로 유지했고 부모의 첫 도입 증거 캡처는 별도로 남아 있다.
+
+
+## AR-B4 LG-C — 실제 조회·graph 실행과 테스트 소유 전환
+
+실제 foreign read/projection10함수는 runtime/resident/langgraph_queries로, 순수 실행 식별자·결과 대응10함수는 Routines execution_results로 이전했다. 같은 구체 모델·Character lookup·timezone 및 명시 helper 인자만 복원하면 원문 전체 AST가 같다. 남은 graph/provider/여러 업무 실행53개 정의는 runtime/resident/langgraph.py에 원문 AST 그대로 있으며, 기존 로깅 category는 명시 문자열로 유지한다. 옛 services/langgraph_resident.py를 제거하고 실제소비자는 runtime/context/GraphState 계약의 defining 경로를 사용한다.
+
+원래 테스트의 LG 관련153함수와 공통 helper10개를 tests/routines/test_resident_graph.py로 옮겼다. 수집된 LG cases166개와 옛 파일의 foreign-owner20개가 원래186개를 보존한다. 원래 DirectLlm fixture18개·AgentWriting1개와 sibling f751611의 readiness1개는 합류 전 원래 파일에 둔다. 따라서 credential synthetic fixture/allowlist/immutable checkpoint 증거를 옮기거나 늘리지 않는다. 원래 assertion과 suppression은 유지하며, 이미 고정된 overload helper/node 지도도 보존한다. 초기 기존 LG·소유별6회귀를 합쳐 **192 passed / 6.72초**다.
+
+보존지도는 원래294LG 정의의 실제목적지를 모두 잇는다. 기존 Memory/공통clip과 Point의 원문 잔여는 함수명·소유·종료조건으로 고정하며 부모 B5/B7 통합이 이미 구현된 서비스를 연결해야 닫힌다. LG source 준비와 GitHub 머지/전체B8 완료를 구분한다.
+
+LG-C 최종 검증: 확장 기존 회귀 **428 passed / 기존 PostgreSQL1 skipped / 기존 warnings3 / 189.69초**. 당시 실패3개는 제거한 LG 파일의 검사 경로2곳이었으며 실제 runtime 경로로 수정한 뒤 해당 아키텍처 검사 **8 passed / 6.20초**를 확인했다. 매개변수 테스트2함수는 frozen에 수집된 정확15노드로 이동지도를 보완했다. 원래6보존진단 source/split/assertion/suppression/API·ORM/node는 전부0(protected2139/current2263), 경계764/2579/205legacy·L4 764/14/97·deferred22 PASS다. 신규 노드0이며 graph 테스트166case는 기존 노드의 위치만 이전했다. 비밀 예외 metadata25개도 그대로 PASS다.
+
+`scripts/verify_m4_contracts.py`의 GraphState 소비는 실제 계약으로 연결했지만, 독립 실행의 옛 148operations/120paths/182schemas snapshot은 현재196/160/266과 달라 실패한다. 이 역사적 baseline을 재작성하지 않았고 현재 source의 API·ORM 보존은 위의 원래6검사에서 따로 동일함을 확인했다. stock 전체 게이트는 부모 최초 source 도입 증거의 선형 합류 뒤에 수행한다.

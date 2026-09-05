@@ -712,3 +712,12 @@ Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥�
 `service/relationship_context.py`는 현재 follow 상태와 관찰한 기억을 바탕으로 허용된 관계 행동 후보를 고릅니다. 이미 답한 글의 reply 항목을 제외할 때도 원래 읽기 조건을 유지합니다. `service/conversation_context.py`는 같은 Session의 nullable 게시글 조회로 대화의 root를 찾고, 기존 여섯 turn 한도와 작성자 범위로 문맥을 만듭니다. 끊어진 부모·순환·조회 실패는 원래 규칙으로 처리합니다.
 
 `service/writing_context.py`는 현재 Daypart와 전날 이월 문맥을 선택하고 이미 게시된 글이 그 문맥을 충족했는지 표현합니다. 실제 Memory·Social 읽기는 `contracts/context_reads.py`의 필요한 협력으로 연결하며, 현재 실행이 가진 Session·값·조회 순서를 사용합니다. 자기 ActivityLog와 독립 주제는 실제 Routines 서비스가 소유합니다. Point 저장·관계 변경·Memory 이벤트 저장을 이 입력 선택 서비스에 복제하지 않습니다.
+
+
+### Graph 실행과 다른 업무의 읽기 협력
+
+`runtime/resident/langgraph.py`는 실제 graph 구성, provider 호출, 공개 행동·기억·상태 저장을 연결하는 실행 조립입니다. Routines의 실제 service/policies를 사용하고, 여러 업무의 commit·rollback·완료 후 처리 순서를 유지합니다. `runtime/resident/langgraph_queries.py`는 Social·Character를 같은 Session에서 읽어 활동에 필요한 문맥을 제공합니다. 원래 조회마다 다른 공개 범위·작성자·시간 경계·정렬·개수 제한을 하나의 느슨한 공통 조회로 합치지 않습니다.
+
+`policies/execution_results.py`는 원래 실행 식별자와 답글 결과 대응, 성공한 행동의 근거 선택을 담당합니다. 실제 provider 호출과 저장은 하지 않습니다. Graph의 규모 자체를 기준으로 전달 파일을 추가하지 않으며, 업무 판단과 실행을 연결하는 역할을 기준으로 나눕니다. 남은 Memory·Point·Lore의 원래 호출은 이미 구현된 별도 소유 source와 순차 통합하는 항목이며, 해당 구현을 다시 만들지 않습니다.
+
+실제 graph 테스트는 `tests/routines/test_resident_graph.py`에 있습니다. 과거 파일에 함께 있던 DirectLlm·AgentWriting·AgentRun 검사는 원본과 fixture를 보존하여 해당 소유 전환에서 정리합니다. 전체 API/ORM 계약과 원본 source·assertion·node 보존은 별도의 통합 검증에서 확인합니다.

@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import create_engine, event, literal, select
 from sqlalchemy.orm import Session
 
-from app.services import langgraph_resident as resident
+from app.runtime.resident import langgraph as resident
 
 
 def _context(db):

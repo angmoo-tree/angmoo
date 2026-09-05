@@ -301,6 +301,54 @@
           "importer": "app.runtime.characters.management"
         },
         {
+          "importer": "app.runtime.resident.langgraph",
+          "imported": "app.cruds.agent_runs"
+        },
+        {
+          "importer": "app.runtime.resident.langgraph",
+          "imported": "app.cruds.agents"
+        },
+        {
+          "importer": "app.runtime.resident.langgraph",
+          "imported": "app.cruds.community"
+        },
+        {
+          "importer": "app.runtime.resident.langgraph",
+          "imported": "app.models"
+        },
+        {
+          "importer": "app.runtime.resident.langgraph",
+          "imported": "app.schemas"
+        },
+        {
+          "importer": "app.runtime.resident.langgraph",
+          "imported": "app.services.character_lore"
+        },
+        {
+          "importer": "app.runtime.resident.langgraph",
+          "imported": "app.services.community"
+        },
+        {
+          "importer": "app.runtime.resident.langgraph",
+          "imported": "app.services.direct_llm"
+        },
+        {
+          "importer": "app.runtime.resident.langgraph",
+          "imported": "app.services.langgraph_social_apply"
+        },
+        {
+          "importer": "app.runtime.resident.langgraph",
+          "imported": "app.services.post_image_generation"
+        },
+        {
+          "importer": "app.runtime.resident.langgraph",
+          "imported": "app.services.prompt_safety"
+        },
+        {
+          "importer": "app.runtime.resident.langgraph",
+          "imported": "app.services.world_feed_runtime"
+        },
+        {
           "imported": "app.models",
           "importer": "app.runtime.world_characters.cleanup"
         },
@@ -390,10 +438,6 @@
         },
         {
           "imported": "app.services.direct_llm",
-          "importer": "app.services.agent_runs"
-        },
-        {
-          "imported": "app.services.langgraph_resident",
           "importer": "app.services.agent_runs"
         },
         {
@@ -503,54 +547,6 @@
         {
           "imported": "app.services.world_feed_search",
           "importer": "app.services.feed_reaction_planner"
-        },
-        {
-          "imported": "app.cruds.agent_runs",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.cruds.agents",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.cruds.community",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.services.character_lore",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.services.community",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.services.direct_llm",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.services.langgraph_social_apply",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.services.post_image_generation",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.services.prompt_safety",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.services.world_feed_runtime",
-          "importer": "app.services.langgraph_resident"
         },
         {
           "imported": "app.models",
@@ -1037,6 +1033,7 @@
       "app.domains.routines.policies",
       "app.domains.routines.policies.action_matching",
       "app.domains.routines.policies.activity_state",
+      "app.domains.routines.policies.execution_results",
       "app.domains.routines.policies.handoff_coverage",
       "app.domains.routines.policies.planning",
       "app.domains.routines.policies.resident_clock",
@@ -1940,14 +1937,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.world_characters.contracts.runtime_modes",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.services.local_bot",
         "target": "app.domains.identity.service.demo_access",
         "owner_stage": "AR-B8-A",
@@ -2198,14 +2187,6 @@
       {
         "importer": "app.models",
         "target": "app.domains.social.models.subjective_context",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.social.contracts.subjective_context",
         "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
         "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
         "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
@@ -2636,14 +2617,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.contracts.resident",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing not-yet-migrated activity runtime/CRUD uses the identical owner clock or pure graph-state contract. All policy is in the canonical module; no new legacy body is introduced.",
-        "removal_condition": "Switch remaining agent-run/LLM graph/activity CRUD roles in later B4-C slices and remove this exact legacy consumer edge.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.schemas",
         "target": "app.domains.routines.schemas.runs",
         "owner_stage": "AR-G5",
@@ -2718,22 +2691,6 @@
       {
         "importer": "app.services.community",
         "target": "app.domains.routines.service.feed_cues",
-        "owner_stage": "AR-B4-C",
-        "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
-        "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.repository.public_action_executions",
-        "owner_stage": "AR-B4-C",
-        "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
-        "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.service.public_action_executions",
         "owner_stage": "AR-B4-C",
         "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
         "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
@@ -2913,222 +2870,6 @@
         "owner_stage": "AR-B5",
         "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
         "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.policies.topic_arc_roles",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing graph uses the identical actual provider schemas and role validator after ownership extraction; no wrapper implementation.",
-        "removal_condition": "Move actual graph workflow to runtime/resident and close this exact legacy consumer in LG-C.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.schemas.resident_planning",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing graph uses the identical actual provider schemas and role validator after ownership extraction; no wrapper implementation.",
-        "removal_condition": "Move actual graph workflow to runtime/resident and close this exact legacy consumer in LG-C.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.policies.action_matching",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing resident execution consumes the actual planning/output rules after full body extraction; no copied implementation or wrapper.",
-        "removal_condition": "Move remaining resident graph/runtime workflows and remove this exact old services consumer in LG-C.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.policies.handoff_coverage",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing resident execution consumes the actual planning/output rules after full body extraction; no copied implementation or wrapper.",
-        "removal_condition": "Move remaining resident graph/runtime workflows and remove this exact old services consumer in LG-C.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.policies.topic_dates",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing resident execution consumes the actual planning/output rules after full body extraction; no copied implementation or wrapper.",
-        "removal_condition": "Move remaining resident graph/runtime workflows and remove this exact old services consumer in LG-C.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.policies.writer_outputs",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing resident execution consumes the actual planning/output rules after full body extraction; no copied implementation or wrapper.",
-        "removal_condition": "Move remaining resident graph/runtime workflows and remove this exact old services consumer in LG-C.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.policies.writing_contract",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing resident execution consumes the actual planning/output rules after full body extraction; no copied implementation or wrapper.",
-        "removal_condition": "Move remaining resident graph/runtime workflows and remove this exact old services consumer in LG-C.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.contracts.topic_arcs",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing graph wires actual TopicArc service, unchanged clock and same-Session nullable reads; no duplicate policy.",
-        "removal_condition": "Move actual graph/runtime module in LG-C; parent B7 connects its already-owned clipping and event query at this existing binding.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.policies.resident_clock",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing graph wires actual TopicArc service, unchanged clock and same-Session nullable reads; no duplicate policy.",
-        "removal_condition": "Move actual graph/runtime module in LG-C; parent B7 connects its already-owned clipping and event query at this existing binding.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.service.topic_arcs",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing graph wires actual TopicArc service, unchanged clock and same-Session nullable reads; no duplicate policy.",
-        "removal_condition": "Move actual graph/runtime module in LG-C; parent B7 connects its already-owned clipping and event query at this existing binding.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.repository.independent_topics",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing resident execution reads canonical own-topic queries and binds the actual initiative service; no copied decision or new transaction.",
-        "removal_condition": "Move remaining graph workflow into runtime in LG-C and close this exact legacy consumer.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.service.independent_topics",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing resident execution reads canonical own-topic queries and binds the actual initiative service; no copied decision or new transaction.",
-        "removal_condition": "Move remaining graph workflow into runtime in LG-C and close this exact legacy consumer.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.contracts.action_planning",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing resident graph binds actual action/budget/writing services and their existing same-Session collaborators; no duplicate business body.",
-        "removal_condition": "Move remaining graph/runtime workflow in LG-C; parent B5/B7 integration replaces only exact foreign read callbacks at their original call sites.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.service.action_budgets",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing resident graph binds actual action/budget/writing services and their existing same-Session collaborators; no duplicate business body.",
-        "removal_condition": "Move remaining graph/runtime workflow in LG-C; parent B5/B7 integration replaces only exact foreign read callbacks at their original call sites.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.service.action_plans",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing resident graph binds actual action/budget/writing services and their existing same-Session collaborators; no duplicate business body.",
-        "removal_condition": "Move remaining graph/runtime workflow in LG-C; parent B5/B7 integration replaces only exact foreign read callbacks at their original call sites.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.service.activity_settings",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing resident graph binds actual action/budget/writing services and their existing same-Session collaborators; no duplicate business body.",
-        "removal_condition": "Move remaining graph/runtime workflow in LG-C; parent B5/B7 integration replaces only exact foreign read callbacks at their original call sites.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.service.writing_plans",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing resident graph binds actual action/budget/writing services and their existing same-Session collaborators; no duplicate business body.",
-        "removal_condition": "Move remaining graph/runtime workflow in LG-C; parent B5/B7 integration replaces only exact foreign read callbacks at their original call sites.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.policies.writer_tasks",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing resident execution binds actual writer/state result rules to same pure converters and exact provider-error summary handling.",
-        "removal_condition": "Move remaining graph/runtime workflow to LG-C without duplicated rule bodies; retain existing source-introduction and original behavior evidence.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.service.post_writer_results",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing resident execution binds actual writer/state result rules to same pure converters and exact provider-error summary handling.",
-        "removal_condition": "Move remaining graph/runtime workflow to LG-C without duplicated rule bodies; retain existing source-introduction and original behavior evidence.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.service.state_outputs",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing resident execution binds actual writer/state result rules to same pure converters and exact provider-error summary handling.",
-        "removal_condition": "Move remaining graph/runtime workflow to LG-C without duplicated rule bodies; retain existing source-introduction and original behavior evidence.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.service.planner_results",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing graph binds actual prompt/task/outcome services; source strings and same-Session TopicArc reads remain in original decision order.",
-        "removal_condition": "Move remaining graph/provider execution composition to LG-C; no old duplicate helper bodies.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.service.resident_prompts",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing graph binds actual prompt/task/outcome services; source strings and same-Session TopicArc reads remain in original decision order.",
-        "removal_condition": "Move remaining graph/provider execution composition to LG-C; no old duplicate helper bodies.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.service.writing_tasks",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing graph binds actual prompt/task/outcome services; source strings and same-Session TopicArc reads remain in original decision order.",
-        "removal_condition": "Move remaining graph/provider execution composition to LG-C; no old duplicate helper bodies.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.contracts.context_reads",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing graph composes actual context services with nullable source reads; no eager query or duplicated owner write.",
-        "removal_condition": "Move graph/provider execution to LG-C; parent connects existing B5/B7 ownership bodies at exact current callback sites.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.service.conversation_context",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing graph composes actual context services with nullable source reads; no eager query or duplicated owner write.",
-        "removal_condition": "Move graph/provider execution to LG-C; parent connects existing B5/B7 ownership bodies at exact current callback sites.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.service.relationship_context",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing graph composes actual context services with nullable source reads; no eager query or duplicated owner write.",
-        "removal_condition": "Move graph/provider execution to LG-C; parent connects existing B5/B7 ownership bodies at exact current callback sites.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.langgraph_resident",
-        "target": "app.domains.routines.service.writing_context",
-        "owner_stage": "AR-B4-LG-C",
-        "reason": "Existing graph composes actual context services with nullable source reads; no eager query or duplicated owner write.",
-        "removal_condition": "Move graph/provider execution to LG-C; parent connects existing B5/B7 ownership bodies at exact current callback sites.",
         "review_date": "2026-09-06"
       }
     ]
