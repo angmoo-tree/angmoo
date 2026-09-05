@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import timedelta
+
 from enum import StrEnum
 
 
@@ -27,3 +29,5 @@ class RuntimeDiagnosticCode(StrEnum):
 
 SCHEDULER_SINGLETON_KEY = "resident-tick-scheduler"
 
+RUNTIME_MIGRATION_HEAD = "20260825_0083"
+RECENT_PROVIDER_WINDOW = timedelta(hours=1)

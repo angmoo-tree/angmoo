@@ -15,10 +15,10 @@ from app.domains.identity.public import (
 from app.domains.runtime.public import (
     LocalRuntimeStatusRead,
     ReadApplicationRuntimeStatus,
-    SqlAlchemyApplicationRuntimeProbe,
     overlay_in_process_component_status,
     runtime_status_read,
 )
+from app.runtime.diagnostics.status_composition import create_runtime_status_reader as SqlAlchemyApplicationRuntimeProbe
 
 
 router = APIRouter(prefix="/runtime", tags=["runtime"])

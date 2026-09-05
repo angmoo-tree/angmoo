@@ -1,7 +1,7 @@
 {
-  "edge_count": 2434,
-  "external_import_count": 2255,
-  "module_count": 727,
+  "edge_count": 2442,
+  "external_import_count": 2273,
+  "module_count": 731,
   "modules": [
     {
       "external_imports": [],
@@ -251,7 +251,8 @@
         "app.domains.identity.browser_session",
         "app.domains.identity.dependencies",
         "app.domains.identity.public",
-        "app.domains.runtime.public"
+        "app.domains.runtime.public",
+        "app.runtime.diagnostics.status_composition"
       ],
       "module": "app.api.v1.routes.runtime_status",
       "path": "backend/app/api/v1/routes/runtime_status.py",
@@ -4631,6 +4632,7 @@
     {
       "external_imports": [
         "__future__",
+        "datetime",
         "enum"
       ],
       "imports": [],
@@ -4744,6 +4746,19 @@
     {
       "external_imports": [
         "__future__",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.runtime.contracts.status_queries",
+      "path": "backend/app/domains/runtime/contracts/status_queries.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "typing"
       ],
       "imports": [
@@ -4793,31 +4808,10 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.runtime.infrastructure.sqlalchemy_application_runtime_probe",
         "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease"
       ],
       "module": "app.domains.runtime.infrastructure",
       "path": "backend/app/domains/runtime/infrastructure/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "json",
-        "os",
-        "sqlalchemy",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.config",
-        "app.domains.runtime.constants",
-        "app.domains.runtime.contracts.status"
-      ],
-      "module": "app.domains.runtime.infrastructure.sqlalchemy_application_runtime_probe",
-      "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py",
       "wildcard_imports": []
     },
     {
@@ -4893,6 +4887,21 @@
       "external_imports": [
         "__future__",
         "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.runtime.constants"
+      ],
+      "module": "app.domains.runtime.repository.status",
+      "path": "backend/app/domains/runtime/repository/status.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
         "pydantic",
         "typing"
       ],
@@ -4919,6 +4928,25 @@
       ],
       "module": "app.domains.runtime.service.components",
       "path": "backend/app/domains/runtime/service/components.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "json",
+        "os",
+        "sqlalchemy.exc",
+        "typing"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.runtime.constants",
+        "app.domains.runtime.contracts.status",
+        "app.domains.runtime.contracts.status_queries"
+      ],
+      "module": "app.domains.runtime.service.status",
+      "path": "backend/app/domains/runtime/service/status.py",
       "wildcard_imports": []
     },
     {
@@ -8222,6 +8250,7 @@
         "app.domains.runtime.public",
         "app.public_main",
         "app.runtime.configuration",
+        "app.runtime.diagnostics.status_composition",
         "app.runtime.logging_config",
         "app.runtime.migrations.embedded_data",
         "app.runtime.persistence.runtime_data_path"
@@ -8259,6 +8288,37 @@
       ],
       "module": "app.runtime.desktop_sidecar",
       "path": "backend/app/runtime/desktop_sidecar.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "functools",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.runtime.contracts.status_queries",
+        "app.domains.runtime.repository.status",
+        "app.domains.runtime.service.status",
+        "app.runtime.diagnostics.status_queries"
+      ],
+      "module": "app.runtime.diagnostics.status_composition",
+      "path": "backend/app/runtime/diagnostics/status_composition.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.runtime.diagnostics.status_queries",
+      "path": "backend/app/runtime/diagnostics/status_queries.py",
       "wildcard_imports": []
     },
     {

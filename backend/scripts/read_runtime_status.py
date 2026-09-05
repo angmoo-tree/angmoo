@@ -19,9 +19,9 @@ from app.core.db import SessionLocal
 from app.core.redaction import sanitize_support_bundle_metadata
 from app.domains.runtime.public import (
     ReadApplicationRuntimeStatus,
-    SqlAlchemyApplicationRuntimeProbe,
     runtime_status_read,
 )
+from app.runtime.diagnostics.status_composition import create_runtime_status_reader as SqlAlchemyApplicationRuntimeProbe
 
 
 def main() -> int:

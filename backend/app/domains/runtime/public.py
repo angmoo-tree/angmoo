@@ -38,7 +38,6 @@ from app.domains.runtime.policies.lease import decide_tick_window
 from app.domains.runtime.policies.lease import logical_tick_window
 from app.domains.runtime.infrastructure import (
     RuntimeSchedulerLease,
-    SqlAlchemyApplicationRuntimeProbe,
     SqlAlchemySchedulerLeaseRepository,
     scheduler_fence,
 )
@@ -90,7 +89,6 @@ __all__ = [
     "SearchIndexHit",
     "SearchIndexPort",
     "SqlAlchemySchedulerLeaseRepository",
-    "SqlAlchemyApplicationRuntimeProbe",
     "UnitOfWorkPort",
     "decide_tick_window",
     "component_observations",

@@ -1,16 +1,20 @@
 from __future__ import annotations
 
+from app.domains.runtime.contracts.status_queries import RuntimeStatusQueries
+
 from datetime import UTC, datetime, timedelta
 import json
 import os
 from typing import Any
 
-from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import Session
 
 from app.config import Settings, settings
-from app.domains.runtime.constants import RuntimeDiagnosticCode
+from app.domains.runtime.constants import (
+    RuntimeDiagnosticCode,
+    RUNTIME_MIGRATION_HEAD,
+    RECENT_PROVIDER_WINDOW,
+)
 from app.domains.runtime.contracts.status import ActivityRuntimeStatus
 from app.domains.runtime.contracts.status import ApplicationRuntimeStatus
 from app.domains.runtime.contracts.status import InstallationState
@@ -26,13 +30,7 @@ from app.domains.runtime.contracts.status import RuntimeDependencyStatus
 from app.domains.runtime.contracts.status import SchedulerRuntimeStatus
 
 
-RUNTIME_MIGRATION_HEAD = "20260825_0083"
-LOCAL_INSTALLATION_KEY = "local-installation"
-SCHEDULER_SINGLETON_KEY = "resident-tick-scheduler"
-RECENT_PROVIDER_WINDOW = timedelta(hours=1)
-
-
-class SqlAlchemyApplicationRuntimeProbe:
+class RuntimeStatusService:
     """Read privacy-safe application facts from canonical local stores.
 
     Host paths, Docker objects, and container identifiers deliberately do not
@@ -41,12 +39,12 @@ class SqlAlchemyApplicationRuntimeProbe:
 
     def __init__(
         self,
-        db: Session,
+        queries: RuntimeStatusQueries,
         *,
         config: Settings = settings,
         now: datetime | None = None,
     ) -> None:
-        self._db = db
+        self._queries = queries
         self._config = config
         self._now = _aware_utc(now or datetime.now(UTC))
 
@@ -122,20 +120,19 @@ class SqlAlchemyApplicationRuntimeProbe:
 
     def _migration_status(self) -> MigrationRuntimeStatus:
         revision_query = (
-            "SELECT source_revision FROM angmoo_schema_version "
-            "WHERE singleton_key = 1"
+            "SELECT source_revision FROM angmoo_schema_version WHERE singleton_key = 1"
             if self._config.database_url.startswith("sqlite")
             else "SELECT version_num FROM alembic_version"
         )
         try:
-            current = self._db.execute(text(revision_query)).scalar()
+            current = self._queries.migration_revision(revision_query)
         except SQLAlchemyError:
             # A first-run or synthetic preview database can exist before
             # Alembic has created its metadata table. Runtime diagnostics must
             # report that recoverable state instead of aborting Device Home
             # with an uncaught 500 response. Roll back the failed statement so
             # the request-scoped session remains usable by later probes.
-            self._db.rollback()
+            self._queries.rollback()
             return MigrationRuntimeStatus(
                 state=RuntimeComponentState.DEGRADED,
                 current_revision=None,
@@ -153,23 +150,12 @@ class SqlAlchemyApplicationRuntimeProbe:
             current_revision=current_revision,
             head_revision=RUNTIME_MIGRATION_HEAD,
             reason_code=(
-                None
-                if is_current
-                else RuntimeDiagnosticCode.MIGRATION_NOT_CURRENT
+                None if is_current else RuntimeDiagnosticCode.MIGRATION_NOT_CURRENT
             ),
         )
 
     def _owner_status(self) -> OwnerRuntimeStatus:
-        row = self._db.execute(
-            text(
-                """
-                SELECT bootstrap_state, owner_user_id
-                FROM installation_identities
-                WHERE singleton_key = :singleton_key
-                """
-            ),
-            {"singleton_key": LOCAL_INSTALLATION_KEY},
-        ).mappings().first()
+        row = self._queries.owner_state()
         if row is None:
             return OwnerRuntimeStatus(bootstrap_state="unclaimed")
         owner_user_id = _optional_string(row["owner_user_id"])
@@ -179,42 +165,11 @@ class SqlAlchemyApplicationRuntimeProbe:
             )
 
         registered_world_count = int(
-            self._db.execute(
-                text(
-                    """
-                    SELECT COUNT(*) FROM worlds
-                    WHERE owner_user_id = :owner_user_id AND status <> 'archived'
-                    """
-                ),
-                {"owner_user_id": owner_user_id},
-            ).scalar_one()
+            self._queries.registered_world_count(owner_user_id)
         )
-        active_world_count = int(
-            self._db.execute(
-                text(
-                    """
-                    SELECT COUNT(DISTINCT wc.world_id)
-                    FROM character_active_worlds caw
-                    JOIN world_characters wc ON wc.id = caw.world_character_id
-                    JOIN characters c ON c.id = caw.character_id
-                    WHERE c.owner_id = :owner_user_id
-                    """
-                ),
-                {"owner_user_id": owner_user_id},
-            ).scalar_one()
-        )
+        active_world_count = int(self._queries.active_world_count(owner_user_id))
         active_world_character_count = int(
-            self._db.execute(
-                text(
-                    """
-                    SELECT COUNT(*)
-                    FROM world_characters wc
-                    JOIN characters c ON c.id = wc.character_id
-                    WHERE c.owner_id = :owner_user_id AND wc.status = 'active'
-                    """
-                ),
-                {"owner_user_id": owner_user_id},
-            ).scalar_one()
+            self._queries.active_world_character_count(owner_user_id)
         )
         return OwnerRuntimeStatus(
             bootstrap_state=str(row["bootstrap_state"]),
@@ -225,17 +180,7 @@ class SqlAlchemyApplicationRuntimeProbe:
         )
 
     def _scheduler_status(self) -> SchedulerRuntimeStatus:
-        row = self._db.execute(
-            text(
-                """
-                SELECT lease_owner_id, fencing_epoch, state, heartbeat_at,
-                       lease_expires_at, next_tick_at, last_error_code
-                FROM runtime_scheduler_leases
-                WHERE singleton_key = :singleton_key
-                """
-            ),
-            {"singleton_key": SCHEDULER_SINGLETON_KEY},
-        ).mappings().first()
+        row = self._queries.scheduler_state()
         if row is None:
             return SchedulerRuntimeStatus(state=RuntimeComponentState.STOPPED)
         lease_expires_at = _optional_datetime(row["lease_expires_at"])
@@ -258,38 +203,21 @@ class SqlAlchemyApplicationRuntimeProbe:
                 )
             ),
             active_owner_id=(
-                _optional_string(row["lease_owner_id"])
-                if active
-                else None
+                _optional_string(row["lease_owner_id"]) if active else None
             ),
             fencing_epoch=int(row["fencing_epoch"] or 0),
             last_heartbeat_at=heartbeat_at,
             lease_expires_at=lease_expires_at,
             next_tick_at=_optional_datetime(row["next_tick_at"]),
             reason_code=(
-                RuntimeDiagnosticCode.SCHEDULER_HEARTBEAT_STALE
-                if stale
-                else None
+                RuntimeDiagnosticCode.SCHEDULER_HEARTBEAT_STALE if stale else None
             ),
         )
 
     def _projector_status(
         self,
     ) -> tuple[ProjectorRuntimeStatus, RuntimeComponentState]:
-        row = self._db.execute(
-            text(
-                """
-                SELECT
-                    SUM(CASE WHEN status IN ('pending','processing') THEN 1 ELSE 0 END) AS pending_count,
-                    SUM(CASE WHEN status = 'pending' AND attempt_count > 0 THEN 1 ELSE 0 END) AS retry_count,
-                    SUM(CASE WHEN status = 'pending' AND last_error_class IS NOT NULL THEN 1 ELSE 0 END) AS failed_count,
-                    SUM(CASE WHEN status = 'dead' THEN 1 ELSE 0 END) AS dead_letter_count,
-                    MIN(CASE WHEN status IN ('pending','processing') THEN created_at END) AS oldest_pending_at,
-                    MAX(updated_at) AS last_projection_at
-                FROM graph_projection_outbox
-                """
-            )
-        ).mappings().one()
+        row = self._queries.projection_counts()
         pending_count = int(row["pending_count"] or 0)
         retry_count = int(row["retry_count"] or 0)
         failed_count = int(row["failed_count"] or 0)
@@ -306,11 +234,7 @@ class SqlAlchemyApplicationRuntimeProbe:
             graph_state = RuntimeComponentState.NOT_AVAILABLE
         else:
             graph_available = _graph_backend_available(self._config)
-            degraded = (
-                not graph_available
-                or failed_count > 0
-                or dead_letter_count > 0
-            )
+            degraded = not graph_available or failed_count > 0 or dead_letter_count > 0
             projector_state = (
                 RuntimeComponentState.DEGRADED
                 if degraded
@@ -346,25 +270,11 @@ class SqlAlchemyApplicationRuntimeProbe:
     ) -> tuple[ActivityRuntimeStatus, ProviderUsageRuntimeStatus]:
         if owner_user_id is None:
             return ActivityRuntimeStatus(), ProviderUsageRuntimeStatus(
-                kill_switch_enabled=(
-                    self._config.AGENT_ACTIVITY_MAINTENANCE_ENABLED
-                )
+                kill_switch_enabled=(self._config.AGENT_ACTIVITY_MAINTENANCE_ENABLED)
             )
-        rows = self._db.execute(
-            text(
-                """
-                SELECT id, post_id, status, gateway_result, created_at, completed_at
-                FROM agent_runs
-                WHERE user_id = :owner_user_id AND created_at >= :since
-                ORDER BY COALESCE(completed_at, created_at) DESC
-                LIMIT 200
-                """
-            ),
-            {
-                "owner_user_id": owner_user_id,
-                "since": self._now - RECENT_PROVIDER_WINDOW,
-            },
-        ).mappings().all()
+        rows = self._queries.recent_runs(
+            owner_user_id, self._now - RECENT_PROVIDER_WINDOW
+        )
         provider_call_count = 0
         recent_failure_class: ProviderFailureClass | None = None
         last_success: Any | None = None
@@ -404,9 +314,7 @@ class SqlAlchemyApplicationRuntimeProbe:
         return activity, ProviderUsageRuntimeStatus(
             recent_call_count=provider_call_count,
             recent_failure_class=recent_failure_class,
-            kill_switch_enabled=(
-                self._config.AGENT_ACTIVITY_MAINTENANCE_ENABLED
-            ),
+            kill_switch_enabled=(self._config.AGENT_ACTIVITY_MAINTENANCE_ENABLED),
         )
 
 
@@ -511,7 +419,9 @@ def _safe_code(value: Any) -> str | None:
     normalized = value.strip().lower()
     if not normalized or len(normalized) > 80:
         return None
-    if not all(character.isalnum() or character in {"_", "-", "."} for character in normalized):
+    if not all(
+        character.isalnum() or character in {"_", "-", "."} for character in normalized
+    ):
         return None
     return normalized
 

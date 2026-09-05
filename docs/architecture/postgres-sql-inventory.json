@@ -663,22 +663,22 @@
     {
       "markers": {
         "advisory_lock": [
-          334
-        ],
-        "driver_or_url": [
           332
         ],
+        "driver_or_url": [
+          330
+        ],
         "row_lock": [
-          138,
-          146,
-          265,
-          297
+          136,
+          144,
+          263,
+          295
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "0705f88e673cee4c3d3c726e39e72b209866d76898a4832e24e18c8ef7235e5e",
+      "source_sha256": "d965cac7fe904ce57d7a71ddde5c38d97b672f42c3e600819702f23b518b6ff5",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -994,13 +994,13 @@
     {
       "markers": {
         "driver_or_url": [
-          36
+          34
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "2ab63358f059bad3e0aa95fdbbb7866a4516b0457ad717be1a07bc5522fea9ce",
+      "source_sha256": "26ac5b2abece14527e2927e77887204957e54f218708e2b418e28c43f8200560",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

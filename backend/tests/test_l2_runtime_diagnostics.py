@@ -12,18 +12,14 @@ from app.domains.identity.dependencies import get_current_user
 from app.api.v1.routes import runtime_status as runtime_routes
 from app.core.db import get_db
 from app.domains.runtime import public as runtime
-from app.domains.runtime.infrastructure.sqlalchemy_application_runtime_probe import (
-    RUNTIME_MIGRATION_HEAD,
-    SqlAlchemyApplicationRuntimeProbe,
-    _find_opaque_id,
-    _graph_backend_available,
-    _lane_result_code,
-    _provider_call_count,
-    _provider_failure_class,
-)
-from app.domains.runtime.infrastructure import (
-    sqlalchemy_application_runtime_probe as runtime_probe_module,
-)
+from app.domains.runtime.service.status import RUNTIME_MIGRATION_HEAD
+from app.runtime.diagnostics.status_composition import create_runtime_status_reader as SqlAlchemyApplicationRuntimeProbe
+from app.domains.runtime.service.status import _find_opaque_id
+from app.domains.runtime.service.status import _graph_backend_available
+from app.domains.runtime.service.status import _lane_result_code
+from app.domains.runtime.service.status import _provider_call_count
+from app.domains.runtime.service.status import _provider_failure_class
+from app.domains.runtime.service import status as runtime_probe_module
 
 
 def _status() -> runtime.ApplicationRuntimeStatus:

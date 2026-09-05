@@ -414,7 +414,8 @@
     "backend/app/domains/runtime/ports/vector_recall.py": "backend/app/domains/runtime/contracts/vector_recall.py",
     "backend/app/domains/runtime/ports/release_candidate.py": "backend/app/domains/runtime/contracts/release.py",
     "backend/app/domains/runtime/domain/scheduler_lease.py": "backend/app/domains/runtime/contracts/lease.py",
-    "backend/app/domains/runtime/application/single_backend_components.py": "backend/app/domains/runtime/service/components.py"
+    "backend/app/domains/runtime/application/single_backend_components.py": "backend/app/domains/runtime/service/components.py",
+    "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py": "backend/app/domains/runtime/service/status.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -33760,6 +33761,359 @@
       ],
       "remaining": "Actual status probe SQL/interpretation and scheduler lease model/policy/SQL, old public/aggregate/read forwarding wrappers and final G5/B8 integration; AgentRun error final ownership follows Routines source.",
       "verification_note": "Split consumers are resolved from actual ImportFrom nodes (or in-file Name loads for private bases/helpers); exact existing test functions were verified before validation."
+    },
+    "AR-B8-RUNTIME-A2": {
+      "status": "SOURCE PREPARATION; 6 actual service methods/all original helpers and8 SQL expressions preserve original AST with actual arguments; final37 PASS/28.96s; boundary731/2442/legacy222; read-only source/split/assertion/suppression/APIORM/nodes0; sequential captures pending",
+      "split_files": {
+        "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py": [
+          "backend/app/domains/runtime/service/status.py",
+          "backend/app/domains/runtime/repository/status.py",
+          "backend/app/runtime/diagnostics/status_queries.py",
+          "backend/app/domains/runtime/constants.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::RUNTIME_MIGRATION_HEAD",
+          "new": "backend/app/domains/runtime/constants.py::RUNTIME_MIGRATION_HEAD",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/status.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::LOCAL_INSTALLATION_KEY",
+          "new": "backend/app/runtime/diagnostics/status_queries.py::LOCAL_INSTALLATION_KEY",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_queries.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SCHEDULER_SINGLETON_KEY",
+          "new": "backend/app/domains/runtime/constants.py::SCHEDULER_SINGLETON_KEY",
+          "direct_consumers": [
+            "backend/app/domains/runtime/repository/status.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::RECENT_PROVIDER_WINDOW",
+          "new": "backend/app/domains/runtime/constants.py::RECENT_PROVIDER_WINDOW",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/status.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/domains/runtime/service/status.py::RuntimeStatusService",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_runtime_version",
+          "new": "backend/app/domains/runtime/service/status.py::_runtime_version",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_installation_state",
+          "new": "backend/app/domains/runtime/service/status.py::_installation_state",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_graph_backend_available",
+          "new": "backend/app/domains/runtime/service/status.py::_graph_backend_available",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_provider_call_count",
+          "new": "backend/app/domains/runtime/service/status.py::_provider_call_count",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_provider_failure_class",
+          "new": "backend/app/domains/runtime/service/status.py::_provider_failure_class",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_lane_result_code",
+          "new": "backend/app/domains/runtime/service/status.py::_lane_result_code",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_safe_code",
+          "new": "backend/app/domains/runtime/service/status.py::_safe_code",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_find_opaque_id",
+          "new": "backend/app/domains/runtime/service/status.py::_find_opaque_id",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_json_object",
+          "new": "backend/app/domains/runtime/service/status.py::_json_object",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_nonnegative_int",
+          "new": "backend/app/domains/runtime/service/status.py::_nonnegative_int",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_optional_string",
+          "new": "backend/app/domains/runtime/service/status.py::_optional_string",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_optional_datetime",
+          "new": "backend/app/domains/runtime/service/status.py::_optional_datetime",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_aware_utc",
+          "new": "backend/app/domains/runtime/service/status.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/domains/runtime/repository/status.py::migration_revision",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/runtime/diagnostics/status_queries.py::owner_state",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/runtime/diagnostics/status_queries.py::registered_world_count",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/runtime/diagnostics/status_queries.py::active_world_count",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/runtime/diagnostics/status_queries.py::active_world_character_count",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/domains/runtime/repository/status.py::scheduler_state",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/runtime/diagnostics/status_queries.py::projection_counts",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/runtime/diagnostics/status_queries.py::recent_runs",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        }
+      ],
+      "direct_consumers": [
+        "backend/app/api/v1/routes/runtime_status.py",
+        "backend/app/domains/runtime/infrastructure/__init__.py",
+        "backend/app/runtime/contributor_backend.py",
+        "backend/scripts/read_runtime_status.py",
+        "backend/tests/test_l2_runtime_diagnostics.py"
+      ],
+      "preserved": "Original query expressions/order, count limits, owner predicates, missing-migration rollback, settings defaults, bounded metadata and failure/health interpretation. No eager query or new Session.",
+      "remaining": "Runtime HTTP/DI ownership and read forwarding/public aggregate cleanup, actual scheduler lease model/policy/SQL; G5 and final application integration.",
+      "composition_note": "Runtime/domain aggregate no longer imports the external query factory. API, contributor and CLI bind the actual runtime composition directly, retaining existing local call names and monkeypatch contracts.",
+      "new_test_nodes": [
+        "tests/runtime/test_status_query_transaction.py::test_diagnostics_share_uncommitted_foreign_facts_and_original_rollback[caller]",
+        "tests/runtime/test_status_query_transaction.py::test_diagnostics_share_uncommitted_foreign_facts_and_original_rollback[missing_migration]"
+      ]
     }
   }
 }
