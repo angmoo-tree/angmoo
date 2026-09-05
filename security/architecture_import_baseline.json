@@ -1,7 +1,7 @@
 {
-  "edge_count": 2784,
-  "external_import_count": 2492,
-  "module_count": 806,
+  "edge_count": 2813,
+  "external_import_count": 2501,
+  "module_count": 808,
   "modules": [
     {
       "external_imports": [],
@@ -3827,9 +3827,15 @@
     },
     {
       "external_imports": [
+        "dataclasses",
+        "sqlalchemy.orm",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.contracts.manual_activity"
+      ],
       "module": "app.domains.routines.contracts.feed_cues",
       "path": "backend/app/domains/routines/contracts/feed_cues.py",
       "wildcard_imports": []
@@ -3858,6 +3864,23 @@
       "imports": [],
       "module": "app.domains.routines.contracts.lifecycle",
       "path": "backend/app/domains/routines/contracts/lifecycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.autonomy_management",
+        "app.domains.routines.models",
+        "app.domains.routines.schemas"
+      ],
+      "module": "app.domains.routines.contracts.manual_activity",
+      "path": "backend/app/domains/routines/contracts/manual_activity.py",
       "wildcard_imports": []
     },
     {
@@ -4895,9 +4918,15 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.core.prompt_safety",
+        "app.domains.routines.contracts.activity_management",
         "app.domains.routines.contracts.feed_cues",
+        "app.domains.routines.exceptions",
         "app.domains.routines.models",
-        "app.domains.routines.repository.feed_cues"
+        "app.domains.routines.repository.feed_cues",
+        "app.domains.routines.schemas",
+        "app.domains.routines.service.activity_settings",
+        "app.domains.routines.service.tendency_settings"
       ],
       "module": "app.domains.routines.service.feed_cues",
       "path": "backend/app/domains/routines/service/feed_cues.py",
@@ -5049,6 +5078,30 @@
       ],
       "module": "app.domains.routines.service.lifecycle",
       "path": "backend/app/domains/routines/service/lifecycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.execution_errors",
+        "app.domains.routines.contracts.manual_activity",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.repository.runs",
+        "app.domains.routines.repository.slots",
+        "app.domains.routines.schemas",
+        "app.domains.routines.service.activity_settings",
+        "app.domains.routines.service.tick_schedule"
+      ],
+      "module": "app.domains.routines.service.manual_activity",
+      "path": "backend/app/domains/routines/service/manual_activity.py",
       "wildcard_imports": []
     },
     {
@@ -9019,6 +9072,8 @@
         "app.domains.routines.constants",
         "app.domains.routines.contracts.activity_management",
         "app.domains.routines.contracts.autonomy_management",
+        "app.domains.routines.contracts.feed_cues",
+        "app.domains.routines.contracts.manual_activity",
         "app.domains.routines.exceptions",
         "app.domains.routines.repository.autonomy",
         "app.domains.routines.repository.feed_cues",
@@ -9028,11 +9083,13 @@
         "app.domains.routines.service.activity_management",
         "app.domains.routines.service.autonomy_management",
         "app.domains.routines.service.feed_cues",
+        "app.domains.routines.service.manual_activity",
         "app.domains.routines.service.runs",
         "app.domains.routines.service.slot_assignments",
         "app.domains.routines.service.slot_pool",
         "app.domains.routines.service.tendency",
         "app.domains.routines.service.tendency_settings",
+        "app.domains.routines.service.tick_schedule",
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",
         "app.exceptions",

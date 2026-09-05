@@ -1317,3 +1317,13 @@ C7-B 이후 실제 활동 관리·HTTP와 B5/B7/Lore/Point 최신 협력, G5/G06
 ### C7-B의 후속 통합 검증
 
 LG-C까지 합류한 `60def90`에 원래 signed C7-B `50d50ed`를 병합했다. 제품 충돌 없이 같은 활성화·잠금·Character 상태 변경 협력을 유지했고, 문서와 symbol별 지도는 양쪽 원래 기록을 보존했다. 실제 통합 tree의 활동 한도·tendency·resident 실행 바인딩 회귀는 **116 passed / 4 warnings / 18.32초**이며 경계는 **806modules / 2784edges / exactlegacy201**, L4는 **806modules / 97parity**다. 원래 첫 도입 소스의 archive 수집은 별도 고정 입력에서 진행 중이며, 아직 원장 append·전체 backend·stock 보존·Hosted CI 완료를 의미하지 않는다.
+
+## AR-B4-C7-C — 수동 실행과 모이 요청
+
+실제 수동 실행·슬롯 안전·쿨다운 10개, 모이 조회·입력·프롬프트 정책 3개, 수동 실행 상수 3개를 Routines로 이전했다. UTC 변환은 기존 동일한 3문장 함수 하나를 재사용했다. 정확한 callback·타입 연결을 원래 이름으로 복원하면 17개 본문/상수가 동일하다. 기존 배정 슬롯/임시 슬롯의 서로 다른 실행, claim 경쟁, provider profile의 cleanup, BaseException 원래 오류 우선순위를 보존했다. 관련 기존 회귀 154개가 통과했고, source inspection 2개도 원래 assertion을 실제 정의 함수로 연결했다. HTTP와 혼합 entry는 후속 C7에서 실제 조립 위치로 연결한다.
+
+C7-C 현재 경계는 777 modules / 2691 edges / exact legacy 202 / cycle0이다. L4는 777/14/97, ER0은 86/87/24/44/7, Memory inventory는 current이다. 원래 보존 진단은 source/assertion/suppression/API·ORM/node 오류0이다. 지도 갱신 때 불필요하게 재계산된 기존 AR-B1/AR-F1의 legacy split metadata 7개를 원래 HEAD 값으로 복구했고, 동일 원래 split 검사도 오류0으로 확인했다. 보호2139/현재2287이며 동결/검사기/additions 변경은 없다. stock 통과는 root의 순차 도입 연결 후 확인한다.
+
+### C7-C의 후속 통합 검증
+
+`339cda2`에 원래 signed C7-C `05691bb`를 병합했다. 수동 실행·모이 요청·활동 한도·tendency·실행 바인딩 회귀 **117 passed / 4 warnings / 18.28초**, 경계 **808modules / 2813edges / exactlegacy201**, L4 **808modules / 97parity**를 확인했다. 처음 검사 명령은 존재하지 않는 `test_run_observations.py` 경로를 지정해 테스트를 실행하지 못했고, 실제 `test_activity_management.py`를 포함한 위 명령으로 수정했다. 선행 C7-B tree에서는 CI 구조·보존 회귀 **209 passed / 21.13초**, public route **196operations**와 Memory·deferred inventory도 통과했다. 이 통합은 원래 소스 증거 수집과 뒤따르는 전체 stock·전체 backend·최종 C7 HTTP 검증을 대신하지 않는다.

@@ -791,3 +791,10 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 `routines/service/autonomy_management.py`는 활성화·비활성화의 권한, 준비 상태, 정원, 슬롯 배정과 보상 순서를 소유합니다. 전역 잠금을 먼저 얻고 해당 World 잠금을 얻는 순서를 유지합니다. SQLite에서는 기존 immediate transaction과 지연 commit 구간을 사용하며, 정원 실패는 원래 rollback 뒤 거절 기록을 저장합니다.
 
 다른 도메인의 User·Character·credential·WorldCharacter는 같은 Session으로 연결합니다. 상태를 바꿀 때는 Character의 실제 대입 함수를 사용하고, provider profile의 bind/release/reload는 런타임 협력으로 실행합니다. `runtime/resident/autonomy_reads.py`는 기존 Character/활동 설정/배정 슬롯의 두 집합 SQL을 그대로 소유하며, 도메인 간 join을 개별 조회로 쪼개지 않습니다.
+
+
+### 사용자가 요청하는 한 번의 활동과 모이
+
+`routines/service/manual_activity.py`는 수동 실행의 권한·준비 상태·사용자별 쿨다운·슬롯 여유와 예약 임박 조건을 판단합니다. 기존 배정 슬롯을 실행하는 경로와 임시 슬롯을 얻어 실행하는 경로는 서로 다른 계약을 유지합니다. 임시 실행의 원래 오류가 있으면 정리 오류가 그것을 덮지 않으며, 원래 오류가 없을 때만 정리 오류를 전달합니다. 런타임 협력은 같은 Session의 외부 소유 조회와 profile bind/release/reload 및 실제 실행기를 연결합니다.
+
+모이의 조회·입력 조건·프롬프트 안전성은 `routines/service/feed_cues.py`의 실제 기능입니다. 성향 분석 확인, 자율활동/manual 허용 확인, 게시글 한도, 미소비 모이 중복 확인의 순서를 유지합니다. 새로운 조회·저장·검증을 runtime entry 함수에 중복 구현하지 않습니다.

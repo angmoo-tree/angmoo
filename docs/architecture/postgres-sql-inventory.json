@@ -931,16 +931,16 @@
     {
       "markers": {
         "advisory_lock": [
-          2103
+          1858
         ],
         "driver_or_url": [
-          2094
+          1849
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/characters/management.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "8a54f012f908edcc1c9ecb7f77066a62959ab15a2cf3e7f5150a778ff7d656bd",
+      "source_sha256": "c24654862a515582ae84df7b8e1c55d07b7bf787dd64960053e7bec3937c9a90",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

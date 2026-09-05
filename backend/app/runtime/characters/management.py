@@ -1,4 +1,10 @@
 from __future__ import annotations
+from app.domains.routines.contracts.manual_activity import ManualActivityWorkflows
+from app.domains.routines.contracts.feed_cues import FeedCueWorkflows
+from app.domains.routines.service import manual_activity
+from app.domains.routines.service.manual_activity import _manual_run_available_at
+from app.domains.routines.service.tick_schedule import aware_utc as _aware_utc
+from app.domains.routines.constants import RUN_NOW_COOLDOWN, RUN_NOW_SCHEDULER_GUARD_WINDOW, RUN_NOW_SCHEDULER_HEADROOM
 from app.domains.routines.contracts.autonomy_management import AutonomyWorkflows
 from app.domains.routines.service import autonomy_management
 from app.domains.routines.repository.autonomy import _lock_server_llm_autonomy_capacity
@@ -182,12 +188,9 @@ from app.domains.world_characters.public import (
 
 
 AGENT_DETAIL_ACTIVITY_LIMIT = 200
-RUN_NOW_COOLDOWN = timedelta(minutes=30)
 FIRST_GREETING_COOLDOWN = timedelta(minutes=30)
 FIRST_GREETING_SESSION_MARKER = ":first-greeting:"
 FIRST_GREETING_WRITER_OUTPUT_TOKENS = 5000
-RUN_NOW_SCHEDULER_GUARD_WINDOW = timedelta(minutes=10)
-RUN_NOW_SCHEDULER_HEADROOM = 2
 DELETED_CHARACTER_NAME = "삭제한 앵무"
 DELETED_CHARACTER_PLACEHOLDER = "삭제된 앵무입니다."
 # OpenClaw validates the global tool allowlist before honoring tool_choice="none".
@@ -292,17 +295,6 @@ def list_agents(db: Session, user: models.User) -> list[schemas.AgentDetailRead]
 
 
 
-def _ensure_feed_cue_prompt_safety(topic: str) -> None:
-    try:
-        prompt_safety.ensure_no_prompt_injection_text(
-            topic,
-            field_name="topic",
-            field_kind="feed_cue",
-        )
-    except prompt_safety.PromptSafetyError as exc:
-        raise PromptInjectionDetectedError(
-            "feed_cue_prompt_injection_detected"
-        ) from exc
 
 
 
@@ -428,46 +420,8 @@ def revoke_local_key(db: Session, user: models.User, character_id: str) -> None:
         )
 
 
-def get_feed_cue(
-    db: Session, user: models.User, character_id: str
-) -> schemas.AgentFeedCueRead | None:
-    character = _get_owned_character(db, user, character_id)
-    _ensure_llm_mode(character)
-    cue = feed_cue_queries.get_pending_feed_cue(db, character.id)
-    return schemas.AgentFeedCueRead.model_validate(cue) if cue else None
 
 
-def give_feed_cue(
-    db: Session, user: models.User, character_id: str, data: schemas.AgentFeedCueCreate
-) -> schemas.AgentFeedCueRead:
-    character = _get_owned_character(db, user, character_id)
-    _ensure_not_suspended(character)
-    _ensure_llm_mode(character)
-    _ensure_imported_world_runtime_enabled(db, character=character)
-    maintenance_service.ensure_feed_cues_available(db)
-    setting = agent_crud.ensure_setting(db, character.id)
-    if not _has_tendency_analysis(setting):
-        raise AgentFeedCueUnavailableError("커뮤니티 성향 분석을 먼저 실행해주세요.")
-    if not setting.auto_enabled:
-        if not data.manual_run:
-            raise AgentFeedCueUnavailableError("자율 활동 중인 앵무에게만 모이를 줄 수 있습니다.")
-    if not setting.allow_post or setting.max_posts_per_day <= 0:
-        raise AgentFeedCueUnavailableError("게시글 작성이 허용된 앵무에게만 모이를 줄 수 있습니다.")
-    policy = agent_activity_policy.build_activity_policy(
-        db, character_id=character.id, ignore_active_hours=True
-    )
-    if "post" not in policy.allowed_actions:
-        reason = policy.blocked_reasons.get("post", "post writing is blocked")
-        raise AgentFeedCueUnavailableError(
-            f"지금은 글쓰기 제한 때문에 모이를 받을 수 없습니다: {reason}"
-        )
-    if feed_cue_queries.get_pending_feed_cue(db, character.id) is not None:
-        raise AgentFeedCueConflictError("이미 다음 활동을 기다리는 모이가 있습니다.")
-    _ensure_feed_cue_prompt_safety(data.topic)
-    cue = feed_cues.create_feed_cue(
-        db, user=user, character=character, topic=data.topic
-    )
-    return schemas.AgentFeedCueRead.model_validate(cue)
 
 
 async def run_first_greeting(
@@ -1480,90 +1434,22 @@ def _reload_openclaw_secrets_sync() -> None:
         raise CredentialSyncError(str(exc)) from exc
 
 
-def _aware_utc(value: datetime) -> datetime:
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)
 
 
-def _slot_has_live_lease(slot: models.AgentSlot, now: datetime) -> bool:
-    lease_expires_at = slot.lease_expires_at
-    if lease_expires_at is None:
-        return False
-    return _aware_utc(lease_expires_at) > now
 
 
-def _slot_is_live_running(slot: models.AgentSlot, now: datetime) -> bool:
-    return (
-        slot.status == routine_constants.SLOT_STATUS_RUNNING
-        and _slot_has_live_lease(slot, now)
-    )
 
 
-def _slot_is_assigned_resident(slot: models.AgentSlot) -> bool:
-    return (
-        slot.assigned_user_id is not None
-        and slot.assigned_character_id is not None
-        and slot.assigned_credential_id is not None
-    )
 
 
-def _allowed_existing_running_resident_slots() -> int:
-    if settings.resident_tick_single_flight_enabled:
-        return 0
-    return max(0, settings.resident_tick_max_runs - RUN_NOW_SCHEDULER_HEADROOM - 1)
 
 
-def _slot_is_due(slot: models.AgentSlot, now: datetime) -> bool:
-    if slot.next_tick_at is None:
-        return False
-    return _aware_utc(slot.next_tick_at) <= now
 
 
-def _slot_is_imminent(slot: models.AgentSlot, now: datetime) -> bool:
-    if slot.next_tick_at is None:
-        return False
-    return _aware_utc(slot.next_tick_at) <= now + RUN_NOW_SCHEDULER_GUARD_WINDOW
 
 
-def _ensure_run_now_scheduler_safe(
-    db: Session,
-    *,
-    target_slot: models.AgentSlot,
-    setting: models.AgentActivitySetting,
-    now: datetime,
-) -> None:
-    if _slot_is_live_running(target_slot, now):
-        raise RunNowSlotBusyError()
-    if setting.auto_enabled and _slot_is_imminent(target_slot, now) and not _slot_is_due(
-        target_slot, now
-    ):
-        raise RunNowSoonScheduledError()
-
-    live_running_count = sum(
-        1
-        for slot in slot_queries.list_agent_slots(db)
-        if _slot_is_assigned_resident(slot) and _slot_is_live_running(slot, now)
-    )
-    if live_running_count > _allowed_existing_running_resident_slots():
-        raise RunNowSchedulerBusyError()
 
 
-def _ensure_claimed_temporary_run_now_scheduler_safe(
-    db: Session,
-    *,
-    target_slot: models.AgentSlot,
-    now: datetime,
-) -> None:
-    live_other_running_count = sum(
-        1
-        for slot in slot_queries.list_agent_slots(db)
-        if slot.agent_id != target_slot.agent_id
-        and _slot_is_assigned_resident(slot)
-        and _slot_is_live_running(slot, now)
-    )
-    if live_other_running_count > _allowed_existing_running_resident_slots():
-        raise RunNowSchedulerBusyError()
 
 
 def _ensure_imported_world_runtime_enabled(
@@ -1589,129 +1475,6 @@ def _ensure_imported_world_runtime_enabled(
         )
 
 
-async def run_agent_now(
-    db: Session, user: models.User, character_id: str
-) -> schemas.OpenClawAgentRunRead:
-    character = _get_owned_character(db, user, character_id)
-    _ensure_not_suspended(character)
-    if is_owner_controlled_character(db, character.id):
-        raise AgentExecutionModeError("owner_controlled_manual_write_not_available")
-    _ensure_llm_mode(character)
-    _ensure_imported_world_runtime_enabled(db, character=character)
-    maintenance_service.ensure_run_now_available(db)
-    setting = agent_crud.ensure_setting(db, character.id)
-    _ensure_activity_profile_ready(
-        db,
-        character=character,
-        setting=setting,
-    )
-    available_at = _manual_run_available_at(db, user.id)
-    if available_at is not None and available_at > datetime.now(UTC):
-        raise RunNowCooldownError(available_at)
-    credential = agent_crud.get_character_credential(db, character.id)
-    if credential is None:
-        raise CredentialRequiredError("Agent credential is required before running")
-    run_message = (
-        "This is a user-clicked run-once test. Read the community, "
-        "then perform one visible public action as this character: "
-        "reply to an existing post, create a new post, repost a post, "
-        "follow a profile, unfollow a profile, or like a relevant post. "
-        "Do not only save mood/state. Save character state after the public action, "
-        "then summarize what you did and why in Korean."
-    )
-    assigned_slot = slot_queries.get_assigned_slot(db, character.id)
-    if assigned_slot is not None:
-        _ensure_run_now_scheduler_safe(
-            db,
-            target_slot=assigned_slot,
-            setting=setting,
-            now=datetime.now(UTC),
-        )
-        return await agent_run_service.run_assigned_resident_slot_once(
-            db,
-            user_id=user.id,
-            character_id=character.id,
-            message=run_message,
-            require_public_action=True,
-            enforce_activity_policy=True,
-        )
-
-    timeout_seconds = settings.openclaw_timeout_seconds
-    heartbeat_interval_seconds = agent_activity_policy.tick_interval_seconds(setting)
-    try:
-        temporary_slot = agent_run_service.claim_temporary_resident_slot(
-            db,
-            user_id=user.id,
-            character_id=character.id,
-            credential_id=credential.id,
-            heartbeat_interval_seconds=heartbeat_interval_seconds,
-            timeout_seconds=timeout_seconds,
-        )
-    except agent_run_service.AgentSlotUnavailableError as exc:
-        raced_slot = slot_queries.get_assigned_slot(db, character.id)
-        if raced_slot is not None and _slot_is_live_running(
-            raced_slot, datetime.now(UTC)
-        ):
-            raise RunNowSlotBusyError() from exc
-        raise RunNowSlotUnavailableError() from exc
-
-    auth_profile_attempted = False
-    primary_error: BaseException | None = None
-    try:
-        _ensure_claimed_temporary_run_now_scheduler_safe(
-            db,
-            target_slot=temporary_slot,
-            now=datetime.now(UTC),
-        )
-        if _resident_openclaw_sync_enabled():
-            auth_profile_attempted = True
-            _bind_slot_auth_profile(
-                schemas.AgentSlotRead.model_validate(temporary_slot),
-                user_id=user.id,
-                character=character,
-                credential=credential,
-            )
-            _reload_openclaw_secrets_sync()
-        return await agent_run_service.run_claimed_temporary_resident_slot_once(
-            db,
-            agent_id=temporary_slot.agent_id,
-            user_id=user.id,
-            character_id=character.id,
-            credential_id=credential.id,
-            timeout_seconds=timeout_seconds,
-            message=run_message,
-            require_public_action=True,
-            enforce_activity_policy=True,
-        )
-    except BaseException as exc:
-        primary_error = exc
-        raise
-    finally:
-        cleanup_error: Exception | None = None
-        if auth_profile_attempted:
-            try:
-                _release_slot_auth_profile(
-                    temporary_slot,
-                    user_id=user.id,
-                    character_id=character.id,
-                    credential=credential,
-                )
-                _reload_openclaw_secrets_sync()
-            except Exception as exc:
-                cleanup_error = exc
-        try:
-            agent_run_service.release_temporary_resident_slot(
-                db,
-                agent_id=temporary_slot.agent_id,
-                user_id=user.id,
-                character_id=character.id,
-                credential_id=credential.id,
-            )
-        except Exception as exc:
-            if cleanup_error is None:
-                cleanup_error = exc
-        if cleanup_error is not None and primary_error is None:
-            raise cleanup_error
 
 
 def _local_connection_read(
@@ -2060,14 +1823,6 @@ def _deleted_character_handle(db: Session, character_id: str) -> str:
     return candidate
 
 
-def _manual_run_available_at(db: Session, user_id: str) -> datetime | None:
-    latest_manual_run = routine_run_queries.get_latest_manual_run_for_user(db, user_id)
-    if latest_manual_run is None:
-        return None
-    created_at = latest_manual_run.created_at
-    if created_at.tzinfo is None:
-        created_at = created_at.replace(tzinfo=UTC)
-    return created_at + RUN_NOW_COOLDOWN
 
 
 def _first_greeting_available_at(db: Session, user_id: str) -> datetime | None:
@@ -2412,3 +2167,50 @@ def deactivate_agent(db: Session, user: models.User, character_id: str) -> schem
 
 def _ensure_activity_profile_ready(db: Session, *, character: character_models.Character, setting: models.AgentActivitySetting) -> schemas.AgentActivityProfileReadinessRead:
     return autonomy_management._ensure_activity_profile_ready(db, character=character, setting=setting, workflows=build_autonomy_workflows())
+
+
+def build_manual_activity_workflows() -> ManualActivityWorkflows:
+    return ManualActivityWorkflows(
+        get_owned_character=_get_owned_character,
+        ensure_not_suspended=_ensure_not_suspended,
+        is_owner_controlled_character=is_owner_controlled_character,
+        ensure_llm_mode=_ensure_llm_mode,
+        ensure_imported_world_runtime_enabled=_ensure_imported_world_runtime_enabled,
+        ensure_run_now_available=maintenance_service.ensure_run_now_available,
+        _ensure_activity_profile_ready=_ensure_activity_profile_ready,
+        get_credential=agent_crud.get_character_credential,
+        run_assigned_slot=agent_run_service.run_assigned_resident_slot_once,
+        claim_temporary_slot=agent_run_service.claim_temporary_resident_slot,
+        sync_enabled=_resident_openclaw_sync_enabled,
+        bind_profile=_bind_slot_auth_profile,
+        reload_secrets=_reload_openclaw_secrets_sync,
+        run_temporary_slot=agent_run_service.run_claimed_temporary_resident_slot_once,
+        release_profile=_release_slot_auth_profile,
+        release_temporary_slot=agent_run_service.release_temporary_resident_slot,
+        execution_mode_error=AgentExecutionModeError,
+        credential_required_error=CredentialRequiredError,
+    )
+
+
+def build_feed_cue_workflows() -> FeedCueWorkflows:
+    return FeedCueWorkflows(
+        get_owned_character=_get_owned_character,
+        ensure_not_suspended=_ensure_not_suspended,
+        ensure_llm_mode=_ensure_llm_mode,
+        ensure_imported_world_runtime_enabled=_ensure_imported_world_runtime_enabled,
+        ensure_feed_cues_available=maintenance_service.ensure_feed_cues_available,
+        build_activity_policy=agent_activity_policy.build_activity_policy,
+        prompt_injection_error=PromptInjectionDetectedError,
+    )
+
+
+async def run_agent_now(db: Session, user: models.User, character_id: str) -> schemas.OpenClawAgentRunRead:
+    return await manual_activity.run_agent_now(db, user, character_id, workflows=build_manual_activity_workflows())
+
+
+def get_feed_cue(db: Session, user: models.User, character_id: str) -> schemas.AgentFeedCueRead | None:
+    return feed_cues.get_feed_cue(db, user, character_id, workflows=build_feed_cue_workflows())
+
+
+def give_feed_cue(db: Session, user: models.User, character_id: str, data: schemas.AgentFeedCueCreate) -> schemas.AgentFeedCueRead:
+    return feed_cues.give_feed_cue(db, user, character_id, data, workflows=build_feed_cue_workflows())
