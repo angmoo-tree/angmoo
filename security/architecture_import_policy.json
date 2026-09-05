@@ -1023,6 +1023,7 @@
       "app.domains.routines.contracts.prompt_context",
       "app.domains.routines.contracts.resident",
       "app.domains.routines.contracts.slots",
+      "app.domains.routines.contracts.topic_arcs",
       "app.domains.routines.dependencies",
       "app.domains.routines.exceptions",
       "app.domains.routines.models",
@@ -1031,6 +1032,7 @@
       "app.domains.routines.policies",
       "app.domains.routines.policies.activity_state",
       "app.domains.routines.policies.planning",
+      "app.domains.routines.policies.topic_arc_roles",
       "app.domains.routines.repository",
       "app.domains.routines.repository.activity_counts",
       "app.domains.routines.repository.activity_evidence",
@@ -1044,6 +1046,7 @@
       "app.domains.routines.schemas",
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
+      "app.domains.routines.schemas.resident_planning",
       "app.domains.routines.schemas.runs",
       "app.domains.routines.service",
       "app.domains.routines.service.action_briefs",
@@ -1228,9 +1231,11 @@
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.plans",
       "app.domains.routines.contracts.resident",
+      "app.domains.routines.contracts.topic_arcs",
       "app.domains.routines.schemas",
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
+      "app.domains.routines.schemas.resident_planning",
       "app.domains.routines.schemas.runs",
       "app.domains.routines.service",
       "app.domains.routines.service.action_briefs",
@@ -2864,6 +2869,22 @@
         "owner_stage": "AR-B5",
         "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
         "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.policies.topic_arc_roles",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing graph uses the identical actual provider schemas and role validator after ownership extraction; no wrapper implementation.",
+        "removal_condition": "Move actual graph workflow to runtime/resident and close this exact legacy consumer in LG-C.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.schemas.resident_planning",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing graph uses the identical actual provider schemas and role validator after ownership extraction; no wrapper implementation.",
+        "removal_condition": "Move actual graph workflow to runtime/resident and close this exact legacy consumer in LG-C.",
         "review_date": "2026-09-06"
       }
     ]

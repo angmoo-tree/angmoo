@@ -1029,3 +1029,14 @@ Social의 지원 schema를 prompt 타입으로 직접 사용했을 때 기존 So
 
 
 C5e 최종 고정 tree 검증: **429 passed / 기존 PostgreSQL 전용1 skipped / 기존 warnings5 /102.78초**. 현재 boundary **732modules /2457edges /exact legacy206 /cycle0**, L4 **732/14/97**, ER0 **85/87/24/44/7**, Memory batch inventory PASS. 읽기 전용 원래6검사(source/split/assertion/suppression/API·ORM/node)는 전부 오류0이며 **보호2139/current2257**이다. 최초 signed869bae의 두 실제 도입 경로를 메모리에서만 복원하여 비교했으며 frozen/checkpoint/additions는 수정하지 않았다. 따라서 stock 전체 게이트는 root의 순차 최초도입 원장 연결 후 검증 대상이며 현재 전체 PASS로 표시하지 않는다. 원본29함수/4상수/brief9정의 및 기존8테스트 AST 동일 확인. 새 bridge는 실제 구독자만 기록했으며 원래 미호출2함수는 후속B8-A 대상으로 원문을 유지했다.
+
+
+## AR-B4 LG-A — Resident provider 응답 스키마와 단계 규칙
+
+B4 C5e `b71c0e3`를 기준으로 LangGraph의 25개 실제 Pydantic 모델·버전 상수와 Topic Arc 단계 검증을 Routines schemas/policies로 이전했습니다. JSON schema 전체 25개가 원문과 같고, 27개 정의 AST는 validator의 역할 전용 입력 Protocol 타입명 한 곳을 복원하면 같습니다. 기존 caller는 실제 동일 class/function 객체를 사용하며 새로운 DB/provider 호출은 없습니다. LG 테스트 186개는 기존 assertion 그대로 초기 PASS입니다. 최종 source 검증 결과를 아래에 기록합니다.
+
+전체 원본 294개 정의의 위치·직접 소비자·기존 검사 대응을 명시했습니다. LG-A는 응답 계약의 실제 소유 이전이며 업무 결정·SQL·graph 조립 전체 완료가 아닙니다. LG-B/LG-C와 이미 고정된 B7 Daypart 및 B5 RelationshipPoint의 root 통합이 남습니다. 불변 checkpoint와 append-only 원본은 수정하지 않으며 신규 4파일의 최초 source 증거는 signed source 이후 root가 순차 캡처합니다.
+
+계획과 Social이 함께 사용하는 동기·감정 enum 두 개의 실제 정의는 `app/contracts/action_subjective_context.py`에 있습니다. Social의 subjective DTO·출처·텍스트 검증·저장 규칙은 Social에 유지하며, 값 enum의 같은 객체를 import합니다. 따라서 enum 값·identity·provider schema를 바꾸지 않고 두 업무의 공유 값만 연결합니다.
+
+LG-A 최종 고정 후보 검증: 관련 **372 passed / 기존 warnings2 / 111.95초**. 전체 provider JSON schema25개 동일, 원문27정의와 공유enum2정의 AST 동일(validator 입력 Protocol 타입명1곳 정규화). 경계736모듈/2463edges/206legacy, L4 736/14/97, deferred22 PASS. 원래 보존 6검사 진단은 sources/split/assertions/suppressions/API·ORM/missing-nodes 모두0이며 protected2139/current2257입니다. signed 최초869bae55의 두 Routines 파일 blob만 읽기 메모리 보충한 진단으로, stock 전체 PASS나 신규 도입 캡처를 주장하지 않습니다. 기존 테스트 수정·노드 추가0, 신규 제품 파일4개이며 root가 source 고정 후 순차 도입 증거를 합칩니다.

@@ -1,7 +1,7 @@
 {
-  "edge_count": 2457,
-  "external_import_count": 2297,
-  "module_count": 732,
+  "edge_count": 2463,
+  "external_import_count": 2304,
+  "module_count": 736,
   "modules": [
     {
       "external_imports": [],
@@ -480,6 +480,15 @@
       ],
       "module": "app.contracts",
       "path": "backend/app/contracts/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "enum"
+      ],
+      "imports": [],
+      "module": "app.contracts.action_subjective_context",
+      "path": "backend/app/contracts/action_subjective_context.py",
       "wildcard_imports": []
     },
     {
@@ -3802,6 +3811,15 @@
     },
     {
       "external_imports": [
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.contracts.topic_arcs",
+      "path": "backend/app/domains/routines/contracts/topic_arcs.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "fastapi",
         "sqlalchemy.orm"
       ],
@@ -3900,6 +3918,17 @@
       ],
       "module": "app.domains.routines.policies.planning",
       "path": "backend/app/domains/routines/policies/planning.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.topic_arcs"
+      ],
+      "module": "app.domains.routines.policies.topic_arc_roles",
+      "path": "backend/app/domains/routines/policies/topic_arc_roles.py",
       "wildcard_imports": []
     },
     {
@@ -4097,6 +4126,21 @@
       ],
       "module": "app.domains.routines.schemas.resident",
       "path": "backend/app/domains/routines/schemas/resident.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.contracts.action_subjective_context",
+        "app.domains.routines.policies.topic_arc_roles"
+      ],
+      "module": "app.domains.routines.schemas.resident_planning",
+      "path": "backend/app/domains/routines/schemas/resident_planning.py",
       "wildcard_imports": []
     },
     {
@@ -5224,7 +5268,9 @@
         "dataclasses",
         "enum"
       ],
-      "imports": [],
+      "imports": [
+        "app.contracts.action_subjective_context"
+      ],
       "module": "app.domains.social.contracts.subjective_context",
       "path": "backend/app/domains/social/contracts/subjective_context.py",
       "wildcard_imports": []
@@ -10572,7 +10618,9 @@
         "app.cruds.agents",
         "app.cruds.community",
         "app.domains.routines.contracts.resident",
+        "app.domains.routines.policies.topic_arc_roles",
         "app.domains.routines.repository.public_action_executions",
+        "app.domains.routines.schemas.resident_planning",
         "app.domains.routines.service.public_action_executions",
         "app.domains.social.contracts.subjective_context",
         "app.domains.world_characters.contracts.runtime_modes",
