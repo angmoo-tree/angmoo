@@ -93,3 +93,10 @@ class WorldCharacterSetupValidationError(WorldCharacterSetupError):
     def __init__(self, reason_code: str) -> None:
         self.reason_code = reason_code
         super().__init__(reason_code)
+
+
+from app.domains.worlds.contracts import WorldServiceError
+
+
+class WorldCharacterOwnershipError(WorldServiceError):
+    reason_code = "world_character_owner_mismatch"

@@ -63,7 +63,7 @@ from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
 from app.policies import name_policy
 from app.services import agent_activity_policy
-from app.services import activity_profile_readiness
+from app.domains.world_characters.service import readiness as activity_profile_readiness
 from app.services import community as community_service
 from app.services import agent_runs as agent_run_service
 from app.domains.identity.service import demo_access as demo_lock
@@ -2750,7 +2750,7 @@ def _scrub_agent_data(db: Session, character: character_models.Character) -> Non
     now = datetime.now(UTC)
     character_id = character.id
 
-    from app.services import world_character_setup
+    from app.runtime.world_characters import cleanup as world_character_setup
     from app.runtime.memory_privacy import scrub_memory_data
 
     scrub_memory_data(db, owner_id=character.owner_id, character_id=character_id)

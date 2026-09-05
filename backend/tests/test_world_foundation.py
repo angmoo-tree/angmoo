@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from app import models
 from app.core.db import Base
 from app.core.ids import uuid7_string
-from app.services import worlds as world_service
+from app.domains.worlds import service as world_service
 from app.services import world_foundation
 
 
@@ -116,6 +116,7 @@ def test_world_slug_and_membership_are_unique() -> None:
 
 
 def test_world_character_requires_membership_in_same_world_and_owner() -> None:
+    from app.domains.world_characters.service import membership as world_service
     with Session(_engine()) as db:
         owner = _user("owner")
         other = _user("other")

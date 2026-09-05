@@ -130,14 +130,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.api.v1.routes.worlds"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.api.v1.routes.worlds"
-        },
-        {
-          "imported": "app.models",
           "importer": "app.cruds.agent_runs"
         },
         {
@@ -321,10 +313,6 @@
           "importer": "app.runtime.characters.management"
         },
         {
-          "imported": "app.services.activity_profile_readiness",
-          "importer": "app.runtime.characters.management"
-        },
-        {
           "imported": "app.services.agent_activity_policy",
           "importer": "app.runtime.characters.management"
         },
@@ -369,8 +357,12 @@
           "importer": "app.runtime.characters.management"
         },
         {
-          "imported": "app.services.world_character_setup",
-          "importer": "app.runtime.characters.management"
+          "imported": "app.models",
+          "importer": "app.runtime.world_characters.cleanup"
+        },
+        {
+          "imported": "app.models",
+          "importer": "app.runtime.world_characters.lifecycle"
         },
         {
           "imported": "app.schemas.agent_runs",
@@ -446,18 +438,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.services.activity_profile_readiness"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.activity_profile_readiness"
-        },
-        {
-          "imported": "app.services.world_character_contracts",
-          "importer": "app.services.activity_profile_readiness"
-        },
-        {
-          "imported": "app.models",
           "importer": "app.services.activity_proposal_runtime"
         },
         {
@@ -506,10 +486,6 @@
         },
         {
           "imported": "app.schemas",
-          "importer": "app.services.agent_runs"
-        },
-        {
-          "imported": "app.services.activity_profile_readiness",
           "importer": "app.services.agent_runs"
         },
         {
@@ -921,10 +897,6 @@
           "importer": "app.services.tree"
         },
         {
-          "imported": "app.models",
-          "importer": "app.services.world_character_setup"
-        },
-        {
           "imported": "app.cruds.agent_runs",
           "importer": "app.services.world_feed_runtime"
         },
@@ -995,10 +967,6 @@
         {
           "imported": "app.models",
           "importer": "app.services.world_foundation"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.worlds"
         }
       ],
       "id": "pre-t2-5-horizontal-layer-imports",
@@ -1182,10 +1150,6 @@
         {
           "importer": "app.runtime.account_deletion",
           "imported": "app.services.runtime_boundary"
-        },
-        {
-          "importer": "app.runtime.account_deletion",
-          "imported": "app.services.world_character_setup"
         }
       ]
     }
@@ -1281,6 +1245,7 @@
       "app.domains.world_characters.contracts.provider",
       "app.domains.world_characters.contracts.public_profile",
       "app.domains.world_characters.contracts.queries",
+      "app.domains.world_characters.contracts.readiness",
       "app.domains.world_characters.contracts.runtime_modes",
       "app.domains.world_characters.contracts.seed",
       "app.domains.world_characters.contracts.setup",
@@ -1289,15 +1254,20 @@
       "app.domains.world_characters.exceptions",
       "app.domains.world_characters.models",
       "app.domains.world_characters.router",
+      "app.domains.world_characters.router.entry",
       "app.domains.world_characters.router.profile",
+      "app.domains.world_characters.router.setup",
       "app.domains.world_characters.schemas",
       "app.domains.world_characters.schemas.identity",
+      "app.domains.world_characters.schemas.readiness",
       "app.domains.world_characters.schemas.setup",
       "app.domains.world_characters.service",
       "app.domains.world_characters.service.autonomous_setup",
       "app.domains.world_characters.service.lifecycle",
+      "app.domains.world_characters.service.membership",
       "app.domains.world_characters.service.owner_identity",
       "app.domains.world_characters.service.public_profile",
+      "app.domains.world_characters.service.readiness",
       "app.domains.world_characters.service.runtime_modes",
       "app.domains.world_characters.service.seed",
       "app.domains.world_characters.service.setup_validation",
@@ -1349,6 +1319,7 @@
       "app.domains.world_characters.contracts.provider",
       "app.domains.world_characters.contracts.public_profile",
       "app.domains.world_characters.contracts.queries",
+      "app.domains.world_characters.contracts.readiness",
       "app.domains.world_characters.contracts.runtime_modes",
       "app.domains.world_characters.contracts.seed",
       "app.domains.world_characters.contracts.setup",
@@ -1356,12 +1327,15 @@
       "app.domains.world_characters.contracts.studio_surface",
       "app.domains.world_characters.schemas",
       "app.domains.world_characters.schemas.identity",
+      "app.domains.world_characters.schemas.readiness",
       "app.domains.world_characters.schemas.setup",
       "app.domains.world_characters.service",
       "app.domains.world_characters.service.autonomous_setup",
       "app.domains.world_characters.service.lifecycle",
+      "app.domains.world_characters.service.membership",
       "app.domains.world_characters.service.owner_identity",
       "app.domains.world_characters.service.public_profile",
+      "app.domains.world_characters.service.readiness",
       "app.domains.world_characters.service.runtime_modes",
       "app.domains.world_characters.service.seed",
       "app.domains.world_characters.service.setup_validation",
@@ -1870,6 +1844,14 @@
         "review_date": "2026-09-05"
       },
       {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.world_characters.schemas.readiness",
+        "owner_stage": "AR-B2",
+        "removal_condition": "Switch the exact shared schema aggregate in G5 or AgentRun readiness consumer in B4/B8-A; preserve the same DTO object and readiness policy.",
+        "reason": "Existing remaining schema/agent consumer now uses the canonical WC readiness implementation. No canonical module depends on this legacy consumer.",
+        "review_date": "2026-09-05"
+      },
+      {
         "importer": "app.schemas.auth",
         "target": "app.domains.identity.schemas",
         "owner_stage": "AR-B8-A",
@@ -1907,6 +1889,14 @@
         "owner_stage": "AR-B8-A",
         "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
         "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.world_characters.service.readiness",
+        "owner_stage": "AR-B2",
+        "removal_condition": "Switch the exact shared schema aggregate in G5 or AgentRun readiness consumer in B4/B8-A; preserve the same DTO object and readiness policy.",
+        "reason": "Existing remaining schema/agent consumer now uses the canonical WC readiness implementation. No canonical module depends on this legacy consumer.",
         "review_date": "2026-09-05"
       },
       {

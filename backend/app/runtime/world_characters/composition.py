@@ -17,3 +17,8 @@ def lifecycle_service(db, *, runtime_guard=None):
     return WorldCharacterLifecycleService(
         db, queries=SqlAlchemyWorldCharacterQueries(), runtime_guard=runtime_guard,
     )
+
+
+def leave_service(db):
+    from app.runtime.world_characters.lifecycle import WorldCharacterLeaveRuntimeGuard
+    return lifecycle_service(db, runtime_guard=WorldCharacterLeaveRuntimeGuard(db))

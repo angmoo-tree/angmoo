@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Protocol
 
+from app.domains.worlds.exceptions import WorldServiceError
+
 
 NO_SPECIFIC_ROLE_KEY = "no_specific_role"
 NO_SPECIFIC_ROLE_PORTABLE_REF = "roles/no-specific-role"

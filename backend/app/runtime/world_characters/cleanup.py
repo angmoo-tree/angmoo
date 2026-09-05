@@ -1,26 +1,9 @@
-"""Compatibility facade for the canonical WorldCharacter setup domain."""
-
+"""Cross-domain deletion composed in the caller-owned character transaction."""
 from sqlalchemy import delete, or_, select, update
 from sqlalchemy.orm import Session
-
 from app import models
-from app.domains.world_characters.public import (
-    OWNER_REGENERATION_LIMIT_24H,
-    PROFILE_REGENERATION_LIMIT_24H,
-    WorldCharacterSetupConflictError,
-    WorldCharacterSetupError,
-    WorldCharacterSetupForbiddenError,
-    WorldCharacterSetupNotFoundError,
-    WorldCharacterSetupValidationError,
-    approve_setup,
-    enter_world,
-    generate_setup,
-    get_setup,
-    get_world_entry,
-    preflight_setup,
-    reject_setup,
-    retry_setup,
-)
+
+
 def delete_setup_data_for_characters(
     db: Session,
     *,
@@ -216,21 +199,4 @@ def delete_setup_data_for_characters(
     )
 
 
-__all__ = [
-    "OWNER_REGENERATION_LIMIT_24H",
-    "PROFILE_REGENERATION_LIMIT_24H",
-    "WorldCharacterSetupConflictError",
-    "WorldCharacterSetupError",
-    "WorldCharacterSetupForbiddenError",
-    "WorldCharacterSetupNotFoundError",
-    "WorldCharacterSetupValidationError",
-    "approve_setup",
-    "delete_setup_data_for_characters",
-    "enter_world",
-    "generate_setup",
-    "get_setup",
-    "get_world_entry",
-    "preflight_setup",
-    "reject_setup",
-    "retry_setup",
-]
+__all__ = ["delete_setup_data_for_characters"]
