@@ -139,6 +139,14 @@ PR #267의 첫 head `ab8fa23`에서 Gitleaks가 새 cursor 호환 회귀의 공�
 
 G1 merge의 Core CI frontend에서 Chat 입력 중 표시 검사가 첫 실행·자동 재시도 모두 실패했다. 해당 테스트는 실제 backend 없이 route fixture로 응답하며 650ms 뒤 응답을 끝내므로 CI의 assertion 진행보다 중간 UI 상태가 먼저 사라질 수 있었다. 가상 stream을 입력 중 표시·모델 잠금 확인까지 유지하고 finally에서 완료시키는 동기화로 바꿨다. 제품 UI/API 동작과 기존 expect 표현식 331개는 TypeScript AST로 정확히 같음을 확인했다. 로컬 Chromium에서 해당 시나리오를 재시도 없이 3회 연속 통과했다(1.3분). G1 실패 job은 동일 merge에서 한 번 재실행해 post-merge 결과를 별도로 확인하며, 이후 후보에는 시간 경합을 제거한 검사를 포함한다.
 
+### AR-G2 post-merge 보안 이력 범위 Hotfix
+
+G2 merge `8a72078`의 Security run `33961102583`은 현재 추적 source 검사에 통과했으나 Gitleaks history가 329 commits에서 후속 Character PR의 source Git fingerprint를 탐지해 실패했다. 기본 Gitleaks는 함께 fetch된 다른 ref를 포함하며, 해당 fingerprint의 정확한 허용은 후속 PR 설정에만 있었다. 앞선 후보의 설정으로 미래 PR을 판단하므로 같은 SHA의 결과가 fetch된 refs에 따라 달라졌다.
+
+Gitleaks에 `--log-opts="HEAD"`를 명시해 현재 후보의 **전체 조상 이력**을 검사한다. depth 제한·변경분만 검사·exit-code 무시는 추가하지 않는다. 현재 tracked-tree scan, SHA 고정 binary/checksum, redaction, 기존 별도 Angmoo scanner의 모든 ref·무제한 history 검사는 유지한다. 공개 전 저장소 전체 이력 감사도 이 후보별 Gitleaks 결과로 대체하지 않는다.
+
+실제 Gitleaks8.30.1과 새 synthetic Git fixture에서 (1) 기본값은 무관한 다른 branch의 canary를 탐지, (2) clean HEAD의 전체 이력은 통과, (3) 그 branch를 병합한 뒤 현재 파일에서 삭제된 과거 canary도 HEAD 이력에서 탐지됨을 확인했다. G2 후보 전체 조상 scan은 312 commits·19.65MB·findings0, 기존 CI policy도 PASS다. 원래 G2 post-merge 실패는 역사로 남기고 이 후속 Hotfix의 필수 PR·merge/post-merge 확인으로 종료한다.
+
 ## AR-G3: 기존 로그 기본값과 배포 자원 연결
 
 별도 `refactor/ar-g3-logging` 작업트리의 기준은 `de83dae`다. AR-G1·G2의 설정/공통 모듈 이전과 섞지 않고, 현재 진입점에 logging 자원을 연결했다. 이 절은 로컬 구현·검증 기록이며 PR·merge·실제 제품 installer 완료 판정은 아니다.
@@ -341,6 +349,12 @@ Creator 조회/수정 2개 endpoint가 canonical router에 추가되었다. 기�
 이번 감사에서 찾은 순수 B2 Character state 잔여는 본문처럼 해결했다. 위에 명시한 다른 업무/후속 단계와 별개로 남겨 둔 미분류 B2 Character 기본 구현은 없다. PR-head CI·전체 병합 후 검증과 후속 domain/bridge 종료는 root의 순차 통합 Gate에서 판정한다.
 - 마지막 고정 후보 `--contracts --nodes`는 현재 **2,118 nodes**를 수집했고, #258/#263 대비 API/OpenAPI/ORM·기존 assertion/suppression·source split 증거 오류는 없었다. 미합류 Identity/Character source 도입의 append-only 증거 오류만 root 선형 capture 대상으로 남았다. 이 기록을 전체 CI PASS로 확대하지 않는다.
 
+### Creator 완료 후보의 선형 통합 검증
+
+Creator lifecycle source `63034348e71ab4ae0bd0611a2ad04e1036244d42`와 HTTP/state source `81aa413abaf74655c3b3432a52ce10125d9aec53`를 하나의 후속 PR로 묶었다. 각 고정 source의 신규 파일·테스트 도입 증거를 선행 메타데이터 뒤에 추가했다. 고정 통합 후보 `49c4d214240b4c473eab3a6caf540f876625787d`에서 전체 backend suite는 **2,096 passed / 기존 22 skipped / 27 warnings, 450.38초**, 보존 검사는 **protected/current 2,118 nodes / items 37 PASS**였다. 이 실행 중 source·test·metadata를 수정하지 않았다.
+
+API/OpenAPI/ORM, 기존 assertion·suppression, 분할 source와 테스트 계보 검사가 모두 통과했다. 공통 CI 계약 7개와 architecture/deferred/L4/embedded/P8-R inventory도 통과했다. 실제 Gitleaks 8.30.1은 추적 archive 18.89MB와 후보의 전체 336 ancestor commits 20.83MB에서 findings 0이었다. 이 기록 뒤에는 문서만 추가한다. PR-head CI, 실제 Installer, 순차 병합과 post-merge는 각각 확인하며, 위 B3~B8의 남은 업무를 Character PR의 완료로 표시하지 않는다.
+
 ## AR-B2 Worlds: 정의·Creator·배너 역할 이전
 
 `refactor/ar-b2-worlds`는 G0~G4 통합 `bfa6321`에 Identity source `abbd08c`를 fast-forward한 상태에서 진행했다. 아래는 Worlds의 로컬 구현·검증 기록이며 전체 B2, PR·merge·post-merge 또는 설치 앱 완료 판정이 아니다.
@@ -360,6 +374,14 @@ Creator 조회/수정 2개 endpoint가 canonical router에 추가되었다. 기�
 승인 public node 검사는 **604 유지 / current 2,092 PASS**였다. `--contracts --nodes`는 **#258 1,867 / #263 1,907 / 보호 계보 2,080 / current 2,092**를 수집했고 기존 API·OpenAPI·ORM·assertion·split 검사에서 변경/누락을 보고하지 않았다. 단, 선행 Identity `abbd08c`의 신규 source 9개와 node 5개가 아직 append-only introduction metadata에 없어서 전체 명령은 exit 1이었다. 이 검사 전체를 PASS로 기록하지 않으며, Identity와 Worlds source를 순서대로 capture한 뒤 통합 후보에서 다시 판정한다. Worlds source의 도입 증거도 부모 작업에서 해당 실제 commit을 기준으로 추가한다.
 
 Live architecture는 **598 modules / 1,878 internal edges / 2,021 external imports / exact legacy 287 PASS**다. ER0는 **76 PostgreSQL source / 기존 역사 migration 부분집합 87 / Neo4j query 24 / Next route 44 / parity workload 7**로 통과했다. PostgreSQL source 하나의 증가는 원래 timezone query를 별도 service 파일에 배치한 결과다. L4의 parity 97 nodes, Memory batch live inventory, local-smoke의 이동한 두 테스트 경로도 연결했다. frozen source baseline·checkpoint·승인 node·SQLite/Alembic 본문과 역사 inventory는 재작성하지 않았다. PR-head CI와 최종 G5·G06·백엔드 통합 검증은 별도 절차로 남는다.
+
+### Worlds 선형 통합 검증
+
+Character 완료 source와 모든 선행 introduction 증거 뒤에 Worlds source `38c26102a7d1f576d4eb9686f4cb9fb3585f75f2`의 신규 파일 5개·회귀 7개를 캡처했다. 현재 보안 route inventory는 실제 World router의 module 필드 10개를 반영하며 URL·method·access·endpoint 계약은 그대로다.
+
+Worlds·권한·Package import·WorldCharacter lifecycle/setup·활동 소비자 집중 검사는 **129 passed / 6 warnings, 33.27초**였다. 이 집중 실행 시작과 Git metadata commit 완료가 잠시 겹쳤으므로 해당 실행을 고정 HEAD 전체 증거로 쓰지 않는다. 고정 후보 `6b9e77d`에서 권한/삭제 회귀 **8 passed, 6.19초**, public **196 operations**, 전체 보존 **2,125 protected/current nodes / items 37 PASS**를 다시 확인했다. 후자의 실행 중 source·test·metadata는 수정하지 않았다.
+
+같은 후보에서 공통 CI 계약 7개, architecture **618 modules / 1,988 edges / exact legacy 281**, deferred **22 files**, L4 **97 parity nodes**, ER0 **77/87/24/44/7**, P8-R inventory가 모두 통과했다. 실제 Gitleaks는 추적 archive **18.97MB**와 후보의 전체 **338 ancestor commits / 20.96MB**에서 findings 0이었다. 이후 선행 Creator 결과를 합친 변경은 문서 한 파일뿐이다. PR-head의 전체 backend·실제 Installer와 순차 merge/post-merge 결과는 별도로 확인한다.
 
 ## AR-B2 WorldCharacter 기반: 모델·계약·검증·생성기
 
@@ -383,6 +405,11 @@ Foundation 이후 Character source `fe022c3`를 merge `7bc58b1`로 합쳤다. �
 
 Live architecture는 **618 modules / 1,937 edges / legacy exact 281 PASS**, ER0 **75/87/24/44/7 PASS**, L4 parity **97**, Memory batch current이다. Owner 서비스 3개 exact module만 추가하고 기존 임시 bridge 중 실제로 사라진 연결을 제거했다. WC profile/Studio/entry/setup/runtime repair/readiness와 최종 HTTP 이전은 다음 slice다.
 
+### WorldCharacter 기반·owner 통합 검증
+
+Foundation source `64537c7694819f5840aab9106f969f80c6c82d53`의 신규 파일 7개·회귀 2개, owner source `cb9b18d67daf42fd8c9d93c68108e27a7cbc08e1`의 신규 파일 3개·회귀 2개를 선행 Character/Worlds 뒤에 캡처했다. 고정 후보 `81724a5`에서 WorldCharacter owner/setup, Package import/UoW, runtime-mode repair, 권한/삭제 검사는 **63 passed / 2 warnings, 39.83초**였다. 전체 보존 검사는 **2,129 protected/current nodes / items 37 PASS**이며 API/OpenAPI/ORM·기존 assertion·suppression·source split도 유지했다. 검사 중 source·test·metadata는 수정하지 않았다.
+
+공통 CI 계약 7개, architecture **625 modules / 1,993 edges / exact legacy 281**, deferred 22, L4 parity 97, ER0 **76/87/24/44/7**, P8-R 및 public **196 operations**가 통과했다. 실제 Gitleaks 추적 archive **19.06MB**와 전체 **341 ancestor commits / 21.13MB**도 findings 0이었다. 이후 선행 Worlds PR의 결과를 통합한 차이는 문서 한 파일이다. Profile/Studio/setup workflow·entry/readiness HTTP는 다음 독립 범위이며, PR-head CI·설치·순차 merge/post-merge를 확인하기 전 전체 B2 완료로 표시하지 않는다.
 
 ### AR-B2 WC profile·Studio·lifecycle와 동일 SQL 조회 조립
 
