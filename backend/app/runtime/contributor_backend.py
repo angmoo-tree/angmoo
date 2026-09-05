@@ -21,6 +21,7 @@ from app.runtime.configuration import (
     initialize_local_installation_identity,
 )
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
+from app.runtime.logging_config import configure_application_logging, uvicorn_logging_config
 
 
 CONTRIBUTOR_GENERATION = "contributor-v1"
@@ -199,6 +200,7 @@ def contributor_runtime_status_payload(
 
 def main() -> None:
     args = _parse_args()
+    configure_application_logging()
     if args.diagnostics:
         payload = contributor_runtime_status_payload(
             data_root=args.data_root,
@@ -219,13 +221,14 @@ def main() -> None:
             port=args.port,
             reload=True,
             reload_dirs=[str(Path(__file__).resolve().parents[2])],
+            log_config=uvicorn_logging_config(),
         )
         return
     app = create_contributor_runtime_app(
         data_root=args.data_root,
         frontend_origin=args.frontend_origin,
     )
-    uvicorn.run(app, host=args.host, port=args.port)
+    uvicorn.run(app, host=args.host, port=args.port, log_config=uvicorn_logging_config())
 
 
 if __name__ == "__main__":

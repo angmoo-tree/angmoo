@@ -224,11 +224,11 @@
     },
     {
       "path": "backend/app/public_main.py",
-      "sha256": "48a13dfab161ab4f544d8a26b476e3a9e9727153c74086f5a75ac2424d87f564"
+      "sha256": "86064d150bd320a8b750694b4be4c2d6a8dc6de5c601482458e82bf5ea17ba1c"
     },
     {
       "path": "backend/app/runtime/desktop_sidecar.py",
-      "sha256": "62d7048116e3eda4b9281408232297ec568a7e19f43f0d7b77d70e6fe4c37fa3"
+      "sha256": "202d5af6af0a90076c87c9d915ba675a50b7c620beb877fd024ded83f8420a54"
     },
     {
       "path": "backend/app/runtime/memory/__init__.py",

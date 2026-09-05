@@ -26,6 +26,11 @@ $sqliteManifestRoot = Join-Path $backendRoot "app\runtime\migrations\sqlite_vers
 $ladybugManifestRoot = Join-Path $backendRoot "app\runtime\migrations\ladybug_versions\manifests"
 $sqliteManifestData = "$sqliteManifestRoot;app/runtime/migrations/sqlite_versions/manifests"
 $ladybugManifestData = "$ladybugManifestRoot;app/runtime/migrations/ladybug_versions/manifests"
+$loggingConfig = Join-Path $backendRoot "logging.ini"
+if (-not (Test-Path -LiteralPath $loggingConfig -PathType Leaf)) {
+    throw "Angmoo logging configuration resource is missing"
+}
+$loggingConfigData = "$loggingConfig;."
 $distRoot = Join-Path $WorkRoot "dist"
 $buildRoot = Join-Path $WorkRoot "build"
 $specRoot = Join-Path $WorkRoot "spec"
@@ -50,6 +55,7 @@ $layoutArgument = if ($Layout -eq "OneFile") { "--onefile" } else { "--onedir" }
     --collect-all ladybug `
     --add-data $sqliteManifestData `
     --add-data $ladybugManifestData `
+    --add-data $loggingConfigData `
     --hidden-import sqlalchemy.dialects.sqlite `
     --exclude-module psycopg `
     --exclude-module psycopg_binary `

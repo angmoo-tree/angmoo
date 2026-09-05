@@ -88,6 +88,42 @@
           "composition/screens/device-home-screen.tsx"
         ]
       }
+    },
+    "AR-G3": {
+      "reason": "Connect the former Python root default and Uvicorn default console configuration to a packaged logging.ini while retaining desktop opt-out and existing host handlers. No original source file is removed in this stage.",
+      "added_files": [
+        "backend/logging.ini",
+        "backend/app/runtime/logging_config.py",
+        "backend/tests/logging/test_runtime_logging.py"
+      ],
+      "direct_consumers": [
+        "backend/app/main.py",
+        "backend/app/public_main.py",
+        "backend/app/runtime/contributor_backend.py",
+        "backend/app/runtime/desktop_sidecar.py",
+        "Dockerfile.backend",
+        "desktop/scripts/build-sidecar.ps1"
+      ],
+      "scope": "Existing app.runtime ownership; no new migrated domain/global scope or boundary exception.",
+      "compatibility": "Existing ASGI targets and create_app contracts remain; desktop log_config=None/access_log=False unchanged.",
+      "verification_nodes": [
+        "tests/logging/test_runtime_logging.py::test_ini_preserves_uvicorn_defaults_and_root_warning_without_handlers",
+        "tests/logging/test_runtime_logging.py::test_repeated_factories_preserve_embedding_handlers_levels_and_caplog",
+        "tests/logging/test_runtime_logging.py::test_explicit_root_level_without_handlers_is_preserved",
+        "tests/logging/test_runtime_logging.py::test_source_resource_is_independent_of_working_directory",
+        "tests/logging/test_runtime_logging.py::test_frozen_onefile_and_onedir_read_only_the_bundle_resource[_MEI12345]",
+        "tests/logging/test_runtime_logging.py::test_frozen_onefile_and_onedir_read_only_the_bundle_resource[sidecar/_internal]",
+        "tests/logging/test_runtime_logging.py::test_ini_is_consumed_and_invalid_configuration_fails_before_startup",
+        "tests/logging/test_runtime_logging.py::test_noconsole_subprocess_with_missing_stdio_has_no_formatter_crash",
+        "tests/logging/test_runtime_logging.py::test_missing_bundle_resource_keeps_content_free_sidecar_fatal_protocol",
+        "tests/logging/test_runtime_logging.py::test_contributor_server_and_reload_child_receive_the_same_logging_configuration[False]",
+        "tests/logging/test_runtime_logging.py::test_contributor_server_and_reload_child_receive_the_same_logging_configuration[True]",
+        "tests/logging/test_runtime_logging.py::test_public_and_legacy_cli_keep_their_existing_asgi_target",
+        "tests/logging/test_runtime_logging.py::test_installer_json_stdout_and_existing_redaction_are_unchanged",
+        "tests/logging/test_runtime_logging.py::test_sidecar_serve_health_and_shutdown_preserve_silent_streams_and_endpoint_protocol",
+        "tests/logging/test_runtime_logging.py::test_container_and_both_pyinstaller_layouts_include_logging_resource"
+      ],
+      "remaining": "Full packaged product/installer and required CI after sequential integration; final G12 closeout in B8-B."
     }
   }
 }

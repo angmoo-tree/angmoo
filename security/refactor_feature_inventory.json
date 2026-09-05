@@ -9650,16 +9650,22 @@
       "title": "로그 설정",
       "owner": "bootstrap / sidecar",
       "stage": "AR-G3",
-      "status": "MAPPED",
+      "status": "MOVED",
       "current_paths": [
+        "Dockerfile.backend",
         "backend/app/core/redaction.py",
         "backend/app/main.py",
         "backend/app/public_main.py",
-        "backend/app/runtime/desktop_sidecar.py"
+        "backend/app/runtime/contributor_backend.py",
+        "backend/app/runtime/desktop_sidecar.py",
+        "backend/app/runtime/logging_config.py",
+        "backend/logging.ini",
+        "desktop/scripts/build-sidecar.ps1"
       ],
       "target_paths": [
-        "backend/logging.ini",
-        "backend/app/runtime/desktop_sidecar.py"
+        "backend/app/runtime/desktop_sidecar.py",
+        "backend/app/runtime/logging_config.py",
+        "backend/logging.ini"
       ],
       "entrypoints": [
         "backend/app/core/redaction.py::redact_secret_text",
@@ -9685,24 +9691,48 @@
         "backend/app/public_main.py::create_lifespan",
         "backend/app/public_main.py::create_app",
         "backend/app/public_main.py::health",
-        "backend/app/public_main.py::runtime_health"
+        "backend/app/public_main.py::runtime_health",
+        "backend/app/runtime/logging_config.py::logging_config_path",
+        "backend/app/runtime/logging_config.py::configure_application_logging",
+        "backend/app/runtime/logging_config.py::uvicorn_logging_config"
       ],
       "consumers": [
+        "Dockerfile.backend",
         "backend/app/integrations/direct_llm.py",
+        "backend/app/main.py",
         "backend/app/providers/fake.py",
         "backend/app/providers/gemini.py",
+        "backend/app/public_main.py",
         "backend/app/runtime/contributor_backend.py",
+        "backend/app/runtime/desktop_sidecar.py",
         "backend/app/services/agent_creation_drafts.py",
         "backend/app/services/agent_runs.py",
         "backend/app/services/agents.py",
         "backend/app/services/auth.py",
-        "backend/app/services/langgraph_resident.py"
+        "backend/app/services/langgraph_resident.py",
+        "desktop/scripts/build-sidecar.ps1"
       ],
       "test_paths": [
+        "backend/tests/logging/test_runtime_logging.py",
         "backend/tests/test_l3_er5_desktop_sidecar_security.py",
         "backend/tests/test_startup_security.py"
       ],
       "test_nodes": [
+        "tests/logging/test_runtime_logging.py::test_container_and_both_pyinstaller_layouts_include_logging_resource",
+        "tests/logging/test_runtime_logging.py::test_contributor_server_and_reload_child_receive_the_same_logging_configuration[False]",
+        "tests/logging/test_runtime_logging.py::test_contributor_server_and_reload_child_receive_the_same_logging_configuration[True]",
+        "tests/logging/test_runtime_logging.py::test_explicit_root_level_without_handlers_is_preserved",
+        "tests/logging/test_runtime_logging.py::test_frozen_onefile_and_onedir_read_only_the_bundle_resource[_MEI12345]",
+        "tests/logging/test_runtime_logging.py::test_frozen_onefile_and_onedir_read_only_the_bundle_resource[sidecar/_internal]",
+        "tests/logging/test_runtime_logging.py::test_ini_is_consumed_and_invalid_configuration_fails_before_startup",
+        "tests/logging/test_runtime_logging.py::test_ini_preserves_uvicorn_defaults_and_root_warning_without_handlers",
+        "tests/logging/test_runtime_logging.py::test_installer_json_stdout_and_existing_redaction_are_unchanged",
+        "tests/logging/test_runtime_logging.py::test_missing_bundle_resource_keeps_content_free_sidecar_fatal_protocol",
+        "tests/logging/test_runtime_logging.py::test_noconsole_subprocess_with_missing_stdio_has_no_formatter_crash",
+        "tests/logging/test_runtime_logging.py::test_public_and_legacy_cli_keep_their_existing_asgi_target",
+        "tests/logging/test_runtime_logging.py::test_repeated_factories_preserve_embedding_handlers_levels_and_caplog",
+        "tests/logging/test_runtime_logging.py::test_sidecar_serve_health_and_shutdown_preserve_silent_streams_and_endpoint_protocol",
+        "tests/logging/test_runtime_logging.py::test_source_resource_is_independent_of_working_directory",
         "tests/test_l3_er5_desktop_sidecar_security.py::test_desktop_loopback_accepts_exact_token_and_strict_cors",
         "tests/test_l3_er5_desktop_sidecar_security.py::test_desktop_loopback_allows_exact_world_package_capability_preflights[DELETE-x-angmoo-launcher-token, x-world-package-download-token]",
         "tests/test_l3_er5_desktop_sidecar_security.py::test_desktop_loopback_allows_exact_world_package_capability_preflights[DELETE-x-angmoo-launcher-token, x-world-package-preview-token]",
@@ -9748,7 +9778,11 @@
         "tests/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides9-invalid_oci_auth_mode]"
       ],
       "preserved_contracts": [
-        "actual load/package logging.ini in laterstage; redaction/handlers/stdout/stderr/handshake unchanged, no import-time side effects"
+        "INI-backed root WARNING default without installing or closing application handlers; explicit host/test levels preserved",
+        "Uvicorn contributor/legacy CLI INFO levels, formatter strings, stderr diagnostics and stdout access stream unchanged; reload receives the same dictionary",
+        "Desktop log_config=None/access_log=False; content-free fatal stderr, installer JSON stdout, endpoint ownership and shutdown protocol preserved",
+        "Existing Python redaction preserved; no file handler or rotation was present or introduced",
+        "Source backend root and frozen sys._MEIPASS resource resolution; Docker COPY and OneFile/OneDir --add-data; missing resources fail closed without cwd fallback"
       ],
       "runtime_paths": [
         "Docker Browser Run",
@@ -9757,14 +9791,14 @@
         "Windows installer"
       ],
       "verification": {
-        "baseline": "security/refactor_source_baseline.json",
-        "backend": "1845 passed / 22 skipped, source tree unchanged",
-        "item_status": "MAPPED; test association is navigation, not a claim every branch is covered",
-        "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
+        "baseline": "security/refactor_backend_checkpoint.json",
+        "backend": "82 passed / 1 warning / 48.05s; API/ORM and 2037-node preservation PASS; actual minimal OneFile and OneDir noconsole resource probes PASS. Full product bundle and required CI remain pending.",
+        "item_status": "MOVED; logging implementation/resources connected, backend completion waits for required runtime/package CI",
+        "remaining": "Final product OneFile/installer, Docker/Host Tauri applicable Gates, sequential G1/G2 merge regeneration, and B8-B G12 closeout remain separate"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
-      "backend_status": "MAPPED"
+      "notes": "Runtime logging module uses the existing app.runtime boundary; no domain/module scope is expanded. Factories validate defaults without fileConfig/dictConfig or handler installation. Detailed evidence is in refactor-backend-results.md.",
+      "backend_status": "MOVED"
     },
     {
       "id": "G13",
