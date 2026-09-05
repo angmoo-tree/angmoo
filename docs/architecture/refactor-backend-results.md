@@ -1122,3 +1122,9 @@ Source `763375b69e10810743dc9bbad1f76d5d3bf340d6`는 SQLite acquire/heartbeat/be
 Runtime `/runtime/status`의 실제 handler는 `domains/runtime/router.py`가 소유한다. 기존 같은 Session의 InstallationIdentity 조회는 Identity repository, claimed-owner 판정은 Identity service에서 수행한다. 원래 origin/auth dependency와403 detail은 그대로이며 reader factory는 두 앱 생성 함수에서 DB 조회 없이 각각1회 설정한다. config가 있을 때만 명시 settings를 넘기는 분기, overlay/privacy/schema/profile/generation 표현을 보존했다. 기존 fake probe fixture는 동일 fake class를 test app의 주입 factory로 연결하고 assertion은 유지한다.
 
 실제 owner SQL·인수·predicate를 펼쳐 handler 전체 AST가 원본과 동일하며 기존 reader/coordinator 두 클래스도 실제 새 service의 전체 AST와 일치한다. Runtime diagnostics/domain/single-backend/ER7 **35 PASS/1 warning/25.91초**, 경계741/2469/legacy222·public196·L4 parity97·ER0 PASS다. 읽기 보존 진단은 source/split/assertion/억제/APIORM/node 모두0(protected2201/current2252). 새 node는 없다. 집합 import 제거와 G5/G06·순차 통합은 계속 남는다.
+
+### AR-B8 Runtime A6 실제 역할 import와 집합 파일 종료
+
+Source `e18f5e5e764ac1774a5ee1ff770b69aedd6289d8`는 기존 export51개가 같은 실제 타입/값/함수임을 확인한 뒤 소비자15파일을 실제 정의로 연결했다. 제품의 public/api/application/domain/infrastructure/ports 집합6파일과 해당 임시 bridge18개를 제거했다. 원래 테스트 두 namespace의29값은 같은 실제 정의를 명시적으로 묶어 기존 assertion을 유지한다. 새 제품 facade나 가짜 ORM은 만들지 않았다. source 지도는 실제 내부 사용과 외부 named import를 대조하며, 옛 aggregate만 소비자로 기록됐던 항목은 실제 사용처로 정정했다.
+
+집중 Runtime/lease/SQL 동시성/HTTP/ER0/ER7 회귀는 **73 PASS/기존PG skip1/43.32초**, 경계735/2457/legacy222·L4 parity97·ER0 PASS다. 원래 source/split/assertion/억제/APIORM/node 읽기 진단0(protected2201/current2252). 현재 contributor navigation87개를 실제 경로로 검토했다. 순차 source/node 원장·다른 업무 후속 import 합류, global ORM 등록/단일Base의 G5, G06 진입점 통합과 검증 후 파일 제거는 별도 미완료 단계다.
