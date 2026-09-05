@@ -38,8 +38,12 @@ from app.integrations.llm import (
 )
 from app.runtime.chat.evidence_reads import today_reader as today_reader
 from app.runtime.chat.memory_producer import SqlAlchemySuccessfulChatMemoryProducer
-from app.runtime.chat.retrieval_policy import SqlAlchemyRetrievalPolicyResolver
-from app.runtime.chat.today_sns_activity import SqlAlchemyTodaySnsSnapshotValidator
+from app.runtime.chat.retrieval_policy import (
+    build_retrieval_policy as SqlAlchemyRetrievalPolicyResolver,
+)
+from app.runtime.chat.today_sns_activity import (
+    build_today_snapshot_validator as SqlAlchemyTodaySnsSnapshotValidator,
+)
 from app.runtime.graph_projection.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
 )

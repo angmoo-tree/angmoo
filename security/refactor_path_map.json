@@ -271,7 +271,9 @@
     "backend/app/domains/chat/ports/__init__.py": "backend/app/domains/chat/contracts/__init__.py",
     "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py": "backend/app/domains/chat/repository/response_lifecycle.py",
     "backend/app/domains/chat/infrastructure/__init__.py": "backend/app/domains/chat/repository/__init__.py",
-    "backend/app/runtime/chat/world_generation.py": "backend/app/domains/chat/service/generation.py"
+    "backend/app/runtime/chat/world_generation.py": "backend/app/domains/chat/service/generation.py",
+    "backend/app/runtime/chat/retrieval_policy.py": "backend/app/domains/chat/service/retrieval_policy.py",
+    "backend/app/runtime/chat/today_sns_activity.py": "backend/app/domains/chat/service/today_sns_activity.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -18588,6 +18590,166 @@
         "backend/app/runtime/chat/today_sns_activity.py": "AR-B6-B2D move actual snapshot hash revalidation policy with reader injection.",
         "backend/app/runtime/chat/memory_producer.py": "Actual after-commit multi-owner Memory candidate/UoW composition; unchanged one proposal, commit/rollback and provider-free contract."
       }
+    },
+    "AR-B6-B2D": {
+      "status": "Canonical preflight denial/entity eligibility and Today snapshot revision policy now reside in Chat services. Runtime factories wire the original same-Session SQL readers and blocked collaborator.",
+      "split_files": {
+        "backend/app/runtime/chat/retrieval_policy.py": [
+          "backend/app/domains/chat/service/retrieval_policy.py",
+          "backend/app/runtime/chat/retrieval_queries.py",
+          "backend/app/domains/chat/repository/response_requests.py",
+          "backend/app/runtime/chat/retrieval_policy.py"
+        ],
+        "backend/app/runtime/chat/today_sns_activity.py": [
+          "backend/app/domains/chat/service/today_sns_activity.py",
+          "backend/app/runtime/chat/today_sns_activity.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/chat/retrieval_policy.py::SqlAlchemyRetrievalPolicyResolver",
+          "new": "backend/app/domains/chat/service/retrieval_policy.py::RetrievalPolicyResolver",
+          "direct_consumers": [
+            "backend/app/runtime/chat/retrieval_policy.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_retrieval_policy_ownership.py::test_entity_policy_rechecks_unicode_identity_and_blocks_clarification"
+          ],
+          "new_member": "load_scope"
+        },
+        {
+          "old": "backend/app/runtime/chat/retrieval_policy.py::SqlAlchemyRetrievalPolicyResolver",
+          "new": "backend/app/domains/chat/service/retrieval_policy.py::RetrievalPolicyResolver",
+          "direct_consumers": [
+            "backend/app/runtime/chat/retrieval_policy.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_retrieval_policy_ownership.py::test_entity_policy_rechecks_unicode_identity_and_blocks_clarification"
+          ],
+          "new_member": "resolve_entity_mentions"
+        },
+        {
+          "old": "backend/app/runtime/chat/retrieval_policy.py::SqlAlchemyRetrievalPolicyResolver",
+          "new": "backend/app/domains/chat/service/retrieval_policy.py::RetrievalPolicyResolver",
+          "direct_consumers": [
+            "backend/app/runtime/chat/retrieval_policy.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_retrieval_policy_ownership.py::test_entity_policy_rechecks_unicode_identity_and_blocks_clarification"
+          ],
+          "new_member": "_pair_is_blocked"
+        },
+        {
+          "old": "backend/app/runtime/chat/retrieval_policy.py::SqlAlchemyRetrievalPolicyResolver",
+          "new": "backend/app/runtime/chat/retrieval_queries.py::installation",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/retrieval_policy.py",
+            "backend/app/runtime/chat/retrieval_policy.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_retrieval_policy_ownership.py::test_entity_policy_rechecks_unicode_identity_and_blocks_clarification"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/retrieval_policy.py::SqlAlchemyRetrievalPolicyResolver",
+          "new": "backend/app/runtime/chat/retrieval_queries.py::world",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/retrieval_policy.py",
+            "backend/app/runtime/chat/retrieval_policy.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_retrieval_policy_ownership.py::test_entity_policy_rechecks_unicode_identity_and_blocks_clarification"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/retrieval_policy.py::SqlAlchemyRetrievalPolicyResolver",
+          "new": "backend/app/runtime/chat/retrieval_queries.py::memory_enabled",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/retrieval_policy.py",
+            "backend/app/runtime/chat/retrieval_policy.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_retrieval_policy_ownership.py::test_entity_policy_rechecks_unicode_identity_and_blocks_clarification"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/retrieval_policy.py::SqlAlchemyRetrievalPolicyResolver",
+          "new": "backend/app/runtime/chat/retrieval_queries.py::entity_mentions",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/retrieval_policy.py",
+            "backend/app/runtime/chat/retrieval_policy.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_retrieval_policy_ownership.py::test_entity_policy_rechecks_unicode_identity_and_blocks_clarification"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/retrieval_policy.py::SqlAlchemyRetrievalPolicyResolver",
+          "new": "backend/app/runtime/chat/retrieval_queries.py::active_world_character",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/retrieval_policy.py",
+            "backend/app/runtime/chat/retrieval_policy.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_retrieval_policy_ownership.py::test_entity_policy_rechecks_unicode_identity_and_blocks_clarification"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/retrieval_policy.py::SqlAlchemyRetrievalPolicyResolver",
+          "new": "backend/app/domains/chat/repository/response_requests.py::get_preflight_thread",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/retrieval_policy.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_retrieval_policy_ownership.py::test_entity_policy_rechecks_unicode_identity_and_blocks_clarification"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/retrieval_policy.py::__all__",
+          "new": "backend/app/runtime/chat/retrieval_policy.py::__all__",
+          "direct_consumers": [
+            "backend/app/runtime/chat/generation_workflows.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_retrieval_policy_ownership.py::test_entity_policy_rechecks_unicode_identity_and_blocks_clarification"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/retrieval_policy.py::SqlAlchemyRetrievalPolicyResolver",
+          "new": "backend/app/runtime/chat/retrieval_policy.py::build_retrieval_policy",
+          "direct_consumers": [
+            "backend/app/runtime/chat/generation_workflows.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_retrieval_policy_ownership.py::test_entity_policy_rechecks_unicode_identity_and_blocks_clarification"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/today_sns_activity.py::SqlAlchemyTodaySnsSnapshotValidator",
+          "new": "backend/app/domains/chat/service/today_sns_activity.py::TodaySnsSnapshotValidator",
+          "direct_consumers": [
+            "backend/app/runtime/chat/today_sns_activity.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_source_change_rejects_old_generation_snapshot_but_later_new_activity_does_not"
+          ],
+          "new_member": "assert_current"
+        },
+        {
+          "old": "backend/app/runtime/chat/today_sns_activity.py::SqlAlchemyTodaySnsSnapshotValidator",
+          "new": "backend/app/runtime/chat/today_sns_activity.py::build_today_snapshot_validator",
+          "direct_consumers": [
+            "backend/app/runtime/chat/generation_workflows.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_today_sns_activity.py::test_source_change_rejects_old_generation_snapshot_but_later_new_activity_does_not"
+          ]
+        }
+      ],
+      "reads_contract": "backend/app/domains/chat/contracts/retrieval_reads.py",
+      "preserved_semantics": "Local owner -> World -> thread -> active requester/responder -> owner-controlled requester -> blocked pair -> memory setting order; exact casefold after SQL and candidate visibility/observable flags; same Today complete_through and snapshot hash errors.",
+      "runtime_responsibility": "build_retrieval_policy and build_today_snapshot_validator construct collaborators, not policy. Historical constructor names alias these same functions for existing tests; canonical builder imports real build functions.",
+      "remaining": "AR-B6-C HTTP ownership with Request service DI, two factories and standalone test wiring; B5/B7 integration and B8 compatibility retirement remain separate."
     }
   }
 }

@@ -1,29 +1,18 @@
-"""Revalidate one immutable Today snapshot without adding later activities."""
+"""Construct Chat snapshot validation with its same-Session Today reader."""
 
 from sqlalchemy.orm import Session
+from app.domains.chat.service.today_sns_activity import TodaySnsSnapshotValidator
+from app.runtime.social.sqlalchemy_today_activity import (
+    SqlAlchemyTodaySocialActivityReader,
+)
 
-from app.domains.chat.service.today_sns_activity import TodaySnsActivityAssembler
-from app.domains.chat.contracts.today_sns_activity import TodaySnsActivitySnapshot
-from app.domains.chat.contracts.today_sns_activity import TodaySnsSnapshotChangedError
-from app.runtime.social.sqlalchemy_today_activity import SqlAlchemyTodaySocialActivityReader
+
+def build_today_snapshot_validator(
+    db: Session, character_labels: dict[str, str]
+) -> TodaySnsSnapshotValidator:
+    return TodaySnsSnapshotValidator(
+        SqlAlchemyTodaySocialActivityReader(db), character_labels
+    )
 
 
-class SqlAlchemyTodaySnsSnapshotValidator:
-    def __init__(self, db: Session, character_labels: dict[str, str]) -> None:
-        self._assembler = TodaySnsActivityAssembler(SqlAlchemyTodaySocialActivityReader(db))
-        self._character_labels = dict(character_labels)
-
-    def assert_current(self, snapshot: TodaySnsActivitySnapshot) -> None:
-        try:
-            current = self._assembler.assemble(
-                owner_id=snapshot.owner_id,
-                world_id=snapshot.world_id,
-                subject_world_character_id=snapshot.subject_world_character_id,
-                timezone=snapshot.timezone,
-                character_labels=self._character_labels,
-                now=snapshot.complete_through,
-            )
-        except Exception as exc:
-            raise TodaySnsSnapshotChangedError("today_sns_snapshot_unavailable") from exc
-        if current.snapshot_hash != snapshot.snapshot_hash:
-            raise TodaySnsSnapshotChangedError("today_sns_snapshot_changed")
+SqlAlchemyTodaySnsSnapshotValidator = build_today_snapshot_validator

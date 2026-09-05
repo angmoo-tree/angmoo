@@ -557,3 +557,10 @@ World 대화 생성의 tuple/quota lock, preference 생성의 flush-only 경로,
 `contracts/execution.py`는 실제 실행 조립 결과와 입력을 명시합니다. `runtime/chat/generation_workflows.py`는 기존 canonical provider/executor, graph gateway/provider/executor, World 이름 목록, router·응답·UoW·성공 Memory 후보·Today validator를 그 순서로 연결합니다. 조립은 새로운 provider 호출이나 권한 판단을 추가하지 않습니다. 서비스는 이어서 기존 20개/8,000자 recent-context 규칙과 optional Today snapshot 실패 처리를 적용하고 실제 response workflow를 실행합니다. recent-context SQL은 repository, 선택·본문 한도와 요청 구성은 서비스에 있습니다.
 
 `runtime/chat/world_generation.py`는 이제 기존 테스트·계약을 위한 동일 인스턴스 이름만 남았습니다. 새 HTTP 동작은 실제 generation/evidence 서비스에 연결됩니다. A2 구조 확인 테스트가 보는 module attribute는 B8의 명시적 퇴역 대상이며 제품 동작의 호출 체인에 포함되지 않습니다. canonical preflight/entity resolution 및 Today snapshot 검증의 남은 소유 이전과 Request 기반 HTTP 의존성은 후속 B6 범위입니다.
+
+
+### 검색 사전 검사와 Today snapshot 판단
+
+`service/retrieval_policy.py`는 설치 소유자 → World → thread → 활성 참여자 → 소유자 제어 requester → 차단 → Memory 설정 순서로 canonical scope를 판단합니다. Entity 이름은 SQL 결과에 다시 Unicode casefold를 적용해 같은 이름인지 확인하고, 같은 World의 활성 상태·공개·차단 여부를 결정합니다. `contracts/retrieval_reads.py`로 받는 교차 업무 조회는 같은 Session의 기존 SQL이며, Chat thread 조회는 자신의 repository에 있습니다.
+
+`service/today_sns_activity.py`의 snapshot validator는 응답 생성 중 Today 원본의 complete-through와 snapshot hash가 유지되는지 판단합니다. Runtime의 retrieval/Today factory는 실제 SQL reader와 차단 조회를 조립합니다. 이 factory는 정책이나 commit을 추가하지 않으며, 기존 constructor 이름은 같은 factory의 임시 alias입니다. Memory와 Social의 미합류 경로는 해당 단계의 canonical 계약으로 순차 연결합니다.

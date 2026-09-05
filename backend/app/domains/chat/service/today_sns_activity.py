@@ -176,3 +176,20 @@ def _fit_detail_budget(details: dict[str, str | None], *, reserved: int) -> bool
 
 
 __all__ = ["TodaySnsActivityAssembler"]
+
+
+from app.domains.chat.contracts.today_sns_activity import TodaySnsSnapshotChangedError
+
+class TodaySnsSnapshotValidator:
+
+    def __init__(self, reader: TodaySnsActivityReaderPort, character_labels: dict[str, str]) -> None:
+        self._assembler = TodaySnsActivityAssembler(reader)
+        self._character_labels = dict(character_labels)
+
+    def assert_current(self, snapshot: TodaySnsActivitySnapshot) -> None:
+        try:
+            current = self._assembler.assemble(owner_id=snapshot.owner_id, world_id=snapshot.world_id, subject_world_character_id=snapshot.subject_world_character_id, timezone=snapshot.timezone, character_labels=self._character_labels, now=snapshot.complete_through)
+        except Exception as exc:
+            raise TodaySnsSnapshotChangedError('today_sns_snapshot_unavailable') from exc
+        if current.snapshot_hash != snapshot.snapshot_hash:
+            raise TodaySnsSnapshotChangedError('today_sns_snapshot_changed')

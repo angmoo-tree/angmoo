@@ -5,6 +5,7 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.domains.chat.contracts.retrieval_policy import RetrievalPreflightCommand
 from app.domains.chat import models
 from app.domains.chat.contracts.generation_lifecycle import TERMINAL_STATES
 
@@ -56,5 +57,24 @@ def recent_context_messages(
                 )
                 .limit(limit)
             ).all()
+        )
+    )
+
+
+
+def get_preflight_thread(
+    session: Session, command: RetrievalPreflightCommand
+) -> models.MessageThread | None:
+    return session.scalar(
+        select(models.MessageThread).where(
+            models.MessageThread.id == command.thread_id,
+            models.MessageThread.requester_id == command.owner_id,
+            models.MessageThread.world_id == command.world_id,
+            models.MessageThread.requester_world_character_id
+            == command.requester_world_character_id,
+            models.MessageThread.responding_world_character_id
+            == command.responding_world_character_id,
+            models.MessageThread.world_scope_status == "resolved",
+            models.MessageThread.deleted_at.is_(None),
         )
     )
