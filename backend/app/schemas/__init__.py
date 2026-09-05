@@ -154,7 +154,7 @@ from app.schemas.tree import (
     TreeRelatedCharacterRead,
 )
 from app.schemas.maintenance import AgentActivityMaintenanceRead
-from app.domains.chat.api.schemas import (
+from app.domains.chat.schemas import (
     CharacterMessageSettingRead,
     CharacterMessageSettingUpdate,
     MessageMessageCreate,

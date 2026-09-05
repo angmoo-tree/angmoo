@@ -12,7 +12,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.core.profile_ref import ProfileRef
-from app.domains.chat.domain.model_binding import MessageModelBindingMode
+from app.domains.chat.contracts.model_binding import MessageModelBindingMode
 from app.providers.registry import MESSAGE_GOOGLE_MODELS
 
 

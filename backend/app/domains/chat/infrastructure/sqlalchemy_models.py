@@ -26,7 +26,7 @@ from app.domains.chat.domain.generation_lifecycle import (
     ResponseRequestState,
     ResponseTerminalReason,
 )
-from app.domains.chat.domain.model_binding import MESSAGE_MODEL_BINDING_MODES
+from app.domains.chat.contracts.model_binding import MESSAGE_MODEL_BINDING_MODES
 from app.domains.chat.domain.retrieval_intent import RetrievalRoute
 from app.domains.chat.domain.workflow_recipe import WorkflowRecipe
 

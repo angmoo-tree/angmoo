@@ -5,7 +5,7 @@ import importlib
 
 from app.domains.chat import public as chat
 from app.domains.chat.application.messages import ChatService
-from app.domains.chat.domain import policies
+from app.domains.chat import policies
 from app.domains.chat.infrastructure import sqlalchemy_models
 from app.runtime.chat import sqlalchemy_service
 

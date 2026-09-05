@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.db import Base
-from app.domains.chat.api.schemas import (
+from app.domains.chat.schemas import (
     MessageSettingsUpdate,
     WorldChatMessageCreate,
     WorldChatRetryCreate,

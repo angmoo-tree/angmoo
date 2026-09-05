@@ -76,7 +76,7 @@ from app.domains.chat.domain.workflow_recipe import (
     WorkflowRecipeSpec,
     select_workflow_recipe,
 )
-from app.domains.chat.domain.model_binding import (
+from app.domains.chat.contracts.model_binding import (
     MESSAGE_MODEL_BINDING_MODES,
     MessageModelBindingMode,
 )

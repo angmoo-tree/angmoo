@@ -10,8 +10,8 @@ from sqlalchemy import func, inspect, or_, select, text, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
-from app.domains.chat.api import schemas
-from app.domains.chat.domain.errors import (
+from app.domains.chat import schemas
+from app.domains.chat.exceptions import (
     MessageCredentialInvalidError,
     MessageCredentialRequiredError,
     MessageForbiddenError,
@@ -23,8 +23,8 @@ from app.domains.chat.domain.errors import (
     MessageValidationError,
 )
 from app.domains.chat.domain.generation_lifecycle import TERMINAL_STATES
-from app.domains.chat.domain.model_binding import MessageModelBindingMode
-from app.domains.chat.domain.policies import (
+from app.domains.chat.contracts.model_binding import MessageModelBindingMode
+from app.domains.chat.policies import (
     API_KEY_INVALID_MESSAGE,
     API_KEY_MISSING_MESSAGE,
     CHARACTER_DISABLED_MESSAGE,

@@ -9,7 +9,7 @@ from app.domains.chat.domain.evidence_bundle import (
     EvidenceBundle,
     compute_evidence_hash,
 )
-from app.domains.chat.domain.policies import (
+from app.domains.chat.policies import (
     MESSAGE_MODELS,
     WORLD_CHAT_FOREGROUND_MAX_OUTPUT_TOKENS,
     resolve_world_chat_model_execution_policy,

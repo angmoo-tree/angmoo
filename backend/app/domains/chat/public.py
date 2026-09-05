@@ -1,6 +1,6 @@
 """Supported backend boundary for Chat consumers."""
 
-from app.domains.chat.api.schemas import (
+from app.domains.chat.schemas import (
     CharacterMessageSettingRead,
     CharacterMessageSettingUpdate,
     MessageMessageCreate,
@@ -123,7 +123,7 @@ from app.domains.relationships.public import (
     GraphPlanStep,
     GraphRetrievalPlan,
 )
-from app.domains.chat.domain.errors import (
+from app.domains.chat.exceptions import (
     MessageCredentialInvalidError,
     MessageCredentialRequiredError,
     MessageForbiddenError,

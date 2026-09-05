@@ -353,7 +353,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/chat/infrastructure/sqlalchemy_models.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "1c18e926cf585d4ee5ce2b08ffab2e0ac84208e922c42023210f60bb5030c7c4",
+      "source_sha256": "b6ceb89991e0b0995ab86cfe81de1e7b5008585d63c7ad2b24158c199caf006c",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -796,7 +796,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/chat/sqlalchemy_service.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "25a6e42aafee239b0470dc2ed06ee61f6209f66dc8b04f6fd5e35017b9cd6a06",
+      "source_sha256": "ecb6fdedc9d42c75cee3b2b313a8274fc49177ccfdbde147b77be07c2b1de815",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -809,7 +809,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/chat/world_generation.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "1a8c51bcb24c886f52efacf2a9b48366658ef0f2f8a79569cb0aad10d3073d0f",
+      "source_sha256": "a9513e7e9f40a90c69aa1a809ee4e5af5a1073fb8823665d7af05405efb720d5",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

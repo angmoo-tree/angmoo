@@ -224,7 +224,11 @@
     "backend/app/domains/world_characters/infrastructure/sqlalchemy_runtime_modes.py": "backend/app/domains/world_characters/service/runtime_modes.py",
     "backend/app/domains/world_characters/infrastructure/autonomous_setup_models.py": "backend/app/domains/world_characters/models.py",
     "backend/tests/test_world_character_setup_service.py": "backend/tests/world_characters/test_setup_service.py",
-    "backend/tests/test_l4_pr_g_runtime_mode_repair.py": "backend/tests/world_characters/test_runtime_mode_repair.py"
+    "backend/tests/test_l4_pr_g_runtime_mode_repair.py": "backend/tests/world_characters/test_runtime_mode_repair.py",
+    "backend/app/domains/chat/api/schemas.py": "backend/app/domains/chat/schemas.py",
+    "backend/app/domains/chat/domain/errors.py": "backend/app/domains/chat/exceptions.py",
+    "backend/app/domains/chat/domain/policies.py": "backend/app/domains/chat/policies.py",
+    "backend/app/domains/chat/domain/model_binding.py": "backend/app/domains/chat/contracts/model_binding.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -16579,6 +16583,24 @@
       "preserved_flow": "Original preflight/generate/retry/approve/reject and exact error hierarchy, logical/physical provider counters, reload hashes, quota/locks, transaction/commit order retained. World entry lookups preserve db.get vs scalar. Identity query stays before the resolver try boundary.",
       "runtime_split": "Only cross-owner capacity SQL and startup session_factory/SQLite immediate wrapper move runtime. Same-Session repair policy remains WC; imported-world exclusions and fail-closed reasons retained.",
       "removed_aggregate": "autonomous_setup_models foreign ORM aggregation is removed. WC models are owned locally; Character profile and bounded World/Identity services perform actual cooperating lookups/writes. No service exports foreign ORM classes."
+    },
+    "AR-B6-A1": {
+      "status": "SOURCE PREPARATION; validation and sequential B6 merge pending",
+      "scope": "Existing HTTP schemas, nine error classes, model execution policy/constants and two-valued model binding enum only. No ORM, actual thread/generation service, provider or HTTP endpoint implementation transition is claimed.",
+      "preserved": "Existing AST bodies, DTO JSON, enum values, model allowlist, Gemini high/low and Gemma unset thinking, foreground token and lease limits. No migration or frozen baseline rewritten.",
+      "moved_files": {
+        "backend/app/domains/chat/api/schemas.py": "backend/app/domains/chat/schemas.py",
+        "backend/app/domains/chat/domain/errors.py": "backend/app/domains/chat/exceptions.py",
+        "backend/app/domains/chat/domain/policies.py": "backend/app/domains/chat/policies.py",
+        "backend/app/domains/chat/domain/model_binding.py": "backend/app/domains/chat/contracts/model_binding.py"
+      },
+      "remaining_owners": {
+        "app.domains.chat.infrastructure.sqlalchemy_models": "B6-A/B models and lifecycle storage; historical migration imports preserved until their owner is moved",
+        "app.runtime.chat.sqlalchemy_service": "B6-A actual thread/message/settings implementation and runtime collaboration",
+        "app.domains.chat.application.messages": "B6-A old forwarding ChatService and runtime adapter chain; preserve until actual service and callers move",
+        "app.domains.chat.public": "B6 exact typed compatibility consumers; remove after actual callers transition",
+        "app.schemas.messages": "G5/B8 aggregate consumers; same actual schema objects"
+      }
     }
   }
 }

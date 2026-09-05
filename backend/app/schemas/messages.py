@@ -1,6 +1,6 @@
 """Compatibility exports for the canonical Chat HTTP schemas."""
 
-from app.domains.chat.api.schemas import (
+from app.domains.chat.schemas import (
     CharacterMessageSettingRead,
     CharacterMessageSettingUpdate,
     MessageCredentialSource,

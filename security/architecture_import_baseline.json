@@ -1,7 +1,7 @@
 {
-  "edge_count": 2002,
+  "edge_count": 2003,
   "external_import_count": 2059,
-  "module_count": 626,
+  "module_count": 627,
   "modules": [
     {
       "external_imports": [],
@@ -1194,21 +1194,6 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "datetime",
-        "pydantic",
-        "typing"
-      ],
-      "imports": [
-        "app.core.profile_ref",
-        "app.domains.chat.domain.model_binding",
-        "app.providers.registry"
-      ],
-      "module": "app.domains.chat.api.schemas",
-      "path": "backend/app/domains/chat/api/schemas.py",
-      "wildcard_imports": []
-    },
-    {
       "external_imports": [],
       "imports": [
         "app.domains.chat.application.answer_request",
@@ -1456,10 +1441,28 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.chat.contracts.model_binding"
+      ],
+      "module": "app.domains.chat.contracts",
+      "path": "backend/app/domains/chat/contracts/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "enum"
+      ],
+      "imports": [],
+      "module": "app.domains.chat.contracts.model_binding",
+      "path": "backend/app/domains/chat/contracts/model_binding.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.chat.contracts.model_binding",
         "app.domains.chat.domain.call_tracker",
         "app.domains.chat.domain.evidence_bundle",
         "app.domains.chat.domain.generation_lifecycle",
-        "app.domains.chat.domain.model_binding",
         "app.domains.chat.domain.resolved_envelope",
         "app.domains.chat.domain.response_request",
         "app.domains.chat.domain.retrieval_intent",
@@ -1485,13 +1488,6 @@
       ],
       "module": "app.domains.chat.domain.call_tracker",
       "path": "backend/app/domains/chat/domain/call_tracker.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.domains.chat.domain.errors",
-      "path": "backend/app/domains/chat/domain/errors.py",
       "wildcard_imports": []
     },
     {
@@ -1522,25 +1518,6 @@
       "imports": [],
       "module": "app.domains.chat.domain.generation_lifecycle",
       "path": "backend/app/domains/chat/domain/generation_lifecycle.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "enum"
-      ],
-      "imports": [],
-      "module": "app.domains.chat.domain.model_binding",
-      "path": "backend/app/domains/chat/domain/model_binding.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses"
-      ],
-      "imports": [],
-      "module": "app.domains.chat.domain.policies",
-      "path": "backend/app/domains/chat/domain/policies.py",
       "wildcard_imports": []
     },
     {
@@ -1641,6 +1618,13 @@
     },
     {
       "external_imports": [],
+      "imports": [],
+      "module": "app.domains.chat.exceptions",
+      "path": "backend/app/domains/chat/exceptions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
       "imports": [
         "app.domains.chat.infrastructure.response_lifecycle_repository"
       ],
@@ -1658,9 +1642,9 @@
       ],
       "imports": [
         "app.core.db",
-        "app.domains.chat.domain.model_binding",
-        "app.domains.chat.domain.policies",
-        "app.domains.chat.infrastructure.world_scope_migration"
+        "app.domains.chat.contracts.model_binding",
+        "app.domains.chat.infrastructure.world_scope_migration",
+        "app.domains.chat.policies"
       ],
       "module": "app.domains.chat.infrastructure.model_binding_migration",
       "path": "backend/app/domains/chat/infrastructure/model_binding_migration.py",
@@ -1697,8 +1681,8 @@
       ],
       "imports": [
         "app.core.db",
+        "app.domains.chat.contracts.model_binding",
         "app.domains.chat.domain.generation_lifecycle",
-        "app.domains.chat.domain.model_binding",
         "app.domains.chat.domain.retrieval_intent",
         "app.domains.chat.domain.workflow_recipe"
       ],
@@ -1720,6 +1704,16 @@
       ],
       "module": "app.domains.chat.infrastructure.world_scope_migration",
       "path": "backend/app/domains/chat/infrastructure/world_scope_migration.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses"
+      ],
+      "imports": [],
+      "module": "app.domains.chat.policies",
+      "path": "backend/app/domains/chat/policies.py",
       "wildcard_imports": []
     },
     {
@@ -1845,16 +1839,31 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.chat.api.schemas",
         "app.domains.chat.application",
         "app.domains.chat.domain",
-        "app.domains.chat.domain.errors",
+        "app.domains.chat.exceptions",
         "app.domains.chat.ports",
+        "app.domains.chat.schemas",
         "app.domains.memory.public",
         "app.domains.relationships.public"
       ],
       "module": "app.domains.chat.public",
       "path": "backend/app/domains/chat/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.core.profile_ref",
+        "app.domains.chat.contracts.model_binding",
+        "app.providers.registry"
+      ],
+      "module": "app.domains.chat.schemas",
+      "path": "backend/app/domains/chat/schemas.py",
       "wildcard_imports": []
     },
     {
@@ -5970,7 +5979,7 @@
         "json"
       ],
       "imports": [
-        "app.domains.chat.domain.policies",
+        "app.domains.chat.policies",
         "app.domains.identity.public",
         "app.domains.memory.domain.canonical_retrieval_planner",
         "app.domains.memory.ports.canonical_planner_provider",
@@ -5987,7 +5996,7 @@
       ],
       "imports": [
         "app.core.prompt_safety",
-        "app.domains.chat.domain.policies",
+        "app.domains.chat.policies",
         "app.domains.chat.ports.character_response_generator",
         "app.domains.identity.public",
         "app.integrations.direct_llm"
@@ -6002,7 +6011,7 @@
         "json"
       ],
       "imports": [
-        "app.domains.chat.domain.policies",
+        "app.domains.chat.policies",
         "app.domains.identity.public",
         "app.domains.relationships.public",
         "app.integrations.direct_llm"
@@ -6053,8 +6062,8 @@
         "json"
       ],
       "imports": [
-        "app.domains.chat.domain.policies",
         "app.domains.chat.domain.retrieval_router",
+        "app.domains.chat.policies",
         "app.domains.chat.ports.retrieval_router_provider",
         "app.domains.identity.public",
         "app.integrations.direct_llm"
@@ -6760,11 +6769,11 @@
         "app.core.prompt_safety",
         "app.core.security",
         "app.credentials",
-        "app.domains.chat.api.schemas",
-        "app.domains.chat.domain.errors",
+        "app.domains.chat.contracts.model_binding",
         "app.domains.chat.domain.generation_lifecycle",
-        "app.domains.chat.domain.model_binding",
-        "app.domains.chat.domain.policies",
+        "app.domains.chat.exceptions",
+        "app.domains.chat.policies",
+        "app.domains.chat.schemas",
         "app.integrations.direct_llm",
         "app.runtime.chat.model_bindings",
         "app.runtime.relationships.sqlalchemy_social_event"
@@ -6800,12 +6809,12 @@
       ],
       "imports": [
         "app.config",
-        "app.domains.chat.api.schemas",
         "app.domains.chat.application",
         "app.domains.chat.domain",
-        "app.domains.chat.domain.errors",
+        "app.domains.chat.exceptions",
         "app.domains.chat.infrastructure",
         "app.domains.chat.ports",
+        "app.domains.chat.schemas",
         "app.domains.identity.public",
         "app.domains.memory.infrastructure",
         "app.domains.memory.public",
@@ -8187,7 +8196,7 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.chat.api.schemas",
+        "app.domains.chat.schemas",
         "app.domains.identity.schemas",
         "app.domains.relationships.graph_read.schemas",
         "app.schemas.agent_runs",
@@ -8311,7 +8320,7 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.chat.api.schemas"
+        "app.domains.chat.schemas"
       ],
       "module": "app.schemas.messages",
       "path": "backend/app/schemas/messages.py",
