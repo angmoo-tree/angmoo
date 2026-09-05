@@ -10,7 +10,7 @@ from app.domains.worlds.models import (
     WorldRole,
     WorldRule,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_models import (
+from app.domains.world_characters.models import (
     CharacterActiveWorld,
     WorldCharacter,
 )

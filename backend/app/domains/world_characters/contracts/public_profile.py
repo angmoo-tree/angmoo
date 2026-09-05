@@ -2,23 +2,16 @@
 
 from __future__ import annotations
 
+from app.domains.world_characters.exceptions import (
+    WorldCharacterProfileError,
+    WorldCharacterProfileNotFoundError,
+    WorldCharacterProfileForbiddenError,
+)
 from dataclasses import dataclass
 from typing import Literal
 
 
 WorldCharacterControlMode = Literal["autonomous", "owner_controlled"]
-
-
-class WorldCharacterProfileError(Exception):
-    reason_code = "world_character_profile_error"
-
-
-class WorldCharacterProfileNotFoundError(WorldCharacterProfileError):
-    reason_code = "target_profile_unavailable"
-
-
-class WorldCharacterProfileForbiddenError(WorldCharacterProfileError):
-    reason_code = "world_character_profile_forbidden"
 
 
 @dataclass(frozen=True, slots=True)

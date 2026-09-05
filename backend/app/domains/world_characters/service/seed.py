@@ -5,14 +5,14 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
-from app.domains.world_characters.domain.runtime_modes import (
+from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
     AUTONOMOUS_FEED_RUNTIME_MODE,
 )
-from app.domains.world_characters.domain.seed import (
+from app.domains.world_characters.contracts.seed import (
     AutonomousWorldCharacterSeedData,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_models import WorldCharacter
+from app.domains.world_characters.models import WorldCharacter
 
 
 def seed_autonomous_world_character(

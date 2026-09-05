@@ -54,9 +54,9 @@ PARITY_WORKLOADS = (
         "phase": "P2",
         "contract": "WorldCharacter setup uses three physical provider requests and persists 40 candidates, ten per daypart",
         "tests": [
-            "backend/tests/test_world_character_contracts.py",
+            "backend/tests/world_characters/test_setup_contracts.py",
             "backend/tests/test_world_character_setup_service.py",
-            "backend/tests/test_l3_owner_controlled_world_character.py",
+            "backend/tests/world_characters/test_owner_identity.py",
         ],
     },
     {

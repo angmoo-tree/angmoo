@@ -23,7 +23,7 @@ from app.domains.social.domain import (
     SocialWriteNotFoundError as ManualSocialNotFoundError,
 )
 from app.domains.world_characters.public import (
-    SqlAlchemyOwnerControlledIdentityRepository,
+    OwnerControlledIdentityService,
 )
 from app.runtime.relationships.sqlalchemy_social_event import (
     world_character_pair_is_blocked,
@@ -50,7 +50,7 @@ social_persistence_models = _SocialPersistenceModels()
 def _owner_actor(
     db: Session, *, world_id: str, current_user_id: str
 ) -> tuple[models.WorldCharacter, models.Character]:
-    snapshot = SqlAlchemyOwnerControlledIdentityRepository(db).get(
+    snapshot = OwnerControlledIdentityService(db).get(
         world_id=world_id,
         current_user_id=current_user_id,
     )

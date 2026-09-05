@@ -1,14 +1,15 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import json
-from typing import Any, Protocol
+from typing import Any
 
-from app.domains.identity.public import CredentialMaterial
-from app.domains.world_characters.api import setup_schemas as schemas
-from app.domains.world_characters.infrastructure import (
-    autonomous_setup_contracts as world_character_contracts,
+from app.domains.identity.contracts import CredentialMaterial
+from app.domains.world_characters.contracts.provider import (
+    WorldCharacterProviderResult,
+    WorldCharacterSetupProvider,
 )
+from app.domains.world_characters.schemas import setup as schemas
+from app.domains.world_characters.service import setup_validation as world_character_contracts
 from app.integrations import direct_llm
 from app.providers.gemini import build_gemini_developer_response_schema
 
@@ -85,36 +86,6 @@ GEMINI_REPERTOIRE_RESPONSE_SCHEMAS = {
     dayparts: build_gemini_repertoire_response_schema(dayparts)
     for dayparts in REPERTOIRE_DAYPART_BATCHES
 }
-
-
-@dataclass(frozen=True)
-class WorldCharacterProviderResult:
-    payload: Any
-    physical_request_count: int
-    prompt_token_count: int | None
-    output_token_count: int | None
-    total_token_count: int | None
-    latency_ms: int | None
-
-
-class WorldCharacterSetupProvider(Protocol):
-    async def generate_community_profile(
-        self,
-        *,
-        material: CredentialMaterial,
-        character_id: str,
-        generation_input: dict[str, Any],
-    ) -> WorldCharacterProviderResult: ...
-
-    async def generate_repertoire(
-        self,
-        *,
-        material: CredentialMaterial,
-        character_id: str,
-        generation_input: dict[str, Any],
-        community_profile: schemas.WorldCommunityProfilePayload,
-        validator,
-    ) -> WorldCharacterProviderResult: ...
 
 
 class DirectLlmWorldCharacterSetupProvider:

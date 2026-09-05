@@ -141,7 +141,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
             "get_replicate_image_api_key",
             "get_profile_image_api_key",
         },
-        "domains/world_characters/infrastructure/direct_llm_setup_provider.py": {
+        "domains/world_characters/client.py": {
             "generate_community_profile",
             "generate_repertoire",
         },

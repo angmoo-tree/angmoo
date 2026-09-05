@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.domains.world_characters.domain.studio_surface import StudioWorldCharacter
+from app.domains.world_characters.contracts.studio_surface import StudioWorldCharacter
 from app.domains.world_characters.ports.studio_surface import StudioWorldCharacterReader
 
 

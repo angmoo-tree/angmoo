@@ -2,11 +2,11 @@
 
 from app.domains.characters.public import Character
 from app.domains.identity.public import LlmCredential, User
-from app.domains.world_characters.infrastructure.sqlalchemy_models import (
+from app.domains.world_characters.models import (
     CharacterActiveWorld,
     WorldCharacter,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_setup_models import (
+from app.domains.world_characters.models import (
     WorldActivityCandidate,
     WorldActivityRepertoire,
     WorldCharacterSetupAttempt,
