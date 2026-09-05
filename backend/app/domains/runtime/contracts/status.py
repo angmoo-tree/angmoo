@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import StrEnum
 
-from app.domains.runtime.domain.diagnostic_codes import RuntimeDiagnosticCode
+from app.domains.runtime.constants import RuntimeDiagnosticCode
 
 
 RUNTIME_STATUS_SCHEMA_VERSION = "local-runtime-status-v1"

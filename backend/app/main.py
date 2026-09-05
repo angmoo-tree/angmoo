@@ -202,6 +202,9 @@ def create_app(
 
     from app.runtime.chat.message_composition import configure_chat_services
     configure_chat_services(runtime_app)
+
+    from app.runtime.diagnostics.http import configure_runtime_diagnostics
+    configure_runtime_diagnostics(runtime_app)
     from app.runtime.characters.management import build_character_management_workflows
     runtime_app.state.character_management_workflows = build_character_management_workflows
     from app.runtime.tree import build_tree_references

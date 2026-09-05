@@ -9,21 +9,45 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
 from app.domains.identity.dependencies import get_current_user
-from app.api.v1.routes import runtime_status as runtime_routes
+from app.domains.runtime import router as runtime_routes
 from app.core.db import get_db
-from app.domains.runtime import public as runtime
-from app.domains.runtime.infrastructure.sqlalchemy_application_runtime_probe import (
-    RUNTIME_MIGRATION_HEAD,
-    SqlAlchemyApplicationRuntimeProbe,
-    _find_opaque_id,
-    _graph_backend_available,
-    _lane_result_code,
-    _provider_call_count,
-    _provider_failure_class,
+from types import SimpleNamespace as _RuntimeTestNamespace
+from app.domains.runtime.contracts.status import ActivityRuntimeStatus as _runtime_ActivityRuntimeStatus
+from app.domains.runtime.contracts.status import ApplicationRuntimeStatus as _runtime_ApplicationRuntimeStatus
+from app.domains.runtime.contracts.status import InstallationState as _runtime_InstallationState
+from app.domains.runtime.contracts.status import MigrationRuntimeStatus as _runtime_MigrationRuntimeStatus
+from app.domains.runtime.contracts.status import OwnerRuntimeStatus as _runtime_OwnerRuntimeStatus
+from app.domains.runtime.contracts.status import ProjectorRuntimeStatus as _runtime_ProjectorRuntimeStatus
+from app.domains.runtime.contracts.status import ProviderFailureClass as _runtime_ProviderFailureClass
+from app.domains.runtime.contracts.status import ProviderUsageRuntimeStatus as _runtime_ProviderUsageRuntimeStatus
+from app.domains.runtime.contracts.status import RuntimeComponentState as _runtime_RuntimeComponentState
+from app.domains.runtime.contracts.status import RuntimeComponentStatus as _runtime_RuntimeComponentStatus
+from app.domains.runtime.constants import RuntimeDiagnosticCode as _runtime_RuntimeDiagnosticCode
+from app.domains.runtime.contracts.status import SchedulerRuntimeStatus as _runtime_SchedulerRuntimeStatus
+
+# Preserve the original test namespace with the same actual role objects.
+runtime = _RuntimeTestNamespace(
+    ActivityRuntimeStatus=_runtime_ActivityRuntimeStatus,
+    ApplicationRuntimeStatus=_runtime_ApplicationRuntimeStatus,
+    InstallationState=_runtime_InstallationState,
+    MigrationRuntimeStatus=_runtime_MigrationRuntimeStatus,
+    OwnerRuntimeStatus=_runtime_OwnerRuntimeStatus,
+    ProjectorRuntimeStatus=_runtime_ProjectorRuntimeStatus,
+    ProviderFailureClass=_runtime_ProviderFailureClass,
+    ProviderUsageRuntimeStatus=_runtime_ProviderUsageRuntimeStatus,
+    RuntimeComponentState=_runtime_RuntimeComponentState,
+    RuntimeComponentStatus=_runtime_RuntimeComponentStatus,
+    RuntimeDiagnosticCode=_runtime_RuntimeDiagnosticCode,
+    SchedulerRuntimeStatus=_runtime_SchedulerRuntimeStatus,
 )
-from app.domains.runtime.infrastructure import (
-    sqlalchemy_application_runtime_probe as runtime_probe_module,
-)
+from app.domains.runtime.service.status import RUNTIME_MIGRATION_HEAD
+from app.runtime.diagnostics.status_composition import create_runtime_status_reader as SqlAlchemyApplicationRuntimeProbe
+from app.domains.runtime.service.status import _find_opaque_id
+from app.domains.runtime.service.status import _graph_backend_available
+from app.domains.runtime.service.status import _lane_result_code
+from app.domains.runtime.service.status import _provider_call_count
+from app.domains.runtime.service.status import _provider_failure_class
+from app.domains.runtime.service import status as runtime_probe_module
 
 
 def _status() -> runtime.ApplicationRuntimeStatus:
@@ -96,7 +120,7 @@ def _client(monkeypatch, *, authenticated_user_id: str, owner_user_id: str) -> T
     app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(
         id=authenticated_user_id
     )
-    monkeypatch.setattr(runtime_routes, "SqlAlchemyApplicationRuntimeProbe", _FakeProbe)
+    app.state.runtime_status_reader_factory = _FakeProbe
     return TestClient(app, base_url="http://127.0.0.1:3000")
 
 

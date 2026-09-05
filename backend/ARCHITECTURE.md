@@ -749,3 +749,11 @@ World 대화 생성의 tuple/quota lock, preference 생성의 flush-only 경로,
 두 앱 factory는 `runtime/chat/message_composition.configure_chat_services`로 기존의 같은 인스턴스를 등록합니다. 요청마다 provider나 Session을 다시 만들지 않습니다. DB와 인증 dependency는 원래 동일 함수이므로 기존 override 및 사용자 검증 경계가 유지됩니다. Standalone router 실행도 같은 명시적 구성을 사용합니다. 서비스 미등록 상태에서는 숨은 기본 인스턴스를 생성하지 않습니다.
 
 이전 HTTP 모듈 3개는 A2 구조 검사 한 곳을 위한 동일 함수/router alias로만 남습니다. 실제 API 조립과 동작 테스트는 canonical router를 사용하고, 이 alias는 B8에서 원래 구조 node를 실제 서비스·전송 회귀와 대응해 제거합니다. Generation의 NDJSON 이벤트 필드·UTF-8 직렬화·no-store/nosniff, route 등록 순서와 operation ID는 변경하지 않습니다.
+
+### Runtime 진단과 실행 잠금의 소유권
+
+`domains/runtime/router.py`는 소유자용 `/runtime/status` HTTP와 응답 형식을 담당합니다. InstallationIdentity의 같은 Session 조회와 claimed-owner 판단은 `identity/repository/runtime_access.py` 및 `identity/service/runtime_access.py`에 있습니다. 상태의 privacy-safe 분류와 component overlay는 Runtime `service/status.py`, `service/components.py`에서 읽을 수 있습니다. 다른 업무의 실제 상태 조회와 reader 생성은 `runtime/diagnostics`가 연결하며, 두 앱 생성 profile은 이 reader factory를 한 번 등록합니다.
+
+`RuntimeSchedulerLease` ORM은 Runtime의 `models.py`에 있습니다. 잠금 획득·heartbeat·tick·해제·오래된 실행자 거부 규칙은 `service/scheduler_lease.py`와 `service/sqlite_lease.py`, 실제 SQL과 compare-and-set 조건은 같은 이름의 `repository` 파일이 담당합니다. `runtime/persistence/scheduler_lease.py`는 SQLAlchemy Session factory와 Identity 조회를 연결하고, `sqlite_scheduler_lease.py`는 SQLite engine·읽기 connection·BEGIN IMMEDIATE 재시도·시계를 연결합니다. `scheduler_fence.py`는 실행 context와 단일 before-commit hook의 수명을 담당합니다.
+
+도메인 밖에서 필요한 Runtime 값과 callback 계약은 `contracts/status.py`, `lease.py`, `lease_store.py`, `search.py`, `transaction.py` 등 실제 정의 파일에서 import합니다. 기존 `public.py`와 `api/application/domain/infrastructure/ports` 집합 export는 제거했습니다. 옛 assertion을 보존하는 두 테스트의 local namespace는 동일한 실제 타입과 함수만 묶으며 제품 코드가 사용하지 않습니다. 공통 Base·DB·모델 등록의 G5 통합과 G06 진입점 최종 정리는 이 역할 배치와 구분하여 검증합니다.

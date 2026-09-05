@@ -13,7 +13,7 @@ from sqlalchemy.pool import StaticPool
 from app import models, schemas
 from app.core.db import Base
 from app.core.search_text import build_post_search_document
-from app.domains.runtime.public import SearchIndexHit
+from app.domains.runtime.contracts.search import SearchIndexHit
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )

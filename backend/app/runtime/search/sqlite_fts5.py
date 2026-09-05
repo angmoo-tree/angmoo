@@ -15,13 +15,11 @@ from threading import RLock
 import unicodedata
 
 from app.core.search_text import normalize_search_text
-from app.domains.runtime.ports.runtime_data_path import RuntimeDataPathPort
-from app.domains.runtime.ports.search_index import (
-    SearchIndexDoctor,
-    SearchIndexDocument,
-    SearchIndexHit,
-    SearchIndexQuery,
-)
+from app.domains.runtime.contracts.data_paths import RuntimeDataPathPort
+from app.domains.runtime.contracts.search import SearchIndexDoctor
+from app.domains.runtime.contracts.search import SearchIndexDocument
+from app.domains.runtime.contracts.search import SearchIndexHit
+from app.domains.runtime.contracts.search import SearchIndexQuery
 
 
 _SCHEMA_VERSION = 1

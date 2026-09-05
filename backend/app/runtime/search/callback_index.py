@@ -4,10 +4,8 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from app.domains.runtime.ports.search_index import (
-    SearchIndexDocument,
-    SearchIndexHit,
-)
+from app.domains.runtime.contracts.search import SearchIndexDocument
+from app.domains.runtime.contracts.search import SearchIndexHit
 
 
 class CallbackSearchIndexAdapter:

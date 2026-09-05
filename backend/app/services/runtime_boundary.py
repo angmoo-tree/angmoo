@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from app.domains.runtime.contracts import (
-    ResidentRuntimeError,
-    ResidentRuntimeAuthError,
-    ResidentRuntimeUnavailableError,
-    ResidentRuntimeRegistrationError,
-)
+from app.domains.runtime.exceptions import ResidentRuntimeError
+from app.domains.runtime.exceptions import ResidentRuntimeAuthError
+from app.domains.runtime.exceptions import ResidentRuntimeUnavailableError
+from app.domains.runtime.exceptions import ResidentRuntimeRegistrationError
 
 from typing import Any, Protocol, runtime_checkable
 

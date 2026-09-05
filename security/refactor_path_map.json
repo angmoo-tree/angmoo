@@ -471,7 +471,31 @@
     "backend/app/runtime/chat/today_sns_activity.py": "backend/app/domains/chat/service/today_sns_activity.py",
     "backend/app/api/v1/routes/messages.py": "backend/app/domains/chat/router/messages.py",
     "backend/app/api/v1/routes/world_chat.py": "backend/app/domains/chat/router/world_chat.py",
-    "backend/app/api/v1/routes/world_chat_response.py": "backend/app/domains/chat/router/world_chat_response.py"
+    "backend/app/api/v1/routes/world_chat_response.py": "backend/app/domains/chat/router/world_chat_response.py",
+    "backend/app/domains/runtime/contracts.py": "backend/app/domains/runtime/exceptions.py",
+    "backend/app/domains/runtime/api/runtime_schemas.py": "backend/app/domains/runtime/schemas.py",
+    "backend/app/domains/runtime/domain/diagnostic_codes.py": "backend/app/domains/runtime/constants.py",
+    "backend/app/domains/runtime/domain/installation_state.py": "backend/app/domains/runtime/contracts/status.py",
+    "backend/app/domains/runtime/ports/application_runtime_probe.py": "backend/app/domains/runtime/contracts/status_reader.py",
+    "backend/app/domains/runtime/ports/runtime_data_path.py": "backend/app/domains/runtime/contracts/data_paths.py",
+    "backend/app/domains/runtime/ports/scheduler_lease_repository.py": "backend/app/domains/runtime/contracts/lease_store.py",
+    "backend/app/domains/runtime/ports/search_index.py": "backend/app/domains/runtime/contracts/search.py",
+    "backend/app/domains/runtime/ports/unit_of_work.py": "backend/app/domains/runtime/contracts/transaction.py",
+    "backend/app/domains/runtime/ports/vector_recall.py": "backend/app/domains/runtime/contracts/vector_recall.py",
+    "backend/app/domains/runtime/ports/release_candidate.py": "backend/app/domains/runtime/contracts/release.py",
+    "backend/app/domains/runtime/domain/scheduler_lease.py": "backend/app/domains/runtime/contracts/lease.py",
+    "backend/app/domains/runtime/application/single_backend_components.py": "backend/app/domains/runtime/service/components.py",
+    "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py": "backend/app/domains/runtime/service/status.py",
+    "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py": "backend/app/domains/runtime/service/scheduler_lease.py",
+    "backend/app/api/v1/routes/runtime_status.py": "backend/app/domains/runtime/router.py",
+    "backend/app/domains/runtime/application/read_runtime_status.py": "backend/app/domains/runtime/service/status.py",
+    "backend/app/domains/runtime/application/manage_scheduler_lease.py": "backend/app/domains/runtime/service/lease_coordinator.py",
+    "backend/app/domains/runtime/public.py": "backend/app/domains/runtime/contracts/status.py",
+    "backend/app/domains/runtime/ports/__init__.py": "backend/app/domains/runtime/contracts/lease_store.py",
+    "backend/app/domains/runtime/infrastructure/__init__.py": "backend/app/domains/runtime/models.py",
+    "backend/app/domains/runtime/application/__init__.py": "backend/app/domains/runtime/service/status.py",
+    "backend/app/domains/runtime/domain/__init__.py": "backend/app/domains/runtime/contracts/status.py",
+    "backend/app/domains/runtime/api/__init__.py": "backend/app/domains/runtime/schemas.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -11010,11 +11034,11 @@
       "status": "Character/Creator-owned HTTP complete; neutral runtime/media error contracts extracted without changing class identity",
       "split_files": {
         "backend/app/services/runtime_boundary.py": [
-          "backend/app/domains/runtime/contracts.py",
+          "backend/app/domains/runtime/exceptions.py",
           "backend/app/services/runtime_boundary.py"
         ],
         "backend/app/services/agent_runs.py": [
-          "backend/app/domains/runtime/contracts.py",
+          "backend/app/domains/runtime/exceptions.py",
           "backend/app/services/agent_runs.py"
         ],
         "backend/app/services/profile_media.py": [
@@ -11029,7 +11053,7 @@
       "split_symbols": [
         {
           "old": "backend/app/services/runtime_boundary.py::ResidentRuntimeError",
-          "new": "backend/app/domains/runtime/contracts.py::ResidentRuntimeError",
+          "new": "backend/app/domains/runtime/exceptions.py::ResidentRuntimeError",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py"
           ],
@@ -11039,7 +11063,7 @@
         },
         {
           "old": "backend/app/services/runtime_boundary.py::ResidentRuntimeAuthError",
-          "new": "backend/app/domains/runtime/contracts.py::ResidentRuntimeAuthError",
+          "new": "backend/app/domains/runtime/exceptions.py::ResidentRuntimeAuthError",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py"
           ],
@@ -11049,7 +11073,7 @@
         },
         {
           "old": "backend/app/services/runtime_boundary.py::ResidentRuntimeUnavailableError",
-          "new": "backend/app/domains/runtime/contracts.py::ResidentRuntimeUnavailableError",
+          "new": "backend/app/domains/runtime/exceptions.py::ResidentRuntimeUnavailableError",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py"
           ],
@@ -11059,7 +11083,7 @@
         },
         {
           "old": "backend/app/services/runtime_boundary.py::ResidentRuntimeRegistrationError",
-          "new": "backend/app/domains/runtime/contracts.py::ResidentRuntimeRegistrationError",
+          "new": "backend/app/domains/runtime/exceptions.py::ResidentRuntimeRegistrationError",
           "direct_consumers": [
             "backend/app/services/runtime_boundary.py"
           ],
@@ -11619,7 +11643,7 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::AgentRunServiceError",
-          "new": "backend/app/domains/runtime/contracts.py::AgentRunServiceError",
+          "new": "backend/app/domains/runtime/exceptions.py::AgentRunServiceError",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
@@ -11719,7 +11743,7 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::AgentSlotUnavailableError",
-          "new": "backend/app/domains/runtime/contracts.py::AgentSlotUnavailableError",
+          "new": "backend/app/domains/runtime/exceptions.py::AgentSlotUnavailableError",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
@@ -26602,7 +26626,7 @@
           "backend/app/domains/memory/repository/daypart.py",
           "backend/app/domains/memory/service/daypart.py",
           "backend/app/domains/memory/service/daypart_observations.py",
-          "backend/app/domains/runtime/contracts.py",
+          "backend/app/domains/runtime/exceptions.py",
           "backend/app/services/agent_runs.py"
         ],
         "backend/app/services/agent_writing.py": [
@@ -26727,7 +26751,7 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::AgentRunServiceError",
-          "new": "backend/app/domains/runtime/contracts.py::AgentRunServiceError",
+          "new": "backend/app/domains/runtime/exceptions.py::AgentRunServiceError",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
@@ -26747,7 +26771,7 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::AgentSlotUnavailableError",
-          "new": "backend/app/domains/runtime/contracts.py::AgentSlotUnavailableError",
+          "new": "backend/app/domains/runtime/exceptions.py::AgentSlotUnavailableError",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
@@ -48452,6 +48476,1493 @@
           ]
         }
       ]
+    },
+    "AR-B8-RUNTIME-A1": {
+      "status": "SOURCE PREPARATION; 65 actual class/function AST preserved; first89 PASS/1 obsolete-file-path failure, corrected final37 PASS/7.26s; boundary727/2434/legacy222; read-only original source/split/assertion/suppression/APIORM/node checks0; stock introductions and remaining Runtime policies/queries pending",
+      "scope": "Runtime owns privacy-safe status values, diagnostic codes, component observation policy and schema conversion. Actual process/DB probing and lease persistence transition in following source.",
+      "moved_files": {
+        "backend/app/domains/runtime/contracts.py": "backend/app/domains/runtime/exceptions.py",
+        "backend/app/domains/runtime/api/runtime_schemas.py": "backend/app/domains/runtime/schemas.py",
+        "backend/app/domains/runtime/domain/diagnostic_codes.py": "backend/app/domains/runtime/constants.py",
+        "backend/app/domains/runtime/domain/installation_state.py": "backend/app/domains/runtime/contracts/status.py",
+        "backend/app/domains/runtime/ports/application_runtime_probe.py": "backend/app/domains/runtime/contracts/status_reader.py",
+        "backend/app/domains/runtime/ports/runtime_data_path.py": "backend/app/domains/runtime/contracts/data_paths.py",
+        "backend/app/domains/runtime/ports/scheduler_lease_repository.py": "backend/app/domains/runtime/contracts/lease_store.py",
+        "backend/app/domains/runtime/ports/search_index.py": "backend/app/domains/runtime/contracts/search.py",
+        "backend/app/domains/runtime/ports/unit_of_work.py": "backend/app/domains/runtime/contracts/transaction.py",
+        "backend/app/domains/runtime/ports/vector_recall.py": "backend/app/domains/runtime/contracts/vector_recall.py",
+        "backend/app/domains/runtime/ports/release_candidate.py": "backend/app/domains/runtime/contracts/release.py",
+        "backend/app/domains/runtime/domain/scheduler_lease.py": "backend/app/domains/runtime/contracts/lease.py",
+        "backend/app/domains/runtime/application/single_backend_components.py": "backend/app/domains/runtime/service/components.py"
+      },
+      "direct_consumers": [
+        "backend/app/domains/characters/router.py",
+        "backend/app/domains/runtime/application/manage_scheduler_lease.py",
+        "backend/app/domains/runtime/application/read_runtime_status.py",
+        "backend/app/domains/runtime/contracts/lease_store.py",
+        "backend/app/domains/runtime/contracts/status.py",
+        "backend/app/domains/runtime/contracts/status_reader.py",
+        "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py",
+        "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py",
+        "backend/app/domains/runtime/ports/__init__.py",
+        "backend/app/domains/runtime/public.py",
+        "backend/app/domains/runtime/schemas.py",
+        "backend/app/domains/runtime/service/components.py",
+        "backend/app/runtime/configuration.py",
+        "backend/app/runtime/memory/sqlite_fts5_recall.py",
+        "backend/app/runtime/migrations/embedded_data.py",
+        "backend/app/runtime/migrations/embedded_sqlite.py",
+        "backend/app/runtime/migrations/ladybug_projection.py",
+        "backend/app/runtime/migrations/release_candidate.py",
+        "backend/app/runtime/persistence/runtime_data_path.py",
+        "backend/app/runtime/persistence/sqlite_database.py",
+        "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
+        "backend/app/runtime/search/callback_index.py",
+        "backend/app/runtime/search/sqlite_fts5.py",
+        "backend/app/services/agent_runs.py",
+        "backend/app/services/runtime_boundary.py",
+        "backend/tests/characters/test_creator_http_errors.py",
+        "backend/tests/test_l3_er1_storage_ports.py",
+        "backend/tests/test_l3_er2_sqlite_canonical_adapter.py",
+        "backend/tests/test_l3_er2_sqlite_concurrency.py",
+        "backend/tests/test_l3_er2_sqlite_fts5_search.py",
+        "scripts/ci/check_local_launcher_contract.py"
+      ],
+      "split_files": {
+        "backend/app/domains/runtime/domain/scheduler_lease.py": [
+          "backend/app/domains/runtime/contracts/lease.py",
+          "backend/app/domains/runtime/policies/lease.py",
+          "backend/app/domains/runtime/exceptions.py",
+          "backend/app/domains/runtime/constants.py"
+        ],
+        "backend/app/domains/runtime/application/single_backend_components.py": [
+          "backend/app/domains/runtime/contracts/components.py",
+          "backend/app/domains/runtime/service/components.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/runtime/domain/scheduler_lease.py::SCHEDULER_SINGLETON_KEY",
+          "new": "backend/app/domains/runtime/constants.py::SCHEDULER_SINGLETON_KEY",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/domains/runtime/repository/scheduler_lease.py",
+            "backend/app/domains/runtime/repository/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/domain/scheduler_lease.py::SchedulerLeaseState",
+          "new": "backend/app/domains/runtime/contracts/lease.py::SchedulerLeaseState",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py",
+            "backend/app/domains/runtime/repository/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/domain/scheduler_lease.py::SchedulerTickResult",
+          "new": "backend/app/domains/runtime/contracts/lease.py::SchedulerTickResult",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/lease_coordinator.py",
+            "backend/app/domains/runtime/contracts/lease_store.py",
+            "backend/tests/test_l3_er2_sqlite_concurrency.py",
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py",
+            "backend/app/runtime/resident/scheduler.py",
+            "backend/tests/routines/test_scheduler_singleton.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/domain/scheduler_lease.py::SchedulerLeaseError",
+          "new": "backend/app/domains/runtime/exceptions.py::SchedulerLeaseError",
+          "direct_consumers": [
+            "backend/app/domains/runtime/exceptions.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/domain/scheduler_lease.py::SchedulerLeaseHeldError",
+          "new": "backend/app/domains/runtime/exceptions.py::SchedulerLeaseHeldError",
+          "direct_consumers": [
+            "backend/tests/test_l3_er2_sqlite_concurrency.py",
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py",
+            "backend/app/runtime/resident/scheduler.py",
+            "backend/app/runtime/single_backend_components.py",
+            "backend/tests/routines/test_scheduler_singleton.py",
+            "backend/tests/test_l2_scheduler_postgres_concurrency.py",
+            "backend/tests/test_l3_er4_single_backend_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/domain/scheduler_lease.py::SchedulerLeaseLostError",
+          "new": "backend/app/domains/runtime/exceptions.py::SchedulerLeaseLostError",
+          "direct_consumers": [
+            "backend/tests/test_l3_er2_sqlite_concurrency.py",
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/domains/runtime/repository/scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py",
+            "backend/app/runtime/resident/scheduler.py",
+            "backend/app/runtime/single_backend_components.py",
+            "backend/tests/routines/test_scheduler_singleton.py",
+            "backend/tests/test_l3_er4_single_backend_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/domain/scheduler_lease.py::SchedulerFenceRejectedError",
+          "new": "backend/app/domains/runtime/exceptions.py::SchedulerFenceRejectedError",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/scheduler_fence.py",
+            "backend/tests/routines/test_scheduler_singleton.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/domain/scheduler_lease.py::SchedulerLeaseSnapshot",
+          "new": "backend/app/domains/runtime/contracts/lease.py::SchedulerLeaseSnapshot",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/lease_coordinator.py",
+            "backend/app/domains/runtime/contracts/lease_store.py",
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/domain/scheduler_lease.py::SchedulerTickPermit",
+          "new": "backend/app/domains/runtime/contracts/lease.py::SchedulerTickPermit",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/lease_coordinator.py",
+            "backend/app/domains/runtime/contracts/lease_store.py",
+            "backend/app/domains/runtime/policies/lease.py",
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py",
+            "backend/tests/routines/test_scheduler_singleton.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/domain/scheduler_lease.py::aware_utc",
+          "new": "backend/app/domains/runtime/policies/lease.py::aware_utc",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/domains/runtime/repository/scheduler_lease.py",
+            "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/domain/scheduler_lease.py::logical_tick_window",
+          "new": "backend/app/domains/runtime/policies/lease.py::logical_tick_window",
+          "direct_consumers": [
+            "backend/app/domains/runtime/policies/lease.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/domain/scheduler_lease.py::decide_tick_window",
+          "new": "backend/app/domains/runtime/policies/lease.py::decide_tick_window",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/domains/runtime/service/sqlite_lease.py",
+            "backend/tests/routines/test_scheduler_singleton.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/application/single_backend_components.py::ComponentMode",
+          "new": "backend/app/domains/runtime/contracts/components.py::ComponentMode",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/components.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er4_single_backend_runtime.py::test_component_failure_degrades_aggregate_status_without_private_text",
+            "tests/test_l3_er4_single_backend_runtime.py::test_external_mode_does_not_overlay_process_local_state",
+            "tests/test_l3_er4_single_backend_runtime.py::test_observation_timestamps_are_bounded_runtime_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/application/single_backend_components.py::ComponentObservation",
+          "new": "backend/app/domains/runtime/contracts/components.py::ComponentObservation",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/components.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er4_single_backend_runtime.py::test_component_failure_degrades_aggregate_status_without_private_text",
+            "tests/test_l3_er4_single_backend_runtime.py::test_external_mode_does_not_overlay_process_local_state",
+            "tests/test_l3_er4_single_backend_runtime.py::test_observation_timestamps_are_bounded_runtime_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/application/single_backend_components.py::ComponentObservationRegistry",
+          "new": "backend/app/domains/runtime/service/components.py::ComponentObservationRegistry",
+          "direct_consumers": [
+            "backend/app/runtime/single_backend_components.py",
+            "backend/tests/test_l3_er4_single_backend_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er4_single_backend_runtime.py::test_component_failure_degrades_aggregate_status_without_private_text",
+            "tests/test_l3_er4_single_backend_runtime.py::test_external_mode_does_not_overlay_process_local_state",
+            "tests/test_l3_er4_single_backend_runtime.py::test_observation_timestamps_are_bounded_runtime_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/application/single_backend_components.py::component_observations",
+          "new": "backend/app/domains/runtime/service/components.py::component_observations",
+          "direct_consumers": [
+            "backend/app/public_main.py",
+            "backend/app/runtime/single_backend_components.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er4_single_backend_runtime.py::test_component_failure_degrades_aggregate_status_without_private_text",
+            "tests/test_l3_er4_single_backend_runtime.py::test_external_mode_does_not_overlay_process_local_state",
+            "tests/test_l3_er4_single_backend_runtime.py::test_observation_timestamps_are_bounded_runtime_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/application/single_backend_components.py::overlay_in_process_component_status",
+          "new": "backend/app/domains/runtime/service/components.py::overlay_in_process_component_status",
+          "direct_consumers": [
+            "backend/tests/test_l3_er4_single_backend_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er4_single_backend_runtime.py::test_component_failure_degrades_aggregate_status_without_private_text",
+            "tests/test_l3_er4_single_backend_runtime.py::test_external_mode_does_not_overlay_process_local_state",
+            "tests/test_l3_er4_single_backend_runtime.py::test_observation_timestamps_are_bounded_runtime_metadata"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/application/single_backend_components.py::__all__",
+          "new": "backend/app/domains/runtime/service/components.py::__all__",
+          "consumer_note": "Original export identity is retained through the actual named imports recorded by AR-B8-RUNTIME-A6.",
+          "direct_consumers": [
+            "backend/tests/test_l2_runtime_domain_foundation.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er4_single_backend_runtime.py::test_component_failure_degrades_aggregate_status_without_private_text",
+            "tests/test_l3_er4_single_backend_runtime.py::test_external_mode_does_not_overlay_process_local_state",
+            "tests/test_l3_er4_single_backend_runtime.py::test_observation_timestamps_are_bounded_runtime_metadata"
+          ]
+        }
+      ],
+      "remaining": "Actual status probe SQL/interpretation and scheduler lease model/policy/SQL, old public/aggregate/read forwarding wrappers and final G5/B8 integration; AgentRun error final ownership follows Routines source.",
+      "verification_note": "Split consumers are resolved from actual ImportFrom nodes (or in-file Name loads for private bases/helpers); exact existing test functions were verified before validation."
+    },
+    "AR-B8-RUNTIME-A2": {
+      "status": "SOURCE PREPARATION; 6 actual service methods/all original helpers and8 SQL expressions preserve original AST with actual arguments; final37 PASS/28.96s; boundary731/2442/legacy222; read-only source/split/assertion/suppression/APIORM/nodes0; sequential captures pending",
+      "split_files": {
+        "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py": [
+          "backend/app/domains/runtime/service/status.py",
+          "backend/app/domains/runtime/repository/status.py",
+          "backend/app/runtime/diagnostics/status_queries.py",
+          "backend/app/domains/runtime/constants.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::RUNTIME_MIGRATION_HEAD",
+          "new": "backend/app/domains/runtime/constants.py::RUNTIME_MIGRATION_HEAD",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/status.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::LOCAL_INSTALLATION_KEY",
+          "new": "backend/app/runtime/diagnostics/status_queries.py::LOCAL_INSTALLATION_KEY",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_queries.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SCHEDULER_SINGLETON_KEY",
+          "new": "backend/app/domains/runtime/constants.py::SCHEDULER_SINGLETON_KEY",
+          "direct_consumers": [
+            "backend/app/domains/runtime/repository/status.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::RECENT_PROVIDER_WINDOW",
+          "new": "backend/app/domains/runtime/constants.py::RECENT_PROVIDER_WINDOW",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/status.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/domains/runtime/service/status.py::RuntimeStatusService",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_runtime_version",
+          "new": "backend/app/domains/runtime/service/status.py::_runtime_version",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_installation_state",
+          "new": "backend/app/domains/runtime/service/status.py::_installation_state",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_graph_backend_available",
+          "new": "backend/app/domains/runtime/service/status.py::_graph_backend_available",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_provider_call_count",
+          "new": "backend/app/domains/runtime/service/status.py::_provider_call_count",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_provider_failure_class",
+          "new": "backend/app/domains/runtime/service/status.py::_provider_failure_class",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_lane_result_code",
+          "new": "backend/app/domains/runtime/service/status.py::_lane_result_code",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_safe_code",
+          "new": "backend/app/domains/runtime/service/status.py::_safe_code",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_find_opaque_id",
+          "new": "backend/app/domains/runtime/service/status.py::_find_opaque_id",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_json_object",
+          "new": "backend/app/domains/runtime/service/status.py::_json_object",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_nonnegative_int",
+          "new": "backend/app/domains/runtime/service/status.py::_nonnegative_int",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_optional_string",
+          "new": "backend/app/domains/runtime/service/status.py::_optional_string",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_optional_datetime",
+          "new": "backend/app/domains/runtime/service/status.py::_optional_datetime",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::_aware_utc",
+          "new": "backend/app/domains/runtime/service/status.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py",
+            "backend/tests/test_l2_runtime_diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/domains/runtime/repository/status.py::migration_revision",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/runtime/diagnostics/status_queries.py::owner_state",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/runtime/diagnostics/status_queries.py::registered_world_count",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/runtime/diagnostics/status_queries.py::active_world_count",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/runtime/diagnostics/status_queries.py::active_world_character_count",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/domains/runtime/repository/status.py::scheduler_state",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/runtime/diagnostics/status_queries.py::projection_counts",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py::SqlAlchemyApplicationRuntimeProbe",
+          "new": "backend/app/runtime/diagnostics/status_queries.py::recent_runs",
+          "direct_consumers": [
+            "backend/app/runtime/diagnostics/status_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_extracts_only_bounded_metadata",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_degrades_when_alembic_metadata_is_missing",
+            "tests/test_l2_runtime_diagnostics.py::test_application_probe_reads_embedded_sqlite_schema_lineage"
+          ]
+        }
+      ],
+      "direct_consumers": [
+        "backend/app/api/v1/routes/runtime_status.py",
+        "backend/app/domains/runtime/infrastructure/__init__.py",
+        "backend/app/runtime/contributor_backend.py",
+        "backend/scripts/read_runtime_status.py",
+        "backend/tests/test_l2_runtime_diagnostics.py"
+      ],
+      "preserved": "Original query expressions/order, count limits, owner predicates, missing-migration rollback, settings defaults, bounded metadata and failure/health interpretation. No eager query or new Session.",
+      "remaining": "Runtime HTTP/DI ownership and read forwarding/public aggregate cleanup, actual scheduler lease model/policy/SQL; G5 and final application integration.",
+      "composition_note": "Runtime/domain aggregate no longer imports the external query factory. API, contributor and CLI bind the actual runtime composition directly, retaining existing local call names and monkeypatch contracts.",
+      "new_test_nodes": [
+        "tests/runtime/test_status_query_transaction.py::test_diagnostics_share_uncommitted_foreign_facts_and_original_rollback[caller]",
+        "tests/runtime/test_status_query_transaction.py::test_diagnostics_share_uncommitted_foreign_facts_and_original_rollback[missing_migration]"
+      ]
+    },
+    "AR-B8-RUNTIME-A3": {
+      "status": "SOURCE PREPARATION; original16 definitions/query AST match; focused63 PASS/1 existing PG skip; original6 preservation diagnostics0; ER0 old physical-count failure corrected by fcf14e8 historical snapshot + complete current source comparison,20PASS; sequential source introductions pending",
+      "split_files": {
+        "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py": [
+          "backend/app/domains/runtime/models.py",
+          "backend/app/domains/runtime/service/scheduler_lease.py",
+          "backend/app/domains/runtime/repository/scheduler_lease.py",
+          "backend/app/runtime/persistence/scheduler_fence.py",
+          "backend/app/runtime/persistence/scheduler_lease.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::RuntimeSchedulerLease",
+          "new": "backend/app/domains/runtime/models.py::RuntimeSchedulerLease",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::_SchedulerFence",
+          "new": "backend/app/runtime/persistence/scheduler_fence.py::_SchedulerFence",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/scheduler_fence.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::_scheduler_fence",
+          "new": "backend/app/runtime/persistence/scheduler_fence.py::_scheduler_fence",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/scheduler_fence.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::scheduler_fence",
+          "new": "backend/app/runtime/persistence/scheduler_fence.py::scheduler_fence",
+          "direct_consumers": [
+            "backend/app/runtime/resident/scheduler.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::_verify_scheduler_fence_before_commit",
+          "new": "backend/app/runtime/persistence/scheduler_fence.py::_verify_scheduler_fence_before_commit",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/scheduler_fence.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ],
+          "consumer_note": "The unchanged event.listens_for(Session, before_commit) decorator registers this function in its actual module."
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::SqlAlchemySchedulerLeaseRepository",
+          "new": "backend/app/domains/runtime/service/scheduler_lease.py::SchedulerLeaseService",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::_locked_current_lease",
+          "new": "backend/app/domains/runtime/service/scheduler_lease.py::_locked_current_lease",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::_lease_matches",
+          "new": "backend/app/domains/runtime/service/scheduler_lease.py::_lease_matches",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/runtime/persistence/scheduler_fence.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::_database_now",
+          "new": "backend/app/domains/runtime/repository/scheduler_lease.py::_database_now",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/scheduler_lease.py",
+            "backend/app/runtime/persistence/scheduler_fence.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::_advisory_xact_lock",
+          "new": "backend/app/domains/runtime/repository/scheduler_lease.py::_advisory_xact_lock",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::_snapshot",
+          "new": "backend/app/domains/runtime/service/scheduler_lease.py::_snapshot",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::SqlAlchemySchedulerLeaseRepository",
+          "new": "backend/app/runtime/persistence/scheduler_lease.py::SqlAlchemySchedulerLeaseRepository",
+          "direct_consumers": [
+            "backend/app/runtime/resident/scheduler.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::SqlAlchemySchedulerLeaseRepository",
+          "new": "backend/app/domains/runtime/repository/scheduler_lease.py::locked_row",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::SqlAlchemySchedulerLeaseRepository",
+          "new": "backend/app/domains/runtime/repository/scheduler_lease.py::read_row",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::_verify_scheduler_fence_before_commit",
+          "new": "backend/app/domains/runtime/repository/scheduler_lease.py::fence_row",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/scheduler_fence.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py::SqlAlchemySchedulerLeaseRepository",
+          "new": "backend/app/runtime/persistence/scheduler_lease.py::read_installation_identity",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+            "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        }
+      ],
+      "direct_consumers": [
+        "backend/tests/test_l2_scheduler_postgres_concurrency.py",
+        "backend/tests/test_l3_er1_storage_ports.py",
+        "backend/tests/routines/test_scheduler_singleton.py",
+        "backend/app/models/__init__.py",
+        "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
+        "backend/app/runtime/resident/scheduler.py",
+        "backend/app/domains/runtime/public.py",
+        "backend/app/domains/runtime/infrastructure/__init__.py"
+      ],
+      "preserved": "Same Session factory, Identity row lock, advisory lock, database clock, singleton query order, fencing epoch, commit/refresh/rollback, context token reset and before-commit denial.",
+      "remaining": "SQLite CAS actual policy/query ownership and Runtime HTTP/aggregates; G5 singleBase registration and final migration/installer integration."
+    },
+    "AR-B8-RUNTIME-A4": {
+      "status": "SOURCE PREPARATION; original16 workflow/helper/executor AST preserved after actual query expansion; exact constructor/read/clock/Identity bindings; focused42 PASS/37.13s; boundary737/2458/legacy222; original6 source/split/assertion/suppression/APIORM/node diagnostics0; sequential source introductions pending",
+      "split_files": {
+        "backend/app/runtime/persistence/sqlite_scheduler_lease.py": [
+          "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
+          "backend/app/domains/runtime/service/sqlite_lease.py",
+          "backend/app/domains/runtime/repository/sqlite_lease.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/domains/runtime/service/sqlite_lease.py::SqliteSchedulerLeaseService",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/sqlite_scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "direct_consumers": [
+            "backend/app/runtime/resident/scheduler.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::read_installation_id",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/sqlite_scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::_lease_matches",
+          "new": "backend/app/domains/runtime/service/sqlite_lease.py::_lease_matches",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::_snapshot",
+          "new": "backend/app/domains/runtime/service/sqlite_lease.py::_snapshot",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::_optional_datetime",
+          "new": "backend/app/domains/runtime/service/sqlite_lease.py::_optional_datetime",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::_optional_str",
+          "new": "backend/app/domains/runtime/service/sqlite_lease.py::_optional_str",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::Clock",
+          "new": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::Clock",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/sqlite_scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ],
+          "consumer_note": "Existing module type annotation or explicit export list remains with the runtime binding."
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::__all__",
+          "new": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::__all__",
+          "direct_consumers": [
+            "backend/app/runtime/persistence/sqlite_scheduler_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ],
+          "consumer_note": "Existing module type annotation or explicit export list remains with the runtime binding."
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/domains/runtime/repository/sqlite_lease.py::current_row",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/domains/runtime/repository/sqlite_lease.py::insert_lease",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/domains/runtime/repository/sqlite_lease.py::acquire_existing",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/domains/runtime/repository/sqlite_lease.py::release_current",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/persistence/sqlite_scheduler_lease.py::SqliteSchedulerLeaseRepository",
+          "new": "backend/app/domains/runtime/repository/sqlite_lease.py::cas_current",
+          "direct_consumers": [
+            "backend/app/domains/runtime/service/sqlite_lease.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_er2_sqlite_concurrency.py::test_ten_scheduler_claims_have_one_owner_and_expired_lease_is_reclaimed",
+            "tests/test_l3_er2_sqlite_concurrency.py::test_sqlite_scheduler_heartbeat_preserves_failure_until_next_tick"
+          ]
+        }
+      ],
+      "preserved": "Original owner/TTL validation, BEGIN IMMEDIATE retry executor, same connection Identity lookup, CAS predicates/rowcount errors, clock sample order, callbacks and read snapshot.",
+      "remaining": "Runtime HTTP and old aggregate removal; G5 single Base/DB/registry; G06 final compatibility removal."
+    },
+    "AR-B8-RUNTIME-A5": {
+      "status": "SOURCE PREPARATION; actual HTTP/owner query+predicate and2classes AST preserved; both factory calls verified; focused35 PASS/25.91s; original full diagnostics pending",
+      "split_files": {
+        "backend/app/api/v1/routes/runtime_status.py": [
+          "backend/app/domains/runtime/router.py",
+          "backend/app/domains/identity/service/runtime_access.py",
+          "backend/app/domains/identity/repository/runtime_access.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/api/v1/routes/runtime_status.py::router",
+          "new": "backend/app/domains/runtime/router.py::router",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_owner_runtime_status_endpoint_is_versioned_and_content_free",
+            "tests/test_l2_runtime_diagnostics.py::test_runtime_status_endpoint_rejects_non_owner"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/runtime_status.py::get_runtime_status",
+          "new": "backend/app/domains/runtime/router.py::get_runtime_status",
+          "direct_consumers": [
+            "backend/app/domains/runtime/router.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_owner_runtime_status_endpoint_is_versioned_and_content_free",
+            "tests/test_l2_runtime_diagnostics.py::test_runtime_status_endpoint_rejects_non_owner"
+          ],
+          "consumer_note": "The unchanged router.get decorator registers the endpoint."
+        },
+        {
+          "old": "backend/app/api/v1/routes/runtime_status.py::get_runtime_status",
+          "new": "backend/app/domains/identity/service/runtime_access.py::is_runtime_owner",
+          "direct_consumers": [
+            "backend/app/domains/runtime/router.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_owner_runtime_status_endpoint_is_versioned_and_content_free",
+            "tests/test_l2_runtime_diagnostics.py::test_runtime_status_endpoint_rejects_non_owner"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/runtime_status.py::get_runtime_status",
+          "new": "backend/app/domains/identity/repository/runtime_access.py::read_installation",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/runtime_access.py"
+          ],
+          "test_nodes": [
+            "tests/test_l2_runtime_diagnostics.py::test_owner_runtime_status_endpoint_is_versioned_and_content_free",
+            "tests/test_l2_runtime_diagnostics.py::test_runtime_status_endpoint_rejects_non_owner"
+          ]
+        }
+      ],
+      "direct_consumers": [
+        "backend/app/domains/runtime/public.py",
+        "backend/app/api/v1/public.py",
+        "backend/tests/test_l2_runtime_diagnostics.py"
+      ],
+      "preserved": "Same browser origin check and auth dependency, same Session Identity get and claimed-owner predicate, exact403 detail, runtime_config branch and factory defaults, schema/privacy/component overlay."
+    },
+    "AR-B8-RUNTIME-A6": {
+      "status": "SOURCE PREPARATION;51 original export identities and29 actual test namespace values preserved;15 product/testconsumerfiles;18 obsoletebridges removed; focused73PASS/1existingPGskip/43.32s; full original diagnostic pending",
+      "aggregate_exports": [
+        {
+          "old": "app.domains.runtime.public::LocalRuntimeStatusRead",
+          "new": "app.domains.runtime.schemas::LocalRuntimeStatusRead"
+        },
+        {
+          "old": "app.domains.runtime.public::runtime_status_read",
+          "new": "app.domains.runtime.schemas::runtime_status_read"
+        },
+        {
+          "old": "app.domains.runtime.public::ReadApplicationRuntimeStatus",
+          "new": "app.domains.runtime.service.status::ReadApplicationRuntimeStatus"
+        },
+        {
+          "old": "app.domains.runtime.public::SchedulerLeaseCoordinator",
+          "new": "app.domains.runtime.service.lease_coordinator::SchedulerLeaseCoordinator"
+        },
+        {
+          "old": "app.domains.runtime.public::ComponentObservation",
+          "new": "app.domains.runtime.contracts.components::ComponentObservation"
+        },
+        {
+          "old": "app.domains.runtime.public::ComponentObservationRegistry",
+          "new": "app.domains.runtime.service.components::ComponentObservationRegistry"
+        },
+        {
+          "old": "app.domains.runtime.public::component_observations",
+          "new": "app.domains.runtime.service.components::component_observations"
+        },
+        {
+          "old": "app.domains.runtime.public::overlay_in_process_component_status",
+          "new": "app.domains.runtime.service.components::overlay_in_process_component_status"
+        },
+        {
+          "old": "app.domains.runtime.public::RuntimeDiagnosticCode",
+          "new": "app.domains.runtime.constants::RuntimeDiagnosticCode"
+        },
+        {
+          "old": "app.domains.runtime.public::RUNTIME_STATUS_SCHEMA_VERSION",
+          "new": "app.domains.runtime.contracts.status::RUNTIME_STATUS_SCHEMA_VERSION"
+        },
+        {
+          "old": "app.domains.runtime.public::ActivityRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::ActivityRuntimeStatus"
+        },
+        {
+          "old": "app.domains.runtime.public::ApplicationRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::ApplicationRuntimeStatus"
+        },
+        {
+          "old": "app.domains.runtime.public::InstallationState",
+          "new": "app.domains.runtime.contracts.status::InstallationState"
+        },
+        {
+          "old": "app.domains.runtime.public::MigrationRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::MigrationRuntimeStatus"
+        },
+        {
+          "old": "app.domains.runtime.public::OwnerRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::OwnerRuntimeStatus"
+        },
+        {
+          "old": "app.domains.runtime.public::ProviderFailureClass",
+          "new": "app.domains.runtime.contracts.status::ProviderFailureClass"
+        },
+        {
+          "old": "app.domains.runtime.public::ProjectorRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::ProjectorRuntimeStatus"
+        },
+        {
+          "old": "app.domains.runtime.public::ProviderUsageRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::ProviderUsageRuntimeStatus"
+        },
+        {
+          "old": "app.domains.runtime.public::RuntimeCapabilityStatus",
+          "new": "app.domains.runtime.contracts.status::RuntimeCapabilityStatus"
+        },
+        {
+          "old": "app.domains.runtime.public::RuntimeComponentState",
+          "new": "app.domains.runtime.contracts.status::RuntimeComponentState"
+        },
+        {
+          "old": "app.domains.runtime.public::RuntimeComponentStatus",
+          "new": "app.domains.runtime.contracts.status::RuntimeComponentStatus"
+        },
+        {
+          "old": "app.domains.runtime.public::RuntimeDependencyStatus",
+          "new": "app.domains.runtime.contracts.status::RuntimeDependencyStatus"
+        },
+        {
+          "old": "app.domains.runtime.public::SchedulerRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::SchedulerRuntimeStatus"
+        },
+        {
+          "old": "app.domains.runtime.public::SchedulerFenceRejectedError",
+          "new": "app.domains.runtime.exceptions::SchedulerFenceRejectedError"
+        },
+        {
+          "old": "app.domains.runtime.public::SchedulerLeaseHeldError",
+          "new": "app.domains.runtime.exceptions::SchedulerLeaseHeldError"
+        },
+        {
+          "old": "app.domains.runtime.public::SchedulerLeaseLostError",
+          "new": "app.domains.runtime.exceptions::SchedulerLeaseLostError"
+        },
+        {
+          "old": "app.domains.runtime.public::SchedulerLeaseSnapshot",
+          "new": "app.domains.runtime.contracts.lease::SchedulerLeaseSnapshot"
+        },
+        {
+          "old": "app.domains.runtime.public::SchedulerLeaseState",
+          "new": "app.domains.runtime.contracts.lease::SchedulerLeaseState"
+        },
+        {
+          "old": "app.domains.runtime.public::SchedulerTickPermit",
+          "new": "app.domains.runtime.contracts.lease::SchedulerTickPermit"
+        },
+        {
+          "old": "app.domains.runtime.public::SchedulerTickResult",
+          "new": "app.domains.runtime.contracts.lease::SchedulerTickResult"
+        },
+        {
+          "old": "app.domains.runtime.public::decide_tick_window",
+          "new": "app.domains.runtime.policies.lease::decide_tick_window"
+        },
+        {
+          "old": "app.domains.runtime.public::logical_tick_window",
+          "new": "app.domains.runtime.policies.lease::logical_tick_window"
+        },
+        {
+          "old": "app.domains.runtime.public::RuntimeSchedulerLease",
+          "new": "app.domains.runtime.models::RuntimeSchedulerLease"
+        },
+        {
+          "old": "app.domains.runtime.public::ApplicationRuntimeProbe",
+          "new": "app.domains.runtime.contracts.status_reader::ApplicationRuntimeProbe"
+        },
+        {
+          "old": "app.domains.runtime.public::ClaimLeasePort",
+          "new": "app.domains.runtime.contracts.lease_store::ClaimLeasePort"
+        },
+        {
+          "old": "app.domains.runtime.public::RuntimeDataPathPort",
+          "new": "app.domains.runtime.contracts.data_paths::RuntimeDataPathPort"
+        },
+        {
+          "old": "app.domains.runtime.public::RuntimeDataPaths",
+          "new": "app.domains.runtime.contracts.data_paths::RuntimeDataPaths"
+        },
+        {
+          "old": "app.domains.runtime.public::SearchIndexDocument",
+          "new": "app.domains.runtime.contracts.search::SearchIndexDocument"
+        },
+        {
+          "old": "app.domains.runtime.public::SearchIndexHit",
+          "new": "app.domains.runtime.contracts.search::SearchIndexHit"
+        },
+        {
+          "old": "app.domains.runtime.public::SearchIndexPort",
+          "new": "app.domains.runtime.contracts.search::SearchIndexPort"
+        },
+        {
+          "old": "app.domains.runtime.public::UnitOfWorkPort",
+          "new": "app.domains.runtime.contracts.transaction::UnitOfWorkPort"
+        },
+        {
+          "old": "app.domains.runtime.ports::ApplicationRuntimeProbe",
+          "new": "app.domains.runtime.contracts.status_reader::ApplicationRuntimeProbe"
+        },
+        {
+          "old": "app.domains.runtime.ports::RuntimeDataPathPort",
+          "new": "app.domains.runtime.contracts.data_paths::RuntimeDataPathPort"
+        },
+        {
+          "old": "app.domains.runtime.ports::RuntimeDataPaths",
+          "new": "app.domains.runtime.contracts.data_paths::RuntimeDataPaths"
+        },
+        {
+          "old": "app.domains.runtime.ports::ClaimLeasePort",
+          "new": "app.domains.runtime.contracts.lease_store::ClaimLeasePort"
+        },
+        {
+          "old": "app.domains.runtime.ports::SchedulerLeaseRepository",
+          "new": "app.domains.runtime.contracts.lease_store::SchedulerLeaseRepository"
+        },
+        {
+          "old": "app.domains.runtime.ports::SearchIndexDocument",
+          "new": "app.domains.runtime.contracts.search::SearchIndexDocument"
+        },
+        {
+          "old": "app.domains.runtime.ports::SearchIndexHit",
+          "new": "app.domains.runtime.contracts.search::SearchIndexHit"
+        },
+        {
+          "old": "app.domains.runtime.ports::SearchIndexPort",
+          "new": "app.domains.runtime.contracts.search::SearchIndexPort"
+        },
+        {
+          "old": "app.domains.runtime.ports::UnitOfWorkPort",
+          "new": "app.domains.runtime.contracts.transaction::UnitOfWorkPort"
+        },
+        {
+          "old": "app.domains.runtime.infrastructure::RuntimeSchedulerLease",
+          "new": "app.domains.runtime.models::RuntimeSchedulerLease"
+        }
+      ],
+      "test_namespaces": [
+        {
+          "test": "backend/tests/test_l2_runtime_diagnostics.py",
+          "name": "ActivityRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::ActivityRuntimeStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_diagnostics.py",
+          "name": "ApplicationRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::ApplicationRuntimeStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_diagnostics.py",
+          "name": "InstallationState",
+          "new": "app.domains.runtime.contracts.status::InstallationState"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_diagnostics.py",
+          "name": "MigrationRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::MigrationRuntimeStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_diagnostics.py",
+          "name": "OwnerRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::OwnerRuntimeStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_diagnostics.py",
+          "name": "ProjectorRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::ProjectorRuntimeStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_diagnostics.py",
+          "name": "ProviderFailureClass",
+          "new": "app.domains.runtime.contracts.status::ProviderFailureClass"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_diagnostics.py",
+          "name": "ProviderUsageRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::ProviderUsageRuntimeStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_diagnostics.py",
+          "name": "RuntimeComponentState",
+          "new": "app.domains.runtime.contracts.status::RuntimeComponentState"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_diagnostics.py",
+          "name": "RuntimeComponentStatus",
+          "new": "app.domains.runtime.contracts.status::RuntimeComponentStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_diagnostics.py",
+          "name": "RuntimeDiagnosticCode",
+          "new": "app.domains.runtime.constants::RuntimeDiagnosticCode"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_diagnostics.py",
+          "name": "SchedulerRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::SchedulerRuntimeStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "ActivityRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::ActivityRuntimeStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "ApplicationRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::ApplicationRuntimeStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "InstallationState",
+          "new": "app.domains.runtime.contracts.status::InstallationState"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "LocalRuntimeStatusRead",
+          "new": "app.domains.runtime.schemas::LocalRuntimeStatusRead"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "MigrationRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::MigrationRuntimeStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "OwnerRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::OwnerRuntimeStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "ProjectorRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::ProjectorRuntimeStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "ProviderFailureClass",
+          "new": "app.domains.runtime.contracts.status::ProviderFailureClass"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "ProviderUsageRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::ProviderUsageRuntimeStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "ReadApplicationRuntimeStatus",
+          "new": "app.domains.runtime.service.status::ReadApplicationRuntimeStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "RuntimeCapabilityStatus",
+          "new": "app.domains.runtime.contracts.status::RuntimeCapabilityStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "RuntimeComponentState",
+          "new": "app.domains.runtime.contracts.status::RuntimeComponentState"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "RuntimeComponentStatus",
+          "new": "app.domains.runtime.contracts.status::RuntimeComponentStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "RuntimeDependencyStatus",
+          "new": "app.domains.runtime.contracts.status::RuntimeDependencyStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "RuntimeDiagnosticCode",
+          "new": "app.domains.runtime.constants::RuntimeDiagnosticCode"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "SchedulerRuntimeStatus",
+          "new": "app.domains.runtime.contracts.status::SchedulerRuntimeStatus"
+        },
+        {
+          "test": "backend/tests/test_l2_runtime_domain_foundation.py",
+          "name": "runtime_status_read",
+          "new": "app.domains.runtime.schemas::runtime_status_read"
+        }
+      ],
+      "direct_consumers": [
+        "backend/app/domains/social/ports/search_index.py",
+        "backend/app/public_main.py",
+        "backend/app/runtime/contributor_backend.py",
+        "backend/app/runtime/resident/scheduler.py",
+        "backend/app/runtime/search/social_projection.py",
+        "backend/app/runtime/single_backend_components.py",
+        "backend/scripts/read_runtime_status.py",
+        "backend/tests/routines/test_scheduler_singleton.py",
+        "backend/tests/test_feed_reaction_intent.py",
+        "backend/tests/test_l2_runtime_diagnostics.py",
+        "backend/tests/test_l2_runtime_domain_foundation.py",
+        "backend/tests/test_l2_scheduler_postgres_concurrency.py",
+        "backend/tests/test_l3_er4_single_backend_runtime.py",
+        "backend/tests/test_world_feed_search.py",
+        "backend/tests/world_packages/test_import_commit.py"
+      ],
+      "removed_paths": [
+        "backend/app/domains/runtime/public.py",
+        "backend/app/domains/runtime/ports/__init__.py",
+        "backend/app/domains/runtime/infrastructure/__init__.py",
+        "backend/app/domains/runtime/application/__init__.py",
+        "backend/app/domains/runtime/domain/__init__.py",
+        "backend/app/domains/runtime/api/__init__.py"
+      ],
+      "preserved": "Same defining values/types/functions; two existing test namespaces bind the actual role objects with assertions unchanged. No product compatibility namespace remains.",
+      "remaining": "G5 single Base/DB/registry; G06 canonical factory integration/removal; later B4/B5/B6 consumers on sequential merge."
     }
   }
 }

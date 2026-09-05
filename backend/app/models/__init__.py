@@ -8,7 +8,7 @@ from app.domains.identity.models import InstallationIdentity
 from app.domains.identity.models import LocalOwnerBootstrapChallenge
 from app.domains.identity.models import User
 from app.domains.identity.models import LlmCredential
-from app.domains.runtime.infrastructure import RuntimeSchedulerLease
+from app.domains.runtime.models import RuntimeSchedulerLease
 from app.domains.characters.models import Character, CharacterState
 from app.domains.character_lore.models import CharacterLoreChunk, CharacterLoreSource, LoreParserLease
 from app.domains.characters.models import AgentImageGenerationSetting

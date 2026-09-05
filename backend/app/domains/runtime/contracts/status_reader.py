@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from app.domains.runtime.domain.installation_state import ApplicationRuntimeStatus
+from app.domains.runtime.contracts.status import ApplicationRuntimeStatus
 
 
 class ApplicationRuntimeProbe(Protocol):

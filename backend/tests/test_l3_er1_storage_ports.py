@@ -12,17 +12,13 @@ from app.domains.relationships.ports.projection import RelationshipProjectionPor
 from app.domains.relationships.projection.commands import NoGraphMutationCommand
 from app.domains.routines.utils.clock import SystemClock
 from app.domains.routines.contracts.clock import ClockPort
-from app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease import (
-    SqlAlchemySchedulerLeaseRepository,
-)
-from app.domains.runtime.ports.runtime_data_path import RuntimeDataPathPort
-from app.domains.runtime.ports.scheduler_lease_repository import ClaimLeasePort
-from app.domains.runtime.ports.search_index import (
-    SearchIndexDocument,
-    SearchIndexHit,
-    SearchIndexPort,
-)
-from app.domains.runtime.ports.unit_of_work import UnitOfWorkPort
+from app.runtime.persistence.scheduler_lease import SqlAlchemySchedulerLeaseRepository
+from app.domains.runtime.contracts.data_paths import RuntimeDataPathPort
+from app.domains.runtime.contracts.lease_store import ClaimLeasePort
+from app.domains.runtime.contracts.search import SearchIndexDocument
+from app.domains.runtime.contracts.search import SearchIndexHit
+from app.domains.runtime.contracts.search import SearchIndexPort
+from app.domains.runtime.contracts.transaction import UnitOfWorkPort
 from app.integrations.ladybug_projection import LadybugRelationshipProjection
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.runtime.graph_projection.sqlalchemy_outbox import SqlAlchemyProjectionOutbox
@@ -174,6 +170,7 @@ def test_port_modules_and_projection_worker_preserve_dependency_direction() -> N
     port_roots = [
         app_root / "domains" / "relationships" / "ports",
         app_root / "domains" / "runtime" / "ports",
+        app_root / "domains" / "runtime" / "contracts",
     ]
     forbidden = ("app.runtime", "app.integrations", "app.models", "app.cruds")
     for root in port_roots:

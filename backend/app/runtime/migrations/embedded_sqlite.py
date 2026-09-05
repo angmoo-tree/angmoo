@@ -13,7 +13,7 @@ from uuid import uuid4
 
 from sqlalchemy import URL, create_engine
 
-from app.domains.runtime.ports.runtime_data_path import RuntimeDataPathPort
+from app.domains.runtime.contracts.data_paths import RuntimeDataPathPort
 from app.runtime.migrations.generation import (
     EmbeddedGenerationController,
     EmbeddedGenerationError,

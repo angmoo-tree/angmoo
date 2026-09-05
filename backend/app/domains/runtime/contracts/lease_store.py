@@ -2,11 +2,9 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from app.domains.runtime.domain.scheduler_lease import (
-    SchedulerLeaseSnapshot,
-    SchedulerTickPermit,
-    SchedulerTickResult,
-)
+from app.domains.runtime.contracts.lease import SchedulerLeaseSnapshot
+from app.domains.runtime.contracts.lease import SchedulerTickPermit
+from app.domains.runtime.contracts.lease import SchedulerTickResult
 
 
 @runtime_checkable

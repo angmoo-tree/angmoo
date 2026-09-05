@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2353,
-      "internal_edge_count": 2670,
+      "external_import_count": 2407,
+      "internal_edge_count": 2707,
       "legacy_import_exception_count": 0,
-      "module_count": 792,
+      "module_count": 804,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -397,7 +397,7 @@
           },
           {
             "imports": [
-              "app.domains.runtime.public"
+              "app.domains.runtime.contracts.search"
             ],
             "module": "app.domains.social.ports.search_index",
             "path": "backend/app/domains/social/ports/search_index.py"
@@ -1331,7 +1331,7 @@
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
-        "sha256": "bd1e83111413a0e8d66ac185b326bf70e8fb19e90632950cfcdf8d00149207f3"
+        "sha256": "3ea5fd8851d01fc5df13a9ba2177242af85bb8e8760e4a4503deefd07093aeb8"
       },
       {
         "path": "backend/tests/test_graph_projection_replay.py",
@@ -1347,7 +1347,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "119af4aafa8ba1388a9868641cfb47f9542efb334acafc232b4ffe34bed32ce1"
+        "sha256": "3498026f08e79c7c51c05b83fbc2aef98ad44e368581c745f64cd05a9356b312"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
@@ -1383,7 +1383,7 @@
       },
       {
         "path": "backend/tests/test_world_feed_search.py",
-        "sha256": "20065d06bae69007cc64172269888d6f1671b16ec8373ce0b5b966d4322352cd"
+        "sha256": "75c3b9d9f1f5d7ad7b80b9c161606bb2aff6ba2c41efeabfe82e0c64ec44ce4e"
       }
     ],
     "parity_test_node_count": 97,

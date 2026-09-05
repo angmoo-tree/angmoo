@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import timedelta
+
 from enum import StrEnum
 
 
@@ -24,3 +26,8 @@ class RuntimeDiagnosticCode(StrEnum):
     PROJECTOR_STALLED = "projector_stalled"
     GRAPH_DEGRADED = "graph_degraded"
     DIAGNOSTIC_REDACTION_FAILED = "diagnostic_redaction_failed"
+
+SCHEDULER_SINGLETON_KEY = "resident-tick-scheduler"
+
+RUNTIME_MIGRATION_HEAD = "20260825_0083"
+RECENT_PROVIDER_WINDOW = timedelta(hours=1)
