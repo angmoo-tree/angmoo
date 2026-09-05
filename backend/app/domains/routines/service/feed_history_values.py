@@ -335,3 +335,16 @@ def format_feed_history_sanitize_payload_for_prompt(
             summary_key="own_root_semantic_summary",
         ),
     }
+
+
+from app.core.json_objects import _json_object
+
+def activity_result_text_for_prompt(
+    result: str | None, reason: str | None = None
+) -> str:
+    payload = _json_object(result)
+    if payload:
+        message = _safe_topic_text(payload.get("message"), 500)
+        if message:
+            return message
+    return result or reason or "-"

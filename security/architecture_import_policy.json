@@ -790,6 +790,19 @@
           "imported": "app.services.direct_llm"
         }
       ]
+    },
+    {
+      "id": "ar-b5-history-brief-binding",
+      "owner_stage": "L6",
+      "reason": "AR-B5-C20 keeps only the existing feed-theme predicate in runtime while the separately prepared Routines brief source is integrated. No policy is duplicated.",
+      "removal_condition": "Parent integrates routines.service.action_briefs.is_feed_scan_community_theme_brief and replaces this one exact runtime import.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.social.feed_history",
+          "imported": "app.services.agent_briefs"
+        }
+      ]
     }
   ],
   "legacy_module_cycles": [],
@@ -973,6 +986,7 @@
       "app.domains.routines.contracts.activity",
       "app.domains.routines.contracts.activity_policy",
       "app.domains.routines.contracts.clock",
+      "app.domains.routines.contracts.feed_history",
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.plans",
@@ -987,6 +1001,7 @@
       "app.domains.routines.policies.planning",
       "app.domains.routines.repository",
       "app.domains.routines.repository.event_evidence",
+      "app.domains.routines.repository.feed_history",
       "app.domains.routines.repository.joint_diagnostics",
       "app.domains.routines.repository.plans",
       "app.domains.routines.router",
@@ -1002,6 +1017,7 @@
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.feed_history",
       "app.domains.routines.service.feed_history_values",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
@@ -1041,6 +1057,7 @@
       "app.domains.social.contracts.timeline",
       "app.domains.social.contracts.today_activity",
       "app.domains.social.contracts.today_references",
+      "app.domains.social.contracts.topic_history",
       "app.domains.social.contracts.world_feed",
       "app.domains.social.contracts.write_execution",
       "app.domains.social.contracts.writes",
@@ -1067,6 +1084,7 @@
       "app.domains.social.repository.resident_affordances",
       "app.domains.social.repository.subjective_context",
       "app.domains.social.repository.today_activity",
+      "app.domains.social.repository.topic_history",
       "app.domains.social.repository.world_feed",
       "app.domains.social.repository.world_profile",
       "app.domains.social.router",
@@ -1116,6 +1134,7 @@
       "app.domains.social.service.timeline",
       "app.domains.social.service.today_activity",
       "app.domains.social.service.today_activity_values",
+      "app.domains.social.service.topic_metadata",
       "app.domains.social.service.visibility",
       "app.domains.social.service.world_feed",
       "app.domains.social.service.world_profile",
@@ -1261,6 +1280,7 @@
       "app.domains.routines.contracts.activity",
       "app.domains.routines.contracts.activity_policy",
       "app.domains.routines.contracts.clock",
+      "app.domains.routines.contracts.feed_history",
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.plans",
@@ -1277,6 +1297,7 @@
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.feed_history",
       "app.domains.routines.service.feed_history_values",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
@@ -1313,6 +1334,7 @@
       "app.domains.social.contracts.timeline",
       "app.domains.social.contracts.today_activity",
       "app.domains.social.contracts.today_references",
+      "app.domains.social.contracts.topic_history",
       "app.domains.social.contracts.world_feed",
       "app.domains.social.contracts.write_execution",
       "app.domains.social.contracts.writes",
@@ -1361,6 +1383,7 @@
       "app.domains.social.service.timeline",
       "app.domains.social.service.today_activity",
       "app.domains.social.service.today_activity_values",
+      "app.domains.social.service.topic_metadata",
       "app.domains.social.service.visibility",
       "app.domains.social.service.world_feed",
       "app.domains.social.service.world_profile",
@@ -3092,6 +3115,22 @@
         "owner_stage": "AR-B5",
         "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
         "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.routines.service.feed_history",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Remaining Community consumes the actual Routines consumed-source decision; its nullable SQL is owned by the same domain repository.",
+        "removal_condition": "Finish Community tool action/runtime ownership and remove exact old imports, preserving actual Routines history and Social topic owners.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.social.service.topic_metadata",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Remaining Community actions consume actual owner history queries/topic policy while their own workflow is migrated; no original history implementation remains in this old surface.",
+        "removal_condition": "Finish Community tool action/runtime ownership and remove exact old imports, preserving actual Routines history and Social topic owners.",
         "review_date": "2026-09-06"
       }
     ]

@@ -1,3 +1,8 @@
+from app.runtime.social import feed_history as history_runtime
+
+from app.domains.routines.service import feed_history as history_policy
+from app.domains.social.service import topic_metadata as topic_policy
+from app.domains.social.repository import posts as post_repository
 import asyncio
 import json
 import inspect
@@ -1203,7 +1208,7 @@ def test_recent_feed_interest_history_formatter_limits_and_filters(monkeypatch):
         )
 
     monkeypatch.setattr(
-        community_service,
+        history_policy,
         "list_recent_feed_interest_logs",
         lambda *args, **kwargs: [
             log("post-1", 1),
@@ -1230,7 +1235,7 @@ def test_recent_feed_interest_history_formatter_limits_and_filters(monkeypatch):
         "post-6": post("post-6"),
     }
     monkeypatch.setattr(
-        community_service.community_crud,
+        post_repository,
         "get_post",
         lambda _db, post_id: posts.get(post_id),
     )
@@ -1257,7 +1262,7 @@ def test_recent_feed_interest_history_formatter_limits_and_filters(monkeypatch):
 
 def test_agent_feed_post_summary_uses_topic_and_preview(monkeypatch):
     monkeypatch.setattr(
-        community_service,
+        topic_policy,
         "_latest_post_created_topic_metadata",
         lambda *args, **kwargs: {
             "topic_signature": "큰 주제: 반복되는 응원 루프",
@@ -1293,7 +1298,7 @@ def test_agent_feed_post_summary_uses_topic_and_preview(monkeypatch):
 
 def test_agent_feed_post_summary_prefers_post_topic_columns(monkeypatch):
     monkeypatch.setattr(
-        community_service,
+        topic_policy,
         "_latest_post_created_topic_metadata",
         lambda *args, **kwargs: {
             "topic_signature": "log topic should not win",
@@ -1326,7 +1331,7 @@ def test_agent_feed_post_summary_prefers_post_topic_columns(monkeypatch):
 
 def test_post_topic_signature_falls_back_to_activity_log_metadata(monkeypatch):
     monkeypatch.setattr(
-        community_service,
+        topic_policy,
         "_latest_post_created_topic_metadata",
         lambda *args, **kwargs: {
             "topic_signature": "log fallback topic",
@@ -1810,7 +1815,7 @@ def test_note_agent_tool_feed_history_sanitize_logs_authorization_error(
 def test_feed_history_metadata_fallback_excludes_raw_seed(monkeypatch):
     now = datetime(2026, 6, 6, 12, 0, tzinfo=UTC)
     monkeypatch.setattr(
-        community_service,
+        history_policy,
         "list_recent_feed_seed_consumed_logs",
         lambda *args, **kwargs: [
             SimpleNamespace(
@@ -1829,17 +1834,17 @@ def test_feed_history_metadata_fallback_excludes_raw_seed(monkeypatch):
         ],
     )
     monkeypatch.setattr(
-        community_service.community_crud,
+        post_repository,
         "get_post",
         lambda *args, **kwargs: SimpleNamespace(title="source lunch title"),
     )
     monkeypatch.setattr(
-        community_service,
+        history_policy,
         "_format_recent_feed_interests_metadata_only",
         lambda *args, **kwargs: "- none",
     )
     monkeypatch.setattr(
-        community_service,
+        history_policy,
         "_format_recent_own_roots_metadata_only",
         lambda *args, **kwargs: "- none",
     )
@@ -2108,12 +2113,12 @@ def test_recent_own_root_topic_exists_uses_post_topic_columns(monkeypatch):
             return post
 
     monkeypatch.setattr(
-        community_service,
+        history_runtime,
         "_is_post_public_context_visible",
         lambda *args, **kwargs: True,
     )
     monkeypatch.setattr(
-        community_service,
+        topic_policy,
         "_latest_post_created_topic_metadata",
         lambda *args, **kwargs: {
             "topic_signature": "log topic should not be needed",

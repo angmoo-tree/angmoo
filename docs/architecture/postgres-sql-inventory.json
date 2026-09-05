@@ -1144,17 +1144,17 @@
     {
       "markers": {
         "driver_or_url": [
-          461
+          463
         ],
         "pgvector": [
-          461,
-          501
+          463,
+          503
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/character_lore.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "48aba56ee542611e447d45dbbc516c69e7f4abfc6947b88ff39c80e4d3d259c8",
+      "source_sha256": "45d4ba23ebdfa8fb7333063a250ab15fa743d846e3f22a90988e3237802ee34a",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2438,
-      "internal_edge_count": 2908,
+      "external_import_count": 2467,
+      "internal_edge_count": 2951,
       "legacy_import_exception_count": 0,
-      "module_count": 824,
+      "module_count": 833,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -778,6 +778,11 @@
             "path": "backend/app/domains/social/contracts/today_references.py"
           },
           {
+            "imports": [],
+            "module": "app.domains.social.contracts.topic_history",
+            "path": "backend/app/domains/social/contracts/topic_history.py"
+          },
+          {
             "imports": [
               "app.domains.social.models.feed",
               "app.domains.social.models.posts",
@@ -1012,6 +1017,13 @@
             ],
             "module": "app.domains.social.repository.today_activity",
             "path": "backend/app/domains/social/repository/today_activity.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.models.posts"
+            ],
+            "module": "app.domains.social.repository.topic_history",
+            "path": "backend/app/domains/social/repository/topic_history.py"
           },
           {
             "imports": [
@@ -1565,6 +1577,21 @@
           },
           {
             "imports": [
+              "app.core.bounded_text",
+              "app.core.json_objects",
+              "app.core.search_text",
+              "app.core.unit_of_work",
+              "app.domains.social.contracts.topic_history",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.topic_history",
+              "app.domains.social.service.activity_results",
+              "app.domains.social.service.visibility"
+            ],
+            "module": "app.domains.social.service.topic_metadata",
+            "path": "backend/app/domains/social/service/topic_metadata.py"
+          },
+          {
+            "imports": [
               "app.domains.social.models.posts",
               "app.domains.social.repository.posts",
               "app.domains.social.schemas.community"
@@ -1894,6 +1921,22 @@
           },
           {
             "imports": [
+              "app.domains.routines.models",
+              "app.domains.routines.service.feed_history",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.posts",
+              "app.domains.social.repository.topic_history",
+              "app.domains.social.service.activity_results",
+              "app.domains.social.service.topic_metadata",
+              "app.domains.social.service.visibility",
+              "app.runtime.social.topic_metadata",
+              "app.services.agent_briefs"
+            ],
+            "module": "app.runtime.social.feed_history",
+            "path": "backend/app/runtime/social/feed_history.py"
+          },
+          {
+            "imports": [
               "app.credentials",
               "app.domains.social.contracts.feed_execution",
               "app.domains.social.contracts.world_feed",
@@ -2134,6 +2177,16 @@
             ],
             "module": "app.runtime.social.today_activity_queries",
             "path": "backend/app/runtime/social/today_activity_queries.py"
+          },
+          {
+            "imports": [
+              "app.domains.routines.models",
+              "app.domains.routines.repository.feed_history",
+              "app.domains.social.models.posts",
+              "app.domains.social.service.topic_metadata"
+            ],
+            "module": "app.runtime.social.topic_metadata",
+            "path": "backend/app/runtime/social/topic_metadata.py"
           },
           {
             "imports": [

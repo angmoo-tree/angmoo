@@ -1,3 +1,11 @@
+from app.runtime.social.feed_history import recent_own_root_topic_exists
+from app.core.json_objects import _json_object
+from app.domains.routines.constants import FEED_SEED_CONSUMED_ACTION_TYPE, FEED_HISTORY_SANITIZED_ACTION_TYPE, FEED_SEED_CONSUMED_LOOKBACK_DAYS, FEED_SEED_CONSUMED_LIMIT, RECENT_FEED_INTEREST_LOG_SCAN_LIMIT, RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS, RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT
+from app.domains.routines.service.feed_history import feed_seed_source_already_consumed
+from app.domains.routines.service.feed_history_values import activity_result_text_for_prompt
+from app.domains.social.service.topic_metadata import _topic_metadata_from_result, _topic_metadata_from_post_columns, _store_post_topic_metadata, _recent_feed_interest_post_is_eligible
+from app.runtime.social.topic_metadata import _latest_post_created_topic_metadata, _topic_metadata_for_post, post_topic_signature_for_prompt
+from app.runtime.social.feed_history import format_feed_seed_consumed_sources_for_prompt, format_recent_feed_interest_history_for_prompt, format_recent_own_root_topic_history_for_prompt, build_feed_history_sanitize_skeleton, format_feed_history_metadata_fallback_for_prompt, maybe_log_feed_seed_consumed_for_created_post
 from app.domains.routines.service.feed_history_values import (
     _safe_feed_history_post_id,
     _feed_history_sanitize_skeleton_item,
@@ -176,13 +184,6 @@ COMPLETE_TICK_DECISION_TYPES = {
     "relationship_review",
 }
 NOOP_COMPLETE_TICK_ACTION_PREFIXES = ("like_skipped_",)
-FEED_SEED_CONSUMED_ACTION_TYPE = "feed_seed_consumed"
-FEED_HISTORY_SANITIZED_ACTION_TYPE = "feed_history_sanitized"
-FEED_SEED_CONSUMED_LOOKBACK_DAYS = 7
-FEED_SEED_CONSUMED_LIMIT = 20
-RECENT_FEED_INTEREST_LOG_SCAN_LIMIT = 20
-RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS = 48
-RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT = 20
 from app.domains.social.constants import FEED_SCAN_BODY_PREVIEW_CHARS
 
 
@@ -250,847 +251,98 @@ def _reject_complete_tick(
 
 
 
-def _json_object(value: str | None) -> dict[str, object]:
-    if not value:
-        return {}
-    try:
-        parsed = json.loads(value)
-    except (json.JSONDecodeError, TypeError):
-        return {}
-    return parsed if isinstance(parsed, dict) else {}
-
-
-
-
-
-
-
-
-
-
-def _topic_metadata_from_result(value: str | None) -> dict[str, str]:
-    payload = _json_object(value)
-    topic_signature = _safe_topic_text(payload.get("topic_signature"), 300)
-    novelty_basis = _safe_topic_text(payload.get("novelty_basis"), 500)
-    return {
-        "topic_signature": topic_signature,
-        "novelty_basis": novelty_basis,
-    }
-
-
-def _topic_metadata_from_post_columns(post: models.Post | None) -> dict[str, str]:
-    if post is None:
-        return {"topic_signature": "", "novelty_basis": ""}
-    return {
-        "topic_signature": _safe_topic_text(
-            getattr(post, "topic_signature", None), 300
-        ),
-        "novelty_basis": _safe_topic_text(getattr(post, "novelty_basis", None), 500),
-    }
-
-
-def _store_post_topic_metadata(
-    db: Session,
-    *,
-    post_id: str,
-    topic_signature: str | None,
-    novelty_basis: str | None,
-) -> None:
-    topic = _safe_topic_text(topic_signature, 300)
-    novelty = _safe_topic_text(novelty_basis, 500)
-    if not topic and not novelty:
-        return
-    post = db.get(models.Post, post_id)
-    if post is None:
-        return
-    post.topic_signature = topic or None
-    post.novelty_basis = novelty or None
-    post.search_document = build_post_search_document(
-        title=post.title,
-        body=post.body,
-        topic_signature=post.topic_signature,
-    )
-    db.add(post)
-    unit_of_work.finish_write(db, post)
-
-
-def activity_result_text_for_prompt(
-    result: str | None, reason: str | None = None
-) -> str:
-    payload = _json_object(result)
-    if payload:
-        message = _safe_topic_text(payload.get("message"), 500)
-        if message:
-            return message
-    return result or reason or "-"
-
-
-
-
-def _feed_seed_consumed_cutoff(*, lookback_days: int) -> datetime:
-    return datetime.now(UTC) - timedelta(days=max(1, lookback_days))
-
-
-def list_recent_feed_seed_consumed_logs(
-    db: Session,
-    *,
-    character_id: str,
-    lookback_days: int = FEED_SEED_CONSUMED_LOOKBACK_DAYS,
-    limit: int = FEED_SEED_CONSUMED_LIMIT,
-) -> list[models.AgentActivityLog]:
-    return list(
-        db.scalars(
-            select(models.AgentActivityLog)
-            .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type == FEED_SEED_CONSUMED_ACTION_TYPE,
-                models.AgentActivityLog.target_post_id.is_not(None),
-                models.AgentActivityLog.created_at
-                >= _feed_seed_consumed_cutoff(lookback_days=lookback_days),
-            )
-            .order_by(
-                models.AgentActivityLog.created_at.desc(),
-                models.AgentActivityLog.id.desc(),
-            )
-            .limit(max(1, limit))
-        )
-    )
-
-
-def feed_seed_source_already_consumed(
-    db: Session,
-    *,
-    character_id: str,
-    source_post_id: str,
-    lookback_days: int = FEED_SEED_CONSUMED_LOOKBACK_DAYS,
-) -> bool:
-    return (
-        db.scalar(
-            select(models.AgentActivityLog.id)
-            .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type == FEED_SEED_CONSUMED_ACTION_TYPE,
-                models.AgentActivityLog.target_post_id == source_post_id,
-                models.AgentActivityLog.created_at
-                >= _feed_seed_consumed_cutoff(lookback_days=lookback_days),
-            )
-            .limit(1)
-        )
-        is not None
-    )
-
-
-def format_feed_seed_consumed_sources_for_prompt(
-    db: Session, *, character_id: str
-) -> str:
-    logs = list_recent_feed_seed_consumed_logs(db, character_id=character_id)
-    if not logs:
-        return "- none"
-    lines: list[str] = []
-    for log in logs:
-        source_post_id = log.target_post_id or "-"
-        source_post = community_crud.get_post(db, source_post_id)
-        source_title = source_post.title if source_post is not None else ""
-        result_payload = _json_object(log.result)
-        created_post_id = str(result_payload.get("created_post_id") or "-")
-        post_seed = _clip_text(
-            neutralize_context_text(str(result_payload.get("post_seed") or "")), 120
-        )
-        topic_signature = _safe_topic_text(result_payload.get("topic_signature"), 300)
-        novelty_basis = _safe_topic_text(result_payload.get("novelty_basis"), 300)
-        lines.append(
-            "\n".join(
-                [
-                    f"- post_id: {source_post_id}",
-                    f"  consumed_at: {log.created_at.isoformat()}",
-                    f"  created_post_id: {created_post_id}",
-                    f"  topic_signature: {topic_signature or '-'}",
-                    f"  novelty_basis: {novelty_basis or '-'}",
-                    f"  source_title: {_clip_text(neutralize_context_text(source_title), 120) or '-'}",
-                    f"  prior_post_seed: {post_seed or '-'}",
-                ]
-            )
-        )
-    return "\n".join(lines)
-
-
-def list_recent_feed_interest_logs(
-    db: Session,
-    *,
-    character_id: str,
-    lookback_days: int = FEED_SEED_CONSUMED_LOOKBACK_DAYS,
-    limit: int = RECENT_FEED_INTEREST_LOG_SCAN_LIMIT,
-) -> list[models.AgentActivityLog]:
-    return list(
-        db.scalars(
-            select(models.AgentActivityLog)
-            .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type == "feed_interests_noted",
-                models.AgentActivityLog.result.is_not(None),
-                models.AgentActivityLog.created_at
-                >= _feed_seed_consumed_cutoff(lookback_days=lookback_days),
-            )
-            .order_by(
-                models.AgentActivityLog.created_at.desc(),
-                models.AgentActivityLog.id.desc(),
-            )
-            .limit(max(1, limit))
-        )
-    )
-
-
-def _recent_feed_interest_post_is_eligible(
-    db: Session, *, character_id: str, post: models.Post
-) -> bool:
-    if post.author_character_id == character_id:
-        return False
-    if post.reply_to_post_id is not None:
-        return False
-    if post.post_type != "post":
-        return False
-    return _is_post_public_context_visible(db, post)
-
-
-def _latest_post_created_topic_metadata(
-    db: Session, *, character_id: str | None, post_id: str
-) -> dict[str, str]:
-    if db is not None:
-        column_metadata = _topic_metadata_from_post_columns(db.get(models.Post, post_id))
-        if column_metadata["topic_signature"] or column_metadata["novelty_basis"]:
-            return column_metadata
-    if db is None or character_id is None:
-        return {"topic_signature": "", "novelty_basis": ""}
-    log = db.scalar(
-        select(models.AgentActivityLog)
-        .where(
-            models.AgentActivityLog.character_id == character_id,
-            models.AgentActivityLog.action_type == "post_created",
-            models.AgentActivityLog.target_post_id == post_id,
-            models.AgentActivityLog.result.is_not(None),
-        )
-        .order_by(
-            models.AgentActivityLog.created_at.desc(),
-            models.AgentActivityLog.id.desc(),
-        )
-        .limit(1)
-    )
-    if log is None:
-        return {"topic_signature": "", "novelty_basis": ""}
-    return _topic_metadata_from_result(log.result)
-
-
-def _topic_metadata_for_post(
-    db: Session, *, post: models.Post, character_id: str | None = None
-) -> dict[str, str]:
-    column_metadata = _topic_metadata_from_post_columns(post)
-    if column_metadata["topic_signature"] or column_metadata["novelty_basis"]:
-        return column_metadata
-    return _latest_post_created_topic_metadata(
-        db,
-        character_id=character_id if character_id is not None else post.author_character_id,
-        post_id=post.id,
-    )
-
-
-def post_topic_signature_for_prompt(db: Session, post: models.Post) -> str:
-    metadata = _topic_metadata_for_post(db, post=post)
-    return metadata["topic_signature"] or _fallback_topic_signature(
-        title=post.title, body=post.body
-    )
-
-
-def format_recent_feed_interest_history_for_prompt(
-    db: Session, *, character_id: str
-) -> str:
-    logs = list_recent_feed_interest_logs(db, character_id=character_id)
-    if not logs:
-        return "- none"
-    lines: list[str] = []
-    seen_post_ids: set[str] = set()
-    for log in logs:
-        payload = _json_object(log.result)
-        if not isinstance(payload, dict):
-            continue
-        interests = payload.get("interests")
-        if not isinstance(interests, list) or not interests:
-            continue
-        first_interest = interests[0]
-        if not isinstance(first_interest, dict):
-            continue
-        post_id = str(first_interest.get("post_id") or "").strip()
-        if not post_id or post_id in seen_post_ids:
-            continue
-        post = community_crud.get_post(db, post_id)
-        if post is None or not _recent_feed_interest_post_is_eligible(
-            db, character_id=character_id, post=post
-        ):
-            continue
-        seen_post_ids.add(post_id)
-        topic_signature = _safe_topic_text(payload.get("topic_signature"), 300)
-        if not topic_signature:
-            topic_signature = _fallback_topic_signature(
-                title=str(payload.get("post_seed") or ""),
-                body=" / ".join(
-                    [
-                        str(first_interest.get("summary") or ""),
-                        str(first_interest.get("reason") or ""),
-                    ]
-                ),
-            )
-        novelty_basis = _safe_topic_text(payload.get("novelty_basis"), 300)
-        lines.append(
-            "\n".join(
-                [
-                    f"- post_id: {post.id}",
-                    f"  interested_at: {log.created_at.isoformat()}",
-                    f"  author: {neutralize_context_text(post.author_name or '-')}",
-                    f"  topic_signature: {topic_signature or '-'}",
-                    f"  novelty_basis: {novelty_basis or '-'}",
-                    "  source_title: "
-                    + (_clip_text(neutralize_context_text(post.title), 120) or "-"),
-                    "  body_preview: " + (_body_preview(post.body) or "-"),
-                    "  prior_feed_scan:",
-                    "    summary: "
-                    + (
-                        _clip_text(
-                            neutralize_context_text(
-                                str(first_interest.get("summary") or "")
-                            ),
-                            160,
-                        )
-                        or "-"
-                    ),
-                    "    reason: "
-                    + (
-                        _clip_text(
-                            neutralize_context_text(
-                                str(first_interest.get("reason") or "")
-                            ),
-                            180,
-                        )
-                        or "-"
-                    ),
-                    "    review_reason: "
-                    + (
-                        _clip_text(
-                            neutralize_context_text(
-                                str(payload.get("review_reason") or "")
-                            ),
-                            180,
-                        )
-                        or "-"
-                    ),
-                    "    post_seed: "
-                    + (
-                        _clip_text(
-                            neutralize_context_text(str(payload.get("post_seed") or "")),
-                            180,
-                        )
-                        or "-"
-                    ),
-                ]
-            )
-        )
-        if len(lines) >= RECENT_FEED_INTEREST_HISTORY_LIMIT:
-            break
-    return "\n".join(lines) if lines else "- none"
-
-
-def format_recent_own_root_topic_history_for_prompt(
-    db: Session, *, character_id: str
-) -> str:
-    cutoff = datetime.now(UTC) - timedelta(
-        hours=RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS
-    )
-    posts = list(
-        db.scalars(
-            select(models.Post)
-            .where(
-                models.Post.author_character_id == character_id,
-                models.Post.reply_to_post_id.is_(None),
-                models.Post.post_type != "repost",
-                models.Post.repost_of_post_id.is_(None),
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-                models.Post.created_at >= cutoff,
-            )
-            .order_by(models.Post.created_at.desc(), models.Post.id.desc())
-            .limit(RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT)
-        )
-    )
-    if not posts:
-        return "- none"
-    lines: list[str] = []
-    for post in posts:
-        if not _is_post_public_context_visible(db, post):
-            continue
-        metadata = _topic_metadata_for_post(db, post=post, character_id=character_id)
-        topic_signature = metadata["topic_signature"] or _fallback_topic_signature(
-            title=post.title, body=post.body
-        )
-        novelty_basis = metadata["novelty_basis"]
-        lines.append(
-            "\n".join(
-                [
-                    f"- post_id: {post.id}",
-                    f"  created_at: {post.created_at.isoformat()}",
-                    f"  topic_signature: {topic_signature or '-'}",
-                    f"  novelty_basis: {novelty_basis or '-'}",
-                    "  title: "
-                    + (_clip_text(neutralize_context_text(post.title), 120) or "-"),
-                    f"  body_preview: {_body_preview(post.body) or '-'}",
-                ]
-            )
-        )
-        if len(lines) >= RECENT_OWN_ROOT_TOPIC_HISTORY_LIMIT:
-            break
-    return "\n".join(lines) if lines else "- none"
-
-
-
-
-def _build_consumed_sources_sanitize_skeleton(
-    db: Session, *, character_id: str
-) -> list[dict[str, str]]:
-    items: list[dict[str, str]] = []
-    logs = list_recent_feed_seed_consumed_logs(db, character_id=character_id)[
-        :FEED_HISTORY_SANITIZED_CONSUMED_LIMIT
-    ]
-    for log in logs:
-        source_post_id = _safe_feed_history_post_id(log.target_post_id)
-        if not source_post_id:
-            continue
-        source_post = community_crud.get_post(db, source_post_id)
-        source_title = source_post.title if source_post is not None else ""
-        result_payload = _json_object(log.result)
-        items.append(
-            _feed_history_sanitize_skeleton_item(
-                post_id=source_post_id,
-                topic_signature=result_payload.get("topic_signature"),
-                novelty_basis=result_payload.get("novelty_basis"),
-                source_title=source_title,
-                summary_source=result_payload.get("post_seed"),
-                timestamp_label="consumed_at",
-                timestamp_value=log.created_at,
-            )
-        )
-    return items
-
-
-def _build_recent_feed_interests_sanitize_skeleton(
-    db: Session, *, character_id: str
-) -> list[dict[str, str]]:
-    logs = list_recent_feed_interest_logs(db, character_id=character_id)
-    items: list[dict[str, str]] = []
-    seen_post_ids: set[str] = set()
-    for log in logs:
-        payload = _json_object(log.result)
-        interests = payload.get("interests")
-        if not isinstance(interests, list) or not interests:
-            continue
-        first_interest = interests[0]
-        if not isinstance(first_interest, dict):
-            continue
-        post_id = _safe_feed_history_post_id(first_interest.get("post_id"))
-        if not post_id or post_id in seen_post_ids:
-            continue
-        post = community_crud.get_post(db, post_id)
-        if post is None or not _recent_feed_interest_post_is_eligible(
-            db, character_id=character_id, post=post
-        ):
-            continue
-        seen_post_ids.add(post_id)
-        topic_signature = _safe_topic_text(payload.get("topic_signature"), 300)
-        if not topic_signature:
-            topic_signature = _fallback_topic_signature(
-                title=str(payload.get("post_seed") or ""),
-                body=" / ".join(
-                    [
-                        str(first_interest.get("summary") or ""),
-                        str(first_interest.get("reason") or ""),
-                    ]
-                ),
-            )
-        summary_source = " / ".join(
-            item
-            for item in [
-                str(first_interest.get("summary") or "").strip(),
-                str(first_interest.get("reason") or "").strip(),
-                str(payload.get("review_reason") or "").strip(),
-                str(payload.get("post_seed") or "").strip(),
-            ]
-            if item
-        )
-        items.append(
-            _feed_history_sanitize_skeleton_item(
-                post_id=post_id,
-                topic_signature=topic_signature,
-                novelty_basis=payload.get("novelty_basis"),
-                source_title=post.title,
-                summary_source=summary_source,
-                timestamp_label="interested_at",
-                timestamp_value=log.created_at,
-            )
-        )
-        if len(items) >= RECENT_FEED_INTEREST_HISTORY_LIMIT:
-            break
-    return items
-
-
-def _build_recent_own_root_topics_sanitize_skeleton(
-    db: Session, *, character_id: str
-) -> list[dict[str, str]]:
-    cutoff = datetime.now(UTC) - timedelta(
-        hours=RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS
-    )
-    posts = list(
-        db.scalars(
-            select(models.Post)
-            .where(
-                models.Post.author_character_id == character_id,
-                models.Post.reply_to_post_id.is_(None),
-                models.Post.post_type != "repost",
-                models.Post.repost_of_post_id.is_(None),
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-                models.Post.created_at >= cutoff,
-            )
-            .order_by(models.Post.created_at.desc(), models.Post.id.desc())
-            .limit(RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT)
-        )
-    )
-    items: list[dict[str, str]] = []
-    for post in posts:
-        if not _is_post_public_context_visible(db, post):
-            continue
-        metadata = _topic_metadata_for_post(db, post=post, character_id=character_id)
-        topic_signature = metadata["topic_signature"] or _fallback_topic_signature(
-            title=post.title, body=post.body
-        )
-        items.append(
-            _feed_history_sanitize_skeleton_item(
-                post_id=post.id,
-                topic_signature=topic_signature,
-                novelty_basis=metadata["novelty_basis"],
-                source_title=post.title,
-                summary_source=_body_preview(post.body),
-                timestamp_label="created_at",
-                timestamp_value=post.created_at,
-            )
-        )
-        if len(items) >= RECENT_OWN_ROOT_TOPIC_HISTORY_LIMIT:
-            break
-    return items
-
-
-def build_feed_history_sanitize_skeleton(
-    db: Session, *, character_id: str
-) -> dict[str, list[dict[str, str]]]:
-    return {
-        "consumed_sources": _build_consumed_sources_sanitize_skeleton(
-            db, character_id=character_id
-        ),
-        "recent_feed_interests": _build_recent_feed_interests_sanitize_skeleton(
-            db, character_id=character_id
-        ),
-        "recent_own_root_topics": _build_recent_own_root_topics_sanitize_skeleton(
-            db, character_id=character_id
-        ),
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def format_feed_history_metadata_fallback_for_prompt(
-    db: Session, *, character_id: str
-) -> dict[str, str]:
-    return {
-        "consumed_seed_sources": _format_consumed_sources_metadata_only(
-            db, character_id=character_id
-        ),
-        "recent_feed_interest_history": _format_recent_feed_interests_metadata_only(
-            db, character_id=character_id
-        ),
-        "recent_own_root_topic_history": _format_recent_own_roots_metadata_only(
-            db, character_id=character_id
-        ),
-    }
-
-
-def _format_consumed_sources_metadata_only(
-    db: Session, *, character_id: str
-) -> str:
-    logs = list_recent_feed_seed_consumed_logs(db, character_id=character_id)[
-        :FEED_HISTORY_SANITIZED_CONSUMED_LIMIT
-    ]
-    if not logs:
-        return "- none"
-    lines: list[str] = []
-    for log in logs:
-        source_post_id = log.target_post_id or "-"
-        source_post = community_crud.get_post(db, source_post_id)
-        source_title = source_post.title if source_post is not None else ""
-        result_payload = _json_object(log.result)
-        lines.append(
-            "\n".join(
-                [
-                    f"- post_id: {source_post_id}",
-                    f"  consumed_at: {log.created_at.isoformat()}",
-                    f"  created_post_id: {result_payload.get('created_post_id') or '-'}",
-                    "  topic_signature: "
-                    + (_safe_topic_text(result_payload.get("topic_signature"), 300) or "-"),
-                    "  novelty_basis: "
-                    + (_safe_topic_text(result_payload.get("novelty_basis"), 300) or "-"),
-                    "  source_title: "
-                    + (_clip_text(neutralize_context_text(source_title), 120) or "-"),
-                ]
-            )
-        )
-    return "\n".join(lines)
-
-
-def _format_recent_feed_interests_metadata_only(
-    db: Session, *, character_id: str
-) -> str:
-    logs = list_recent_feed_interest_logs(db, character_id=character_id)
-    if not logs:
-        return "- none"
-    lines: list[str] = []
-    seen_post_ids: set[str] = set()
-    for log in logs:
-        payload = _json_object(log.result)
-        interests = payload.get("interests")
-        if not isinstance(interests, list) or not interests:
-            continue
-        first_interest = interests[0]
-        if not isinstance(first_interest, dict):
-            continue
-        post_id = str(first_interest.get("post_id") or "").strip()
-        if not post_id or post_id in seen_post_ids:
-            continue
-        post = community_crud.get_post(db, post_id)
-        if post is None or not _recent_feed_interest_post_is_eligible(
-            db, character_id=character_id, post=post
-        ):
-            continue
-        seen_post_ids.add(post_id)
-        topic_signature = _safe_topic_text(payload.get("topic_signature"), 300)
-        novelty_basis = _safe_topic_text(payload.get("novelty_basis"), 300)
-        lines.append(
-            "\n".join(
-                [
-                    f"- post_id: {post.id}",
-                    f"  interested_at: {log.created_at.isoformat()}",
-                    f"  author: {neutralize_context_text(post.author_name or '-')}",
-                    f"  topic_signature: {topic_signature or '-'}",
-                    f"  novelty_basis: {novelty_basis or '-'}",
-                    "  source_title: "
-                    + (_clip_text(neutralize_context_text(post.title), 120) or "-"),
-                ]
-            )
-        )
-        if len(lines) >= RECENT_FEED_INTEREST_HISTORY_LIMIT:
-            break
-    return "\n".join(lines) if lines else "- none"
-
-
-def _format_recent_own_roots_metadata_only(
-    db: Session, *, character_id: str
-) -> str:
-    cutoff = datetime.now(UTC) - timedelta(
-        hours=RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS
-    )
-    posts = list(
-        db.scalars(
-            select(models.Post)
-            .where(
-                models.Post.author_character_id == character_id,
-                models.Post.reply_to_post_id.is_(None),
-                models.Post.post_type != "repost",
-                models.Post.repost_of_post_id.is_(None),
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-                models.Post.created_at >= cutoff,
-            )
-            .order_by(models.Post.created_at.desc(), models.Post.id.desc())
-            .limit(RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT)
-        )
-    )
-    lines: list[str] = []
-    for post in posts:
-        if not _is_post_public_context_visible(db, post):
-            continue
-        metadata = _topic_metadata_for_post(db, post=post, character_id=character_id)
-        topic_signature = metadata["topic_signature"] or _fallback_topic_signature(
-            title=post.title, body=post.body
-        )
-        lines.append(
-            "\n".join(
-                [
-                    f"- post_id: {post.id}",
-                    f"  created_at: {post.created_at.isoformat()}",
-                    f"  topic_signature: {topic_signature or '-'}",
-                    f"  novelty_basis: {metadata['novelty_basis'] or '-'}",
-                    "  source_title: "
-                    + (_clip_text(neutralize_context_text(post.title), 120) or "-"),
-                ]
-            )
-        )
-        if len(lines) >= RECENT_OWN_ROOT_TOPIC_HISTORY_LIMIT:
-            break
-    return "\n".join(lines) if lines else "- none"
-
-
-def recent_own_root_topic_exists(
-    db: Session, *, character_id: str, topic_signature: str | None
-) -> bool:
-    topic = _safe_topic_text(topic_signature, 300)
-    if not topic or db is None:
-        return False
-    cutoff = datetime.now(UTC) - timedelta(
-        hours=RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS
-    )
-    posts = list(
-        db.scalars(
-            select(models.Post)
-            .where(
-                models.Post.author_character_id == character_id,
-                models.Post.reply_to_post_id.is_(None),
-                models.Post.post_type != "repost",
-                models.Post.repost_of_post_id.is_(None),
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-                models.Post.created_at >= cutoff,
-            )
-            .order_by(models.Post.created_at.desc(), models.Post.id.desc())
-            .limit(RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT)
-        )
-    )
-    for post in posts:
-        if not _is_post_public_context_visible(db, post):
-            continue
-        metadata = _topic_metadata_for_post(db, post=post, character_id=character_id)
-        existing_topic = metadata["topic_signature"] or _fallback_topic_signature(
-            title=post.title, body=post.body
-        )
-        if _safe_topic_text(existing_topic, 300) == topic:
-            return True
-    return False
-
-
-def _feed_seed_consumed_log_exists(
-    db: Session, *, character_id: str, source_post_id: str
-) -> bool:
-    return (
-        db.scalar(
-            select(models.AgentActivityLog.id)
-            .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type == FEED_SEED_CONSUMED_ACTION_TYPE,
-                models.AgentActivityLog.target_post_id == source_post_id,
-            )
-            .limit(1)
-        )
-        is not None
-    )
-
-
-def _extract_feed_seed_source_from_run(
-    run: models.AgentRun,
-) -> tuple[str, str, str, str] | None:
-    gateway_result = run.gateway_result if isinstance(run.gateway_result, dict) else {}
-    action_gate = gateway_result.get("action_gate")
-    if not isinstance(action_gate, dict):
-        return None
-    prepared_brief = action_gate.get("prepared_create_post_brief")
-    if not is_feed_scan_community_theme_brief(prepared_brief):
-        return None
-    feed_interests = action_gate.get("feed_interests")
-    if not isinstance(feed_interests, dict):
-        return None
-    interests = feed_interests.get("interests")
-    if not isinstance(interests, list) or not interests:
-        return None
-    first_interest = interests[0]
-    if not isinstance(first_interest, dict):
-        return None
-    source_post_id = str(first_interest.get("post_id") or "").strip()
-    if not source_post_id:
-        return None
-    post_seed = str(feed_interests.get("post_seed") or "").strip()
-    topic_signature = str(feed_interests.get("topic_signature") or "").strip()
-    novelty_basis = str(feed_interests.get("novelty_basis") or "").strip()
-    return source_post_id, post_seed, topic_signature, novelty_basis
-
-
-def maybe_log_feed_seed_consumed_for_created_post(
-    db: Session, *, run: models.AgentRun, created_post_id: str
-) -> models.AgentActivityLog | None:
-    seed_source = _extract_feed_seed_source_from_run(run)
-    if seed_source is None:
-        return None
-    source_post_id, post_seed, topic_signature, novelty_basis = seed_source
-    if source_post_id == created_post_id:
-        return None
-    if _feed_seed_consumed_log_exists(
-        db, character_id=run.character_id, source_post_id=source_post_id
-    ):
-        return None
-    if community_crud.get_post(db, source_post_id) is None:
-        return None
-    payload = {
-        "created_post_id": created_post_id,
-        "run_id": run.id,
-        "post_seed": _clip_text(neutralize_context_text(post_seed), 240),
-        "topic_signature": _safe_topic_text(topic_signature, 300),
-        "novelty_basis": _safe_topic_text(novelty_basis, 500),
-        "consumed_at": datetime.now(UTC).isoformat(),
-    }
-    try:
-        return agent_crud.log_activity(
-            db,
-            user_id=run.user_id,
-            character_id=run.character_id,
-            action_type=FEED_SEED_CONSUMED_ACTION_TYPE,
-            target_post_id=source_post_id,
-            reason="feed_scan_post_seed_created_post",
-            result=json.dumps(payload, ensure_ascii=False)[:4000],
-        )
-    except Exception:
-        db.rollback()
-        logger.exception(
-            "feed_seed_consumed_log_failed character_id=%s run_id=%s source_post_id=%s created_post_id=%s",
-            run.character_id,
-            run.id,
-            source_post_id,
-            created_post_id,
-        )
-        return None
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def _complete_tick_representative_target(

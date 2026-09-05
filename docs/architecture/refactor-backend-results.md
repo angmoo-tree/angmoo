@@ -1288,3 +1288,12 @@ C18 최종 확대 검증은 **330 PASS / 83.41초 / 기존 Starlette warning 1�
 최초 자동 추출은 multi-line 문자열 내부 들여쓰기 때문에 syntax 수집3오류가 났다. AST statement를 그대로 추출해 문자열 값까지 보존하도록 수정했으며, 새 텍스트나 검증 완화는 추가하지 않았다. Community87 및 G07/full B5/capture/Hosted 종료는 후속이다.
 
 C19 최종 직접/검색/Package/보안 검증은 **37 PASS / 35.38초 / 기존 Starlette warning 1개**다. 경계 **824 module / 2908 edge / legacy177**, L4 parity99·ER0 84/87/24/44/7과 PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence가 통과했다. 첫 split 진단의 이전 단계 실제 이동4정의 누락은 원래 C18 전체 추적 행을 승계해 보완했다. 같은 원래 검사 재실행0오류이며 보호 baseline·assertion은 변경하지 않았다.
+
+
+## AR-B5-C20 — 소비 이력·게시물 주제·활동 로그 실제 소유
+
+Community 실제28함수를 Routines 이력 서비스/조회, Social Post/주제/공개 판단, 공통 JSON 값으로 나눴다. 남은59함수와 이동28함수 전체 AST는 정확한 SQL/callback 복원 후 동일하다. Routines service는 foreign ORM/query import 없이 readonly Social 협력을 사용하고, 컬럼 우선/로그 fallback·cutoff/order/limit·로그 저장/rollback 의미를 보존했다.
+
+최초 기존69개 집중 회귀는64 PASS/5 FAIL로, 모두 옛 Community helper를 monkeypatch하던 대상이 실제 새 소유 함수에 연결되지 않은 문제였다. 정확11개의 receiver를 이동했고 기존 assertion은 유지했다. 확대285 중284 PASS/1 FAIL 역시 Character lore의 옛 history mock 대상이어서 실제 runtime history로 연결했다. 최종 새 SQLite 포함 집중은 **90 PASS / 6.49초 / 기존 warning 2개**다. 새 회귀는 구성 IO0·attached Post/log·owner roots·추가 SQL 없는 컬럼 우선·caller rollback 후 로그 복원을 확인한다. Community59·G07·full B5/capture/Hosted는 계속한다.
+
+C20 최종 확대 검증은 **454 PASS / 54.81초 / 기존 warning 5개**다. 처음 경계 검사에서 Social이 Routines 상수를 직접 참조하고 repository를 업무 진입점으로 노출한 문제를 발견했다. 원래 cutoff·상한·이미 소비했는지 판단은 Routines service가 소유하고, Social repository는 전달받은 값으로 원래 SQL만 수행하도록 정리했다. 검사 예외를 추가하지 않았으며 최종 경계 **833 module / 2951 edge / legacy178**, L4 parity99·ER0 84/87/24/44/7, PR #258/#263 API/schema/ORM·변경 보호 테스트2파일 assertion·전체 split evidence가 통과했다. 기존28개 이전 함수와59개 잔여 함수의 전체 AST는 정확한 SQL/callback 복원 후 동일하다.
