@@ -9,11 +9,11 @@
 | 단계 | 상태 | 범위 |
 | --- | --- | --- |
 | AR-G0 | PR #265 MERGED · PR CI/POST-MERGE PASS | 후속 체크포인트·부분 scope·단계/소유권·Actions 연결 |
-| AR-G1 | PR #266 MERGED · PR CI PASS · POST-MERGE IN PROGRESS | 설정·개발 환경 경로 |
-| AR-G2 | LOCAL VERIFIED · PR/MERGE PENDING | 공통 오류 4개·cursor bytes helper 2개·소비자/테스트 이전 |
-| AR-G3 | IMPLEMENTED · LOCAL VERIFICATION · PR/CI PENDING | logging.ini·초기화·배포 자원 연결 |
-| AR-G4 | LOCAL VERIFIED · PR PENDING | Alembic 물리 경로·역사 본문 보존; G5 최종 모델 등록 연결 대기 |
-| AR-B2 | IDENTITY PR #270 · CHARACTER FOUNDATION INTEGRATION | Identity full backend PASS; Character 기반·Creator 정책 통합 후 HTTP/Worlds/WC 후속 |
+| AR-G1 | PR #266 MERGED · PR CI/POST-MERGE PASS | 설정·개발 환경 경로 |
+| AR-G2 | PR #267 및 보안 Hotfix #272 MERGED · Hotfix POST-MERGE PASS | 원래 Security 실패는 역사로 유지하며 후속 수정 검증 완료 |
+| AR-G3 | PR #268 MERGED · PR CI/POST-MERGE PASS | logging.ini·초기화·배포 자원 연결 |
+| AR-G4 | PR #269 CI 진행 | Alembic 물리 경로·역사 본문 보존; G5 최종 모델 등록 연결 대기 |
+| AR-B2 | #270~#276 순차 PR CI · WC workflow LOCAL VERIFIED | Identity·Characters·Worlds·WC 기반 후 profile/setup/lifecycle 통합 및 기존 Package race 수정 |
 | AR-B3 | NOT STARTED | World Package→media |
 | AR-B4 | NOT STARTED | routines→routine_posts→활동 조립 |
 | AR-B5 | NOT STARTED | social→relationships→projection |
@@ -447,6 +447,14 @@ Setup slice의 최종 현재 API·ORM 및 전체 split evidence 검사도 PASS�
 `local-smoke`에 기존 UoW 전체 파일과 새 결정적 회귀를 명시적으로 연결했다. World API·ORM·historical migration·기존 assertion은 수정하지 않았다. 이 hotfix는 seed UoW의 한 경로이며 `BEGIN IMMEDIATE`를 사용하는 media import commit 흐름의 트랜잭션 설계는 바꾸지 않는다. 후속 Package runtime UoW로 파일이 옮겨질 때도 같은 수정이 유지되어야 한다. Source introduction capture 및 PR/merge 검증은 root의 선형 통합 단계가 담당한다.
 
 최종 고정 구현·CI 목록·현재 inventory에서 새 경합 6개, 기존 UoW/Import Commit/Preview, World 정의·Creator API, CI policy를 함께 실행한 결과는 **60 passed / 기존 2 warnings / 42.29초**다. 현재 경계 검사는 **626 modules / 2,003 internal edges / exact legacy 281 PASS**, L4 parity **97**이다.
+### WC workflow 통합 검증과 보존 검사 성능
+
+고정 제품 source `0c9deff`에서 WC·World·Package replay/UoW·활동 회귀 **178 passed / 6 warnings / 53.93초**를 통과했다. API module inventory의 기존 profile 7개도 실제 canonical module로 연결했으며 권한과 HTTP 계약은 유지했다. CI 계약 7개 및 architecture **626/2003/legacy281**, source archive Gitleaks **19.14MB**, 전체 HEAD 조상 **353 commits/21.27MB**는 PASS/findings0이다.
+
+전체 보존 검사 중 명시적 경로 쌍이 526개로 늘면서 Python 정규식 캐시 한도를 넘겨 같은 표현식을 반복 컴파일하는 CPU 병목을 확인했다. 진행 중이던 검사는 중단했고 완료로 기록하지 않았다. `_compiled_path_literals`는 완전한 순서 있는 경로 튜플만 키로 사용해 정규식 컴파일을 최대 8종 재사용한다. 실제 source·assertion·테스트 수집·Git 증거는 캐시하지 않고 경계식·치환 순서·예외·기준선은 그대로 유지한다. 실제 frozen assertion 64개와 순서/부분 경로/숫자/오류 24개 비교는 AST가 모두 같았고 3.885초→0.099초였다. 기존 guard 회귀 **149 passed / 1.74초**를 통과했다. 신규 파일/test node는 없으며 전체 계보 검증은 이 수정이 포함된 고정 후보로 다시 실행한다.
+### WC workflow 고정 후보 보존 완료
+
+source `36fd4748cb55744d3effbcfb9d18eb921e0fd8d9`의 기본 전체 검사 `check_refactor_preservation.py --contracts --nodes`가 **protected/current 2,137 / items37 PASS**로 종료했다. #258/#263 API·OpenAPI·ORM·frozen source·assertion/suppression 및 원본 commit별 신규 source/node 계보를 그대로 검사했다. 앞선 오래 실행한 미완료 검사는 이 고정 후보의 stock 검사 결과로 대체하며, 결과 캐시나 검사 생략은 없다. 실제 WC entry/setup HTTP·readiness·혼합 cleanup 종료는 다음 최종 slice이며 workflow의 로컬 PASS를 AR-B2 전체 완료로 확대하지 않는다.
 
 ### AR-B2 WC entry/setup HTTP·readiness·혼합 삭제 소유권 종료
 
