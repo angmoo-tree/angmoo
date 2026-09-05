@@ -413,38 +413,6 @@
           "importer": "app.services.agent_runs"
         },
         {
-          "imported": "app.cruds.agent_runs",
-          "importer": "app.services.agent_writing"
-        },
-        {
-          "imported": "app.cruds.agents",
-          "importer": "app.services.agent_writing"
-        },
-        {
-          "imported": "app.cruds.community",
-          "importer": "app.services.agent_writing"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.agent_writing"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.agent_writing"
-        },
-        {
-          "imported": "app.services.character_lore",
-          "importer": "app.services.agent_writing"
-        },
-        {
-          "imported": "app.services.community",
-          "importer": "app.services.agent_writing"
-        },
-        {
-          "imported": "app.services.runtime_boundary",
-          "importer": "app.services.agent_writing"
-        },
-        {
           "imported": "app.cruds.agents",
           "importer": "app.services.character_lore"
         },
@@ -877,6 +845,97 @@
       "owner_stage": "L4",
       "removal_condition": "Root sequential AR-B5/B7/B8/LG integration binds actual Social/Memory/Identity/Operations/Runtime and resident.langgraph/context owners, then removes these exact imports before AR-B8-B.",
       "review_date": "2026-09-06"
+    },
+    {
+      "id": "ar-b4-writer-agent_runs",
+      "owner_stage": "L6",
+      "reason": "Existing writer collaboration relocated to actual runtime; no added policy or wider namespace. Pending owner: AR-B8 Identity credential source c2cd integration.",
+      "removal_condition": "Use the already implemented nullable credential query in the same caller Session; retain enabled/error ordering.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.resident.writing",
+          "imported": "app.cruds.agent_runs"
+        }
+      ]
+    },
+    {
+      "id": "ar-b4-writer-community",
+      "owner_stage": "L6",
+      "reason": "Existing writer collaboration relocated to actual runtime; no added policy or wider namespace. Pending owner: AR-B5 Social query integration.",
+      "removal_condition": "Connect the original nullable Post lookup to its signed Social owner without changing missing/self/thread error order.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.resident.writing",
+          "imported": "app.cruds.community"
+        }
+      ]
+    },
+    {
+      "id": "ar-b4-writer-character_lore",
+      "owner_stage": "L6",
+      "reason": "Existing writer collaboration relocated to actual runtime; no added policy or wider namespace. Pending owner: AR-B8 signed Lore source integration.",
+      "removal_condition": "Use existing signed Lore read/use services and preserve best-effort mark-used behavior.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.resident.writing",
+          "imported": "app.services.character_lore"
+        }
+      ]
+    },
+    {
+      "id": "ar-b4-writer-community",
+      "owner_stage": "L6",
+      "reason": "Existing writer collaboration relocated to actual runtime; no added policy or wider namespace. Pending owner: AR-B5 Social workflow integration.",
+      "removal_condition": "Connect exact existing admission/read/write collaborators in the same Session and original order.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.resident.writing",
+          "imported": "app.services.community"
+        }
+      ]
+    },
+    {
+      "id": "ar-b4-writer-runtime_boundary",
+      "owner_stage": "L6",
+      "reason": "Existing writer collaboration relocated to actual runtime; no added policy or wider namespace. Pending owner: AR-B8 Runtime transport integration.",
+      "removal_condition": "Connect the actual same gateway client/error objects; preserve one provider call and timeout contract.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.resident.writing",
+          "imported": "app.services.runtime_boundary"
+        }
+      ]
+    },
+    {
+      "id": "ar-b4-writer-agent_writing",
+      "owner_stage": "L6",
+      "reason": "Existing writer collaboration relocated to actual runtime; no added policy or wider namespace. Pending owner: AR-B7 signed Daypart source integration.",
+      "removal_condition": "Connect the already implemented Memory action write; remove this exact final body only when that source joins.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.resident.writing",
+          "imported": "app.services.agent_writing"
+        }
+      ]
+    },
+    {
+      "id": "ar-b4-writer-existing-memory-model",
+      "owner_stage": "L6",
+      "reason": "The single original Daypart action body remains in its old file until the already signed Memory owner is merged. Pending owner: AR-B7 signed Daypart source integration.",
+      "removal_condition": "Parent replaces the existing body with the canonical Memory implementation and removes this exact model import.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.services.agent_writing",
+          "imported": "app.models.agent_runs"
+        }
+      ]
     }
   ],
   "legacy_module_cycles": [],
@@ -992,6 +1051,7 @@
       "app.domains.routines.constants",
       "app.domains.routines.contracts",
       "app.domains.routines.contracts.action_context",
+      "app.domains.routines.contracts.action_planning",
       "app.domains.routines.contracts.activity",
       "app.domains.routines.contracts.activity_management",
       "app.domains.routines.contracts.activity_policy",
@@ -1006,26 +1066,41 @@
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.manual_activity",
+      "app.domains.routines.contracts.planning_context",
       "app.domains.routines.contracts.plans",
       "app.domains.routines.contracts.post_selection",
       "app.domains.routines.contracts.prompt_context",
       "app.domains.routines.contracts.resident",
+      "app.domains.routines.contracts.resident_prompts",
       "app.domains.routines.contracts.run_identity",
       "app.domains.routines.contracts.slot_requests",
       "app.domains.routines.contracts.slots",
+      "app.domains.routines.contracts.topic_arcs",
+      "app.domains.routines.contracts.writer_results",
+      "app.domains.routines.contracts.writing",
       "app.domains.routines.dependencies",
       "app.domains.routines.exceptions",
       "app.domains.routines.models",
       "app.domains.routines.models.plans",
       "app.domains.routines.models.resident",
       "app.domains.routines.policies",
+      "app.domains.routines.policies.action_matching",
       "app.domains.routines.policies.activity_state",
+      "app.domains.routines.policies.execution_results",
+      "app.domains.routines.policies.handoff_coverage",
       "app.domains.routines.policies.planning",
+      "app.domains.routines.policies.resident_clock",
+      "app.domains.routines.policies.topic_arc_roles",
+      "app.domains.routines.policies.topic_dates",
+      "app.domains.routines.policies.writer_outputs",
+      "app.domains.routines.policies.writer_tasks",
+      "app.domains.routines.policies.writing_contract",
       "app.domains.routines.repository",
       "app.domains.routines.repository.activity_counts",
       "app.domains.routines.repository.activity_evidence",
       "app.domains.routines.repository.autonomy",
       "app.domains.routines.repository.feed_cues",
+      "app.domains.routines.repository.independent_topics",
       "app.domains.routines.repository.plans",
       "app.domains.routines.repository.public_action_executions",
       "app.domains.routines.repository.resident_context",
@@ -1036,13 +1111,16 @@
       "app.domains.routines.schemas",
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
+      "app.domains.routines.schemas.resident_planning",
       "app.domains.routines.schemas.runs",
       "app.domains.routines.schemas.tendency",
       "app.domains.routines.service",
       "app.domains.routines.service.action_admission",
       "app.domains.routines.service.action_briefs",
+      "app.domains.routines.service.action_budgets",
       "app.domains.routines.service.action_candidates",
       "app.domains.routines.service.action_menu",
+      "app.domains.routines.service.action_plans",
       "app.domains.routines.service.action_prompts",
       "app.domains.routines.service.activity_evidence",
       "app.domains.routines.service.activity_logs",
@@ -1052,6 +1130,7 @@
       "app.domains.routines.service.activity_sessions",
       "app.domains.routines.service.activity_settings",
       "app.domains.routines.service.autonomy_management",
+      "app.domains.routines.service.conversation_context",
       "app.domains.routines.service.decision_results",
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
@@ -1061,6 +1140,7 @@
       "app.domains.routines.service.execution_results",
       "app.domains.routines.service.feed_context",
       "app.domains.routines.service.feed_cues",
+      "app.domains.routines.service.independent_topics",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
       "app.domains.routines.service.joint_activity.execution",
@@ -1071,10 +1151,14 @@
       "app.domains.routines.service.manual_activity",
       "app.domains.routines.service.perception_diagnostics",
       "app.domains.routines.service.perception_prompts",
+      "app.domains.routines.service.planner_results",
       "app.domains.routines.service.plans",
       "app.domains.routines.service.post_selection",
+      "app.domains.routines.service.post_writer_results",
       "app.domains.routines.service.prompt_context",
       "app.domains.routines.service.public_action_executions",
+      "app.domains.routines.service.relationship_context",
+      "app.domains.routines.service.resident_prompts",
       "app.domains.routines.service.retry_schedule",
       "app.domains.routines.service.run_backoff",
       "app.domains.routines.service.run_identity",
@@ -1091,11 +1175,18 @@
       "app.domains.routines.service.slot_state",
       "app.domains.routines.service.slot_status",
       "app.domains.routines.service.social_context",
+      "app.domains.routines.service.state_outputs",
       "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tendency",
       "app.domains.routines.service.tendency_settings",
       "app.domains.routines.service.tick_schedule",
       "app.domains.routines.service.tool_policy",
+      "app.domains.routines.service.topic_arcs",
+      "app.domains.routines.service.writing_context",
+      "app.domains.routines.service.writing_plans",
+      "app.domains.routines.service.writing_prompts",
+      "app.domains.routines.service.writing_results",
+      "app.domains.routines.service.writing_tasks",
       "app.domains.routines.utils",
       "app.domains.routines.utils.activity_actions",
       "app.domains.routines.utils.clock",
@@ -1188,36 +1279,7 @@
       "app.domains.worlds.service.generation_context",
       "app.domains.worlds.service.reserved_roles",
       "app.domains.worlds.service.scheduling",
-      "app.domains.worlds.storage",
-      "app.domains.routines.contracts.action_planning",
-      "app.domains.routines.contracts.planning_context",
-      "app.domains.routines.contracts.resident_prompts",
-      "app.domains.routines.contracts.topic_arcs",
-      "app.domains.routines.contracts.writer_results",
-      "app.domains.routines.policies.action_matching",
-      "app.domains.routines.policies.execution_results",
-      "app.domains.routines.policies.handoff_coverage",
-      "app.domains.routines.policies.resident_clock",
-      "app.domains.routines.policies.topic_arc_roles",
-      "app.domains.routines.policies.topic_dates",
-      "app.domains.routines.policies.writer_outputs",
-      "app.domains.routines.policies.writer_tasks",
-      "app.domains.routines.policies.writing_contract",
-      "app.domains.routines.repository.independent_topics",
-      "app.domains.routines.schemas.resident_planning",
-      "app.domains.routines.service.action_budgets",
-      "app.domains.routines.service.action_plans",
-      "app.domains.routines.service.conversation_context",
-      "app.domains.routines.service.independent_topics",
-      "app.domains.routines.service.planner_results",
-      "app.domains.routines.service.post_writer_results",
-      "app.domains.routines.service.relationship_context",
-      "app.domains.routines.service.resident_prompts",
-      "app.domains.routines.service.state_outputs",
-      "app.domains.routines.service.topic_arcs",
-      "app.domains.routines.service.writing_context",
-      "app.domains.routines.service.writing_plans",
-      "app.domains.routines.service.writing_tasks"
+      "app.domains.worlds.storage"
     ],
     "entries": [
       "app.domains.characters.contracts",
@@ -1266,6 +1328,7 @@
       "app.domains.routine_posts.service.generation",
       "app.domains.routines.contracts",
       "app.domains.routines.contracts.action_context",
+      "app.domains.routines.contracts.action_planning",
       "app.domains.routines.contracts.activity",
       "app.domains.routines.contracts.activity_management",
       "app.domains.routines.contracts.activity_policy",
@@ -1277,21 +1340,29 @@
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.manual_activity",
+      "app.domains.routines.contracts.planning_context",
       "app.domains.routines.contracts.plans",
       "app.domains.routines.contracts.post_selection",
       "app.domains.routines.contracts.resident",
+      "app.domains.routines.contracts.resident_prompts",
       "app.domains.routines.contracts.run_identity",
       "app.domains.routines.contracts.slot_requests",
+      "app.domains.routines.contracts.topic_arcs",
+      "app.domains.routines.contracts.writer_results",
+      "app.domains.routines.contracts.writing",
       "app.domains.routines.schemas",
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
+      "app.domains.routines.schemas.resident_planning",
       "app.domains.routines.schemas.runs",
       "app.domains.routines.schemas.tendency",
       "app.domains.routines.service",
       "app.domains.routines.service.action_admission",
       "app.domains.routines.service.action_briefs",
+      "app.domains.routines.service.action_budgets",
       "app.domains.routines.service.action_candidates",
       "app.domains.routines.service.action_menu",
+      "app.domains.routines.service.action_plans",
       "app.domains.routines.service.action_prompts",
       "app.domains.routines.service.activity_evidence",
       "app.domains.routines.service.activity_logs",
@@ -1301,6 +1372,7 @@
       "app.domains.routines.service.activity_sessions",
       "app.domains.routines.service.activity_settings",
       "app.domains.routines.service.autonomy_management",
+      "app.domains.routines.service.conversation_context",
       "app.domains.routines.service.decision_results",
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
@@ -1310,6 +1382,7 @@
       "app.domains.routines.service.execution_results",
       "app.domains.routines.service.feed_context",
       "app.domains.routines.service.feed_cues",
+      "app.domains.routines.service.independent_topics",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
       "app.domains.routines.service.joint_activity.execution",
@@ -1320,10 +1393,14 @@
       "app.domains.routines.service.manual_activity",
       "app.domains.routines.service.perception_diagnostics",
       "app.domains.routines.service.perception_prompts",
+      "app.domains.routines.service.planner_results",
       "app.domains.routines.service.plans",
       "app.domains.routines.service.post_selection",
+      "app.domains.routines.service.post_writer_results",
       "app.domains.routines.service.prompt_context",
       "app.domains.routines.service.public_action_executions",
+      "app.domains.routines.service.relationship_context",
+      "app.domains.routines.service.resident_prompts",
       "app.domains.routines.service.retry_schedule",
       "app.domains.routines.service.run_backoff",
       "app.domains.routines.service.run_identity",
@@ -1339,11 +1416,18 @@
       "app.domains.routines.service.slot_requests",
       "app.domains.routines.service.slot_status",
       "app.domains.routines.service.social_context",
+      "app.domains.routines.service.state_outputs",
       "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tendency",
       "app.domains.routines.service.tendency_settings",
       "app.domains.routines.service.tick_schedule",
       "app.domains.routines.service.tool_policy",
+      "app.domains.routines.service.topic_arcs",
+      "app.domains.routines.service.writing_context",
+      "app.domains.routines.service.writing_plans",
+      "app.domains.routines.service.writing_prompts",
+      "app.domains.routines.service.writing_results",
+      "app.domains.routines.service.writing_tasks",
       "app.domains.runtime.contracts",
       "app.domains.social.contracts",
       "app.domains.social.contracts.actors",
@@ -1419,26 +1503,7 @@
       "app.domains.worlds.schemas",
       "app.domains.worlds.service",
       "app.domains.worlds.service.character_entry",
-      "app.domains.worlds.service.definition",
-      "app.domains.routines.contracts.action_planning",
-      "app.domains.routines.contracts.planning_context",
-      "app.domains.routines.contracts.resident_prompts",
-      "app.domains.routines.contracts.topic_arcs",
-      "app.domains.routines.contracts.writer_results",
-      "app.domains.routines.schemas.resident_planning",
-      "app.domains.routines.service.action_budgets",
-      "app.domains.routines.service.action_plans",
-      "app.domains.routines.service.conversation_context",
-      "app.domains.routines.service.independent_topics",
-      "app.domains.routines.service.planner_results",
-      "app.domains.routines.service.post_writer_results",
-      "app.domains.routines.service.relationship_context",
-      "app.domains.routines.service.resident_prompts",
-      "app.domains.routines.service.state_outputs",
-      "app.domains.routines.service.topic_arcs",
-      "app.domains.routines.service.writing_context",
-      "app.domains.routines.service.writing_plans",
-      "app.domains.routines.service.writing_tasks"
+      "app.domains.worlds.service.definition"
     ],
     "bridges": [
       {
@@ -2754,14 +2819,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.agent_writing",
-        "target": "app.domains.routines.service.action_briefs",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
-        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.services.community",
         "target": "app.domains.routines.service.action_briefs",
         "owner_stage": "AR-B5",
@@ -2807,6 +2864,14 @@
         "owner_stage": "AR-B4-C7",
         "reason": "Existing mixed HTTP route now imports actual same Routines error classes instead of removed execution re-exports.",
         "removal_condition": "Move actual activity/slot/first-greeting HTTP in C7 and remove legacy route consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_writing",
+        "target": "app.domains.routines.models",
+        "owner_stage": "AR-B7 signed Daypart source integration",
+        "reason": "Original Memory action writer annotates the caller-owned Run with the actual same Routines model.",
+        "removal_condition": "Remove the exact old Memory body when signed B7 service joins; no other old writer definitions remain.",
         "review_date": "2026-09-06"
       }
     ]

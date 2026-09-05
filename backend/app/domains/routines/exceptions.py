@@ -251,3 +251,11 @@ class RunNowSchedulerBusyError(AgentServiceError):
 class RunNowSoonScheduledError(AgentServiceError):
     def __init__(self) -> None:
         super().__init__("곧 자율활동이 예정되어 있어요. 잠시 기다리면 앵무가 스스로 활동합니다.")
+
+
+class WritingCompositionError(Exception):
+    pass
+
+
+class WritingCompositionInvalidError(WritingCompositionError):
+    pass

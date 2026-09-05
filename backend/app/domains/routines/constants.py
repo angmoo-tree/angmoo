@@ -417,3 +417,19 @@ RUN_NOW_SCHEDULER_GUARD_WINDOW = timedelta(minutes=10)
 
 
 RUN_NOW_SCHEDULER_HEADROOM = 2
+
+
+# Time labels and no-tool gateway admission for the brief writer.
+
+WRITING_TIMEZONE = ZoneInfo("Asia/Seoul")
+WRITING_KOREAN_WEEKDAYS = (
+    "월요일",
+    "화요일",
+    "수요일",
+    "목요일",
+    "금요일",
+    "토요일",
+    "일요일",
+)
+
+WRITING_TOOLS_ALLOWED = ["angmoo_list_feed"]

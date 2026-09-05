@@ -1333,3 +1333,15 @@ C7-C 현재 경계는 777 modules / 2691 edges / exact legacy 202 / cycle0이다
 `a93e724`까지 들어온 원래 signed 소스 22개를 각각 독립 Git archive에서 기존 `committed_snapshot`으로 수집했다. 저장한 commit과 tree ID를 대조하고 기존 main `0e50e0c`의 원장 64개를 불변 prefix로 유지한 채, 원래 **91개 파일과 33개 추가 노드**의 증거를 최초 도입 순서대로 기록해 원장을 **64→86개**로 확장했다. 추가 노드의 함수가 처음 정의된 source SHA도 각 기록과 일치했다. 임시 중간 목적지가 뒤의 split 원본이 되는 경우도 그 첫 blob을 기록했다.
 
 원장 쓰기 전 변경 없는 production `checkpoint_errors`와 `addition_errors`가 원래 blob·단언·suppression·첫 source 도입·append-only 이력을 검증해 통과했다. 기준 baseline/checkpoint는 변경하지 않았다. 이후 현재 코드의 전체 stock 보존·전체 backend 및 남은 C7 실제 HTTP/실행 조립 검증은 별도 진행 상태다. DCO·CI 정책·OSS 경계·비밀 예외 metadata25개·컨테이너/launcher/설치/Tauri 개발 계약도 이 통합본에서 통과했다.
+## AR-B4 Writer — 작성 정책과 provider·업무 조립의 실제 소유
+
+원래 `services/agent_writing.py`의 29개 함수·클래스 및 5개 상수·타입·logger 정의를 모두 대응했다. 그중 함수·클래스 28개는 Routines의 실제 prompt/result/error 역할과 runtime의 provider·다중 업무 조립으로 이전했다. Memory 이벤트 저장 1개는 이미 고정된 B7 source의 중복 구현을 만들지 않기 위해 원래 파일에 같은 본문으로 남겼다. 정확한 남은 함수·소비자·종료 조건은 소유 지도에 기록했다. 공통 logger 이름, 서울 시간대, 모델·사용량·토큰 제한과 provider 호출 조건을 변경하지 않았다.
+
+원래 34개 정의의 전체 AST를 비교했으며, 실제 동일 nullable 조회 소유 경로와 명시적 문맥 읽기 인자만 복원하면 모두 동일하다. 기존 테스트 4개 파일의 모든 assertion과 suppression도 그대로다. 새 테스트 8노드는 1회 provider 호출, 실행 중 event loop 거절, 같은 Run/Session의 사용량 commit, JSON 검증 전 사용량 기록, Social 게시·답글 저장 뒤 Memory 기록, 원래 Daypart의 날짜·source IDs·단일 commit을 확인한다.
+
+첫 확대 검사에서 신규 fixture가 읽기 전용 Settings property에 대입하여 2개가 실패했다. 제품 코드는 바꾸지 않고 실제 설정 필드 `OPENCLAW_GATEWAY_TOKEN`과 SecretStr를 사용하도록 fixture를 수정했다. 이후 기존 79개와 신규 8개를 함께 실행한 결과는 **87 passed / 2 warnings / 13.34초**다. 현재 경계는 **812 modules / 2833 edges / 200 exact legacy edges**다. 다음 원본 source·assertion·API/ORM·node 보존 검사를 별도로 확인하며, 현재 source 준비 결과를 GitHub 또는 전체 B4 완료로 표현하지 않는다.
+
+이 작업트리는 `cf142ac`에서 분기했으므로 후속 통합의 구조 경로 회귀 2개 수정 `70b238c`를 포함하지 않는다. G07의 실제 tendency test 경로 수정은 같은 값으로 반영하며 원래 test node를 재기준화하지 않는다. 원본 checkpoint·기존 additions 86개는 수정하지 않고 최초 source commit의 archive를 통합 후 순서대로 수집한다.
+
+
+Writer 최종 고정 tree의 원래 6개 보존 진단은 source·split·assertion·suppression·API/ORM·node 모두 **0 errors**다. 기존 보호 2293 / 현재 2301로 기존 손실 없이 신규 8개가 수집된다. 이 읽기 진단은 source introduction metadata를 만들지 않으며, source commit 뒤 원래 archive를 append한 stock 통합 gate와 구분한다.

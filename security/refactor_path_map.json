@@ -29254,7 +29254,7 @@
           "new": "backend/app/cruds/agent_runs.py::get_credential",
           "direct_consumers": [
             "backend/app/runtime/resident/execution.py",
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
@@ -30762,7 +30762,7 @@
           "new": "backend/app/cruds/agent_runs.py::get_credential",
           "direct_consumers": [
             "backend/app/runtime/resident/execution.py",
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
@@ -32272,7 +32272,7 @@
           "new": "backend/app/cruds/agent_runs.py::get_credential",
           "direct_consumers": [
             "backend/app/runtime/resident/execution.py",
-            "backend/app/services/agent_writing.py"
+            "backend/app/runtime/resident/writing.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
@@ -37223,6 +37223,413 @@
       "verification": "460 passed,5warnings,248.61seconds; modules802/edges2758/exactlegacy201; L4 modules802/parity97; deferred22; original source/split/assertion/suppression/APIORM/missing_node diagnostics each0; protected2260/current2293",
       "provenance": "No added capture records or changed frozen/checkpoint/baseline. Verified main already contains signed869bae original two introduction paths, so no supplemental snapshot was appended even in memory. Parent captures actual original C6/LG source commits in order.",
       "remaining": "C7-B and later Character activity workflows/HTTP remain on their owner source branch. B5/B7/Lore/Point final canonical cooperation and G5/G06 are integrated by parent; no unrelated owner ancestry or copied owner implementation was introduced. No push, PR or merge-to-main performed here."
+    },
+    "AR-B4-WRITING": {
+      "status": "IMPLEMENTED SOURCE; final verification pending",
+      "split_files": {
+        "backend/app/services/agent_writing.py": [
+          "backend/app/domains/routines/constants.py",
+          "backend/app/domains/routines/contracts/writing.py",
+          "backend/app/domains/routines/exceptions.py",
+          "backend/app/domains/routines/service/writing_prompts.py",
+          "backend/app/domains/routines/service/writing_results.py",
+          "backend/app/runtime/resident/writing.py",
+          "backend/app/services/agent_writing.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/agent_writing.py::_agent_tool_header_source",
+          "new": "backend/app/domains/routines/service/writing_results.py::_agent_tool_header_source",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_resolve_create_post_brief",
+          "new": "backend/app/domains/routines/service/writing_results.py::_resolve_create_post_brief",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_composition_metadata_field",
+          "new": "backend/app/domains/routines/service/writing_results.py::_composition_metadata_field",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_compact_memory_field",
+          "new": "backend/app/domains/routines/service/writing_results.py::_compact_memory_field",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/writing_results.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_build_compact_action_memory",
+          "new": "backend/app/domains/routines/service/writing_results.py::_build_compact_action_memory",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_writing_stream_params",
+          "new": "backend/app/domains/routines/service/writing_results.py::_writing_stream_params",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py",
+            "backend/tests/test_langgraph_resident_engine.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_gateway_writer_keeps_single_call_scratch_identity_and_no_tool_contract"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_extract_gateway_result_text",
+          "new": "backend/app/domains/routines/service/writing_results.py::_extract_gateway_result_text",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_parse_json_object",
+          "new": "backend/app/domains/routines/service/writing_results.py::_parse_json_object",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_positive_int",
+          "new": "backend/app/domains/routines/service/writing_results.py::_positive_int",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/writing_results.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_gateway_writer_keeps_single_call_scratch_identity_and_no_tool_contract",
+            "tests/routines/test_writing_composition.py::test_writing_lane_preserves_other_run_state_and_commits_same_session_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_extract_gateway_llm_usage",
+          "new": "backend/app/domains/routines/service/writing_results.py::_extract_gateway_llm_usage",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_gateway_writer_keeps_single_call_scratch_identity_and_no_tool_contract",
+            "tests/routines/test_writing_composition.py::test_writing_lane_preserves_other_run_state_and_commits_same_session_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_compact_stored_llm_usage",
+          "new": "backend/app/domains/routines/service/writing_results.py::_compact_stored_llm_usage",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/writing_results.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_gateway_writer_keeps_single_call_scratch_identity_and_no_tool_contract",
+            "tests/routines/test_writing_composition.py::test_writing_lane_preserves_other_run_state_and_commits_same_session_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_compact_tool_usage",
+          "new": "backend/app/domains/routines/service/writing_results.py::_compact_tool_usage",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_append_writing_composition_lane",
+          "new": "backend/app/domains/routines/service/writing_results.py::_append_writing_composition_lane",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py",
+            "backend/tests/routines/test_writing_composition.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_gateway_writer_keeps_single_call_scratch_identity_and_no_tool_contract",
+            "tests/routines/test_writing_composition.py::test_writing_lane_preserves_other_run_state_and_commits_same_session_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_build_composition_prompt",
+          "new": "backend/app/domains/routines/service/writing_prompts.py::_build_composition_prompt",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py",
+            "backend/tests/routines/test_tendency.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_tendency.py::test_writing_composition_prompt_has_input_voice_boundary"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_is_self_update_create_post_brief",
+          "new": "backend/app/domains/routines/service/writing_prompts.py::_is_self_update_create_post_brief",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_tendency.py::test_writing_composition_prompt_has_input_voice_boundary"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_format_current_time",
+          "new": "backend/app/domains/routines/service/writing_prompts.py::_format_current_time",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/writing_prompts.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_tendency.py::test_writing_composition_prompt_has_input_voice_boundary"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_format_daypart",
+          "new": "backend/app/domains/routines/service/writing_prompts.py::_format_daypart",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/writing_prompts.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_tendency.py::test_writing_composition_prompt_has_input_voice_boundary"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_format_state",
+          "new": "backend/app/domains/routines/service/writing_prompts.py::_format_state",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/writing_prompts.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_tendency.py::test_writing_composition_prompt_has_input_voice_boundary"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_format_recent_activity",
+          "new": "backend/app/domains/routines/service/writing_prompts.py::_format_recent_activity",
+          "direct_consumers": [
+            "backend/app/domains/routines/contracts/writing.py",
+            "backend/app/runtime/resident/writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_tendency.py::test_writing_composition_prompt_has_input_voice_boundary"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::create_agent_tool_post_from_brief",
+          "new": "backend/app/runtime/resident/writing.py::create_agent_tool_post_from_brief",
+          "direct_consumers": [
+            "backend/tests/routines/test_writing_composition.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::reply_agent_tool_post_from_brief",
+          "new": "backend/app/runtime/resident/writing.py::reply_agent_tool_post_from_brief",
+          "direct_consumers": [
+            "backend/tests/routines/test_writing_composition.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_compose_writing_from_brief",
+          "new": "backend/app/runtime/resident/writing.py::_compose_writing_from_brief",
+          "direct_consumers": [
+            "backend/tests/routines/test_writing_composition.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_run_credential",
+          "new": "backend/app/runtime/resident/writing.py::_run_credential",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_run_composition_gateway",
+          "new": "backend/app/runtime/resident/writing.py::_run_composition_gateway",
+          "direct_consumers": [
+            "backend/tests/routines/test_writing_composition.py",
+            "backend/tests/test_daypart_persistent_session.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_gateway_writer_keeps_single_call_scratch_identity_and_no_tool_contract"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_writing_scratch_base_session_key",
+          "new": "backend/app/runtime/resident/writing.py::_writing_scratch_base_session_key",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_gateway_writer_keeps_single_call_scratch_identity_and_no_tool_contract"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_format_reply_context",
+          "new": "backend/app/runtime/resident/writing.py::_format_reply_context",
+          "direct_consumers": [
+            "backend/app/domains/routines/contracts/writing.py",
+            "backend/app/domains/routines/service/writing_prompts.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::logger",
+          "new": "backend/app/runtime/resident/writing.py::logger",
+          "direct_consumers": [
+            "backend/tests/routines/test_tendency.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::_record_daypart_action_memory",
+          "new": "backend/app/services/agent_writing.py::_record_daypart_action_memory",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py",
+            "backend/tests/routines/test_writing_composition.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_existing_daypart_writer_keeps_event_identity_and_single_commit"
+          ],
+          "remaining_owner": "AR-B7 signed Daypart source integration",
+          "removal_condition": "Replace this exact existing definition with the already introduced Memory service at parent integration; do not introduce a duplicate Daypart implementation."
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::WritingCompositionError",
+          "new": "backend/app/domains/routines/exceptions.py::WritingCompositionError",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/writing_results.py",
+            "backend/app/runtime/resident/writing.py",
+            "backend/tests/routines/test_writing_composition.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::WritingCompositionInvalidError",
+          "new": "backend/app/domains/routines/exceptions.py::WritingCompositionInvalidError",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py",
+            "backend/tests/routines/test_writing_composition.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::WritingKind",
+          "new": "backend/app/domains/routines/contracts/writing.py::WritingKind",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/writing_prompts.py",
+            "backend/app/domains/routines/service/writing_results.py",
+            "backend/app/runtime/resident/writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::APP_TIMEZONE",
+          "new": "backend/app/domains/routines/constants.py::WRITING_TIMEZONE",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/writing_prompts.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::KOREAN_WEEKDAYS",
+          "new": "backend/app/domains/routines/constants.py::WRITING_KOREAN_WEEKDAYS",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/writing_prompts.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_writing.py::TOOLS_ALLOW_WRITING_COMPOSITION",
+          "new": "backend/app/domains/routines/constants.py::WRITING_TOOLS_ALLOWED",
+          "direct_consumers": [
+            "backend/app/runtime/resident/writing.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[create_post]",
+            "tests/routines/test_writing_composition.py::test_writer_admits_before_composition_and_records_memory_after_social_write[reply]"
+          ]
+        }
+      ],
+      "actual_paths": [
+        "backend/app/domains/routines/constants.py",
+        "backend/app/domains/routines/contracts/writing.py",
+        "backend/app/domains/routines/exceptions.py",
+        "backend/app/domains/routines/service/writing_prompts.py",
+        "backend/app/domains/routines/service/writing_results.py",
+        "backend/app/runtime/resident/writing.py",
+        "backend/app/services/agent_writing.py",
+        "backend/tests/routines/test_writing_composition.py"
+      ],
+      "preservation": "Original 29 function/class definitions plus 5 constants/type/logger assignments are accounted for. Twenty-eight actual definitions move by role; one exact Daypart persistence body remains until its already signed B7 owner joins. Whole-definition AST equality is checked after only declared owner imports, same-query lookup and typed callback wiring. Original four consumer-test files retain every assertion and suppression.",
+      "runtime_order": "Original auth/admission -> prompt -> one provider call -> usage lane commit -> JSON validation -> Social write -> lore use where applicable -> Daypart event remains unchanged. No new retry, provider invocation, transaction or hidden domain-to-runtime import.",
+      "remaining": "The two preserved legacy writer entry functions currently have no active product callers in this B4 source. Exact existing Social admission/write, Lore, Identity credential and Runtime gateway consumers await the independently signed owner sources at parent integration. This source does not claim those merges or B8 retirement complete."
     }
   },
   "test_symbols": {

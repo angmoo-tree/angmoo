@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from app.services import agent_writing
+from app.runtime.resident import writing as agent_writing
 from app.services import community
 from app.runtime.resident import execution as agent_runs
 

@@ -798,3 +798,10 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 `routines/service/manual_activity.py`는 수동 실행의 권한·준비 상태·사용자별 쿨다운·슬롯 여유와 예약 임박 조건을 판단합니다. 기존 배정 슬롯을 실행하는 경로와 임시 슬롯을 얻어 실행하는 경로는 서로 다른 계약을 유지합니다. 임시 실행의 원래 오류가 있으면 정리 오류가 그것을 덮지 않으며, 원래 오류가 없을 때만 정리 오류를 전달합니다. 런타임 협력은 같은 Session의 외부 소유 조회와 profile bind/release/reload 및 실제 실행기를 연결합니다.
 
 모이의 조회·입력 조건·프롬프트 안전성은 `routines/service/feed_cues.py`의 실제 기능입니다. 성향 분석 확인, 자율활동/manual 허용 확인, 게시글 한도, 미소비 모이 중복 확인의 순서를 유지합니다. 새로운 조회·저장·검증을 runtime entry 함수에 중복 구현하지 않습니다.
+### Brief 기반 작성의 정책과 실행
+
+`domains/routines/service/writing_prompts.py`는 캐릭터 말투·현재 시간·활동 문맥·최종 brief를 조합하는 실제 작성 규칙을 담습니다. 다른 업무의 답글 문맥과 Lore는 `contracts/writing.py`의 명시적인 읽기 협력으로 전달합니다. 문맥은 기존 조건과 순서에서 읽으며, 사용하지 않는 Lore나 최근 활동을 미리 조회하지 않습니다.
+
+`service/writing_results.py`는 준비된 brief 해석, 생성 결과와 사용량 정제, 같은 Session에서 Run의 작성 사용량을 저장하는 업무를 담당합니다. `runtime/resident/writing.py`는 Social 권한 확인과 실제 게시·답글 저장, provider 호출, Lore 사용 기록과 Memory 저장을 연결합니다. 원래의 생성기 호출 횟수, 사용량 기록 후 JSON 검증 순서와 게시 완료 후 Memory 저장 순서를 유지합니다.
+
+현재 B4 source에서 옛 `services/agent_writing.py`에 남은 실제 함수는 Daypart 이벤트 저장 하나입니다. 이미 별도 B7 source에 구현된 Memory 서비스가 통합되면 이 기존 구현을 그 서비스로 연결하고 제거합니다. Identity credential, Social 및 Lore의 기존 협력도 해당 소유 source와 순차 통합하며, 새 작성 정책을 옛 서비스로 추가하지 않습니다. 두 legacy 작성 진입 함수는 이 source에서 활성 제품 호출자가 없지만 기존 구현과 계약을 보존합니다.

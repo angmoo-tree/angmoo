@@ -1,7 +1,7 @@
 {
-  "edge_count": 2813,
-  "external_import_count": 2501,
-  "module_count": 808,
+  "edge_count": 2833,
+  "external_import_count": 2513,
+  "module_count": 812,
   "modules": [
     {
       "external_imports": [],
@@ -4015,6 +4015,18 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "dataclasses",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.contracts.writing",
+      "path": "backend/app/domains/routines/contracts/writing.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "fastapi",
         "sqlalchemy.orm"
       ],
@@ -5663,6 +5675,42 @@
       ],
       "module": "app.domains.routines.service.writing_plans",
       "path": "backend/app/domains/routines/service/writing_plans.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.context_text",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.writing",
+        "app.domains.routines.service.activity_logs"
+      ],
+      "module": "app.domains.routines.service.writing_prompts",
+      "path": "backend/app/domains/routines/service/writing_prompts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "json",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.context_text",
+        "app.domains.routines.contracts.writing",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.repository.runs",
+        "app.domains.routines.service.action_briefs"
+      ],
+      "module": "app.domains.routines.service.writing_results",
+      "path": "backend/app/domains/routines/service/writing_results.py",
       "wildcard_imports": []
     },
     {
@@ -10760,6 +10808,41 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "hashlib",
+        "logging",
+        "pydantic",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.config",
+        "app.core.context_text",
+        "app.cruds.agent_runs",
+        "app.cruds.community",
+        "app.domains.characters.service.profile",
+        "app.domains.characters.service.state",
+        "app.domains.identity.models",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.writing",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.service.activity_settings",
+        "app.domains.routines.service.writing_prompts",
+        "app.domains.routines.service.writing_results",
+        "app.domains.social.schemas.community",
+        "app.services.agent_writing",
+        "app.services.character_lore",
+        "app.services.community",
+        "app.services.runtime_boundary"
+      ],
+      "module": "app.runtime.resident.writing",
+      "path": "backend/app/runtime/resident/writing.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.runtime.routine_posts.sqlalchemy_runtime"
@@ -11634,29 +11717,13 @@
     },
     {
       "external_imports": [
-        "asyncio",
         "datetime",
-        "hashlib",
-        "json",
-        "logging",
-        "pydantic",
-        "sqlalchemy",
         "sqlalchemy.orm",
-        "typing",
-        "zoneinfo"
+        "typing"
       ],
       "imports": [
-        "app.config",
-        "app.core.context_text",
-        "app.cruds.agent_runs",
-        "app.cruds.agents",
-        "app.cruds.community",
-        "app.domains.routines.service.action_briefs",
-        "app.models",
-        "app.schemas",
-        "app.services.character_lore",
-        "app.services.community",
-        "app.services.runtime_boundary"
+        "app.domains.routines.models",
+        "app.models.agent_runs"
       ],
       "module": "app.services.agent_writing",
       "path": "backend/app/services/agent_writing.py",
