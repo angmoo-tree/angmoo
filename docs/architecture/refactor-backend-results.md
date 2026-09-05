@@ -704,3 +704,14 @@ Source `9133d7a709f473755aeff149281f80c6794ceefc`에서 실제 item/evidence SQL
 Read method 본문10개와 canonical helper10개, 외부 join·block SQL 본문은 명시된 factory/query 추출만 역변환하면 AST가 같다. 회상·retrieval planner·consolidation·inspector 집중 **44 passed / 1 warning / 19.10초**, 신규 SQLite 회귀2개를 포함한 canonical 묶음 **7 passed / 26.07초**다. 새 회귀는 Character summary의 caller flush가 같은 Session에서 보이고 observer에는 보이지 않는 점, 원본 Chat 내용을 그 Session 안에서 바꾸면 저장 digest와 달라져 문서가 제외되고 Session 종료 후 두 변경 모두 rollback되는 점을 확인한다. 경계659/2170/legacy256·L4 parity97·ER0 및 current/frozen-chained Memory inventory PASS다.
 
 초기 파일 분류에서 ORM 기반 record hydration을 pure policies로 둔 오류는 경계 검사에서 발견하여 실제 저장 snapshot을 다루는 repository에 배치했다. 일반 pure 정책의 framework 금지 규칙과 외부 entry 허용을 완화하지 않았다. 전체 source/node 계보 capture·B4~B6 합류·최종 B7/백엔드 통합은 별도 진행 중이다.
+
+
+### AR-B7-A10 Memory 원본 근거 판정의 실제 소유
+
+Source `a0b72a97bbabfb1fc2a5d1055ac992fed6c5414d`에서 성공/공개/관찰/차단/active 참여자/주관적 선언/digest 판단의 실제 구현은 `memory/service/source_evidence.py`가 소유한다. 외부 Chat·Social·Relationships·Routines 원본 SQL은 `runtime/memory/source_queries.py`에서 기존 raw row/result를 같은 Session으로 읽고, `source_composition.py`가 둘을 연결한다. 옛 `runtime/memory/sqlalchemy_source_reader.py`는 제거하고 현재 소비자를 실제 factory로 전환했다. Subjective source의 lazy 조회 시점과 현재 응답 형태는 유지한다.
+
+최종 가독성 formatting 이후에도 명시된 query 추출을 역변환하면 **13개 method 본문·16개 SQL 표현식·모든 digest/summary helper AST가 원문과 동일**하다. 기존 성공/노출/실제 관찰/수정·차단 판단, early return, 조회 결과 소비 순서, digest와 summary byte 범위, caller Session 및 commit/rollback 부재를 유지한다. 기존 write lifecycle/canonical recall/Today SNS와 같은 Session 신규 회귀를 포함한 집중 **41 passed / 81.05초**다.
+
+경계 **662 modules / 2177 edges / exact legacy256 PASS**, L4 parity97·current Memory batch 및 frozen chained G/P inventory PASS다. ER0 현재 inventory가 실제 SQL 소유 파일 변경으로 stale인 점을 발견하여 현재 inventory만 재생성했고 **76/87/24/44/7 PASS**를 확인했다. Frozen migration/기능 계약/checkpoint JSON은 재생성하지 않았다.
+
+이 source 고정 직전 stock 전체는 보호2,201/현재2,210 nodes와 API/ORM·assertion/suppression·split을 보존하고, 이미 준비한 새 source/node의 선형 introduction capture 대기만 보고했다. B4~B6 합류 및 실제 도입 commit의 append-only capture 전이므로 전체 B7/§8.2 종료는 아니다.
