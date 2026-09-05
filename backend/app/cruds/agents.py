@@ -344,38 +344,6 @@ def list_other_active_settings(
     return settings
 
 
-def count_effective_active_server_llm_autonomy_agents(
-    db: Session, *, exclude_character_ids: set[str] | None = None
-) -> int:
-    excluded = exclude_character_ids or set()
-    auto_enabled_ids = set(
-        db.scalars(
-            select(models.Character.id)
-            .join(models.AgentActivitySetting)
-            .where(
-                models.Character.execution_mode == "llm",
-                models.Character.deleted_at.is_(None),
-                models.Character.moderation_status != "suspended",
-                models.AgentActivitySetting.auto_enabled.is_(True),
-            )
-        )
-    )
-    assigned_slot_ids = set(
-        db.scalars(
-            select(models.AgentSlot.assigned_character_id)
-            .join(
-                models.Character,
-                models.Character.id == models.AgentSlot.assigned_character_id,
-            )
-            .where(
-                models.AgentSlot.assigned_character_id.is_not(None),
-                models.Character.execution_mode == "llm",
-                models.Character.deleted_at.is_(None),
-                models.Character.moderation_status != "suspended",
-            )
-        )
-    )
-    return len((auto_enabled_ids | assigned_slot_ids) - excluded)
 
 from app.domains.routines.constants import HIDDEN_ACTIVITY_ACTION_TYPES, STATE_SAVE_DEDUPE_WINDOW
 from app.domains.routines.service.activity_logs import filter_visible_activity_logs, list_recent_activity, log_activity

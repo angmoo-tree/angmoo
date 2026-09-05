@@ -1,3 +1,4 @@
+from app.runtime.resident import autonomy_reads
 from app.domains.routines.service import slot_leases as slot_leases
 from app.domains.routines.service import slot_pool as slot_pool
 from app.domains.routines.service import slot_recovery as slot_recovery
@@ -1269,6 +1270,17 @@ def test_update_settings_normalizes_observe_to_internal_enabled() -> None:
 
 
 def test_effective_server_llm_autonomy_count_includes_auto_or_slot_unique() -> None:
+    from app.domains.routines.service import activity_settings
+    from app.domains.routines.repository import slots
+
+    # Bind the original test namespace to the actual owners; no wrapper or stub.
+    agent_crud = SimpleNamespace(
+        get_setting=activity_settings.get_setting,
+        get_assigned_slot=slots.get_assigned_slot,
+        count_effective_active_server_llm_autonomy_agents=(
+            autonomy_reads.count_effective_active_server_llm_autonomy_agents
+        ),
+    )
     engine = create_engine("sqlite:///:memory:")
     _create_autonomy_capacity_tables(engine)
 
@@ -1382,6 +1394,17 @@ def test_activate_agent_allows_same_user_replacement_at_capacity(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Keep the frozen M3 node name while enforcing the local multi-ON contract."""
+    from app.domains.routines.service import activity_settings
+    from app.domains.routines.repository import slots
+
+    # Bind the original test namespace to the actual owners; no wrapper or stub.
+    agent_crud = SimpleNamespace(
+        get_setting=activity_settings.get_setting,
+        get_assigned_slot=slots.get_assigned_slot,
+        count_effective_active_server_llm_autonomy_agents=(
+            autonomy_reads.count_effective_active_server_llm_autonomy_agents
+        ),
+    )
 
     monkeypatch.setattr(settings, "SERVER_LLM_AUTONOMY_MAX_ACTIVE_AGENTS", 2)
     monkeypatch.setattr(settings, "AGENT_ACTIVITY_ENGINE", "langgraph")
@@ -1602,6 +1625,17 @@ def test_world_autonomy_capacity_excludes_owner_controlled_left_and_inactive_row
 def test_global_autonomy_capacity_rejects_one_hundred_first_without_side_effects(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from app.domains.routines.service import activity_settings
+    from app.domains.routines.repository import slots
+
+    # Bind the original test namespace to the actual owners; no wrapper or stub.
+    agent_crud = SimpleNamespace(
+        get_setting=activity_settings.get_setting,
+        get_assigned_slot=slots.get_assigned_slot,
+        count_effective_active_server_llm_autonomy_agents=(
+            autonomy_reads.count_effective_active_server_llm_autonomy_agents
+        ),
+    )
     monkeypatch.setattr(settings, "SERVER_LLM_AUTONOMY_MAX_ACTIVE_AGENTS", 100)
     monkeypatch.setattr(
         settings,
@@ -1813,8 +1847,9 @@ def test_sqlite_busy_exhaustion_is_exposed_as_retryable_activation_error(
             character_id="char-busy",
         )
         db.commit()
+        from app.domains.routines.service import autonomy_management
         monkeypatch.setattr(
-            agent_service,
+            autonomy_management,
             "run_sqlite_session_immediate",
             lambda *_args, **_kwargs: (_ for _ in ()).throw(
                 agent_service.SqliteBusyRetryExhausted("busy")

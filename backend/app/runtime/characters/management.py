@@ -1,4 +1,11 @@
 from __future__ import annotations
+from app.domains.routines.contracts.autonomy_management import AutonomyWorkflows
+from app.domains.routines.service import autonomy_management
+from app.domains.routines.repository.autonomy import _lock_server_llm_autonomy_capacity
+from app.domains.routines.service.autonomy_management import _reject_server_llm_autonomy_capacity, _reject_world_autonomy_capacity, _log_autonomy_activation_rejection
+from app.runtime.resident.autonomy_reads import count_effective_active_server_llm_autonomy_agents as _effective_server_llm_autonomy_count
+from app.domains.identity.service import profile as identity_profile
+from app.domains.routines.constants import SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE, WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE, SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY
 from app.domains.routines.schemas.tendency import _TendencyRangePayload
 from app.domains.routines.schemas.tendency import _TendencyActionRangesPayload
 from app.domains.routines.schemas.tendency import _IndependentPostInitiativePayload
@@ -174,15 +181,6 @@ from app.domains.world_characters.public import (
 )
 
 
-SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE = (
-    "global_autonomy_capacity_full: 로컬 runtime 전체 자율활동 정원이 가득 찼습니다. "
-    "다른 앵무의 자율활동을 끄거나 runtime 설정을 확인해주세요."
-)
-WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE = (
-    "world_autonomy_capacity_full: 이 World에서 동시에 자율활동할 수 있는 "
-    "앵무 50개의 상한에 도달했습니다."
-)
-SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY = 6_180_100
 AGENT_DETAIL_ACTIVITY_LIMIT = 200
 RUN_NOW_COOLDOWN = timedelta(minutes=30)
 FIRST_GREETING_COOLDOWN = timedelta(minutes=30)
@@ -362,67 +360,14 @@ def _ensure_initial_image_settings(db: Session, character_id: str) -> None:
     db.refresh(setting)
 
 
-def _lock_server_llm_autonomy_capacity(db: Session) -> None:
-    if db.bind is None or db.bind.dialect.name != "postgresql":
-        return
-    db.execute(
-        text("select pg_advisory_xact_lock(:lock_key)"),
-        {"lock_key": SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY},
-    )
 
 
-def _effective_server_llm_autonomy_count(
-    db: Session, *, exclude_character_ids: set[str] | None = None
-) -> int:
-    return agent_crud.count_effective_active_server_llm_autonomy_agents(
-        db, exclude_character_ids=exclude_character_ids
-    )
 
 
-def _reject_server_llm_autonomy_capacity(
-    *,
-    active_count: int,
-    max_active: int,
-) -> None:
-    raise AgentAutonomyCapacityError(
-        SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE,
-        reason_code="global_autonomy_capacity_full",
-        active_count=active_count,
-        max_active=max_active,
-    )
 
 
-def _reject_world_autonomy_capacity(
-    *,
-    active_count: int,
-    max_active: int,
-) -> None:
-    raise AgentAutonomyCapacityError(
-        WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE,
-        reason_code="world_autonomy_capacity_full",
-        active_count=active_count,
-        max_active=max_active,
-    )
 
 
-def _log_autonomy_activation_rejection(
-    db: Session,
-    *,
-    user_id: str,
-    character_id: str,
-    error: AgentAutonomyCapacityError,
-) -> None:
-    agent_crud.log_activity(
-        db,
-        user_id=user_id,
-        character_id=character_id,
-        action_type="autonomy_activation_rejected",
-        target_post_id=None,
-        reason=error.reason_code,
-        result=(
-            f"active_count={error.active_count}; max_active={error.max_active}"
-        ),
-    )
 
 
 def get_agent(db: Session, user: models.User, character_id: str) -> schemas.AgentDetailRead:
@@ -1371,261 +1316,10 @@ async def analyze_tendency(
             raise CredentialSyncError(release_error)
 
 
-def activate_agent(
-    db: Session, user: models.User, character_id: str
-) -> schemas.AgentDetailRead:
-    user_id = user.id
-    try:
-        if db.get_bind().dialect.name == "sqlite":
-            with unit_of_work.deferred_commits():
-                activated_character_id = run_sqlite_session_immediate(
-                    db,
-                    lambda: _activate_agent_uow(
-                        db,
-                        user_id=user_id,
-                        character_id=character_id,
-                        commit=False,
-                    ),
-                )
-        else:
-            activated_character_id = _activate_agent_uow(
-                db,
-                user_id=user_id,
-                character_id=character_id,
-                commit=True,
-            )
-        activated_character = db.get(character_models.Character, activated_character_id)
-        if activated_character is None:
-            raise AgentNotFoundError(activated_character_id)
-        return _build_agent_detail(db, activated_character)
-    except AgentAutonomyCapacityError as exc:
-        db.rollback()
-        _log_autonomy_activation_rejection(
-            db,
-            user_id=user_id,
-            character_id=character_id,
-            error=exc,
-        )
-        raise
-    except SqliteBusyRetryExhausted as exc:
-        raise AgentAutonomyRetryableError(
-            "autonomy_activation_retryable: 자율활동 상태를 동시에 변경하고 있어요. "
-            "잠시 후 다시 시도해주세요."
-        ) from exc
 
 
-def _activate_agent_uow(
-    db: Session,
-    *,
-    user_id: str,
-    character_id: str,
-    commit: bool,
-) -> str:
-    user = db.get(models.User, user_id)
-    if user is None:
-        raise AgentNotFoundError(character_id)
-    character = _get_owned_character(db, user, character_id)
-    _ensure_not_suspended(character)
-    _ensure_llm_mode(character)
-    maintenance_service.ensure_auto_ticks_available(db)
-    current_setting = agent_crud.ensure_setting(db, character.id, commit=commit)
-    readiness = _ensure_activity_profile_ready(
-        db,
-        character=character,
-        setting=current_setting,
-    )
-    credential = agent_crud.get_character_credential(db, character.id)
-    if credential is None or not credential.enabled:
-        raise CredentialRequiredError("Agent credential is required before activation")
-
-    current_assigned_slot = slot_queries.get_assigned_slot(db, character.id)
-    selected_world_character = selected_autonomous_world_character(
-        db, character_id=character.id
-    )
-    if (
-        current_setting.auto_enabled
-        and current_assigned_slot is not None
-        and (
-            selected_world_character is None
-            or selected_world_character.autonomous_enabled
-        )
-    ):
-        return character.id
-
-    # Fixed lock order: global first, then exact World. SQLite callers already
-    # hold the single writer through BEGIN IMMEDIATE.
-    _lock_server_llm_autonomy_capacity(db)
-    if selected_world_character is not None:
-        lock_world_autonomy_capacity(
-            db, world_id=selected_world_character.world_id
-        )
-        max_world_active = settings.world_autonomy_max_active_characters
-        world_active_count = count_enabled_autonomous_world_characters(
-            db,
-            world_id=selected_world_character.world_id,
-            exclude_character_ids={character.id},
-        )
-        if world_active_count >= max_world_active:
-            _reject_world_autonomy_capacity(
-                active_count=world_active_count,
-                max_active=max_world_active,
-            )
-    else:
-        world_active_count = 0
-        max_world_active = settings.world_autonomy_max_active_characters
-
-    max_active = settings.server_llm_autonomy_max_active_agents
-    active_count_without_target = _effective_server_llm_autonomy_count(
-        db, exclude_character_ids={character.id}
-    )
-    if active_count_without_target >= max_active:
-        _reject_server_llm_autonomy_capacity(
-            active_count=active_count_without_target,
-            max_active=max_active,
-        )
-
-    heartbeat_interval_seconds = agent_activity_policy.tick_interval_seconds(current_setting)
-    slot = agent_run_service.assign_resident_slot(
-        db,
-        user_id=user.id,
-        character_id=character.id,
-        credential_id=credential.id,
-        heartbeat_interval_seconds=heartbeat_interval_seconds,
-        commit=False,
-    )
-    if _resident_openclaw_sync_enabled():
-        try:
-            _bind_slot_auth_profile(
-                slot, user_id=user.id, character=character, credential=credential
-            )
-            _reload_openclaw_secrets_sync()
-        except CredentialSyncError:
-            try:
-                _release_slot_auth_profile(
-                    slot,
-                    user_id=user.id,
-                    character_id=character.id,
-                    credential=credential,
-                )
-                _reload_openclaw_secrets_sync()
-            except CredentialSyncError:
-                pass
-            slot_assignments.release_resident_slot_assignment(
-                db,
-                user_id=user.id,
-                character_id=character.id,
-                commit=False,
-            )
-            current_setting.auto_enabled = False
-            set_active_world_character_autonomy(
-                db,
-                character_id=character.id,
-                enabled=False,
-            )
-            character.status = "inactive"
-            if commit:
-                db.commit()
-            else:
-                db.flush()
-            raise
-    current_setting.auto_enabled = True
-    set_active_world_character_autonomy(
-        db,
-        character_id=character.id,
-        enabled=True,
-    )
-    character.status = "active"
-    active_count = _effective_server_llm_autonomy_count(db)
-    world_active_count = (
-        count_enabled_autonomous_world_characters(
-            db,
-            world_id=selected_world_character.world_id,
-        )
-        if selected_world_character is not None
-        else 0
-    )
-    if commit:
-        db.commit()
-    else:
-        db.flush()
-    agent_crud.log_activity(
-        db,
-        user_id=user.id,
-        character_id=character.id,
-        action_type="activated",
-        target_post_id=None,
-        reason="user_enabled_autonomy",
-        result=(
-            f"Assigned resident slot {slot.agent_id} with credential {credential.id}. "
-            f"active_count={active_count}; max_active={max_active}; "
-            f"world_id={readiness.world_id}; world_active_count={world_active_count}; "
-            f"max_world_active={max_world_active}"
-        ),
-    )
-    db.refresh(character)
-    return character.id
 
 
-def deactivate_agent(
-    db: Session, user: models.User, character_id: str
-) -> schemas.AgentDetailRead:
-    character = _get_owned_character(db, user, character_id)
-    current_setting = agent_crud.ensure_setting(db, character.id)
-    assigned_slot = slot_queries.get_assigned_slot(db, character.id)
-    if assigned_slot is None and not current_setting.auto_enabled:
-        changed = set_active_world_character_autonomy(
-            db,
-            character_id=character.id,
-            enabled=False,
-        )
-        if changed:
-            db.commit()
-        return _build_agent_detail(db, character)
-    if (
-        assigned_slot is not None
-        and assigned_slot.status == routine_constants.SLOT_STATUS_RUNNING
-    ):
-        raise ActiveSlotBusyError(
-            f"agent {character.id}가 지금 실행 중이라 끌 수 없습니다. 잠시 뒤 다시 시도해주세요."
-        )
-    credential = agent_crud.get_character_credential(db, character.id)
-    if (
-        assigned_slot is not None
-        and credential is not None
-        and _resident_openclaw_sync_enabled()
-    ):
-        _release_slot_auth_profile(
-            assigned_slot,
-            user_id=user.id,
-            character_id=character.id,
-            credential=credential,
-        )
-        _reload_openclaw_secrets_sync()
-    slot_assignments.release_resident_slot_assignment(
-        db,
-        user_id=user.id,
-        character_id=character.id,
-        commit=False,
-    )
-    current_setting.auto_enabled = False
-    set_active_world_character_autonomy(
-        db,
-        character_id=character.id,
-        enabled=False,
-    )
-    character.status = "inactive"
-    db.commit()
-    agent_crud.log_activity(
-        db,
-        user_id=user.id,
-        character_id=character.id,
-        action_type="deactivated",
-        target_post_id=None,
-        reason="user_disabled_autonomy",
-        result="OpenClaw slot assignment was released.",
-    )
-    db.refresh(character)
-    return _build_agent_detail(db, character)
 
 
 def delete_agent(
@@ -1719,26 +1413,6 @@ def _activity_profile_readiness(
     )
 
 
-def _ensure_activity_profile_ready(
-    db: Session,
-    *,
-    character: character_models.Character,
-    setting: models.AgentActivitySetting,
-) -> schemas.AgentActivityProfileReadinessRead:
-    readiness = _activity_profile_readiness(
-        db,
-        character=character,
-        setting=setting,
-    )
-    if readiness.ready:
-        return readiness
-    if readiness.source == "world_community_profile":
-        raise ActivityProfileRequiredError(
-            "이 World의 활동 준비를 완료해주세요."
-        )
-    raise TendencyAnalysisRequiredError(
-        "커뮤니티 성향 분석을 먼저 실행해주세요."
-    )
 
 
 
@@ -2697,3 +2371,44 @@ def get_settings(db: Session, user: models.User, character_id: str) -> schemas.A
 
 def update_settings(db: Session, user: models.User, character_id: str, data: schemas.AgentActivitySettingUpdate) -> schemas.AgentActivitySettingRead:
     return activity_management.update_settings(db, user, character_id, data, references=build_activity_management_references())
+
+
+def build_autonomy_workflows() -> AutonomyWorkflows[schemas.AgentDetailRead]:
+    return AutonomyWorkflows(
+        get_user=identity_profile.get_user,
+        get_character=character_profile.get_character,
+        get_owned_character=_get_owned_character,
+        ensure_not_suspended=_ensure_not_suspended,
+        ensure_llm_mode=_ensure_llm_mode,
+        ensure_auto_ticks_available=maintenance_service.ensure_auto_ticks_available,
+        evaluate_readiness=_activity_profile_readiness,
+        get_credential=agent_crud.get_character_credential,
+        select_world_character=selected_autonomous_world_character,
+        lock_world_capacity=lock_world_autonomy_capacity,
+        count_world_autonomy=count_enabled_autonomous_world_characters,
+        count_effective_agents=_effective_server_llm_autonomy_count,
+        set_world_autonomy=set_active_world_character_autonomy,
+        set_character_status=character_mutations.set_activity_status,
+        assign_slot=agent_run_service.assign_resident_slot,
+        sync_enabled=_resident_openclaw_sync_enabled,
+        bind_profile=_bind_slot_auth_profile,
+        release_profile=_release_slot_auth_profile,
+        reload_secrets=_reload_openclaw_secrets_sync,
+        build_detail=_build_agent_detail,
+        character_not_found_error=AgentNotFoundError,
+        credential_required_error=CredentialRequiredError,
+        credential_sync_error=CredentialSyncError,
+        slot_busy_error=ActiveSlotBusyError,
+    )
+
+
+def activate_agent(db: Session, user: models.User, character_id: str) -> schemas.AgentDetailRead:
+    return autonomy_management.activate_agent(db, user, character_id, workflows=build_autonomy_workflows())
+
+
+def deactivate_agent(db: Session, user: models.User, character_id: str) -> schemas.AgentDetailRead:
+    return autonomy_management.deactivate_agent(db, user, character_id, workflows=build_autonomy_workflows())
+
+
+def _ensure_activity_profile_ready(db: Session, *, character: character_models.Character, setting: models.AgentActivitySetting) -> schemas.AgentActivityProfileReadinessRead:
+    return autonomy_management._ensure_activity_profile_ready(db, character=character, setting=setting, workflows=build_autonomy_workflows())

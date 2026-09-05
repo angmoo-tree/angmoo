@@ -395,3 +395,16 @@ TENDENCY_PERSONA_CHARACTER_PATTERN = re.compile(
     r"은|는|이|가|의|을|를|에게|에겐|께|로|로서|처럼|답게|다운|"
     r"입니다|입니다\.|이고|이며|라서|라면|만의|마다)"
 )
+
+
+SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE = (
+    "global_autonomy_capacity_full: 로컬 runtime 전체 자율활동 정원이 가득 찼습니다. "
+    "다른 앵무의 자율활동을 끄거나 runtime 설정을 확인해주세요."
+)
+
+WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE = (
+    "world_autonomy_capacity_full: 이 World에서 동시에 자율활동할 수 있는 "
+    "앵무 50개의 상한에 도달했습니다."
+)
+
+SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY = 6_180_100

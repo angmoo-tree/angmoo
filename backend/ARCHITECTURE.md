@@ -784,3 +784,10 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 `policies/execution_results.py`는 원래 실행 식별자와 답글 결과 대응, 성공한 행동의 근거 선택을 담당합니다. 실제 provider 호출과 저장은 하지 않습니다. Graph의 규모 자체를 기준으로 전달 파일을 추가하지 않으며, 업무 판단과 실행을 연결하는 역할을 기준으로 나눕니다. 남은 Memory·Point·Lore의 원래 호출은 이미 구현된 별도 소유 source와 순차 통합하는 항목이며, 해당 구현을 다시 만들지 않습니다.
 
 실제 graph 테스트는 `tests/routines/test_resident_graph.py`에 있습니다. 과거 파일에 함께 있던 DirectLlm·AgentWriting·AgentRun 검사는 원본과 fixture를 보존하여 해당 소유 전환에서 정리합니다. 전체 API/ORM 계약과 원본 source·assertion·node 보존은 별도의 통합 검증에서 확인합니다.
+
+
+### 자율활동 활성화와 비활성화
+
+`routines/service/autonomy_management.py`는 활성화·비활성화의 권한, 준비 상태, 정원, 슬롯 배정과 보상 순서를 소유합니다. 전역 잠금을 먼저 얻고 해당 World 잠금을 얻는 순서를 유지합니다. SQLite에서는 기존 immediate transaction과 지연 commit 구간을 사용하며, 정원 실패는 원래 rollback 뒤 거절 기록을 저장합니다.
+
+다른 도메인의 User·Character·credential·WorldCharacter는 같은 Session으로 연결합니다. 상태를 바꿀 때는 Character의 실제 대입 함수를 사용하고, provider profile의 bind/release/reload는 런타임 협력으로 실행합니다. `runtime/resident/autonomy_reads.py`는 기존 Character/활동 설정/배정 슬롯의 두 집합 SQL을 그대로 소유하며, 도메인 간 join을 개별 조회로 쪼개지 않습니다.

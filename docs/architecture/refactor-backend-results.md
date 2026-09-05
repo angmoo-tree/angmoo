@@ -1306,3 +1306,14 @@ LG 테스트는 원래 node map을 유지하며 Routines 경로로 옮겨졌고,
 최종 고정 tree의 Routines·LangGraph·Social UoW·Package import 회귀 **460 PASS / 5 warnings / 248.61초**. 현재 경계 **802modules / 2758edges / exactlegacy201**, L4 **802modules / 97parity**, deferred runtime **22files** PASS. 원래 source/split/assertion/suppression/APIORM/node 진단은 모두0오류, **protected2260/current2293**이다. main에 이미 기록된 signed869bae 두 경로의 원형을 확인했으며 새 snapshot을 메모리에 추가하지도 않았다. Frozen/checkpoint/additions는 불변이다. 전체 stock capture/Hosted CI/PR/머지는 parent의 순차 통합 단계이며 이 focused 결과로 승격하지 않는다.
 
 C7-B 이후 실제 활동 관리·HTTP와 B5/B7/Lore/Point 최신 협력, G5/G06은 각각 원래 소유 source에서 합류한다. 미전환 협력은 기존 실제 구현을 유지했고 다른 source의 업무 로직을 복제하지 않았다.
+
+
+## AR-B4-C7-B — 자율활동 활성화·비활성화
+
+실제 활성화·비활성화·준비 정책 7개를 Routines 서비스로, 전역 transaction lock 1개를 Routines repository로, 원래 두 집합을 합산하는 cross-owner query 1개를 runtime aggregate로 옮겼다. Character.status의 원래 대입 3개는 Character mutations의 동일 객체 대입으로 연결했다. 전역→World 잠금, 이미 활성화된 경우의 반환, credential sync 실패 보상, commit/flush와 rollback 후 거절 로그의 원래 순서는 그대로이다. 원래 9개 본문은 정확한 collaborator/type/status 복원 뒤 AST가 동일하다. 초기 95개 통과 후 SQLite 재시도 mock을 실제 service 위치로 바꿨고 해당 1개와 tendency48 검사는 모두 통과했다. 관리 HTTP와 나머지 provider 실행 조립은 후속 C7 범위이다.
+
+최종 C7-B 관련 176개 통과, 기존 PostgreSQL 환경 1개 skip, 기존 경고 5개를 확인했다. 네 테스트의 원래 namespace를 실제 소유 함수에 명시 바인딩한 뒤 해당 4개도 재통과했다. 원래 assertion AST는 그대로이고 제품 alias나 검사기 예외는 추가하지 않았다. 현재 경계는 775 modules / 2662 edges / exact legacy 202 / cycle 0이다. 기존 여섯 보존 검사의 읽기 전용 진단은 모두 오류 0, 보호 노드 2139 / 현재 2287이다. 선행 도입 원장 연결과 원래 stock gate는 root의 순차 통합에서 처리한다.
+
+### C7-B의 후속 통합 검증
+
+LG-C까지 합류한 `60def90`에 원래 signed C7-B `50d50ed`를 병합했다. 제품 충돌 없이 같은 활성화·잠금·Character 상태 변경 협력을 유지했고, 문서와 symbol별 지도는 양쪽 원래 기록을 보존했다. 실제 통합 tree의 활동 한도·tendency·resident 실행 바인딩 회귀는 **116 passed / 4 warnings / 18.32초**이며 경계는 **806modules / 2784edges / exactlegacy201**, L4는 **806modules / 97parity**다. 원래 첫 도입 소스의 archive 수집은 별도 고정 입력에서 진행 중이며, 아직 원장 append·전체 backend·stock 보존·Hosted CI 완료를 의미하지 않는다.

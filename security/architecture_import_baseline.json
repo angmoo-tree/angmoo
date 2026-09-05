@@ -1,7 +1,7 @@
 {
-  "edge_count": 2758,
-  "external_import_count": 2482,
-  "module_count": 802,
+  "edge_count": 2784,
+  "external_import_count": 2492,
+  "module_count": 806,
   "modules": [
     {
       "external_imports": [],
@@ -3755,6 +3755,22 @@
       "external_imports": [
         "__future__",
         "dataclasses",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.models",
+        "app.domains.routines.schemas"
+      ],
+      "module": "app.domains.routines.contracts.autonomy_management",
+      "path": "backend/app/domains/routines/contracts/autonomy_management.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
         "datetime"
       ],
       "imports": [],
@@ -4254,6 +4270,18 @@
     },
     {
       "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.constants"
+      ],
+      "module": "app.domains.routines.repository.autonomy",
+      "path": "backend/app/domains/routines/repository/autonomy.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "sqlalchemy",
         "sqlalchemy.orm"
@@ -4685,6 +4713,32 @@
       ],
       "module": "app.domains.routines.service.activity_settings",
       "path": "backend/app/domains/routines/service/activity_settings.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.config",
+        "app.core.sqlite_concurrency",
+        "app.core.unit_of_work",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.autonomy_management",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.repository.autonomy",
+        "app.domains.routines.repository.slots",
+        "app.domains.routines.service.activity_logs",
+        "app.domains.routines.service.activity_settings",
+        "app.domains.routines.service.slot_assignments",
+        "app.domains.routines.service.tick_schedule",
+        "app.exceptions"
+      ],
+      "module": "app.domains.routines.service.autonomy_management",
+      "path": "backend/app/domains/routines/service/autonomy_management.py",
       "wildcard_imports": []
     },
     {
@@ -8961,14 +9015,18 @@
         "app.domains.characters.service.profile",
         "app.domains.characters.service.promotion",
         "app.domains.identity.service.demo_access",
+        "app.domains.identity.service.profile",
         "app.domains.routines.constants",
         "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.autonomy_management",
         "app.domains.routines.exceptions",
+        "app.domains.routines.repository.autonomy",
         "app.domains.routines.repository.feed_cues",
         "app.domains.routines.repository.runs",
         "app.domains.routines.repository.slots",
         "app.domains.routines.schemas.tendency",
         "app.domains.routines.service.activity_management",
+        "app.domains.routines.service.autonomy_management",
         "app.domains.routines.service.feed_cues",
         "app.domains.routines.service.runs",
         "app.domains.routines.service.slot_assignments",
@@ -8984,6 +9042,7 @@
         "app.policies.name_policy",
         "app.runtime.memory_privacy",
         "app.runtime.resident.activity_policy",
+        "app.runtime.resident.autonomy_reads",
         "app.runtime.resident.execution",
         "app.runtime.world_characters.cleanup",
         "app.runtime.world_characters.queries",
@@ -10215,6 +10274,19 @@
       ],
       "module": "app.runtime.resident.activity_scope",
       "path": "backend/app/runtime/resident/activity_scope.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.routines.models"
+      ],
+      "module": "app.runtime.resident.autonomy_reads",
+      "path": "backend/app/runtime/resident/autonomy_reads.py",
       "wildcard_imports": []
     },
     {
