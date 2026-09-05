@@ -88,15 +88,15 @@ PARITY_WORKLOADS = (
         "contract": "Successful social events create directional relationship state and evidence once; failed writes create none",
         "tests": [
             "backend/tests/test_social_event_runtime.py",
-            "backend/tests/test_activity_proposal_runtime.py",
+            "backend/tests/relationships/test_activity_proposals.py",
         ],
     },
     {
         "phase": "P7",
         "contract": "Graph projection is replayable, World-isolated, idempotent, outage-tolerant, and query-template compatible",
         "tests": [
-            "backend/tests/test_graph_projection_commands.py",
-            "backend/tests/test_graph_projection_replay.py",
+            "backend/tests/relationships/test_projection_commands.py",
+            "backend/tests/relationships/test_projection_replay.py",
             "backend/tests/test_graph_projection_worker.py",
             "backend/tests/test_relationship_graph_repository.py",
             "backend/tests/test_relationship_graph_api.py",

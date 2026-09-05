@@ -131,9 +131,9 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         "services/feed_reaction_planner.py": {"_api_key"},
         "services/langgraph_resident.py": {"_decrypt_api_key"},
         "domains/chat/service/settings.py": {"_resolve_message_credential"},
-        "services/post_image_generation.py": {
-            "_ensure_visual_identity",
-            "_refine_image_prompt",
+        "runtime/social/image_generation.py": {
+            "_generate_visual_identity_payload",
+            "_generate_image_prompt_payload",
             "_image_key_for_source",
         },
         "domains/routine_posts/client.py": {"_api_key"},

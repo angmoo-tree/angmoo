@@ -144,7 +144,7 @@ def test_relationship_graph_cleanup_removes_horizontal_compatibility_modules() -
     assert "app.runtime.graph_projection.replay" in modules
     assert "app.runtime.relationships.sqlalchemy_social_event" in modules
     assert (
-        "app.domains.relationships.infrastructure.sqlalchemy_social_models"
+        "app.domains.relationships.models.social"
         in modules
     )
 

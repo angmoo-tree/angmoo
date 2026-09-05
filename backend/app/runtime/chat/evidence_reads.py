@@ -13,14 +13,10 @@ from app.domains.memory.contracts.inspector import MemoryItemDetail
 from app.domains.memory.service.inspector import MemoryReadService
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.contracts.source_evidence import MemorySourceEvidenceReaderPort
-from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
-    RelationshipState,
-)
+from app.domains.relationships.models.social import RelationshipState
 from app.domains.world_characters.models import WorldCharacter
 from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
-from app.runtime.social.sqlalchemy_today_activity import (
-    SqlAlchemyTodaySocialActivityReader,
-)
+from app.runtime.social.today_activity import today_social_activity_reader as SqlAlchemyTodaySocialActivityReader
 
 
 def source_reader(db: Session) -> MemorySourceEvidenceReaderPort:

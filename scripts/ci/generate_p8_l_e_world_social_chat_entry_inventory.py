@@ -81,7 +81,7 @@ def _backend_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/runtime/social/sqlalchemy_read_repository.py",
+        "backend/app/domains/social/service/manual_feed.py",
         (
             "author_profile_capability",
             "author_world_character_id",
@@ -89,7 +89,7 @@ def _backend_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/api/v1/routes/manual_social.py",
+        "backend/app/domains/social/router.py",
         (
             '"/{world_id}/world-characters/{world_character_id}/social-profile"',
             'Literal["posts", "replies", "likes"]',
@@ -97,13 +97,19 @@ def _backend_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+        "backend/app/domains/social/service/world_profile.py",
         (
-            "SqlAlchemyWorldCharacterSocialProfileReader",
-            "world-character-social-profile-cursor-v1",
-            "received_like_count",
+            "WorldSocialProfileService",
             "_blocked_world_character_ids",
         ),
+    )
+    _require_text(
+        "backend/app/domains/social/repository/world_profile.py",
+        ("received_like_count", "_blocked_world_character_ids"),
+    )
+    _require_text(
+        "backend/app/domains/social/service/profile_cursor.py",
+        ("world-character-social-profile-cursor-v1",),
     )
     return {
         "profile_operations": [

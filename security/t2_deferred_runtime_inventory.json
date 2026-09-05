@@ -25,24 +25,6 @@
       "owner_phases": [
         "L0-L4 hosted extension compatibility audit"
       ],
-      "path": "backend/app/main.py"
-    },
-    {
-      "markers": [
-        "hosted-extension-type"
-      ],
-      "owner_phases": [
-        "L0-L4 hosted extension compatibility audit"
-      ],
-      "path": "backend/app/main.py"
-    },
-    {
-      "markers": [
-        "hosted-extension-type"
-      ],
-      "owner_phases": [
-        "L0-L4 hosted extension compatibility audit"
-      ],
       "path": "backend/app/public_main.py"
     },
     {
@@ -138,6 +120,24 @@
         "L0-L4 hosted extension compatibility audit"
       ],
       "path": "backend/tests/test_m4_public_runtime.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/test_post_image_generation.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "backend/tests/test_post_image_generation.py"
     },
     {
       "markers": [

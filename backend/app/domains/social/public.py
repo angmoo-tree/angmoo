@@ -11,7 +11,6 @@ from app.domains.social.application import (
     current_social_search,
     find_keyword_post_ids,
     observe_social_source,
-    read_world_character_social_profile,
     register_social_search,
     unregister_social_search,
 )
@@ -59,7 +58,6 @@ from app.domains.social.ports import (
     SocialObservationUnitOfWorkPort,
     SocialSearchIndexPort,
     SocialWriteUnitOfWorkPort,
-    WorldCharacterSocialProfileReader,
 )
 
 apply_validated_autonomous_social_result = apply_validated_autonomous_result
@@ -107,7 +105,6 @@ __all__ = [
     "WorldCharacterSocialProfilePage",
     "WorldCharacterSocialProfilePost",
     "WorldCharacterSocialProfileQuery",
-    "WorldCharacterSocialProfileReader",
     "WorldCharacterSocialProfileTab",
     "WorldCharacterSocialProfileValidationError",
     "apply_validated_autonomous_social_result",
@@ -116,7 +113,6 @@ __all__ = [
     "current_social_search",
     "find_keyword_post_ids",
     "observe_social_source",
-    "read_world_character_social_profile",
     "register_social_search",
     "unregister_social_search",
 ]

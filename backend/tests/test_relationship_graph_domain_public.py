@@ -7,7 +7,7 @@ from app.runtime.graph_projection.relationship_graph_read import (
 )
 from app.config import Settings
 from app.domains.relationships import public as relationships
-from app.domains.relationships.graph_read.errors import GraphReadBackendError
+from app.domains.relationships.exceptions import (GraphReadBackendError)
 from p7_graph_support import seed_projection_fixture, sqlite_engine
 
 

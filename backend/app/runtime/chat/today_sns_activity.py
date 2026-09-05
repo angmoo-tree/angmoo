@@ -2,9 +2,7 @@
 
 from sqlalchemy.orm import Session
 from app.domains.chat.service.today_sns_activity import TodaySnsSnapshotValidator
-from app.runtime.social.sqlalchemy_today_activity import (
-    SqlAlchemyTodaySocialActivityReader,
-)
+from app.runtime.social.today_activity import today_social_activity_reader as SqlAlchemyTodaySocialActivityReader
 
 
 def build_today_snapshot_validator(

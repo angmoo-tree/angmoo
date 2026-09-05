@@ -29,7 +29,7 @@ from app.domains.social.contracts.subjective_context import (  # noqa: E402
 from app.domains.social.public import TodaySocialActivityKind  # noqa: E402
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest  # noqa: E402
 from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION  # noqa: E402
-from app.runtime.social.sqlalchemy_today_activity import (  # noqa: E402
+from app.domains.social.constants import (  # noqa: E402
     MAX_TODAY_BRANCH_DEPTH, MAX_TODAY_QUERY_BATCH,
     MAX_TODAY_SOCIAL_RECORDS, MAX_TODAY_SOCIAL_SCAN,
 )

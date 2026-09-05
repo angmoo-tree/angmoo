@@ -1,3 +1,34 @@
+from app.runtime.social.profile_activity import profile_activity_service
+get_character_activity = profile_activity_service.get_character_activity
+from app.domains.social.service.feed import list_today_popular_posts, _today_start_utc, _post_reaction_score
+from app.runtime.social.discovery import discovery_service
+list_today_activity = discovery_service.list_today_activity
+search_nest = discovery_service.search_nest
+from app.domains.social.service.feed import list_posts, list_feed, list_following_feed, list_character_following_feed
+from app.domains.social.service.inbox import list_notifications_for_character, mark_character_notification_read
+from app.runtime.social.inbox import inbox_service
+list_notifications = inbox_service.list_notifications
+mark_notification_read = inbox_service.mark_notification_read
+from app.domains.social.service.profiles import (
+    follow_profile,
+    get_follow_status,
+    unfollow_profile,
+    get_user_profile,
+    get_character_profile,
+    get_user_profile_feed,
+    get_character_profile_feed,
+    get_user_profile_connections,
+    get_character_profile_connections,
+    _profile_ref,
+    _profile_connections_page,
+    _profile_list_item,
+    _viewer_follows_character,
+    _character_search_result,
+    _resolve_follower,
+    _resolve_target_profile,
+    _ensure_not_self_follow,
+)
+from app.domains.social.utils.limits import _safe_limit
 from app.domains.social.service.activity_results import _clip_text, _safe_topic_text, _body_preview, _fallback_topic_signature, build_post_created_activity_result
 from app.domains.social.service.notifications import _notify_post_owner, _notify_mentioned_characters
 from app.domains.social.service.timeline import _resolve_author_character, _can_delete_post, _reply_title, _quote_title, _timeline_world_scope, create_comment
@@ -1394,535 +1425,74 @@ def _raise_agent_tool_authorization_error(
     raise AgentRunAuthorizationError(detail)
 
 
-def list_posts(db: Session, *, limit: int = 20) -> list[schemas.PostSummary]:
-    return list_feed(db, limit=limit, content="all").items
-
-
-def list_feed(
-    db: Session,
-    *,
-    limit: int = 20,
-    cursor: str | None = None,
-    content: schemas.FeedContentFilter = "all",
-) -> schemas.FeedPage:
-    posts, next_cursor = community_crud.list_timeline_posts(
-        db, limit=_safe_limit(limit), cursor=cursor, content_filter=content
-    )
-    return schemas.FeedPage(
-        items=[
-            _post_summary(db, post)
-            for post in posts
-            if _is_post_public_context_visible(db, post)
-        ],
-        next_cursor=next_cursor,
-    )
-
-
-def list_today_popular_posts(
-    db: Session, *, limit: int = 2
-) -> list[schemas.PostSummary]:
-    day_start = _today_start_utc()
-    posts = list(
-        db.scalars(
-            select(models.Post)
-            .where(
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-                models.Post.reply_to_post_id.is_(None),
-                models.Post.created_at >= day_start,
-            )
-            .order_by(models.Post.created_at.desc(), models.Post.id.asc())
-        )
-    )
-    ranked_posts = [
-        summary
-        for summary in (
-            _post_summary(db, post)
-            for post in posts
-            if _is_post_public_context_visible(db, post)
-        )
-        if _post_reaction_score(summary) > 0
-    ]
-    safe_limit = max(1, min(limit, 10))
-    return sorted(
-        ranked_posts,
-        key=lambda post: (-_post_reaction_score(post), post.created_at),
-    )[:safe_limit]
-
-
-def list_today_activity(db: Session, *, limit: int = 3) -> list[schemas.TodayActivityRead]:
-    day_start = _today_start_utc()
-    post_types = ("post_created", "quoted")
-    reply_types = ("commented", "replied")
-    like_types = ("liked",)
-
-    rows = db.execute(
-        select(
-            models.Character.id,
-            models.Character.name,
-            models.Character.handle,
-            models.Character.avatar_url,
-            func.sum(
-                case((models.AgentActivityLog.action_type.in_(post_types), 1), else_=0)
-            ).label("post_count"),
-            func.sum(
-                case((models.AgentActivityLog.action_type.in_(reply_types), 1), else_=0)
-            ).label("reply_count"),
-            func.sum(
-                case((models.AgentActivityLog.action_type.in_(like_types), 1), else_=0)
-            ).label("like_count"),
-        )
-        .join(
-            models.AgentActivityLog,
-            models.AgentActivityLog.character_id == models.Character.id,
-        )
-        .where(models.AgentActivityLog.created_at >= day_start)
-        .where(
-            models.AgentActivityLog.action_type.not_in(
-                agent_crud.HIDDEN_ACTIVITY_ACTION_TYPES
-            )
-        )
-        .group_by(
-            models.Character.id,
-            models.Character.name,
-            models.Character.handle,
-            models.Character.avatar_url,
-        )
-    ).all()
-
-    rankings = []
-    for row in rows:
-        post_count = int(row.post_count or 0)
-        reply_count = int(row.reply_count or 0)
-        like_count = int(row.like_count or 0)
-        score = post_count * 3 + reply_count * 2 + like_count
-        if score <= 0:
-            continue
-        rankings.append(
-            schemas.TodayActivityRead(
-                character_id=row.id,
-                name=row.name,
-                handle=row.handle,
-                avatar_url=row.avatar_url,
-                post_count=post_count,
-                reply_count=reply_count,
-                like_count=like_count,
-                score=score,
-            )
-        )
-
-    safe_limit = max(1, min(limit, 50))
-    return sorted(rankings, key=lambda item: (-item.score, item.name))[:safe_limit]
-
-
-def _today_start_utc() -> datetime:
-    local_now = datetime.now(tz=agent_activity_policy.APP_TIMEZONE)
-    return datetime.combine(
-        local_now.date(), time.min, tzinfo=agent_activity_policy.APP_TIMEZONE
-    ).astimezone(UTC)
-
-
-def _post_reaction_score(post: schemas.PostSummary) -> int:
-    return (
-        post.like_count * 2
-        + post.reply_count
-        + post.repost_count * 2
-        + post.quote_count * 2
-    )
-
-
-def search_nest(
-    db: Session, *, query: str, limit: int = 20, offset: int = 0
-) -> schemas.SearchResults:
-    normalized_query = query.strip()
-    if not normalized_query:
-        return schemas.SearchResults(query="", posts=[], characters=[])
-    safe_limit = _safe_limit(limit)
-    safe_offset = max(0, offset)
-    posts, posts_next_offset = community_crud.search_posts(
-        db, normalized_query, limit=safe_limit, offset=safe_offset
-    )
-    characters, characters_next_offset = community_crud.search_characters(
-        db, normalized_query, limit=safe_limit, offset=safe_offset
-    )
-    return schemas.SearchResults(
-        query=normalized_query,
-        posts=[
-            _post_summary(db, post)
-            for post in posts
-            if _is_post_public_context_visible(db, post)
-        ],
-        characters=[_character_search_result(character) for character in characters],
-        posts_next_offset=posts_next_offset,
-        characters_next_offset=characters_next_offset,
-    )
-
-
-def list_following_feed(
-    db: Session,
-    user: models.User,
-    *,
-    limit: int = 20,
-    cursor: str | None = None,
-    content: schemas.FeedContentFilter = "all",
-) -> schemas.FeedPage:
-    followed_user_ids, followed_character_ids = community_crud.get_followed_profiles_for_user(
-        db, user.id
-    )
-    posts, next_cursor = community_crud.list_timeline_posts(
-        db,
-        limit=_safe_limit(limit),
-        cursor=cursor,
-        content_filter=content,
-        followed_user_ids=followed_user_ids,
-        followed_character_ids=followed_character_ids,
-    )
-    return schemas.FeedPage(
-        items=[
-            _post_summary(db, post)
-            for post in posts
-            if _is_post_public_context_visible(db, post)
-        ],
-        next_cursor=next_cursor,
-    )
-
-
-def list_character_following_feed(
-    db: Session,
-    user: models.User,
-    character_id: str,
-    *,
-    limit: int = 20,
-    cursor: str | None = None,
-    content: schemas.FeedContentFilter = "all",
-) -> schemas.FeedPage:
-    character = community_crud.get_character(db, character_id)
-    if character is None or character.deleted_at is not None:
-        raise CharacterNotFoundError(character_id)
-    if character.owner_id != user.id:
-        raise CharacterOwnershipError(
-            f"user {user.id} cannot read following feed for character {character.id}"
-        )
-    followed_user_ids, followed_character_ids = (
-        community_crud.get_followed_profiles_for_character(db, character.id)
-    )
-    posts, next_cursor = community_crud.list_timeline_posts(
-        db,
-        limit=_safe_limit(limit),
-        cursor=cursor,
-        content_filter=content,
-        followed_user_ids=followed_user_ids,
-        followed_character_ids=followed_character_ids,
-    )
-    return schemas.FeedPage(
-        items=[
-            _post_summary(db, post)
-            for post in posts
-            if _is_post_public_context_visible(db, post)
-        ],
-        next_cursor=next_cursor,
-    )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def follow_profile(
-    db: Session, user: models.User, data: schemas.FollowCreate
-) -> schemas.FollowRead:
-    follower_user, follower_character = _resolve_follower(db, user, data)
-    target_user, target_character = _resolve_target_profile(db, data.target_type, data.target_id)
-    _ensure_not_self_follow(follower_user, follower_character, target_user, target_character)
-    follow, created = community_crud.create_follow(
-        db,
-        follower_user=follower_user,
-        follower_character=follower_character,
-        target_user=target_user,
-        target_character=target_character,
-    )
-    if created:
-        community_crud.create_notification(
-            db,
-            notification_type="follow",
-            recipient_user_id=target_user.id if target_user else None,
-            recipient_character_id=target_character.id if target_character else None,
-            actor_user_id=follower_user.id if follower_user else None,
-            actor_character_id=follower_character.id if follower_character else None,
-        )
-    return schemas.FollowRead(
-        follower=_profile_ref(follower_user, follower_character),
-        target=_profile_ref(target_user, target_character),
-        created_at=follow.created_at,
-    )
-
-
-def get_follow_status(
-    db: Session, user: models.User, data: schemas.FollowCreate
-) -> schemas.FollowStatusRead:
-    follower_user, follower_character = _resolve_follower(db, user, data)
-    target_user, target_character = _resolve_target_profile(db, data.target_type, data.target_id)
-    _ensure_not_self_follow(follower_user, follower_character, target_user, target_character)
-    return schemas.FollowStatusRead(
-        following=community_crud.profile_follow_exists(
-            db,
-            follower_user=follower_user,
-            follower_character=follower_character,
-            target_user=target_user,
-            target_character=target_character,
-        )
-    )
-
-
-def unfollow_profile(db: Session, user: models.User, data: schemas.FollowCreate) -> None:
-    follower_user, follower_character = _resolve_follower(db, user, data)
-    target_user, target_character = _resolve_target_profile(db, data.target_type, data.target_id)
-    community_crud.delete_follow(
-        db,
-        follower_user=follower_user,
-        follower_character=follower_character,
-        target_user=target_user,
-        target_character=target_character,
-    )
-
-
-def get_user_profile(db: Session, user_id: str) -> schemas.ProfileRead:
-    user = community_crud.get_user(db, user_id)
-    if user is None:
-        raise ProfileNotFoundError(user_id)
-    return schemas.ProfileRead(
-        profile=_profile_ref(user, None),
-        post_count=community_crud.count_profile_posts(db, user_id=user.id),
-        reply_count=community_crud.count_profile_replies(db, user_id=user.id),
-        liked_post_count=community_crud.count_profile_likes(db, user_id=user.id),
-        received_like_count=community_crud.count_profile_received_likes(db, user_id=user.id),
-        follower_count=community_crud.count_profile_followers(db, user_id=user.id),
-        user_follower_count=community_crud.count_profile_followers(
-            db, user_id=user.id, follower_type="user"
-        ),
-        character_follower_count=community_crud.count_profile_followers(
-            db, user_id=user.id, follower_type="character"
-        ),
-        following_count=community_crud.count_profile_following(db, user_id=user.id),
-    )
-
-
-def get_character_profile(db: Session, character_id: str) -> schemas.ProfileRead:
-    character = community_crud.get_character(db, character_id)
-    if character is None:
-        raise ProfileNotFoundError(character_id)
-    return schemas.ProfileRead(
-        profile=_profile_ref(None, character),
-        execution_mode=character.execution_mode,  # type: ignore[arg-type]
-        post_count=community_crud.count_profile_posts(db, character_id=character.id),
-        reply_count=community_crud.count_profile_replies(db, character_id=character.id),
-        liked_post_count=community_crud.count_profile_likes(
-            db, character_id=character.id
-        ),
-        received_like_count=community_crud.count_profile_received_likes(
-            db, character_id=character.id
-        ),
-        follower_count=community_crud.count_profile_followers(db, character_id=character.id),
-        user_follower_count=community_crud.count_profile_followers(
-            db, character_id=character.id, follower_type="user"
-        ),
-        character_follower_count=community_crud.count_profile_followers(
-            db, character_id=character.id, follower_type="character"
-        ),
-        following_count=community_crud.count_profile_following(
-            db, character_id=character.id
-        ),
-        one_liner=character.one_liner,
-    )
-
-
-def get_user_profile_feed(
-    db: Session,
-    user_id: str,
-    *,
-    limit: int = 20,
-    cursor: str | None = None,
-    tab: str = "posts",
-) -> schemas.FeedPage:
-    if community_crud.get_user(db, user_id) is None:
-        raise ProfileNotFoundError(user_id)
-    safe_limit = _safe_limit(limit)
-    if tab == "replies":
-        posts, next_cursor = community_crud.list_profile_posts(
-            db, limit=safe_limit, cursor=cursor, author_user_id=user_id, replies=True
-        )
-    elif tab == "likes":
-        posts, next_cursor = community_crud.list_liked_profile_posts(
-            db, limit=safe_limit, cursor=cursor, user_id=user_id
-        )
-    else:
-        posts, next_cursor = community_crud.list_profile_posts(
-            db, limit=safe_limit, cursor=cursor, author_user_id=user_id
-        )
-    return schemas.FeedPage(
-        items=[
-            _post_summary(db, post)
-            for post in posts
-            if _is_post_public_context_visible(db, post)
-        ],
-        next_cursor=next_cursor,
-    )
-
-
-def get_character_profile_feed(
-    db: Session,
-    character_id: str,
-    *,
-    limit: int = 20,
-    cursor: str | None = None,
-    tab: str = "posts",
-) -> schemas.FeedPage:
-    if community_crud.get_character(db, character_id) is None:
-        raise ProfileNotFoundError(character_id)
-    safe_limit = _safe_limit(limit)
-    if tab == "replies":
-        posts, next_cursor = community_crud.list_profile_posts(
-            db,
-            limit=safe_limit,
-            cursor=cursor,
-            author_character_id=character_id,
-            replies=True,
-        )
-    elif tab == "likes":
-        posts, next_cursor = community_crud.list_liked_profile_posts(
-            db, limit=safe_limit, cursor=cursor, character_id=character_id
-        )
-    else:
-        posts, next_cursor = community_crud.list_profile_posts(
-            db, limit=safe_limit, cursor=cursor, author_character_id=character_id
-        )
-    return schemas.FeedPage(
-        items=[
-            _post_summary(db, post)
-            for post in posts
-            if _is_post_public_context_visible(db, post)
-        ],
-        next_cursor=next_cursor,
-    )
-
-
-def get_user_profile_connections(
-    db: Session,
-    user_id: str,
-    *,
-    tab: str = "following",
-    limit: int = 10,
-    cursor: str | None = None,
-    viewer_user: models.User | None = None,
-) -> schemas.ProfileListPage:
-    if community_crud.get_user(db, user_id) is None:
-        raise ProfileNotFoundError(user_id)
-    return _profile_connections_page(
-        db,
-        user_id=user_id,
-        tab=tab,
-        limit=limit,
-        cursor=cursor,
-        viewer_user=viewer_user,
-    )
-
-
-def get_character_profile_connections(
-    db: Session,
-    character_id: str,
-    *,
-    tab: str = "following",
-    limit: int = 10,
-    cursor: str | None = None,
-    viewer_user: models.User | None = None,
-) -> schemas.ProfileListPage:
-    if community_crud.get_character(db, character_id) is None:
-        raise ProfileNotFoundError(character_id)
-    return _profile_connections_page(
-        db,
-        character_id=character_id,
-        tab=tab,
-        limit=limit,
-        cursor=cursor,
-        viewer_user=viewer_user,
-    )
-
-
-def list_notifications(
-    db: Session, user: models.User, *, limit: int = 50, cursor: str | None = None
-) -> schemas.NotificationPage:
-    notifications, next_cursor = community_crud.list_notifications(
-        db, user=user, limit=max(1, min(limit, 100)), cursor=cursor
-    )
-    return schemas.NotificationPage(
-        items=[_notification_read(db, item) for item in notifications],
-        next_cursor=next_cursor,
-    )
-
-
-def mark_notification_read(
-    db: Session, user: models.User, notification_id: int
-) -> schemas.NotificationRead:
-    notification = community_crud.get_notification_for_user(
-        db, user=user, notification_id=notification_id
-    )
-    if notification is None:
-        raise NotificationNotFoundError(notification_id)
-    return _notification_read(db, community_crud.mark_notification_read(db, notification))
-
-
-def list_notifications_for_character(
-    db: Session,
-    *,
-    user_id: str,
-    character_id: str,
-    limit: int = 50,
-    cursor: str | None = None,
-) -> schemas.NotificationPage:
-    notifications, next_cursor = community_crud.list_notifications_for_agent_page(
-        db,
-        user_id=user_id,
-        character_id=character_id,
-        limit=max(1, min(limit, 100)),
-        cursor=cursor,
-    )
-    return schemas.NotificationPage(
-        items=[_notification_read(db, item) for item in notifications],
-        next_cursor=next_cursor,
-    )
-
-
-def mark_character_notification_read(
-    db: Session, *, user_id: str, character_id: str, notification_id: int
-) -> schemas.NotificationRead:
-    notification = community_crud.get_notification_for_agent(
-        db, user_id=user_id, character_id=character_id, notification_id=notification_id
-    )
-    if notification is None:
-        raise NotificationNotFoundError(notification_id)
-    return _notification_read(db, community_crud.mark_notification_read(db, notification))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def create_agent_tool_comment(
@@ -4400,14 +3970,6 @@ def save_agent_tool_character_state(
     return state
 
 
-def get_character_activity(
-    db: Session, character_id: str
-) -> schemas.CharacterActivityRead:
-    character = community_crud.get_character(db, character_id)
-    if character is None or character.deleted_at is not None:
-        raise CharacterNotFoundError(character_id)
-
-    return community_crud.get_character_activity(db, character)
 
 
 def _get_agent_tool_run(
@@ -4500,8 +4062,6 @@ def _ensure_tick_action_allowed(
         )
 
 
-def _safe_limit(limit: int) -> int:
-    return max(1, min(limit, 100))
 
 
 
@@ -4510,155 +4070,14 @@ def _safe_limit(limit: int) -> int:
 
 
 
-def _profile_ref(
-    user: models.User | None, character: models.Character | None
-) -> schemas.ProfileRef:
-    if character is not None:
-        if character.deleted_at is not None:
-            return schemas.ProfileRef(
-                profile_type="character",
-                id=character.id,
-                display_name=DELETED_CHARACTER_NAME,
-                handle=None,
-                avatar_url=None,
-                banner_url=None,
-            )
-        return schemas.ProfileRef(
-            profile_type="character",
-            id=character.id,
-            display_name=character.name,
-            handle=character.handle,
-            avatar_url=character.avatar_url,
-            banner_url=character.banner_url,
-        )
-    if user is None:
-        raise ProfileNotFoundError("profile")
-    return schemas.ProfileRef(
-        profile_type="user",
-        id=user.id,
-        display_name=user.display_name,
-    )
 
 
-def _profile_connections_page(
-    db: Session,
-    *,
-    user_id: str | None = None,
-    character_id: str | None = None,
-    tab: str,
-    limit: int,
-    cursor: str | None,
-    viewer_user: models.User | None,
-) -> schemas.ProfileListPage:
-    safe_limit = _safe_limit(limit)
-    if tab == "character_followers":
-        rows, next_cursor = community_crud.list_profile_followers(
-            db,
-            user_id=user_id,
-            character_id=character_id,
-            follower_type="character",
-            limit=safe_limit,
-            cursor=cursor,
-        )
-        items = [
-            _profile_list_item(
-                db,
-                user_id=row.follower_user_id,
-                character_id=row.follower_character_id,
-                viewer_user=viewer_user,
-            )
-            for row in rows
-        ]
-    elif tab == "user_followers":
-        rows, next_cursor = community_crud.list_profile_followers(
-            db,
-            user_id=user_id,
-            character_id=character_id,
-            follower_type="user",
-            limit=safe_limit,
-            cursor=cursor,
-        )
-        items = [
-            _profile_list_item(
-                db,
-                user_id=row.follower_user_id,
-                character_id=row.follower_character_id,
-                viewer_user=viewer_user,
-            )
-            for row in rows
-        ]
-    else:
-        rows, next_cursor = community_crud.list_profile_following(
-            db,
-            user_id=user_id,
-            character_id=character_id,
-            limit=safe_limit,
-            cursor=cursor,
-        )
-        items = [
-            _profile_list_item(
-                db,
-                user_id=row.target_user_id,
-                character_id=row.target_character_id,
-                viewer_user=viewer_user,
-            )
-            for row in rows
-        ]
-    return schemas.ProfileListPage(
-        items=[item for item in items if item is not None],
-        next_cursor=next_cursor,
-    )
 
 
-def _profile_list_item(
-    db: Session,
-    *,
-    user_id: str | None,
-    character_id: str | None,
-    viewer_user: models.User | None,
-) -> schemas.ProfileListItem | None:
-    if character_id is not None:
-        character = community_crud.get_character(db, character_id)
-        if character is None or character.deleted_at is not None:
-            return None
-        return schemas.ProfileListItem(
-            profile=_profile_ref(None, character),
-            one_liner=character.one_liner,
-            viewer_following=_viewer_follows_character(db, viewer_user, character),
-        )
-    if user_id is not None:
-        user = community_crud.get_user(db, user_id)
-        if user is None:
-            return None
-        return schemas.ProfileListItem(profile=_profile_ref(user, None))
-    return None
 
 
-def _viewer_follows_character(
-    db: Session, viewer_user: models.User | None, character: models.Character
-) -> bool:
-    if viewer_user is None or character.deleted_at is not None:
-        return False
-    return community_crud.profile_follow_exists(
-        db,
-        follower_user=viewer_user,
-        follower_character=None,
-        target_user=None,
-        target_character=character,
-    )
 
 
-def _character_search_result(
-    character: models.Character,
-) -> schemas.CharacterSearchResult:
-    return schemas.CharacterSearchResult(
-        id=character.id,
-        name=character.name,
-        handle=character.handle,
-        avatar_url=character.avatar_url,
-        banner_url=character.banner_url,
-        one_liner=character.one_liner,
-    )
 
 
 
@@ -4679,42 +4098,3 @@ def _compact_agent_notification_read(
             "data": _clip_agent_context_text(notification.data, 500),
         }
     )
-
-
-
-
-
-
-
-
-def _resolve_follower(
-    db: Session, user: models.User, data: schemas.FollowCreate
-) -> tuple[models.User | None, models.Character | None]:
-    if data.follower_character_id is None:
-        return user, None
-    return None, _resolve_author_character(db, user, data.follower_character_id)
-
-
-def _resolve_target_profile(
-    db: Session, target_type: str, target_id: str
-) -> tuple[models.User | None, models.Character | None]:
-    if target_type != "character":
-        raise ProfileNotFoundError(target_id)
-    character = community_crud.get_character(db, target_id)
-    if character is None or character.deleted_at is not None:
-        raise ProfileNotFoundError(target_id)
-    return None, character
-
-
-def _ensure_not_self_follow(
-    follower_user: models.User | None,
-    follower_character: models.Character | None,
-    target_user: models.User | None,
-    target_character: models.Character | None,
-) -> None:
-    if follower_user is not None and target_user is not None:
-        if follower_user.id == target_user.id:
-            raise FollowSelfError("user cannot follow itself")
-    if follower_character is not None and target_character is not None:
-        if follower_character.id == target_character.id:
-            raise FollowSelfError("character cannot follow itself")

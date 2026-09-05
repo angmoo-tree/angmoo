@@ -33,7 +33,7 @@ from app.domains.chat.contracts.today_sns_activity import (
 from app.domains.memory.contracts.recall import CanonicalRecallStatus
 from app.domains.memory.contracts.provenance import MemorySourceTypeV1
 from app.domains.memory.contracts.recall import SOURCE_KIND_BY_TYPE
-from app.domains.relationships.public import GraphRecallStatus
+from app.domains.relationships.contracts.graph_recall import GraphRecallStatus
 
 
 class EvidenceBundleAssembler:

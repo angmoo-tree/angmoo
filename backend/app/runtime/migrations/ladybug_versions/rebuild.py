@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from app.domains.relationships.ports.replay import ProjectionReplaySource
-from app.domains.relationships.projection.digest import projection_digest
+from app.domains.relationships.contracts.replay import (ProjectionReplaySource)
+from app.domains.relationships.utils.projection_digest import (projection_digest)
 from app.integrations.ladybug_projection import LadybugRelationshipProjection
 
 

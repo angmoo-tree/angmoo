@@ -91,10 +91,10 @@ from app.domains.social.models.feed import (
     WorldCharacterFeedCursor,
     WorldCharacterFeedObservation,
 )
-from app.domains.relationships.infrastructure.sqlalchemy_models import (
+from app.domains.relationships.models.projection import (
     GraphProjectionReplayRun,
 )
-from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
+from app.domains.relationships.models.social import (
     ActivityProposal,
     GraphProjectionOutbox,
     RelationshipState,

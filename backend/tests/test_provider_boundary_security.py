@@ -9,7 +9,7 @@ from urllib.request import Request
 import pytest
 
 from app import schemas
-from app.services import post_image_generation
+from app.domains.social.service import image_attempts
 from app.integrations import pollinations_image, provider_http, replicate_image
 from app.runtime.characters import creator as agent_creation_drafts
 
@@ -89,7 +89,7 @@ def test_provider_failure_attempt_and_log_never_retain_raw_body(caplog) -> None:
         prompt="safe prompt",
         log_context={"source": "security-test"},
     )
-    prepared = post_image_generation._pollinations_failed(
+    prepared = image_attempts._pollinations_failed(
         error,
         key_source="user",
         reference_source=None,

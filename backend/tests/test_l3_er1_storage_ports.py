@@ -4,12 +4,10 @@ import ast
 from datetime import UTC, datetime
 from pathlib import Path
 
-from app.domains.relationships.graph_read.repository import (
-    RelationshipGraphQueryPort,
-)
-from app.domains.relationships.ports.outbox import OutboxPort, ProjectionWorkItem
-from app.domains.relationships.ports.projection import RelationshipProjectionPort
-from app.domains.relationships.projection.commands import NoGraphMutationCommand
+from app.domains.relationships.contracts.graph_query import (RelationshipGraphQueryPort)
+from app.domains.relationships.contracts.outbox import (OutboxPort, ProjectionWorkItem)
+from app.domains.relationships.contracts.projection import (RelationshipProjectionPort)
+from app.domains.relationships.contracts.projection_commands import (NoGraphMutationCommand)
 from app.domains.routines.utils.clock import SystemClock
 from app.domains.routines.contracts.clock import ClockPort
 from app.runtime.persistence.scheduler_lease import SqlAlchemySchedulerLeaseRepository

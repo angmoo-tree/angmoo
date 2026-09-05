@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 
 from app.config import Settings
 from app.domains.relationships import public as relationships
-from app.domains.relationships.graph_read.errors import GraphReadBackendError
-from app.domains.relationships.graph_read.repository import (
+from app.domains.relationships.exceptions import (GraphReadBackendError)
+from app.domains.relationships.contracts.graph_query import (
     EvidencePostFacts,
     GraphEvidenceCandidate,
     GraphEvidenceHit,

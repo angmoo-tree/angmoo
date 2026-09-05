@@ -721,7 +721,7 @@ def test_today_snapshot_reaches_both_providers_without_extra_calls(
 ):
     from app.domains.chat.service.today_sns_activity import TodaySnsActivityAssembler
     from app.domains.chat.contracts.retrieval_intent import RetrievalContractError
-    from app.runtime.social.sqlalchemy_today_activity import SqlAlchemyTodaySocialActivityReader
+    from app.runtime.social.today_activity import today_social_activity_reader as SqlAlchemyTodaySocialActivityReader
     from app.runtime.chat.today_sns_activity import SqlAlchemyTodaySnsSnapshotValidator
 
     now = datetime.now(UTC)

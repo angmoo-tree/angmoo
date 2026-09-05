@@ -7,7 +7,7 @@ from sqlalchemy import func, or_, select
 from app.domains.social.models.posts import Post
 from app.domains.social.models.feed import WorldCharacterBlock
 from app.domains.worlds.models import WorldPlace
-from app.domains.relationships.infrastructure.sqlalchemy_social_models import SocialEventEvidence
+from app.domains.relationships.models.social import SocialEventEvidence
 from app.domains.social.service import joint_posts, notifications
 from app.runtime.relationships import sqlalchemy_social_event as social_event_runtime
 from app.runtime.routines.activity_references import SqlAlchemyActivityReferences

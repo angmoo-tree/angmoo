@@ -40,7 +40,7 @@ from app.domains.chat.contracts.retrieval_router_provider import (
     RetrievalRouterRequest,
 )
 from app.domains.memory.service.recall import CANONICAL_PRIMITIVE_REGISTRY
-from app.domains.relationships.public import GRAPH_RECALL_PRIMITIVE_REGISTRY
+from app.domains.relationships.contracts.graph_recall_gateway import GRAPH_RECALL_PRIMITIVE_REGISTRY
 
 
 _ABSOLUTE_RANGE_RE = re.compile(

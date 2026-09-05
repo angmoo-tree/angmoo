@@ -21,7 +21,7 @@ from app.domains.social.public import (
     WorldCharacterSocialProfileValidationError,
 )
 from app.runtime import persistence
-from app.runtime.social import sqlalchemy_profile_repository as social
+from app.domains.social.service import profile_cursor as social
 
 
 # Compatibility vectors from de83dae's cursor functions, using only the public
@@ -90,7 +90,8 @@ def test_request_body_limit_catches_the_shared_error_for_streamed_chunks(excess)
 
 
 def test_shared_busy_error_keeps_different_social_and_autonomy_http_contracts(monkeypatch):
-    from app.api.v1.routes import agents, manual_social
+    from app.api.v1.routes import agents
+    from app.domains.social import router as manual_social
 
     with pytest.raises(HTTPException) as social_error:
         manual_social._raise_error(SocialWriteRetryableError())

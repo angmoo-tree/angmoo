@@ -1,3 +1,4 @@
+from app.domains.social.service import feed as social_feed
 from app.domains.social.service import notifications as social_notifications
 
 from app.domains.social.service import presentation as post_presentation
@@ -5,7 +6,7 @@ from datetime import datetime, timezone
 from types import SimpleNamespace
 
 from app import schemas
-from app.api.v1.routes import community as community_routes
+from app.domains.social import router as community_routes
 from app.services import community as community_service
 
 
@@ -17,7 +18,7 @@ def test_list_posts_route_passes_limit(monkeypatch) -> None:
         captured["limit"] = limit
         return []
 
-    monkeypatch.setattr(community_routes.community_service, "list_posts", fake_list_posts)
+    monkeypatch.setattr(community_routes.feed_service, "list_posts", fake_list_posts)
 
     db = object()
     assert community_routes.list_posts(limit=1, db=db) == []
@@ -34,7 +35,7 @@ def test_list_posts_service_uses_feed_limit(monkeypatch) -> None:
         captured["content"] = content
         return page
 
-    monkeypatch.setattr(community_service, "list_feed", fake_list_feed)
+    monkeypatch.setattr(social_feed, "list_feed", fake_list_feed)
 
     db = object()
     assert community_service.list_posts(db, limit=1) == []

@@ -59,3 +59,29 @@ class CommunityRateLimitedError(CommunityServiceError):
 @dataclass(frozen=True)
 class CommunityQuotaExceeded(Exception):
     retry_after_seconds: int
+
+
+class ServiceImageQuotaError(Exception):
+    def __init__(self, reason: str) -> None:
+        super().__init__(reason)
+        self.reason = reason
+
+
+class SubjectiveContextPersistenceError(ValueError):
+    """Stable fail-closed persistence error."""
+
+
+class TodaySocialActivityReadError(ValueError):
+    """Stable scope/read failure for Today SNS context."""
+
+
+class LangGraphSocialApplyError(Exception):
+    def __init__(self, reason_code: str) -> None:
+        super().__init__(reason_code)
+        self.reason_code = reason_code
+
+
+class WorldFeedSocialApplyError(Exception):
+    def __init__(self, reason_code: str) -> None:
+        super().__init__(reason_code)
+        self.reason_code = reason_code

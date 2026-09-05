@@ -13,15 +13,17 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 > **AR-B2 WorldCharacter 기반 적용 범위:** 6개 ORM은 `world_characters/models.py`, 입출력은 `schemas/identity.py`·`schemas/setup.py`, 순수 업무 계약은 `contracts/`, 오류는 `exceptions.py`가 소유합니다. 생성기 통신은 `client.py`, 응답 검증은 `service/setup_validation.py`, Package용 seed는 `service/seed.py`에 있습니다. 소유자·입장·승인·Studio·퇴장·runtime mode·readiness의 실제 업무 흐름은 `service/`, HTTP는 `router/profile.py`·`entry.py`·`setup.py`가 소유합니다. 여러 업무 join과 삭제·runtime busy 검사 및 시작 조립은 `runtime/world_characters/`에 있습니다. 미전환 외부 소비자는 정확한 bridge만 허용합니다. immutable SQLite migration이 사용하는 옛 ORM 경로 두 개는 같은 class 객체의 alias로 유지합니다.
 
 
-> **AR-B5-A Social 기반 적용 범위:** 게시물·반응·미디어 작업은 `social/models/posts.py`, Feed cursor·관찰·block은 `models/feed.py`, owner 수동 작성·inbox 후보는 `models/manual_writes.py`, 성공 행동의 당시 자기 설명은 `models/subjective_context.py`가 실제 ORM을 소유합니다. 수동 쓰기·관찰·프로필·Today·subjective context의 값과 오류는 `contracts/`, 수동 HTTP 요청·응답은 `schemas/manual.py`에 있습니다. 일반 게시물/agent tool 서비스와 Relationship/projection 전환은 뒤이은 B5 범위입니다. immutable SQLite v7→v8와 Alembic 0088의 subjective-context import는 같은 클래스와 schema helper의 호환만 남습니다. 기존 공통 model export도 같은 클래스를 사용하고 G5에서 최종 조립 위치를 정리합니다.
+> **AR-B5-A Social 기반 적용 범위:** 게시물·반응·미디어 작업은 `social/models/posts.py`, Feed cursor·관찰·block은 `models/feed.py`, owner 수동 작성·inbox 후보는 `models/manual_writes.py`, 성공 행동의 당시 자기 설명은 `models/subjective_context.py`가 실제 ORM을 소유합니다. 수동 쓰기·관찰·프로필·Today·subjective context의 값과 오류는 `contracts/`, 수동 HTTP 요청·응답은 `schemas/manual.py`에 있습니다. 원본 글·반응·프로필 업무 흐름은 아래 B5-B2~B6 적용 범위로 이어지며 agent 도구와 Relationship/projection 전환은 아직 남아 있습니다. immutable SQLite v7→v8와 Alembic 0088의 subjective-context import는 같은 클래스와 schema helper의 호환만 남습니다. 기존 공통 model export도 같은 클래스를 사용하고 G5에서 최종 조립 위치를 정리합니다.
 
-> **AR-B5-B1/B2 Social 읽기 적용 범위:** `repository/{posts,profiles,media,inbox}.py`는 Social 테이블의 실제 SQL을 소유하고, `service/notifications.py`는 수신자·자기 알림 판단을 수행합니다. `service/posts.py`는 게시물·스레드 읽기, `service/visibility.py`는 삭제·신고·인용·조상 게시물 공개 판단, `service/presentation.py`는 응답 조립을 담당합니다. User와 Character 조회는 각 소유 도메인의 service를 같은 Session으로 호출합니다. 멘션 조회의 한 번의 SQL, 입력 순서·삭제/정지 필터와 nullable 조회를 유지하며, 조회 협력은 flush/commit을 추가하지 않습니다. 기존 `services/community.py`의 쓰기·프로필·Inbox·agent 동작은 아직 실제 남은 구현이며 이어지는 B5에서 이전합니다.
+> **AR-B5-B1/B2 Social 읽기 적용 범위:** `repository/{posts,profiles,media,inbox}.py`는 Social 테이블의 실제 SQL을 소유하고, `service/notifications.py`는 수신자·자기 알림 판단을 수행합니다. `service/posts.py`는 게시물·스레드 읽기, `service/visibility.py`는 삭제·신고·인용·조상 게시물 공개 판단, `service/presentation.py`는 응답 조립을 담당합니다. User와 Character 조회는 각 소유 도메인의 service를 같은 Session으로 호출합니다. 멘션 조회의 한 번의 SQL, 입력 순서·삭제/정지 필터와 nullable 조회를 유지하며, 조회 협력은 flush/commit을 추가하지 않습니다. 원본 글·반응은 `service/timeline.py`, 프로필·팔로우는 `service/profiles.py`가 현재 실제 업무 구현을 소유합니다. Feed 목록·following은 `service/feed.py`, Inbox 목록·읽음 판단은 `service/inbox.py`에 있습니다. 기본 검색·Today 순위는 `service/discovery.py`가 담당합니다. 기본 HTTP 31개는 `social/router.py`, 요청 의존성은 `dependencies.py`가 소유합니다. 앱 생성은 `runtime/social/composition.py`에서 네 서비스를 연결하고, 공통 API 조립은 원래 Character 상태 경로 순서를 보존합니다. World Feed 검색·agent 도구는 이어지는 B5에서 이전합니다.
 
 > **Social 저장과 협력:** `service/source_posts.py`는 원본 글·타임라인 글 생성, `repository/reactions.py`는 반응·신고 저장, `repository/profiles.py`는 팔로우 저장을 소유합니다. 이미 검증된 actor의 id/name/display_name을 읽는 협력은 외부 ORM 조회를 대신하는 우회 저장소가 아닙니다. `service/joint_posts.py`의 각 필드 대입과 `notifications.ensure_joint_started_notification`의 query/add는 기존 공동 활동 caller의 Session과 저장 순서를 유지합니다.
 
 > **Social timeline 업무 흐름:** `service/timeline.py::SocialTimelineService`가 원본 글·대꾸·인용·반응·신고·삭제의 실제 권한/흐름/저장 순서를 소유합니다. `runtime/social/timeline.py`는 이미 존재하던 활동 로그·quota·관계 이벤트 처리만 같은 Session으로 연결합니다. WorldCharacter의 현재 World와 멤버십 판단은 `world_characters/service/social_scope.py`에서 수행하며 캐릭터 값을 복사하거나 먼저 읽지 않고 원래 읽기 순서를 보존합니다. 순수 문맥 정제는 `core/context_text.py`, 제한된 topic/게시 결과 표현은 `social/service/activity_results.py`에 있습니다. Identity quota 모델의 역사적 공개 별칭은 G5/B8에서 종료 조건을 검토합니다.
 
 Social의 SQL은 `repository/posts.py`, `profiles.py`, `inbox.py`, `media.py`에서 읽습니다. 다른 업무 ORM을 사용하는 복합 조회는 아직 남은 runtime 전환 범위입니다. `service/notifications.py`는 수신자 없음·자기 자신 알림 제외와 실제 저장 순서를 함께 소유하고, `utils/text.py`·`cursors.py`는 IO 없는 변환만 담당합니다. 기존 SQL helper가 호출하는 `finish_write`는 caller의 지연 commit 구간에서 flush만 하므로, 새 위치를 이유로 commit을 추가하거나 제거하지 않습니다. Community/World Feed의 HTTP DTO는 `schemas/community.py`·`feed.py`에 있습니다. `cruds/community.py`에는 아직 이전하지 않은 여러 업무 조회와 정확한 같은 함수 export가 남으며 B5/B4/G5에서 각 실제 소비자를 전환합니다.
+
+> **AR-B5-C1 Relationships 기반과 후보 처리:** 관계 event/evidence/state/change/proposal/outbox는 `relationships/models/social.py`, replay는 `models/projection.py`, 관계 응답 후보는 `models/points.py`가 실제 ORM을 소유합니다. 후보 입력 판단·생성·선택/소비/실패는 `service/points.py`, 해당 SQL은 `repository/points.py`, 결정적 식별자는 `utils/points.py`에 있습니다. 후보의 기존 명시적 commit과 중복 충돌 rollback→winner 조회를 유지합니다. Graph 읽기·회상·계획 실행은 `service/graph_read.py`·`graph_recall.py`·`graph_planning.py`, 응답은 `schemas.py`, 값·실행/조회 callback 계약은 `contracts/`가 소유합니다. `policies/`는 strict plan 파싱, 방향·근거·범위의 IO 없는 규칙을 소유합니다. 성공 source의 값은 `contracts/events.py`, 변화량/시간대/snapshot은 `policies/events.py`, 방향별 상태와 상한은 `service/state.py`, outbox 선택·원본 제외는 `service/projection_events.py`·`events.py`가 소유합니다. 이 흐름의 SQL은 `repository/events.py`·`state.py`에 있으며 caller Session의 flush/commit 순서를 보존합니다. 최종 Event 생성·다른 업무 검증·proposal·projection 실행의 나머지 실제 업무 분리는 다음 B5 단계입니다.
 
 ## 목차
 
@@ -641,6 +643,42 @@ AR-B3-M2에서 이 네 파일의 실제 구현과 모든 Python 소비자를 이
 실제 이미지 provider/검증된 HTTP/Azure 번역은 `integrations`에 있다. Runtime은 설정/credential·Character 후처리 callback을 제공하며 provider 호출 횟수와 기존 transaction 순서를 유지한다. 과거 media export와 생산에서 호출하지 않는 URL helper는 이전 테스트의 한시적 호환 경로로 결과 문서에 소유·종료 단계를 기록하고 새 기능의 시작점으로 사용하지 않는다.
 
 
+### Social 프로필과 팔로우
+
+프로필의 팔로우 권한·중복 알림·팔로우 해제, 글/답글/좋아요 수와 목록, 팔로워 응답 구성은 `social/service/profiles.py`에서 찾는다. SQL은 Social의 `repository/profiles.py`가 담당하고 User·Character의 nullable 조회는 각 소유 서비스에 같은 Session을 전달한다. 다른 도메인의 ORM을 가져와 조회를 복제하지 않는다.
+
+프로필 표시와 팔로우 가능 여부는 서로 다른 기존 판단이다. 삭제된 Character의 기존 프로필은 이름과 미디어를 가린 응답을 유지하지만 해당 Character를 새로운 팔로우 대상으로 선택하는 것은 거절한다. 각 서비스의 flush·commit 규칙을 그대로 사용하므로 호출자의 deferred transaction에 참여하며 프로필 구성 과정에서 새로운 commit을 만들지 않는다. `utils/limits.py`는 기존 페이지 크기 제한 계산만 공유한다.
+
+현재 AR-B5-B6에서 이 실제 구현을 이전했다. 남은 HTTP·agent 호출자의 옛 Community import는 정확한 임시 소비자로 추적하며 전체 Social·Relationships 전환 완료로 취급하지 않는다.
+
+
+### Social Feed와 Inbox 조회
+
+Feed 목록과 following 권한은 `social/service/feed.py`가 소유한다. 현재 공개 상태와 참조 게시물의 판단은 기존 visibility service를 사용하고, 선택·정렬·cursor와 응답 조립 순서를 유지한다.
+
+Inbox의 없는 알림 오류와 응답·읽음 흐름은 `social/service/inbox.py`에서 찾는다. `runtime/social/inbox.py`의 조회는 Character 소유권 subquery와 Notification을 기존 한 번의 SQL로 연결한다. 소유 Character를 먼저 별도 조회해 ID 목록으로 바꾸지 않으므로 쿼리 수와 읽기 시점이 같다. 이 조회는 `UserInboxReads` 계약으로 전달하며 runtime에서 알림 상태를 변경하지 않는다.
+
+읽음 대입·commit·refresh는 Social `service/notifications.py`가 실제로 수행한다. 이 경로는 원래 deferred write 문맥에서도 명시적으로 commit하던 동작을 유지한다. 새 소스 작성의 flush/finish_write 계약과 임의로 같게 바꾸지 않는다. Character Inbox의 명시적 User 또는 Character recipient 범위와 상위 caller의 기존 인증 조건도 유지한다.
+
+
+### Social 검색과 Today 순위
+
+기본 검색 입력·현재 공개 판단·응답과 Today 활동 점수·동점 정렬은 `social/service/discovery.py`의 실제 정책이다. Character 텍스트 검색은 `characters/service/search.py`가 소유하고, Post와 Character 이름을 함께 찾는 SQL 및 Character와 활동 로그의 집계는 `runtime/social/discovery.py`에서 한 번의 기존 쿼리로 연결한다. 공통 LIKE token/escape는 `core/search_text.py`에 한 번만 정의한다. `%`·`_`·역슬래시를 새 wildcard 문법으로 해석하지 않는다.
+
+Today 인기 root Post의 SQL은 Social repository에 있고 공개 응답·반응 점수는 Feed service가 결정한다. 활동 순위의 KST 자정·포스트/대꾸/좋아요 가중치·이름에 따른 동점 순서를 유지한다. 이 전역 Today 순위는 Chat 근거용의 World 범위 Today SNS snapshot과 서로 다른 기존 기능이므로 합치지 않는다.
+
+현재 AgentActivityLog와 hidden-action 상수는 AR-B4-C 이전 대상이다. 그 두 원래 조회 의존은 runtime의 정확한 임시 소비자로 기록하고 Social 도메인이 옛 model/CRUD를 다시 import하지 않는다. 이 조회는 provider 호출이나 commit을 만들지 않는다.
+
+
+### 공개 캐릭터 활동 응답
+
+공개 캐릭터 활동의 대상 존재/삭제 판단과 응답 구성은 `social/service/profile_activity.py`가 소유한다. `schemas/activity.py`는 공개되는 Character·state·event 필드를 명시한다. 활동의 원문 reason/result나 Character private 설정, state memory_note를 그대로 직렬화하지 않고 기존 action alias와 고정 요약을 사용한다.
+
+댓글 조회는 Social repository, 활동 로그 조회/기존 visible filter는 `runtime/social/profile_activity.py`의 같은 Session 협력이다. 원래 댓글 20개 조회 → 공개 Character/state 구성 → 활동 로그 80개 조회와 visible/dedupe 20개 적용 순서를 유지한다. 이미 로드한 state의 ORM identity-map 사용이나 필요한 lazy read도 보존한다.
+
+기존 schema aggregate는 같은 class를 내보내는 임시 호환 경로이며 구현이 중복되지 않는다. ActivityLog와 visible filter의 실제 owner 이동은 AR-B4-C가 이 정확한 runtime 소비자까지 연결한다.
+
+
 ### RoutinePost의 입력 형식과 이벤트 문맥
 
 `routine_posts/schemas.py`는 장면 계획·게시 초안·상태 효과의 Pydantic 형식을 소유합니다. `contracts/interaction.py`는 서버가 관찰한 성공 사건 후보의 값입니다. World·consumer·시간 범위와 기존 소비 여부를 확인하고, 관련도 순서와 글자 수·JSON byte 한도를 적용하는 실제 정책은 `service/event_context.py`에 있습니다. 제한 값은 `constants.py`, 문맥 사용 불가 오류는 `exceptions.py`, 텍스트 표현은 `utils/text.py`에서 찾습니다. 공통 텍스트 정제의 실제 구현은 `core/context_text.py`를 사용합니다.
@@ -765,3 +803,83 @@ World 대화 생성의 tuple/quota lock, preference 생성의 flush-only 경로,
 `RuntimeSchedulerLease` ORM은 Runtime의 `models.py`에 있습니다. 잠금 획득·heartbeat·tick·해제·오래된 실행자 거부 규칙은 `service/scheduler_lease.py`와 `service/sqlite_lease.py`, 실제 SQL과 compare-and-set 조건은 같은 이름의 `repository` 파일이 담당합니다. `runtime/persistence/scheduler_lease.py`는 SQLAlchemy Session factory와 Identity 조회를 연결하고, `sqlite_scheduler_lease.py`는 SQLite engine·읽기 connection·BEGIN IMMEDIATE 재시도·시계를 연결합니다. `scheduler_fence.py`는 실행 context와 단일 before-commit hook의 수명을 담당합니다.
 
 도메인 밖에서 필요한 Runtime 값과 callback 계약은 `contracts/status.py`, `lease.py`, `lease_store.py`, `search.py`, `transaction.py` 등 실제 정의 파일에서 import합니다. 기존 `public.py`와 `api/application/domain/infrastructure/ports` 집합 export는 제거했습니다. 옛 assertion을 보존하는 두 테스트의 local namespace는 동일한 실제 타입과 함수만 묶으며 제품 코드가 사용하지 않습니다. 공통 Base·DB·모델 등록의 G5 통합과 G06 진입점 최종 정리는 이 역할 배치와 구분하여 검증합니다.
+
+관계 이벤트가 활동 실행을 연결할 때 Routines의 `service/public_action_executions.py`는 같은 Session의 nullable 조회와 같은 객체의 `social_event_id` 대입만 소유한다. 이벤트 오류 판정·최종 flush와 commit 책임은 호출 workflow에 남으므로 이 helper는 자체 commit이나 flush를 하지 않는다.
+
+
+성공한 Social source가 관계 이벤트를 만들 때 `relationships/service/events.py`가 재실행 확인·근거 적격성·변화량·상태·outbox의 순서를 소유한다. 근거 조회는 각 실제 소유자의 조회 함수에 요청하고 runtime의 `event_references.py`가 원래 Session을 연결한다. Actor의 잠금과 WorldCharacter/member 상태 판단은 WorldCharacter 서비스에 남고, evidence의 공개 여부 판단은 Relationships가 원래 시점에 수행한다. 이 흐름은 commit하지 않으므로 게시/실행/event/evidence/outbox는 caller의 하나의 transaction으로 함께 저장하거나 되돌린다.
+
+
+활동 제안의 한도·발행·수락·거절·역제안은 Relationships `service/proposals.py`를 수정한다. 공동 활동 슬롯과 두 참가자의 예약/계획 변경은 Routines 소유이며 `runtime/activity_proposals`가 같은 Session의 두 서비스를 조립한다. 이 상위 조립은 각 도메인과 기존 event/joint runtime을 단방향으로 참조하며 제안 상태 판단을 복제하지 않는다. 예약 도중 실패해도 caller가 근거 event와 모든 상태를 함께 rollback할 수 있도록 제안 서비스는 자체 commit을 하지 않는다.
+
+
+Projection outbox의 업무 상태 전이와 재시도 기준은 Relationships가 소유한다. Session 기반 경로의 `service/projection_state.py`는 원래 claim/finalize 순서를 수행하고 commit은 실행 경로가 맡는다. 후보 선택·World별 readiness 집계는 같은 도메인의 repository가 소유하며, 이 조회 결과를 그래프의 권한 판단을 대신하는 근거로 사용하지 않는다.
+
+
+Canonical SQLite 경로의 `service/sqlite_projection_state.py`는 lease 검증·retry/dead/cancel 판단을, 같은 이름의 repository는 기존 SQL과 CAS를 소유한다. Runtime의 기존 `_write`가 `run_sqlite_immediate`에 같은 connection callback을 전달하여 BEGIN IMMEDIATE·commit·busy retry를 수행한다. 서비스는 engine이나 별도 Session을 만들지 않고, 늦은 worker가 다른 lease의 성공/실패 상태를 덮어쓰지 못하도록 원래 owner·만료·attempt 조건을 그대로 사용한다.
+
+
+Projection 명령의 버전·서명·payload 형식은 `relationships/policies/projection_commands.py`, 현재 canonical source의 적격성과 삭제/숨김·관계 방향·replay snapshot 판단은 `service/projection_commands.py`가 소유한다. Repository는 원래 nullable 조회와 evidence 순서를 유지한다. WorldCharacter의 `service/projection_scope.py`는 기존 World와 membership 연결만 확인하며 active 작성 권한 검사와 구별한다. Runtime은 같은 Session과 attached 객체를 연결하고 기존 ProjectionCommandError로 오류를 변환한다. 그래프 복구가 새로운 사건을 승인하거나 삭제된 source를 다시 공개하는 경로가 되지 않는다.
+
+
+Replay의 요청 검증·동시 실행 차단·lease·high-water 고정·완료 감사 기록은 `relationships/service/replay.py`가 소유하며 SQL은 `repository/replay.py`에 있다. 생성은 기존처럼 flush만 하고, start/renew/finalize는 기존 실행 경로의 commit 시점을 유지한다. `runtime/graph_projection/replay.py`는 Session 열기·clock·sidecar clear/apply/digest와 지표 기록을 조립한다. 복구 중 새로 들어온 outbox가 고정된 high-water 범위에 섞이지 않으며, 원래 오류와 재개·실패 상태를 유지한다. World의 전체 식별자는 World 소유 조회로 가져온다.
+
+
+Owner의 Social-memory 진단 응답은 Relationships `schemas.py`가 소유한다. 이 응답의 Joint 스냅샷은 진단 화면에서 보여 주는 형식이며 Routines의 실행 상태 쓰기를 소유하지 않는다. Event·evidence·방향별 관계·열린 제안·outbox 개수는 Relationships `repository/diagnostics.py`, Joint/participant 조회는 Routines `repository/joint_diagnostics.py`에 있다. 같은 Session에서 원래 join/filter/order와 활동별 참가자 조회를 유지하고 중간 commit을 만들지 않는다.
+
+
+Social-memory 진단의 소유권·현재 근거 상태·응답 구성은 `relationships/service/diagnostics.py`를 수정한다. WC의 현재 active membership 상태는 `world_characters/service/projection_scope.py`의 별도 진단 판단이며 과거 projection 복구 허용과 합치지 않는다. Runtime의 `diagnostic_references.py`는 Character·WC·Social·Routines의 같은 Session 조회와 graph gateway를 연결한다. 진단/관계 그래프 HTTP 두 개는 Relationships router가 소유하고 기존 URL prefix·tags 조립은 공통 API가 맡는다. 두 앱 factory는 `configure_relationships_runtime`을 한 번 호출하며 요청마다 실제 설정과 같은 DB Session으로 reader를 만든다.
+
+
+실제 관찰의 원본 적격성·방향별 친숙도·중복 receipt·그래프 outbox는 `relationships/service/observations.py`, 해당 evidence SQL은 `repository/observations.py`가 소유한다. Social의 관찰 입력/결과 계약은 그대로 사용하며 `runtime/relationships/observation_references.py`가 caller의 같은 Session에서 WC active membership과 Social Post/양방향 block 조회를 연결한다. 성공 source 자체를 복제하거나 감정을 추론하지 않으며 기존 flush 위치와 caller rollback/commit 책임을 유지한다. Source 작성 runtime UoW의 나머지 전환은 별도로 이어진다.
+
+
+수동·검증된 자율 작성의 성공 source와 evidence는 `relationships/service/source_posts.py`가 원래 `audit_only` 상태로 저장한다. 실제 관찰에 의한 관계 receipt와는 다른 책임이다. source 작성의 중복 digest·이미 작성한 결과 확인·공개 root 검사와 ledger/candidate 조회는 각각 `social/utils/source_writes.py`, `service/manual_writes.py`, `repository/manual_writes.py`에 있다. fault injection 위치와 두 번의 원래 flush를 보존하고 caller의 원자적 쓰기 경계 안에서 실행한다.
+
+
+수동·검증된 자율 작성의 actor/target 허용·중복 결과·게시물·inbox candidate·응답 판단은 `social/service/source_writes.py::SocialSourceWriteService`가 구현한다. 같은 도메인의 Timeline 서비스를 받아 기존 정책을 그대로 사용한다. `runtime/social/sqlalchemy_unit_of_work.py`는 SQLite BEGIN IMMEDIATE·재시도·최종 commit을 소유하고 `source_references.py`에서 Character/Identity/WC/membership 및 성공 사건 쓰기를 같은 Session으로 연결한다. WC nullable actor query는 해당 repository의 실제 조회이며 외부 ORM을 서비스 이름으로 재export하지 않는다. 협력 객체 생성은 조회를 수행하지 않고 actor/target 정책은 원래 잠금 이후 순서로 실행한다.
+
+
+Social 임시 `_SocialPersistenceModels`/`social_persistence_models` export는 종료했다. Runtime의 프로필·Today·자기 설명·Memory 근거 복합 조회는 Social/Character/WC/World/Routines의 실제 ORM 클래스를 import한다. 이 변경은 query 조립을 runtime에서 도메인으로 우회 수출하는 변경이 아니며 원래 SQL과 cursor·bounded batch·검증 순서는 유지한다. 각 남은 실제 Social 조회 정책/SQL의 소유 분리는 다음 단계에서 이어진다.
+
+
+수동 World 피드·스레드는 `social/service/manual_feed.py`에서 읽기 권한, 공개 범위, 작성자 profile capability와 응답을 판단한다. `social/repository/manual_feed.py`는 원래 게시물·댓글·좋아요 query를 소유한다. 여러 도메인을 함께 조회하는 active-profile join과 nullable owner 사실은 `runtime/social/manual_feed_references.py`가 같은 Session으로 제공한다. 읽기와 쓰기의 검증 순서·오류가 다르므로 이름이 비슷하다는 이유로 owner 검증 함수를 통합하지 않는다. 읽기는 commit하지 않고 호출자가 가진 변경을 원래 autoflush 시점에 관찰한다.
+
+
+게시물 이미지의 시각 정체성·scene 프롬프트 규칙은 `social/service/image_prompts.py`, 구조화 출력 검증은 `social/schemas/image_generation.py`, prepared 결과는 `social/contracts/image_generation.py`에 있다. Character 사실은 readonly `ImageCharacter`로 사용한다. 날짜별 사용량·무료 quota 예약/종료 정책은 `social/service/image_quota.py`가 실제 Social media repository를 호출하며 기존 lock→사용량→예약→commit/refresh 순서와 KST 날짜 계산을 유지한다. 오류는 Social exceptions, 실패/건너뜀 결과 작성은 image_attempts가 소유한다.
+
+
+이미지 작업의 queued→processing claim, stale 실패, 완료·quota 종료 및 Character/Post 존재 확인 순서는 `social/service/image_jobs.py`가 소유한다. `social/repository/image_jobs.py`는 기존 대기 작업 선택과 stale 목록 query만 수행한다. 워커는 Session·설정 시각·루프와 구체 callback을 연결한다. Claim commit/refresh가 완료된 후 같은 Session에서 Character를 조회하고, 삭제된 Character나 Post이면 provider를 호출하지 않고 기존 실패를 저장한다. Provider·attachment는 명시적인 typed callback이며 service가 실행 runtime을 import하지 않는다.
+
+
+생성 결과 첨부·quota 종료는 `social/service/image_attachment.py`에 있다. 미준비 결과는 그대로 반환하고, 준비된 결과는 기존 크기·품질 값으로 저장한 뒤 PostMedia commit/refresh와 quota 종료 commit을 수행한다. 저장 실패의 quota 실패 처리도 같은 순서다. 모델별 reference 필요·fallback 판단은 `image_reference_policy.py`, provider 진단값을 안정적인 업무 실패 결과로 만드는 정책은 `image_attempts.py`가 소유한다.
+
+
+이미지 요청 수락과 resident/local 생성 준비의 실제 판단은 `social/service/image_generation.py`가 담당한다. 키 mode·지원 모델·사용량·reference·시각 정체성·생성 실패와 quota 종료 순서를 여기서 읽는다. Character 설정/LLM/운영 설정/비밀 해석/활동 로그는 하나의 `ImageGenerationWorkflows` 협력으로 구체 구현을 연결하며 같은 Session과 tracker 객체를 유지한다. `BotImageRequestRead`는 기존 Social schema의 동일 class이다. 수동 이미지 요청은 job만 기록하고 즉시 LLM/이미지 provider를 호출하지 않는다.
+
+
+시각 정체성의 수동 값·이미지 hash 캐시, 생성 응답 검증, fallback과 seed→avatar→banner 참조 선택은 `social/service/image_identity.py`가 담당한다. `ImageGenerationWorkflows`는 원시 LLM 응답과 파일 참조 로딩 및 Character의 실제 저장 협력을 제공한다. 정상 검증을 통과한 값만 같은 attached 설정 객체에 저장하며, 캐시 적중·잘못된 응답에 저장을 추가하지 않는다. HTTP DTO와 LLM 출력 schema의 기존 검증 규칙도 유지한다.
+
+
+이미지 작업의 실제 실행 조립은 `runtime/social/image_generation.py`, 워커의 Session·시각·반복·취소·로그는 `runtime/social/image_job_worker.py`에 있다. 앞의 파일은 Social 서비스에 Character 설정·비밀 해석·LLM·파일 로딩 협력을 연결한다. 프롬프트/참조 정책이나 quota/첨부를 찾아볼 때는 해당 `social/service/image_*.py`를 사용한다. 옛 이미지 services 두 파일 및 사용하지 않는 private wrapper4·단순 정책 재수출을 제거하고 caller와 테스트를 실제 소유 모듈에 연결했다.
+
+
+World 캐릭터 소셜 프로필의 불투명 커서는 `social/service/profile_cursor.py`가 소유한다. `app/pagination.py`의 공통 bytes 인코딩과 달리 이 파일은 기존 version·AESGCM AAD/nonce·secret 유도 key·payload shape·World/캐릭터/탭 범위를 정한다. 암호화 성공만으로 게시물 공개 판단을 대신하지 않으며 실제 조회는 현재 공개·차단 조건을 적용한다.
+
+
+World 캐릭터의 게시물·대꾸·좋아요 프로필은 `social/service/world_profile.py`가 입력 검증, 소유 프로필 오류, 차단, 탭/페이지 선택과 응답 조립을 소유한다. 같은 업무 테이블의 count·posts·likes·media SQL은 `repository/world_profile.py`, 여러 업무의 Character·World 멤버십 join은 `runtime/social/profile_references.py`에 있다. `profile_composition.py`가 같은 Session을 연결하며 구성만으로 DB를 읽지 않는다. 전체 reader 인터페이스와 별도 profile application은 실제 서비스에 통합했고 옛 runtime reader 파일을 제거했다.
+
+
+수동 World 피드·스레드·게시·답글·캐릭터 Social 프로필의 HTTP 5개는 `social/router.py::manual_router`가 소유한다. 공통 API는 원래 위치에서 그 router를 포함한다. `dependencies.py`는 요청의 같은 Session을 사용하여 프로필 서비스, 수동 피드 조회 협력, source 쓰기 실행기를 얻고, `runtime/social/composition.py`가 실제 factory를 연결한다. 구성은 DB·provider IO를 하지 않으며 프런트엔드 요청 검증 뒤에 업무가 실행된다. SQLite 즉시 트랜잭션·재시도·commit은 기존 실행기에 남고 service의 판단을 복제하지 않는다. 트랜잭션 실행 계약은 `contracts/write_execution.py`에 있다.
+
+
+성공한 행동에서 명시한 동기·감정의 저장은 `social/service/subjective_context.py`가 소유한다. 실행/event/scope/evidence/source 일치, digest·중복 충돌과 검증된 row 저장 순서를 이곳에서 판단한다. `repository/subjective_context.py`는 Social source·기존 declaration을 조회하고 `runtime/social/subjective_references.py`는 같은 Session의 World/WC/Relationship 사실을 제공한다. 상위 행동 트랜잭션은 `subjective_composition.py`를 통해 연결하며 서비스는 원래 flush만 수행한다. 명시하지 않은 감정을 추론하거나 실패한 행동에 활성 declaration을 남기지 않는다.
+
+
+Today SNS의 활동 종류, 실행 성공 일치, source/chain 변경 감지값, watermark와 UTC 값 변환은 `social/service/today_activity_values.py`가 실제 구현한다. 최대 기록96·scan2048·batch512·분기 깊이8과 기존 공개 범위/event 종류 집합은 Social constants에 둔다. 조회 조립·scope·SQL은 아래 `TodaySocialActivityService`와 같은 Session 조회 협력이 소유한다.
+
+
+Today SNS의 범위·권한·차단·조상 게시물·성공 근거·명시적 자기 설명 검증과 category/count/coverage/watermark 조립은 `social/service/today_activity.py::TodaySocialActivityService`가 소유한다. `repository/today_activity.py`는 기존 bound/batch 실행과 Social post/block/declaration SQL, `runtime/social/today_activity_queries.py`는 같은 Session의 World/WC/membership/Relationship/Routines 사실을 조회한다. 구체 fact 조회는 Social의 동일 bounded query 실행을 사용해 populate_existing·정렬·상한·batch 순서를 유지한다. `runtime/social/today_activity.py::today_social_activity_reader`는 실제 서비스를 구성만 하고, 옛 SqlAlchemyTodaySocialActivityReader 파일은 제거했다.
+
+
+성공한 자율 행동을 기록할 때 `social/service/action_sources.py`가 원본 글·반응 확인과 World 연결을, `action_notifications.py`가 생성/입력 알림 연결과 명시적 NO_ACTION 처리 판단을 소유한다. `world_characters/service/action_scope.py`는 원래 활성 WorldCharacter 조회·확인, `relationships/service/action_response.py`는 제안 응답의 허용 판단을 수행한다. 실행 레코드 필드는 `routines/service/public_action_executions.py`가 실제 대입하며 flush/commit을 추가하지 않는다. `runtime/social/{langgraph_actions,world_feed_actions}.py`는 같은 Session에서 소유 서비스를 호출하고 성공 event/evidence·proposal 저장을 원래 순서로 연결한다. 오류 생성자는 이 협력에서 원래 오류 클래스를 전달하여 scope 오류의 class와 reason을 유지하고, 이를 위해 다른 업무를 역참조하지 않는다. 옛 services의 두 social_apply 파일은 제거했다.

@@ -1,13 +1,8 @@
-"""Social-owned SQL; original caller transaction/flush/finish_write behavior is preserved."""
-
-from datetime import date, datetime, timezone
-from sqlalchemy import and_, func, or_, select, text
-from sqlalchemy.orm import Session, aliased, selectinload
+"""Social-owned inbox SQL with the original scope, ordering and cursor rules."""
+from sqlalchemy import or_, select
+from sqlalchemy.orm import Session
 from app.domains.social.models import posts as models
-from app.core import unit_of_work
 from app.domains.social.utils.cursors import _parse_int_cursor
-
-
 
 
 def list_notifications_for_agent(
@@ -96,11 +91,3 @@ def get_notification_for_agent(
             ),
         )
     )
-
-def mark_notification_read(
-    db: Session, notification: models.Notification
-) -> models.Notification:
-    notification.read_at = datetime.now(timezone.utc)
-    db.commit()
-    db.refresh(notification)
-    return notification

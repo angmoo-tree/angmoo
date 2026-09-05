@@ -27,15 +27,15 @@ H_INVENTORY_SHA256 = (
     "1228178d70130040b453296c1ac71fcdd1b26b0347c0c7a0eb91d05d47e8ad48"
 )
 
-from app.domains.relationships.graph_recall import (  # noqa: E402
+from app.domains.relationships.contracts.graph_recall import (
     GRAPH_RECALL_CONTRACT_VERSION,
-    GRAPH_RECALL_PRIMITIVE_REGISTRY,
     MAX_GRAPH_RECALL_EDGES,
     MAX_GRAPH_RECALL_EVIDENCE,
     MAX_GRAPH_RECALL_HOPS,
     MAX_GRAPH_RECALL_RESULTS,
     GraphRecallOperation,
 )
+from app.domains.relationships.contracts.graph_recall_gateway import (GRAPH_RECALL_PRIMITIVE_REGISTRY)
 
 
 class InventoryError(RuntimeError):
@@ -43,10 +43,10 @@ class InventoryError(RuntimeError):
 
 
 REQUIRED_FILES = (
-    "backend/app/domains/relationships/graph_recall/contracts.py",
-    "backend/app/domains/relationships/graph_recall/service.py",
+    "backend/app/domains/relationships/contracts/graph_recall.py",
+    "backend/app/domains/relationships/service/graph_recall.py",
     "backend/app/domains/relationships/public.py",
-    "backend/app/domains/relationships/graph_read/repository.py",
+    "backend/app/domains/relationships/contracts/graph_query.py",
     "backend/app/runtime/graph_projection/relationship_graph_read.py",
     "backend/tests/test_p8_l_i_graph_recall.py",
     "docs/architecture/p8-l-i-graph-recall.md",
@@ -82,7 +82,7 @@ def _require_text(relative: str, values: tuple[str, ...]) -> None:
 
 def _boundary_contract() -> dict[str, Any]:
     _require_text(
-        "backend/app/domains/relationships/graph_recall/service.py",
+        "backend/app/domains/relationships/service/graph_recall.py",
         (
             "GRAPH_RECALL_PRIMITIVE_REGISTRY",
             "class GraphRecallValidator",

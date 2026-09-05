@@ -18,7 +18,7 @@ from app.runtime.characters import management as agent_service
 from app.services import community as community_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.domains.local_bot.service import quota as local_bot_quota
-from app.services import post_image_generation
+from app.runtime.social import image_generation as post_image_generation
 
 
 

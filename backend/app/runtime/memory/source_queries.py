@@ -18,19 +18,18 @@ from app.domains.chat.models import (
 from app.domains.memory.contracts.source_evidence import CanonicalMemoryEvidence
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.contracts.provenance import MemorySourceTypeV1
-from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
-    RelationshipStateChange,
-    SocialEvent,
-    SocialEventEvidence,
-)
+from app.domains.relationships.models.social import RelationshipStateChange
+from app.domains.relationships.models.social import SocialEvent
+from app.domains.relationships.models.social import SocialEventEvidence
 from app.domains.routines.models import (
     ActivityBeat,
     JointActivity,
     JointActivityParticipant,
 )
-from app.runtime.social.sqlalchemy_read_repository import (
-    social_persistence_models,
-)
+from app.domains.social.models.posts import Post, PostLike
+from app.domains.social.models.feed import WorldCharacterBlock, WorldCharacterFeedObservation
+from app.domains.world_characters.models import WorldCharacter
+from app.domains.worlds.models import WorldMembership
 
 
 class _MemorySourceModels:
@@ -44,14 +43,14 @@ class _MemorySourceModels:
     RelationshipStateChange = RelationshipStateChange
     SocialEvent = SocialEvent
     SocialEventEvidence = SocialEventEvidence
-    Post = social_persistence_models.Post
-    PostLike = social_persistence_models.PostLike
-    WorldCharacter = social_persistence_models.WorldCharacter
-    WorldCharacterBlock = social_persistence_models.WorldCharacterBlock
+    Post = Post
+    PostLike = PostLike
+    WorldCharacter = WorldCharacter
+    WorldCharacterBlock = WorldCharacterBlock
     WorldCharacterFeedObservation = (
-        social_persistence_models.WorldCharacterFeedObservation
+        WorldCharacterFeedObservation
     )
-    WorldMembership = social_persistence_models.WorldMembership
+    WorldMembership = WorldMembership
 
 
 models = _MemorySourceModels()

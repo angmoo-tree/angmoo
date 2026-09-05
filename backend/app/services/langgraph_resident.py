@@ -57,7 +57,7 @@ from app.domains.social.contracts.subjective_context import (
     ActionMotivationKind,
     ActionSubjectiveContextV1,
 )
-from app.runtime.social.subjective_context import record_declared_subjective_context
+from app.runtime.social.subjective_composition import record_declared_subjective_context
 from app.runtime.routine_posts.sqlalchemy_runtime import (
     routine_world_character_for_character,
     run_routine_post_runtime,
@@ -68,8 +68,9 @@ from app.domains.character_lore.service import presentation as lore_presentation
 from app.domains.character_lore.contracts import LoreRetrievalResult
 from app.runtime.character_lore import build_lore_workflows
 from app.services import community as community_service
-from app.services import langgraph_social_apply
-from app.services import post_image_generation
+from app.runtime.social import langgraph_actions as langgraph_social_apply
+from app.runtime.social import image_generation as post_image_generation
+from app.domains.social.service import image_attachment
 from app.services import prompt_safety
 from app.services.direct_llm import (
     DirectLlmCallContext,
@@ -8277,7 +8278,7 @@ def _execute_writing_plan(
     if blocked is not None:
         blocked_field, blocked_result = blocked
         if prepared_image is not None:
-            post_image_generation.release_prepared_post_image_quota(
+            image_attachment.release_prepared_post_image_quota(
                 db=ctx.db,
                 prepared=prepared_image,
                 status="failed",
@@ -8345,7 +8346,7 @@ def _execute_writing_plan(
                 author_world_character_id=actor.id,
             )
             image_attempt = (
-                post_image_generation.attach_prepared_post_image(
+                image_attachment.attach_prepared_post_image(
                     db=ctx.db,
                     post_id=result.id,
                     prepared=prepared_image,
