@@ -1,7 +1,7 @@
 {
-  "edge_count": 1957,
-  "external_import_count": 2044,
-  "module_count": 611,
+  "edge_count": 1971,
+  "external_import_count": 2045,
+  "module_count": 613,
   "modules": [
     {
       "external_imports": [],
@@ -187,6 +187,7 @@
       ],
       "imports": [
         "app.core.db",
+        "app.domains.characters.router",
         "app.domains.identity.dependencies",
         "app.models",
         "app.schemas",
@@ -924,9 +925,13 @@
         "app.domains.characters.dependencies",
         "app.domains.characters.exceptions",
         "app.domains.characters.schemas",
+        "app.domains.characters.service.creator",
         "app.domains.characters.service.drafts",
         "app.domains.characters.service.management",
-        "app.domains.identity.service.demo_access"
+        "app.domains.characters.service.state",
+        "app.domains.identity.service.demo_access",
+        "app.domains.media.contracts",
+        "app.domains.runtime.contracts"
       ],
       "module": "app.domains.characters.router",
       "path": "backend/app/domains/characters/router.py",
@@ -1129,8 +1134,11 @@
       ],
       "imports": [
         "app.core.unit_of_work",
+        "app.domains.characters.contracts",
+        "app.domains.characters.exceptions",
         "app.domains.characters.models",
-        "app.domains.characters.schemas"
+        "app.domains.characters.schemas",
+        "app.domains.characters.service.profile"
       ],
       "module": "app.domains.characters.service.state",
       "path": "backend/app/domains/characters/service/state.py",
@@ -2267,6 +2275,13 @@
       "imports": [],
       "module": "app.domains.media",
       "path": "backend/app/domains/media/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.media.contracts",
+      "path": "backend/app/domains/media/contracts.py",
       "wildcard_imports": []
     },
     {
@@ -3744,6 +3759,15 @@
       ],
       "module": "app.domains.runtime.application.single_backend_components",
       "path": "backend/app/domains/runtime/application/single_backend_components.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.runtime.contracts",
+      "path": "backend/app/domains/runtime/contracts.py",
       "wildcard_imports": []
     },
     {
@@ -6483,6 +6507,7 @@
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
         "app.domains.characters.service.access",
+        "app.domains.characters.service.creator",
         "app.domains.characters.service.management",
         "app.domains.characters.service.mutations",
         "app.domains.characters.service.persona",
@@ -8322,6 +8347,7 @@
         "app.cruds.agents",
         "app.cruds.community",
         "app.domains.routines.public",
+        "app.domains.runtime.contracts",
         "app.domains.social.public",
         "app.domains.world_characters.public",
         "app.models",
@@ -8434,6 +8460,8 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.characters.exceptions",
+        "app.domains.characters.service.state",
         "app.models",
         "app.runtime.relationships.sqlalchemy_social_event",
         "app.schemas",
@@ -8849,7 +8877,8 @@
         "warnings"
       ],
       "imports": [
-        "app.config"
+        "app.config",
+        "app.domains.media.contracts"
       ],
       "module": "app.services.profile_media",
       "path": "backend/app/services/profile_media.py",
@@ -8990,7 +9019,9 @@
         "__future__",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.domains.runtime.contracts"
+      ],
       "module": "app.services.runtime_boundary",
       "path": "backend/app/services/runtime_boundary.py",
       "wildcard_imports": []

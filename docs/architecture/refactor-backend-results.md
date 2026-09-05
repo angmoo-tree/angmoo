@@ -268,3 +268,30 @@ Creator 조회/수정 2개 endpoint가 canonical router에 추가되었다. 기�
 - Characters/Creator/promotion/private preview/prompt/demo lock 집중 검사 **94 passed, 1 warning (12.98s)**. 기존 테스트의 assertion은 수정하지 않았다.
 - 이전 runtime 실제 8개 함수의 본문 AST를 callback 이름·model alias·명시적 workflow 인자만 역정규화해 비교한 결과 **차이 0**. 실제 분기·field·오류·commit/flush 순서가 보존됨을 별도로 확인했다.
 - 경계 **611 modules / 1957 edges / legacy exact 282**, 공개 route inventory **196 operations**. 이번 변경은 기존 추가 2개 route의 module 필드만 바꾸고 public generator를 실행했다.
+
+### AR-B2-B5/B6 — Creator HTTP 종료와 Character state 잔여 추출
+
+현재 Character/Creator 기본 업무 HTTP **11개**와 Character state HTTP **1개**는 `domains/characters/router.py`에 실제 구현을 둔다. mixed agents/community router는 기존 APIRoute를 원래 자리에 조립한다. 생성·보강·완료 HTTP를 후속 미디어 단계에 넘기지 않고 이번 B2에서 종료했다. 앞의 B3/B4 기록 중 이 세 endpoint가 미전환으로 남았다는 문장은 당시 source 상태이며 현재는 해소되었다.
+
+- 런타임 중립 오류(`ResidentRuntime*`, `AgentRunServiceError`, `AgentSlotUnavailableError`)는 `runtime/contracts.py`, 관리 미디어의 validation 오류 한 종류는 `media/contracts.py`의 정확한 선행 추출이다. 기존 service alias는 같은 class 객체를 유지한다. slot 실행·adapter registry·파일 저장 정책은 옮기지 않았다.
+- Character credential 오류 두 종류는 Character exceptions, 기존 credential 오류 문구 판정은 Character Creator service로 이동했다. HTTP 오류 순서·문구와 400/409/422/429/502를 실제 요청으로 검사했다.
+- `services/community.py`의 순수 state admission/응답 조립 2개도 `characters/service/state.py`로 옮겼다. 기존 Community 소비자는 얇은 wrapper에서 기존 `CharacterNotFoundError` 클래스로 전달한다. tool-run 인증·관찰 로그·중복 note 억제는 Social/activity의 실제 조립에 남는다. owner state HTTP의 URL·인증·404 은닉·private 필드와 기존 defer-commit 정책은 유지한다.
+- 집중 검증 **203 passed / 4 warnings / 16.78s**. 기존 draft/promotion/private preview/prompt/demo/activity, 권한·삭제, Local Bot 응답, public activity 보안을 포함한다. 신규 `test_creator_http_errors.py` 9개와 `test_character_state_http.py` 2개 node이다. 새 state 테스트의 잘못된 `deferred_commits(db)` 호출은 `deferred_commits()`로 바로잡았고 제품 동작을 수정하지 않았다.
+- 경계 **613 modules / 1971 edges / legacy exact 282**, 공개 inventory **196 operations**. 이번 source에서 Creator 3개와 state 1개의 정확한 module 필드만 바꾸었다.
+
+#### B2 Character 종료 범위와 후속 책임 감사
+
+| 실제 업무/잔여 경로 | 현재 책임과 종료 단계 |
+| --- | --- |
+| Character/State/Creator ORM, profile·persona·promotion·seed·state, 기본 Creator 입력/응답/업무 흐름 | B2 Character canonical models/schemas/service에서 구현. 일반 create의 기존 두 commit과 World Package seed의 flush-only 차이 보존 |
+| Character/Creator 기본 API 11개, owner state API 1개, dependencies/factory 연결 | B2 구현 완료. old API에는 같은 route 객체 조립만 있고 endpoint 업무 중복 없음 |
+| World binding와 WorldCharacter readiness | B2-D WorldCharacter 담당자가 `service.readiness.evaluate`로 실제 조회/정책을 이전한다. Character runtime은 이 서비스의 동일 반환 계약을 받는다. 독립 B2-D를 Character 완료로 대체하지 않음 |
+| `runtime/characters/creator.py`의 profile/draft media 업로드·generate/apply/discard/candidate access·provider/translation | B3 미디어·외부 provider 단계. Character-owned candidate/개인 quota 모델을 Media 전체로 통째 이동하지 않고, Character의 media 정책과 외부 파일/통신 조립을 나눌 범위. 기본 draft lifecycle은 이미 canonical 서비스 호출 |
+| `runtime/characters/management.py`의 활동 설정·분석·활성화·run-now·greeting·feed cue·slot/lease | B4 활동/루틴·runtime 조립. capacity/world lock·sqlite retry·provider 호출 횟수·취소를 원문대로 유지 |
+| `services/community.py`의 tool state auth/log/dedup, public Character profile/search/activity·follow/feed와 cruds의 Social join | B4/B5 실제 활동/Social 소유. Character state 쓰기만 canonical 서비스로 호출. public activity에서 private memory_note를 노출하지 않는 기존 검증 유지 |
+| image settings/credential/local-key/Local Bot, `schemas/agents.py`의 해당 DTO와 `cruds/agents.py` | 계획 §9의 B8-A 실제 잔여 설정/Local Bot·quota 소유 정리(이미지 provider 연결은 B3와 협력). 새 Character 기본 업무를 이 옛 파일에 추가하지 않음 |
+| Character 삭제/계정 삭제의 다중 ORM·메모리·WorldCharacter·미디어 정리 | B8-A 복합 runtime UoW. `runtime.characters.management`/`runtime.account_deletion`의 같은 Session, 순서, busy·미디어 복구 계약 유지 |
+| `characters/public.py`, `app.models/`, `app.schemas/`, `cruds.community`의 이전 함수 export, runtime lifecycle entry | G5/B8-A 직접 소비자 전환 후 제거할 정확한 단방향 bridge. 새 코드에는 canonical service/schema/contracts를 사용. 현재 partial-module scope를 유지하며 다른 업무의 public/aggregate 소비자가 남은 상태를 whole-domain 종료로 허위 승격하지 않음 |
+
+이번 감사에서 찾은 순수 B2 Character state 잔여는 본문처럼 해결했다. 위에 명시한 다른 업무/후속 단계와 별개로 남겨 둔 미분류 B2 Character 기본 구현은 없다. PR-head CI·전체 병합 후 검증과 후속 domain/bridge 종료는 root의 순차 통합 Gate에서 판정한다.
+- 마지막 고정 후보 `--contracts --nodes`는 현재 **2,118 nodes**를 수집했고, #258/#263 대비 API/OpenAPI/ORM·기존 assertion/suppression·source split 증거 오류는 없었다. 미합류 Identity/Character source 도입의 append-only 증거 오류만 root 선형 capture 대상으로 남았다. 이 기록을 전체 CI PASS로 확대하지 않는다.

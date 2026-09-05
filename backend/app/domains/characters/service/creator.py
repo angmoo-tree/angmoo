@@ -106,3 +106,26 @@ def _clean_text(value: Any) -> Any:
 def _ensure_not_in_cooldown(available_at: datetime | None) -> None:
     if available_at is not None and available_at > datetime.now(UTC):
         raise AgentCreationDraftCooldownError(available_at)
+
+
+def llm_credential_error_message(exc: Exception) -> str | None:
+    message = str(exc)
+    normalized = message.lower()
+    if "api key" not in normalized:
+        return None
+    if not any(
+        marker in normalized
+        for marker in (
+            "expired",
+            "invalid",
+            "not valid",
+            "invalid_argument",
+            "permission",
+            "unauthenticated",
+        )
+    ):
+        return None
+    return (
+        "저장된 LLM API key가 만료되었거나 유효하지 않습니다. "
+        "새 API key를 저장한 뒤 커뮤니티 성향 분석을 다시 실행해주세요."
+    )

@@ -1,4 +1,8 @@
 from app.domains.characters.router import (
+    create_agent_draft,
+    enhance_agent_draft_persona,
+    complete_agent_draft,
+
     get_agent_draft,
     update_agent_draft,
     list_agents,
@@ -43,32 +47,7 @@ router.routes.append(_character_routes["list_agents"])
 router.routes.append(_character_routes["create_agent"])
 
 
-@router.post(
-    "/drafts",
-    response_model=schemas.AgentCreationDraftRead,
-    status_code=status.HTTP_201_CREATED,
-)
-async def create_agent_draft(
-    data: schemas.AgentCreationDraftCreate,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentCreationDraftRead:
-    try:
-        return await draft_service.create_draft(db, user, data)
-    except agent_service.CredentialSyncError as exc:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
-    except agent_run_service.AgentSlotUnavailableError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except OpenClawGatewayAuthError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="OpenClaw Gateway authentication failed",
-        ) from exc
-    except OpenClawGatewayError as exc:
-        credential_error = agent_service.llm_credential_error_message(exc)
-        if credential_error is not None:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=credential_error) from exc
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+router.routes.append(_character_routes["create_agent_draft"])
 
 
 router.routes.append(_character_routes["get_agent_draft"])
@@ -109,44 +88,7 @@ def get_agent_draft_media(
 router.routes.append(_character_routes["update_agent_draft"])
 
 
-@router.post(
-    "/drafts/{draft_id}/enhance-persona",
-    response_model=schemas.AgentCreationDraftRead,
-)
-async def enhance_agent_draft_persona(
-    draft_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentCreationDraftRead:
-    try:
-        return await draft_service.enhance_persona(db, user, draft_id)
-    except draft_service.AgentCreationDraftNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Draft not found") from exc
-    except draft_service.AgentCreationDraftCooldownError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"페르소나 보강은 {exc.available_at.isoformat()} 이후 다시 시도할 수 있습니다.",
-        ) from exc
-    except agent_service.CredentialRequiredError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.CredentialSyncError as exc:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
-    except agent_run_service.AgentSlotUnavailableError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except draft_service.AgentCreationDraftParseError as exc:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
-    except draft_service.AgentCreationDraftValidationError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-    except OpenClawGatewayAuthError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="OpenClaw Gateway authentication failed",
-        ) from exc
-    except OpenClawGatewayError as exc:
-        credential_error = agent_service.llm_credential_error_message(exc)
-        if credential_error is not None:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=credential_error) from exc
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+router.routes.append(_character_routes["enhance_agent_draft_persona"])
 
 
 @router.post("/drafts/{draft_id}/media", response_model=schemas.AgentCreationDraftRead)
@@ -274,33 +216,7 @@ def discard_agent_draft_media_candidate(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.post("/drafts/{draft_id}/complete", response_model=schemas.AgentDetailRead)
-def complete_agent_draft(
-    draft_id: str,
-    data: schemas.AgentCreationDraftComplete | None = Body(default=None),
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentDetailRead:
-    try:
-        return draft_service.complete_draft(
-            db, user, draft_id, data or schemas.AgentCreationDraftComplete()
-        )
-    except draft_service.AgentCreationDraftNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Draft not found") from exc
-    except draft_service.AgentCreationDraftValidationError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-    except agent_service.AgentHandleConflictError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.AgentHandleInvalidError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-    except agent_service.AgentActiveHoursInvalidError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-    except agent_service.PromptInjectionDetectedError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-    except agent_service.CredentialRequiredError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except profile_media.InvalidProfileMediaError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+router.routes.append(_character_routes["complete_agent_draft"])
 
 
 router.routes.append(_character_routes["get_agent"])

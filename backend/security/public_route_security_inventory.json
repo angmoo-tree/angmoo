@@ -599,17 +599,17 @@
     },
     "POST /api/v1/agents/drafts": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "create_agent_draft"
     },
     "POST /api/v1/agents/drafts/{draft_id}/complete": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "complete_agent_draft"
     },
     "POST /api/v1/agents/drafts/{draft_id}/enhance-persona": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "enhance_agent_draft_persona"
     },
     "POST /api/v1/agents/drafts/{draft_id}/generate-media": {
@@ -739,7 +739,7 @@
     },
     "POST /api/v1/characters/{character_id}/state": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.characters.router",
       "endpoint": "save_character_state"
     },
     "POST /api/v1/characters/{character_id}/worlds/{world_id}/activity-plan/prepare": {
