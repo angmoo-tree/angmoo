@@ -17,10 +17,6 @@
           "importer": "app.api.v1.routes.agent_runs"
         },
         {
-          "imported": "app.services.agent_runs",
-          "importer": "app.api.v1.routes.agent_runs"
-        },
-        {
           "imported": "app.models",
           "importer": "app.api.v1.routes.agents"
         },
@@ -34,10 +30,6 @@
         },
         {
           "imported": "app.schemas",
-          "importer": "app.api.v1.routes.agents"
-        },
-        {
-          "imported": "app.services.agent_runs",
           "importer": "app.api.v1.routes.agents"
         },
         {
@@ -229,10 +221,6 @@
           "importer": "app.runtime.characters.creator"
         },
         {
-          "imported": "app.services.agent_runs",
-          "importer": "app.runtime.characters.creator"
-        },
-        {
           "imported": "app.services.direct_llm",
           "importer": "app.runtime.characters.creator"
         },
@@ -262,10 +250,6 @@
         },
         {
           "imported": "app.schemas",
-          "importer": "app.runtime.characters.management"
-        },
-        {
-          "imported": "app.services.agent_runs",
           "importer": "app.runtime.characters.management"
         },
         {
@@ -365,14 +349,6 @@
           "importer": "app.services.activity_proposal_runtime"
         },
         {
-          "imported": "app.cruds.agent_runs",
-          "importer": "app.services.agent_runs"
-        },
-        {
-          "imported": "app.cruds.agents",
-          "importer": "app.services.agent_runs"
-        },
-        {
           "imported": "app.cruds.community",
           "importer": "app.services.agent_runs"
         },
@@ -386,22 +362,6 @@
         },
         {
           "imported": "app.services.community",
-          "importer": "app.services.agent_runs"
-        },
-        {
-          "imported": "app.services.direct_llm",
-          "importer": "app.services.agent_runs"
-        },
-        {
-          "imported": "app.services.langgraph_resident",
-          "importer": "app.services.agent_runs"
-        },
-        {
-          "imported": "app.services.maintenance",
-          "importer": "app.services.agent_runs"
-        },
-        {
-          "imported": "app.services.runtime_boundary",
           "importer": "app.services.agent_runs"
         },
         {
@@ -886,17 +846,41 @@
       ]
     },
     {
-      "id": "ar-b4-c2-existing-resident-caller-moves",
-      "owner_stage": "L6",
-      "reason": "Four existing implementation edges move with their actual Session-rich Context and process scheduler; imported targets and original behavior are unchanged. AR-B4-C3+ owns removal, not new functionality.",
-      "removal_condition": "AR-B4-C3+ replaces ActivityPolicy, AgentRun and schema aggregate with actual canonical owners; G5 finishes registration. Remove each exact edge as that owner migrates, before B8-A closeout.",
-      "review_date": "2026-09-06",
+      "id": "AR-B4-C6-execution-pending-owner-bindings",
       "edges": [
         {
-          "importer": "app.runtime.resident.scheduler",
+          "importer": "app.runtime.resident.execution",
+          "imported": "app.cruds.agent_runs"
+        },
+        {
+          "importer": "app.runtime.resident.execution",
           "imported": "app.services.agent_runs"
+        },
+        {
+          "importer": "app.runtime.resident.execution",
+          "imported": "app.services.community"
+        },
+        {
+          "importer": "app.runtime.resident.execution",
+          "imported": "app.services.direct_llm"
+        },
+        {
+          "importer": "app.runtime.resident.execution",
+          "imported": "app.services.langgraph_resident"
+        },
+        {
+          "importer": "app.runtime.resident.execution",
+          "imported": "app.services.maintenance"
+        },
+        {
+          "importer": "app.runtime.resident.execution",
+          "imported": "app.services.runtime_boundary"
         }
-      ]
+      ],
+      "reason": "Actual execution moved with original Memory, provider, credential and maintenance callbacks. Each same-Session call keeps its original implementation until independently authored owner source joins; no policy copying or alias layer.",
+      "owner_stage": "L4",
+      "removal_condition": "Root sequential AR-B5/B7/B8/LG integration binds actual Social/Memory/Identity/Operations/Runtime and resident.langgraph/context owners, then removes these exact imports before AR-B8-B.",
+      "review_date": "2026-09-06"
     }
   ],
   "legacy_module_cycles": [],
@@ -982,6 +966,7 @@
       "app.domains.identity.schemas",
       "app.domains.identity.service",
       "app.domains.identity.service.auth",
+      "app.domains.identity.service.credential_cooldown",
       "app.domains.identity.service.credential_migration",
       "app.domains.identity.service.credential_resolution",
       "app.domains.identity.service.demo_access",
@@ -1010,19 +995,25 @@
       "app.domains.routine_posts.utils.text",
       "app.domains.routines.constants",
       "app.domains.routines.contracts",
+      "app.domains.routines.contracts.action_context",
       "app.domains.routines.contracts.activity",
+      "app.domains.routines.contracts.activity_management",
       "app.domains.routines.contracts.activity_policy",
       "app.domains.routines.contracts.activity_scope",
       "app.domains.routines.contracts.backoff",
       "app.domains.routines.contracts.clock",
+      "app.domains.routines.contracts.context_reads",
       "app.domains.routines.contracts.decision_lanes",
       "app.domains.routines.contracts.execution_errors",
       "app.domains.routines.contracts.feed_cues",
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.plans",
+      "app.domains.routines.contracts.post_selection",
       "app.domains.routines.contracts.prompt_context",
       "app.domains.routines.contracts.resident",
+      "app.domains.routines.contracts.run_identity",
+      "app.domains.routines.contracts.slot_requests",
       "app.domains.routines.contracts.slots",
       "app.domains.routines.dependencies",
       "app.domains.routines.exceptions",
@@ -1038,6 +1029,7 @@
       "app.domains.routines.repository.feed_cues",
       "app.domains.routines.repository.plans",
       "app.domains.routines.repository.public_action_executions",
+      "app.domains.routines.repository.resident_context",
       "app.domains.routines.repository.run_backoff",
       "app.domains.routines.repository.runs",
       "app.domains.routines.repository.slots",
@@ -1046,11 +1038,16 @@
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
       "app.domains.routines.schemas.runs",
+      "app.domains.routines.schemas.tendency",
       "app.domains.routines.service",
+      "app.domains.routines.service.action_admission",
       "app.domains.routines.service.action_briefs",
+      "app.domains.routines.service.action_candidates",
+      "app.domains.routines.service.action_menu",
       "app.domains.routines.service.action_prompts",
       "app.domains.routines.service.activity_evidence",
       "app.domains.routines.service.activity_logs",
+      "app.domains.routines.service.activity_management",
       "app.domains.routines.service.activity_policy",
       "app.domains.routines.service.activity_scope",
       "app.domains.routines.service.activity_sessions",
@@ -1059,8 +1056,10 @@
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.execution_admission",
       "app.domains.routines.service.execution_prompts",
       "app.domains.routines.service.execution_results",
+      "app.domains.routines.service.feed_context",
       "app.domains.routines.service.feed_cues",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
@@ -1072,20 +1071,30 @@
       "app.domains.routines.service.perception_diagnostics",
       "app.domains.routines.service.perception_prompts",
       "app.domains.routines.service.plans",
+      "app.domains.routines.service.post_selection",
       "app.domains.routines.service.prompt_context",
       "app.domains.routines.service.public_action_executions",
+      "app.domains.routines.service.retry_schedule",
       "app.domains.routines.service.run_backoff",
+      "app.domains.routines.service.run_identity",
       "app.domains.routines.service.run_results",
       "app.domains.routines.service.runs",
       "app.domains.routines.service.scheduling",
+      "app.domains.routines.service.session_keys",
       "app.domains.routines.service.slot_assignments",
       "app.domains.routines.service.slot_claims",
       "app.domains.routines.service.slot_leases",
       "app.domains.routines.service.slot_pool",
       "app.domains.routines.service.slot_recovery",
+      "app.domains.routines.service.slot_requests",
       "app.domains.routines.service.slot_state",
+      "app.domains.routines.service.slot_status",
+      "app.domains.routines.service.social_context",
       "app.domains.routines.service.state_prompts",
+      "app.domains.routines.service.tendency",
+      "app.domains.routines.service.tendency_settings",
       "app.domains.routines.service.tick_schedule",
+      "app.domains.routines.service.tool_policy",
       "app.domains.routines.utils",
       "app.domains.routines.utils.activity_actions",
       "app.domains.routines.utils.clock",
@@ -1114,6 +1123,7 @@
       "app.domains.social.repository.posts",
       "app.domains.social.repository.profiles",
       "app.domains.social.repository.reactions",
+      "app.domains.social.repository.resident_context",
       "app.domains.social.schemas",
       "app.domains.social.schemas.community",
       "app.domains.social.schemas.feed",
@@ -1202,6 +1212,7 @@
       "app.domains.identity.schemas",
       "app.domains.identity.service",
       "app.domains.identity.service.auth",
+      "app.domains.identity.service.credential_cooldown",
       "app.domains.identity.service.credential_migration",
       "app.domains.identity.service.credential_resolution",
       "app.domains.identity.service.demo_access",
@@ -1224,23 +1235,34 @@
       "app.domains.routine_posts.service.evidence",
       "app.domains.routine_posts.service.generation",
       "app.domains.routines.contracts",
+      "app.domains.routines.contracts.action_context",
       "app.domains.routines.contracts.activity",
+      "app.domains.routines.contracts.activity_management",
       "app.domains.routines.contracts.activity_policy",
       "app.domains.routines.contracts.clock",
+      "app.domains.routines.contracts.context_reads",
       "app.domains.routines.contracts.execution_errors",
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.plans",
+      "app.domains.routines.contracts.post_selection",
       "app.domains.routines.contracts.resident",
+      "app.domains.routines.contracts.run_identity",
+      "app.domains.routines.contracts.slot_requests",
       "app.domains.routines.schemas",
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
       "app.domains.routines.schemas.runs",
+      "app.domains.routines.schemas.tendency",
       "app.domains.routines.service",
+      "app.domains.routines.service.action_admission",
       "app.domains.routines.service.action_briefs",
+      "app.domains.routines.service.action_candidates",
+      "app.domains.routines.service.action_menu",
       "app.domains.routines.service.action_prompts",
       "app.domains.routines.service.activity_evidence",
       "app.domains.routines.service.activity_logs",
+      "app.domains.routines.service.activity_management",
       "app.domains.routines.service.activity_policy",
       "app.domains.routines.service.activity_scope",
       "app.domains.routines.service.activity_sessions",
@@ -1249,8 +1271,10 @@
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.execution_admission",
       "app.domains.routines.service.execution_prompts",
       "app.domains.routines.service.execution_results",
+      "app.domains.routines.service.feed_context",
       "app.domains.routines.service.feed_cues",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
@@ -1262,19 +1286,29 @@
       "app.domains.routines.service.perception_diagnostics",
       "app.domains.routines.service.perception_prompts",
       "app.domains.routines.service.plans",
+      "app.domains.routines.service.post_selection",
       "app.domains.routines.service.prompt_context",
       "app.domains.routines.service.public_action_executions",
+      "app.domains.routines.service.retry_schedule",
       "app.domains.routines.service.run_backoff",
+      "app.domains.routines.service.run_identity",
       "app.domains.routines.service.run_results",
       "app.domains.routines.service.runs",
       "app.domains.routines.service.scheduling",
+      "app.domains.routines.service.session_keys",
       "app.domains.routines.service.slot_assignments",
       "app.domains.routines.service.slot_claims",
       "app.domains.routines.service.slot_leases",
       "app.domains.routines.service.slot_pool",
       "app.domains.routines.service.slot_recovery",
+      "app.domains.routines.service.slot_requests",
+      "app.domains.routines.service.slot_status",
+      "app.domains.routines.service.social_context",
       "app.domains.routines.service.state_prompts",
+      "app.domains.routines.service.tendency",
+      "app.domains.routines.service.tendency_settings",
       "app.domains.routines.service.tick_schedule",
+      "app.domains.routines.service.tool_policy",
       "app.domains.runtime.contracts",
       "app.domains.social.contracts",
       "app.domains.social.contracts.actors",
@@ -1890,14 +1924,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.world_characters.service.readiness",
-        "owner_stage": "AR-B2",
-        "removal_condition": "Switch the exact shared schema aggregate in G5 or AgentRun readiness consumer in B4/B8-A; preserve the same DTO object and readiness policy.",
-        "reason": "Existing remaining schema/agent consumer now uses the canonical WC readiness implementation. No canonical module depends on this legacy consumer.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.services.langgraph_resident",
         "target": "app.domains.world_characters.contracts.runtime_modes",
         "owner_stage": "AR-B2",
@@ -2506,14 +2532,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.lifecycle",
-        "owner_stage": "AR-B4-A3b / AR-B4-B / AR-B4-C / AR-G5",
-        "removal_condition": "Move this exact legacy claim, joint, provider, scheduler or aggregate consumer to its actual owner; remove the same-object alias after the last tracked caller moves.",
-        "reason": "Actual guarded lifecycle is now service-owned; these existing callers or public aliases preserve the original invocation and no-catch-up/per-character commit contracts while their remaining roles transition.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.services.activity_proposal_runtime",
         "target": "app.domains.routines.service.joint_activity",
         "owner_stage": "AR-B5",
@@ -2586,14 +2604,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.tick_schedule",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing not-yet-migrated activity runtime/CRUD uses the identical owner clock or pure graph-state contract. All policy is in the canonical module; no new legacy body is introduced.",
-        "removal_condition": "Switch remaining agent-run/LLM graph/activity CRUD roles in later B4-C slices and remove this exact legacy consumer edge.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.services.langgraph_resident",
         "target": "app.domains.routines.contracts.resident",
         "owner_stage": "AR-B4-C",
@@ -2639,22 +2649,6 @@
         "owner_stage": "AR-B4-C",
         "reason": "Existing constant-only caller imports the same canonical APP_TIMEZONE object after the old mixed activity-policy module is removed. No policy/runtime lookup occurs here.",
         "removal_condition": "Retire this precise legacy consumer edge when the Bot/media actual owner moves by B8-A; canonical clock contract remains supported.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.repository.feed_cues",
-        "owner_stage": "AR-B4-C",
-        "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
-        "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.runs",
-        "owner_stage": "AR-B4-C",
-        "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
-        "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
         "review_date": "2026-09-06"
       },
       {
@@ -2723,82 +2717,10 @@
       },
       {
         "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.repository.slots",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing remaining assignment/claim or AgentRun caller invokes the same actual slot helper/constant after its owner move; no duplicated lifecycle.",
-        "removal_condition": "C4b2 moves four remaining foreign-read slot flows and later B4-C moves AgentRun execution; remove precise legacy consumer imports by B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.slot_assignments",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing remaining assignment/claim or AgentRun caller invokes the same actual slot helper/constant after its owner move; no duplicated lifecycle.",
-        "removal_condition": "C4b2 moves four remaining foreign-read slot flows and later B4-C moves AgentRun execution; remove precise legacy consumer imports by B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.slot_leases",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing remaining assignment/claim or AgentRun caller invokes the same actual slot helper/constant after its owner move; no duplicated lifecycle.",
-        "removal_condition": "C4b2 moves four remaining foreign-read slot flows and later B4-C moves AgentRun execution; remove precise legacy consumer imports by B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.slot_pool",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing remaining assignment/claim or AgentRun caller invokes the same actual slot helper/constant after its owner move; no duplicated lifecycle.",
-        "removal_condition": "C4b2 moves four remaining foreign-read slot flows and later B4-C moves AgentRun execution; remove precise legacy consumer imports by B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.slot_recovery",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing remaining assignment/claim or AgentRun caller invokes the same actual slot helper/constant after its owner move; no duplicated lifecycle.",
-        "removal_condition": "C4b2 moves four remaining foreign-read slot flows and later B4-C moves AgentRun execution; remove precise legacy consumer imports by B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
         "target": "app.domains.routines.constants",
         "owner_stage": "AR-B4-C",
         "reason": "Remaining real AgentRun orchestration catches the same actual Routines conflict class and consumes canonical lifecycle constants after the old CRUD exports are removed.",
         "removal_condition": "Move remaining AgentRun real execution to runtime/owner services in B4-C, removing this exact legacy consumer by B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.exceptions",
-        "owner_stage": "AR-B4-C",
-        "reason": "Remaining real AgentRun orchestration catches the same actual Routines conflict class and consumes canonical lifecycle constants after the old CRUD exports are removed.",
-        "removal_condition": "Move remaining AgentRun real execution to runtime/owner services in B4-C, removing this exact legacy consumer by B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.run_backoff",
-        "owner_stage": "AR-B4-C",
-        "reason": "Remaining real AgentRun execution consumes the same backoff decision after its actual policy/query move; no duplicate classifier or forwarding function.",
-        "removal_condition": "Move remaining actual execution orchestration to runtime/owner services in B4-C and remove this exact legacy consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.run_results",
-        "owner_stage": "AR-B4-C",
-        "reason": "Remaining actual AgentRun orchestration consumes canonical result retention and snapshot persistence; no duplicate policy or forwarding function.",
-        "removal_condition": "Move actual execution composition to runtime in B4-C and remove this exact legacy consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.activity_evidence",
-        "owner_stage": "AR-B4-C",
-        "reason": "Remaining actual execution/prompt composition consumes the same actual Routines evidence/text function after responsibility extraction.",
-        "removal_condition": "Move remaining actual execution/prompt composition in B4-C; retire exact legacy consumer before B8-A.",
         "review_date": "2026-09-06"
       },
       {
@@ -2812,46 +2734,6 @@
       {
         "importer": "app.services.agent_runs",
         "target": "app.domains.routines.service.action_briefs",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
-        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.action_prompts",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
-        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.execution_prompts",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
-        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.perception_prompts",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
-        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.prompt_context",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
-        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.state_prompts",
         "owner_stage": "AR-B4-C",
         "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
         "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
@@ -2875,7 +2757,7 @@
       },
       {
         "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.execution_results",
+        "target": "app.domains.routines.service.action_candidates",
         "owner_stage": "AR-B4-C",
         "reason": "Existing actual resident execution uses canonical original response/decision/log policy and same provider workflow after full implementation move; no forwarding function.",
         "removal_condition": "Move actual remaining resident composition in C6 and remove legacy entry before B8-A.",
@@ -2883,10 +2765,34 @@
       },
       {
         "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.perception_diagnostics",
+        "target": "app.domains.social.repository.resident_context",
         "owner_stage": "AR-B4-C",
-        "reason": "Existing actual resident execution uses canonical original response/decision/log policy and same provider workflow after full implementation move; no forwarding function.",
-        "removal_condition": "Move actual remaining resident composition in C6 and remove legacy entry before B8-A.",
+        "reason": "Existing mixed Resident composition calls exactly the original query functions after Social-owned SQL extraction; no copied policy, query or wrapper.",
+        "removal_condition": "Move actual admission/context composition to typed same-Session runtime collaborator in C6b2/C6c and retire exact legacy importer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.action_admission",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing actual execution calls the canonical original admission/menu policy with explicit same-Session read references; no forwarding facade or copied query.",
+        "removal_condition": "Move remaining actual execution composition in C6c/C6d and remove exact legacy importer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.api.v1.routes.agent_runs",
+        "target": "app.domains.routines.service.slot_status",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing exact execution/slot-route consumer calls the actual original owner policy after implementation move; no forwarding facade or copied query.",
+        "removal_condition": "Move actual execution in C6d and Slot HTTP in C7; remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.api.v1.routes.agents",
+        "target": "app.domains.routines.exceptions",
+        "owner_stage": "AR-B4-C7",
+        "reason": "Existing mixed HTTP route now imports actual same Routines error classes instead of removed execution re-exports.",
+        "removal_condition": "Move actual activity/slot/first-greeting HTTP in C7 and remove legacy route consumer before B8-A.",
         "review_date": "2026-09-06"
       }
     ]

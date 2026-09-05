@@ -14,7 +14,7 @@ from app.public_main import (
     create_lifespan,
     validate_public_runtime_settings,
 )
-from app.services import agent_runs as agent_run_service
+from app.runtime.resident import execution as agent_run_service
 from app.services.hosted_configuration import (
     HOSTED_EXTENSION_CONTRACT_VERSION,
     HostedConfigurationRegistrationError,

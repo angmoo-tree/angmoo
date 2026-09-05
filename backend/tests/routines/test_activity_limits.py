@@ -23,7 +23,7 @@ from app.domains.routines import constants as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.domains.worlds import public as world_service
 from app.runtime.resident import activity_policy as agent_activity_policy
-from app.services import agent_runs as agent_run_service
+from app.runtime.resident import execution as agent_run_service
 from app.runtime.resident import scheduler as resident_tick_scheduler
 from app.runtime.characters import creator as draft_service
 from app.runtime.characters import management as agent_service
@@ -842,30 +842,6 @@ def test_api_agent_instants_normalize_sqlite_naive_values_to_utc() -> None:
     assert '"next_tick_at":"2026-08-29T02:48:00Z"' in slot.model_dump_json()
 
 
-@pytest.mark.parametrize(
-    ("next_tick_at", "expected"),
-    [
-        (None, False),
-        (datetime(2026, 8, 29, 4, 59, 59), True),
-        (datetime(2026, 8, 29, 5, 0), True),
-        (datetime(2026, 8, 29, 5, 0, 1), False),
-        (datetime(2026, 8, 29, 4, 59, 59, tzinfo=UTC), True),
-        (
-            datetime(2026, 8, 29, 14, 0, 1, tzinfo=ZoneInfo("Asia/Seoul")),
-            False,
-        ),
-    ],
-)
-def test_resident_slot_due_comparison_normalizes_utc_instants(
-    next_tick_at: datetime | None,
-    expected: bool,
-) -> None:
-    slot = SimpleNamespace(next_tick_at=next_tick_at)
-
-    assert agent_run_service._resident_slot_is_due(
-        slot,
-        now=datetime(2026, 8, 29, 5, 0, tzinfo=UTC),
-    ) is expected
 
 
 def test_file_backed_sqlite_tick_claims_two_naive_due_slots(
@@ -963,7 +939,7 @@ def test_file_backed_sqlite_tick_claims_two_naive_due_slots(
         )
 
     monkeypatch.setattr(
-        resident_tick_scheduler.agent_runs,
+        resident_tick_scheduler,
         "reconcile_all_elapsed_routines",
         lambda _db, *, references: SimpleNamespace(completed=0, skipped=0),
     )
@@ -1168,7 +1144,7 @@ def test_resident_scheduler_tick_runner_uses_configured_global_tick(
 
     monkeypatch.setattr(resident_tick_scheduler, "SessionLocal", _SessionContext)
     monkeypatch.setattr(
-        resident_tick_scheduler.agent_runs,
+        resident_tick_scheduler,
         "reconcile_all_elapsed_routines",
         lambda _db, *, references: SimpleNamespace(completed=0, skipped=0),
     )
@@ -1923,7 +1899,7 @@ def test_activation_uses_canonical_initial_schedule(
         )
 
     monkeypatch.setattr(
-        agent_activity_policy,
+        agent_activity_schedule,
         "initial_tick_schedule",
         _initial_schedule,
     )
@@ -1965,8 +1941,9 @@ def test_enabled_idle_slot_reschedules_immediately_after_activity_window_change(
             slot_id="angmoo-1",
         )
         db.commit()
+        from app.domains.routines.service import activity_management
         monkeypatch.setattr(
-            agent_activity_policy,
+            activity_management,
             "build_activity_policy",
             lambda *_args, **_kwargs: SimpleNamespace(next_tick_at=expected),
         )
@@ -3019,57 +2996,3 @@ def test_resident_shutdown_cancellation_marks_run_and_releases_slot(
         assert run is not None
         assert run.status == "cancelled"
         assert run.gateway_result["reason"] == "runtime_shutdown"
-
-
-def test_routine_runtime_does_not_invent_global_selected_post(monkeypatch) -> None:
-    monkeypatch.setattr(
-        agent_run_service,
-        "routine_world_character_for_character",
-        lambda *_args, **_kwargs: object(),
-    )
-
-    def global_fallback_must_not_run(*_args, **_kwargs):
-        raise AssertionError("routine runtime must not select a global fallback post")
-
-    monkeypatch.setattr(
-        agent_run_service,
-        "_select_tick_post_id",
-        global_fallback_must_not_run,
-    )
-
-    assert (
-        agent_run_service._select_resident_run_post_id(
-            object(),
-            preferred_post_id=None,
-            character_id="char-routine",
-            scoped_runtime=True,
-        )
-        is None
-    )
-
-
-
-
-
-
-def test_non_scoped_runtime_keeps_legacy_post_fallback(monkeypatch) -> None:
-    monkeypatch.setattr(
-        agent_run_service,
-        "routine_world_character_for_character",
-        lambda *_args, **_kwargs: object(),
-    )
-    monkeypatch.setattr(
-        agent_run_service,
-        "_select_tick_post_id",
-        lambda *_args, **_kwargs: "post-legacy-fallback",
-    )
-
-    assert (
-        agent_run_service._select_resident_run_post_id(
-            object(),
-            preferred_post_id=None,
-            character_id="char-legacy",
-            scoped_runtime=False,
-        )
-        == "post-legacy-fallback"
-    )

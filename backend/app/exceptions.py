@@ -15,3 +15,7 @@ class SqliteTaskQueueFull(SqliteConcurrencyError):
 
 class RequestBodyTooLargeError(Exception):
     pass
+
+
+class AgentServiceError(Exception):
+    pass

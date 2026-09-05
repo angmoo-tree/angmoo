@@ -11,6 +11,7 @@ PUBLIC_RUNTIME_FILES = (
     APP_ROOT / "api" / "v1" / "routes" / "agents.py",
     APP_ROOT / "runtime" / "characters" / "creator.py",
     APP_ROOT / "services" / "agent_runs.py",
+    APP_ROOT / "runtime" / "resident" / "execution.py",
     APP_ROOT / "services" / "agent_writing.py",
     APP_ROOT / "runtime" / "characters" / "management.py",
     APP_ROOT / "domains" / "identity" / "service" / "auth.py",
@@ -118,7 +119,7 @@ def test_secret_decryption_is_confined_to_credential_resolver():
 def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
     allowed: dict[str, set[str]] = {
         "runtime/characters/creator.py": {"_decrypt_draft_api_key"},
-        "services/agent_runs.py": {"_ensure_slot_auth_profile"},
+        "runtime/resident/credential_profiles.py": {"_ensure_slot_auth_profile"},
         "runtime/characters/management.py": {
             "run_first_greeting",
             "analyze_tendency",

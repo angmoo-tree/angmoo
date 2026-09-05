@@ -1114,3 +1114,99 @@ Media 후보 위에서 signed source `aa183ecec887d08c31f172c68bd7c40b22492c19`�
 최초 전체 backend 실행은2235 PASS/3 FAIL/22 SKIP/27 warnings,1265.51초였다. 실제 실패와 후속 처리: (1) L0 core inventory에 이미 이전한 activity schedule/limit 두 모듈이 남고 새 공통 context_text가 빠졌으므로 실제16개 목록으로 수정했다. 기존 L0 6 tests와 원래 CLI PASS다. (2) isolated docx parser가 부하 중 기존15초 제한을 초과했으나 동일 코드/동일 제한으로 원래 검사 재실행 PASS다. (3) Memory observation fixture의 Post·Observation 동시 add_all이 ORM 등록 순서에 따라 FK를 위반하므로 부모 Post add/flush 후 Observation add로 고쳤다. FK나 assertion은 그대로이며 원래 검사 PASS다. 마지막 두 검사는 함께2 PASS/21.97초다. 초기 실패를 전체 PASS로 바꾸어 기록하지 않으며 PR 전체 CI와 머지 후 설치 검증을 별도로 확인한다.
 
 PR #281 첫 head51b6ee4의 architecture-boundary는 실제 import/경계 통과 뒤 frontend portable-contract 목록이 삭제된 social/api/schemas.py를 가리켜 실패했다. 실제 동일 스키마 소유 social/schemas/manual.py로 정책과 보고서 경로 두 곳만 전환했다. 원래 frontend design 검사 PASS(raw_colors1408/files33/surfaces18/route_gaps0/screenshots11)이며 색상·UI·스크린샷 기대값은 그대로다. 최신 PR head의 전체 검사를 다시 확인한다.
+
+## AR-B4-C6a — Resident 후보·도구·세션·실행 오류 소유
+
+기존 순수 candidate8/tool정책4/session키·시간대6/request옵션3/오류클래스8 총29정의와 active상수19개를 실제 소유로 이전했다. 호출되지 않는 과거 action_menu178줄·recovery2함수와 unused상수2개는 원문보존 및 B8-A 검토 대상으로 남겼으며 허구 소비자나 새 지원경로를 만들지 않았다. 기존 세션3테스트 본문과 KST/settings 객체를 그대로 유지했다. 최종 검증을 아래에 이어 기록한다.
+
+
+C6a 초기 **142 passed /기존warnings6/12.42초**, 최종 고정 tree **441 passed /기존 PostgreSQL1 skipped/기존warnings6/103.78초**. 원문29함수·클래스/19상수 AST 정확동일, 기존 세션3테스트 본문동일이며 새 동작·테스트 node 추가는 없다. 현재 boundary **742modules/2495edges/exact legacy206/cycle0**, L4 **742/14/97**, ER0 **85/87/24/44/7**, Memory batch PASS. 읽기 전용 원래6검사는 오류0이며 **보호2139/current2260**. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions 불변; root의 선형 최초도입 원장 연결 뒤 stock 전체 게이트를 다시 확인한다. 기존 class alias 소비자는 실제 HTTP/runtime의 동일객체 참조를 기록했으며 신규 타입간 상속·오류 메시지·처리순서를 바꾸지 않았다.
+
+
+## AR-B4-C6b1 — Resident의 실제 Social 조회 소유
+
+원래5 query helper와 `_profile_following_status`의 nullable scalar 한 개만 Social repository/resident_context.py로 이전했다. Social 담당과 파일 충돌 및 소유권을 확인했다. 모델·조건·정렬·limit1·BFS frontier/seen·숨김/삭제 제외·같은 Session을 바꾸지 않았고 별도 commit을 추가하지 않았다. 실제 활성 소스의 조회함수를 이동했으며 정책·HTTP·provider 동작은 그대로다. 후속 C6b2에서 실제 후보/table 규칙과 typed runtime read 협력을 연결한다. 신규 SQLite2노드는 pending 데이터의 caller/observer 차이와 rollback, visible 답글 경로 및 direct-reply 의미를 검증한다.
+
+
+C6b1 초기 **55 passed /기존 warnings2/25.07초**, 최종 고정 tree **443 passed /기존 PostgreSQL1 skipped/기존 warnings6/259.37초**. 실제5 query 함수와 follow scalar·주변 정책의 원래 AST를 확인했고, 경계 **743modules/2498edges/exact legacy206/cycle0**, L4 **743/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2262**다. 최초 signed869bae의2경로만 메모리에서 보충했으며 frozen/checkpoint/additions는 변경하지 않았다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 뒤 확인한다. C6 이후에도 settings/활성화·capacity/수동 실행/첫인사의 실제 Routines 정책과 HTTP 전환을 완료해야 하며, runtime/characters/management에 남은 업무를 완료로 간주하지 않는다.
+
+
+## AR-B4-C6b2 — Resident 행동 허용·실제 후보 표
+
+실제 정책5함수와 원래2개 메뉴 테스트를 Routines 소유로 이전했다. 조회9개는 caller의 같은 Session을 가진 runtime collaborator가 소유별 실제 함수로 연결하고, 원래 conditional 호출·autoflush·객체 identity·예외와 provider0을 유지한다. 정확 협력 인자를 복원하면 정책5개와 모든 남은 AgentRun 본문 AST가 같고 기존2테스트의 assertion도 같다. 초기57 PASS/기존warnings2/39.49초이며 추가2SQLite는 caller pending/observer/rollback 및 미커밋 숨김의 후보 제외를 검증한다.
+
+검사기는 parent가 검토한 signed6d9e342의 `check_split_evidence` 함수 본문만 반영했다. 각 검사 위치에서 파일을 계속 읽고 동일 invocation의 동일 source text parsing만 재사용한다. Memory 테스트2개·추가원장·제품 소스는 가져오지 않았다. 기존 검증 의미와 동결자료를 유지하며 최종 검증을 이어 기록한다.
+
+
+C6b2 최종 고정 tree는 **538 passed /기존 PostgreSQL1 skipped/기존warnings4/187.22초**이며 기존 checkpoint·node 검사도 포함했다. 경계 **747modules/2520edges/exact legacy206/cycle0**, L4 **747/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2264**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions 불변이다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 뒤 다시 확인한다. 호출 token만 바꾸어 원문의 여러 줄 서식을 유지했고 실제5정책과 남은 전체 AgentRun의 AST 및 원래2테스트 assertion을 대조했다.
+
+
+## AR-B4-C6c1 — Resident 알림·게시물·자기 실행 이력 SQL
+
+원래7개 SQL 조각과 스레드 루트 함수1개를 실제 소유로 분리했다. 동일 알림 SQL 두 곳은 원래30/20을 인자로 유지하는 한 함수로 묶었고 나머지 조건·정렬·limit·nullable·Session은 그대로다. 실제 업무 선택과 표현은 원래 위치에서 후속 C6c2로 이어진다. 신규3SQLite는 알림 type/recipient/unread와30/20, 게시물 숨김·삭제/시각/정렬·8/5/200, 스레드 cycle, pending 관계검토와 observer/rollback을 검증한다. 원문7SQL 및 helper와 모든 남은 AgentRun 본문은 exact query를 복원하면 AST가 같다.
+
+
+C6c1 초기 **60 passed /기존warnings2/25.78초**, 최종 고정 tree **455 passed /기존 PostgreSQL1 skipped/기존warnings4/211.47초**. 경계 **748modules/2522edges/exact legacy206/cycle0**, L4 **748/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2267**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions는 수정하지 않았다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 이후 별도로 확인한다.
+
+
+## AR-B4-C6c2 — Resident 피드·알림·관계 문맥의 실제 정책
+
+실제11개 선택·표현 함수를 feed_context/social_context로 이전했다. Runtime은 기존Session의 owner SQL과 제한된 Character/Identity 값을 연결하며, 아직 B5 원문인 Social3기능은 기존caller가 typed협력으로 전달한다. 새legacy import나예외를 만들지 않았다. Strict Post isinstance는 같은 실제 Post class로 유지하며 입력을 복제하지 않는다. 순수UTC helper는 이름만 다른 기존 tick_schedule.aware_utc와 AST가 정확 같아 실제함수 하나를 재사용했다. 원문11함수와 남은AgentRun본문 전체는 한정된read호출을 복원하면 AST가 같다. 초기63PASS/기존warnings2/37.62초, 추가3SQLite는 원래행identity·pendingvisibility·수신자·잘못된review입력·상호답글→pendingfollow제외와observer/rollback을 검증한다.
+
+
+C6c2 최종 고정 tree **458 passed /기존 PostgreSQL1 skipped/기존warnings4/164.50초**. 경계 **752modules/2546edges/exact legacy206/cycle0**, L4 **752/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2270**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions는 수정하지 않았다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 이후 별도로 확인한다.
+
+
+## AR-B4-C6d1 — 슬롯 상태·준비 조건·예약 재시도
+
+실제4함수를 Routines 서비스로 옮기고 due6 parameter/readiness1 원문node를 원래decorator·본문·fixture·assertion 그대로 이전했다. LG 담당과 readiness1node의 정확 소유를 협의했다. 슬롯 목록 API는 실제owner service로 직접 연결했으며 원래route본문/응답은 같다. 첫264PASS/기존warnings2/19.04초와 route/transaction 집중10PASS/14.43초를 확인했다. 신규3SQLite는 early return에서 timezone 읽기0, 제공된setting의 pending/rollback과 없는setting의 원래ensure commit→timezone순서, 실제 API 함수의 소유자필터·공개형식·pending변경을 검증한다. 원문4함수와 전체남은AgentRun본문은 한정timezone callback만 복원하면 AST가 같고 원래7testnodes와 routebody도 정확동일하다.
+
+
+정확 소비자 확인 결과 AgentRun의 `_has_tendency_analysis`는 제품 호출이 없고 기존 테스트1개만 소비한다. 실제 관리 흐름의 동명 함수와 통합하지 않고 원래 AgentRun helper를 B8-A 검토 대상으로 보존했다. 이번 실제이전은 **4함수**이며 기존 readiness테스트는 소유 위치만 옮겨 원래 helper를 계속 검사한다. 허구 실행 소비자나 신규 지원 API를 추가하지 않았다.
+
+
+C6d1 최종 고정 tree **461 passed /기존 PostgreSQL1 skipped/기존warnings4/176.92초**. 경계 **754modules/2556edges/exact legacy205/cycle0**, L4 **754/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2273**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions 불변이다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 이후 별도로 확인한다.
+
+
+## AR-B4-C6d2 — 실행 권한·인증 프로필 연결
+
+원래3함수의 실제 책임을 Routines 실행 권한과 Runtime 인증 IO로 나눴다. 캐릭터 missing/deleted·ownership 뒤에만 credential을 읽고 기존 Social CharacterNotFoundError class를 유지한다. 등록 proxy는 호출자가 같은 객체를 전달하므로 추가 registry lookup이 없다. Match이면 reveal0, 아니면 resolve/reveal→bind→reload→inspect와 release→reload가 원래 순서다. 원래3함수 및 전체남은AgentRun본문 AST는 한정주입/타입만 복원하면 정확 같다. 초기85PASS/기존warnings2/23.39초. 신규SQLite2+auth5는 attached객체·pending/rollback·오류순서와실패단계·비밀정제를 검증한다. Reveal allowlist는 실제 정의 경로/함수 pair만 옮겼으며 기존 assertion을 유지했다. Identity c2cd2a6의 실제 query는 parent 후속통합 시 현재typed lookup에 연결한다.
+
+
+C6d2 최종 고정 tree **476 passed /기존 PostgreSQL1 skipped/기존warnings4/192.06초**. 경계 **758modules/2570edges/exact legacy205/cycle0**, L4 **758/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2280**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions는 수정하지 않았다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 뒤 별도로 확인한다.
+
+
+## AR-B4-C6d3 — 실행 대상·상태 조회 소유권
+
+원래Social SQL2와 실제대상정책2를 분리했고 CharacterState5/활동설정2/슬롯2의 원래nullable9읽기를 실제owner로 연결했다. 원문2SQL 및 전체남은AgentRun본문은 exactbinding 복원 후 AST동일하다. 기존scoped/fallback2node는 실제owner test로옮겼으며 원래assertion/exception/expected를 유지하고 테스트 호출배선만 실제새서비스+같은Session references로 조립했다. 제품호환wrapper/검사예외를 만들지 않았다. 초기72PASS/기존warnings2/17.78초; 신규SQLite2는 필터/nullableauthor/정렬/우선순위/fallback·pending/rollback 및 loaded객체identity/no flush/no commit을 검증했다. Social·LG담당과한정새query/Character상태helper소유를협의했다.
+
+
+C6d3 최종 고정 제품 tree **478 passed /기존 PostgreSQL1 skipped/기존warnings4/231.18초**. 마지막 정적 검사에서는 repo를 entry가 아닌 scope module로 등록하고 새기존get_setting소비자 한edge를 기한있는 bridge로명시했다. 경계 **761modules/2576edges/exact legacy205/cycle0**, L4 **761/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2282**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions 불변이다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 뒤 확인한다.
+
+
+## AR-B4-C6d4a — 실행 진입 판단·credential 대기 시각
+
+실제admission3block을 Routines로 옮기고 동일available Character3문장은 두원래caller에서같은정책을사용한다. 명시credential검증과기본owner+character조회는기존차이를유지하며 post조회→owner판단순서도그대로다. Identity의boundedcooldown은4원래대입만담당하고Caller의flush/commit/rollback은변경하지않았다. log_activity8호출은C1의samefunction actualowner로직접연결했다. 원문3block·전체남은AgentRun본문 AST는exact호출복원후동일하다. 초기72PASS/기존warnings2/21.90초. 신규SQLite2는기본queryscope·실제행identity·pending/rollback과cooldownSQL증분0을확인한다.
+
+
+C6d4a 최종 고정 tree **480 passed /기존 PostgreSQL1 skipped/기존warnings4/192.09초**. 경계 **763modules/2582edges/exact legacy205/cycle0**, L4 **763/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2284**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions 불변이다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 뒤 확인한다.
+
+
+## AR-B4-C6 — 슬롯 요청 정책·Resident 실행 연결
+
+슬롯 요청 2개의 원래 업무 판단을 Routines 서비스로 옮겼다. 런타임은 같은 Session에서 원래 유지보수 제한 → 캐릭터·credential 검증 → 설정 저장 → 최초 시각 → 슬롯 lock 순서를 지연 평가로 연결한다. 신규 SQLite 2개는 commit=False/True 각각 pending 행, observer 가시성, clock/lock 호출 시점과 rollback을 검사한다. 임시 claim의 원래 정책 본문은 AST 대조와 기존 회귀로 확인한다.
+
+Resident 실행 10개 함수는 실제 provider·lease·run_created·보상 순서를 그대로 `runtime/resident/execution.py`로 옮겼다. Scheduler의 lifecycle 연결은 원래 실제 서비스를 직접 참조한다. HTTP의 실행 오류는 동일 Routines 오류 클래스를 사용한다. 기존 소스 경계 검사는 execution/post_selection/scheduler의 정확한 세 파일을 모두 검사하고 원래 positive/forbidden assertion을 유지한다. 보안 소스 검사는 새 실행과 기존 Memory 잔여를 모두 포함한다. 초기 집중 152개 통과 뒤 mock 대상 2개와 실제 scheduler 연결을 수정했고, 해당 3개 재검사는 통과했다. 최종 확대 검증은 아래에 별도로 기록한다.
+
+B7 Memory 7개 실제 정의와 원래 미호출/검사용 5개 정의는 아직 제거하지 않았다. Social·Memory·Identity·Operations·Runtime·LangGraph의 독립 source 합류까지 필요한 기존 구현 연결은 정확한 7개 edge와 제거 조건으로 기록한다. 이는 해당 후속 단계나 전체 B4 완료 주장이 아니다.
+
+최종 고정 대상 검증은 **490 passed, 1 skipped, 4 warnings / 209.73초**이다. skip은 기존 PostgreSQL 환경 표식이며 경고도 기존 항목이다. 경계는 766 modules / 2609 edges / exact legacy 202 / cycle 0, L4 766/14/97, ER0 85/87/24/44/7 및 Memory batch current이다. 읽기 전용 원래 6개 검사는 오류 0, 보호 2139개·현재 2286개 노드로 확인했다. 선행 source 최초 도입 원장 합류 전이므로 이 진단은 stock 보존 gate나 Hosted CI 통과를 대신하지 않는다.
+
+
+## AR-B4-C7-A — 활동 설정·성향 분석의 실제 소유
+
+원래 management에 있던 성향 schema 6개, 프롬프트·정규화 11개, 상태 4개, 활동 설정 4개, 오류 15개와 상수 8개를 역할별 Routines 코드로 이전했다. 공유 `AgentServiceError` 원래 클래스 1개는 공통 오류 기반으로 옮기고 기존 Character 경로는 같은 객체를 제공한다. 원래 48개 정의/상수와 공유 기반 1개의 AST는 정확한 type/callback 복원 뒤 동일하다. 초기 관련 153개 통과 후 실제 schedule 구현 위치로 mock 1곳만 전환했으며 해당 1개 재검사는 통과했다. 기존 tendency 검사 파일 전체는 Routines 소유 경로로 옮기고 assertion·fixture·parametrize를 유지한다. 후속 관리 실행/HTTP/credential owner 전환은 남아 있다.
+
+최종 집중 검증은 **155 passed / 기존 경고 6개 / 12.96초**이다. 신규 실제 SQLite 검사는 같은 Session의 pending Character/Setting/Slot을 유지하며, schedule callback 시점의 다른 Session에는 이전 값이 보이고 최종 commit 뒤 새 값이 보이는 것을 확인한다. 공통 기반으로 이동한 오류는 기존 Character catch에서 같은 동작과 오류 필드를 유지한다.
+
+최종 소스 경계는 771 modules / 2636 edges / exact legacy 202 / cycle 0이다. L4 771/14/97, ER0 85/87/24/44/7과 Memory batch가 현재 코드와 일치한다. 최초 진단에서 남은 generic parametrized 테스트 경로 9개를 실제 이전 경로로 고쳤고, 최종 원래 6개 읽기 전용 검사는 모두 오류 0(보호 2139개 / 현재 2287개)이다. assertion, suppression, API/ORM 및 원래 노드는 모두 보존했다. 선행 최초 도입 원장이 합류하기 전의 진단이며 stock gate·Hosted CI와 구분한다.

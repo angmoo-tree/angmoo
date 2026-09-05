@@ -2,7 +2,8 @@ import pytest
 from pydantic import ValidationError
 
 from app import schemas
-from app.services import agent_runs, community
+from app.services import community
+from app.domains.routines.service import action_candidates as agent_runs
 
 
 @pytest.mark.parametrize("schema_cls", [schemas.FollowCreate, schemas.BotFollowCreate])

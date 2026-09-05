@@ -667,3 +667,62 @@ Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥�
 ### Resident 응답 판단과 실제 호출
 
 `routines/service/decision_results.py`는 받은 JSON의 범위와 fallback을, `execution_results.py`는 성공 상태와 실제 공개 행동의 근거 선택을 소유합니다. `perception_diagnostics.py`는 같은 Session의 원래 ActivityLog 저장을 호출하여 caller의 deferred commit을 존중합니다. `runtime/resident/decision_lanes.py`는 기존 client의 읽기 전용 요청 두 개와 프롬프트·응답 규칙을 연결하며, `gateway_results.py`는 외부 응답의 텍스트와 추적 문맥을 다룹니다. provider 호출 순서·키·건너뜀 조건·오류 전달을 유지하며, 외부 응답을 해석하는 것만으로 공개 행동의 성공을 만들어내지 않습니다.
+
+
+### Resident 후보·도구·세션 정책
+
+`routines/service/action_candidates.py`는 읽은 후보값을 식별하고 설명하며, `tool_policy.py`는 허용 행동을 실제 도구명으로 연결합니다. `session_keys.py`는 실행/시간대 세션의 식별 및 flag·character allowlist의 원래 조건을 다룹니다. 새 SQL·provider 호출 없이 기존 전달값을 사용합니다. 원래 실행 오류8개는 `routines/exceptions.py`의 실제 클래스이며 기존 HTTP와 runtime에서 같은 객체로 처리됩니다. SDK 요청 형식은 `runtime/resident/request_options.py`에 있습니다.
+
+
+### Resident가 사용하는 Social 조회
+
+`social/repository/resident_context.py`는 좋아요·리포스트·팔로우 여부와 보이는 스레드 답글의 실제 조회를 소유합니다. 조회는 caller의 Session을 그대로 사용하며 visibility 조건·후속 조회 순서·미커밋 변경의 자동 반영·rollback 의미를 유지합니다. Routines는 이 결과를 활동 후보와 도구 허용 판단에 사용하며 Social ORM의 조회를 별도의 Routines repository에 복제하지 않습니다. 현재 남은 AgentRun 소비자는 C6b의 실행 협력 전환 대상으로 명시합니다.
+
+
+### Resident 행동 후보의 허용과 표현
+
+`routines/service/action_admission.py`는 자기 글·기존 반응·답글·팔로우 상태에 따라 허용 도구와 차단 이유를 정합니다. `action_menu.py`는 실제 후보 표를, `action_candidates.py`는 읽은 작성자 이름을 표현합니다. `contracts/action_context.py`의 제한된 읽기 협력을 `runtime/resident/context_references.py`가 같은 Session으로 연결합니다. 조건을 판단하기 전 모든 자료를 미리 읽지 않고, 원래 분기에서 필요한 조회만 수행하며 받은 ORM 객체를 복제하지 않습니다. Social SQL과 숨김 판단은 Social 소유 함수를 사용합니다.
+
+
+Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 SQL은 같은 `social/repository/resident_context.py`가 소유합니다. 읽지 않은 알림의30/20개 제한, 최근 자기 글8개·대상 글5개·답글200개와 원래 정렬을 각각 호출 목적에 맞게 유지합니다. Routines 자기 활동 로그의 최근 관계 검토 시각만 `routines/repository/resident_context.py`에서 읽습니다. 스레드 루트 추적은 원래 cycle·없는 부모의 처리만 수행하며, 별도의 공개 여부 검사와 합치지 않습니다.
+
+
+### Resident의 피드·알림·관계 문맥
+
+`routines/service/feed_context.py`는 읽을 피드와 알림 후보를 선택하고 설명하며, `social_context.py`는 팔로우·상호 답글·관계 검토 후보를 판단합니다. 이 코드에서 다른 도메인의 ORM을 조회하지 않습니다. `contracts/context_reads.py`는 실제로 읽는 값과 조회 협력을 정의하고 `runtime/resident/feed_context_references.py`가 기존 Session에 연결합니다. 원래 Post class 확인은 runtime이 같은 class로 수행하여 정책의 strict assertion을 유지합니다. Feed/행동 가능 알림/결과 문장의 기존 Social workflow는 caller가 명시 전달하며, 같은 코드를 runtime 안에 다시 구현하지 않습니다.
+
+
+### 슬롯 상태와 실행 준비 확인
+
+`routines/service/slot_status.py`는 슬롯 목록의 공개 응답·소유자 필터와 UTC 실행시각 비교를 담당합니다. AgentRun의 기존 성향 helper는 제품 호출 없이 원래 테스트만 소비하므로 B8-A 검토 대상으로 보존하며, 실제 관리 흐름의 readiness 업무는 C7에서 별도로 이전합니다. `retry_schedule.py`는 수동 실행 시각과 재시도 시각의 우선순위를 정하고, 필요한 경우에만 기존 ActivityTimezoneReader로 World 시간을 읽습니다. 설정이 이미 주어졌을 때의 no-commit과 설정을 처음 만드는 ensure 경로의 원래 commit을 구분합니다. 슬롯 목록 HTTP도 이 실제 서비스와 같은 기존 응답 모델을 사용합니다.
+
+
+### Resident 실행 권한과 슬롯 인증 연결
+
+`routines/service/run_identity.py`는 캐릭터 삭제·소유자와 자격 증명 소유자·배정·활성 상태를 원래 순서로 판단합니다. `runtime/resident/identity_references.py`는 동일 Session의 소유 도메인 조회를 연결하며, 캐릭터 오류가 나면 자격 증명을 미리 읽지 않습니다. `runtime/resident/credential_profiles.py`는 등록된 인증 어댑터를 통해 검사·키 해석·연결·새로고침을 수행합니다. 이미 일치하면 키를 해석하지 않으며, 실패는 기존 오류 유형과 비밀 정제를 유지합니다. 이 런타임 연결에 SDK나 다른 업무의 권한 판단을 다시 작성하지 않습니다.
+
+
+### 실행 대상 선택과 상태 조회
+
+`routines/service/post_selection.py`는 명시된 대상 우선, 자기 글 제외 조회, 마지막 공개 루트 글 fallback 순서를 담당합니다. Scoped routine이 연결된 경우에는 전역 피드 대상을 만들지 않습니다. 실제 두 SQL은 Social의 `repository/resident_context.py`에 있고 runtime이 같은 Session을 연결합니다. 캐릭터 상태는 `characters/service/state.py::get_character_state`, 슬롯은 `routines/repository/slots.py::get_agent_slot`, 활동 설정은 기존 `activity_settings.get_setting`에서 읽습니다. 이 nullable 조회는 원래 attached 객체를 반환하며 별도 flush/commit을 추가하지 않습니다.
+
+
+### 실행 요청의 진입 판단
+
+`routines/service/execution_admission.py`는 사용 가능한 캐릭터, 요청 소유자, 명시 또는 기본 자격 증명을 판단합니다. 명시 자격 증명과 기본 선택은 기존 검증 조건이 다르므로 두 흐름을 그대로 구분합니다. 런타임은 게시물 조회 뒤 소유자를 정하는 원래 순서를 유지합니다. `identity/service/credential_cooldown.py`는 이미 붙어 있는 credential의 대기 시각만 변경하며, 대기 여부와 저장 시점은 해당 실행 흐름이 결정합니다. 설정 변경을 이유로 먼저 commit하거나 자격 증명을 다시 읽지 않습니다.
+
+
+### Resident 실행과 슬롯 요청
+
+`routines/service/slot_requests.py`는 슬롯 요청의 실제 유지보수 제한, 캐릭터·자격 증명 판단, 활동 설정, 최초 시각과 배정 순서를 소유합니다. 같은 Session의 조회 협력은 `runtime/resident/slots.py`에서 연결하며, 필요한 시점에 평가합니다.
+
+`runtime/resident/execution.py`는 수동 실행, 슬롯별 실행, 전체 tick의 실제 비동기 실행을 조립합니다. provider 호출, lease 수명, 실행 기록 생성 시점과 실패 보상이 이곳에서 연결됩니다. 오류 처리에서 사용하는 `run_created` 같은 상태는 원래 저장 성공 직후에 바뀌어야 하므로 별도 전달 계층으로 감추지 않습니다. Scheduler는 만료 루틴을 정리하는 실제 lifecycle 서비스를 직접 호출한 뒤 실행을 시작합니다.
+
+현재 원래 `services/agent_runs.py`에는 B7 소유 Memory 함수와 별도 정리 대상인 원래 미호출 함수만 남습니다. 순차 통합 전까지 실행이 참조하는 Memory 함수는 기존 구현 자체입니다. 같은 함수를 새 파일에 복사하지 않으며, Memory 소유 전환이 합류할 때 실제 서비스로 연결합니다.
+
+
+### 활동 설정과 성향 분석
+
+`routines/service/activity_management.py`는 활동 시간 입력과 활동 설정 저장, 슬롯의 다음 실행 시각 변경을 담당합니다. Character 소유권과 Identity의 demo 변경 제한은 같은 Session에서 기존 소유 기능을 호출합니다. 최초 설정의 commit 시점과 설정 변경 후 slot 갱신 순서를 유지하며, 외부 값을 미리 읽지 않습니다.
+
+성향 분석의 provider 출력 형식은 `schemas/tendency.py`, 프롬프트·문자열 정제·범위와 주제 검증은 `service/tendency.py`, 저장된 성향의 준비 상태와 변경은 `service/tendency_settings.py`에 있습니다. provider 통신과 슬롯 해제는 runtime이 조립합니다. Character와 Routines에서 기존에 함께 사용하던 `AgentServiceError` 기반은 `app/exceptions.py`의 하나의 클래스이며, 기존 Character 이름도 같은 객체를 가리킵니다.

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app import models, schemas
 from app.domains.identity.dependencies import get_current_user
 from app.core.db import get_db
-from app.services import agent_runs as agent_run_service
+from app.domains.routines.service import slot_status as agent_run_service
 
 router = APIRouter(prefix="/agent-runs", tags=["agent-runs"])
 
