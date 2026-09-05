@@ -37158,6 +37158,7 @@
           "backend/app/domains/local_bot/policies/rate_limit_clock.py",
           "backend/app/domains/local_bot/service/authentication.py",
           "backend/app/domains/local_bot/service/presentation.py",
+          "backend/app/domains/local_bot/service/rate_limits.py",
           "backend/app/runtime/local_bot/queries.py",
           "backend/app/services/local_bot.py"
         ],
@@ -37738,45 +37739,53 @@
         },
         {
           "old": "backend/app/services/local_bot.py::_ensure_post_rate_limit",
-          "new": "backend/app/services/local_bot.py::_ensure_post_rate_limit",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_ensure_post_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_bot_activity_limits",
-          "new": "backend/app/services/local_bot.py::_bot_activity_limits",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_bot_activity_limits",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_post_limit_status",
-          "new": "backend/app/services/local_bot.py::_post_limit_status",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_post_limit_status",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_activity_limit_status",
-          "new": "backend/app/services/local_bot.py::_activity_limit_status",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_activity_limit_status",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
@@ -37816,67 +37825,79 @@
         },
         {
           "old": "backend/app/services/local_bot.py::_ensure_reaction_rate_limit",
-          "new": "backend/app/services/local_bot.py::_ensure_reaction_rate_limit",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_ensure_reaction_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_ensure_reaction_daily_limit",
-          "new": "backend/app/services/local_bot.py::_ensure_reaction_daily_limit",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_ensure_reaction_daily_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_ensure_activity_rate_limit",
-          "new": "backend/app/services/local_bot.py::_ensure_activity_rate_limit",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_ensure_activity_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_ensure_read_rate_limit",
-          "new": "backend/app/services/local_bot.py::_ensure_read_rate_limit",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_ensure_read_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_complete_action_quota",
-          "new": "backend/app/services/local_bot.py::_complete_action_quota",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_complete_action_quota",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_rollback_action_quota",
-          "new": "backend/app/services/local_bot.py::_rollback_action_quota",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_rollback_action_quota",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
@@ -37951,23 +37972,27 @@
         },
         {
           "old": "backend/app/services/local_bot.py::_raise_rate_limit",
-          "new": "backend/app/services/local_bot.py::_raise_rate_limit",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_raise_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_log_rate_limit",
-          "new": "backend/app/services/local_bot.py::_log_rate_limit",
+          "new": "backend/app/domains/local_bot/service/rate_limits.py::_log_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_rate_limit.py::test_reaction_cooldown_is_action_specific",
+            "tests/test_local_bot_rate_limit.py::test_reaction_daily_limit_still_uses_shared_reaction_bucket",
             "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
           ]
         },
@@ -47170,6 +47195,28 @@
       ],
       "preservation": "Original five complete nullable/predicate queries and ten SQL expression bodies moved into same-Session runtime queries. All remaining original35 functions match after exact query body expansion; no query order/conditions/limit/sort or non-Session fallback altered. Own quota policy remains separate and read projections add no writes.",
       "remaining": "Rate-limit and Bot actions/HTTP remain actual old service until follow-up LocalBot ownership; parent integrates canonical B4/B5 query/model paths and shared Character state helper without duplicating it."
+    },
+    "AR-B8-LOCAL-BOT-A4": {
+      "status": "SOURCE VERIFIED;30 complete original functions preserved after exact workflow binding;54 focused PASS/7.24s; all original assertions/suppression unchanged; six diagnostics0/protected2201/current2262; boundary780/2589/173legacy; source introductions pending",
+      "actual_paths": [
+        "backend/app/domains/local_bot/service/rate_limits.py",
+        "backend/app/domains/local_bot/contracts/rate_limits.py",
+        "backend/app/runtime/local_bot/rate_limits.py"
+      ],
+      "preservation": "12 actual admission/usage/retry/log/commit/rollback functions moved into LocalBot service. Runtime supplies only same Session query module and original Routines activity logger through typed contracts. Real Session quota lock path and synthetic fallback remain distinct; own read consume commits and action quota commit/rollback are unchanged. All30 original whole functions preserved after exact workflow binding.",
+      "temporary_bindings": [
+        "_activity_limit_status",
+        "_bot_activity_limits",
+        "_ensure_activity_rate_limit",
+        "_ensure_post_rate_limit",
+        "_ensure_reaction_daily_limit",
+        "_ensure_reaction_rate_limit",
+        "_ensure_read_rate_limit",
+        "_log_rate_limit",
+        "_post_limit_status",
+        "_raise_rate_limit"
+      ],
+      "remaining": "Exact partial bindings in the existing service connect its unconverted actual Bot actions; they retire with Bot action/service and HTTP slice, not as permanent parallel entrypoints. Original frozen/test assertions/suppression and no extra provider or owner mutation remain protected."
     }
   }
 }

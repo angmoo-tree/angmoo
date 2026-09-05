@@ -1,3 +1,18 @@
+from functools import partial
+from app.domains.local_bot.service import rate_limits
+from app.runtime.local_bot.rate_limits import build_rate_limit_workflows
+_ensure_post_rate_limit = partial(rate_limits._ensure_post_rate_limit, workflows=build_rate_limit_workflows())
+_bot_activity_limits = partial(rate_limits._bot_activity_limits, workflows=build_rate_limit_workflows())
+_post_limit_status = partial(rate_limits._post_limit_status, workflows=build_rate_limit_workflows())
+_activity_limit_status = partial(rate_limits._activity_limit_status, workflows=build_rate_limit_workflows())
+_ensure_reaction_rate_limit = partial(rate_limits._ensure_reaction_rate_limit, workflows=build_rate_limit_workflows())
+_ensure_reaction_daily_limit = partial(rate_limits._ensure_reaction_daily_limit, workflows=build_rate_limit_workflows())
+_ensure_activity_rate_limit = partial(rate_limits._ensure_activity_rate_limit, workflows=build_rate_limit_workflows())
+_ensure_read_rate_limit = partial(rate_limits._ensure_read_rate_limit, workflows=build_rate_limit_workflows())
+_complete_action_quota = rate_limits._complete_action_quota
+_rollback_action_quota = rate_limits._rollback_action_quota
+_raise_rate_limit = partial(rate_limits._raise_rate_limit, workflows=build_rate_limit_workflows())
+_log_rate_limit = partial(rate_limits._log_rate_limit, workflows=build_rate_limit_workflows())
 from app.runtime.local_bot import queries as local_bot_queries
 from app.runtime.local_bot.queries import (_latest_activity_at, _count_activities_today, _post_like_exists, _post_repost_exists, _profile_follow_exists)
 from app.domains.local_bot.contracts.authentication import LocalBotContext
@@ -5,7 +20,7 @@ from app.domains.local_bot.service.presentation import (_bot_post_reference, _bo
 from app.domains.local_bot.policies.rate_limit_clock import (_remaining_seconds, _local_day_start_utc, _next_local_day_start_utc, _seconds_until)
 from app.domains.local_bot.exceptions import LocalBotAuthError, LocalBotError, LocalBotForbiddenError, LocalBotModeError, LocalBotRateLimitError
 from app.domains.local_bot.constants import MAX_POSTS_PER_DAY, MAX_REACTIONS_PER_DAY, MAX_READS_PER_WINDOW, MAX_REPLIES_PER_DAY, POST_COOLDOWN, RATE_LIMIT_LOG_DEDUPE_WINDOW, REACTION_ACTION_TYPES, REACTION_COOLDOWN, REACTION_COOLDOWN_ACTION_TYPES, READ_WINDOW, REPLY_COOLDOWN, STATE_ACTION_TYPES, STATE_COOLDOWN
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session
 
@@ -13,7 +28,6 @@ from app import schemas
 from app.core import unit_of_work
 from app.cruds import agents as agent_crud
 from app.services import community as community_service
-from app.domains.local_bot.service import quota as local_bot_quota
 from app.services import post_image_generation
 
 
@@ -457,331 +471,6 @@ def unfollow_profile(
         raise
 
 
-def _ensure_post_rate_limit(
-    db: Session, context: LocalBotContext
-) -> local_bot_quota.ActionQuota | None:
-    if isinstance(db, Session):
-        quota = local_bot_quota.lock_action_quota(
-            db,
-            character_id=context.character.id,
-            labels=("post",),
-        )
-        try:
-            quota.ensure_allowed(
-                "post",
-                cooldown=POST_COOLDOWN,
-                max_per_day=MAX_POSTS_PER_DAY,
-                message="Local bot post limit is reached.",
-            )
-        except local_bot_quota.QuotaExceeded as exc:
-            db.rollback()
-            _raise_rate_limit(
-                db,
-                context,
-                label=exc.label,
-                message=exc.message,
-                retry_after_seconds=exc.retry_after_seconds,
-            )
-        return quota
-
-    now = datetime.now(UTC)
-    recent_post = local_bot_queries.recent_root_post_at(db, context, now=now)
-    if recent_post is not None:
-        _raise_rate_limit(
-            db,
-            context,
-            label="post",
-            message="Local bot post cooldown is active.",
-            retry_after_seconds=_seconds_until(recent_post + POST_COOLDOWN, now),
-        )
-    day_start = _local_day_start_utc(now)
-    today_count = local_bot_queries.count_root_posts_since(db, context, day_start=day_start)
-    if (today_count or 0) >= MAX_POSTS_PER_DAY:
-        _raise_rate_limit(
-            db,
-            context,
-            label="post",
-            message="Local bot daily post limit is reached.",
-            retry_after_seconds=_seconds_until(_next_local_day_start_utc(now), now),
-        )
-    return None
-
-
-def _bot_activity_limits(
-    db: Session, context: LocalBotContext
-) -> list[schemas.BotActivityLimitRead]:
-    now = datetime.now(UTC)
-    day_start = _local_day_start_utc(now)
-    reaction_used_today = _count_activities_today(
-        db, context, action_types=REACTION_ACTION_TYPES, day_start=day_start
-    )
-    return [
-        _post_limit_status(db, context, now=now, day_start=day_start),
-        _activity_limit_status(
-            db,
-            context,
-            action="reply",
-            action_types=("replied",),
-            cooldown=REPLY_COOLDOWN,
-            max_per_day=MAX_REPLIES_PER_DAY,
-            now=now,
-            day_start=day_start,
-        ),
-        schemas.BotActivityLimitRead(
-            action="reaction",
-            used_today=reaction_used_today,
-            max_per_day=MAX_REACTIONS_PER_DAY,
-            cooldown_seconds=0,
-            retry_after_seconds=(
-                _seconds_until(_next_local_day_start_utc(now), now)
-                if reaction_used_today >= MAX_REACTIONS_PER_DAY
-                else None
-            ),
-        ),
-        *[
-            _activity_limit_status(
-                db,
-                context,
-                action=action,
-                action_types=action_types,
-                cooldown=REACTION_COOLDOWN,
-                max_per_day=MAX_REACTIONS_PER_DAY,
-                used_today_override=reaction_used_today,
-                now=now,
-                day_start=day_start,
-            )
-            for action, action_types in REACTION_COOLDOWN_ACTION_TYPES.items()
-        ],
-        _activity_limit_status(
-            db,
-            context,
-            action="state",
-            action_types=STATE_ACTION_TYPES,
-            cooldown=STATE_COOLDOWN,
-            max_per_day=None,
-            now=now,
-            day_start=day_start,
-        ),
-    ]
-
-
-def _post_limit_status(
-    db: Session, context: LocalBotContext, *, now: datetime, day_start: datetime
-) -> schemas.BotActivityLimitRead:
-    latest = local_bot_queries.latest_root_post_at(db, context)
-    used_today = local_bot_queries.root_post_usage_since(db, context, day_start=day_start) or 0
-    cooldown_remaining = _remaining_seconds(latest, POST_COOLDOWN, now)
-    retry_after = cooldown_remaining or (
-        _seconds_until(_next_local_day_start_utc(now), now)
-        if used_today >= MAX_POSTS_PER_DAY
-        else None
-    )
-    return schemas.BotActivityLimitRead(
-        action="post",
-        used_today=used_today,
-        max_per_day=MAX_POSTS_PER_DAY,
-        cooldown_seconds=int(POST_COOLDOWN.total_seconds()),
-        cooldown_remaining_seconds=cooldown_remaining,
-        retry_after_seconds=retry_after,
-    )
-
-
-def _activity_limit_status(
-    db: Session,
-    context: LocalBotContext,
-    *,
-    action: str,
-    action_types: tuple[str, ...],
-    cooldown: timedelta,
-    max_per_day: int | None,
-    now: datetime,
-    day_start: datetime,
-    used_today_override: int | None = None,
-) -> schemas.BotActivityLimitRead:
-    latest = _latest_activity_at(db, context, action_types=action_types)
-    used_today = (
-        used_today_override
-        if used_today_override is not None
-        else _count_activities_today(
-            db, context, action_types=action_types, day_start=day_start
-        )
-    )
-    cooldown_remaining = _remaining_seconds(latest, cooldown, now)
-    retry_after = cooldown_remaining or (
-        _seconds_until(_next_local_day_start_utc(now), now)
-        if max_per_day is not None and used_today >= max_per_day
-        else None
-    )
-    return schemas.BotActivityLimitRead(
-        action=action,
-        used_today=used_today,
-        max_per_day=max_per_day,
-        cooldown_seconds=int(cooldown.total_seconds()),
-        cooldown_remaining_seconds=cooldown_remaining,
-        retry_after_seconds=retry_after,
-    )
-
-
-
-
-
-
-
-
-def _ensure_reaction_rate_limit(
-    db: Session, context: LocalBotContext, *, label: str
-) -> local_bot_quota.ActionQuota | None:
-    if isinstance(db, Session):
-        quota = local_bot_quota.lock_action_quota(
-            db,
-            character_id=context.character.id,
-            labels=("reaction", label),
-        )
-        try:
-            quota.ensure_allowed(
-                "reaction",
-                cooldown=timedelta(0),
-                max_per_day=MAX_REACTIONS_PER_DAY,
-                message="Local bot daily reaction limit is reached.",
-            )
-            quota.ensure_allowed(
-                label,
-                cooldown=REACTION_COOLDOWN,
-                max_per_day=None,
-                message=f"Local bot {label} cooldown is active.",
-            )
-        except local_bot_quota.QuotaExceeded as exc:
-            db.rollback()
-            _raise_rate_limit(
-                db,
-                context,
-                label=exc.label,
-                message=exc.message,
-                retry_after_seconds=exc.retry_after_seconds,
-            )
-        return quota
-
-    _ensure_reaction_daily_limit(db, context)
-    _ensure_activity_rate_limit(
-        db,
-        context=context,
-        action_types=REACTION_COOLDOWN_ACTION_TYPES[label],
-        cooldown=REACTION_COOLDOWN,
-        max_per_day=None,
-        label=label,
-    )
-    return None
-
-
-def _ensure_reaction_daily_limit(db: Session, context: LocalBotContext) -> None:
-    now = datetime.now(UTC)
-    day_start = _local_day_start_utc(now)
-    today_count = local_bot_queries.reaction_usage_since(db, context, day_start=day_start)
-    if (today_count or 0) >= MAX_REACTIONS_PER_DAY:
-        _raise_rate_limit(
-            db,
-            context,
-            label="reaction",
-            message="Local bot daily reaction limit is reached.",
-            retry_after_seconds=_seconds_until(_next_local_day_start_utc(now), now),
-        )
-
-
-def _ensure_activity_rate_limit(
-    db: Session,
-    *,
-    context: LocalBotContext,
-    action_types: tuple[str, ...],
-    cooldown: timedelta,
-    max_per_day: int | None,
-    label: str,
-) -> local_bot_quota.ActionQuota | None:
-    if isinstance(db, Session):
-        quota = local_bot_quota.lock_action_quota(
-            db,
-            character_id=context.character.id,
-            labels=(label,),
-        )
-        try:
-            quota.ensure_allowed(
-                label,
-                cooldown=cooldown,
-                max_per_day=max_per_day,
-                message=f"Local bot {label} limit is reached.",
-            )
-        except local_bot_quota.QuotaExceeded as exc:
-            db.rollback()
-            _raise_rate_limit(
-                db,
-                context,
-                label=exc.label,
-                message=exc.message,
-                retry_after_seconds=exc.retry_after_seconds,
-            )
-        return quota
-
-    now = datetime.now(UTC)
-    recent_activity = local_bot_queries.recent_activity_at(db, context, action_types=action_types, now=now, cooldown=cooldown)
-    if recent_activity is not None:
-        _raise_rate_limit(
-            db,
-            context,
-            label=label,
-            message=f"Local bot {label} cooldown is active.",
-            retry_after_seconds=_seconds_until(recent_activity + cooldown, now),
-        )
-    if max_per_day is not None:
-        day_start = _local_day_start_utc(now)
-        today_count = local_bot_queries.activity_usage_since(db, context, action_types=action_types, day_start=day_start)
-        if (today_count or 0) >= max_per_day:
-            _raise_rate_limit(
-                db,
-                context,
-                label=label,
-                message=f"Local bot daily {label} limit is reached.",
-                retry_after_seconds=_seconds_until(_next_local_day_start_utc(now), now),
-            )
-    return None
-
-
-def _ensure_read_rate_limit(db: Session, context: LocalBotContext, *, label: str) -> None:
-    try:
-        local_bot_quota.consume_read(
-            db,
-            local_key_id=context.local_key.id,
-            limit=MAX_READS_PER_WINDOW,
-            window=READ_WINDOW,
-        )
-    except local_bot_quota.QuotaExceeded as exc:
-        db.rollback()
-        _raise_rate_limit(
-            db,
-            context,
-            label=label,
-            message=exc.message,
-            retry_after_seconds=exc.retry_after_seconds,
-        )
-
-
-def _complete_action_quota(
-    db: Session,
-    quota: local_bot_quota.ActionQuota | None,
-    *,
-    labels: tuple[str, ...],
-    changed: bool,
-) -> None:
-    if quota is None:
-        return
-    if changed:
-        quota.consume(labels)
-    db.commit()
-
-
-def _rollback_action_quota(
-    db: Session, quota: local_bot_quota.ActionQuota | None
-) -> None:
-    if quota is not None:
-        db.rollback()
 
 
 
@@ -793,38 +482,29 @@ def _rollback_action_quota(
 
 
 
-def _raise_rate_limit(
-    db: Session,
-    context: LocalBotContext,
-    *,
-    label: str,
-    message: str,
-    retry_after_seconds: int,
-) -> None:
-    _log_rate_limit(db, context, label=label, retry_after_seconds=retry_after_seconds)
-    raise LocalBotRateLimitError(message, retry_after_seconds=retry_after_seconds)
 
 
-def _log_rate_limit(
-    db: Session,
-    context: LocalBotContext,
-    *,
-    label: str,
-    retry_after_seconds: int,
-) -> None:
-    now = datetime.now(UTC)
-    recent_log = local_bot_queries.recent_rate_limit_log_id(db, context, now=now, label=label)
-    if recent_log is not None:
-        return
-    agent_crud.log_activity(
-        db,
-        user_id=context.user.id,
-        character_id=context.character.id,
-        action_type="local_bot_rate_limited",
-        target_post_id=None,
-        reason="local_bot_rate_limit",
-        result=(
-            f"label={label}; retry_after_seconds={retry_after_seconds}; "
-            f"token_prefix={context.local_key.token_prefix}"
-        ),
-    )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

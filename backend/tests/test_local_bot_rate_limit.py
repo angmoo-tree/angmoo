@@ -2,7 +2,8 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.services import local_bot
+from app.domains.local_bot.service import rate_limits as local_bot
+from app.runtime.local_bot.rate_limits import build_rate_limit_workflows
 
 
 def _context():
@@ -27,18 +28,18 @@ def test_reaction_cooldown_is_action_specific(
 ):
     calls = []
 
-    def fake_daily_limit(db, context):
+    def fake_daily_limit(db, context, *, workflows):
         calls.append(("daily",))
 
     def fake_activity_limit(
-        db, *, context, action_types, cooldown, max_per_day, label
+        db, *, context, action_types, cooldown, max_per_day, label, workflows
     ):
         calls.append((action_types, cooldown, max_per_day, label))
 
     monkeypatch.setattr(local_bot, "_ensure_reaction_daily_limit", fake_daily_limit)
     monkeypatch.setattr(local_bot, "_ensure_activity_rate_limit", fake_activity_limit)
 
-    local_bot._ensure_reaction_rate_limit(object(), _context(), label=label)
+    local_bot._ensure_reaction_rate_limit(object(), _context(), label=label, workflows=build_rate_limit_workflows())
 
     assert calls == [
         ("daily",),
@@ -56,14 +57,14 @@ def test_reaction_daily_limit_still_uses_shared_reaction_bucket(monkeypatch):
             self.label = label
 
     def fake_raise_rate_limit(
-        db, context, *, label, message, retry_after_seconds
+        db, context, *, label, message, retry_after_seconds, workflows
     ):
         raise RaisedRateLimit(label)
 
     monkeypatch.setattr(local_bot, "_raise_rate_limit", fake_raise_rate_limit)
 
     with pytest.raises(RaisedRateLimit) as exc:
-        local_bot._ensure_reaction_daily_limit(FakeDb(), _context())
+        local_bot._ensure_reaction_daily_limit(FakeDb(), _context(), workflows=build_rate_limit_workflows())
 
     assert exc.value.label == "reaction"
 

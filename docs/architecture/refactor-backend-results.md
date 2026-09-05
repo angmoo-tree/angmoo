@@ -1202,3 +1202,9 @@ LocalBot A2 최종: 원래18정의와 Bot19전체 class AST/JSONschema 동일. �
 기존 전체 조회5함수와 실제SQL10표현식을 `runtime/local_bot/queries.py`로 이전했다. 해당 표현식을 원래 호출자에 대입하면 남은35함수의 전체 AST가 동일하고, 구체 클래스는 실제 Character/Social/Routines 소유 정의와 같은 객체다. 조회 조건·정렬·한도·NULL·synthetic non-Session 경로를 유지하며 새조회나 저장을 추가하지 않는다. 기존테스트수정0·새노드0·신규제품1파일이다.
 
 집중 **54 passed / 기존warning1 /7.34초**, 원래6진단 전부0(protected2201/current2262), 경계777/2577/173legacy·L4 777/14/97·deferred22 PASS. 실제 rate-limit/행동/HTTP의 후속 역할 전환과 source 첫 도입 캡처는 별도로 남는다.
+
+## AR-B8 LocalBot A4 — 할당량·사용량·실패의 실제 정책
+
+12개 실제 판단/사용량/Retry-After/log/commit/rollback 함수를 LocalBot service로 옮겼다. 명시 workflow의 같은 조회·Routines 기록 함수를 복원하면 원래 남은30함수의 전체AST와 같다. 기존 rate-limit 테스트는 실제 소유 서비스와 workflow 준비만 바꾸고 모든 assertion/suppression은 유지했다. 옛 action 구현의 임시partial10개는 뒤따르는 실제 action/HTTP 이전에서 제거한다.
+
+집중 **54 passed / 기존warning1 /7.24초**, 원래6진단 모든항목0(protected2201/current2262), 경계780/2589/173legacy·L4 780/14/97·deferred22 PASS. 실제 신규3파일(service/rate_limits.py,contracts/rate_limits.py,runtime/local_bot/rate_limits.py), 새노드0이다. 원본 frozen·append-only 원장은 그대로이고 source도입 캡처는 부모의 순차 통합에서 수행한다.

@@ -882,6 +882,7 @@
       "app.domains.local_bot.constants",
       "app.domains.local_bot.contracts.authentication",
       "app.domains.local_bot.contracts.key_management",
+      "app.domains.local_bot.contracts.rate_limits",
       "app.domains.local_bot.dependencies",
       "app.domains.local_bot.exceptions",
       "app.domains.local_bot.models",
@@ -895,6 +896,7 @@
       "app.domains.local_bot.service.key_records",
       "app.domains.local_bot.service.presentation",
       "app.domains.local_bot.service.quota",
+      "app.domains.local_bot.service.rate_limits",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
       "app.domains.memory.contracts",
@@ -1168,12 +1170,14 @@
       "app.domains.identity.service.world_character_credentials",
       "app.domains.local_bot.contracts.authentication",
       "app.domains.local_bot.contracts.key_management",
+      "app.domains.local_bot.contracts.rate_limits",
       "app.domains.local_bot.schemas",
       "app.domains.local_bot.service.authentication",
       "app.domains.local_bot.service.key_management",
       "app.domains.local_bot.service.key_records",
       "app.domains.local_bot.service.presentation",
       "app.domains.local_bot.service.quota",
+      "app.domains.local_bot.service.rate_limits",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
       "app.domains.memory.contracts",
@@ -2894,14 +2898,6 @@
       },
       {
         "importer": "app.services.local_bot",
-        "target": "app.domains.local_bot.service.quota",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Remove original aggregate/workflow caller after remaining LocalBot roles and G5 registration transition; none remain at AR-B8-B.",
-        "reason": "Existing same-object value/model/quota caller during actual LocalBot source migration.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.local_bot",
         "target": "app.domains.local_bot.exceptions",
         "owner_stage": "AR-B8-A",
         "removal_condition": "Remove original aggregate/workflow caller after remaining LocalBot roles and G5 registration transition; none remain at AR-B8-B.",
@@ -2994,6 +2990,14 @@
         "owner_stage": "AR-B8-A",
         "removal_condition": "Remove this exact existing consumer during remaining LocalBot HTTP/action ownership or G5 schema registration; no such bridge remains at AR-B8-B.",
         "reason": "Actual original callback or same-object response/clock/context while the specific remaining source is migrated.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.local_bot",
+        "target": "app.domains.local_bot.service.rate_limits",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove exact original Bot action caller partial bindings when actual actions and Bot HTTP move in the next LocalBot slice; none remain at AR-B8-B.",
+        "reason": "Original actions call the real rate-limit service with same Session read/log collaborators; no duplicate policy.",
         "review_date": "2026-09-06"
       }
     ]
