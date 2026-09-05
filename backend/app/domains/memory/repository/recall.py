@@ -1,38 +1,31 @@
-"""Canonical SQLAlchemy read adapters for bounded Memory recall."""
-
+"""Canonical Memory SQL hydration and revalidation against current source rows."""
 from __future__ import annotations
-
 from collections.abc import Iterable
 from datetime import UTC, datetime
 from typing import Any
-
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, sessionmaker
-
-from app.domains.characters.public import Character
-from app.domains.memory.infrastructure import (
-    MemoryItem,
-    MemoryItemEvidence,
-    MemoryScopeSettingModel,
+from app.domains.memory.models.items import MemoryItem, MemoryItemEvidence, MemoryScopeSettingModel
+from app.domains.memory.contracts.recall import (
+    CanonicalRecallOperation, CanonicalRecallQuery, CanonicalRecallRecord,
+    MemoryRecallCandidate, MemoryRecallDocument, RecallDocumentKind, SOURCE_KIND_BY_TYPE,
 )
-from app.domains.memory.public import (
-    CanonicalMemoryEvidence,
-    CanonicalRecallOperation,
-    CanonicalRecallQuery,
-    CanonicalRecallRecord,
-    MemoryItemStatus,
-    MemoryRecallCandidate,
-    MemoryRecallDocument,
-    MemoryScope,
-    MemorySourceTypeV1,
-    RecallDocumentKind,
-    SOURCE_KIND_BY_TYPE,
+from app.domains.memory.contracts.provenance import MemoryItemStatus, MemorySourceTypeV1
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.contracts.source_evidence import CanonicalMemoryEvidence, MemorySourceEvidenceReaderPort
+from app.domains.memory.contracts.recall_reads import SourceReaderFactory, CharacterRowsReader
+from app.domains.memory.repository.recall_records import (
+    _candidate_record,
+    _canonical_source_record,
+    _item_scope,
+    _item_retrievable,
+    _current_evidence,
+    _operation_source_types,
+    _reference_matches,
+    _source_reference,
+    _in_time_range,
+    _as_utc,
 )
-from app.runtime.memory.sqlalchemy_source_reader import (
-    SqlAlchemyMemorySourceEvidenceReader,
-    models as source_models,
-)
-
 
 class SqlAlchemyMemoryRecallDocumentSource:
     """Materialize only accepted, current, observable canonical Memory evidence."""
@@ -41,9 +34,11 @@ class SqlAlchemyMemoryRecallDocumentSource:
         self,
         session_factory: sessionmaker[Session],
         *,
+        source_reader_factory: SourceReaderFactory,
         now_factory=lambda: datetime.now(UTC),
     ) -> None:
         self._factory = session_factory
+        self._source_reader_factory = source_reader_factory
         self._now_factory = now_factory
 
     def all_documents(self) -> tuple[MemoryRecallDocument, ...]:
@@ -87,7 +82,7 @@ class SqlAlchemyMemoryRecallDocumentSource:
                 )
             ):
                 evidence_by_item.setdefault(evidence.memory_item_id, []).append(evidence)
-            reader = SqlAlchemyMemorySourceEvidenceReader(session)
+            reader = self._source_reader_factory(session)
             result: dict[str, tuple[MemoryRecallDocument, ...]] = {}
             for item in items:
                 result[item.id] = self._documents_for_item(
@@ -141,7 +136,7 @@ class SqlAlchemyMemoryRecallDocumentSource:
     def _documents_for_item(
         *,
         session: Session,
-        reader: SqlAlchemyMemorySourceEvidenceReader,
+        reader: MemorySourceEvidenceReaderPort,
         item: MemoryItem,
         evidences: list[MemoryItemEvidence],
         now: datetime,
@@ -209,14 +204,20 @@ class SqlAlchemyMemoryRecallDocumentSource:
         return tuple(documents)
 
 
+
 class SqlAlchemyCanonicalRecallRepository:
     """Hydrate and revalidate every projection candidate against canonical rows."""
 
     def __init__(
         self,
         session_factory: sessionmaker[Session],
+        *,
+        source_reader_factory: SourceReaderFactory,
+        character_rows: CharacterRowsReader,
     ) -> None:
         self._factory = session_factory
+        self._source_reader_factory = source_reader_factory
+        self._character_rows = character_rows
 
     def memory_enabled(self, scope: MemoryScope) -> bool:
         with self._factory() as session:
@@ -236,7 +237,7 @@ class SqlAlchemyCanonicalRecallRepository:
             setting = _scope_setting(session, scope)
             if setting is None or not setting.enabled:
                 return ()
-            reader = SqlAlchemyMemorySourceEvidenceReader(session)
+            reader = self._source_reader_factory(session)
             records: list[CanonicalRecallRecord] = []
             seen: set[str] = set()
             for candidate in candidates:
@@ -311,7 +312,7 @@ class SqlAlchemyCanonicalRecallRepository:
                     )
                 )
             rows = list(session.execute(statement))
-            reader = SqlAlchemyMemorySourceEvidenceReader(session)
+            reader = self._source_reader_factory(session)
             records: list[CanonicalRecallRecord] = []
             seen: set[str] = set()
             for evidence, item in rows:
@@ -351,51 +352,13 @@ class SqlAlchemyCanonicalRecallRepository:
                     break
             return tuple(records)
 
-    @staticmethod
     def _character_summaries(
+        self,
         session: Session,
         query: CanonicalRecallQuery,
     ) -> tuple[CanonicalRecallRecord, ...]:
         requested = tuple(dict.fromkeys(query.world_character_references))
-        rows = list(
-            session.execute(
-                select(source_models.WorldCharacter, Character)
-                .join(
-                    Character,
-                    Character.id == source_models.WorldCharacter.character_id,
-                )
-                .join(
-                    source_models.WorldMembership,
-                    source_models.WorldMembership.id
-                    == source_models.WorldCharacter.membership_id,
-                )
-                .where(
-                    source_models.WorldCharacter.id.in_(requested),
-                    source_models.WorldCharacter.world_id == query.scope.world_id,
-                    source_models.WorldCharacter.status == "active",
-                    source_models.WorldMembership.status == "active",
-                )
-                .order_by(source_models.WorldCharacter.id)
-                .limit(query.limit)
-            )
-        )
-        blocked = set(
-            session.scalars(
-                select(source_models.WorldCharacterBlock.blocked_world_character_id).where(
-                    source_models.WorldCharacterBlock.world_id == query.scope.world_id,
-                    source_models.WorldCharacterBlock.blocker_world_character_id
-                    == query.scope.subject_world_character_id,
-                )
-            )
-        ) | set(
-            session.scalars(
-                select(source_models.WorldCharacterBlock.blocker_world_character_id).where(
-                    source_models.WorldCharacterBlock.world_id == query.scope.world_id,
-                    source_models.WorldCharacterBlock.blocked_world_character_id
-                    == query.scope.subject_world_character_id,
-                )
-            )
-        )
+        rows, blocked = self._character_rows(session, query, requested)
         records: list[CanonicalRecallRecord] = []
         for world_character, character in rows:
             if world_character.id in blocked:
@@ -423,90 +386,6 @@ class SqlAlchemyCanonicalRecallRepository:
         return tuple(records)
 
 
-def _candidate_record(
-    candidate: MemoryRecallCandidate,
-    item: MemoryItem,
-    current: list[tuple[MemoryItemEvidence, CanonicalMemoryEvidence]],
-) -> CanonicalRecallRecord | None:
-    evidence_references = tuple(
-        _source_reference(value.source_type, value.source_id)
-        for _row, value in current
-    )
-    if candidate.kind is RecallDocumentKind.MEMORY_ITEM:
-        if (
-            candidate.document_id != f"memory-item:{item.id}"
-            or candidate.canonical_source_id != item.id
-            or candidate.counterpart_world_character_id
-            != item.counterpart_world_character_id
-            or candidate.thread_id != item.thread_id
-        ):
-            return None
-        return CanonicalRecallRecord(
-            reference=candidate.document_id,
-            kind=RecallDocumentKind.MEMORY_ITEM,
-            canonical_source_id=item.id,
-            text=item.summary,
-            occurred_at=max(value.source_created_at for _row, value in current),
-            memory_item_id=item.id,
-            counterpart_world_character_id=item.counterpart_world_character_id,
-            thread_id=item.thread_id,
-            evidence_references=evidence_references,
-            metadata={"memory_kind": item.memory_kind, "item_version": str(item.version)},
-        )
-
-    evidence_id = candidate.metadata.get("evidence_id")
-    for row, canonical in current:
-        if row.id != evidence_id:
-            continue
-        if (
-            candidate.document_id != f"memory-source:{item.id}:{row.id}"
-            or candidate.kind is not SOURCE_KIND_BY_TYPE[canonical.source_type]
-            or candidate.canonical_source_id != canonical.source_id
-            or candidate.source_type is not canonical.source_type
-            or candidate.source_event_id != canonical.source_event_id
-            or candidate.counterpart_world_character_id
-            != canonical.counterpart_world_character_id
-            or candidate.thread_id != canonical.thread_id
-            or candidate.metadata.get("source_digest") != row.source_digest
-        ):
-            return None
-        return _canonical_source_record(
-            reference=candidate.document_id,
-            item=item,
-            evidence=row,
-            canonical=canonical,
-        )
-    return None
-
-
-def _canonical_source_record(
-    *,
-    reference: str,
-    item: MemoryItem,
-    evidence: MemoryItemEvidence,
-    canonical: CanonicalMemoryEvidence,
-) -> CanonicalRecallRecord:
-    return CanonicalRecallRecord(
-        reference=reference,
-        kind=SOURCE_KIND_BY_TYPE[canonical.source_type],
-        canonical_source_id=canonical.source_id,
-        text=canonical.deterministic_summary,
-        occurred_at=_as_utc(canonical.source_created_at),
-        memory_item_id=item.id,
-        counterpart_world_character_id=canonical.counterpart_world_character_id,
-        thread_id=canonical.thread_id,
-        source_type=canonical.source_type,
-        source_event_id=canonical.source_event_id,
-        evidence_references=(
-            _source_reference(canonical.source_type, canonical.source_id),
-        ),
-        metadata={
-            "evidence_id": evidence.id,
-            "source_digest": evidence.source_digest,
-            "memory_kind": item.memory_kind,
-        },
-    )
-
 
 def _scope_setting(
     session: Session,
@@ -522,111 +401,4 @@ def _scope_setting(
     )
 
 
-def _item_scope(item: MemoryItem) -> MemoryScope:
-    return MemoryScope(
-        owner_id=item.owner_id,
-        world_id=item.world_id,
-        subject_world_character_id=item.subject_world_character_id,
-    )
-
-
-def _item_retrievable(item: MemoryItem, now: datetime) -> bool:
-    return (
-        item.status == MemoryItemStatus.ACTIVE.value
-        and item.deleted_at is None
-        and item.superseded_by_id is None
-        and _as_utc(item.valid_from) <= now
-        and (item.valid_until is None or _as_utc(item.valid_until) > now)
-    )
-
-
-def _current_evidence(
-    reader: SqlAlchemyMemorySourceEvidenceReader,
-    scope: MemoryScope,
-    item: MemoryItem,
-    evidence: MemoryItemEvidence,
-) -> CanonicalMemoryEvidence | None:
-    try:
-        source_type = MemorySourceTypeV1(evidence.source_type)
-    except ValueError:
-        return None
-    canonical = reader.read_evidence(
-        scope=scope,
-        source_type=source_type,
-        source_id=evidence.source_id,
-    )
-    if canonical is None:
-        return None
-    if (
-        canonical.source_type is not source_type
-        or canonical.source_id != evidence.source_id
-        or canonical.source_world_id != scope.world_id
-        or canonical.source_digest != evidence.source_digest
-        or not canonical.successful
-        or not canonical.visible
-        or not canonical.observed_by_subject
-        or not canonical.membership_active
-        or canonical.blocked
-    ):
-        return None
-    if (
-        item.counterpart_world_character_id is not None
-        and canonical.counterpart_world_character_id
-        != item.counterpart_world_character_id
-    ):
-        return None
-    if item.thread_id is not None and canonical.thread_id != item.thread_id:
-        return None
-    return canonical
-
-
-def _operation_source_types(
-    operation: CanonicalRecallOperation,
-) -> tuple[MemorySourceTypeV1, ...]:
-    if operation is CanonicalRecallOperation.LIST_SOCIAL_EVENTS:
-        return (MemorySourceTypeV1.SOCIAL_EVENT,)
-    if operation is CanonicalRecallOperation.LIST_ACTIVITY_EPISODES:
-        return (MemorySourceTypeV1.ACTIVITY_EVENT,)
-    if operation is CanonicalRecallOperation.LIST_RELATIONSHIP_CHANGES:
-        return (MemorySourceTypeV1.RELATIONSHIP_EVENT,)
-    if operation is CanonicalRecallOperation.GET_POST_THREAD:
-        return (MemorySourceTypeV1.POST, MemorySourceTypeV1.REPLY)
-    return ()
-
-
-def _reference_matches(
-    evidence: MemoryItemEvidence,
-    references: tuple[str, ...],
-) -> bool:
-    values = {
-        evidence.id,
-        evidence.source_id,
-        evidence.source_event_id,
-        _source_reference(MemorySourceTypeV1(evidence.source_type), evidence.source_id),
-    }
-    return any(reference in values for reference in references)
-
-
-def _source_reference(source_type: MemorySourceTypeV1, source_id: str) -> str:
-    return f"source:{source_type.value}:{source_id}"
-
-
-def _in_time_range(value: datetime, query: CanonicalRecallQuery) -> bool:
-    occurred = _as_utc(value)
-    if query.occurred_from is not None and occurred < _as_utc(query.occurred_from):
-        return False
-    if query.occurred_to is not None and occurred >= _as_utc(query.occurred_to):
-        return False
-    return True
-
-
-def _as_utc(value: datetime) -> datetime:
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)
-
-
-__all__ = [
-    "SqlAlchemyCanonicalRecallRepository",
-    "SqlAlchemyMemoryRecallDocumentSource",
-]
+__all__ = ["SqlAlchemyCanonicalRecallRepository", "SqlAlchemyMemoryRecallDocumentSource"]

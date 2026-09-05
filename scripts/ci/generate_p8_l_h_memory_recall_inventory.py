@@ -46,7 +46,7 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/contracts/recall_store.py",
     "backend/app/domains/memory/public.py",
     "backend/app/runtime/memory/sqlite_fts5_recall.py",
-    "backend/app/runtime/memory/sqlalchemy_recall.py",
+    "backend/app/domains/memory/repository/recall.py",
     "backend/app/runtime/memory/recall_projection.py",
     "backend/app/runtime/configuration.py",
     "backend/app/public_main.py",
@@ -108,15 +108,20 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/runtime/memory/sqlalchemy_recall.py",
+        "backend/app/domains/memory/repository/recall.py",
         (
             "class SqlAlchemyMemoryRecallDocumentSource",
             "class SqlAlchemyCanonicalRecallRepository",
+            "MemoryItemStatus.ACTIVE.value",
+        ),
+    )
+    _require_text(
+        "backend/app/domains/memory/repository/recall_records.py",
+        (
             "canonical.source_digest != evidence.source_digest",
             "not canonical.visible",
             "not canonical.observed_by_subject",
             "canonical.blocked",
-            "MemoryItemStatus.ACTIVE.value",
         ),
     )
     _require_text(

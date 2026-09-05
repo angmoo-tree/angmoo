@@ -91,6 +91,10 @@
       "sha256": "e9d8f4aa53919c901f0fe74cc8f893d14b5b1b537a4382f1bc006b6b30385f20"
     },
     {
+      "path": "backend/app/domains/memory/contracts/recall_reads.py",
+      "sha256": "e07f32cd9ca9103f211f587a51c577610084020bc04bcedd828619b792353051"
+    },
+    {
       "path": "backend/app/domains/memory/contracts/recall_store.py",
       "sha256": "23a1e45fc306a31ad862eb46bd7097b625b5a68cc28ee04ea71bb87454c22c41"
     },
@@ -203,6 +207,14 @@
       "sha256": "823a7fbfb1cb1f5670089455e3eab74814c7856623f8efdc9c674259c82f3a47"
     },
     {
+      "path": "backend/app/domains/memory/repository/recall.py",
+      "sha256": "7d7328a9cb9a76d6fee3de5bbec33f956ccfc46a0f94802d1c9348c6e87a6872"
+    },
+    {
+      "path": "backend/app/domains/memory/repository/recall_records.py",
+      "sha256": "46811b25d618b41c176a2e8eff507d41547fb2a14be96cbe98c1ee2861e0a38c"
+    },
+    {
       "path": "backend/app/domains/memory/router.py",
       "sha256": "c4b590eb1570460cc758e5335f6e9d55a1745cefd9565d725258327a003fd778"
     },
@@ -284,7 +296,7 @@
     },
     {
       "path": "backend/app/runtime/memory/__init__.py",
-      "sha256": "5309a0d31f701f20d70ae6e97d5e625b64e6669a81ed123b339f0424b30d2c24"
+      "sha256": "df05782cc7de3c5a411c980adde971025c1ad99309bfb9705f4564d802cfc2b2"
     },
     {
       "path": "backend/app/runtime/memory/batch_preparation.py",
@@ -299,8 +311,16 @@
       "sha256": "ffc8b259e43241295d4e2c73d9968d72f7569eab89047de75d8f2f69aaaab57b"
     },
     {
+      "path": "backend/app/runtime/memory/recall_composition.py",
+      "sha256": "5c33c1f9a928cf7a3e59122ce91320816bcbee7c4ffb19130afbfc53b4d19300"
+    },
+    {
       "path": "backend/app/runtime/memory/recall_projection.py",
-      "sha256": "1b0ed5540914a060467e7f935d84680180c0033d2095c8270be39038d659a6ac"
+      "sha256": "415281cdaa1f54aeeeefbdca6d41b517f4d21f5613eda219cf3b0b264107db26"
+    },
+    {
+      "path": "backend/app/runtime/memory/recall_queries.py",
+      "sha256": "01d0126ea85b72602538cc81ef7291f67d461eb90514d924081871a71018c66a"
     },
     {
       "path": "backend/app/runtime/memory/scope_queries.py",
@@ -313,10 +333,6 @@
     {
       "path": "backend/app/runtime/memory/source_delivery.py",
       "sha256": "9fc76566b940903d71f4b2fc07940369075023bba09a4b89975ba4ac0a01fc5e"
-    },
-    {
-      "path": "backend/app/runtime/memory/sqlalchemy_recall.py",
-      "sha256": "cc7b5b7038fb7205baa684a82d7ecee841a79303728c6179e60d2d4ac429862f"
     },
     {
       "path": "backend/app/runtime/memory/sqlalchemy_source_reader.py",

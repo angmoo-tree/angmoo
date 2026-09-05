@@ -331,7 +331,8 @@
     "backend/app/domains/memory/infrastructure/consolidation_repository.py": "backend/app/domains/memory/repository/consolidation.py",
     "backend/app/domains/memory/infrastructure/maintenance_queue.py": "backend/app/domains/memory/repository/queue.py",
     "backend/app/domains/memory/infrastructure/activation.py": "backend/app/domains/memory/repository/activation.py",
-    "backend/app/api/v1/routes/memory.py": "backend/app/domains/memory/router.py"
+    "backend/app/api/v1/routes/memory.py": "backend/app/domains/memory/router.py",
+    "backend/app/runtime/memory/sqlalchemy_recall.py": "backend/app/domains/memory/repository/recall.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -18689,6 +18690,160 @@
         }
       ],
       "remaining": "Cross-owner source reconciliation, canonical recall, source interpretation and Daypart Memory; exact old bridges remain tracked."
+    },
+    "AR-B7-A9": {
+      "status": "SOURCE PREPARATION; 10 actual read method bodies/10 snapshot helpers and foreign SQL exact AST; focused44 PASS + same-Session canonical7 PASS; boundary659/2170/legacy256 PASS; full lineage gate pending sequential source capture",
+      "split_files": {
+        "backend/app/runtime/memory/sqlalchemy_recall.py": [
+          "backend/app/domains/memory/repository/recall.py",
+          "backend/app/domains/memory/repository/recall_records.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/memory/sqlalchemy_recall.py::SqlAlchemyMemoryRecallDocumentSource",
+          "new": "backend/app/domains/memory/repository/recall.py::SqlAlchemyMemoryRecallDocumentSource",
+          "direct_consumers": [
+            "backend/app/runtime/memory/recall_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_h_canonical_recall.py::test_canonical_service_revalidates_stale_fts_candidates_and_memory_off"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/sqlalchemy_recall.py::SqlAlchemyCanonicalRecallRepository",
+          "new": "backend/app/domains/memory/repository/recall.py::SqlAlchemyCanonicalRecallRepository",
+          "direct_consumers": [
+            "backend/app/runtime/memory/recall_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_h_canonical_recall.py::test_canonical_service_revalidates_stale_fts_candidates_and_memory_off"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/sqlalchemy_recall.py::_candidate_record",
+          "new": "backend/app/domains/memory/repository/recall_records.py::_candidate_record",
+          "direct_consumers": [
+            "backend/app/domains/memory/repository/recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_h_canonical_recall.py::test_canonical_service_revalidates_stale_fts_candidates_and_memory_off"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/sqlalchemy_recall.py::_canonical_source_record",
+          "new": "backend/app/domains/memory/repository/recall_records.py::_canonical_source_record",
+          "direct_consumers": [
+            "backend/app/domains/memory/repository/recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_h_canonical_recall.py::test_canonical_service_revalidates_stale_fts_candidates_and_memory_off"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/sqlalchemy_recall.py::_scope_setting",
+          "new": "backend/app/domains/memory/repository/recall.py::_scope_setting",
+          "direct_consumers": [
+            "backend/app/domains/memory/repository/recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_h_canonical_recall.py::test_canonical_service_revalidates_stale_fts_candidates_and_memory_off"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/sqlalchemy_recall.py::_item_scope",
+          "new": "backend/app/domains/memory/repository/recall_records.py::_item_scope",
+          "direct_consumers": [
+            "backend/app/domains/memory/repository/recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_h_canonical_recall.py::test_canonical_service_revalidates_stale_fts_candidates_and_memory_off"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/sqlalchemy_recall.py::_item_retrievable",
+          "new": "backend/app/domains/memory/repository/recall_records.py::_item_retrievable",
+          "direct_consumers": [
+            "backend/app/domains/memory/repository/recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_h_canonical_recall.py::test_canonical_service_revalidates_stale_fts_candidates_and_memory_off"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/sqlalchemy_recall.py::_current_evidence",
+          "new": "backend/app/domains/memory/repository/recall_records.py::_current_evidence",
+          "direct_consumers": [
+            "backend/app/domains/memory/repository/recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_h_canonical_recall.py::test_canonical_service_revalidates_stale_fts_candidates_and_memory_off"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/sqlalchemy_recall.py::_operation_source_types",
+          "new": "backend/app/domains/memory/repository/recall_records.py::_operation_source_types",
+          "direct_consumers": [
+            "backend/app/domains/memory/repository/recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_h_canonical_recall.py::test_canonical_service_revalidates_stale_fts_candidates_and_memory_off"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/sqlalchemy_recall.py::_reference_matches",
+          "new": "backend/app/domains/memory/repository/recall_records.py::_reference_matches",
+          "direct_consumers": [
+            "backend/app/domains/memory/repository/recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_h_canonical_recall.py::test_canonical_service_revalidates_stale_fts_candidates_and_memory_off"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/sqlalchemy_recall.py::_source_reference",
+          "new": "backend/app/domains/memory/repository/recall_records.py::_source_reference",
+          "direct_consumers": [
+            "backend/app/domains/memory/repository/recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_h_canonical_recall.py::test_canonical_service_revalidates_stale_fts_candidates_and_memory_off"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/sqlalchemy_recall.py::_in_time_range",
+          "new": "backend/app/domains/memory/repository/recall_records.py::_in_time_range",
+          "direct_consumers": [
+            "backend/app/domains/memory/repository/recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_h_canonical_recall.py::test_canonical_service_revalidates_stale_fts_candidates_and_memory_off"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/sqlalchemy_recall.py::_as_utc",
+          "new": "backend/app/domains/memory/repository/recall_records.py::_as_utc",
+          "direct_consumers": [
+            "backend/app/domains/memory/repository/recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_h_canonical_recall.py::test_canonical_service_revalidates_stale_fts_candidates_and_memory_off"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/memory/sqlalchemy_recall.py::__all__",
+          "new": "backend/app/domains/memory/repository/recall.py::__all__",
+          "direct_consumers": [
+            "backend/app/runtime/memory/recall_composition.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_h_canonical_recall.py::test_canonical_service_revalidates_stale_fts_candidates_and_memory_off"
+          ]
+        }
+      ],
+      "scope": "Memory repositories own actual SQL item/evidence hydration and mandatory current-source validation for recall/projection records. Foreign Character/World membership/block SQL stays in read-only runtime composition against the same Session. Memory recall services continue to own query validation, operation choice and result status.",
+      "preserved": "Original statement/order/caps, valid-time and opt-out behavior, source-digest/visibility/observation/block checks, deterministic record bytes/order and session lifetime. No new provider call or changed SQLite schema.",
+      "remaining": "Existing runtime aggregate exposes the same factory call shape until B8; source interpretation/Daypart Memory and source reconciliation remain."
     }
   }
 }

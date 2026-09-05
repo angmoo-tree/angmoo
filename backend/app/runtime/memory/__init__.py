@@ -4,10 +4,7 @@ from app.runtime.memory.recall_projection import (
     EmbeddedMemoryRecallProjection,
     MemoryRecallProjectionState,
 )
-from app.runtime.memory.sqlalchemy_recall import (
-    SqlAlchemyCanonicalRecallRepository,
-    SqlAlchemyMemoryRecallDocumentSource,
-)
+from app.runtime.memory.recall_composition import canonical_recall_repository as SqlAlchemyCanonicalRecallRepository, recall_document_source as SqlAlchemyMemoryRecallDocumentSource
 from app.runtime.memory.sqlalchemy_source_reader import (
     SqlAlchemyMemorySourceEvidenceReader,
 )

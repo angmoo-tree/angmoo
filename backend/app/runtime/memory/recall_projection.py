@@ -13,9 +13,7 @@ from app.domains.memory.infrastructure import (
     MemoryItemEvidence,
     MemoryScopeSettingModel,
 )
-from app.runtime.memory.sqlalchemy_recall import (
-    SqlAlchemyMemoryRecallDocumentSource,
-)
+from app.runtime.memory.recall_composition import recall_document_source as SqlAlchemyMemoryRecallDocumentSource
 from app.runtime.memory.sqlite_fts5_recall import (
     MemoryRecallIndexError,
     MemoryRecallIndexSchemaError,
