@@ -685,3 +685,8 @@ Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥�
 
 
 Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 SQL은 같은 `social/repository/resident_context.py`가 소유합니다. 읽지 않은 알림의30/20개 제한, 최근 자기 글8개·대상 글5개·답글200개와 원래 정렬을 각각 호출 목적에 맞게 유지합니다. Routines 자기 활동 로그의 최근 관계 검토 시각만 `routines/repository/resident_context.py`에서 읽습니다. 스레드 루트 추적은 원래 cycle·없는 부모의 처리만 수행하며, 별도의 공개 여부 검사와 합치지 않습니다.
+
+
+### Resident의 피드·알림·관계 문맥
+
+`routines/service/feed_context.py`는 읽을 피드와 알림 후보를 선택하고 설명하며, `social_context.py`는 팔로우·상호 답글·관계 검토 후보를 판단합니다. 이 코드에서 다른 도메인의 ORM을 조회하지 않습니다. `contracts/context_reads.py`는 실제로 읽는 값과 조회 협력을 정의하고 `runtime/resident/feed_context_references.py`가 기존 Session에 연결합니다. 원래 Post class 확인은 runtime이 같은 class로 수행하여 정책의 strict assertion을 유지합니다. Feed/행동 가능 알림/결과 문장의 기존 Social workflow는 caller가 명시 전달하며, 같은 코드를 runtime 안에 다시 구현하지 않습니다.

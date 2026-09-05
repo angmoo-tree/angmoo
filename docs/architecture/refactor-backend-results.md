@@ -1071,3 +1071,11 @@ C6b2 최종 고정 tree는 **538 passed /기존 PostgreSQL1 skipped/기존warnin
 
 
 C6c1 초기 **60 passed /기존warnings2/25.78초**, 최종 고정 tree **455 passed /기존 PostgreSQL1 skipped/기존warnings4/211.47초**. 경계 **748modules/2522edges/exact legacy206/cycle0**, L4 **748/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2267**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions는 수정하지 않았다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 이후 별도로 확인한다.
+
+
+## AR-B4-C6c2 — Resident 피드·알림·관계 문맥의 실제 정책
+
+실제11개 선택·표현 함수를 feed_context/social_context로 이전했다. Runtime은 기존Session의 owner SQL과 제한된 Character/Identity 값을 연결하며, 아직 B5 원문인 Social3기능은 기존caller가 typed협력으로 전달한다. 새legacy import나예외를 만들지 않았다. Strict Post isinstance는 같은 실제 Post class로 유지하며 입력을 복제하지 않는다. 순수UTC helper는 이름만 다른 기존 tick_schedule.aware_utc와 AST가 정확 같아 실제함수 하나를 재사용했다. 원문11함수와 남은AgentRun본문 전체는 한정된read호출을 복원하면 AST가 같다. 초기63PASS/기존warnings2/37.62초, 추가3SQLite는 원래행identity·pendingvisibility·수신자·잘못된review입력·상호답글→pendingfollow제외와observer/rollback을 검증한다.
+
+
+C6c2 최종 고정 tree **458 passed /기존 PostgreSQL1 skipped/기존warnings4/164.50초**. 경계 **752modules/2546edges/exact legacy206/cycle0**, L4 **752/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2270**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions는 수정하지 않았다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 이후 별도로 확인한다.

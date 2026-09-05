@@ -10911,13 +10911,16 @@
           "backend/app/domains/routines/service/decision_results.py",
           "backend/app/domains/routines/service/execution_prompts.py",
           "backend/app/domains/routines/service/execution_results.py",
+          "backend/app/domains/routines/service/feed_context.py",
           "backend/app/domains/routines/service/perception_diagnostics.py",
           "backend/app/domains/routines/service/perception_prompts.py",
           "backend/app/domains/routines/service/prompt_context.py",
           "backend/app/domains/routines/service/run_backoff.py",
           "backend/app/domains/routines/service/run_results.py",
           "backend/app/domains/routines/service/session_keys.py",
+          "backend/app/domains/routines/service/social_context.py",
           "backend/app/domains/routines/service/state_prompts.py",
+          "backend/app/domains/routines/service/tick_schedule.py",
           "backend/app/domains/routines/service/tool_policy.py",
           "backend/app/domains/routines/utils/context_text.py",
           "backend/app/domains/runtime/contracts.py",
@@ -11986,12 +11989,15 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_recent_feed_sections",
-          "new": "backend/app/services/agent_runs.py::_format_recent_feed_sections",
+          "new": "backend/app/domains/routines/service/feed_context.py::_format_recent_feed_sections",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
+            "tests/routines/test_context_reads.py::test_review_candidate_preserves_recipient_and_invalid_payload_admission",
+            "tests/routines/test_context_reads.py::test_mutual_reply_candidate_preserves_strict_post_type_and_pending_follow",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12123,12 +12129,15 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_collect_v6_inbox_candidates",
-          "new": "backend/app/services/agent_runs.py::_collect_v6_inbox_candidates",
+          "new": "backend/app/domains/routines/service/feed_context.py::_collect_v6_inbox_candidates",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
+            "tests/routines/test_context_reads.py::test_review_candidate_preserves_recipient_and_invalid_payload_admission",
+            "tests/routines/test_context_reads.py::test_mutual_reply_candidate_preserves_strict_post_type_and_pending_follow",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12200,12 +12209,15 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_v6_inbox_candidates_from_review",
-          "new": "backend/app/services/agent_runs.py::_v6_inbox_candidates_from_review",
+          "new": "backend/app/domains/routines/service/feed_context.py::_v6_inbox_candidates_from_review",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
+            "tests/routines/test_context_reads.py::test_review_candidate_preserves_recipient_and_invalid_payload_admission",
+            "tests/routines/test_context_reads.py::test_mutual_reply_candidate_preserves_strict_post_type_and_pending_follow",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12223,12 +12235,15 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_v6_feed_interests",
-          "new": "backend/app/services/agent_runs.py::_format_v6_feed_interests",
+          "new": "backend/app/domains/routines/service/feed_context.py::_format_v6_feed_interests",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
+            "tests/routines/test_context_reads.py::test_review_candidate_preserves_recipient_and_invalid_payload_admission",
+            "tests/routines/test_context_reads.py::test_mutual_reply_candidate_preserves_strict_post_type_and_pending_follow",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12846,29 +12861,35 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_recent_own_posts_to_avoid",
-          "new": "backend/app/services/agent_runs.py::_format_recent_own_posts_to_avoid",
+          "new": "backend/app/domains/routines/service/feed_context.py::_format_recent_own_posts_to_avoid",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
+            "tests/routines/test_context_reads.py::test_review_candidate_preserves_recipient_and_invalid_payload_admission",
+            "tests/routines/test_context_reads.py::test_mutual_reply_candidate_preserves_strict_post_type_and_pending_follow",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_recent_activity_summary",
-          "new": "backend/app/services/agent_runs.py::_format_recent_activity_summary",
+          "new": "backend/app/domains/routines/service/feed_context.py::_format_recent_activity_summary",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
+            "tests/routines/test_context_reads.py::test_review_candidate_preserves_recipient_and_invalid_payload_admission",
+            "tests/routines/test_context_reads.py::test_mutual_reply_candidate_preserves_strict_post_type_and_pending_follow",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_thread_root_post_id_for_prompt",
           "new": "backend/app/domains/social/repository/resident_context.py::_thread_root_post_id_for_prompt",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/feed_context_references.py"
           ],
           "test_nodes": [
             "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
@@ -12879,52 +12900,67 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_inbox_threads",
-          "new": "backend/app/services/agent_runs.py::_format_inbox_threads",
+          "new": "backend/app/domains/routines/service/feed_context.py::_format_inbox_threads",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
+            "tests/routines/test_context_reads.py::test_review_candidate_preserves_recipient_and_invalid_payload_admission",
+            "tests/routines/test_context_reads.py::test_mutual_reply_candidate_preserves_strict_post_type_and_pending_follow",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_social_connection_candidate",
-          "new": "backend/app/services/agent_runs.py::_format_social_connection_candidate",
+          "new": "backend/app/domains/routines/service/social_context.py::_format_social_connection_candidate",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
+            "tests/routines/test_context_reads.py::test_review_candidate_preserves_recipient_and_invalid_payload_admission",
+            "tests/routines/test_context_reads.py::test_mutual_reply_candidate_preserves_strict_post_type_and_pending_follow",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_profile_display_name",
-          "new": "backend/app/services/agent_runs.py::_format_profile_display_name",
+          "new": "backend/app/domains/routines/service/social_context.py::_format_profile_display_name",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/social_context.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
+            "tests/routines/test_context_reads.py::test_review_candidate_preserves_recipient_and_invalid_payload_admission",
+            "tests/routines/test_context_reads.py::test_mutual_reply_candidate_preserves_strict_post_type_and_pending_follow",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_strong_social_connection_candidate",
-          "new": "backend/app/services/agent_runs.py::_format_strong_social_connection_candidate",
+          "new": "backend/app/domains/routines/service/social_context.py::_format_strong_social_connection_candidate",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
+            "tests/routines/test_context_reads.py::test_review_candidate_preserves_recipient_and_invalid_payload_admission",
+            "tests/routines/test_context_reads.py::test_mutual_reply_candidate_preserves_strict_post_type_and_pending_follow",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_relationship_review_candidate",
-          "new": "backend/app/services/agent_runs.py::_format_relationship_review_candidate",
+          "new": "backend/app/domains/routines/service/social_context.py::_format_relationship_review_candidate",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
+            "tests/routines/test_context_reads.py::test_review_candidate_preserves_recipient_and_invalid_payload_admission",
+            "tests/routines/test_context_reads.py::test_mutual_reply_candidate_preserves_strict_post_type_and_pending_follow",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -13326,13 +13362,18 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_aware_utc",
-          "new": "backend/app/services/agent_runs.py::_aware_utc",
+          "new": "backend/app/domains/routines/service/tick_schedule.py::aware_utc",
           "direct_consumers": [
+            "backend/app/domains/routines/service/social_context.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
+            "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
+            "tests/routines/test_context_reads.py::test_review_candidate_preserves_recipient_and_invalid_payload_admission",
+            "tests/routines/test_context_reads.py::test_mutual_reply_candidate_preserves_strict_post_type_and_pending_follow",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ],
+          "same_implementation": "Existing tick_schedule.aware_utc body/signature is exactly identical after function-name normalization; callers keep the same _aware_utc alias. No new time conversion policy."
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_tool_recovery_message",
@@ -14644,7 +14685,7 @@
           "new": "backend/app/domains/social/repository/resident_context.py::find_review_notification",
           "source_member": "Exact original notification query expression. SQL predicates/order/nullable/limit and original conditional caller position are unchanged.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/feed_context_references.py"
           ],
           "test_nodes": [
             "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
@@ -14658,7 +14699,7 @@
           "new": "backend/app/domains/social/repository/resident_context.py::list_recent_own_posts",
           "source_member": "Exact original posts query expression. SQL predicates/order/nullable/limit and original conditional caller position are unchanged.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/feed_context_references.py"
           ],
           "test_nodes": [
             "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
@@ -14672,7 +14713,7 @@
           "new": "backend/app/domains/social/repository/resident_context.py::list_unread_reply_notifications",
           "source_member": "Exact original notifications query expression. SQL predicates/order/nullable/limit and original conditional caller position are unchanged. The two identical unread-reply queries retain explicit original limit30/20 via one actual query function.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/feed_context_references.py"
           ],
           "test_nodes": [
             "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
@@ -14686,7 +14727,7 @@
           "new": "backend/app/domains/social/repository/resident_context.py::list_unread_reply_notifications",
           "source_member": "Exact original notifications query expression. SQL predicates/order/nullable/limit and original conditional caller position are unchanged. The two identical unread-reply queries retain explicit original limit30/20 via one actual query function.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/feed_context_references.py"
           ],
           "test_nodes": [
             "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
@@ -14700,7 +14741,7 @@
           "new": "backend/app/domains/social/repository/resident_context.py::list_recent_reply_posts",
           "source_member": "Exact original reply_posts query expression. SQL predicates/order/nullable/limit and original conditional caller position are unchanged.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/feed_context_references.py"
           ],
           "test_nodes": [
             "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
@@ -14714,7 +14755,7 @@
           "new": "backend/app/domains/social/repository/resident_context.py::list_recent_followed_posts",
           "source_member": "Exact original recent_posts query expression with its original post_filter expression. SQL predicates/order/nullable/limit and original conditional caller position are unchanged.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/feed_context_references.py"
           ],
           "test_nodes": [
             "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
@@ -14728,7 +14769,7 @@
           "new": "backend/app/domains/routines/repository/resident_context.py::latest_relationship_review_at",
           "source_member": "Exact original last_review query expression. SQL predicates/order/nullable/limit and original conditional caller position are unchanged.",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/feed_context_references.py"
           ],
           "test_nodes": [
             "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
@@ -32623,6 +32664,24 @@
       "ownership": "Social owns actual notification/post-history queries and thread ancestry. Routines owns only its own ActivityLog latest relationship review read. Existing mixed context policies keep their original branching and call sites before typed policy transfer in C6c2.",
       "preservation": "Seven original SQL fragments preserve AST, including the exact duplicate unread-reply query with original limit30/20 supplied explicitly. Original thread helper body and all surrounding original AgentRun functions preserve AST after exact query restoration. No commit/flush/Session creation or new visibility predicate.",
       "remaining": "Original context policy selection/formatting still belongs the next actual Routines service slice; this is only real SQL ownership. Memory/B5/Operations future source remains independently owned and is not copied or merged."
+    },
+    "AR-B4-C6c2-resident-context-policy": {
+      "status": "IMPLEMENTED — initial63 and final458 passed / existing PostgreSQL1 skipped; original read-only6checks0, stock gate awaits sequential introduction append",
+      "actual_paths": [
+        "backend/app/domains/routines/contracts/context_reads.py",
+        "backend/app/domains/routines/service/feed_context.py",
+        "backend/app/domains/routines/service/social_context.py",
+        "backend/app/runtime/resident/feed_context_references.py"
+      ],
+      "test_nodes": [
+        "tests/routines/test_context_reads.py::test_feed_interest_context_uses_original_rows_and_pending_visibility",
+        "tests/routines/test_context_reads.py::test_review_candidate_preserves_recipient_and_invalid_payload_admission",
+        "tests/routines/test_context_reads.py::test_mutual_reply_candidate_preserves_strict_post_type_and_pending_follow",
+        "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+      ],
+      "ownership": "Actual feed/inbox context selection and explanation live in Routines feed_context; follow/mutual-reply/relationship-review decisions live in social_context. Runtime binds canonical queries on the original Session and receives the three existing Social workflows explicitly from the existing caller, without a new legacy import.",
+      "preservation": "Eleven original functions and all remaining AgentRun bodies are AST-identical after only exact read-collaborator restoration. Original strict Post isinstance is implemented by the runtime same-class type guard, not duck typing. Original UTC helper reuses existing tick_schedule.aware_utc with exact identical body. Three SQLite tests preserve original attached rows, pending visibility/recipient checks and mutual-reply candidate exclusion after pending follow with observer/rollback.",
+      "remaining": "Existing Social list_feed/actionable inbox/result-text bindings become canonical after B5 merge. Credential/slot preparation and actual execution placement remain C6d; original Daypart functions await B7. C7 settings/autonomy/tendency/manual-first-greeting HTTP and actual policies remain pending."
     }
   },
   "test_symbols": {

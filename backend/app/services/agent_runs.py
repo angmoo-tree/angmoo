@@ -1,10 +1,19 @@
-from app.domains.routines.repository import resident_context as resident_own_queries
-from app.domains.social.repository.resident_context import _thread_root_post_id_for_prompt
+from app.runtime.resident.feed_context_references import SqlAlchemyResidentContextReferences
+from app.domains.routines.service.tick_schedule import aware_utc as _aware_utc
+from app.domains.routines.service.feed_context import _collect_v6_inbox_candidates
+from app.domains.routines.service.feed_context import _format_inbox_threads
+from app.domains.routines.service.feed_context import _format_recent_activity_summary
+from app.domains.routines.service.feed_context import _format_recent_feed_sections
+from app.domains.routines.service.feed_context import _format_recent_own_posts_to_avoid
+from app.domains.routines.service.social_context import _format_relationship_review_candidate
+from app.domains.routines.service.social_context import _format_social_connection_candidate
+from app.domains.routines.service.social_context import _format_strong_social_connection_candidate
+from app.domains.routines.service.feed_context import _format_v6_feed_interests
+from app.domains.routines.service.feed_context import _v6_inbox_candidates_from_review
 from app.runtime.resident.context_references import SqlAlchemyResidentActionReferences
 from app.domains.routines.service.action_menu import _format_v6_action_menu_table
 from app.domains.routines.service.action_candidates import _profile_display_name_for_action_menu
 from app.domains.routines.service.action_admission import _profile_following_status
-from app.domains.social.repository import resident_context as resident_context_queries
 from app.domains.social.repository.resident_context import _has_character_like
 from app.domains.social.repository.resident_context import _has_character_repost
 from app.domains.social.repository.resident_context import _has_character_replied_to_thread
@@ -217,90 +226,6 @@ COMPLETE_TICK_ACTION_TYPES = (
 
 
 
-def _format_recent_feed_sections(
-    db: Session, *, run_id: str, character_id: str, allowed_actions: tuple[str, ...]
-) -> tuple[str, str]:
-    feed = community_service.list_feed(db, limit=50)
-    if not feed.items:
-        return "- none", "- none"
-    lines: list[str] = []
-    candidate_lines: list[str] = []
-    allowed = set(allowed_actions)
-    for index, post in enumerate(feed.items, start=1):
-        self_authored = post.author_character_id == character_id
-        author_target_type, author_target_id = _profile_target_parts(
-            user_id=post.author_user_id,
-            character_id=post.author_character_id,
-        )
-        already_liked = _has_character_like(
-            db, post_id=post.id, character_id=character_id
-        )
-        already_reposted = _has_character_repost(
-            db, post_id=post.id, character_id=character_id
-        )
-        already_following_author = _profile_following_status(
-            SqlAlchemyResidentActionReferences(db),
-            follower_character_id=character_id,
-            target_user_id=post.author_user_id,
-            target_character_id=post.author_character_id,
-        )
-        available_actions, _blocked_actions = _format_feed_post_action_status(
-            allowed_actions=allowed,
-            self_authored=self_authored,
-            already_liked=already_liked,
-            already_reposted=already_reposted,
-            already_following_author=already_following_author,
-        )
-        action_candidates = _format_feed_post_action_candidates(
-            run_id=run_id,
-            character_id=character_id,
-            available_actions=available_actions,
-            post_id=post.id,
-            author_target_type=author_target_type,
-            author_target_id=author_target_id,
-        )
-        reply_next_step = (
-            (
-                "candidate_id="
-                + _resident_action_candidate_id(
-                    run_id=run_id,
-                    character_id=character_id,
-                    action_type="reply",
-                    target_key=f"post:{post.id}",
-                )
-                + f"; call angmoo_get_post_thread({post.id}) before any reply action"
-            )
-            if "reply" in allowed
-            else "none"
-        )
-        candidate = _format_actionable_feed_candidate(
-            index=index,
-            post_id=post.id,
-            author_name=post.author_name,
-            title=post.title,
-            available_actions=available_actions,
-            reply_next_step=reply_next_step,
-            action_candidates=action_candidates,
-        )
-        if candidate is not None:
-            candidate_lines.append(candidate)
-        lines.append(
-            "\n".join(
-                [
-                    f"{index}. post_id: {post.id}",
-                    f"   post_type: {post.post_type}",
-                    f"   repost_of_post_id: {post.repost_of_post_id or '-'}",
-                    f"   author: {post.author_name} ({_format_profile_ref(user_id=post.author_user_id, character_id=post.author_character_id)})",
-                    f"   created_at: {post.created_at.isoformat()}",
-                    f"   title: {_clip_text(neutralize_context_text(post.title), 160)}",
-                    f"   body: {_clip_text(neutralize_context_text(post.body), 1200)}",
-                    f"   stats: likes={post.like_count}, replies={post.reply_count}, reposts={post.repost_count}",
-                    "   reading_context_only: yes",
-                    "   surface_style: neutralized",
-                ]
-            )
-        )
-    return "\n".join(lines), "\n".join(candidate_lines) or "- none"
 
 
 def _purge_expired_daypart_memory_events(db: Session) -> None:
@@ -314,164 +239,12 @@ def _purge_expired_daypart_memory_events(db: Session) -> None:
     )
     db.commit()
 
-def _collect_v6_inbox_candidates(
-    db: Session,
-    *,
-    character_id: str,
-    allowed_actions: tuple[str, ...],
-    limit: int = 10,
-) -> list[dict[str, Any]]:
-    notifications = community_service.list_resident_actionable_inbox_notifications(
-        db,
-        character_id=character_id,
-        allowed_actions=allowed_actions,
-        limit=max(1, min(limit, 10)),
-    )
-    candidates: list[dict[str, Any]] = []
-    for notification in notifications:
-        source_post_id = notification.source_post_id or notification.post_id
-        if source_post_id is None:
-            continue
-        source = community_crud.get_post(db, source_post_id)
-        root_post_id = _thread_root_post_id_for_prompt(db, source_post_id)
-        if source is None or root_post_id is None:
-            continue
-        root = community_crud.get_post(db, root_post_id)
-        actor_target_type, actor_target_id = _profile_target_parts(
-            user_id=notification.actor_user_id,
-            character_id=notification.actor_character_id,
-        )
-        candidates.append(
-            {
-                "notification_id": notification.id,
-                "root_post_id": root_post_id,
-                "source_post_id": source_post_id,
-                "actor_name": _profile_display_name_for_action_menu(
-                    SqlAlchemyResidentActionReferences(db),
-                    user_id=notification.actor_user_id,
-                    character_id=notification.actor_character_id,
-                ),
-                "actor_ref": _format_profile_ref(
-                    user_id=notification.actor_user_id,
-                    character_id=notification.actor_character_id,
-                ),
-                "actor_target_type": actor_target_type,
-                "actor_target_id": actor_target_id,
-                "source_body": _clip_text(neutralize_context_text(source.body), 400),
-                "parent_body": _clip_text(
-                    neutralize_context_text(root.body if root else ""), 300
-                ),
-                "created_at": notification.created_at.isoformat(),
-            }
-        )
-    return candidates
 
 
 
 
-def _v6_inbox_candidates_from_review(
-    db: Session, *, character_id: str, payload: dict[str, Any]
-) -> list[dict[str, Any]]:
-    raw_notification_id = payload.get("candidate_notification_id")
-    if isinstance(raw_notification_id, bool):
-        return []
-    try:
-        notification_id = int(raw_notification_id)
-    except (TypeError, ValueError):
-        return []
-    notification = resident_context_queries.find_review_notification(db, notification_id=notification_id, character_id=character_id)
-    if notification is None:
-        return []
-    source_post_id = notification.source_post_id or notification.post_id
-    if source_post_id is None:
-        return []
-    source = community_crud.get_post(db, source_post_id)
-    root_post_id = _thread_root_post_id_for_prompt(db, source_post_id)
-    if source is None or root_post_id is None:
-        return []
-    root = community_crud.get_post(db, root_post_id)
-    actor_target_type, actor_target_id = _profile_target_parts(
-        user_id=notification.actor_user_id,
-        character_id=notification.actor_character_id,
-    )
-    return [
-        {
-            "notification_id": notification.id,
-            "root_post_id": root_post_id,
-            "source_post_id": source_post_id,
-            "actor_name": _profile_display_name_for_action_menu(
-                SqlAlchemyResidentActionReferences(db),
-                user_id=notification.actor_user_id,
-                character_id=notification.actor_character_id,
-            ),
-            "actor_ref": _format_profile_ref(
-                user_id=notification.actor_user_id,
-                character_id=notification.actor_character_id,
-            ),
-            "actor_target_type": actor_target_type,
-            "actor_target_id": actor_target_id,
-            "source_body": _clip_text(neutralize_context_text(source.body), 500),
-            "root_summary": _clip_text(
-                neutralize_context_text(
-                    str(payload.get("candidate_summary") or (root.body if root else ""))
-                ),
-                500,
-            ),
-            "candidate_reason": _clip_text(
-                neutralize_context_text(str(payload.get("candidate_reason") or "")),
-                500,
-            ),
-            "reply_context": _clip_text(
-                neutralize_context_text(str(payload.get("reply_context") or "")),
-                700,
-            ),
-            "created_at": notification.created_at.isoformat(),
-        }
-    ]
 
 
-def _format_v6_feed_interests(
-    db: Session, *, feed_interest_payload: dict[str, Any]
-) -> str:
-    interests = feed_interest_payload.get("interests")
-    if not isinstance(interests, list) or not interests:
-        return "- none"
-    lines: list[str] = []
-    for index, item in enumerate(interests[:GEMINI_FREE_FEED_CANDIDATE_MAX], start=1):
-        if not isinstance(item, dict):
-            continue
-        post_id = str(item.get("post_id") or "").strip()
-        if not post_id:
-            continue
-        post = community_crud.get_post(db, post_id)
-        if post is None or not community_service.is_post_public_context_visible(db, post):
-            continue
-        topic_signature = _clip_text(
-            neutralize_context_text(
-                str(feed_interest_payload.get("topic_signature") or "")
-            ),
-            300,
-        )
-        novelty_basis = _clip_text(
-            neutralize_context_text(
-                str(feed_interest_payload.get("novelty_basis") or "")
-            ),
-            300,
-        )
-        lines.append(
-            "\n".join(
-                [
-                    f"{index}. post_id: {post.id}",
-                    f"   author: {_profile_display_name_for_action_menu(SqlAlchemyResidentActionReferences(db), user_id=post.author_user_id, character_id=post.author_character_id)}",
-                    f"   topic_signature: {topic_signature or '-'}",
-                    f"   novelty_basis: {novelty_basis or '-'}",
-                    f"   summary: {_clip_text(neutralize_context_text(str(item.get('summary') or post.title)), 240)}",
-                    f"   interest_reason: {_clip_text(neutralize_context_text(str(item.get('reason') or '')), 240)}",
-                    f"   short_reply_context: {_clip_text(neutralize_context_text(post.body), 500)}",
-                ]
-            )
-        )
-    return "\n".join(lines) if lines else "- none"
 
 
 def _daypart_memory_event_exists(
@@ -1034,460 +807,22 @@ def _v6_possible_post_actions(
 
 
 
-def _format_recent_own_posts_to_avoid(db: Session, *, character_id: str) -> str:
-    posts = resident_context_queries.list_recent_own_posts(db, character_id=character_id)
-    if not posts:
-        return "- none"
-    return "\n".join(
-        (
-            f"- post_id: {post.id}; type={post.post_type}; created_at={post.created_at.isoformat()}; "
-            f"title={_clip_text(neutralize_context_text(post.title), 120)}; "
-            f"body={_clip_text(neutralize_context_text(post.body), 300)}; "
-            "surface_style=neutralized"
-        )
-        for post in posts
-    )
-
-
-def _format_recent_activity_summary(db: Session, *, character_id: str) -> str:
-    logs = agent_crud.list_recent_activity(db, character_id, limit=8)
-    if not logs:
-        return "- none"
-    return "\n".join(
-        (
-            f"- {log.created_at.isoformat()} {log.action_type}: "
-            f"{_clip_text(neutralize_context_text(community_service.activity_result_text_for_prompt(log.result, log.reason)), 240)}"
-        )
-        for log in logs
-    )
 
 
 
 
-def _format_inbox_threads(
-    db: Session,
-    *,
-    run_id: str,
-    user_id: str,
-    character_id: str,
-    allowed_actions: tuple[str, ...],
-) -> tuple[str, bool]:
-    notifications = resident_context_queries.list_unread_reply_notifications(db, character_id=character_id, limit=30)
-    grouped: dict[str, list[models.Notification]] = {}
-    for notification in notifications:
-        anchor_post_id = notification.source_post_id or notification.post_id
-        if anchor_post_id is None:
-            continue
-        root_post_id = _thread_root_post_id_for_prompt(db, anchor_post_id)
-        if root_post_id is None:
-            continue
-        grouped.setdefault(root_post_id, []).append(notification)
-    if not grouped:
-        return "- none", False
-
-    lines: list[str] = []
-    follow_allowed = "follow" in set(allowed_actions)
-    for root_post_id, items in list(grouped.items())[:5]:
-        root_post = community_crud.get_post(db, root_post_id)
-        root_title = _clip_text(
-            neutralize_context_text(root_post.title if root_post else ""), 160
-        )
-        notification_ids = ", ".join(str(item.id) for item in items)
-        lines.append(
-            f"- root_post_id: {root_post_id}; notification_ids: [{notification_ids}]; root_title: {root_title}"
-        )
-        for item in items[:5]:
-            source = (
-                community_crud.get_post(db, item.source_post_id)
-                if item.source_post_id
-                else None
-            )
-            if item.source_post_id and source is None:
-                continue
-            actor_ref = _format_profile_ref(
-                user_id=item.actor_user_id, character_id=item.actor_character_id
-            )
-            actor_following_status = _profile_following_status(
-                SqlAlchemyResidentActionReferences(db),
-                follower_character_id=character_id,
-                target_user_id=item.actor_user_id,
-                target_character_id=item.actor_character_id,
-            )
-            source_post_id = item.source_post_id or item.post_id or "-"
-            source_body = _clip_text(
-                neutralize_context_text(source.body if source else ""), 500
-            )
-            follow_candidate = "none"
-            target_type, target_id = _profile_target_parts(
-                user_id=item.actor_user_id,
-                character_id=item.actor_character_id,
-            )
-            if (
-                follow_allowed
-                and actor_following_status == "no"
-                and target_type is not None
-                and target_id is not None
-            ):
-                follow_candidate = _resident_action_candidate_id(
-                    run_id=run_id,
-                    character_id=character_id,
-                    action_type="follow",
-                    target_key=f"{target_type}:{target_id}",
-                )
-            lines.append(
-                f"  - notification_id: {item.id}; source_post_id: {source_post_id}; actor={actor_ref}; actor_already_following={actor_following_status}; follow_candidate_id={follow_candidate}; created_at={item.created_at.isoformat()}; body={source_body}; surface_style=neutralized"
-            )
-    return "\n".join(lines), True
 
 
-def _format_social_connection_candidate(
-    db: Session,
-    *,
-    character_id: str,
-    feed_cue: models.AgentFeedCue | None,
-    allowed_actions: tuple[str, ...],
-) -> str:
-    if feed_cue is not None:
-        return """- status: none
-- reason: A pending owner feed cue exists. Use the feed cue create_post flow only; do not apply social connection judgment."""
-    if "follow" not in allowed_actions:
-        return """- status: none
-- reason: follow is not allowed in this tick by backend activity policy."""
-
-    candidates: list[str] = []
-    seen_targets: set[tuple[str, str]] = set()
-
-    notifications = resident_context_queries.list_unread_reply_notifications(db, character_id=character_id, limit=20)
-    for item in notifications:
-        target_type, target_id = _profile_target_parts(
-            user_id=item.actor_user_id, character_id=item.actor_character_id
-        )
-        if target_id is None:
-            continue
-        target_key = (target_type, target_id)
-        if target_key in seen_targets:
-            continue
-        status = _profile_following_status(
-            SqlAlchemyResidentActionReferences(db),
-            follower_character_id=character_id,
-            target_user_id=item.actor_user_id,
-            target_character_id=item.actor_character_id,
-        )
-        if status != "no":
-            continue
-        source = (
-            community_crud.get_post(db, item.source_post_id)
-            if item.source_post_id
-            else None
-        )
-        if source is None:
-            continue
-        root_post_id = _thread_root_post_id_for_prompt(
-            db, item.source_post_id or item.post_id or ""
-        )
-        if root_post_id is None:
-            continue
-        seen_targets.add(target_key)
-        candidates.append(
-            "\n".join(
-                [
-                    f"  - source: inbox_reply",
-                    f"    target: {target_type}:{target_id}",
-                    f"    root_post_id: {root_post_id or '-'}",
-                    f"    source_post_id: {item.source_post_id or item.post_id or '-'}",
-                    f"    recent_signal: {_clip_text(neutralize_context_text(source.body if source else ''), 500)}",
-                    "    surface_style: neutralized",
-                ]
-            )
-        )
-        if len(candidates) >= 5:
-            break
-
-    if len(candidates) < 5:
-        feed = community_service.list_feed(db, limit=50)
-        for post in feed.items:
-            target_type, target_id = _profile_target_parts(
-                user_id=post.author_user_id, character_id=post.author_character_id
-            )
-            if target_id is None:
-                continue
-            target_key = (target_type, target_id)
-            if target_key in seen_targets:
-                continue
-            status = _profile_following_status(
-                SqlAlchemyResidentActionReferences(db),
-                follower_character_id=character_id,
-                target_user_id=post.author_user_id,
-                target_character_id=post.author_character_id,
-            )
-            if status != "no":
-                continue
-            seen_targets.add(target_key)
-            candidates.append(
-                "\n".join(
-                    [
-                        f"  - source: recent_root",
-                        f"    target: {target_type}:{target_id}",
-                        f"    post_id: {post.id}",
-                        f"    title: {_clip_text(neutralize_context_text(post.title), 160)}",
-                        f"    recent_signal: {_clip_text(neutralize_context_text(post.body), 500)}",
-                        "    surface_style: neutralized",
-                    ]
-                )
-            )
-            if len(candidates) >= 5:
-                break
-
-    if not candidates:
-        return """- status: none
-- reason: No not-yet-followed profile candidate was found in inbox replies or recent root posts."""
-
-    return "\n".join(
-        [
-            "- status: available_soft_nudge",
-            "- meaning: follow is a relationship action when the character wants to keep seeing another character's posts and reactions.",
-            "- candidate_signals: repeated warm exchange, shared interest, direct address, positive affect, or a promise of later interaction.",
-            "- blockers: already following, self, deleted target, merely polite reply, or persona preference for distance.",
-            "- not_required: Do not follow just because a candidate is listed. Choose follow only when it fits the persona and community tendency.",
-            "- candidates:",
-            *candidates,
-        ]
-    )
 
 
-def _format_profile_display_name(
-    db: Session, *, target_type: str, target_id: str
-) -> str:
-    if target_type == "character":
-        character = community_crud.get_character(db, target_id)
-        if character is None:
-            return f"character:{target_id}"
-        return f"{character.name} (@{character.handle})"
-    user = community_crud.get_user(db, target_id)
-    if user is None:
-        return f"user:{target_id}"
-    return user.display_name
 
 
-def _format_strong_social_connection_candidate(
-    db: Session,
-    *,
-    character_id: str,
-    feed_cue: models.AgentFeedCue | None,
-    allowed_actions: tuple[str, ...],
-) -> str:
-    if feed_cue is not None:
-        return """- status: none
-- reason: A pending owner feed cue exists. Use the feed cue create_post flow only; do not apply social connection judgment."""
-    if "follow" not in allowed_actions:
-        return """- status: none
-- reason: follow is not allowed in this tick by backend activity policy."""
-
-    since = datetime.now(UTC) - timedelta(days=3)
-    reply_posts = resident_context_queries.list_recent_reply_posts(db, since=since)
-    if not reply_posts:
-        return """- status: none
-- reason: No recent reply posts were found for a strong social connection check."""
-
-    direct_exchanges: dict[tuple[str, str, str], dict[str, object]] = {}
-    for post in reply_posts:
-        if post.reply_to_post_id is None:
-            continue
-        parent = community_crud.get_post(db, post.reply_to_post_id)
-        if parent is None:
-            continue
-        post_target_type, post_target_id = _profile_target_parts(
-            user_id=post.author_user_id,
-            character_id=post.author_character_id,
-        )
-        parent_target_type, parent_target_id = _profile_target_parts(
-            user_id=parent.author_user_id,
-            character_id=parent.author_character_id,
-        )
-        if (
-            post_target_type is None
-            or post_target_id is None
-            or parent_target_type is None
-            or parent_target_id is None
-        ):
-            continue
-        root_post_id = _thread_root_post_id_for_prompt(db, post.id)
-        if root_post_id is None:
-            continue
-
-        target_type: str | None = None
-        target_id: str | None = None
-        own_to_target = False
-        target_to_own = False
-        if post_target_type == "character" and post_target_id == character_id:
-            target_type = parent_target_type
-            target_id = parent_target_id
-            own_to_target = True
-        elif parent_target_type == "character" and parent_target_id == character_id:
-            target_type = post_target_type
-            target_id = post_target_id
-            target_to_own = True
-        if target_type is None or target_id is None:
-            continue
-        if target_type == "character" and target_id == character_id:
-            continue
-
-        key = (target_type, target_id, root_post_id)
-        exchange = direct_exchanges.setdefault(
-            key,
-            {
-                "target_type": target_type,
-                "target_id": target_id,
-                "root_post_id": root_post_id,
-                "own_count": 0,
-                "target_count": 0,
-                "latest_at": post.created_at,
-                "context_posts": [],
-                "seen_post_ids": set(),
-            },
-        )
-        if own_to_target:
-            exchange["own_count"] = int(exchange["own_count"]) + 1
-        if target_to_own:
-            exchange["target_count"] = int(exchange["target_count"]) + 1
-        if post.created_at > exchange["latest_at"]:
-            exchange["latest_at"] = post.created_at
-        seen_post_ids = exchange["seen_post_ids"]
-        assert isinstance(seen_post_ids, set)
-        if post.id not in seen_post_ids:
-            context_posts = exchange["context_posts"]
-            assert isinstance(context_posts, list)
-            context_posts.append(post)
-            seen_post_ids.add(post.id)
-
-    candidates: list[dict[str, object]] = []
-    for exchange in direct_exchanges.values():
-        if int(exchange["own_count"]) <= 0 or int(exchange["target_count"]) <= 0:
-            continue
-        target_type = str(exchange["target_type"])
-        target_id = str(exchange["target_id"])
-        if target_type != "character":
-            continue
-        status = _profile_following_status(
-            SqlAlchemyResidentActionReferences(db),
-            follower_character_id=character_id,
-            target_user_id=None,
-            target_character_id=target_id,
-        )
-        if status != "no":
-            continue
-        context_posts = exchange["context_posts"]
-        assert isinstance(context_posts, list)
-        candidates.append(
-            {
-                "target_type": target_type,
-                "target_id": target_id,
-                "root_post_id": exchange["root_post_id"],
-                "own_count": exchange["own_count"],
-                "target_count": exchange["target_count"],
-                "total_count": int(exchange["own_count"])
-                + int(exchange["target_count"]),
-                "latest_at": exchange["latest_at"],
-                "context_posts": sorted(
-                    context_posts,
-                    key=lambda item: (item.created_at, item.id),
-                    reverse=True,
-                )[:2],
-            }
-        )
-
-    if not candidates:
-        return """- status: none
-- reason: No recent mutual reply exchange with a not-yet-followed profile was found."""
-
-    candidates.sort(
-        key=lambda item: (item["total_count"], item["latest_at"]),
-        reverse=True,
-    )
-    candidate = candidates[0]
-    target_type = str(candidate["target_type"])
-    target_id = str(candidate["target_id"])
-    display_name = _format_profile_display_name(
-        db, target_type=target_type, target_id=target_id
-    )
-    context_lines = []
-    for post in candidate["context_posts"]:
-        assert isinstance(post, models.Post)
-        author_label = "self" if post.author_character_id == character_id else display_name
-        context_lines.append(
-            f"  - {author_label}: {_clip_text(neutralize_context_text(post.body), 220)}"
-        )
-    latest_context = "\n".join(context_lines) if context_lines else "  - none"
-    return "\n".join(
-        [
-            "- status: available",
-            f"- target: {target_type}:{target_id}",
-            f"- display_name: {display_name}",
-            "- relationship_signal: Recent thread contains direct replies in both directions between this character and the target profile.",
-            (
-                "- exchange_summary: "
-                f"own_replies={candidate['own_count']}; "
-                f"target_replies={candidate['target_count']}; "
-                f"latest_at={candidate['latest_at'].isoformat()}"
-            ),
-            f"- thread_root_id: {candidate['root_post_id']}",
-            "- latest_context:",
-            latest_context,
-            "- instruction: Strongly consider follow, but selected-mode completion must use a backend candidate_id from actionable_feed_candidates or inbox follow_candidate_id. Do not submit a raw follow payload.",
-        ]
-    )
 
 
-def _format_relationship_review_candidate(
-    db: Session, *, character_id: str, has_feed_cue: bool, has_inbox: bool
-) -> str:
-    if has_feed_cue or has_inbox:
-        return "- none"
-    now = datetime.now(UTC)
-    last_review = resident_own_queries.latest_relationship_review_at(db, character_id=character_id)
-    if last_review is not None and _aware_utc(last_review) > now - timedelta(hours=24):
-        return "- none"
-
-    follows, _cursor = community_crud.list_profile_following(
-        db, character_id=character_id, limit=20
-    )
-    since = now - timedelta(days=14)
-    for follow in follows:
-        target_id = follow.target_character_id
-        if target_id is None or target_id == character_id:
-            continue
-        target_character = community_crud.get_character(db, target_id)
-        target_name = target_character.name if target_character is not None else target_id
-        recent_posts = resident_context_queries.list_recent_followed_posts(db, target_id=target_id, since=since)
-        if not recent_posts:
-            continue
-        activities = "\n".join(
-            (
-                f"  - post_id: {post.id}; type={post.post_type}; created_at={post.created_at.isoformat()}; "
-                f"title={_clip_text(neutralize_context_text(post.title), 120)}; "
-                f"body={_clip_text(neutralize_context_text(post.body), 500)}; "
-                "surface_style=neutralized"
-            )
-            for post in recent_posts
-        )
-        return "\n".join(
-            [
-                "- target_type: character",
-                f"- target_id: {target_id}",
-                f"- display_name: {target_name}",
-                f"- followed_since: {follow.created_at.isoformat()}",
-                "- previous_relationship_note: none recorded separately yet",
-                "- recent_activity:",
-                activities,
-            ]
-        )
-    return "- none"
 
 
-def _aware_utc(value: datetime) -> datetime:
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)
+
+
 
 
 def _validate_character_and_credential(
@@ -1825,7 +1160,7 @@ async def run_community_once(
     )
     feed_cue = feed_cue_queries.get_pending_feed_cue(db, character.id)
     inbox_threads, has_inbox = _format_inbox_threads(
-        db,
+        SqlAlchemyResidentContextReferences(db, social=community_service),
         run_id=run_id,
         user_id=user_id,
         character_id=character.id,
@@ -1834,7 +1169,7 @@ async def run_community_once(
         else DEFAULT_ACTIVITY_ACTIONS,
     )
     recent_feed_roots, actionable_feed_candidates = _format_recent_feed_sections(
-        db,
+        SqlAlchemyResidentContextReferences(db, social=community_service),
         run_id=run_id,
         character_id=character.id,
         allowed_actions=activity_policy.allowed_actions
@@ -1842,19 +1177,19 @@ async def run_community_once(
         else DEFAULT_ACTIVITY_ACTIONS,
     )
     recent_own_posts_to_avoid = _format_recent_own_posts_to_avoid(
-        db, character_id=character.id
+        SqlAlchemyResidentContextReferences(db, social=community_service), character_id=character.id
     )
     recent_activity_summary = _format_recent_activity_summary(
-        db, character_id=character.id
+        SqlAlchemyResidentContextReferences(db, social=community_service), character_id=character.id
     )
     relationship_review_candidate = _format_relationship_review_candidate(
-        db,
+        SqlAlchemyResidentContextReferences(db, social=community_service),
         character_id=character.id,
         has_feed_cue=feed_cue is not None,
         has_inbox=has_inbox,
     )
     social_connection_candidate = _format_social_connection_candidate(
-        db,
+        SqlAlchemyResidentContextReferences(db, social=community_service),
         character_id=character.id,
         feed_cue=feed_cue,
         allowed_actions=activity_policy.allowed_actions
@@ -1862,7 +1197,7 @@ async def run_community_once(
         else DEFAULT_ACTIVITY_ACTIONS,
     )
     strong_social_connection_candidate = _format_strong_social_connection_candidate(
-        db,
+        SqlAlchemyResidentContextReferences(db, social=community_service),
         character_id=character.id,
         feed_cue=feed_cue,
         allowed_actions=activity_policy.allowed_actions
@@ -2256,7 +1591,7 @@ async def _run_resident_individual_tool_flow(
 ) -> dict[str, Any]:
     allowed_actions = _gemini_free_effective_actions(activity_policy.allowed_actions)
     inbox_scan_candidates = _collect_v6_inbox_candidates(
-        db,
+        SqlAlchemyResidentContextReferences(db, social=community_service),
         character_id=character.id,
         allowed_actions=allowed_actions,
         limit=10,
@@ -2347,7 +1682,7 @@ async def _run_resident_individual_tool_flow(
         db, character_id=character.id, since=run_started_at
     )
     inbox_candidates = _v6_inbox_candidates_from_review(
-        db, character_id=character.id, payload=inbox_review_payload
+        SqlAlchemyResidentContextReferences(db, social=community_service), character_id=character.id, payload=inbox_review_payload
     )
     if use_daypart_main_session and daypart_start_date and activity_daypart:
         inbox_candidates = _filter_daypart_duplicate_inbox_candidates(
@@ -2609,10 +1944,10 @@ async def _run_resident_individual_tool_flow(
             feed_interest_payload=feed_interest_payload,
         )
     feed_interests = _format_v6_feed_interests(
-        db, feed_interest_payload=feed_interest_payload
+        SqlAlchemyResidentContextReferences(db, social=community_service), feed_interest_payload=feed_interest_payload
     )
     relationship_review_candidate = _format_relationship_review_candidate(
-        db,
+        SqlAlchemyResidentContextReferences(db, social=community_service),
         character_id=character.id,
         has_feed_cue=feed_cue is not None
         or bool(feed_interest_payload.get("interests"))
@@ -3119,7 +2454,7 @@ async def _run_resident_slot_once(
         )
         feed_cue = feed_cue_queries.get_pending_feed_cue(db, character.id)
         inbox_threads, has_inbox = _format_inbox_threads(
-            db,
+            SqlAlchemyResidentContextReferences(db, social=community_service),
             run_id=run_id,
             user_id=slot.assigned_user_id,
             character_id=character.id,
@@ -3128,7 +2463,7 @@ async def _run_resident_slot_once(
             else DEFAULT_ACTIVITY_ACTIONS,
         )
         recent_feed_roots, actionable_feed_candidates = _format_recent_feed_sections(
-            db,
+            SqlAlchemyResidentContextReferences(db, social=community_service),
             run_id=run_id,
             character_id=character.id,
             allowed_actions=activity_policy.allowed_actions
@@ -3136,19 +2471,19 @@ async def _run_resident_slot_once(
             else DEFAULT_ACTIVITY_ACTIONS,
         )
         recent_own_posts_to_avoid = _format_recent_own_posts_to_avoid(
-            db, character_id=character.id
+            SqlAlchemyResidentContextReferences(db, social=community_service), character_id=character.id
         )
         recent_activity_summary = _format_recent_activity_summary(
-            db, character_id=character.id
+            SqlAlchemyResidentContextReferences(db, social=community_service), character_id=character.id
         )
         relationship_review_candidate = _format_relationship_review_candidate(
-            db,
+            SqlAlchemyResidentContextReferences(db, social=community_service),
             character_id=character.id,
             has_feed_cue=feed_cue is not None,
             has_inbox=has_inbox,
         )
         social_connection_candidate = _format_social_connection_candidate(
-            db,
+            SqlAlchemyResidentContextReferences(db, social=community_service),
             character_id=character.id,
             feed_cue=feed_cue,
             allowed_actions=activity_policy.allowed_actions
@@ -3156,7 +2491,7 @@ async def _run_resident_slot_once(
             else DEFAULT_ACTIVITY_ACTIONS,
         )
         strong_social_connection_candidate = _format_strong_social_connection_candidate(
-            db,
+            SqlAlchemyResidentContextReferences(db, social=community_service),
             character_id=character.id,
             feed_cue=feed_cue,
             allowed_actions=activity_policy.allowed_actions
