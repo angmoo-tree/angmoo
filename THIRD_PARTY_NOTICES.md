@@ -3,7 +3,7 @@
 This inventory is generated from the locked Angmoo dependencies.
 Package authors retain all rights granted by their respective licenses.
 
-## Python packages (74)
+## Python packages (75)
 
 - `alembic 1.19.0` — MIT
 - `annotated-doc 0.0.4` — MIT
@@ -44,6 +44,7 @@ Package authors retain all rights granted by their respective licenses.
 - `orjson 3.11.9` — MPL-2.0 AND (Apache-2.0 OR MIT)
 - `ormsgpack 1.12.2` — Apache-2.0 OR MIT
 - `packaging 26.2` — Apache-2.0 OR BSD-2-Clause
+- `pgvector 0.5.0` — MIT
 - `pillow 12.3.0` — MIT-CMU
 - `pluggy 1.6.0` — MIT
 - `pyasn1 0.6.4` — BSD-2-Clause

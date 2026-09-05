@@ -77,3 +77,19 @@ class AgentPrivateMediaNotFoundError(AgentCreationDraftError):
 
 class AgentCreationDraftParseError(AgentCreationDraftError):
     pass
+
+
+class AgentActiveHoursInvalidError(AgentServiceError):
+    pass
+
+
+class CredentialRequiredError(AgentServiceError):
+    pass
+
+
+class CredentialSyncError(AgentServiceError):
+    pass
+
+
+class CharacterStateNotFoundError(AgentServiceError):
+    pass

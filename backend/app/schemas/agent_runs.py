@@ -1,3 +1,8 @@
+from app.domains.runtime.schemas import (
+    AgentActivityLogRead,
+    AgentSlotRead,
+)
+
 from datetime import UTC, datetime
 from typing import Any
 
@@ -9,22 +14,6 @@ from app.core.response_schemas import (
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
-class AgentActivityLogRead(UtcInstantResponseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    user_id: str
-    character_id: str
-    action_type: str
-    target_post_id: str | None = None
-    target_profile_type: str | None = None
-    target_profile_id: str | None = None
-    target_profile_name: str | None = None
-    target_profile_handle: str | None = None
-    target_profile_avatar_url: str | None = None
-    reason: str
-    result: str
-    created_at: datetime
 
 class OpenClawCommunityRunCreate(BaseModel):
     user_id: str | None = None
@@ -49,21 +38,6 @@ class OpenClawAgentRunRead(BaseModel):
     gateway_result: dict[str, Any]
 
 
-class AgentSlotRead(UtcInstantResponseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    agent_id: str
-    status: str
-    assigned_user_id: str | None = None
-    assigned_character_id: str | None = None
-    assigned_credential_id: str | None = None
-    next_tick_at: datetime | None = None
-    last_run_at: datetime | None = None
-    heartbeat_interval_seconds: int | None = None
-    locked_by_run_id: str | None = None
-    lease_expires_at: datetime | None = None
-    last_error: str | None = None
-    updated_at: datetime
 
 class AgentSlotPublicRead(UtcInstantResponseModel):
     model_config = ConfigDict(from_attributes=True)

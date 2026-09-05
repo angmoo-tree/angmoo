@@ -3,6 +3,14 @@ title = "Angmoo public secret scanning"
 [extend]
 useDefault = true
 
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact public synthetic G2 cursor compatibility vector fixture, source b5dcdd80; never a runtime credential; reviewed 2026-09-05"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)backend/tests/common/test_errors_pagination\.py$''']
+regexes = ['''^\s*monkeypatch\.setattr\(social, "settings", SimpleNamespace\(app_secret="g2-synthetic-cursor-secret"\)\)\s*$''']
+
 [[rules]]
 id = "angmoo-local-bot-token"
 description = "Angmoo Local Bot bearer token"
@@ -146,3 +154,11 @@ regexes = [
   '''^\s*"scripts/security_secret_scan\.py":\ "8b2c3ab19b4ff31ca9f8056f50898e6ccd6f2331",?\s*$''',
   '''^\s*"security/trivy\-secret\.yaml":\ "40aa1f04bc2b8cadd2f115939c1e645e693a6d50",?\s*$''',
 ]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact Character access service Git blob from d8780945 in append-only source evidence; verified Git object, not a credential; reviewed 2026-09-05"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)security/refactor_backend_additions\.json$''']
+regexes = ['''^\s*"backend/app/domains/characters/service/access\.py": "b060e60b24d5ca01a9f212bb7769de189c1b5dbd",?\s*$''']

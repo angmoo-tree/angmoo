@@ -752,18 +752,18 @@
     {
       "markers": {
         "advisory_lock": [
-          514,
-          2994
+          509,
+          2995
         ],
         "driver_or_url": [
-          511,
-          2985
+          506,
+          2986
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/characters/management.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "b5cadf7d61757d08d58ee1930b9128eac5913eceb043d51ed560c69e1d1ad7f8",
+      "source_sha256": "7edb753f42d55f62f6b98efd94fc609f1a924efd82a35e553b1c8ddfbda4a64d",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1107,6 +1107,18 @@
     },
     {
       "markers": {
+        "pgvector": [
+          30
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/pyproject.toml",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "795125bab3be5f77aa35ae43d262beac0d7ee5af8fd482b110d98ee94c811a76",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
         "advisory_lock": [
           17,
           33,
@@ -1185,12 +1197,12 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 75,
+  "entry_count": 76,
   "marker_counts": {
     "advisory_lock": 9,
     "driver_or_url": 47,
     "jsonb": 9,
-    "pgvector": 4,
+    "pgvector": 5,
     "row_lock": 31,
     "skip_locked": 7
   },

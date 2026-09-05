@@ -1,3 +1,7 @@
+from app.domains.runtime.contracts import (
+    AgentRunServiceError,
+    AgentSlotUnavailableError,
+)
 import asyncio
 import hashlib
 import json
@@ -198,8 +202,6 @@ ACTION_DECISION_TYPES = (
 )
 
 
-class AgentRunServiceError(Exception):
-    pass
 
 
 class OpenClawNotConfiguredError(AgentRunServiceError):
@@ -260,8 +262,6 @@ class ReadOnlyLaneDeferredError(AgentRunServiceError):
         super().__init__(raw_error)
 
 
-class AgentSlotUnavailableError(AgentRunServiceError):
-    pass
 
 
 class AgentSessionBusyError(AgentRunServiceError):
