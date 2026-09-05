@@ -1,7 +1,7 @@
 {
-  "edge_count": 2562,
-  "external_import_count": 2292,
-  "module_count": 752,
+  "edge_count": 2586,
+  "external_import_count": 2300,
+  "module_count": 758,
   "modules": [
     {
       "external_imports": [],
@@ -303,21 +303,11 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "fastapi",
-        "sqlalchemy.orm",
-        "typing"
+        "fastapi"
       ],
       "imports": [
-        "app.config",
-        "app.core.db",
-        "app.domains.identity.dependencies",
-        "app.domains.relationships.public",
-        "app.domains.routines.router",
-        "app.models",
-        "app.runtime.graph_projection.relationship_graph_read",
-        "app.runtime.graph_projection.social_memory_read",
-        "app.schemas"
+        "app.domains.relationships.router",
+        "app.domains.routines.router"
       ],
       "module": "app.api.v1.routes.world_activity_runtime",
       "path": "backend/app/api/v1/routes/world_activity_runtime.py",
@@ -3158,6 +3148,20 @@
     {
       "external_imports": [
         "__future__",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.contracts.graph_read",
+        "app.domains.relationships.contracts.projection_commands"
+      ],
+      "module": "app.domains.relationships.contracts.diagnostics",
+      "path": "backend/app/domains/relationships/contracts/diagnostics.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "dataclasses",
         "typing"
       ],
@@ -3331,6 +3335,21 @@
       ],
       "module": "app.domains.relationships.contracts.replay",
       "path": "backend/app/domains/relationships/contracts/replay.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.api.identity_dependencies",
+        "app.config",
+        "app.core.db",
+        "app.domains.relationships.contracts.diagnostics"
+      ],
+      "module": "app.domains.relationships.dependencies",
+      "path": "backend/app/domains/relationships/dependencies.py",
       "wildcard_imports": []
     },
     {
@@ -3626,6 +3645,27 @@
     {
       "external_imports": [
         "__future__",
+        "fastapi",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.relationships.contracts.diagnostics",
+        "app.domains.relationships.contracts.graph_read",
+        "app.domains.relationships.dependencies",
+        "app.domains.relationships.exceptions",
+        "app.domains.relationships.schemas",
+        "app.domains.relationships.service.diagnostics",
+        "app.domains.relationships.service.graph_read"
+      ],
+      "module": "app.domains.relationships.router",
+      "path": "backend/app/domains/relationships/router.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "datetime",
         "pydantic",
         "typing"
@@ -3640,6 +3680,27 @@
       "imports": [],
       "module": "app.domains.relationships.service",
       "path": "backend/app/domains/relationships/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.relationships.contracts.diagnostics",
+        "app.domains.relationships.contracts.graph_read",
+        "app.domains.relationships.exceptions",
+        "app.domains.relationships.models",
+        "app.domains.relationships.repository.diagnostics",
+        "app.domains.relationships.repository.projection_state",
+        "app.domains.relationships.schemas",
+        "app.domains.relationships.service.graph_read"
+      ],
+      "module": "app.domains.relationships.service.diagnostics",
+      "path": "backend/app/domains/relationships/service/diagnostics.py",
       "wildcard_imports": []
     },
     {
@@ -7843,6 +7904,7 @@
         "app.runtime.account_deletion",
         "app.runtime.characters.creator",
         "app.runtime.characters.management",
+        "app.runtime.graph_projection.composition",
         "app.runtime.logging_config",
         "app.runtime.routines.composition",
         "app.runtime.single_backend_components",
@@ -8193,6 +8255,7 @@
         "app.runtime.characters.management",
         "app.runtime.component_workers",
         "app.runtime.configuration",
+        "app.runtime.graph_projection.composition",
         "app.runtime.logging_config",
         "app.runtime.memory.batch_runtime",
         "app.runtime.memory.shutdown",
@@ -8707,6 +8770,35 @@
     },
     {
       "external_imports": [
+        "fastapi"
+      ],
+      "imports": [
+        "app.runtime.graph_projection.diagnostic_references"
+      ],
+      "module": "app.runtime.graph_projection.composition",
+      "path": "backend/app/runtime/graph_projection/composition.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.characters.service.profile",
+        "app.domains.relationships.contracts.graph_read",
+        "app.domains.routines.repository.joint_diagnostics",
+        "app.domains.social.repository.blocks",
+        "app.domains.social.repository.event_evidence",
+        "app.domains.world_characters.service.projection_scope",
+        "app.runtime.graph_projection.relationship_graph_read"
+      ],
+      "module": "app.runtime.graph_projection.diagnostic_references",
+      "path": "backend/app/runtime/graph_projection/diagnostic_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "dataclasses",
         "threading",
@@ -8781,21 +8873,15 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "datetime",
-        "sqlalchemy",
         "sqlalchemy.orm"
       ],
       "imports": [
         "app.config",
+        "app.domains.relationships.contracts.diagnostics",
         "app.domains.relationships.exceptions",
-        "app.domains.relationships.public",
-        "app.domains.relationships.repository.diagnostics",
-        "app.domains.relationships.repository.projection_state",
         "app.domains.relationships.schemas",
-        "app.domains.routines.repository.joint_diagnostics",
-        "app.models",
-        "app.runtime.graph_projection.relationship_graph_read"
+        "app.domains.relationships.service.diagnostics",
+        "app.runtime.graph_projection.diagnostic_references"
       ],
       "module": "app.runtime.graph_projection.social_memory_read",
       "path": "backend/app/runtime/graph_projection/social_memory_read.py",

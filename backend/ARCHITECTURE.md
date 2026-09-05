@@ -676,3 +676,6 @@ Replay의 요청 검증·동시 실행 차단·lease·high-water 고정·완료 
 
 
 Owner의 Social-memory 진단 응답은 Relationships `schemas.py`가 소유한다. 이 응답의 Joint 스냅샷은 진단 화면에서 보여 주는 형식이며 Routines의 실행 상태 쓰기를 소유하지 않는다. Event·evidence·방향별 관계·열린 제안·outbox 개수는 Relationships `repository/diagnostics.py`, Joint/participant 조회는 Routines `repository/joint_diagnostics.py`에 있다. 같은 Session에서 원래 join/filter/order와 활동별 참가자 조회를 유지하고 중간 commit을 만들지 않는다.
+
+
+Social-memory 진단의 소유권·현재 근거 상태·응답 구성은 `relationships/service/diagnostics.py`를 수정한다. WC의 현재 active membership 상태는 `world_characters/service/projection_scope.py`의 별도 진단 판단이며 과거 projection 복구 허용과 합치지 않는다. Runtime의 `diagnostic_references.py`는 Character·WC·Social·Routines의 같은 Session 조회와 graph gateway를 연결한다. 진단/관계 그래프 HTTP 두 개는 Relationships router가 소유하고 기존 URL prefix·tags 조립은 공통 API가 맡는다. 두 앱 factory는 `configure_relationships_runtime`을 한 번 호출하며 요청마다 실제 설정과 같은 DB Session으로 reader를 만든다.

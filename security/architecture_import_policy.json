@@ -93,14 +93,6 @@
           "imported": "app.services.tree"
         },
         {
-          "importer": "app.api.v1.routes.world_activity_runtime",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.api.v1.routes.world_activity_runtime",
-          "imported": "app.schemas"
-        },
-        {
           "importer": "app.api.v1.routes.world_character_setup",
           "imported": "app.models"
         },
@@ -847,10 +839,6 @@
         {
           "importer": "app.runtime.graph_projection.relationship_graph_read",
           "imported": "app.models"
-        },
-        {
-          "importer": "app.runtime.graph_projection.social_memory_read",
-          "imported": "app.models"
         }
       ],
       "id": "l4-relationship-projection-runtime-persistence",
@@ -1004,6 +992,7 @@
       "app.domains.media.schemas",
       "app.domains.relationships.constants",
       "app.domains.relationships.contracts",
+      "app.domains.relationships.contracts.diagnostics",
       "app.domains.relationships.contracts.events",
       "app.domains.relationships.contracts.graph_execution",
       "app.domains.relationships.contracts.graph_plan",
@@ -1018,6 +1007,7 @@
       "app.domains.relationships.contracts.proposals",
       "app.domains.relationships.contracts.query",
       "app.domains.relationships.contracts.replay",
+      "app.domains.relationships.dependencies",
       "app.domains.relationships.exceptions",
       "app.domains.relationships.models",
       "app.domains.relationships.models.points",
@@ -1039,8 +1029,10 @@
       "app.domains.relationships.repository.replay",
       "app.domains.relationships.repository.sqlite_projection_state",
       "app.domains.relationships.repository.state",
+      "app.domains.relationships.router",
       "app.domains.relationships.schemas",
       "app.domains.relationships.service",
+      "app.domains.relationships.service.diagnostics",
       "app.domains.relationships.service.events",
       "app.domains.relationships.service.evidence",
       "app.domains.relationships.service.graph_planning",
@@ -1260,6 +1252,7 @@
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
+      "app.domains.relationships.contracts.diagnostics",
       "app.domains.relationships.contracts.events",
       "app.domains.relationships.contracts.graph_execution",
       "app.domains.relationships.contracts.graph_plan",
@@ -1275,6 +1268,7 @@
       "app.domains.relationships.contracts.query",
       "app.domains.relationships.contracts.replay",
       "app.domains.relationships.schemas",
+      "app.domains.relationships.service.diagnostics",
       "app.domains.relationships.service.events",
       "app.domains.relationships.service.graph_planning",
       "app.domains.relationships.service.graph_read",
@@ -3008,6 +3002,14 @@
         "reason": "Existing diagnostics schema export retains exactly the original class objects while current consumers follow the actual owner.",
         "review_date": "2026-09-06",
         "target": "app.domains.relationships.schemas"
+      },
+      {
+        "importer": "app.api.v1.routes.world_activity_runtime",
+        "target": "app.domains.relationships.router",
+        "owner_stage": "AR-B5",
+        "removal_condition": "Move this exact Character prefix/tags route aggregation to final G06 API assembly, preserving order and URL contracts.",
+        "reason": "The old mixed route module only includes actual Routines and Relationships routers; no duplicate endpoint or business implementation remains.",
+        "review_date": "2026-09-06"
       }
     ]
   }

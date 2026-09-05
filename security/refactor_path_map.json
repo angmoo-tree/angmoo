@@ -19718,6 +19718,7 @@
         ],
         "backend/app/api/v1/routes/world_activity_runtime.py": [
           "backend/app/api/v1/routes/world_activity_runtime.py",
+          "backend/app/domains/relationships/router.py",
           "backend/app/domains/routines/router.py"
         ]
       },
@@ -19871,7 +19872,7 @@
         },
         {
           "old": "backend/app/api/v1/routes/world_activity_runtime.py::_raise_social_memory_error",
-          "new": "backend/app/api/v1/routes/world_activity_runtime.py::_raise_social_memory_error",
+          "new": "backend/app/domains/relationships/router.py::_raise_social_memory_error",
           "direct_consumers": [
             "backend/app/api/v1/routes/world_activity_runtime.py",
             "backend/app/api/v1/main.py",
@@ -19886,7 +19887,7 @@
         },
         {
           "old": "backend/app/api/v1/routes/world_activity_runtime.py::_raise_relationship_graph_error",
-          "new": "backend/app/api/v1/routes/world_activity_runtime.py::_raise_relationship_graph_error",
+          "new": "backend/app/domains/relationships/router.py::_raise_relationship_graph_error",
           "direct_consumers": [
             "backend/app/api/v1/routes/world_activity_runtime.py",
             "backend/app/api/v1/main.py",
@@ -19946,7 +19947,7 @@
         },
         {
           "old": "backend/app/api/v1/routes/world_activity_runtime.py::get_world_character_social_memory",
-          "new": "backend/app/api/v1/routes/world_activity_runtime.py::get_world_character_social_memory",
+          "new": "backend/app/domains/relationships/router.py::get_world_character_social_memory",
           "direct_consumers": [
             "backend/app/api/v1/routes/world_activity_runtime.py",
             "backend/app/api/v1/main.py",
@@ -19961,7 +19962,7 @@
         },
         {
           "old": "backend/app/api/v1/routes/world_activity_runtime.py::get_world_character_relationship_graph",
-          "new": "backend/app/api/v1/routes/world_activity_runtime.py::get_world_character_relationship_graph",
+          "new": "backend/app/domains/relationships/router.py::get_world_character_relationship_graph",
           "direct_consumers": [
             "backend/app/api/v1/routes/world_activity_runtime.py",
             "backend/app/api/v1/main.py",
@@ -30505,8 +30506,10 @@
           "backend/app/domains/routines/repository/joint_diagnostics.py"
         ],
         "backend/app/runtime/graph_projection/social_memory_read.py": [
-          "backend/app/runtime/graph_projection/social_memory_read.py",
-          "backend/app/domains/relationships/exceptions.py"
+          "backend/app/domains/relationships/exceptions.py",
+          "backend/app/domains/relationships/service/diagnostics.py",
+          "backend/app/domains/world_characters/service/projection_scope.py",
+          "backend/app/runtime/graph_projection/social_memory_read.py"
         ]
       },
       "split_symbols": [
@@ -30877,7 +30880,7 @@
         },
         {
           "old": "backend/app/runtime/graph_projection/social_memory_read.py::_world_character_status",
-          "new": "backend/app/runtime/graph_projection/social_memory_read.py::_world_character_status",
+          "new": "backend/app/domains/world_characters/service/projection_scope.py::diagnostic_world_character_status",
           "direct_consumers": [
             "backend/app/api/v1/routes/world_activity_runtime.py"
           ],
@@ -30898,7 +30901,7 @@
         },
         {
           "old": "backend/app/runtime/graph_projection/social_memory_read.py::_pair_blocked",
-          "new": "backend/app/runtime/graph_projection/social_memory_read.py::_pair_blocked",
+          "new": "backend/app/domains/relationships/service/diagnostics.py::_pair_blocked",
           "direct_consumers": [
             "backend/app/api/v1/routes/world_activity_runtime.py"
           ],
@@ -30919,7 +30922,7 @@
         },
         {
           "old": "backend/app/runtime/graph_projection/social_memory_read.py::_source_status",
-          "new": "backend/app/runtime/graph_projection/social_memory_read.py::_source_status",
+          "new": "backend/app/domains/relationships/service/diagnostics.py::_source_status",
           "direct_consumers": [
             "backend/app/api/v1/routes/world_activity_runtime.py"
           ],
@@ -30961,6 +30964,341 @@
         }
       ],
       "new_tests": []
+    },
+    "AR-B5-C6-B": {
+      "status": "IMPLEMENTED; focused29 PASS; diagnostics4/HTTP4 original AST contracts PASS; source introduction pending",
+      "scope": "Relationships owns owner diagnostics/current source exclusion/response assembly and2 HTTP routes; WC owns exact active membership status/nullable lookup. Same Session readers and graph gateway are configured once in both app factories. Original mixed API only aggregates actual route owners.",
+      "split_files": {
+        "backend/app/runtime/graph_projection/social_memory_read.py": [
+          "backend/app/domains/relationships/exceptions.py",
+          "backend/app/domains/world_characters/service/projection_scope.py",
+          "backend/app/domains/relationships/service/diagnostics.py",
+          "backend/app/runtime/graph_projection/social_memory_read.py",
+          "backend/app/runtime/graph_projection/diagnostic_references.py",
+          "backend/app/domains/relationships/contracts/diagnostics.py"
+        ],
+        "backend/app/api/v1/routes/world_activity_runtime.py": [
+          "backend/app/api/v1/routes/world_activity_runtime.py",
+          "backend/app/domains/relationships/router.py",
+          "backend/app/domains/routines/router.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::SocialMemoryReadError",
+          "new": "backend/app/domains/relationships/exceptions.py::SocialMemoryReadError",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/diagnostics.py",
+            "backend/app/runtime/graph_projection/social_memory_read.py",
+            "backend/app/domains/relationships/router.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::SocialMemoryNotFoundError",
+          "new": "backend/app/domains/relationships/exceptions.py::SocialMemoryNotFoundError",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/diagnostics.py",
+            "backend/app/runtime/graph_projection/social_memory_read.py",
+            "backend/app/domains/relationships/router.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::SocialMemoryForbiddenError",
+          "new": "backend/app/domains/relationships/exceptions.py::SocialMemoryForbiddenError",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/diagnostics.py",
+            "backend/app/runtime/graph_projection/social_memory_read.py",
+            "backend/app/domains/relationships/router.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::_world_character_status",
+          "new": "backend/app/domains/world_characters/service/projection_scope.py::diagnostic_world_character_status",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/diagnostic_references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::_pair_blocked",
+          "new": "backend/app/domains/relationships/service/diagnostics.py::_pair_blocked",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::_source_status",
+          "new": "backend/app/domains/relationships/service/diagnostics.py::_source_status",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/diagnostics.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::get_owner_diagnostics",
+          "new": "backend/app/domains/relationships/service/diagnostics.py::get_owner_diagnostics",
+          "direct_consumers": [
+            "backend/app/domains/relationships/router.py",
+            "backend/app/runtime/graph_projection/social_memory_read.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::get_owner_diagnostics",
+          "new": "backend/app/runtime/graph_projection/social_memory_read.py::get_owner_diagnostics",
+          "direct_consumers": [
+            "backend/tests/relationships/test_diagnostics_http_ownership.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::get_owner_diagnostics",
+          "new": "backend/app/domains/world_characters/service/projection_scope.py::find_diagnostic_world_character",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/diagnostic_references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::get_owner_diagnostics",
+          "new": "backend/app/runtime/graph_projection/diagnostic_references.py::SqlAlchemyDiagnosticReferences",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/social_memory_read.py",
+            "backend/app/runtime/graph_projection/composition.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::get_owner_diagnostics",
+          "new": "backend/app/domains/relationships/contracts/diagnostics.py::DiagnosticsOwner",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/diagnostics.py",
+            "backend/app/domains/relationships/dependencies.py",
+            "backend/app/domains/relationships/router.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::get_owner_diagnostics",
+          "new": "backend/app/domains/relationships/contracts/diagnostics.py::DiagnosticsCharacter",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/diagnostics.py",
+            "backend/app/domains/relationships/dependencies.py",
+            "backend/app/domains/relationships/router.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::get_owner_diagnostics",
+          "new": "backend/app/domains/relationships/contracts/diagnostics.py::DiagnosticsWorldCharacter",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/diagnostics.py",
+            "backend/app/domains/relationships/dependencies.py",
+            "backend/app/domains/relationships/router.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::get_owner_diagnostics",
+          "new": "backend/app/domains/relationships/contracts/diagnostics.py::DiagnosticsJoint",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/diagnostics.py",
+            "backend/app/domains/relationships/dependencies.py",
+            "backend/app/domains/relationships/router.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/social_memory_read.py::get_owner_diagnostics",
+          "new": "backend/app/domains/relationships/contracts/diagnostics.py::DiagnosticsReferences",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/diagnostics.py",
+            "backend/app/domains/relationships/dependencies.py",
+            "backend/app/domains/relationships/router.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::router",
+          "new": "backend/app/api/v1/routes/world_activity_runtime.py::router",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::_raise_plan_error",
+          "new": "backend/app/domains/routines/router.py::_raise_plan_error",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::_raise_social_memory_error",
+          "new": "backend/app/domains/relationships/router.py::_raise_social_memory_error",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/tests/relationships/test_diagnostics_http_ownership.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::_raise_relationship_graph_error",
+          "new": "backend/app/domains/relationships/router.py::_raise_relationship_graph_error",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/tests/relationships/test_diagnostics_http_ownership.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::get_daily_activity_plan",
+          "new": "backend/app/domains/routines/router.py::get_daily_activity_plan",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::prepare_daily_activity_plan",
+          "new": "backend/app/domains/routines/router.py::prepare_daily_activity_plan",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::update_world_character_activity_runtime_mode",
+          "new": "backend/app/domains/routines/router.py::update_world_character_activity_runtime_mode",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+            "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+            "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::get_world_character_social_memory",
+          "new": "backend/app/domains/relationships/router.py::get_world_character_social_memory",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/tests/relationships/test_diagnostics_http_ownership.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_activity_runtime.py::get_world_character_relationship_graph",
+          "new": "backend/app/domains/relationships/router.py::get_world_character_relationship_graph",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_activity_runtime.py",
+            "backend/tests/relationships/test_diagnostics_http_ownership.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+            "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+          ]
+        }
+      ],
+      "new_files": [
+        "backend/app/domains/relationships/dependencies.py",
+        "backend/app/runtime/graph_projection/composition.py"
+      ],
+      "new_tests": [
+        "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
+        "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
+      ]
     }
   }
 }

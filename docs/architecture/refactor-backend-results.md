@@ -1081,3 +1081,12 @@ C5-D 최종 경계 **751 modules / 2,558 edges / exact legacy 210**, API·응답
 원문 **17개 정의/조회 AST 동일**, 기존 사건/World격리·현재 source 공개·소유 진단/그래프/replay 집중 **24 passed / 12.23초**다. 새 node나 기존 assertion 변경은 없다. Routines 담당과 실제 새 query 경로가 겹치지 않음을 확인했다. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
 
 C6-A 최종 경계 **752 modules / 2,562 edges / exact legacy 208**과 API·응답·ORM 및 full split evidence 오류 0을 확인했다. 단일 목적지 schema 이동은 full split 대신 실제 파일 이동 map으로 명시했다. 임시 bridge의 정확 target 필드도 검사 규약에 맞췄으며 검사 예외를 넓히지 않았다. L4·ER0 current inventory가 통과했다.
+
+
+## AR-B5-C6-B — 소유 진단 workflow와 Relationships HTTP
+
+Relationships가 진단 소유권·현재 evidence source 상태·공개 응답·graph 비교 순서를 실제로 소유한다. Character nullable get, WC의 같은 next(query)/membership 확인, Social block/Post, Routines Joint 조회와 runtime graph gateway를 같은 Session collaborator로 연결했다. 기존 nullable/read 순서·반응 없는 source·World 격리·차단·삭제/숨김 의미와 clock 위치를 유지하며 별도 commit을 만들지 않는다. 진단/관계 그래프 HTTP 두 개도 실제 Relationships router로 옮겼고 옛 world_activity_runtime는 Routines와 Relationships router의 prefix/tags/등록 순서 조립만 남는다. main/public_main에는 reader factory 구성을 각각 한 번 연결했다.
+
+원문 진단 **4개 및 HTTP 4개 정의 AST 계약이 동일**하다. 첫 검증은 새 test가 hosted factory의 startup 전 runtime_settings를 항상 존재한다고 가정한 1건 때문에 28 PASS/1 FAIL이었다. 제품의 기존 fallback을 그대로 두고 새 test가 실제 전역 fallback과 요청 설정 교체를 확인하도록 고친 뒤 **29 passed / 기존 warning 1 / 17.01초**를 확인했다. 새 HTTP 두 node는 두 factory 등록/같은 객체 설정과 Session, 실제 200 응답/403·404 오류/깊이 422/disabled graph fallback을 검증한다. 기존 assertion은 바꾸지 않았다. Source capture/Hosted CI/installer와 잔여 Social·observation 전환은 후속 통합에서 수행한다.
+
+C6-B 최종 경계 **758 modules / 2,586 edges / exact legacy 205**와 PR258/263 API·응답·ORM 및 전체 split evidence 오류 0을 확인했다. 외부 공개 entry에는 service/schema/contract만 등록하고 router/dependencies는 실제 검사 module과 정확한 기존 API 조립 bridge로 구분했으며 경계 검사를 완화하지 않았다. L4·ER0 current inventory도 통과했다.
