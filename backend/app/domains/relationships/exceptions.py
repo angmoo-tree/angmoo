@@ -27,3 +27,9 @@ class GraphReadBackendError(RuntimeError):
     def __init__(self, error_class: str) -> None:
         super().__init__(error_class)
         self.error_class = error_class
+
+
+class SocialEventRuntimeError(Exception):
+    def __init__(self, reason_code: str) -> None:
+        super().__init__(reason_code)
+        self.reason_code = reason_code

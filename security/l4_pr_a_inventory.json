@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2180,
-      "internal_edge_count": 2304,
+      "external_import_count": 2200,
+      "internal_edge_count": 2329,
       "legacy_import_exception_count": 0,
-      "module_count": 693,
+      "module_count": 700,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -22,6 +22,13 @@
             "imports": [],
             "module": "app.domains.relationships.contracts",
             "path": "backend/app/domains/relationships/contracts/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.models"
+            ],
+            "module": "app.domains.relationships.contracts.events",
+            "path": "backend/app/domains/relationships/contracts/events.py"
           },
           {
             "imports": [
@@ -132,7 +139,8 @@
           },
           {
             "imports": [
-              "app.core.db"
+              "app.core.db",
+              "app.domains.relationships.constants"
             ],
             "module": "app.domains.relationships.models.social",
             "path": "backend/app/domains/relationships/models/social.py"
@@ -141,6 +149,14 @@
             "imports": [],
             "module": "app.domains.relationships.policies",
             "path": "backend/app/domains/relationships/policies/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.events",
+              "app.domains.relationships.exceptions"
+            ],
+            "module": "app.domains.relationships.policies.events",
+            "path": "backend/app/domains/relationships/policies/events.py"
           },
           {
             "imports": [
@@ -190,11 +206,25 @@
           },
           {
             "imports": [
+              "app.domains.relationships.models"
+            ],
+            "module": "app.domains.relationships.repository.events",
+            "path": "backend/app/domains/relationships/repository/events.py"
+          },
+          {
+            "imports": [
               "app.domains.relationships.constants",
               "app.domains.relationships.models"
             ],
             "module": "app.domains.relationships.repository.points",
             "path": "backend/app/domains/relationships/repository/points.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.models"
+            ],
+            "module": "app.domains.relationships.repository.state",
+            "path": "backend/app/domains/relationships/repository/state.py"
           },
           {
             "imports": [],
@@ -205,6 +235,15 @@
             "imports": [],
             "module": "app.domains.relationships.service",
             "path": "backend/app/domains/relationships/service/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.policies.events",
+              "app.domains.relationships.repository.events",
+              "app.domains.relationships.service.projection_events"
+            ],
+            "module": "app.domains.relationships.service.events",
+            "path": "backend/app/domains/relationships/service/events.py"
           },
           {
             "imports": [
@@ -249,6 +288,27 @@
             ],
             "module": "app.domains.relationships.service.points",
             "path": "backend/app/domains/relationships/service/points.py"
+          },
+          {
+            "imports": [
+              "app.core.ids",
+              "app.domains.relationships.constants",
+              "app.domains.relationships.models",
+              "app.domains.relationships.repository.events"
+            ],
+            "module": "app.domains.relationships.service.projection_events",
+            "path": "backend/app/domains/relationships/service/projection_events.py"
+          },
+          {
+            "imports": [
+              "app.core.ids",
+              "app.domains.relationships.contracts.events",
+              "app.domains.relationships.models",
+              "app.domains.relationships.policies.events",
+              "app.domains.relationships.repository.state"
+            ],
+            "module": "app.domains.relationships.service.state",
+            "path": "backend/app/domains/relationships/service/state.py"
           },
           {
             "imports": [],

@@ -736,3 +736,14 @@ B4-C의 실제 residual 소비자 연결과 G5 공통 model 등록에서 정확 
 Graph 읽기·six primitives recall·strict planner·commands/replay/worker/metrics 검증은 **58 passed / 12.29s**, 기존 inventory/port/architecture 회귀는 **24 passed / 3.28s**다. 새로운 test node는 없으며 기존 permission/World/방향/누락 근거/관찰 여부/차단/삭제/실패 fallback/provider 한도 assertion을 유지한다. #258/#263 API/schema/ORM 차이0, 변경 보호 테스트7파일 assertion PASS, 전체 split evidence PASS다. 최초 한 차례 root cwd의 collection은 app import를 찾지 못했으며 이후 모든 실제 검증은 backend cwd에서 수행했다.
 
 Architecture **693 modules / 2,304 edges / 241 exact legacy edges**, L4 693/parity97, ER0 Postgres78/migration subset87/Neo4j24/Next44/parity7이다. 역사 frozen JSON은 수정하지 않았다. 관계 event 생성·proposal과 projection runtime의 SQL/상태 변경 소유, Social agent·World Feed·media jobs는 B5 잔여로 남는다. Source 도입 capture·통합 Actions·PR/merge는 root가 진행한다.
+
+
+## AR-B5-C3-A — 성공 source의 변화량·상태 상한·outbox와 원본 제외
+
+기존 runtime의 실제 정의20개를 Relationships의 오류/constants/contracts/policies/service로 이전했다. EvidenceInput/EventApplyResult는 같은 값/attached ORM을 유지하고, 시간대와 snapshot은 원래 객체의 값이 읽히는 시점을 유지하는 protocol을 사용한다. Social event type tuple은 constraints와 admission이 같은 constants 객체를 사용한다. 실제 방향별 상태 생성·하루/원본별 변화량 상한·projection payload 선택/서명/중복·원본 삭제 제외를 service가 소유하며 query6개는 repository가 원문 그대로 실행한다.
+
+원본문과 추출 query를 결합한 **20 AST checks PASS**다. `FOR UPDATE`, 조건/정렬/순서·same Session·flush-only source 원자성, 명시적 caller commit 책임을 바꾸지 않았다. Delta cap이 적용돼도 event/evidence/interaction count가 남는 의미, 방향·World 격리, source exclusion의 dedupe와 감사 row도 그대로다.
+
+기존 SocialEvent·manual/observation UoW·owner 수동 작성·proposal·projection·삭제 검증은 **57 passed / 1 existing warning / 26.37s**다. 새 test node나 보호 assertion 변경은 없으며 #258/#263 API/schema/ORM·전체 split evidence PASS다. Architecture **700 modules / 2,329 edges / 241 exact legacy edges**, L4 700/parity97, ER0 **Postgres80 / migration subset87 / Neo4j24 / Next44 / parity7**다. Postgres 분류 파일 수 증가는 실제 query 소유 파일2개의 추출로 생겼으며 schema 변경은 없다.
+
+최종 record_successful_social_event와 외부 source/WC 검증·실행기록 연결은 다음 C3-B 실제 이전 범위로 남겼다. Source capture·통합 Actions·PR/merge는 root가 순차 진행한다.

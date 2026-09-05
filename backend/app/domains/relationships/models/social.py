@@ -29,24 +29,7 @@ from app.core.db import Base
 JSON_DOCUMENT = JSON().with_variant(JSONB(), "postgresql")
 
 
-SOCIAL_EVENT_TYPES = (
-    "post_published",
-    "comment_created",
-    "reply_created",
-    "mention_created",
-    "like_added",
-    "like_removed",
-    "follow_added",
-    "follow_removed",
-    "repost_added",
-    "repost_removed",
-    "joint_proposed",
-    "joint_accepted",
-    "joint_started",
-    "joint_completed",
-    "joint_declined",
-    "joint_cancelled",
-)
+from app.domains.relationships.constants import SOCIAL_EVENT_TYPES
 
 
 class SocialEvent(Base):

@@ -480,7 +480,31 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/relationships/models/social.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "57b3c570f7d8cf84674735b6f27cc9c21c9e77fbf291d1be58e9465c84523d99",
+      "source_sha256": "3b981263028dddd88b30d36d67e14b017c4a1cad8eea4f0d32a923bbd57e2f7f",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          44
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/relationships/repository/events.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "1a5875d0c67108396d5051e5d3f0dfd974504f732f2c5cfa3c5c9aac68e7d2a8",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          18
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/relationships/repository/state.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "63dd612540a5639591c6fef3b3870491627cb913234fd858d663a6a9defae7ce",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -926,15 +950,13 @@
     {
       "markers": {
         "row_lock": [
-          202,
-          320,
-          535
+          67
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/relationships/sqlalchemy_social_event.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "8a376efc85d411103870c488cff5b06cf0fe6a99eeb7d7418669408c18dfd9d2",
+      "source_sha256": "440dd79c8253c00c5e4ef707e627d5858ad1a5305c2de1d190a325810933a780",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1227,13 +1249,13 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 78,
+  "entry_count": 80,
   "marker_counts": {
     "advisory_lock": 10,
     "driver_or_url": 49,
     "jsonb": 10,
     "pgvector": 5,
-    "row_lock": 31,
+    "row_lock": 33,
     "skip_locked": 7
   },
   "purpose": "Residual PostgreSQL markers retained only as historical schema evidence, serialized compatibility values, and negative reintroduction guards",

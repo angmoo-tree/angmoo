@@ -17,175 +17,40 @@ from app.core.ids import uuid7_string
 from app.domains.relationships.models.social import (
     SOCIAL_EVENT_TYPES,
 )
-
-
-SOCIAL_EVENT_SCHEMA_VERSION = "social-event-v1"
-GRAPH_PAYLOAD_VERSION = "relationship-v1"
-SOURCE_EXCLUSION_PAYLOAD_VERSION = "source-exclusion-v1"
-
-
-class SocialEventRuntimeError(Exception):
-    def __init__(self, reason_code: str) -> None:
-        super().__init__(reason_code)
-        self.reason_code = reason_code
-
-
-@dataclass(frozen=True)
-class EvidenceInput:
-    evidence_kind: Literal[
-        "post",
-        "reply_post",
-        "like",
-        "repost",
-        "follow",
-        "notification",
-        "execution",
-        "joint_activity",
-    ]
-    source_object_type: Literal[
-        "post",
-        "post_like",
-        "post_repost",
-        "profile_follow",
-        "notification",
-        "agent_public_action_execution",
-        "joint_activity",
-    ]
-    source_object_id: str
-    root_post_id: str | None = None
-    source_post_id: str | None = None
-    target_post_id: str | None = None
-    source_notification_id: int | None = None
-    agent_run_id: str | None = None
-    public_action_execution_id: int | None = None
-    interaction_intent: str | None = None
-    comment_purpose: str | None = None
-    proposal_decision: str | None = None
-    source_text: str | None = None
-    source_visibility_at_event: str | None = None
-    source_author_id_at_event: str | None = None
-
-
-@dataclass(frozen=True)
-class EventApplyResult:
-    event: models.SocialEvent
-    relationship_state: models.RelationshipState | None
-    relationship_change: models.RelationshipStateChange | None
-    reused: bool
-
-
-@dataclass(frozen=True)
-class _Delta:
-    familiarity: int = 0
-    affinity: int = 0
-    trust: int = 0
-    tension: int = 0
-    valence: str = "neutral"
-    intensity: str = "low"
-
-
-_RELATION_EVENT_TYPES = {
-    "comment_created",
-    "reply_created",
-    "mention_created",
-    "like_added",
-    "like_removed",
-    "follow_added",
-    "follow_removed",
-    "repost_added",
-    "repost_removed",
-    "joint_accepted",
-    "joint_completed",
-    "joint_declined",
-    "joint_cancelled",
-}
-
-
-def _aware_utc(value: datetime) -> datetime:
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)
-
-
-def _world_zone(world: models.World) -> ZoneInfo:
-    try:
-        return ZoneInfo(world.timezone)
-    except ZoneInfoNotFoundError as exc:
-        raise SocialEventRuntimeError("world_timezone_invalid") from exc
-
-
-def _local_day_bounds(world: models.World, occurred_at: datetime) -> tuple[datetime, datetime]:
-    zone = _world_zone(world)
-    local_date = _aware_utc(occurred_at).astimezone(zone).date()
-    start = datetime.combine(local_date, time.min, tzinfo=zone).astimezone(UTC)
-    return start, start + timedelta(days=1)
-
-
-def _snapshot(state: models.RelationshipState) -> dict[str, int]:
-    return {
-        "familiarity": state.familiarity,
-        "affinity": state.affinity,
-        "trust": state.trust,
-        "tension": state.tension,
-        "interaction_count": state.interaction_count,
-        "version": state.version,
-    }
-
-
-def _clamp(value: int, minimum: int, maximum: int) -> int:
-    return max(minimum, min(maximum, value))
-
-
-def _purpose_delta(event_type: str, purpose: str | None) -> _Delta:
-    positive = {"empathy", "encouragement", "humor"}
-    neutral = {"question", "advice", "information", "observation"}
-    if purpose in positive:
-        valence, intensity = "positive", "low"
-        affinity = 1 if event_type == "comment_created" else 2
-        trust = 0 if event_type == "comment_created" else 1
-        tension = 0
-    elif purpose == "competition":
-        valence, intensity = "negative", "medium"
-        affinity = -1 if event_type == "comment_created" else -2
-        trust = 0
-        tension = 1 if event_type == "comment_created" else 2
-    elif purpose == "disagreement":
-        valence, intensity = "negative", "low"
-        affinity = -1
-        trust = 0
-        tension = 1
-    elif purpose in neutral or purpose is None:
-        valence, intensity = "neutral", "low"
-        affinity = trust = tension = 0
-    else:
-        raise SocialEventRuntimeError("comment_purpose_invalid")
-    return _Delta(
-        familiarity=2,
-        affinity=affinity,
-        trust=trust,
-        tension=tension,
-        valence=valence,
-        intensity=intensity,
-    )
-
-
-def _delta(event_type: str, purpose: str | None) -> _Delta:
-    if event_type in {"comment_created", "reply_created", "mention_created"}:
-        return _purpose_delta(event_type, purpose)
-    return {
-        "like_added": _Delta(familiarity=1, affinity=1, valence="positive"),
-        "follow_added": _Delta(familiarity=3, affinity=1, valence="positive"),
-        "follow_removed": _Delta(affinity=-1, valence="negative"),
-        "repost_added": _Delta(familiarity=2, affinity=1, valence="positive"),
-        "joint_accepted": _Delta(familiarity=2, trust=1, valence="positive"),
-        "joint_completed": _Delta(
-            familiarity=4,
-            affinity=2,
-            trust=3,
-            valence="positive",
-            intensity="medium",
-        ),
-    }.get(event_type, _Delta())
+from app.domains.relationships.exceptions import (
+    SocialEventRuntimeError,
+)
+from app.domains.relationships.constants import (
+    SOCIAL_EVENT_SCHEMA_VERSION,
+    GRAPH_PAYLOAD_VERSION,
+    SOURCE_EXCLUSION_PAYLOAD_VERSION,
+    _RELATION_EVENT_TYPES,
+)
+from app.domains.relationships.contracts.events import (
+    EvidenceInput,
+    EventApplyResult,
+    _Delta,
+)
+from app.domains.relationships.policies.events import (
+    _aware_utc,
+    _world_zone,
+    _local_day_bounds,
+    _snapshot,
+    _clamp,
+    _purpose_delta,
+    _delta,
+)
+from app.domains.relationships.service.state import (
+    _relationship_state,
+    _delta_is_capped,
+)
+from app.domains.relationships.service.projection_events import (
+    _enqueue_outbox,
+    _enqueue_source_exclusion_outbox,
+)
+from app.domains.relationships.service.events import (
+    exclude_events_for_posts,
+)
 
 
 def _validate_world_character(
@@ -299,254 +164,6 @@ def _validate_evidence_source(
     }
     for post_id in post_ids:
         _validate_live_public_post(db.get(models.Post, post_id), world_id=world_id)
-
-
-def _relationship_state(
-    db: Session,
-    *,
-    world_id: str,
-    actor_world_character_id: str,
-    target_world_character_id: str,
-) -> models.RelationshipState:
-    state = db.scalar(
-        select(models.RelationshipState)
-        .where(
-            models.RelationshipState.world_id == world_id,
-            models.RelationshipState.actor_world_character_id
-            == actor_world_character_id,
-            models.RelationshipState.target_world_character_id
-            == target_world_character_id,
-        )
-        .with_for_update()
-    )
-    if state is None:
-        state = models.RelationshipState(
-            id=uuid7_string(),
-            world_id=world_id,
-            actor_world_character_id=actor_world_character_id,
-            target_world_character_id=target_world_character_id,
-            familiarity=0,
-            affinity=0,
-            trust=0,
-            tension=0,
-            interaction_count=0,
-            version=1,
-        )
-        db.add(state)
-        db.flush()
-    return state
-
-
-def _delta_is_capped(
-    db: Session,
-    *,
-    world: models.World,
-    event: models.SocialEvent,
-    evidence: EvidenceInput,
-) -> bool:
-    if event.target_world_character_id is None:
-        return False
-    if event.event_type in {"comment_created", "reply_created", "mention_created"}:
-        start, end = _local_day_bounds(world, event.occurred_at)
-        count = db.scalar(
-            select(func.count(models.RelationshipStateChange.id))
-            .join(
-                models.SocialEvent,
-                models.SocialEvent.id == models.RelationshipStateChange.social_event_id,
-            )
-            .where(
-                models.RelationshipStateChange.world_id == event.world_id,
-                models.RelationshipStateChange.actor_world_character_id
-                == event.actor_world_character_id,
-                models.RelationshipStateChange.target_world_character_id
-                == event.target_world_character_id,
-                models.RelationshipStateChange.applied.is_(True),
-                models.SocialEvent.event_type.in_(
-                    ("comment_created", "reply_created", "mention_created")
-                ),
-                models.SocialEvent.occurred_at >= start,
-                models.SocialEvent.occurred_at < end,
-            )
-        )
-        return int(count or 0) >= 4
-    if event.event_type not in {"like_added", "repost_added"}:
-        return False
-    source_post_id = evidence.target_post_id or evidence.source_post_id
-    if source_post_id is None:
-        return False
-    prior = db.scalar(
-        select(models.RelationshipStateChange.id)
-        .join(
-            models.SocialEvent,
-            models.SocialEvent.id == models.RelationshipStateChange.social_event_id,
-        )
-        .join(
-            models.SocialEventEvidence,
-            models.SocialEventEvidence.social_event_id == models.SocialEvent.id,
-        )
-        .where(
-            models.RelationshipStateChange.world_id == event.world_id,
-            models.RelationshipStateChange.actor_world_character_id
-            == event.actor_world_character_id,
-            models.RelationshipStateChange.target_world_character_id
-            == event.target_world_character_id,
-            models.RelationshipStateChange.applied.is_(True),
-            models.SocialEvent.event_type == event.event_type,
-            models.SocialEventEvidence.target_post_id == source_post_id,
-            models.SocialEvent.id != event.id,
-        )
-        .limit(1)
-    )
-    return prior is not None
-
-
-def _enqueue_outbox(
-    db: Session,
-    *,
-    event: models.SocialEvent,
-    relationship_state: models.RelationshipState | None,
-) -> models.GraphProjectionOutbox:
-    if event.event_type in {
-        "joint_proposed",
-        "joint_declined",
-        "joint_cancelled",
-        "joint_started",
-    }:
-        projection_type = "source_exclusion"
-    elif relationship_state is not None:
-        projection_type = "relationship_state"
-    else:
-        projection_type = "social_event"
-    payload: dict[str, object] = {
-        "world_id": event.world_id,
-        "source_event_id": event.id,
-        "actor_world_character_id": event.actor_world_character_id,
-        "target_world_character_id": event.target_world_character_id,
-    }
-    if relationship_state is not None:
-        payload["relationship_state_id"] = relationship_state.id
-    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
-    signature = sha256(canonical.encode("utf-8")).hexdigest()
-    dedupe_key = sha256(
-        f"{projection_type}|{event.id}|{GRAPH_PAYLOAD_VERSION}".encode("utf-8")
-    ).hexdigest()
-    existing = db.scalar(
-        select(models.GraphProjectionOutbox).where(
-            models.GraphProjectionOutbox.dedupe_key == dedupe_key
-        )
-    )
-    if existing is not None:
-        return existing
-    row = models.GraphProjectionOutbox(
-        id=uuid7_string(),
-        world_id=event.world_id,
-        source_event_id=event.id,
-        projection_type=projection_type,
-        payload_version=GRAPH_PAYLOAD_VERSION,
-        payload=payload,
-        source_signature=signature,
-        dedupe_key=dedupe_key,
-        status="pending",
-        attempt_count=0,
-    )
-    db.add(row)
-    return row
-
-
-def _enqueue_source_exclusion_outbox(
-    db: Session,
-    *,
-    event: models.SocialEvent,
-    reason: Literal["source_deleted", "source_hidden"],
-) -> models.GraphProjectionOutbox:
-    projection_type = "source_exclusion"
-    payload: dict[str, object] = {
-        "world_id": event.world_id,
-        "source_event_id": event.id,
-        "reason": reason,
-    }
-    canonical = json.dumps(payload, sort_keys=True, separators=(",", ":"))
-    signature = sha256(canonical.encode("utf-8")).hexdigest()
-    dedupe_key = sha256(
-        (
-            f"{projection_type}|{event.id}|"
-            f"{SOURCE_EXCLUSION_PAYLOAD_VERSION}"
-        ).encode("utf-8")
-    ).hexdigest()
-    existing = db.scalar(
-        select(models.GraphProjectionOutbox).where(
-            models.GraphProjectionOutbox.dedupe_key == dedupe_key
-        )
-    )
-    if existing is not None:
-        return existing
-    row = models.GraphProjectionOutbox(
-        id=uuid7_string(),
-        world_id=event.world_id,
-        source_event_id=event.id,
-        projection_type=projection_type,
-        payload_version=SOURCE_EXCLUSION_PAYLOAD_VERSION,
-        payload=payload,
-        source_signature=signature,
-        dedupe_key=dedupe_key,
-        status="pending",
-        attempt_count=0,
-    )
-    db.add(row)
-    return row
-
-
-def exclude_events_for_posts(
-    db: Session,
-    *,
-    post_ids: list[str],
-    reason: Literal["source_deleted", "source_hidden"],
-    invalidated_at: datetime,
-) -> int:
-    unique_post_ids = sorted({post_id for post_id in post_ids if post_id})
-    if not unique_post_ids:
-        return 0
-    event_ids = list(
-        db.scalars(
-            select(models.SocialEventEvidence.social_event_id)
-            .where(
-                or_(
-                    models.SocialEventEvidence.root_post_id.in_(unique_post_ids),
-                    models.SocialEventEvidence.source_post_id.in_(unique_post_ids),
-                    models.SocialEventEvidence.target_post_id.in_(unique_post_ids),
-                    (
-                        (models.SocialEventEvidence.source_object_type == "post")
-                        & (
-                            models.SocialEventEvidence.source_object_id.in_(
-                                unique_post_ids
-                            )
-                        )
-                    ),
-                )
-            )
-            .distinct()
-        )
-    )
-    changed = 0
-    for event_id in event_ids:
-        event = db.scalar(
-            select(models.SocialEvent)
-            .where(models.SocialEvent.id == event_id)
-            .with_for_update()
-        )
-        if event is None:
-            continue
-        if (
-            event.retrieval_status != "excluded"
-            or event.invalidation_reason != reason
-        ):
-            event.retrieval_status = "excluded"
-            event.invalidated_at = _aware_utc(invalidated_at)
-            event.invalidation_reason = reason
-            changed += 1
-        _enqueue_source_exclusion_outbox(db, event=event, reason=reason)
-    db.flush()
-    return changed
 
 
 def record_successful_social_event(
