@@ -691,3 +691,6 @@ Social-memory 진단의 소유권·현재 근거 상태·응답 구성은 `relat
 
 
 Social 임시 `_SocialPersistenceModels`/`social_persistence_models` export는 종료했다. Runtime의 프로필·Today·자기 설명·Memory 근거 복합 조회는 Social/Character/WC/World/Routines의 실제 ORM 클래스를 import한다. 이 변경은 query 조립을 runtime에서 도메인으로 우회 수출하는 변경이 아니며 원래 SQL과 cursor·bounded batch·검증 순서는 유지한다. 각 남은 실제 Social 조회 정책/SQL의 소유 분리는 다음 단계에서 이어진다.
+
+
+수동 World 피드·스레드는 `social/service/manual_feed.py`에서 읽기 권한, 공개 범위, 작성자 profile capability와 응답을 판단한다. `social/repository/manual_feed.py`는 원래 게시물·댓글·좋아요 query를 소유한다. 여러 도메인을 함께 조회하는 active-profile join과 nullable owner 사실은 `runtime/social/manual_feed_references.py`가 같은 Session으로 제공한다. 읽기와 쓰기의 검증 순서·오류가 다르므로 이름이 비슷하다는 이유로 owner 검증 함수를 통합하지 않는다. 읽기는 commit하지 않고 호출자가 가진 변경을 원래 autoflush 시점에 관찰한다.

@@ -1124,3 +1124,10 @@ C8-B 최종 집중 **35 passed / 기존 warning 1 / 19.61초**, 경계 **771 mod
 처음 집중은 **43 PASS/1 FAIL**이었다. 실패는 root가 이미 확인한 기존 Memory fixture의 Post+observation add_all 시 observation INSERT가 먼저 실행된 FK 오류로, 실제 reader 호출 전이었다. 원래 FK/DDL/assertion을 유지하고 fixture만 Post add→flush→observation add 순서로 명시했다. Production은 기존 source 조회 및 begin_nested pre-flush 후 observation을 저장하며 정책을 변경하지 않았다. 신규 node는 없고 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
 
 C9-A 최종 집중 **44 passed / 기존 warning 1 / 9.36초**, 경계 **771 modules / 2,651 edges / exact legacy 203**다. 변경한 기존 fixture의 보호 assertion은 모두 동일했고 PR258/263 API·응답·ORM·전체 split evidence 및 L4·ER0 current inventory가 통과했다.
+
+
+## AR-B5-C9-B — 수동 World 피드·스레드 실제 조회 책임
+
+원래 6개 읽기 정책은 Social service, 원래 4개 Social SQL은 repository, active WC/Character/membership의 동일 join은 runtime references로 나누었다. 같은 Session에서 owner→WC→Character→membership 조회 순서와 profile capability 판단, 공개 root/reply 정렬·한도·오류를 유지한다. 원래 읽기는 User를 별도로 읽지 않으며 `owner_membership_inactive`를 사용하므로 작성 정책의 추가 검증/다른 오류를 재사용하지 않는다. Runtime의 기존 두 entry는 실제 service와 구체 references를 조립한다.
+
+SQL·협력 호출을 원문으로 확장한 **6개 정책 AST 동일**. 기존 집중 **13 PASS/7.03초**, 새 동일 Session/조회 순서/변경 관찰/commit 없음 회귀 포함 **14 PASS/8.83초**. 신규 1개 node는 호출자의 미commit Character moderation 변경이 profile capability에 반영되지만 기존 feed 결과를 새로 필터하지 않고 rollback으로 복원됨을 검증한다. 모든 기존 assertion은 유지했다. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.

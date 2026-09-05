@@ -801,10 +801,6 @@
         {
           "importer": "app.runtime.social.sqlalchemy_inbox",
           "imported": "app.models"
-        },
-        {
-          "importer": "app.runtime.social.sqlalchemy_read_repository",
-          "imported": "app.models"
         }
       ],
       "id": "l4-social-persistence-model-bridge",
@@ -1115,6 +1111,7 @@
       "app.domains.social.contracts.discovery",
       "app.domains.social.contracts.inbox",
       "app.domains.social.contracts.inbox_reads",
+      "app.domains.social.contracts.manual_feed",
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
       "app.domains.social.contracts.search_state",
@@ -1135,6 +1132,7 @@
       "app.domains.social.repository.blocks",
       "app.domains.social.repository.event_evidence",
       "app.domains.social.repository.inbox",
+      "app.domains.social.repository.manual_feed",
       "app.domains.social.repository.manual_writes",
       "app.domains.social.repository.media",
       "app.domains.social.repository.posts",
@@ -1152,6 +1150,7 @@
       "app.domains.social.service.feed",
       "app.domains.social.service.inbox",
       "app.domains.social.service.joint_posts",
+      "app.domains.social.service.manual_feed",
       "app.domains.social.service.manual_writes",
       "app.domains.social.service.media_storage",
       "app.domains.social.service.notifications",
@@ -1335,6 +1334,7 @@
       "app.domains.social.contracts.discovery",
       "app.domains.social.contracts.inbox",
       "app.domains.social.contracts.inbox_reads",
+      "app.domains.social.contracts.manual_feed",
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
       "app.domains.social.contracts.search_state",
@@ -1353,6 +1353,7 @@
       "app.domains.social.service.feed",
       "app.domains.social.service.inbox",
       "app.domains.social.service.joint_posts",
+      "app.domains.social.service.manual_feed",
       "app.domains.social.service.manual_writes",
       "app.domains.social.service.media_storage",
       "app.domains.social.service.notifications",

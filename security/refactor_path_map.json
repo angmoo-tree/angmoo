@@ -33103,6 +33103,7 @@
           "backend/app/domains/routines/models/resident.py",
           "backend/app/domains/social/models/feed.py",
           "backend/app/domains/social/models/posts.py",
+          "backend/app/domains/social/service/manual_feed.py",
           "backend/app/domains/world_characters/models.py",
           "backend/app/domains/worlds/models.py",
           "backend/app/runtime/social/sqlalchemy_read_repository.py"
@@ -33391,67 +33392,67 @@
         },
         {
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_owner_actor",
-          "new": "backend/app/runtime/social/sqlalchemy_read_repository.py::_owner_actor",
+          "new": "backend/app/domains/social/service/manual_feed.py::_owner_actor",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_read_repository.py",
-            "backend/app/api/v1/routes/manual_social.py"
+            "backend/app/domains/social/service/manual_feed.py"
           ],
           "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
             "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
           ]
         },
         {
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_post_read",
-          "new": "backend/app/runtime/social/sqlalchemy_read_repository.py::_post_read",
+          "new": "backend/app/domains/social/service/manual_feed.py::_post_read",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_read_repository.py",
-            "backend/app/api/v1/routes/manual_social.py"
+            "backend/app/domains/social/service/manual_feed.py"
           ],
           "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
             "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
           ]
         },
         {
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_post_reads",
-          "new": "backend/app/runtime/social/sqlalchemy_read_repository.py::_post_reads",
+          "new": "backend/app/domains/social/service/manual_feed.py::_post_reads",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_read_repository.py",
-            "backend/app/api/v1/routes/manual_social.py"
+            "backend/app/domains/social/service/manual_feed.py"
           ],
           "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
             "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
           ]
         },
         {
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_author_profile_available",
-          "new": "backend/app/runtime/social/sqlalchemy_read_repository.py::_author_profile_available",
+          "new": "backend/app/domains/social/service/manual_feed.py::_author_profile_available",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_read_repository.py",
-            "backend/app/api/v1/routes/manual_social.py"
+            "backend/app/domains/social/service/manual_feed.py"
           ],
           "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
             "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
           ]
         },
         {
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::list_owner_world_feed",
-          "new": "backend/app/runtime/social/sqlalchemy_read_repository.py::list_owner_world_feed",
+          "new": "backend/app/domains/social/service/manual_feed.py::list_owner_world_feed",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_read_repository.py",
-            "backend/app/api/v1/routes/manual_social.py"
+            "backend/app/runtime/social/sqlalchemy_read_repository.py"
           ],
           "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
             "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
           ]
         },
         {
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::get_owner_world_post_thread",
-          "new": "backend/app/runtime/social/sqlalchemy_read_repository.py::get_owner_world_post_thread",
+          "new": "backend/app/domains/social/service/manual_feed.py::get_owner_world_post_thread",
           "direct_consumers": [
-            "backend/app/runtime/social/sqlalchemy_read_repository.py",
-            "backend/app/api/v1/routes/manual_social.py"
+            "backend/app/runtime/social/sqlalchemy_read_repository.py"
           ],
           "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
             "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
           ]
         },
@@ -33508,6 +33509,499 @@
         "change": "Same FK-on fixture now adds/flushed Post before dependent observation, instead of relying on unrelated mapper ordering; every original assertion and DDL preserved."
       },
       "new_tests": []
+    },
+    "AR-B5-C9-B": {
+      "status": "IMPLEMENTED; six original policies/four query expressions/one mixed join preserved; source introduction pending",
+      "scope": "Actual owner feed/thread response and profile-capability decisions live in Social service; own counts/post queries in Social repository; the original active WC/Character/membership join and owner nullable reads remain in same-Session runtime composition. Read ownership preserves owner_membership_inactive and does not reuse writer preconditions.",
+      "split_files": {
+        "backend/app/runtime/social/sqlalchemy_read_repository.py": [
+          "backend/app/domains/characters/models.py",
+          "backend/app/domains/routines/models/resident.py",
+          "backend/app/domains/social/contracts/manual_feed.py",
+          "backend/app/domains/social/models/feed.py",
+          "backend/app/domains/social/models/posts.py",
+          "backend/app/domains/social/repository/manual_feed.py",
+          "backend/app/domains/social/service/manual_feed.py",
+          "backend/app/domains/world_characters/models.py",
+          "backend/app/domains/worlds/models.py",
+          "backend/app/runtime/social/manual_feed_references.py",
+          "backend/app/runtime/social/sqlalchemy_read_repository.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_SocialPersistenceModels",
+          "new": "backend/app/domains/routines/models/resident.py::AgentPublicActionExecution",
+          "direct_consumers": [
+            "backend/app/runtime/social/subjective_context.py",
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/runtime/memory/subjective_source.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_SocialPersistenceModels",
+          "new": "backend/app/domains/characters/models.py::Character",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_SocialPersistenceModels",
+          "new": "backend/app/domains/social/models/posts.py::Post",
+          "direct_consumers": [
+            "backend/app/runtime/social/subjective_context.py",
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_SocialPersistenceModels",
+          "new": "backend/app/domains/social/models/posts.py::PostLike",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/runtime/memory/subjective_source.py",
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_SocialPersistenceModels",
+          "new": "backend/app/domains/social/models/posts.py::PostMedia",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_SocialPersistenceModels",
+          "new": "backend/app/domains/world_characters/models.py::WorldCharacter",
+          "direct_consumers": [
+            "backend/app/runtime/social/subjective_context.py",
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_SocialPersistenceModels",
+          "new": "backend/app/domains/social/models/feed.py::WorldCharacterBlock",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_SocialPersistenceModels",
+          "new": "backend/app/domains/social/models/feed.py::WorldCharacterFeedObservation",
+          "direct_consumers": [
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_SocialPersistenceModels",
+          "new": "backend/app/domains/worlds/models.py::WorldMembership",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::social_persistence_models",
+          "new": "backend/app/domains/routines/models/resident.py::AgentPublicActionExecution",
+          "direct_consumers": [
+            "backend/app/runtime/social/subjective_context.py",
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/runtime/memory/subjective_source.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::social_persistence_models",
+          "new": "backend/app/domains/characters/models.py::Character",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::social_persistence_models",
+          "new": "backend/app/domains/social/models/posts.py::Post",
+          "direct_consumers": [
+            "backend/app/runtime/social/subjective_context.py",
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::social_persistence_models",
+          "new": "backend/app/domains/social/models/posts.py::PostLike",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/runtime/memory/subjective_source.py",
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::social_persistence_models",
+          "new": "backend/app/domains/social/models/posts.py::PostMedia",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::social_persistence_models",
+          "new": "backend/app/domains/world_characters/models.py::WorldCharacter",
+          "direct_consumers": [
+            "backend/app/runtime/social/subjective_context.py",
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::social_persistence_models",
+          "new": "backend/app/domains/social/models/feed.py::WorldCharacterBlock",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::social_persistence_models",
+          "new": "backend/app/domains/social/models/feed.py::WorldCharacterFeedObservation",
+          "direct_consumers": [
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::social_persistence_models",
+          "new": "backend/app/domains/worlds/models.py::WorldMembership",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_today_activity.py",
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+            "backend/app/runtime/memory/sqlalchemy_source_reader.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_cursor_is_opaque_and_scope_bound",
+            "tests/test_p8_l_r_today_sns_activity.py::test_subjective_context_is_exact_action_linked_idempotent_and_fail_closed",
+            "tests/test_p8_l_r_today_sns_activity.py::test_batched_read_query_count_does_not_grow_per_post",
+            "tests/test_p8_l_g_memory_write_lifecycle.py::test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_owner_actor",
+          "new": "backend/app/domains/social/service/manual_feed.py::_owner_actor",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_feed.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_post_read",
+          "new": "backend/app/domains/social/service/manual_feed.py::_post_read",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_feed.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_post_reads",
+          "new": "backend/app/domains/social/service/manual_feed.py::_post_reads",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_feed.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_author_profile_available",
+          "new": "backend/app/domains/social/service/manual_feed.py::_author_profile_available",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_feed.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::list_owner_world_feed",
+          "new": "backend/app/domains/social/service/manual_feed.py::list_owner_world_feed",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_read_repository.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::get_owner_world_post_thread",
+          "new": "backend/app/domains/social/service/manual_feed.py::get_owner_world_post_thread",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_read_repository.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::__all__",
+          "new": "backend/app/runtime/social/sqlalchemy_read_repository.py::__all__",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_read_repository.py",
+            "backend/app/api/v1/routes/manual_social.py"
+          ],
+          "test_nodes": [
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_post_reads",
+          "new": "backend/app/domains/social/repository/manual_feed.py::reply_counts",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_feed.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_post_reads",
+          "new": "backend/app/domains/social/repository/manual_feed.py::like_counts",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_feed.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::list_owner_world_feed",
+          "new": "backend/app/domains/social/repository/manual_feed.py::list_visible_posts",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_feed.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::get_owner_world_post_thread",
+          "new": "backend/app/domains/social/repository/manual_feed.py::list_visible_replies",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_feed.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_owner_actor",
+          "new": "backend/app/domains/social/contracts/manual_feed.py::ManualFeedWorldCharacter",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_feed.py",
+            "backend/app/runtime/social/manual_feed_references.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_owner_actor",
+          "new": "backend/app/domains/social/contracts/manual_feed.py::ManualFeedReferences",
+          "direct_consumers": [
+            "backend/app/domains/social/service/manual_feed.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_owner_actor",
+          "new": "backend/app/runtime/social/manual_feed_references.py::RuntimeManualFeedReferences",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_read_repository.py",
+            "backend/tests/social/test_manual_feed_ownership.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::_author_profile_available",
+          "new": "backend/app/runtime/social/manual_feed_references.py::RuntimeManualFeedReferences",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_read_repository.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::list_owner_world_feed",
+          "new": "backend/app/runtime/social/sqlalchemy_read_repository.py::list_owner_world_feed",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/manual_social.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::get_owner_world_post_thread",
+          "new": "backend/app/runtime/social/sqlalchemy_read_repository.py::get_owner_world_post_thread",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/manual_social.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
+          ]
+        }
+      ],
+      "new_tests": [
+        "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing"
+      ]
     }
   }
 }

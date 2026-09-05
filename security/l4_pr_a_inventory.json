@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2326,
-      "internal_edge_count": 2651,
+      "external_import_count": 2331,
+      "internal_edge_count": 2673,
       "legacy_import_exception_count": 0,
-      "module_count": 771,
+      "module_count": 775,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -667,6 +667,15 @@
             "path": "backend/app/domains/social/contracts/inbox_reads.py"
           },
           {
+            "imports": [
+              "app.domains.social.contracts.actors",
+              "app.domains.social.contracts.source_writes",
+              "app.domains.world_characters.contracts.owner_identity"
+            ],
+            "module": "app.domains.social.contracts.manual_feed",
+            "path": "backend/app/domains/social/contracts/manual_feed.py"
+          },
+          {
             "imports": [],
             "module": "app.domains.social.contracts.observations",
             "path": "backend/app/domains/social/contracts/observations.py"
@@ -852,6 +861,13 @@
           },
           {
             "imports": [
+              "app.domains.social.models.posts"
+            ],
+            "module": "app.domains.social.repository.manual_feed",
+            "path": "backend/app/domains/social/repository/manual_feed.py"
+          },
+          {
+            "imports": [
               "app.domains.social.models.manual_writes"
             ],
             "module": "app.domains.social.repository.manual_writes",
@@ -1008,6 +1024,20 @@
             ],
             "module": "app.domains.social.service.joint_posts",
             "path": "backend/app/domains/social/service/joint_posts.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.actors",
+              "app.domains.social.contracts.manual_feed",
+              "app.domains.social.contracts.writes",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.blocks",
+              "app.domains.social.repository.event_evidence",
+              "app.domains.social.repository.manual_feed",
+              "app.domains.social.schemas.manual"
+            ],
+            "module": "app.domains.social.service.manual_feed",
+            "path": "backend/app/domains/social/service/manual_feed.py"
           },
           {
             "imports": [
@@ -1420,6 +1450,23 @@
           },
           {
             "imports": [
+              "app.domains.characters.models",
+              "app.domains.characters.service.profile",
+              "app.domains.social.contracts.actors",
+              "app.domains.social.contracts.manual_feed",
+              "app.domains.social.contracts.source_writes",
+              "app.domains.world_characters.contracts.owner_identity",
+              "app.domains.world_characters.models",
+              "app.domains.world_characters.repository.source_writes",
+              "app.domains.world_characters.service.owner_identity",
+              "app.domains.worlds.models",
+              "app.domains.worlds.service.character_entry"
+            ],
+            "module": "app.runtime.social.manual_feed_references",
+            "path": "backend/app/runtime/social/manual_feed_references.py"
+          },
+          {
+            "imports": [
               "app.domains.social.public",
               "app.runtime.social.sqlalchemy_unit_of_work"
             ],
@@ -1480,11 +1527,10 @@
           },
           {
             "imports": [
-              "app.domains.social.contracts",
+              "app.domains.social.contracts.writes",
               "app.domains.social.schemas.manual",
-              "app.domains.world_characters.public",
-              "app.models",
-              "app.runtime.relationships.sqlalchemy_social_event"
+              "app.domains.social.service.manual_feed",
+              "app.runtime.social.manual_feed_references"
             ],
             "module": "app.runtime.social.sqlalchemy_read_repository",
             "path": "backend/app/runtime/social/sqlalchemy_read_repository.py"
