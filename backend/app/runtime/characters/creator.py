@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from app.domains.characters.service import media as media_service
+from app.domains.characters.service.media import _cleanup_expired_profile_image_candidates, _get_owned_profile_image_candidate
+
 from app.domains.characters.contracts import CreatorWorkflows
 from app.domains.characters.service import drafts as draft_lifecycle
 
@@ -147,21 +150,7 @@ def get_draft_media_content(
     draft_id: str,
     media_type: str,
 ):
-    if media_type not in {"avatar", "banner"}:
-        raise AgentPrivateMediaNotFoundError(media_type)
-    draft = _get_owned_draft(db, user, draft_id)
-    media_url = (
-        draft.avatar_temp_url if media_type == "avatar" else draft.banner_temp_url
-    )
-    if media_url is None:
-        raise AgentPrivateMediaNotFoundError(media_type)
-    try:
-        return media_files.resolve_private_media_file(
-            media_url,
-            expected_directory="drafts",
-        )
-    except profile_media.InvalidProfileMediaError as exc:
-        raise AgentPrivateMediaNotFoundError(media_type) from exc
+    return media_service.get_draft_media_content(db, user, draft_id, media_type, workflows=build_creator_workflows())
 
 
 def get_draft_candidate_content(
@@ -170,22 +159,7 @@ def get_draft_candidate_content(
     draft_id: str,
     candidate_id: str,
 ):
-    draft = _get_owned_draft(db, user, draft_id)
-    candidate = _get_owned_profile_image_candidate(
-        db,
-        user=user,
-        candidate_id=candidate_id,
-        scope="create",
-        draft_id=draft.id,
-        character_id=None,
-    )
-    try:
-        return media_files.resolve_private_media_file(
-            candidate.url,
-            expected_directory="profile-candidates",
-        )
-    except profile_media.InvalidProfileMediaError as exc:
-        raise AgentProfileImageCandidateNotFoundError(candidate_id) from exc
+    return media_service.get_draft_candidate_content(db, user, draft_id, candidate_id, workflows=build_creator_workflows())
 
 
 def get_profile_candidate_content(
@@ -194,28 +168,7 @@ def get_profile_candidate_content(
     character_id: str,
     candidate_id: str,
 ):
-    character = character_profile.get_character(db, character_id)
-    if (
-        character is None
-        or character.owner_id != user.id
-        or character.deleted_at is not None
-    ):
-        raise agent_service.AgentNotFoundError(character_id)
-    candidate = _get_owned_profile_image_candidate(
-        db,
-        user=user,
-        candidate_id=candidate_id,
-        scope="profile",
-        draft_id=None,
-        character_id=character.id,
-    )
-    try:
-        return media_files.resolve_private_media_file(
-            candidate.url,
-            expected_directory="profile-candidates",
-        )
-    except profile_media.InvalidProfileMediaError as exc:
-        raise AgentProfileImageCandidateNotFoundError(candidate_id) from exc
+    return media_service.get_profile_candidate_content(db, user, character_id, candidate_id)
 
 
 def update_draft(
@@ -239,20 +192,7 @@ def upload_draft_media(
     draft_id: str,
     data: schemas.AgentCreationDraftMediaUpload,
 ) -> schemas.AgentCreationDraftRead:
-    draft = _get_owned_draft(db, user, draft_id)
-    url = profile_media.save_draft_profile_media(
-        draft_id=draft.id,
-        media_type=data.media_type,
-        content_type=data.content_type,
-        data_base64=data.data_base64,
-    )
-    if data.media_type == "avatar":
-        draft.avatar_temp_url = url
-    else:
-        draft.banner_temp_url = url
-    db.commit()
-    db.refresh(draft)
-    return _draft_read(draft)
+    return media_service.upload_draft_media(db, user, draft_id, data, workflows=build_creator_workflows())
 
 
 async def generate_media(
@@ -472,21 +412,13 @@ async def generate_profile_media(
 def get_draft_profile_image_usage(
     db: Session, user: models.User, draft_id: str
 ) -> schemas.AgentProfileImageUsageRead:
-    _ = _get_owned_draft(db, user, draft_id)
-    return _profile_image_usage_read(db, user=user, scope="create")
+    return media_service.get_draft_profile_image_usage(db, user, draft_id, workflows=build_creator_workflows())
 
 
 def get_agent_profile_image_usage(
     db: Session, user: models.User, character_id: str
 ) -> schemas.AgentProfileImageUsageRead:
-    character = character_profile.get_character(db, character_id)
-    if (
-        character is None
-        or character.owner_id != user.id
-        or character.deleted_at is not None
-    ):
-        raise agent_service.AgentNotFoundError(character_id)
-    return _profile_image_usage_read(db, user=user, scope="profile")
+    return media_service.get_agent_profile_image_usage(db, user, character_id)
 
 
 def apply_draft_media_candidate(
@@ -495,39 +427,7 @@ def apply_draft_media_candidate(
     draft_id: str,
     candidate_id: str,
 ) -> schemas.AgentCreationDraftRead:
-    draft = _get_owned_draft(db, user, draft_id)
-    candidate = _get_owned_profile_image_candidate(
-        db,
-        user=user,
-        candidate_id=candidate_id,
-        scope="create",
-        draft_id=draft.id,
-        character_id=None,
-    )
-    source_path = media_files.media_url_to_path(candidate.url)
-    content = source_path.read_bytes()
-    url = profile_media.save_draft_profile_media_bytes(
-        draft_id=draft.id,
-        media_type=candidate.media_type,
-        content_type="image/webp",
-        content=content,
-    )
-    if candidate.media_type == "avatar":
-        draft.avatar_temp_url = url
-    else:
-        draft.banner_temp_url = url
-    candidate_id = candidate.id
-    _finalize_profile_image_quota(
-        db,
-        reservation_id=candidate.quota_reservation_id,
-        status="applied",
-        candidate_id=candidate_id,
-    )
-    db.delete(candidate)
-    db.commit()
-    db.refresh(draft)
-    profile_media.delete_profile_image_candidate(candidate_id, user.id)
-    return _draft_read(draft)
+    return media_service.apply_draft_media_candidate(db, user, draft_id, candidate_id, workflows=build_creator_workflows())
 
 
 def apply_profile_media_candidate(
@@ -536,53 +436,7 @@ def apply_profile_media_candidate(
     character_id: str,
     candidate_id: str,
 ) -> schemas.AgentDetailRead:
-    character = character_profile.get_character(db, character_id)
-    if (
-        character is None
-        or character.owner_id != user.id
-        or character.deleted_at is not None
-    ):
-        raise agent_service.AgentNotFoundError(character_id)
-    demo_lock.ensure_demo_user_mutable(user)
-    candidate = _get_owned_profile_image_candidate(
-        db,
-        user=user,
-        candidate_id=candidate_id,
-        scope="profile",
-        draft_id=None,
-        character_id=character.id,
-    )
-    url = profile_media.promote_profile_image_candidate(
-        character_id=character.id,
-        media_type=candidate.media_type,
-        candidate_media_url=candidate.url,
-    )
-    if candidate.media_type == "avatar":
-        character.avatar_url = url
-    else:
-        character.banner_url = url
-    agent_service._invalidate_image_visual_identity_if_present(db, character.id)
-    candidate_id = candidate.id
-    _finalize_profile_image_quota(
-        db,
-        reservation_id=candidate.quota_reservation_id,
-        status="applied",
-        candidate_id=candidate_id,
-    )
-    db.delete(candidate)
-    agent_crud.log_activity(
-        db,
-        user_id=user.id,
-        character_id=character.id,
-        action_type="profile_updated",
-        target_post_id=None,
-        reason=f"user_applied_generated_{candidate.media_type}",
-        result=f"Agent {candidate.media_type} image candidate was applied.",
-    )
-    db.commit()
-    db.refresh(character)
-    profile_media.delete_profile_image_candidate(candidate_id, user.id)
-    return agent_service._build_agent_detail(db, character)
+    return media_service.apply_profile_media_candidate(db, user, character_id, candidate_id, workflows=agent_service.build_character_media_workflows())
 
 
 def discard_draft_media_candidate(
@@ -591,18 +445,7 @@ def discard_draft_media_candidate(
     draft_id: str,
     candidate_id: str,
 ) -> None:
-    draft = _get_owned_draft(db, user, draft_id)
-    candidate = _get_owned_profile_image_candidate(
-        db,
-        user=user,
-        candidate_id=candidate_id,
-        scope="create",
-        draft_id=draft.id,
-        character_id=None,
-    )
-    profile_media.delete_profile_image_candidate(candidate.id, user.id)
-    db.delete(candidate)
-    db.commit()
+    return media_service.discard_draft_media_candidate(db, user, draft_id, candidate_id, workflows=build_creator_workflows())
 
 
 def discard_profile_media_candidate(
@@ -611,24 +454,7 @@ def discard_profile_media_candidate(
     character_id: str,
     candidate_id: str,
 ) -> None:
-    character = character_profile.get_character(db, character_id)
-    if (
-        character is None
-        or character.owner_id != user.id
-        or character.deleted_at is not None
-    ):
-        raise agent_service.AgentNotFoundError(character_id)
-    candidate = _get_owned_profile_image_candidate(
-        db,
-        user=user,
-        candidate_id=candidate_id,
-        scope="profile",
-        draft_id=None,
-        character_id=character.id,
-    )
-    profile_media.delete_profile_image_candidate(candidate.id, user.id)
-    db.delete(candidate)
-    db.commit()
+    return media_service.discard_profile_media_candidate(db, user, character_id, candidate_id)
 
 
 def complete_draft(
@@ -921,54 +747,8 @@ async def _generate_profile_image_candidate(
         raise AgentCreationDraftMediaError("candidate_storage_failed") from exc
 
 
-def _get_owned_profile_image_candidate(
-    db: Session,
-    *,
-    user: models.User,
-    candidate_id: str,
-    scope: str,
-    draft_id: str | None,
-    character_id: str | None,
-) -> character_models.ProfileImageCandidate:
-    candidate = db.get(character_models.ProfileImageCandidate, candidate_id)
-    if (
-        candidate is None
-        or candidate.user_id != user.id
-        or candidate.scope != scope
-        or candidate.applied_at is not None
-    ):
-        raise AgentProfileImageCandidateNotFoundError(candidate_id)
-    if draft_id is not None and candidate.draft_id != draft_id:
-        raise AgentProfileImageCandidateNotFoundError(candidate_id)
-    if character_id is not None and candidate.character_id != character_id:
-        raise AgentProfileImageCandidateNotFoundError(candidate_id)
-    expires_at = candidate.expires_at
-    if expires_at.tzinfo is None:
-        expires_at = expires_at.replace(tzinfo=UTC)
-    if expires_at < datetime.now(UTC):
-        profile_media.delete_profile_image_candidate(candidate.id, user.id)
-        raise AgentProfileImageCandidateExpiredError(candidate_id)
-    if not media_files.media_url_to_path(candidate.url).is_file():
-        raise AgentProfileImageCandidateNotFoundError(candidate_id)
-    return candidate
 
 
-def _cleanup_expired_profile_image_candidates(db: Session, user_id: str) -> None:
-    now = datetime.now(UTC)
-    candidates = list(
-        db.scalars(
-            select(character_models.ProfileImageCandidate)
-            .where(character_models.ProfileImageCandidate.user_id == user_id)
-            .where(character_models.ProfileImageCandidate.expires_at < now)
-            .limit(50)
-        )
-    )
-    if not candidates:
-        return
-    for candidate in candidates:
-        profile_media.delete_profile_image_candidate(candidate.id, user_id)
-        db.delete(candidate)
-    db.commit()
 
 
 def _open_pollinations_request(request: Request, timeout_seconds: float):

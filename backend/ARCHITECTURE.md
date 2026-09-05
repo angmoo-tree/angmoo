@@ -465,3 +465,12 @@ Character 업로드의 원본 크기 한도와 Post의 인코딩 결과 크기 �
 `integrations/image_provider.py`가 모델별 실제 클라이언트를 선택하고, `pollinations_image.py`와 `replicate_image.py`는 provider 요청·응답·대기·실패 변환을 처리합니다. `integrations/provider_http.py`는 공개 HTTPS URL·리다이렉트·민감 헤더 제거와 제한된 오류 진단을 공유합니다. 외부 호출 횟수나 후보 quota를 결정하는 업무는 이 통신 모듈로 옮기지 않습니다.
 
 AR-B3-M2에서 이 네 파일의 실제 구현과 모든 Python 소비자를 이전하고 옛 `services` 파일은 제거했습니다. 기존 운영 필터와 연결되는 Pollinations logger 이름은 유지합니다. Replicate 전용 검증은 `tests/media`에 있고, Post quota와 provider 실패가 연결되는 혼합 검증은 기존 Social 검증 위치에 남습니다.
+
+
+### Character media 후보와 비공개 조회
+
+`characters/service/media.py`는 소유자/후보 scope·만료·업로드·적용·폐기·비공개 파일 조회를 소유합니다. Draft 조회는 기존 Creator lifecycle의 정리 규칙을 사용하며 같은 `CreatorWorkflows`를 전달합니다. Profile 적용과 upload는 `CharacterMediaWorkflows`로 이미지 설정 무효화·활동 기록·상세 응답 조립을 같은 Session에서 실행합니다.
+
+두 동작의 원래 저장 순서는 다릅니다. Upload는 Character 변경을 먼저 commit한 뒤 활동을 기록합니다. 후보 적용은 quota 확정과 후보 DB 삭제·활동 기록을 함께 commit한 뒤 후보 파일을 삭제합니다. 구조를 단순하게 보이게 만들기 위해 이 transaction 차이를 없애지 않습니다. 두 앱 factory는 callback factory를 `app.state`에 등록하고 HTTP dependency가 이를 제공합니다.
+
+현재 11개 미디어 조회/업로드/적용/삭제 HTTP는 Character router에서 실제 구현하며 기존 혼합 router의 원래 위치에 같은 route 객체로 연결됩니다. 비공개 응답은 `private, no-store`와 `nosniff`를 유지합니다. 이미지 생성 두 endpoint와 provider·settings 조립은 뒤이은 media source 범위이고, 남은 runtime forwarding의 실제 소비자는 보존 지도와 tests에서 추적하여 후속 종료 단계에서 제거합니다.

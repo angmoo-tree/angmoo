@@ -4626,6 +4626,7 @@
           "backend/app/domains/characters/service/access.py",
           "backend/app/domains/characters/service/creator.py",
           "backend/app/domains/characters/service/management.py",
+          "backend/app/domains/characters/service/media.py",
           "backend/app/domains/characters/service/mutations.py",
           "backend/app/domains/characters/service/persona.py",
           "backend/app/domains/characters/service/promotion.py",
@@ -4636,6 +4637,7 @@
           "backend/app/domains/characters/service/creator.py",
           "backend/app/domains/characters/service/drafts.py",
           "backend/app/domains/characters/service/image_quota.py",
+          "backend/app/domains/characters/service/media.py",
           "backend/app/runtime/characters/creator.py"
         ]
       },
@@ -5788,12 +5790,15 @@
         },
         {
           "old": "backend/app/services/agents.py::upload_profile_media",
-          "new": "backend/app/runtime/characters/management.py::upload_profile_media",
+          "new": "backend/app/domains/characters/service/media.py::upload_profile_media",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -6951,32 +6956,41 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::get_draft_media_content",
-          "new": "backend/app/runtime/characters/creator.py::get_draft_media_content",
+          "new": "backend/app/domains/characters/service/media.py::get_draft_media_content",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
             "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::get_draft_candidate_content",
-          "new": "backend/app/runtime/characters/creator.py::get_draft_candidate_content",
+          "new": "backend/app/domains/characters/service/media.py::get_draft_candidate_content",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
             "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::get_profile_candidate_content",
-          "new": "backend/app/runtime/characters/creator.py::get_profile_candidate_content",
+          "new": "backend/app/domains/characters/service/media.py::get_profile_candidate_content",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -7003,12 +7017,15 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::upload_draft_media",
-          "new": "backend/app/runtime/characters/creator.py::upload_draft_media",
+          "new": "backend/app/domains/characters/service/media.py::upload_draft_media",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -7035,62 +7052,80 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::get_draft_profile_image_usage",
-          "new": "backend/app/runtime/characters/creator.py::get_draft_profile_image_usage",
+          "new": "backend/app/domains/characters/service/media.py::get_draft_profile_image_usage",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::get_agent_profile_image_usage",
-          "new": "backend/app/runtime/characters/creator.py::get_agent_profile_image_usage",
+          "new": "backend/app/domains/characters/service/media.py::get_agent_profile_image_usage",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::apply_draft_media_candidate",
-          "new": "backend/app/runtime/characters/creator.py::apply_draft_media_candidate",
+          "new": "backend/app/domains/characters/service/media.py::apply_draft_media_candidate",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::apply_profile_media_candidate",
-          "new": "backend/app/runtime/characters/creator.py::apply_profile_media_candidate",
+          "new": "backend/app/domains/characters/service/media.py::apply_profile_media_candidate",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::discard_draft_media_candidate",
-          "new": "backend/app/runtime/characters/creator.py::discard_draft_media_candidate",
+          "new": "backend/app/domains/characters/service/media.py::discard_draft_media_candidate",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::discard_profile_media_candidate",
-          "new": "backend/app/runtime/characters/creator.py::discard_profile_media_candidate",
+          "new": "backend/app/domains/characters/service/media.py::discard_profile_media_candidate",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_m3_authorization_deletion.py::test_two_user_object_authorization_matrix_denies_cross_owner_access"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -7319,13 +7354,14 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_get_owned_profile_image_candidate",
-          "new": "backend/app/runtime/characters/creator.py::_get_owned_profile_image_candidate",
+          "new": "backend/app/domains/characters/service/media.py::_get_owned_profile_image_candidate",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate",
-            "tests/test_m3_authorization_deletion.py::test_two_user_object_authorization_matrix_denies_cross_owner_access",
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
             "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
@@ -7372,14 +7408,15 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_cleanup_expired_profile_image_candidates",
-          "new": "backend/app/runtime/characters/creator.py::_cleanup_expired_profile_image_candidates",
+          "new": "backend/app/domains/characters/service/media.py::_cleanup_expired_profile_image_candidates",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
-            "tests/test_agent_creation_drafts.py::test_profile_image_quota_exceeded_skips_translation_and_pollinations",
-            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -8372,12 +8409,14 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::get_agent_draft_media",
-          "new": "backend/app/api/v1/routes/agents.py::get_agent_draft_media",
+          "new": "backend/app/domains/characters/router.py::get_agent_draft_media",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -8402,12 +8441,14 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::upload_agent_draft_media",
-          "new": "backend/app/api/v1/routes/agents.py::upload_agent_draft_media",
+          "new": "backend/app/domains/characters/router.py::upload_agent_draft_media",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -8422,42 +8463,50 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::get_agent_draft_media_usage",
-          "new": "backend/app/api/v1/routes/agents.py::get_agent_draft_media_usage",
+          "new": "backend/app/domains/characters/router.py::get_agent_draft_media_usage",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::get_agent_draft_media_candidate_content",
-          "new": "backend/app/api/v1/routes/agents.py::get_agent_draft_media_candidate_content",
+          "new": "backend/app/domains/characters/router.py::get_agent_draft_media_candidate_content",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::apply_agent_draft_media_candidate",
-          "new": "backend/app/api/v1/routes/agents.py::apply_agent_draft_media_candidate",
+          "new": "backend/app/domains/characters/router.py::apply_agent_draft_media_candidate",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::discard_agent_draft_media_candidate",
-          "new": "backend/app/api/v1/routes/agents.py::discard_agent_draft_media_candidate",
+          "new": "backend/app/domains/characters/router.py::discard_agent_draft_media_candidate",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -8572,12 +8621,14 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::upload_profile_media",
-          "new": "backend/app/api/v1/routes/agents.py::upload_profile_media",
+          "new": "backend/app/domains/characters/router.py::upload_profile_media",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -8642,42 +8693,50 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::get_profile_media_usage",
-          "new": "backend/app/api/v1/routes/agents.py::get_profile_media_usage",
+          "new": "backend/app/domains/characters/router.py::get_profile_media_usage",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::get_agent_profile_media_candidate_content",
-          "new": "backend/app/api/v1/routes/agents.py::get_agent_profile_media_candidate_content",
+          "new": "backend/app/domains/characters/router.py::get_agent_profile_media_candidate_content",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::apply_profile_media_candidate",
-          "new": "backend/app/api/v1/routes/agents.py::apply_profile_media_candidate",
+          "new": "backend/app/domains/characters/router.py::apply_profile_media_candidate",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::discard_profile_media_candidate",
-          "new": "backend/app/api/v1/routes/agents.py::discard_profile_media_candidate",
+          "new": "backend/app/domains/characters/router.py::discard_profile_media_candidate",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -14268,6 +14327,36 @@
         "no credential reveal or Social quota/job-policy movement"
       ],
       "test_move": "The two provider-specific Replicate suites move to tests/media without changing their test names or assertions. Mixed Social/provider security tests retain their current owner paths."
+    },
+    "AR-B3-M3": {
+      "status": "Character private preview, candidate ownership/expiry/application/discard and upload now use actual service/media implementation. Existing same-Session runtime callbacks own visual-identity invalidation/activity/detail collaboration. Eleven existing HTTP functions moved to Character router and are inserted as the same APIRoute objects at their old positions.",
+      "actual_moved_symbols": {
+        "backend/app/runtime/characters/creator.py::get_draft_media_content": "backend/app/domains/characters/service/media.py::get_draft_media_content",
+        "backend/app/runtime/characters/creator.py::_get_owned_profile_image_candidate": "backend/app/domains/characters/service/media.py::_get_owned_profile_image_candidate",
+        "backend/app/runtime/characters/creator.py::discard_profile_media_candidate": "backend/app/domains/characters/service/media.py::discard_profile_media_candidate",
+        "backend/app/runtime/characters/creator.py::get_agent_profile_image_usage": "backend/app/domains/characters/service/media.py::get_agent_profile_image_usage",
+        "backend/app/runtime/characters/creator.py::get_profile_candidate_content": "backend/app/domains/characters/service/media.py::get_profile_candidate_content",
+        "backend/app/runtime/characters/creator.py::get_draft_candidate_content": "backend/app/domains/characters/service/media.py::get_draft_candidate_content",
+        "backend/app/runtime/characters/creator.py::apply_draft_media_candidate": "backend/app/domains/characters/service/media.py::apply_draft_media_candidate",
+        "backend/app/runtime/characters/creator.py::get_draft_profile_image_usage": "backend/app/domains/characters/service/media.py::get_draft_profile_image_usage",
+        "backend/app/runtime/characters/creator.py::_cleanup_expired_profile_image_candidates": "backend/app/domains/characters/service/media.py::_cleanup_expired_profile_image_candidates",
+        "backend/app/runtime/characters/creator.py::upload_draft_media": "backend/app/domains/characters/service/media.py::upload_draft_media",
+        "backend/app/runtime/characters/creator.py::apply_profile_media_candidate": "backend/app/domains/characters/service/media.py::apply_profile_media_candidate",
+        "backend/app/runtime/characters/creator.py::discard_draft_media_candidate": "backend/app/domains/characters/service/media.py::discard_draft_media_candidate",
+        "backend/app/runtime/characters/management.py::upload_profile_media": "backend/app/domains/characters/service/media.py::upload_profile_media",
+        "backend/app/api/v1/routes/agents.py::get_agent_draft_media": "backend/app/domains/characters/router.py::get_agent_draft_media",
+        "backend/app/api/v1/routes/agents.py::upload_agent_draft_media": "backend/app/domains/characters/router.py::upload_agent_draft_media",
+        "backend/app/api/v1/routes/agents.py::get_agent_draft_media_usage": "backend/app/domains/characters/router.py::get_agent_draft_media_usage",
+        "backend/app/api/v1/routes/agents.py::get_agent_draft_media_candidate_content": "backend/app/domains/characters/router.py::get_agent_draft_media_candidate_content",
+        "backend/app/api/v1/routes/agents.py::apply_agent_draft_media_candidate": "backend/app/domains/characters/router.py::apply_agent_draft_media_candidate",
+        "backend/app/api/v1/routes/agents.py::discard_agent_draft_media_candidate": "backend/app/domains/characters/router.py::discard_agent_draft_media_candidate",
+        "backend/app/api/v1/routes/agents.py::upload_profile_media": "backend/app/domains/characters/router.py::upload_profile_media",
+        "backend/app/api/v1/routes/agents.py::get_profile_media_usage": "backend/app/domains/characters/router.py::get_profile_media_usage",
+        "backend/app/api/v1/routes/agents.py::get_agent_profile_media_candidate_content": "backend/app/domains/characters/router.py::get_agent_profile_media_candidate_content",
+        "backend/app/api/v1/routes/agents.py::apply_profile_media_candidate": "backend/app/domains/characters/router.py::apply_profile_media_candidate",
+        "backend/app/api/v1/routes/agents.py::discard_profile_media_candidate": "backend/app/domains/characters/router.py::discard_profile_media_candidate"
+      },
+      "remaining": "Generation/quota reservation/provider work continues in the next media slice. Two generate HTTP routes still use the old runtime composition; B4/B8 retain only their documented activity/settings/deletion ownership."
     }
   }
 }

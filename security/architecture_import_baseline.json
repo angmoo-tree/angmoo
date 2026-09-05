@@ -1,7 +1,7 @@
 {
-  "edge_count": 1991,
-  "external_import_count": 2053,
-  "module_count": 619,
+  "edge_count": 2005,
+  "external_import_count": 2057,
+  "module_count": 620,
   "modules": [
     {
       "external_imports": [],
@@ -141,7 +141,6 @@
         "app.services.community",
         "app.services.direct_llm",
         "app.services.maintenance",
-        "app.services.profile_media",
         "app.services.runtime_boundary"
       ],
       "module": "app.api.v1.routes.agents",
@@ -918,6 +917,7 @@
     {
       "external_imports": [
         "fastapi",
+        "fastapi.responses",
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -928,6 +928,7 @@
         "app.domains.characters.service.creator",
         "app.domains.characters.service.drafts",
         "app.domains.characters.service.management",
+        "app.domains.characters.service.media",
         "app.domains.characters.service.state",
         "app.domains.identity.service.demo_access",
         "app.domains.media.contracts",
@@ -1046,6 +1047,30 @@
       ],
       "module": "app.domains.characters.service.management",
       "path": "backend/app/domains/characters/service/management.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.contracts",
+        "app.domains.characters.exceptions",
+        "app.domains.characters.models",
+        "app.domains.characters.schemas",
+        "app.domains.characters.service.access",
+        "app.domains.characters.service.creator",
+        "app.domains.characters.service.drafts",
+        "app.domains.characters.service.image_quota",
+        "app.domains.characters.service.media_storage",
+        "app.domains.characters.service.profile",
+        "app.domains.identity.service.demo_access",
+        "app.integrations.media.files"
+      ],
+      "module": "app.domains.characters.service.media",
+      "path": "backend/app/domains/characters/service/media.py",
       "wildcard_imports": []
     },
     {
@@ -6610,6 +6635,7 @@
         "app.domains.characters.service.creator",
         "app.domains.characters.service.drafts",
         "app.domains.characters.service.image_quota",
+        "app.domains.characters.service.media",
         "app.domains.characters.service.media_storage",
         "app.domains.characters.service.profile",
         "app.domains.identity.service.demo_access",
@@ -6667,6 +6693,7 @@
         "app.domains.characters.service.access",
         "app.domains.characters.service.creator",
         "app.domains.characters.service.management",
+        "app.domains.characters.service.media",
         "app.domains.characters.service.media_storage",
         "app.domains.characters.service.mutations",
         "app.domains.characters.service.persona",

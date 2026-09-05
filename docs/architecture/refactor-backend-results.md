@@ -322,3 +322,14 @@ M1 집중 검증은 **136 passed / 3 warnings / 14.01s**다. 새 회귀 3개는 
 
 
 M2 집중 검증은 **135 passed / 2 warnings / 12.49s**이며 전체 **2121 tests collected / 6.43s**, protected mapped node loss 0이다. 네 transport 파일의 기존 함수/class 45개 AST 본문 차이는 0개다. Architecture는 619 modules / 1991 edges / 268 exact legacy edges로 통과했다. 신규 test node는 없으며 기존 Replicate 두 suite의 one-to-one node map을 유지했다. source/메타데이터 도입 capture와 전체 API/ORM 재검증은 root의 선형 통합에서 이어진다.
+
+
+## AR-B3-M3 — Character 미디어 서비스와 HTTP
+
+기존 Character media 함수 13개(비공개 조회·소유 후보/만료·usage·apply/discard·upload)의 실제 구현은 `characters/service/media.py`로, HTTP 11개는 `characters/router.py`로 옮겼다. Runtime에는 실제 남은 호출자와 테스트용 같은 서명 forwarding만 남겼다. Draft expiry는 기존 Creator lifecycle에 같은 workflow를 전달하고, Profile 시각 정체성/활동/detail 조립은 `CharacterMediaWorkflows`가 같은 Session으로 실행한다.
+
+원래 upload의 commit→log→refresh와 apply의 quota finalize→candidate delete→log→commit→refresh→파일 삭제→detail 차이를 보존했다. 두 factory의 구성, 원래 route 순서/같은 APIRoute·인증 dependency, private no-store/nosniff 및 기존 오류 변환을 유지했다. Root 독립 읽기 리뷰도 이 범위에서 추가 수정 요청 없이 이를 확인했다.
+
+새 회귀 **5 nodes**는 `tests/characters/test_character_media_workflows.py`에 있으며 실제 SQLite transaction과 callback Session, commit 후 파일 정리, private HTTP 헤더와 두 factory 연결을 검증한다. 최초 fixture의 필수 persona_summary/filename 누락을 보완한 최종 혼합 matrix는 **165 passed / 2 warnings / 15.76s**다. 원본 #258·#263 대비 API/ORM contract 차이 0, complete split evidence 오류 0이다. Architecture는 620 modules / 2005 edges / 267 exact legacy edges, public route inventory는 기존 196 operations로 통과했다. 원래 split 목적지 24개(13 service + 11 HTTP)를 갱신했고 frozen 증거는 수정하지 않았다.
+
+이 source는 generate_media/generate_profile_media와 quota 예약/provider 수행을 완료했다고 표시하지 않는다. 두 generation endpoint와 해당 Character 업무는 다음 B3 source에서 이동한다. 활동/settings/multi-domain deletion은 이전에 명시한 B4/B8-A 소유 범위를 유지한다. source introduction capture·통합 CI·PR/merge는 root가 순차 기록한다.

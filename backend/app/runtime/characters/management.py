@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.domains.characters.service import media as media_service
+
 from app.domains.characters.service.creator import (
     llm_credential_error_message,
 )
@@ -998,35 +1000,7 @@ def upload_profile_media(
     character_id: str,
     data: schemas.AgentProfileMediaUpload,
 ) -> schemas.AgentDetailRead:
-    character = _get_owned_character(db, user, character_id)
-    demo_lock.ensure_demo_user_mutable(user)
-    try:
-        url = profile_media.save_profile_media(
-            character_id=character.id,
-            media_type=data.media_type,
-            content_type=data.content_type,
-            data_base64=data.data_base64,
-        )
-    except profile_media.InvalidProfileMediaError as exc:
-        raise InvalidProfileMediaError(str(exc)) from exc
-
-    if data.media_type == "avatar":
-        character.avatar_url = url
-    else:
-        character.banner_url = url
-    _invalidate_image_visual_identity_if_present(db, character.id)
-    db.commit()
-    agent_crud.log_activity(
-        db,
-        user_id=user.id,
-        character_id=character.id,
-        action_type="profile_updated",
-        target_post_id=None,
-        reason=f"user_uploaded_{data.media_type}",
-        result=f"Agent {data.media_type} image was uploaded.",
-    )
-    db.refresh(character)
-    return _build_agent_detail(db, character)
+    return media_service.upload_profile_media(db, user, character_id, data, workflows=build_character_media_workflows())
 
 
 def get_image_settings(
@@ -3234,3 +3208,13 @@ def build_character_management_workflows() -> CharacterManagementWorkflows:
 
 def _build_full_character_detail(db: Session, character: character_models.Character) -> schemas.AgentDetailRead:
     return _build_agent_detail(db, character, recent_activity_limit=AGENT_DETAIL_ACTIVITY_LIMIT)
+
+
+def build_character_media_workflows():
+    from app.domains.characters.contracts import CharacterMediaWorkflows
+
+    return CharacterMediaWorkflows(
+        invalidate_visual_identity=_invalidate_image_visual_identity_if_present,
+        log_activity=agent_crud.log_activity,
+        build_detail=_build_agent_detail,
+    )

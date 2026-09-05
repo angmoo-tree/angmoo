@@ -53,10 +53,6 @@
           "importer": "app.api.v1.routes.agents"
         },
         {
-          "imported": "app.services.profile_media",
-          "importer": "app.api.v1.routes.agents"
-        },
-        {
           "imported": "app.services.runtime_boundary",
           "importer": "app.api.v1.routes.agents"
         },
@@ -1195,6 +1191,7 @@
       "app.domains.characters.service.drafts",
       "app.domains.characters.service.image_quota",
       "app.domains.characters.service.management",
+      "app.domains.characters.service.media",
       "app.domains.characters.service.media_storage",
       "app.domains.characters.service.mutations",
       "app.domains.characters.service.persona",
@@ -1237,6 +1234,7 @@
       "app.domains.characters.service.drafts",
       "app.domains.characters.service.image_quota",
       "app.domains.characters.service.management",
+      "app.domains.characters.service.media",
       "app.domains.characters.service.media_storage",
       "app.domains.characters.service.mutations",
       "app.domains.characters.service.persona",
