@@ -798,3 +798,10 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 `routines/service/manual_activity.py`는 수동 실행의 권한·준비 상태·사용자별 쿨다운·슬롯 여유와 예약 임박 조건을 판단합니다. 기존 배정 슬롯을 실행하는 경로와 임시 슬롯을 얻어 실행하는 경로는 서로 다른 계약을 유지합니다. 임시 실행의 원래 오류가 있으면 정리 오류가 그것을 덮지 않으며, 원래 오류가 없을 때만 정리 오류를 전달합니다. 런타임 협력은 같은 Session의 외부 소유 조회와 profile bind/release/reload 및 실제 실행기를 연결합니다.
 
 모이의 조회·입력 조건·프롬프트 안전성은 `routines/service/feed_cues.py`의 실제 기능입니다. 성향 분석 확인, 자율활동/manual 허용 확인, 게시글 한도, 미소비 모이 중복 확인의 순서를 유지합니다. 새로운 조회·저장·검증을 runtime entry 함수에 중복 구현하지 않습니다.
+
+
+### 첫 인사
+
+`routines/service/first_greeting.py`는 첫 게시글의 자격, 별도 사용자 쿨다운, 중복 확인, 실행 기록 확정과 결과 상태를 소유합니다. PostgreSQL의 원래 사용자별 잠금은 같은 Session의 repository에서 얻고, 잠금 뒤 게시글과 쿨다운을 다시 확인합니다. 실행 기록의 원래 commit은 글 생성 호출보다 먼저 끝납니다.
+
+첫 인사의 입력과 writer JSON은 `routines/schemas/first_greeting.py`에 있습니다. Routines 실행 결과와 Social 게시글을 함께 담는 HTTP 응답은 `api/schemas/first_greeting.py`에 실제 정의합니다. 서비스에는 원래 PostCreate와 응답 생성자를 연결하므로 도메인 간 역방향 schema 의존 없이 같은 응답 클래스·필드가 유지됩니다. runtime의 실제 writer와 이미지 IO는 해당 DTO를 사용하고, 키 해석은 `runtime/resident/first_greeting.py`의 한정 함수에서 수행합니다. Social 게시글의 저장·조회는 같은 Session의 Social 기능을 연결합니다. 이미지 실패와 글 생성 실패, provider 지연은 기존의 서로 다른 결과 처리를 유지합니다.

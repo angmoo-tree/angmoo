@@ -1492,6 +1492,9 @@ def test_agent_creation_allows_concurrent_local_characters_without_a_saved_count
 
 
 def test_first_greeting_claim_is_single_flight_across_postgres_sessions() -> None:
+    from app.domains.routines.service import first_greeting as agent_service
+    from app.domains.social.repository.posts import character_has_authored_post
+
     engine = _engine()
     suffix = uuid4().hex
     user_id = f"user-greeting-{suffix}"
@@ -1560,6 +1563,7 @@ def test_first_greeting_claim_is_single_flight_across_postgres_sessions() -> Non
                         f"{user_id}:{character_id}:{run_id}"
                     ),
                     now=now,
+                    has_authored_post=character_has_authored_post,
                 )
             except (
                 agent_service.FirstGreetingCooldownError,

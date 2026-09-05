@@ -120,8 +120,8 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
     allowed: dict[str, set[str]] = {
         "runtime/characters/creator.py": {"_decrypt_draft_api_key"},
         "runtime/resident/credential_profiles.py": {"_ensure_slot_auth_profile"},
+        "runtime/resident/first_greeting.py": {"resolve_first_greeting_key"},
         "runtime/characters/management.py": {
-            "run_first_greeting",
             "analyze_tendency",
             "_bind_slot_auth_profile",
         },

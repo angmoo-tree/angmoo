@@ -1341,3 +1341,13 @@ C7-C 현재 경계는 777 modules / 2691 edges / exact legacy 202 / cycle0이다
 첫 stock 전체 검사는 보호/current **2293/2293**으로 source/split/단언/suppression/API·ORM/node 손실이 없었으나, G07.test_paths의 옛 tendency 파일 참조 한 건으로 실패했다. 이 한 항목을 이미 검증된 file/node map의 `tests/routines/test_tendency.py`로 연결했다. 원본 node 목록·frozen/checkpoint·원장 내용은 바꾸지 않았다. stock 재검사와 최종 C7/작성 경로 합류 뒤 전체 backend 재실행은 별도 게이트로 남긴다.
 
 `70b238c` 고정 tree에서 stock `--contracts --nodes` 재검사는 **PASS(37items / protected2293 / current2293)**다. 실패 원인인 실제 경로만 보완했으며 원래 단언과 86개 append-only 기록은 그대로다. 최종 C7/작성 책임 합류와 이후 전체 backend·Hosted CI는 계속 진행 상태다.
+
+## AR-B4-C7-D — 첫 인사 정책·실행 기록·provider IO
+
+첫인사 eligibility/claim/result/prompt4, PostgreSQL owner lock1, request/writer DTO2를 실제 Routines 역할로 이전했다. Social.PostDetail을 포함하는 복합 HTTP 응답 DTO1은 api/schemas에 실제 정의하고, 원래 두 생성자를 런타임에서 연결했다. writer/image IO2와 원래 credential resolution try1은 runtime에 두었다. 기존 14개 본문·상수는 원래 추출문을 정확히 되붙이고 callback/type을 복원하면 AST가 동일하다. 관련156회귀가 통과했고, 기존 claim-before-provider source assertion과 실제 PostgreSQL claim 호출은 actual service에 연결했다. 공개 응답 schema와 전체 secret reveal equality 검사도 통과했다. first greeting은 수동 실행과 별개 세션/쿨다운을 유지하며 이미지 실패를 전체 post 실패로 바꾸지 않는다.
+
+복합 응답의 직접 도메인 참조로 발견한 순환은 API 응답 조립과 typed value/factory로 제거했고 경계 예외는 추가하지 않았다. 최종 연결 후 같은 관련156회귀를 다시 통과했다. 현재784 modules / 2735 edges / exact legacy203 / cycle0이다. 추가 legacy1은 원래 image IO가 이동한 정확1 import이며, 이미 별도 작성된 B5 Social image source의 순차합류 때 제거한다. 새 API schema도 기존 모든 schemas 경로의 비밀 필드 검사 범위에 포함된다.
+
+C7-D 최종 원래 six 읽기 전용 진단은 모두 오류0, 보호2139/현재2287이다. API/ORM·원본 assertion·기존 노드가 보존됐고 검사기/동결/additions 변경은 없다. L4 784/14/97, ER0 86/87/24/44/7, Memory current이다. stock 증명은 root의 순차 source introduction 연결 뒤 확인한다.
+
+C7-D `b0a8a8d`를 LG/C7-C 통합본에 병합한 tree는 첫 인사·활동 한도·tendency·경계 회귀 **121 passed / PostgreSQL 환경 18 skipped / 4 warnings / 18.50초**, public route **196operations**, 경계 **815modules / 2857edges / exactlegacy202**, L4 **815modules / 97parity**다. 원래 소스의 archive도 commit/tree ID와 2287개 수집 노드로 확보했다. 기존 split record의 테스트 목록 순서 차이는 목록 내용이 동일한 경우에만 동등하게 판정해 실제 새 policy·credential 두 소유 행을 모두 유지했다. 제품 검사기와 보존 원본은 변경하지 않았다.
