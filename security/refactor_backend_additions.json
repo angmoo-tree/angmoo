@@ -4664,6 +4664,107 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "b0a8a8d5c782eabbcbf6beafb94ae9520a909acc",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): separate first greeting policy and provider IO",
+      "tracked_files": {
+        "backend/app/api/schemas/__init__.py": "7d7173a33eb4590ae1dad0d0b4ede6020e0ec8e7",
+        "backend/app/api/schemas/first_greeting.py": "90a58dd6c54d9a756ad99a9d53173098719389e8",
+        "backend/app/domains/routines/contracts/first_greeting.py": "0043b61676904d565c6a69de19cb9c4a9dc3e7b7",
+        "backend/app/domains/routines/repository/first_greeting.py": "2098955e810ac7923c4f408fb4efd5fcac0789d9",
+        "backend/app/domains/routines/schemas/first_greeting.py": "7b8c1b9fd8fbc0bca40bd2a99cdf4a054d9b1a09",
+        "backend/app/domains/routines/service/first_greeting.py": "7f3714b542fe6cd03fcb7c14041da6ec84c1b25c",
+        "backend/app/runtime/resident/first_greeting.py": "fdfd4de03ddcc83ae0b5bcf5b2161a21c60d054c"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "2abe37962f3af3968435d53a38d5bb2abc678e3e",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own tendency analysis preparation and storage",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/tendency_analysis.py": "f6cf745a2e4ec9ccd0ee35e5a9d6b20b60c0d05e",
+        "backend/app/domains/routines/service/tendency_analysis.py": "f27bbd3b8972e8648487c579a76e16549e427300",
+        "backend/app/runtime/resident/tendency_analysis.py": "f8398b4241cec1f19ac8ed46bc0d62f91b1aa483",
+        "backend/tests/routines/test_tendency_result_transaction.py": "652428e539192c7fa4e6579090c6af06fae11d01"
+      },
+      "test_nodes": [
+        "tests/routines/test_tendency_result_transaction.py::test_tendency_result_is_evaluated_after_setting_commit_before_activity_log[direct]",
+        "tests/routines/test_tendency_result_transaction.py::test_tendency_result_is_evaluated_after_setting_commit_before_activity_log[openclaw]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_tendency_result_transaction.py": {
+          "test_tendency_result_is_evaluated_after_setting_commit_before_activity_log": [
+            "assert observed == [('after', None, [])]",
+            "assert ordering.index('commit') < ordering.index('user-read') < ordering.index('result')",
+            "assert ordering.index('commit') < ordering.index('character-read') < ordering.index('result')",
+            "assert db.get(AgentActivitySetting, character.id) is setting",
+            "assert setting.tendency_updated_at is not None",
+            "assert durable_setting is not None",
+            "assert durable_setting.tendency_action_ranges == {'post': {'min': 1, 'max': 2}}",
+            "assert durable_setting.planner_tendency_profile == {'feed_seed_interest_criteria': 'fixture'}",
+            "assert log is not None",
+            "assert (log.user_id, log.character_id, log.action_type, log.target_post_id, log.reason, log.result) == (user.id, character.id, 'tendency_analyzed', None, reason, result_text)",
+            "assert durable_setting is not None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_tendency_result_transaction.py": {}
+      }
+    },
+    {
+      "commit": "0299586cc9436f5ad02147e229b0c90dc2e231e6",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(identity): own character credential management and scope",
+      "tracked_files": {
+        "backend/app/domains/identity/service/credential_management.py": "92662fd09ceacf4d52c44e80b3faf2b2787bb791",
+        "backend/app/domains/world_characters/repository/__init__.py": "da377944dd7efbf5c1a75e4b329366298938d35f",
+        "backend/app/domains/world_characters/repository/credential_scope.py": "0777801d8ab9cb307bd2442dc802e44da80a55d3",
+        "backend/app/domains/worlds/repository/__init__.py": "e60e31495849b935557a8c435f7f7b20f6048840",
+        "backend/app/domains/worlds/repository/credential_scope.py": "d946317189427c821eab62ba757b49f8c4f8154d",
+        "backend/tests/identity/test_character_credential_transaction.py": "6e78bc39545122921f33e389f73a3ab0614ed470"
+      },
+      "test_nodes": [
+        "tests/identity/test_character_credential_transaction.py::test_credential_delete_keeps_shared_session_and_rolls_back_flushed_slot[commit]",
+        "tests/identity/test_character_credential_transaction.py::test_credential_delete_keeps_shared_session_and_rolls_back_flushed_slot[rollback]"
+      ],
+      "test_assertions": {
+        "tests/identity/test_character_credential_transaction.py": {
+          "test_credential_delete_keeps_shared_session_and_rolls_back_flushed_slot": [
+            "assert observed == [('character', True, True)]",
+            "assert db.get(Character, 'character') is character",
+            "assert db.get(LlmCredential, 'credential') is credential",
+            "assert session is db",
+            "assert character_id == 'character'",
+            "assert enabled is False",
+            "assert setting.auto_enabled is False",
+            "assert slot.assigned_character_id is None",
+            "assert credential.enabled is True",
+            "pytest.raises(RuntimeError, match='synthetic world write failure')",
+            "assert durable_character.status == 'active'",
+            "assert durable_credential.enabled is True",
+            "assert durable_credential.encrypted_api_key == 'synthetic-envelope'",
+            "assert durable_credential.key_fingerprint == 'synthetic-fingerprint'",
+            "assert durable_slot.assigned_character_id == 'character'",
+            "assert durable_setting.auto_enabled is True",
+            "assert durable_character.status == 'inactive'",
+            "assert durable_credential.enabled is False",
+            "assert durable_credential.encrypted_api_key is None",
+            "assert durable_credential.key_fingerprint is None",
+            "assert durable_credential.cooldown_until is None",
+            "assert durable_slot.assigned_character_id is None",
+            "assert durable_setting.auto_enabled is False"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/identity/test_character_credential_transaction.py": {}
+      }
     }
   ]
 }

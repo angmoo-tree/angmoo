@@ -1372,3 +1372,6 @@ C7-F 최종 검증은 **80 passed / 기존 경고2 / 19.63초**이다. 경계792
 ### B4 후속 통합 — C7-F Character credential 소유
 
 원래 signed 0299586의 실제 credential 업무 4개·HTTP 3개·같은 Session 설정/조회 협력을 합류했다. 두 app factory의 실제 workflow 등록을 유지했다. 신규 commit/rollback 2노드와 기존 성향·활동 제한·OSS 회귀는 **123 passed / 4 warnings / 18.13초**이며 경계는 823 modules / 2900 edges / 203 exact legacy edges다. 이 source의 원본 archive 수집은 완료했고 신규 ledger append와 전체 검증은 남은 C7 HTTP/Writer 합류 뒤 순서대로 수행한다.
+
+
+B4 C7-D/E/F의 원래 signed 최초 도입 3개 source archive를 순서대로 append했다. 실제 새 source 17개와 새 테스트 4노드의 첫 도입을 Git history에서 확인했으며 원래 production provenance 검증을 통과했다. 기존 main 64개 및 직전 86개 기록은 불변 prefix이고 ledger는 **86 → 89 records**다. frozen checkpoint와 source baseline은 바꾸지 않았다.
