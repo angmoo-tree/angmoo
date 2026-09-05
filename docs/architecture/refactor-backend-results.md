@@ -13,7 +13,7 @@
 | AR-G2 | LOCAL VERIFIED · PR/MERGE PENDING | 공통 오류 4개·cursor bytes helper 2개·소비자/테스트 이전 |
 | AR-G3 | IMPLEMENTED · LOCAL VERIFICATION · PR/CI PENDING | logging.ini·초기화·배포 자원 연결 |
 | AR-G4 | LOCAL VERIFIED · PR PENDING | Alembic 물리 경로·역사 본문 보존; G5 최종 모델 등록 연결 대기 |
-| AR-B2 | IDENTITY IMPLEMENTED · FOCUSED CHECKS PASS · PR PENDING | identity 역할 이전; characters→worlds→world_characters 후속 |
+| AR-B2 | IDENTITY IMPLEMENTED · FULL BACKEND PASS · PR PREPARATION | identity 역할 이전; characters→worlds→world_characters 후속 |
 | AR-B3 | NOT STARTED | World Package→media |
 | AR-B4 | NOT STARTED | routines→routine_posts→활동 조립 |
 | AR-B5 | NOT STARTED | social→relationships→projection |
@@ -203,3 +203,12 @@ Identity의 실제 역할 20개 module에 부분 scope를 적용했다. `identit
 - 변경·신규 파일 120개에 대해 기존 exact allowlist를 적용한 secret scanner는 **findings 0**이었다. 실제 credential 값이나 새 예외는 추가하지 않았다.
 
 Architecture/L4/ER0/Memory batch의 live inventory를 현재 코드로 갱신했다. 고정 #258 baseline·#263 checkpoint·승인 test node·frozen migration과 선행 Today SNS inventory는 수정하지 않았다. Source commit 후 새 파일·신규 5개 test node의 도입 증거를 별도 capture하며 Git 추적 파일을 사용하는 inventory도 다시 갱신한다. 최신 G0와 G1~G4 통합, 최종 backend 검증, PR-head Actions, merge와 post-merge는 후속 결과를 확인할 때 기록한다. 이 Identity 검증은 전체 AR-B2 또는 설치 앱·실제 AI 검증 완료를 뜻하지 않는다.
+
+
+### Identity와 선행 공통 기반의 통합 검증
+
+G0~G4를 합친 후보에서 보존 검사 **#258 1,867 / #263 1,907 / protected/current 2,085 nodes, items37 PASS**를 확인했다. source `9841bdff3c226a1bc9a07a0246b31dda8e8be87b`의 실제 신규 파일9개·회귀5개는 별도 append-only 증거로 기록했다. 부분 경계는 **593 modules / 1,861 internal edges / 288 exact legacy edges PASS**였다.
+
+새 Identity router를 사용하는 API operation 13개의 보안 inventory module 위치를 실제 경로로 옮겼다. URL·method·endpoint 이름·access 분류·검증은 그대로이며 public 목록은 같은 196 operations다. 선행 L4의 현재/역사 topology 구분을 포함해 Identity·config·logging·migration·보안·P8 inventory 집중 검사는 **233 passed / 기존 1 skipped, 62.09초**였다.
+
+고정 commit `0d97e38dab51624b80d2e7a994f25c480bae9c26`에서 전체 backend suite는 **2,063 passed / 기존 22 skipped / 26 warnings, 495.44초**로 통과했다. 실행 중 source·test·metadata를 수정하지 않았다. 이후 합류한 선행 변경은 G2의 browser fixture 동기화와 그 현재 source fingerprint이며 backend 소스는 같다. 공통 CI/OSS/metadata/container/launcher/installer/Host Tauri 계약 7개, 실제 Gitleaks 8.30.1 추적 archive·328 commits history 검사도 PASS/findings0이었다. PR-head·실제 설치·merge·post-merge는 별도 Gate로 남긴다.
