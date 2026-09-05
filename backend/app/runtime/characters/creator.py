@@ -79,7 +79,9 @@ from app.services import operation_settings
 from app.services import image_provider
 from app.services import pollinations_image
 from app.core import prompt_safety
-from app.services import profile_media
+from app.domains.characters.service import media_storage as profile_media
+from app.integrations.media import files as media_files
+from app.integrations.media import images as media_images
 from app.integrations import bounded_http
 from app.services import provider_http
 from app.services import replicate_image
@@ -154,7 +156,7 @@ def get_draft_media_content(
     if media_url is None:
         raise AgentPrivateMediaNotFoundError(media_type)
     try:
-        return profile_media.resolve_private_media_file(
+        return media_files.resolve_private_media_file(
             media_url,
             expected_directory="drafts",
         )
@@ -178,7 +180,7 @@ def get_draft_candidate_content(
         character_id=None,
     )
     try:
-        return profile_media.resolve_private_media_file(
+        return media_files.resolve_private_media_file(
             candidate.url,
             expected_directory="profile-candidates",
         )
@@ -208,7 +210,7 @@ def get_profile_candidate_content(
         character_id=character.id,
     )
     try:
-        return profile_media.resolve_private_media_file(
+        return media_files.resolve_private_media_file(
             candidate.url,
             expected_directory="profile-candidates",
         )
@@ -502,7 +504,7 @@ def apply_draft_media_candidate(
         draft_id=draft.id,
         character_id=None,
     )
-    source_path = profile_media.media_url_to_path(candidate.url)
+    source_path = media_files.media_url_to_path(candidate.url)
     content = source_path.read_bytes()
     url = profile_media.save_draft_profile_media_bytes(
         draft_id=draft.id,
@@ -946,7 +948,7 @@ def _get_owned_profile_image_candidate(
     if expires_at < datetime.now(UTC):
         profile_media.delete_profile_image_candidate(candidate.id, user.id)
         raise AgentProfileImageCandidateExpiredError(candidate_id)
-    if not profile_media.media_url_to_path(candidate.url).is_file():
+    if not media_files.media_url_to_path(candidate.url).is_file():
         raise AgentProfileImageCandidateNotFoundError(candidate_id)
     return candidate
 
@@ -1248,7 +1250,7 @@ def _download_pollinations_image(
                     response,
                     max_bytes=bounded_http.MAX_PROVIDER_IMAGE_BYTES,
                 )
-            profile_media.validate_profile_media_content(content_type, content)
+            media_images.validate_profile_media_content(content_type, content)
             return content_type, content
         except HTTPError as exc:
             last_status = exc.code

@@ -281,10 +281,6 @@
           "importer": "app.runtime.characters.creator"
         },
         {
-          "imported": "app.services.profile_media",
-          "importer": "app.runtime.characters.creator"
-        },
-        {
           "imported": "app.services.provider_http",
           "importer": "app.runtime.characters.creator"
         },
@@ -354,10 +350,6 @@
         },
         {
           "imported": "app.services.post_image_generation",
-          "importer": "app.runtime.characters.management"
-        },
-        {
-          "imported": "app.services.profile_media",
           "importer": "app.runtime.characters.management"
         },
         {
@@ -1181,10 +1173,6 @@
         },
         {
           "importer": "app.runtime.account_deletion",
-          "imported": "app.services.profile_media"
-        },
-        {
-          "importer": "app.runtime.account_deletion",
           "imported": "app.services.runtime_boundary"
         },
         {
@@ -1251,6 +1239,7 @@
       "app.domains.characters.service.drafts",
       "app.domains.characters.service.image_quota",
       "app.domains.characters.service.management",
+      "app.domains.characters.service.media_storage",
       "app.domains.characters.service.mutations",
       "app.domains.characters.service.persona",
       "app.domains.characters.service.profile",
@@ -1280,7 +1269,9 @@
       "app.domains.media.contracts",
       "app.domains.media.schemas",
       "app.domains.runtime.contracts",
-      "app.domains.runtime.schemas"
+      "app.domains.runtime.schemas",
+      "app.domains.social.service",
+      "app.domains.social.service.media_storage"
     ],
     "entries": [
       "app.domains.characters.contracts",
@@ -1290,6 +1281,7 @@
       "app.domains.characters.service.drafts",
       "app.domains.characters.service.image_quota",
       "app.domains.characters.service.management",
+      "app.domains.characters.service.media_storage",
       "app.domains.characters.service.mutations",
       "app.domains.characters.service.persona",
       "app.domains.characters.service.profile",
@@ -1309,7 +1301,8 @@
       "app.domains.media.contracts",
       "app.domains.media.schemas",
       "app.domains.runtime.contracts",
-      "app.domains.runtime.schemas"
+      "app.domains.runtime.schemas",
+      "app.domains.social.service.media_storage"
     ],
     "bridges": [
       {
@@ -1742,6 +1735,22 @@
         "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
         "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
         "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.profile_media",
+        "target": "app.domains.characters.service.media_storage",
+        "owner_stage": "AR-B3 media / AR-B5 Social",
+        "removal_condition": "Move the recorded remaining profile-media/preview consumers in AR-B3 and Social job consumers in AR-B5 to the exact owner service, then remove this same-object export.",
+        "reason": "The historical mixed media module re-exports the actual Character or Social file-placement implementation; it no longer owns that function body.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.profile_media",
+        "target": "app.domains.social.service.media_storage",
+        "owner_stage": "AR-B3 media / AR-B5 Social",
+        "removal_condition": "Move the recorded remaining profile-media/preview consumers in AR-B3 and Social job consumers in AR-B5 to the exact owner service, then remove this same-object export.",
+        "reason": "The historical mixed media module re-exports the actual Character or Social file-placement implementation; it no longer owns that function body.",
         "review_date": "2026-09-05"
       }
     ]

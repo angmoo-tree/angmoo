@@ -8773,7 +8773,11 @@
           "backend/app/services/agent_runs.py"
         ],
         "backend/app/services/profile_media.py": [
+          "backend/app/domains/characters/service/media_storage.py",
           "backend/app/domains/media/contracts.py",
+          "backend/app/domains/social/service/media_storage.py",
+          "backend/app/integrations/media/files.py",
+          "backend/app/integrations/media/images.py",
           "backend/app/services/profile_media.py"
         ]
       },
@@ -11070,72 +11074,107 @@
         },
         {
           "old": "backend/app/services/profile_media.py::CONTENT_TYPES",
-          "new": "backend/app/services/profile_media.py::CONTENT_TYPES",
+          "new": "backend/app/integrations/media/images.py::CONTENT_TYPES",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::MEDIA_TARGET_SIZES",
-          "new": "backend/app/services/profile_media.py::MEDIA_TARGET_SIZES",
+          "new": "backend/app/integrations/media/images.py::MEDIA_TARGET_SIZES",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::WEBP_QUALITY",
-          "new": "backend/app/services/profile_media.py::WEBP_QUALITY",
+          "new": "backend/app/integrations/media/images.py::WEBP_QUALITY",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::SEED_IMAGE_TARGET_SIZE",
-          "new": "backend/app/services/profile_media.py::SEED_IMAGE_TARGET_SIZE",
+          "new": "backend/app/integrations/media/images.py::SEED_IMAGE_TARGET_SIZE",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::MAX_IMAGE_DIMENSION",
-          "new": "backend/app/services/profile_media.py::MAX_IMAGE_DIMENSION",
+          "new": "backend/app/integrations/media/images.py::MAX_IMAGE_DIMENSION",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::MAX_IMAGE_PIXELS",
-          "new": "backend/app/services/profile_media.py::MAX_IMAGE_PIXELS",
+          "new": "backend/app/integrations/media/images.py::MAX_IMAGE_PIXELS",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::MAX_IMAGE_FRAMES",
-          "new": "backend/app/services/profile_media.py::MAX_IMAGE_FRAMES",
+          "new": "backend/app/integrations/media/images.py::MAX_IMAGE_FRAMES",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
@@ -11150,52 +11189,68 @@
         },
         {
           "old": "backend/app/services/profile_media.py::PrivateMediaCleanupError",
-          "new": "backend/app/services/profile_media.py::PrivateMediaCleanupError",
+          "new": "backend/app/integrations/media/files.py::PrivateMediaCleanupError",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::PrivateMediaQuarantine",
-          "new": "backend/app/services/profile_media.py::PrivateMediaQuarantine",
+          "new": "backend/app/integrations/media/files.py::PrivateMediaQuarantine",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::quarantine_private_media",
-          "new": "backend/app/services/profile_media.py::quarantine_private_media",
+          "new": "backend/app/integrations/media/files.py::quarantine_private_media",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_profile_media",
-          "new": "backend/app/services/profile_media.py::save_profile_media",
+          "new": "backend/app/domains/characters/service/media_storage.py::save_profile_media",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_profile_media_bytes",
-          "new": "backend/app/services/profile_media.py::save_profile_media_bytes",
+          "new": "backend/app/domains/characters/service/media_storage.py::save_profile_media_bytes",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
@@ -11210,242 +11265,326 @@
         },
         {
           "old": "backend/app/services/profile_media.py::save_seed_image",
-          "new": "backend/app/services/profile_media.py::save_seed_image",
+          "new": "backend/app/domains/characters/service/media_storage.py::save_seed_image",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_seed_image_bytes",
-          "new": "backend/app/services/profile_media.py::save_seed_image_bytes",
+          "new": "backend/app/domains/characters/service/media_storage.py::save_seed_image_bytes",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_generated_post_image_bytes",
-          "new": "backend/app/services/profile_media.py::save_generated_post_image_bytes",
+          "new": "backend/app/domains/social/service/media_storage.py::save_generated_post_image_bytes",
           "direct_consumers": [
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_draft_profile_media",
-          "new": "backend/app/services/profile_media.py::save_draft_profile_media",
+          "new": "backend/app/domains/characters/service/media_storage.py::save_draft_profile_media",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_draft_profile_media_bytes",
-          "new": "backend/app/services/profile_media.py::save_draft_profile_media_bytes",
+          "new": "backend/app/domains/characters/service/media_storage.py::save_draft_profile_media_bytes",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_profile_image_candidate_bytes",
-          "new": "backend/app/services/profile_media.py::save_profile_image_candidate_bytes",
+          "new": "backend/app/domains/characters/service/media_storage.py::save_profile_image_candidate_bytes",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::promote_draft_profile_media",
-          "new": "backend/app/services/profile_media.py::promote_draft_profile_media",
+          "new": "backend/app/domains/characters/service/media_storage.py::promote_draft_profile_media",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::promote_profile_image_candidate",
-          "new": "backend/app/services/profile_media.py::promote_profile_image_candidate",
+          "new": "backend/app/domains/characters/service/media_storage.py::promote_profile_image_candidate",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::delete_profile_image_candidate",
-          "new": "backend/app/services/profile_media.py::delete_profile_image_candidate",
+          "new": "backend/app/domains/characters/service/media_storage.py::delete_profile_image_candidate",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::delete_draft_media",
-          "new": "backend/app/services/profile_media.py::delete_draft_media",
+          "new": "backend/app/domains/characters/service/media_storage.py::delete_draft_media",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::decode_profile_media",
-          "new": "backend/app/services/profile_media.py::decode_profile_media",
+          "new": "backend/app/integrations/media/images.py::decode_profile_media",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::validate_profile_media_content",
-          "new": "backend/app/services/profile_media.py::validate_profile_media_content",
+          "new": "backend/app/integrations/media/images.py::validate_profile_media_content",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::encode_profile_media_webp",
-          "new": "backend/app/services/profile_media.py::encode_profile_media_webp",
+          "new": "backend/app/integrations/media/images.py::encode_profile_media_webp",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::encode_image_webp_preserve_ratio",
-          "new": "backend/app/services/profile_media.py::encode_image_webp_preserve_ratio",
+          "new": "backend/app/integrations/media/images.py::encode_image_webp_preserve_ratio",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::encode_generated_post_webp",
-          "new": "backend/app/services/profile_media.py::encode_generated_post_webp",
+          "new": "backend/app/integrations/media/images.py::encode_generated_post_webp",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::media_url_to_path",
-          "new": "backend/app/services/profile_media.py::media_url_to_path",
+          "new": "backend/app/integrations/media/files.py::media_url_to_path",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::resolve_private_media_file",
-          "new": "backend/app/services/profile_media.py::resolve_private_media_file",
+          "new": "backend/app/integrations/media/files.py::resolve_private_media_file",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::delete_media_url",
-          "new": "backend/app/services/profile_media.py::delete_media_url",
+          "new": "backend/app/integrations/media/files.py::delete_media_url",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::_media_url_to_path",
-          "new": "backend/app/services/profile_media.py::_media_url_to_path",
+          "new": "backend/app/integrations/media/files.py::_media_url_to_path",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::_assert_image_signature",
-          "new": "backend/app/services/profile_media.py::_assert_image_signature",
+          "new": "backend/app/integrations/media/images.py::_assert_image_signature",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::_assert_decodable_image",
-          "new": "backend/app/services/profile_media.py::_assert_decodable_image",
+          "new": "backend/app/integrations/media/images.py::_assert_decodable_image",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::_assert_safe_image_geometry",
-          "new": "backend/app/services/profile_media.py::_assert_safe_image_geometry",
+          "new": "backend/app/integrations/media/images.py::_assert_safe_image_geometry",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::_content_type_from_suffix",
-          "new": "backend/app/services/profile_media.py::_content_type_from_suffix",
+          "new": "backend/app/integrations/media/images.py::_content_type_from_suffix",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::_flatten_for_webp",
-          "new": "backend/app/services/profile_media.py::_flatten_for_webp",
+          "new": "backend/app/integrations/media/images.py::_flatten_for_webp",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         }
       ]
@@ -14074,6 +14213,17 @@
           ]
         }
       ]
+    },
+    "AR-B3-M1": {
+      "status": "Shared bounded codec/path/quarantine and Character/Social file placement now have actual role owners. Character candidate workflows and World legacy helper continue in the next media slice; Social job/quota/public attachment closes in AR-B5.",
+      "unchanged_symbols": 36,
+      "split_record": "AR-B2-B5 retains the complete original profile_media symbol inventory; destinations and exact consumers are updated there rather than adding a second partial historical snapshot.",
+      "remaining_owners": {
+        "backend/app/services/profile_media.py::save_world_banner": "AR-B3 World storage integration, historical helper has no production direct caller.",
+        "backend/app/services/post_image_generation.py": "AR-B5 Social quota/job/attachment; shared storage compatibility removed after explicit consumers migrate.",
+        "backend/app/runtime/characters/creator.py": "AR-B3 Character media admission/candidates/private preview and provider composition.",
+        "backend/app/runtime/characters/management.py": "AR-B3 upload flow; activity/settings and multi-domain deletion remain their documented AR-B4/AR-B8-A scopes."
+      }
     }
   }
 }

@@ -295,3 +295,20 @@ Creator 조회/수정 2개 endpoint가 canonical router에 추가되었다. 기�
 
 이번 감사에서 찾은 순수 B2 Character state 잔여는 본문처럼 해결했다. 위에 명시한 다른 업무/후속 단계와 별개로 남겨 둔 미분류 B2 Character 기본 구현은 없다. PR-head CI·전체 병합 후 검증과 후속 domain/bridge 종료는 root의 순차 통합 Gate에서 판정한다.
 - 마지막 고정 후보 `--contracts --nodes`는 현재 **2,118 nodes**를 수집했고, #258/#263 대비 API/OpenAPI/ORM·기존 assertion/suppression·source split 증거 오류는 없었다. 미합류 Identity/Character source 도입의 append-only 증거 오류만 root 선형 capture 대상으로 남았다. 이 기록을 전체 CI PASS로 확대하지 않는다.
+
+
+## AR-B3-M1 — 공유 media 처리와 저장 소유 기반
+
+별도 media 작업트리는 Character source `81aa413abaf74655c3b3432a52ce10125d9aec53`에서 시작했다. `profile_media.py`의 36개 기존 함수/class/상수 본문을 수정 없이 공통 `integrations/media/{images,files}.py`와 Character·Social `service/media_storage.py`에 옮겼다. 실제 Character runtime와 account deletion의 소비자도 새 파일·codec 소유자로 연결했다. 호환 export의 오류와 callable 객체는 같으며 ORM·transaction·provider·HTTP 계약은 이 범위에서 바꾸지 않았다.
+
+- Shared 처리: MIME/base64/기하·frame 검사, WebP 변환, root containment, private 경로 검사, quarantine 복구.
+- Character 저장: profile/draft/candidate/seed의 기존 디렉터리와 promotion/delete 순서.
+- Social 저장: 이미 승인된 생성 결과의 Post 파일 기록. quota/job/공개 부착은 B5 소유이며 기존 mixed service 소비자의 정확한 bridge 종료 조건을 기록했다.
+- 후속 B3: Character 후보 업무·private HTTP·generation transport, Worlds 실제 storage 연결. 직접 사용되지 않는 역사 `save_world_banner`는 그 연결 검증 전까지 기존 export에 남는다.
+
+Frozen 원본과 checkpoint는 수정하지 않았다. 원본 profile_media 전체 symbol split은 기존 AR-B2-B5 기록에서 실제 목적지와 소비자를 갱신했고 Character/Social 저장소만 exact partial scope로 추가했다. PR·병합·설치 및 B3 전체 종료는 별도 기록한다.
+
+
+M1 집중 검증은 **136 passed / 3 warnings / 14.01s**다. 새 회귀 3개는 Character 원본 upload 한도와 Post encoded 크기 계약의 구별, quarantine 두 번째 파일 이동 실패 시 첫 파일 복원, 기존 export의 동일 함수·오류 객체를 검증한다. 추출한 36개 원본 symbol의 AST 본문 비교 차이는 0개다. Architecture는 619 modules / 1991 edges / 279 exact legacy edges로 통과했다.
+
+`check_refactor_preservation.py --contracts --nodes`는 원본 #258 1867 / #263 1907 / protected lineages 2080 / current 2121을 수집했다. API/ORM·assertion·suppression·node 누락·split 오류는 없고 선행 source 74건의 append-only introduction 기록만 root 선형 통합 대기다. 따라서 전체 CLI 성공이나 신규 source capture 완료로 표시하지 않는다. 이 source의 신규 node 3개는 `tests/media/test_media_storage_boundaries.py`에 있다.

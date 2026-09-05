@@ -91,7 +91,9 @@ from app.services import image_prompt_safety
 from app.services import maintenance as maintenance_service
 from app.services import post_image_generation
 from app.core import prompt_safety
-from app.services import profile_media
+from app.domains.characters.service import media_storage as profile_media
+from app.integrations.media import files as media_files
+from app.integrations.media import images as media_images
 from app.services import service_image_key
 from app.services import operation_settings
 from app.services.direct_llm import (
@@ -1109,7 +1111,7 @@ def upload_image_seed(
         )
     except profile_media.InvalidProfileMediaError as exc:
         raise InvalidProfileMediaError(str(exc)) from exc
-    profile_media.delete_media_url(setting.seed_image_url)
+    media_files.delete_media_url(setting.seed_image_url)
     setting.seed_image_url = seed_image_url
     if setting.visual_identity_source_hash is not None:
         setting.visual_identity_prompt = None
@@ -1127,7 +1129,7 @@ def delete_image_seed(
     character = _get_owned_character(db, user, character_id)
     demo_lock.ensure_demo_user_mutable(user)
     setting = agent_crud.ensure_image_generation_setting(db, character.id)
-    profile_media.delete_media_url(setting.seed_image_url)
+    media_files.delete_media_url(setting.seed_image_url)
     setting.seed_image_url = None
     if setting.visual_identity_source_hash is not None:
         setting.visual_identity_prompt = None
@@ -1881,20 +1883,20 @@ def delete_agent(
         db.rollback()
         try:
             media_quarantine.restore()
-        except profile_media.PrivateMediaCleanupError as restore_exc:
+        except media_files.PrivateMediaCleanupError as restore_exc:
             raise AgentDeletionMediaCleanupError(
                 "private_media_restore_failed"
             ) from restore_exc
         raise
     try:
         media_quarantine.purge()
-    except profile_media.PrivateMediaCleanupError as exc:
+    except media_files.PrivateMediaCleanupError as exc:
         raise AgentDeletionMediaCleanupError("private_media_purge_failed") from exc
 
 
 def _quarantine_agent_private_media(
     db: Session, user_id: str, character_id: str
-) -> profile_media.PrivateMediaQuarantine:
+) -> media_files.PrivateMediaQuarantine:
     candidate_ids = list(
         db.scalars(
             select(character_models.ProfileImageCandidate.id).where(
@@ -1908,7 +1910,7 @@ def _quarantine_agent_private_media(
         media_root / "profile-candidates" / user_id / candidate_id
         for candidate_id in candidate_ids
     )
-    return profile_media.quarantine_private_media(paths)
+    return media_files.quarantine_private_media(paths)
 
 
 def _build_tendency_analysis_prompt(*, character: character_models.Character) -> str:

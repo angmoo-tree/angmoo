@@ -449,3 +449,12 @@ Creator 이미지 한도는 `service/image_quota.py`, draft 응답·파싱·쿨�
 Character/Creator 기본 HTTP 11개와 owner state API 1개가 Character router와 서비스에 연결된다. state URL은 역사적으로 community namespace이므로 같은 파일의 `state_router`를 사용하며, API assembly가 원래 자리에 연결한다. Creator provider 실패는 runtime-neutral 계약과 media validation 계약을 받아 기존 HTTP 상태로 변환한다. 이전 런타임/service 오류 export는 같은 클래스다.
 
 순수 state admission/쓰기/응답은 Character 서비스가 소유한다. 기존 Social tool 소비자에게는 Community 오류 타입을 유지하는 호환 wrapper만 남는다. 활동/World readiness/미디어/Local Bot/복합 삭제와 공개 Social profile/search는 각각 해당 실제 업무의 후속 단계에 속하며, 기본 Character 완료를 이유로 섞어 옮기지 않는다. 자세한 종료 경계와 bridge 소비자는 `docs/architecture/refactor-backend-results.md`의 B2 Character 감사표를 따른다.
+
+
+### Media의 공유 처리와 업무 소유
+
+`integrations/media/images.py`는 제한된 이미지 해석과 WebP 변환, `files.py`는 관리 경로와 삭제 복구용 quarantine을 담당합니다. 소유자 승인이나 공개 여부, 후보 만료와 quota는 결정하지 않습니다. Character의 profile/draft/candidate/seed 저장은 `characters/service/media_storage.py`, 생성된 Post 파일 저장은 `social/service/media_storage.py`에서 찾습니다. 두 서비스는 해당 업무가 전달한 ID·용도에 맞는 파일을 만들며 기존 호출자가 인증과 DB transaction을 계속 소유합니다.
+
+Character 업로드의 원본 크기 한도와 Post의 인코딩 결과 크기 한도는 서로 다른 기존 계약입니다. 공통 decoder를 쓴다는 이유로 이 정책을 하나로 합치지 않습니다. World Package의 lossless 재인코딩·digest/journal도 별도 계약입니다. `core/public_media.py`의 공개 mount 목록에 draft나 candidate 디렉터리를 추가하지 않습니다.
+
+이 설명의 현재 적용 범위는 AR-B3-M1입니다. `services/profile_media.py`는 같은 객체의 임시 export와 역사 World helper만 남기며, 미전환 Character HTTP/candidate 업무와 Social job은 각 B3/B5 단계에서 소비자를 옮깁니다. quota·job·publication을 포괄하는 전역 media service는 만들지 않습니다.
