@@ -1,3 +1,7 @@
+from app.domains.characters.service import state as character_state_service
+from app.domains.routines.service import activity_settings
+from app.domains.routines.service.post_selection import _select_tick_post_id, _select_resident_run_post_id
+from app.runtime.resident.post_selection import SqlAlchemyPostSelectionReferences
 from app.domains.routines.service.run_identity import _validate_character_and_credential
 from app.runtime.resident.identity_references import SqlAlchemyRunIdentityReferences
 from app.runtime.resident.credential_profiles import _ensure_slot_auth_profile, _release_slot_auth_profile
@@ -177,7 +181,6 @@ from app.core.db import SessionLocal
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
-from app.runtime.routine_posts import routine_world_character_for_character
 from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routines
 from app.domains.social.public import current_social_search
 from app.domains.world_characters.public import (
@@ -953,7 +956,7 @@ async def run_community_once(
     if character.moderation_status == "suspended":
         raise community_service.CharacterSuspendedError("character_suspended")
     post_id = _select_tick_post_id(
-        db, preferred_post_id=data.post_id, character_id=character.id
+        SqlAlchemyPostSelectionReferences(db), preferred_post_id=data.post_id, character_id=character.id
     )
     post = community_service.get_post(db, post_id) if post_id else None
     user_id = data.user_id or character.owner_id
@@ -986,7 +989,7 @@ async def run_community_once(
                 f"No enabled credential is assigned to character {character.id}"
             )
 
-    state = db.get(models.CharacterState, character.id)
+    state = character_state_service.get_character_state(db, character.id)
 
     run_id = str(uuid4())
     timeout_seconds = data.timeout_seconds or settings.openclaw_timeout_seconds
@@ -1941,7 +1944,7 @@ async def _run_resident_individual_tool_flow(
     writing_composition_lanes = _pending_writing_composition_lanes(db, run_id)
     if writing_composition_lanes:
         result["writing_composition_lanes"] = writing_composition_lanes
-    state_before_memory_lane = db.get(models.CharacterState, character.id)
+    state_before_memory_lane = character_state_service.get_character_state(db, character.id)
     state_public_action_ledger = _format_tick_public_action_ledger_since(
         db, character_id=character.id, since=run_started_at
     )
@@ -1995,7 +1998,7 @@ async def _run_resident_individual_tool_flow(
         result["state_recovery_attempted"] = True
         try:
             db.expire_all()
-            recovery_state = db.get(models.CharacterState, character.id)
+            recovery_state = character_state_service.get_character_state(db, character.id)
             result["state_recovery_lane"] = await client.run_agent(
                 message=_build_v6_state_recovery_message(character=character),
                 agent_id=agent_id,
@@ -2159,7 +2162,7 @@ async def _run_resident_slot_once(
             credential_id=slot.assigned_credential_id,
         )
         selected_post_id = _select_resident_run_post_id(
-            db,
+            SqlAlchemyPostSelectionReferences(db),
             preferred_post_id=post_id,
             character_id=character.id,
             scoped_runtime=use_langgraph_resident,
@@ -2171,7 +2174,7 @@ async def _run_resident_slot_once(
             else f"agent:{slot.agent_id}:resident-manual:{slot.assigned_user_id}:{character.id}:{run_id}"
         )
         tool_auth_key = _tool_auth_key(session_key, run_id=run_id)
-        setting = db.get(models.AgentActivitySetting, character.id)
+        setting = activity_settings.get_setting(db, character.id)
         now = datetime.now(UTC)
         cooldown_until = (
             _aware_utc(credential.cooldown_until)
@@ -2312,7 +2315,7 @@ async def _run_resident_slot_once(
                 post_id=selected_post_id,
                 gateway_result=gateway_payload,
             )
-        state = db.get(models.CharacterState, character.id)
+        state = character_state_service.get_character_state(db, character.id)
         activity_policy = (
             agent_activity_policy.build_activity_policy(
                 db,
@@ -3130,7 +3133,7 @@ async def _run_resident_slot_once(
             refine_started_at = datetime.now(UTC)
             try:
                 db.expire_all()
-                refined_state = db.get(models.CharacterState, character.id)
+                refined_state = character_state_service.get_character_state(db, character.id)
                 refine_client = OpenClawGatewayClient(
                     url=settings.openclaw_gateway_url,
                     token=token,
@@ -3363,7 +3366,7 @@ async def run_claimed_temporary_resident_slot_once(
 ) -> schemas.OpenClawAgentRunRead:
     maintenance_service.ensure_run_now_available(db)
     timeout = timeout_seconds or settings.openclaw_timeout_seconds
-    slot = db.get(models.AgentSlot, agent_id)
+    slot = slot_queries.get_agent_slot(db, agent_id)
     if (
         slot is None
         or slot.status != routine_constants.SLOT_STATUS_RUNNING
@@ -3394,7 +3397,7 @@ async def tick_resident_slots(
     def _recovery_next_tick_at(slot: models.AgentSlot, recovered_at: datetime) -> datetime:
         if not slot.assigned_character_id:
             return recovered_at
-        setting = db.get(models.AgentActivitySetting, slot.assigned_character_id)
+        setting = activity_settings.get_setting(db, slot.assigned_character_id)
         if setting is None:
             return recovered_at
         return agent_activity_policy.recovery_tick_schedule(
@@ -3503,7 +3506,7 @@ async def _run_claimed_resident_slot_once(
     if start_delay_seconds > 0:
         await asyncio.sleep(start_delay_seconds)
     with SessionLocal() as db:
-        slot = db.get(models.AgentSlot, agent_id)
+        slot = slot_queries.get_agent_slot(db, agent_id)
         if slot is None:
             raise AgentSlotUnavailableError(f"slot {agent_id} does not exist")
         return await _run_resident_slot_once(
@@ -3517,60 +3520,8 @@ async def _run_claimed_resident_slot_once(
         )
 
 
-def _select_tick_post_id(
-    db: Session, *, preferred_post_id: str | None, character_id: str
-) -> str | None:
-    if preferred_post_id:
-        return preferred_post_id
-    post_id = db.scalar(
-        select(models.Post.id)
-        .where(
-            models.Post.deleted_at.is_(None),
-            models.Post.report_hidden_at.is_(None),
-            models.Post.reply_to_post_id.is_(None),
-            or_(
-                models.Post.author_character_id.is_(None),
-                models.Post.author_character_id != character_id,
-            )
-        )
-        .order_by(models.Post.created_at.desc(), models.Post.id.desc())
-        .limit(1)
-    )
-    if post_id:
-        return post_id
-    post_id = db.scalar(
-        select(models.Post.id)
-        .where(
-            models.Post.deleted_at.is_(None),
-            models.Post.report_hidden_at.is_(None),
-            models.Post.reply_to_post_id.is_(None),
-        )
-        .order_by(models.Post.created_at.desc(), models.Post.id.desc())
-        .limit(1)
-    )
-    if post_id:
-        return post_id
-    return None
 
 
-def _select_resident_run_post_id(
-    db: Session,
-    *,
-    preferred_post_id: str | None,
-    character_id: str,
-    scoped_runtime: bool,
-) -> str | None:
-    """Avoid inventing a global feed target for the scoped routine runtime."""
-    if scoped_runtime and (
-        routine_world_character_for_character(db, character_id=character_id)
-        is not None
-    ):
-        return preferred_post_id
-    return _select_tick_post_id(
-        db,
-        preferred_post_id=preferred_post_id,
-        character_id=character_id,
-    )
 
 
 

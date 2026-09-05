@@ -700,3 +700,8 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 ### Resident 실행 권한과 슬롯 인증 연결
 
 `routines/service/run_identity.py`는 캐릭터 삭제·소유자와 자격 증명 소유자·배정·활성 상태를 원래 순서로 판단합니다. `runtime/resident/identity_references.py`는 동일 Session의 소유 도메인 조회를 연결하며, 캐릭터 오류가 나면 자격 증명을 미리 읽지 않습니다. `runtime/resident/credential_profiles.py`는 등록된 인증 어댑터를 통해 검사·키 해석·연결·새로고침을 수행합니다. 이미 일치하면 키를 해석하지 않으며, 실패는 기존 오류 유형과 비밀 정제를 유지합니다. 이 런타임 연결에 SDK나 다른 업무의 권한 판단을 다시 작성하지 않습니다.
+
+
+### 실행 대상 선택과 상태 조회
+
+`routines/service/post_selection.py`는 명시된 대상 우선, 자기 글 제외 조회, 마지막 공개 루트 글 fallback 순서를 담당합니다. Scoped routine이 연결된 경우에는 전역 피드 대상을 만들지 않습니다. 실제 두 SQL은 Social의 `repository/resident_context.py`에 있고 runtime이 같은 Session을 연결합니다. 캐릭터 상태는 `characters/service/state.py::get_character_state`, 슬롯은 `routines/repository/slots.py::get_agent_slot`, 활동 설정은 기존 `activity_settings.get_setting`에서 읽습니다. 이 nullable 조회는 원래 attached 객체를 반환하며 별도 flush/commit을 추가하지 않습니다.

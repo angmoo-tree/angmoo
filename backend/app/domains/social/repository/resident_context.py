@@ -1,7 +1,7 @@
 """Original Social relationship and visible-thread reads for resident decisions."""
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.domains.social.models import posts as models
@@ -197,3 +197,33 @@ def _thread_root_post_id_for_prompt(db: Session, post_id: str) -> str | None:
         post = parent
         seen.add(post.id)
     return post.id
+
+
+def get_latest_visible_nonself_root_id(db: Session, character_id: str) -> str | None:
+    return db.scalar(
+        select(models.Post.id)
+        .where(
+            models.Post.deleted_at.is_(None),
+            models.Post.report_hidden_at.is_(None),
+            models.Post.reply_to_post_id.is_(None),
+            or_(
+                models.Post.author_character_id.is_(None),
+                models.Post.author_character_id != character_id,
+            )
+        )
+        .order_by(models.Post.created_at.desc(), models.Post.id.desc())
+        .limit(1)
+    )
+
+
+def get_latest_visible_root_id(db: Session) -> str | None:
+    return db.scalar(
+        select(models.Post.id)
+        .where(
+            models.Post.deleted_at.is_(None),
+            models.Post.report_hidden_at.is_(None),
+            models.Post.reply_to_post_id.is_(None),
+        )
+        .order_by(models.Post.created_at.desc(), models.Post.id.desc())
+        .limit(1)
+    )

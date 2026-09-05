@@ -1098,3 +1098,11 @@ C6d1 최종 고정 tree **461 passed /기존 PostgreSQL1 skipped/기존warnings4
 
 
 C6d2 최종 고정 tree **476 passed /기존 PostgreSQL1 skipped/기존warnings4/192.06초**. 경계 **758modules/2570edges/exact legacy205/cycle0**, L4 **758/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2280**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions는 수정하지 않았다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 뒤 별도로 확인한다.
+
+
+## AR-B4-C6d3 — 실행 대상·상태 조회 소유권
+
+원래Social SQL2와 실제대상정책2를 분리했고 CharacterState5/활동설정2/슬롯2의 원래nullable9읽기를 실제owner로 연결했다. 원문2SQL 및 전체남은AgentRun본문은 exactbinding 복원 후 AST동일하다. 기존scoped/fallback2node는 실제owner test로옮겼으며 원래assertion/exception/expected를 유지하고 테스트 호출배선만 실제새서비스+같은Session references로 조립했다. 제품호환wrapper/검사예외를 만들지 않았다. 초기72PASS/기존warnings2/17.78초; 신규SQLite2는 필터/nullableauthor/정렬/우선순위/fallback·pending/rollback 및 loaded객체identity/no flush/no commit을 검증했다. Social·LG담당과한정새query/Character상태helper소유를협의했다.
+
+
+C6d3 최종 고정 제품 tree **478 passed /기존 PostgreSQL1 skipped/기존warnings4/231.18초**. 마지막 정적 검사에서는 repo를 entry가 아닌 scope module로 등록하고 새기존get_setting소비자 한edge를 기한있는 bridge로명시했다. 경계 **761modules/2576edges/exact legacy205/cycle0**, L4 **761/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2282**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions 불변이다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 뒤 확인한다.

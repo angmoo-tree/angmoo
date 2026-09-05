@@ -757,7 +757,7 @@
     "tests/test_agent_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot": "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot",
     "tests/test_agent_activity_limits.py::test_next_tick_schedule_adds_interval_jitter_without_running_early": "tests/routines/test_activity_limits.py::test_next_tick_schedule_adds_interval_jitter_without_running_early",
     "tests/test_agent_activity_limits.py::test_next_tick_schedule_moves_end_of_window_to_next_active_start": "tests/routines/test_activity_limits.py::test_next_tick_schedule_moves_end_of_window_to_next_active_start",
-    "tests/test_agent_activity_limits.py::test_non_scoped_runtime_keeps_legacy_post_fallback": "tests/routines/test_activity_limits.py::test_non_scoped_runtime_keeps_legacy_post_fallback",
+    "tests/test_agent_activity_limits.py::test_non_scoped_runtime_keeps_legacy_post_fallback": "tests/routines/test_post_selection.py::test_non_scoped_runtime_keeps_legacy_post_fallback",
     "tests/test_agent_activity_limits.py::test_physical_slot_capacity_does_not_disable_existing_agents": "tests/routines/test_activity_limits.py::test_physical_slot_capacity_does_not_disable_existing_agents",
     "tests/test_agent_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick": "tests/routines/test_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick",
     "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot": "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
@@ -767,7 +767,7 @@
     "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at3-False]": "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at3-False]",
     "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at4-True]": "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at4-True]",
     "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at5-False]": "tests/routines/test_execution_readiness.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at5-False]",
-    "tests/test_agent_activity_limits.py::test_routine_runtime_does_not_invent_global_selected_post": "tests/routines/test_activity_limits.py::test_routine_runtime_does_not_invent_global_selected_post",
+    "tests/test_agent_activity_limits.py::test_routine_runtime_does_not_invent_global_selected_post": "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
     "tests/test_agent_activity_limits.py::test_run_now_allows_other_imminent_slot": "tests/routines/test_activity_limits.py::test_run_now_allows_other_imminent_slot",
     "tests/test_agent_activity_limits.py::test_run_now_allows_target_due_slot": "tests/routines/test_activity_limits.py::test_run_now_allows_target_due_slot",
     "tests/test_agent_activity_limits.py::test_run_now_allows_two_other_live_running_slots": "tests/routines/test_activity_limits.py::test_run_now_allows_two_other_live_running_slots",
@@ -10896,6 +10896,7 @@
           "backend/app/services/runtime_boundary.py"
         ],
         "backend/app/services/agent_runs.py": [
+          "backend/app/domains/characters/service/state.py",
           "backend/app/domains/routines/constants.py",
           "backend/app/domains/routines/contracts/backoff.py",
           "backend/app/domains/routines/exceptions.py",
@@ -10903,18 +10904,21 @@
           "backend/app/domains/routines/repository/resident_context.py",
           "backend/app/domains/routines/repository/run_backoff.py",
           "backend/app/domains/routines/repository/runs.py",
+          "backend/app/domains/routines/repository/slots.py",
           "backend/app/domains/routines/service/action_admission.py",
           "backend/app/domains/routines/service/action_briefs.py",
           "backend/app/domains/routines/service/action_candidates.py",
           "backend/app/domains/routines/service/action_menu.py",
           "backend/app/domains/routines/service/action_prompts.py",
           "backend/app/domains/routines/service/activity_evidence.py",
+          "backend/app/domains/routines/service/activity_settings.py",
           "backend/app/domains/routines/service/decision_results.py",
           "backend/app/domains/routines/service/execution_prompts.py",
           "backend/app/domains/routines/service/execution_results.py",
           "backend/app/domains/routines/service/feed_context.py",
           "backend/app/domains/routines/service/perception_diagnostics.py",
           "backend/app/domains/routines/service/perception_prompts.py",
+          "backend/app/domains/routines/service/post_selection.py",
           "backend/app/domains/routines/service/prompt_context.py",
           "backend/app/domains/routines/service/retry_schedule.py",
           "backend/app/domains/routines/service/run_backoff.py",
@@ -13983,22 +13987,31 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_select_tick_post_id",
-          "new": "backend/app/services/agent_runs.py::_select_tick_post_id",
+          "new": "backend/app/domains/routines/service/post_selection.py::_select_tick_post_id",
           "direct_consumers": [
+            "backend/app/domains/routines/service/post_selection.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
+            "tests/routines/test_post_selection.py::test_non_scoped_runtime_keeps_legacy_post_fallback",
+            "tests/routines/test_execution_owner_reads.py::test_target_queries_keep_visibility_nonself_priority_and_pending_rollback",
+            "tests/routines/test_execution_owner_reads.py::test_nullable_owner_reads_keep_attached_identity_without_flush_or_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_select_resident_run_post_id",
-          "new": "backend/app/services/agent_runs.py::_select_resident_run_post_id",
+          "new": "backend/app/domains/routines/service/post_selection.py::_select_resident_run_post_id",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
+            "tests/routines/test_post_selection.py::test_non_scoped_runtime_keeps_legacy_post_fallback",
+            "tests/routines/test_execution_owner_reads.py::test_target_queries_keep_visibility_nonself_priority_and_pending_rollback",
+            "tests/routines/test_execution_owner_reads.py::test_nullable_owner_reads_keep_attached_identity_without_flush_or_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -14815,6 +14828,141 @@
             "tests/social/test_resident_context_history.py::test_resident_notification_queries_keep_limits_and_pending_read_state",
             "tests/social/test_resident_context_history.py::test_resident_post_history_keeps_filters_order_limits_and_root_cycle",
             "tests/routines/test_resident_review_history.py::test_relationship_review_time_observes_pending_log_without_committing",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_select_tick_post_id",
+          "new": "backend/app/domains/social/repository/resident_context.py::get_latest_visible_nonself_root_id",
+          "source_member": "Exact original first non-self/nullable-author db.scalar(select(Post.id)) expression; deleted/report_hidden/reply filters, created_at/id descending and limit1 remain identical. Preferred/scoped policy is separately owned by Routines.",
+          "direct_consumers": [
+            "backend/app/runtime/resident/post_selection.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
+            "tests/routines/test_post_selection.py::test_non_scoped_runtime_keeps_legacy_post_fallback",
+            "tests/routines/test_execution_owner_reads.py::test_target_queries_keep_visibility_nonself_priority_and_pending_rollback",
+            "tests/routines/test_execution_owner_reads.py::test_nullable_owner_reads_keep_attached_identity_without_flush_or_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_select_tick_post_id",
+          "new": "backend/app/domains/social/repository/resident_context.py::get_latest_visible_root_id",
+          "source_member": "Exact original second fallback-any-author db.scalar(select(Post.id)) expression; deleted/report_hidden/reply filters, created_at/id descending and limit1 remain identical. Preferred/scoped policy is separately owned by Routines.",
+          "direct_consumers": [
+            "backend/app/runtime/resident/post_selection.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
+            "tests/routines/test_post_selection.py::test_non_scoped_runtime_keeps_legacy_post_fallback",
+            "tests/routines/test_execution_owner_reads.py::test_target_queries_keep_visibility_nonself_priority_and_pending_rollback",
+            "tests/routines/test_execution_owner_reads.py::test_nullable_owner_reads_keep_attached_identity_without_flush_or_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_run_claimed_resident_slot_once",
+          "new": "backend/app/domains/routines/repository/slots.py::get_agent_slot",
+          "source_member": "Exact original nullable expression db.get(models.AgentSlot, agent_id); 1 occurrence(s) keep their original conditional position and same Session. Owner helper performs only that db.get; existing get_setting reused without changing ensure_setting or adding flush/commit.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
+            "tests/routines/test_post_selection.py::test_non_scoped_runtime_keeps_legacy_post_fallback",
+            "tests/routines/test_execution_owner_reads.py::test_target_queries_keep_visibility_nonself_priority_and_pending_rollback",
+            "tests/routines/test_execution_owner_reads.py::test_nullable_owner_reads_keep_attached_identity_without_flush_or_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_run_resident_individual_tool_flow",
+          "new": "backend/app/domains/characters/service/state.py::get_character_state",
+          "source_member": "Exact original nullable expression db.get(models.CharacterState, character.id); 2 occurrence(s) keep their original conditional position and same Session. Owner helper performs only that db.get; existing get_setting reused without changing ensure_setting or adding flush/commit.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
+            "tests/routines/test_post_selection.py::test_non_scoped_runtime_keeps_legacy_post_fallback",
+            "tests/routines/test_execution_owner_reads.py::test_target_queries_keep_visibility_nonself_priority_and_pending_rollback",
+            "tests/routines/test_execution_owner_reads.py::test_nullable_owner_reads_keep_attached_identity_without_flush_or_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_run_resident_slot_once",
+          "new": "backend/app/domains/characters/service/state.py::get_character_state",
+          "source_member": "Exact original nullable expression db.get(models.CharacterState, character.id); 2 occurrence(s) keep their original conditional position and same Session. Owner helper performs only that db.get; existing get_setting reused without changing ensure_setting or adding flush/commit.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
+            "tests/routines/test_post_selection.py::test_non_scoped_runtime_keeps_legacy_post_fallback",
+            "tests/routines/test_execution_owner_reads.py::test_target_queries_keep_visibility_nonself_priority_and_pending_rollback",
+            "tests/routines/test_execution_owner_reads.py::test_nullable_owner_reads_keep_attached_identity_without_flush_or_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_run_resident_slot_once",
+          "new": "backend/app/domains/routines/service/activity_settings.py::get_setting",
+          "source_member": "Exact original nullable expression db.get(models.AgentActivitySetting, character.id); 1 occurrence(s) keep their original conditional position and same Session. Owner helper performs only that db.get; existing get_setting reused without changing ensure_setting or adding flush/commit.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
+            "tests/routines/test_post_selection.py::test_non_scoped_runtime_keeps_legacy_post_fallback",
+            "tests/routines/test_execution_owner_reads.py::test_target_queries_keep_visibility_nonself_priority_and_pending_rollback",
+            "tests/routines/test_execution_owner_reads.py::test_nullable_owner_reads_keep_attached_identity_without_flush_or_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::run_claimed_temporary_resident_slot_once",
+          "new": "backend/app/domains/routines/repository/slots.py::get_agent_slot",
+          "source_member": "Exact original nullable expression db.get(models.AgentSlot, agent_id); 1 occurrence(s) keep their original conditional position and same Session. Owner helper performs only that db.get; existing get_setting reused without changing ensure_setting or adding flush/commit.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
+            "tests/routines/test_post_selection.py::test_non_scoped_runtime_keeps_legacy_post_fallback",
+            "tests/routines/test_execution_owner_reads.py::test_target_queries_keep_visibility_nonself_priority_and_pending_rollback",
+            "tests/routines/test_execution_owner_reads.py::test_nullable_owner_reads_keep_attached_identity_without_flush_or_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::run_community_once",
+          "new": "backend/app/domains/characters/service/state.py::get_character_state",
+          "source_member": "Exact original nullable expression db.get(models.CharacterState, character.id); 1 occurrence(s) keep their original conditional position and same Session. Owner helper performs only that db.get; existing get_setting reused without changing ensure_setting or adding flush/commit.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
+            "tests/routines/test_post_selection.py::test_non_scoped_runtime_keeps_legacy_post_fallback",
+            "tests/routines/test_execution_owner_reads.py::test_target_queries_keep_visibility_nonself_priority_and_pending_rollback",
+            "tests/routines/test_execution_owner_reads.py::test_nullable_owner_reads_keep_attached_identity_without_flush_or_commit",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::tick_resident_slots",
+          "new": "backend/app/domains/routines/service/activity_settings.py::get_setting",
+          "source_member": "Exact original nullable expression db.get(models.AgentActivitySetting, slot.assigned_character_id); 1 occurrence(s) keep their original conditional position and same Session. Owner helper performs only that db.get; existing get_setting reused without changing ensure_setting or adding flush/commit.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
+            "tests/routines/test_post_selection.py::test_non_scoped_runtime_keeps_legacy_post_fallback",
+            "tests/routines/test_execution_owner_reads.py::test_target_queries_keep_visibility_nonself_priority_and_pending_rollback",
+            "tests/routines/test_execution_owner_reads.py::test_nullable_owner_reads_keep_attached_identity_without_flush_or_commit",
             "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         }
@@ -32765,6 +32913,31 @@
       "ownership": "Routines run_identity owns exact Character/credential authorization precedence. Runtime binds nullable owner queries in the same Session and the registered profiles proxy without eager reads. Runtime credential_profiles owns external inspect/resolve/reveal/bind/reload/inspect and release/reload IO.",
       "preservation": "All original three function bodies and remaining AgentRun functions are AST-identical after exact callback/proxy/type restoration. Existing Social CharacterNotFoundError identity, deletion-before-credential-read, attached objects, optional shared credential and original errors are preserved. New SQLite2 and auth5 parameterized regressions verify rollback/observer, original auth failure precedence, no reveal on existing match, exact IO order and redacted failures. Plaintext allowlist moved only the exact defining path/function pair.",
       "remaining": "Current credential_lookup binding comes from existing caller CRUD; root Identity source c2cd2a64b18a42320292a68db37ba1f0c9d78f69 supplies the canonical same query on integration. Root Runtime owns registered-adapter contracts. Actual AgentRun composition remains C6d, management/HTTP C7; no future ancestry merged."
+    },
+    "AR-B4-C6d3-resident-owner-queries": {
+      "status": "SOURCE READY — 478 passed / existing PostgreSQL 1 skipped; read-only original six checks 0, root linear source introduction pending",
+      "actual_paths": [
+        "backend/app/domains/characters/service/state.py",
+        "backend/app/domains/routines/contracts/post_selection.py",
+        "backend/app/domains/routines/repository/slots.py",
+        "backend/app/domains/routines/service/post_selection.py",
+        "backend/app/domains/social/repository/resident_context.py",
+        "backend/app/runtime/resident/post_selection.py"
+      ],
+      "test_nodes": [
+        "tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
+        "tests/routines/test_post_selection.py::test_non_scoped_runtime_keeps_legacy_post_fallback",
+        "tests/routines/test_execution_owner_reads.py::test_target_queries_keep_visibility_nonself_priority_and_pending_rollback",
+        "tests/routines/test_execution_owner_reads.py::test_nullable_owner_reads_keep_attached_identity_without_flush_or_commit",
+        "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+      ],
+      "test_moves": {
+        "backend/tests/routines/test_activity_limits.py::test_routine_runtime_does_not_invent_global_selected_post": "backend/tests/routines/test_post_selection.py::test_routine_runtime_does_not_invent_global_selected_post",
+        "backend/tests/routines/test_activity_limits.py::test_non_scoped_runtime_keeps_legacy_post_fallback": "backend/tests/routines/test_post_selection.py::test_non_scoped_runtime_keeps_legacy_post_fallback"
+      },
+      "ownership": "Social owns original latest visible root ID SQL2; Routines owns preferred/scoped/fallback policy2. Character state and Routines slot/setting owners supply original9 nullable reads. Runtime binds one Session, no eager fetch/commit.",
+      "preservation": "Original two SQL expressions and all AgentRun function bodies are AST-identical after exact read-binding restoration. Original scoped2tests retain every assertion/exception and expected branch: their test-only old call shape composes the actual new service with SqlAlchemyPostSelectionReferences; monkeypatch targets now name defining modules. New SQLite2 verifies nonself/null-author/hidden/deleted/root/order/fallback/pending rollback and loaded-object identity/no flush/no commit.",
+      "remaining": "Actual AgentRun execution composition C6d4; Character management and HTTP C7. Memory Daypart and other domain owners remain later same-implementation bindings, no future ancestry merged."
     }
   },
   "test_symbols": {

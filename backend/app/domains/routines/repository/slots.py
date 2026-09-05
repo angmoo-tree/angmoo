@@ -44,3 +44,7 @@ def get_assigned_slot(
             models.AgentSlot.agent_id.asc(),
         )
     )
+
+
+def get_agent_slot(db: Session, agent_id: str) -> models.AgentSlot | None:
+    return db.get(models.AgentSlot, agent_id)

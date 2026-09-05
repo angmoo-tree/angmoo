@@ -1019,6 +1019,7 @@
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.plans",
+      "app.domains.routines.contracts.post_selection",
       "app.domains.routines.contracts.prompt_context",
       "app.domains.routines.contracts.resident",
       "app.domains.routines.contracts.run_identity",
@@ -1076,6 +1077,7 @@
       "app.domains.routines.service.perception_diagnostics",
       "app.domains.routines.service.perception_prompts",
       "app.domains.routines.service.plans",
+      "app.domains.routines.service.post_selection",
       "app.domains.routines.service.prompt_context",
       "app.domains.routines.service.public_action_executions",
       "app.domains.routines.service.retry_schedule",
@@ -1244,6 +1246,7 @@
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.plans",
+      "app.domains.routines.contracts.post_selection",
       "app.domains.routines.contracts.resident",
       "app.domains.routines.contracts.run_identity",
       "app.domains.routines.schemas",
@@ -1280,6 +1283,7 @@
       "app.domains.routines.service.perception_diagnostics",
       "app.domains.routines.service.perception_prompts",
       "app.domains.routines.service.plans",
+      "app.domains.routines.service.post_selection",
       "app.domains.routines.service.prompt_context",
       "app.domains.routines.service.public_action_executions",
       "app.domains.routines.service.retry_schedule",
@@ -3007,6 +3011,30 @@
         "owner_stage": "AR-B4-C",
         "reason": "Existing exact Resident execution calls actual original identity admission with same-Session typed owner lookup; no wrapper policy or copied queries.",
         "removal_condition": "Move actual execution composition in C6d and remove legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.characters.service.state",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing exact Resident execution calls original nullable owner read or target decision on the same Session; no copied queries or new policy wrapper.",
+        "removal_condition": "Move actual execution composition in C6d and remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.post_selection",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing exact Resident execution calls original nullable owner read or target decision on the same Session; no copied queries or new policy wrapper.",
+        "removal_condition": "Move actual execution composition in C6d and remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.activity_settings",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact existing execution setting db.get calls reuse canonical same-Session get_setting; no ensure mutation or copied query.",
+        "removal_condition": "Move actual execution composition in C6d and remove exact legacy consumer before B8-A.",
         "review_date": "2026-09-06"
       }
     ]

@@ -1,7 +1,7 @@
 {
-  "edge_count": 2570,
-  "external_import_count": 2355,
-  "module_count": 758,
+  "edge_count": 2576,
+  "external_import_count": 2358,
+  "module_count": 761,
   "modules": [
     {
       "external_imports": [],
@@ -3806,6 +3806,15 @@
         "typing"
       ],
       "imports": [],
+      "module": "app.domains.routines.contracts.post_selection",
+      "path": "backend/app/domains/routines/contracts/post_selection.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "typing"
+      ],
+      "imports": [],
       "module": "app.domains.routines.contracts.prompt_context",
       "path": "backend/app/domains/routines/contracts/prompt_context.py",
       "wildcard_imports": []
@@ -4668,6 +4677,17 @@
       ],
       "module": "app.domains.routines.service.plans",
       "path": "backend/app/domains/routines/service/plans.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.post_selection"
+      ],
+      "module": "app.domains.routines.service.post_selection",
+      "path": "backend/app/domains/routines/service/post_selection.py",
       "wildcard_imports": []
     },
     {
@@ -9732,6 +9752,18 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.repository.resident_context",
+        "app.runtime.routine_posts"
+      ],
+      "module": "app.runtime.resident.post_selection",
+      "path": "backend/app/runtime/resident/post_selection.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "asyncio",
         "datetime",
@@ -10684,6 +10716,7 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.characters.service.state",
         "app.domains.routines.constants",
         "app.domains.routines.exceptions",
         "app.domains.routines.repository.feed_cues",
@@ -10694,12 +10727,14 @@
         "app.domains.routines.service.action_menu",
         "app.domains.routines.service.action_prompts",
         "app.domains.routines.service.activity_evidence",
+        "app.domains.routines.service.activity_settings",
         "app.domains.routines.service.execution_prompts",
         "app.domains.routines.service.execution_results",
         "app.domains.routines.service.feed_context",
         "app.domains.routines.service.lifecycle",
         "app.domains.routines.service.perception_diagnostics",
         "app.domains.routines.service.perception_prompts",
+        "app.domains.routines.service.post_selection",
         "app.domains.routines.service.prompt_context",
         "app.domains.routines.service.retry_schedule",
         "app.domains.routines.service.run_backoff",
@@ -10729,10 +10764,10 @@
         "app.runtime.resident.feed_context_references",
         "app.runtime.resident.gateway_results",
         "app.runtime.resident.identity_references",
+        "app.runtime.resident.post_selection",
         "app.runtime.resident.read_only_lanes",
         "app.runtime.resident.request_options",
         "app.runtime.resident.slots",
-        "app.runtime.routine_posts",
         "app.schemas",
         "app.services.community",
         "app.services.direct_llm",
