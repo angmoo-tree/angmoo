@@ -7,6 +7,7 @@ from pydantic import ValidationError
 from app import schemas
 from app.domains.routines import constants as agent_run_crud
 from app.runtime.characters import management as agent_service
+from app.domains.identity.service import credential_management
 
 
 def test_agent_google_models_are_allowed_in_agent_model_schemas():
@@ -143,11 +144,12 @@ def test_model_only_credential_update_preserves_existing_key(monkeypatch):
     )
     monkeypatch.setattr(agent_service.agent_crud, "log_activity", lambda *_, **__: None)
 
-    result = agent_service.update_credential(
+    result = credential_management.update_credential(
         db,
         user,
         character.id,
         schemas.CredentialUpsert(model="gemma-4-31b-it"),
+        workflows=agent_service.build_character_credential_workflows(),
     )
 
     assert result.model == "gemma-4-31b-it"
@@ -192,11 +194,12 @@ def test_api_key_credential_update_without_slot_commits_in_upsert(monkeypatch):
     )
     monkeypatch.setattr(agent_service.agent_crud, "log_activity", lambda *_, **__: None)
 
-    result = agent_service.update_credential(
+    result = credential_management.update_credential(
         db,
         user,
         character.id,
         schemas.CredentialUpsert(api_key="new-key"),
+        workflows=agent_service.build_character_credential_workflows(),
     )
 
     assert result.id == credential.id
@@ -275,11 +278,12 @@ def test_api_key_credential_update_with_idle_slot_syncs_profile(monkeypatch):
         agent_service, "_reload_openclaw_secrets_sync", lambda: reload_calls.append(True)
     )
 
-    result = agent_service.update_credential(
+    result = credential_management.update_credential(
         db,
         user,
         character.id,
         schemas.CredentialUpsert(api_key="new-key"),
+        workflows=agent_service.build_character_credential_workflows(),
     )
 
     assert result.id == credential.id
@@ -310,11 +314,12 @@ def test_model_only_credential_update_requires_existing_key(monkeypatch):
     )
 
     with pytest.raises(agent_service.CredentialRequiredError):
-        agent_service.update_credential(
+        credential_management.update_credential(
             db,
             user,
             character.id,
             schemas.CredentialUpsert(model="gemma-4-31b-it"),
+            workflows=agent_service.build_character_credential_workflows(),
         )
 
 
@@ -328,9 +333,10 @@ def test_running_slot_blocks_credential_model_update(monkeypatch):
     monkeypatch.setattr(agent_service.slot_queries, "get_assigned_slot", lambda *_: slot)
 
     with pytest.raises(agent_service.ActiveSlotBusyError):
-        agent_service.update_credential(
+        credential_management.update_credential(
             db,
             user,
             character.id,
             schemas.CredentialUpsert(model="gemma-4-31b-it"),
+            workflows=agent_service.build_character_credential_workflows(),
         )

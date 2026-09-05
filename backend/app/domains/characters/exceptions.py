@@ -92,3 +92,7 @@ class CredentialSyncError(AgentServiceError):
 
 class CharacterStateNotFoundError(AgentServiceError):
     pass
+
+
+class ActiveSlotBusyError(AgentServiceError):
+    pass

@@ -810,3 +810,8 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 ### 성향 분석 결과 저장
 
 `routines/service/tendency_analysis.py`는 성향 분석의 준비 조건과 결과 저장을 소유하고, `runtime/resident/tendency_analysis.py`는 Direct/OpenClaw provider 호출과 profile·슬롯 정리를 수행합니다. Direct와 OpenClaw의 원래 오류 처리 및 마지막 정리 규칙은 각각 유지합니다. 결과 필드 저장·commit·refresh가 끝난 뒤 기존 객체의 ID를 읽고 사용량 요약을 계산하며 활동 로그를 저장합니다. 호출자가 ID나 요약 문자열을 미리 평가하여 ORM 조회 또는 provider 사용량 평가 순서를 바꾸지 않습니다.
+
+
+### 캐릭터의 자격 증명 관리
+
+키·모델 변경, metadata 조회와 삭제의 실제 규칙은 `identity/service/credential_management.py`가 담당합니다. `/agents/{id}/credential`은 Character 리소스 HTTP이며 이 서비스를 typed workflow와 함께 직접 호출합니다. World membership과 WorldCharacter 범위 조회는 각 소유 repository가, 활동 슬롯과 설정은 Routines가 담당합니다. 모든 협력은 기존 Session과 붙어 있는 객체를 사용합니다. 슬롯 실행 중 거절, profile 연결/해제, commit=False와 최종 commit/rollback의 순서는 해당 서비스의 계약입니다. 성공 응답에는 기존 CredentialRead만 포함합니다.

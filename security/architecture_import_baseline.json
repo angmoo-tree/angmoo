@@ -1,7 +1,7 @@
 {
-  "edge_count": 2886,
-  "external_import_count": 2533,
-  "module_count": 818,
+  "edge_count": 2900,
+  "external_import_count": 2539,
+  "module_count": 823,
   "modules": [
     {
       "external_imports": [],
@@ -898,7 +898,8 @@
       "imports": [
         "app.api.identity_dependencies",
         "app.core.db",
-        "app.domains.characters.contracts"
+        "app.domains.characters.contracts",
+        "app.domains.identity.contracts"
       ],
       "module": "app.domains.characters.dependencies",
       "path": "backend/app/domains/characters/dependencies.py",
@@ -958,6 +959,9 @@
         "app.domains.characters.service.management",
         "app.domains.characters.service.media",
         "app.domains.characters.service.state",
+        "app.domains.identity.contracts",
+        "app.domains.identity.schemas",
+        "app.domains.identity.service.credential_management",
         "app.domains.identity.service.demo_access",
         "app.domains.media.contracts",
         "app.domains.routines.contracts.execution_errors",
@@ -2238,7 +2242,8 @@
       ],
       "imports": [
         "app.core.response_schemas",
-        "app.domains.identity.contracts"
+        "app.domains.identity.contracts",
+        "app.providers.registry"
       ],
       "module": "app.domains.identity.schemas",
       "path": "backend/app/domains/identity/schemas.py",
@@ -2292,6 +2297,20 @@
       ],
       "module": "app.domains.identity.service.credential_cooldown",
       "path": "backend/app/domains/identity/service/credential_cooldown.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.identity.contracts",
+        "app.domains.identity.models",
+        "app.domains.identity.schemas"
+      ],
+      "module": "app.domains.identity.service.credential_management",
+      "path": "backend/app/domains/identity/service/credential_management.py",
       "wildcard_imports": []
     },
     {
@@ -7077,6 +7096,25 @@
     {
       "external_imports": [],
       "imports": [],
+      "module": "app.domains.world_characters.repository",
+      "path": "backend/app/domains/world_characters/repository/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.world_characters.models"
+      ],
+      "module": "app.domains.world_characters.repository.credential_scope",
+      "path": "backend/app/domains/world_characters/repository/credential_scope.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
       "module": "app.domains.world_characters.router",
       "path": "backend/app/domains/world_characters/router/__init__.py",
       "wildcard_imports": []
@@ -8148,6 +8186,25 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.worlds.repository",
+      "path": "backend/app/domains/worlds/repository/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.worlds.models"
+      ],
+      "module": "app.domains.worlds.repository.credential_scope",
+      "path": "backend/app/domains/worlds/repository/credential_scope.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "__future__",
         "fastapi",
@@ -9190,6 +9247,7 @@
         "app.domains.characters.service.persona",
         "app.domains.characters.service.profile",
         "app.domains.characters.service.promotion",
+        "app.domains.identity.contracts",
         "app.domains.identity.service.demo_access",
         "app.domains.identity.service.profile",
         "app.domains.routines.constants",
@@ -9207,6 +9265,7 @@
         "app.domains.routines.schemas.first_greeting",
         "app.domains.routines.schemas.tendency",
         "app.domains.routines.service.activity_management",
+        "app.domains.routines.service.activity_settings",
         "app.domains.routines.service.autonomy_management",
         "app.domains.routines.service.feed_cues",
         "app.domains.routines.service.first_greeting",
@@ -9219,7 +9278,9 @@
         "app.domains.routines.service.tick_schedule",
         "app.domains.social.repository.posts",
         "app.domains.world_characters.public",
+        "app.domains.world_characters.repository.credential_scope",
         "app.domains.world_characters.service.readiness",
+        "app.domains.worlds.repository.credential_scope",
         "app.exceptions",
         "app.integrations.media.files",
         "app.integrations.media.images",

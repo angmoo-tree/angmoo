@@ -1,0 +1,1 @@
+"""World-owned persistence queries."""

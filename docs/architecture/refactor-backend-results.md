@@ -1362,3 +1362,13 @@ C7-D `b0a8a8d`를 LG/C7-C 통합본에 병합한 tree는 첫 인사·활동 한�
 ### B4 후속 통합 — C7-E 성향 결과 소유
 
 원래 signed 2abe379의 실제 성향 결과 정책·provider IO 및 같은 Session의 결과 저장을 합류했다. 신규 direct/OpenClaw SQLite 2노드와 기존 성향·활동 제한·OSS 회귀를 함께 실행하여 **123 passed / 4 warnings / 18.08초**다. 현재 경계는 818 modules / 2886 edges / 203 exact legacy edges다. 원본 도입 archive는 고정됐고 이 단계의 신규 ledger append 및 전체 backend 재검증은 C7 잔여와 Writer 합류 뒤 진행한다. 이전 whole backend 2실패와 수정/stock PASS 이력은 유지한다.
+## AR-B4-C7-F — 자격 증명 업무·World 권한·Character HTTP
+
+키와 모델 변경·metadata·삭제·World scope4를 Identity 실제 서비스로 이전하고, 기존 Character 리소스 HTTP3을 Character router에서 직접 연결했다. request schema와 원래 오류도 실제 소유에 두었다. World/WC의 원래 scalar 조회2, Routines의 optional 설정 disable, Character의 한 대입은 각 소유에 있으며 같은 Session으로 호출한다. 전체 원문4함수·HTTP3·DTO/오류 및 추출 SQL/대입은 정확 callback 복원 후 AST가 동일하다. 초기 기존49검사가 통과했으며 신규 SQLite2는 flush된 슬롯과 설정이 최종 commit까지 다른 Session에 보이지 않고, World 처리 실패 시 전체 rollback되는 것을 검증한다. 새 테스트의 필수 auth_profile_id fixture를 보완한 뒤 두 검사가 통과했다. 제품 동작·기존 assertion·원래 오류 순서는 변경하지 않았다.
+
+C7-F 최종 검증은 **80 passed / 기존 경고2 / 19.63초**이다. 경계792 modules /2778 edges / exact legacy204 / cycle0, L4 792/14/97, ER0 86/87/24/44/7, Memory current이다. 두 실제 앱 생성 함수는 같은 typed credential workflow를 연결한다. 처음 runtime.routines에서 Character factory를 역으로 조립하여 드러난 package cycle은 앱 생성의 기존 Character 조립 위치로 연결을 옮겨 해소했다. 경계 예외는 늘리지 않았다. 읽기 전용 원래6검사 모두 오류0(보호2139/current2291), frozen/checkpoint/additions 불변이다. stock gate는 root의 선형 최초 도입 연결 뒤 확인한다.
+
+
+### B4 후속 통합 — C7-F Character credential 소유
+
+원래 signed 0299586의 실제 credential 업무 4개·HTTP 3개·같은 Session 설정/조회 협력을 합류했다. 두 app factory의 실제 workflow 등록을 유지했다. 신규 commit/rollback 2노드와 기존 성향·활동 제한·OSS 회귀는 **123 passed / 4 warnings / 18.13초**이며 경계는 823 modules / 2900 edges / 203 exact legacy edges다. 이 source의 원본 archive 수집은 완료했고 신규 ledger append와 전체 검증은 남은 C7 HTTP/Writer 합류 뒤 순서대로 수행한다.

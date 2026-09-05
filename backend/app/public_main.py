@@ -312,6 +312,8 @@ def create_app(
     configure_routines_runtime(runtime_app)
     from app.runtime.characters.management import build_character_management_workflows
     runtime_app.state.character_management_workflows = build_character_management_workflows
+    from app.runtime.characters.management import build_character_credential_workflows
+    runtime_app.state.character_credential_workflows = build_character_credential_workflows
     from app.runtime.characters.management import build_character_media_workflows
     runtime_app.state.character_media_workflows = build_character_media_workflows
     from app.runtime.characters.creator import build_creator_workflows
