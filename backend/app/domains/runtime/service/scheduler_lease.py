@@ -1,148 +1,49 @@
+"""Scheduler ownership, fencing decisions and exact transactional state changes."""
+
 from __future__ import annotations
-
-from collections.abc import Iterator
-from contextlib import contextmanager
-from contextvars import ContextVar
-from datetime import UTC, datetime, timedelta
+from collections.abc import Callable
+from datetime import datetime, timedelta
 from typing import Any
-
-from sqlalchemy import (
-    CheckConstraint,
-    DateTime,
-    ForeignKey,
-    Integer,
-    String,
-    event,
-    func,
-    select,
-    text,
-)
-from sqlalchemy.orm import Mapped, Session, mapped_column, sessionmaker
-
-from app.core.db import Base
-from app.domains.identity.public import InstallationIdentity, LOCAL_INSTALLATION_KEY
+from sqlalchemy.orm import Session, sessionmaker
 from app.domains.runtime.constants import SCHEDULER_SINGLETON_KEY
-from app.domains.runtime.exceptions import SchedulerFenceRejectedError
-from app.domains.runtime.exceptions import SchedulerLeaseHeldError
-from app.domains.runtime.exceptions import SchedulerLeaseLostError
-from app.domains.runtime.contracts.lease import SchedulerLeaseSnapshot
-from app.domains.runtime.contracts.lease import SchedulerLeaseState
-from app.domains.runtime.contracts.lease import SchedulerTickPermit
-from app.domains.runtime.contracts.lease import SchedulerTickResult
-from app.domains.runtime.policies.lease import aware_utc
-from app.domains.runtime.policies.lease import decide_tick_window
-
-
-class RuntimeSchedulerLease(Base):
-    __tablename__ = "runtime_scheduler_leases"
-    __table_args__ = (
-        CheckConstraint(
-            "singleton_key = 'resident-tick-scheduler'",
-            name="ck_runtime_scheduler_leases_singleton",
-        ),
-        CheckConstraint(
-            "state IN ('starting','active','draining','stopped','failed')",
-            name="ck_runtime_scheduler_leases_state",
-        ),
-        CheckConstraint(
-            "fencing_epoch >= 0",
-            name="ck_runtime_scheduler_leases_fencing_epoch",
-        ),
-        CheckConstraint(
-            "last_tick_result IS NULL OR last_tick_result IN "
-            "('success','no_action','partial','failed','skipped')",
-            name="ck_runtime_scheduler_leases_tick_result",
-        ),
-    )
-
-    singleton_key: Mapped[str] = mapped_column(String(40), primary_key=True)
-    installation_id: Mapped[str] = mapped_column(
-        ForeignKey("installation_identities.installation_id"),
-        nullable=False,
-        unique=True,
-    )
-    lease_owner_id: Mapped[str | None] = mapped_column(String(128))
-    fencing_epoch: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
-    state: Mapped[str] = mapped_column(
-        String(20), nullable=False, default="stopped", server_default="stopped"
-    )
-    acquired_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    heartbeat_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    last_observed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    last_sleep_gap_seconds: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0, server_default="0"
-    )
-    last_tick_window_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    last_tick_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    last_tick_finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    last_tick_result: Mapped[str | None] = mapped_column(String(20))
-    next_tick_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    last_error_code: Mapped[str | None] = mapped_column(String(80))
-    shutdown_requested_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
-    )
-
-
-_SchedulerFence = tuple[str, int]
-_scheduler_fence: ContextVar[_SchedulerFence | None] = ContextVar(
-    "angmoo_scheduler_fence",
-    default=None,
+from app.domains.runtime.contracts.lease import (
+    SchedulerLeaseSnapshot,
+    SchedulerLeaseState,
+    SchedulerTickPermit,
+    SchedulerTickResult,
+)
+from app.domains.runtime.exceptions import (
+    SchedulerLeaseHeldError,
+    SchedulerLeaseLostError,
+)
+from app.domains.runtime.models import RuntimeSchedulerLease
+from app.domains.runtime.policies.lease import aware_utc, decide_tick_window
+from app.domains.runtime.repository import scheduler_lease as lease_repository
+from app.domains.runtime.repository.scheduler_lease import (
+    _advisory_xact_lock,
+    _database_now,
 )
 
 
-@contextmanager
-def scheduler_fence(*, owner_id: str, fencing_epoch: int) -> Iterator[None]:
-    token = _scheduler_fence.set((owner_id, fencing_epoch))
-    try:
-        yield
-    finally:
-        _scheduler_fence.reset(token)
-
-
-@event.listens_for(Session, "before_commit")
-def _verify_scheduler_fence_before_commit(db: Session) -> None:
-    expected = _scheduler_fence.get()
-    if expected is None:
-        return
-    owner_id, fencing_epoch = expected
-    row = db.scalar(
-        select(RuntimeSchedulerLease).where(
-            RuntimeSchedulerLease.singleton_key == SCHEDULER_SINGLETON_KEY
-        )
-    )
-    now = _database_now(db)
-    if not _lease_matches(row, owner_id=owner_id, fencing_epoch=fencing_epoch, now=now):
-        raise SchedulerFenceRejectedError("scheduler lease fence rejected commit")
-
-
-class SqlAlchemySchedulerLeaseRepository:
-    def __init__(self, session_factory: sessionmaker[Session]) -> None:
+class SchedulerLeaseService:
+    def __init__(
+        self,
+        session_factory: sessionmaker[Session],
+        *,
+        installation_reader: Callable[[Session], Any],
+    ) -> None:
         self._session_factory = session_factory
+        self._installation_reader = installation_reader
 
     def acquire(self, *, owner_id: str, ttl_seconds: int) -> SchedulerLeaseSnapshot:
         with self._session_factory() as db:
             _advisory_xact_lock(db)
             now = _database_now(db)
-            installation = db.scalar(
-                select(InstallationIdentity)
-                .where(InstallationIdentity.singleton_key == LOCAL_INSTALLATION_KEY)
-                .with_for_update()
-            )
+            installation = self._installation_reader(db)
             if installation is None:
                 db.rollback()
                 raise SchedulerLeaseLostError("local installation identity is missing")
-            row = db.scalar(
-                select(RuntimeSchedulerLease)
-                .where(RuntimeSchedulerLease.singleton_key == SCHEDULER_SINGLETON_KEY)
-                .with_for_update()
-            )
+            row = lease_repository.locked_row(db)
             if row is None:
                 row = RuntimeSchedulerLease(
                     singleton_key=SCHEDULER_SINGLETON_KEY,
@@ -252,18 +153,16 @@ class SqlAlchemySchedulerLeaseRepository:
             db.refresh(row)
             return _snapshot(row)
 
-    def release(
-        self, *, owner_id: str, fencing_epoch: int
-    ) -> SchedulerLeaseSnapshot:
+    def release(self, *, owner_id: str, fencing_epoch: int) -> SchedulerLeaseSnapshot:
         with self._session_factory() as db:
             _advisory_xact_lock(db)
-            row = db.scalar(
-                select(RuntimeSchedulerLease)
-                .where(RuntimeSchedulerLease.singleton_key == SCHEDULER_SINGLETON_KEY)
-                .with_for_update()
-            )
+            row = lease_repository.locked_row(db)
             now = _database_now(db)
-            if row is None or row.lease_owner_id != owner_id or row.fencing_epoch != fencing_epoch:
+            if (
+                row is None
+                or row.lease_owner_id != owner_id
+                or row.fencing_epoch != fencing_epoch
+            ):
                 db.rollback()
                 raise SchedulerLeaseLostError("scheduler lease cannot be released")
             row.state = SchedulerLeaseState.STOPPED.value
@@ -278,7 +177,7 @@ class SqlAlchemySchedulerLeaseRepository:
 
     def read(self) -> SchedulerLeaseSnapshot | None:
         with self._session_factory() as db:
-            row = db.get(RuntimeSchedulerLease, SCHEDULER_SINGLETON_KEY)
+            row = lease_repository.read_row(db)
             return _snapshot(row) if row is not None else None
 
 
@@ -289,11 +188,7 @@ def _locked_current_lease(
     fencing_epoch: int,
 ) -> tuple[RuntimeSchedulerLease, datetime]:
     _advisory_xact_lock(db)
-    row = db.scalar(
-        select(RuntimeSchedulerLease)
-        .where(RuntimeSchedulerLease.singleton_key == SCHEDULER_SINGLETON_KEY)
-        .with_for_update()
-    )
+    row = lease_repository.locked_row(db)
     now = _database_now(db)
     if not _lease_matches(row, owner_id=owner_id, fencing_epoch=fencing_epoch, now=now):
         db.rollback()
@@ -316,22 +211,6 @@ def _lease_matches(
         and row.lease_expires_at is not None
         and aware_utc(row.lease_expires_at) > now
     )
-
-
-def _database_now(db: Session) -> datetime:
-    value: Any = db.scalar(select(func.current_timestamp()))
-    if not isinstance(value, datetime):
-        raise SchedulerLeaseLostError("database clock is unavailable")
-    return aware_utc(value)
-
-
-def _advisory_xact_lock(db: Session) -> None:
-    bind = db.get_bind()
-    if bind.dialect.name == "postgresql":
-        db.execute(
-            text("SELECT pg_advisory_xact_lock(hashtext(:lock_key))"),
-            {"lock_key": "angmoo:runtime-scheduler-lease"},
-        )
 
 
 def _snapshot(row: RuntimeSchedulerLease) -> SchedulerLeaseSnapshot:

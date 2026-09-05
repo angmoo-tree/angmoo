@@ -663,22 +663,20 @@
     {
       "markers": {
         "advisory_lock": [
-          332
+          25
         ],
         "driver_or_url": [
-          330
+          1,
+          23
         ],
         "row_lock": [
-          136,
-          144,
-          263,
-          295
+          34
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py",
+      "path": "backend/app/domains/runtime/repository/scheduler_lease.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "d965cac7fe904ce57d7a71ddde5c38d97b672f42c3e600819702f23b518b6ff5",
+      "source_sha256": "c9efa2143284dd73e2ec9fcc0273d6df5f37bbc074029211d9c41677bf62fee3",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -981,6 +979,18 @@
     },
     {
       "markers": {
+        "row_lock": [
+          15
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/runtime/persistence/scheduler_lease.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "c29ae077be030addf153be4c1574b5d5b9d4dd2e709aa8dde2a3228f5b3b6ca3",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
         "pgvector": [
           80
         ]
@@ -994,13 +1004,13 @@
     {
       "markers": {
         "driver_or_url": [
-          34
+          32
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/persistence/sqlite_scheduler_lease.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "26ac5b2abece14527e2927e77887204957e54f218708e2b418e28c43f8200560",
+      "source_sha256": "84d5c91e3dc1c002377fe7609335e4efd4e67de4d4f1c47fb04ab729ccdf7043",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1264,13 +1274,13 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 81,
+  "entry_count": 82,
   "marker_counts": {
     "advisory_lock": 10,
     "driver_or_url": 49,
     "jsonb": 11,
     "pgvector": 5,
-    "row_lock": 34,
+    "row_lock": 35,
     "skip_locked": 7
   },
   "purpose": "Residual PostgreSQL markers retained only as historical schema evidence, serialized compatibility values, and negative reintroduction guards",

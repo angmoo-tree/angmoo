@@ -14,14 +14,12 @@ from app.runtime.routines.lifecycle_references import SqlAlchemyLifecycleReferen
 
 from app.config import Settings, settings
 from app.core.db import SessionLocal
-from app.domains.runtime.public import (
-    SchedulerLeaseCoordinator,
-    SchedulerLeaseHeldError,
-    SchedulerLeaseLostError,
-    SchedulerTickResult,
-    SqlAlchemySchedulerLeaseRepository,
-    scheduler_fence,
-)
+from app.domains.runtime.public import SchedulerLeaseCoordinator
+from app.domains.runtime.public import SchedulerLeaseHeldError
+from app.domains.runtime.public import SchedulerLeaseLostError
+from app.domains.runtime.public import SchedulerTickResult
+from app.runtime.persistence.scheduler_lease import SqlAlchemySchedulerLeaseRepository
+from app.runtime.persistence.scheduler_fence import scheduler_fence
 from app.services import agent_runs
 
 

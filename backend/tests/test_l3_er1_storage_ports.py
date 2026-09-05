@@ -12,9 +12,7 @@ from app.domains.relationships.ports.projection import RelationshipProjectionPor
 from app.domains.relationships.projection.commands import NoGraphMutationCommand
 from app.domains.routines.utils.clock import SystemClock
 from app.domains.routines.contracts.clock import ClockPort
-from app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease import (
-    SqlAlchemySchedulerLeaseRepository,
-)
+from app.runtime.persistence.scheduler_lease import SqlAlchemySchedulerLeaseRepository
 from app.domains.runtime.contracts.data_paths import RuntimeDataPathPort
 from app.domains.runtime.contracts.lease_store import ClaimLeasePort
 from app.domains.runtime.contracts.search import SearchIndexDocument

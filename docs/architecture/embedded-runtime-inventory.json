@@ -31,7 +31,7 @@
     },
     {
       "path": "backend/app/runtime/resident/scheduler.py",
-      "sha256": "7bf69417532f4fd133dcaba93ded775b1b5cd043949e08750d349ac4e3c23094"
+      "sha256": "0a3aee8b07bf5d18d9ec210a47f6c23dd12d8a34dc59da33c72bafd9053f2cba"
     },
     {
       "path": "backend/app/runtime/graph_projection/worker.py",
@@ -237,19 +237,19 @@
       "owner": "ER4",
       "path": "backend/app/runtime/resident/scheduler.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "7bf69417532f4fd133dcaba93ded775b1b5cd043949e08750d349ac4e3c23094",
+      "source_sha256": "0a3aee8b07bf5d18d9ec210a47f6c23dd12d8a34dc59da33c72bafd9053f2cba",
       "transition_pr": "ER4 PR J"
     },
     {
       "component": "scheduler",
       "markers": [
-        "lease repository",
+        "lease workflow",
         "fencing epoch"
       ],
       "owner": "ER4",
-      "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py",
+      "path": "backend/app/domains/runtime/service/scheduler_lease.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "d965cac7fe904ce57d7a71ddde5c38d97b672f42c3e600819702f23b518b6ff5",
+      "source_sha256": "f374a808d070266fad9e1a16f50a51ea7a291a6d14f50c6ab62250fde20d4844",
       "transition_pr": "ER4 PR J"
     },
     {

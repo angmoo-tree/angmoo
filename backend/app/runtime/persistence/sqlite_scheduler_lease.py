@@ -18,9 +18,7 @@ from app.domains.runtime.contracts.lease import SchedulerTickPermit
 from app.domains.runtime.contracts.lease import SchedulerTickResult
 from app.domains.runtime.policies.lease import aware_utc
 from app.domains.runtime.policies.lease import decide_tick_window
-from app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease import (
-    RuntimeSchedulerLease,
-)
+from app.domains.runtime.models import RuntimeSchedulerLease
 from app.core.sqlite_concurrency import (
     SqliteRetryPolicy,
     run_sqlite_immediate,

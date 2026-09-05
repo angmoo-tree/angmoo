@@ -36,11 +36,7 @@ from app.domains.runtime.contracts.lease import SchedulerTickPermit
 from app.domains.runtime.contracts.lease import SchedulerTickResult
 from app.domains.runtime.policies.lease import decide_tick_window
 from app.domains.runtime.policies.lease import logical_tick_window
-from app.domains.runtime.infrastructure import (
-    RuntimeSchedulerLease,
-    SqlAlchemySchedulerLeaseRepository,
-    scheduler_fence,
-)
+from app.domains.runtime.models import RuntimeSchedulerLease
 from app.domains.runtime.contracts.status_reader import ApplicationRuntimeProbe
 from app.domains.runtime.ports import (
     ClaimLeasePort,
@@ -88,12 +84,10 @@ __all__ = [
     "SearchIndexDocument",
     "SearchIndexHit",
     "SearchIndexPort",
-    "SqlAlchemySchedulerLeaseRepository",
     "UnitOfWorkPort",
     "decide_tick_window",
     "component_observations",
     "logical_tick_window",
     "overlay_in_process_component_status",
     "runtime_status_read",
-    "scheduler_fence",
 ]

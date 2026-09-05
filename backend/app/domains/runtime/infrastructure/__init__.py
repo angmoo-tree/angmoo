@@ -1,11 +1,5 @@
-from app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease import (
-    RuntimeSchedulerLease,
-    SqlAlchemySchedulerLeaseRepository,
-    scheduler_fence,
-)
+from app.domains.runtime.models import RuntimeSchedulerLease
 
 __all__ = [
     "RuntimeSchedulerLease",
-    "SqlAlchemySchedulerLeaseRepository",
-    "scheduler_fence",
 ]

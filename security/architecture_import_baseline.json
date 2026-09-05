@@ -1,7 +1,7 @@
 {
-  "edge_count": 2442,
-  "external_import_count": 2273,
-  "module_count": 731,
+  "edge_count": 2454,
+  "external_import_count": 2289,
+  "module_count": 735,
   "modules": [
     {
       "external_imports": [],
@@ -4808,7 +4808,7 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease"
+        "app.domains.runtime.models"
       ],
       "module": "app.domains.runtime.infrastructure",
       "path": "backend/app/domains/runtime/infrastructure/__init__.py",
@@ -4817,24 +4817,15 @@
     {
       "external_imports": [
         "__future__",
-        "collections.abc",
-        "contextlib",
-        "contextvars",
         "datetime",
         "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
+        "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.db",
-        "app.domains.identity.public",
-        "app.domains.runtime.constants",
-        "app.domains.runtime.contracts.lease",
-        "app.domains.runtime.exceptions",
-        "app.domains.runtime.policies.lease"
+        "app.core.db"
       ],
-      "module": "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease",
-      "path": "backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py",
+      "module": "app.domains.runtime.models",
+      "path": "backend/app/domains/runtime/models.py",
       "wildcard_imports": []
     },
     {
@@ -4873,7 +4864,7 @@
         "app.domains.runtime.contracts.status",
         "app.domains.runtime.contracts.status_reader",
         "app.domains.runtime.exceptions",
-        "app.domains.runtime.infrastructure",
+        "app.domains.runtime.models",
         "app.domains.runtime.policies.lease",
         "app.domains.runtime.ports",
         "app.domains.runtime.schemas",
@@ -4881,6 +4872,24 @@
       ],
       "module": "app.domains.runtime.public",
       "path": "backend/app/domains/runtime/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.runtime.constants",
+        "app.domains.runtime.exceptions",
+        "app.domains.runtime.models",
+        "app.domains.runtime.policies.lease"
+      ],
+      "module": "app.domains.runtime.repository.scheduler_lease",
+      "path": "backend/app/domains/runtime/repository/scheduler_lease.py",
       "wildcard_imports": []
     },
     {
@@ -4928,6 +4937,26 @@
       ],
       "module": "app.domains.runtime.service.components",
       "path": "backend/app/domains/runtime/service/components.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.runtime.constants",
+        "app.domains.runtime.contracts.lease",
+        "app.domains.runtime.exceptions",
+        "app.domains.runtime.models",
+        "app.domains.runtime.policies.lease",
+        "app.domains.runtime.repository.scheduler_lease"
+      ],
+      "module": "app.domains.runtime.service.scheduler_lease",
+      "path": "backend/app/domains/runtime/service/scheduler_lease.py",
       "wildcard_imports": []
     },
     {
@@ -7506,7 +7535,7 @@
         "app.domains.relationships.infrastructure.sqlalchemy_models",
         "app.domains.relationships.infrastructure.sqlalchemy_social_models",
         "app.domains.routines.models",
-        "app.domains.runtime.infrastructure",
+        "app.domains.runtime.models",
         "app.domains.social.models.feed",
         "app.domains.social.models.manual_writes",
         "app.domains.social.models.posts",
@@ -9187,6 +9216,39 @@
     {
       "external_imports": [
         "__future__",
+        "collections.abc",
+        "contextlib",
+        "contextvars",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.runtime.exceptions",
+        "app.domains.runtime.repository.scheduler_lease",
+        "app.domains.runtime.service.scheduler_lease"
+      ],
+      "module": "app.runtime.persistence.scheduler_fence",
+      "path": "backend/app/runtime/persistence/scheduler_fence.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.identity.public",
+        "app.domains.runtime.service.scheduler_lease"
+      ],
+      "module": "app.runtime.persistence.scheduler_lease",
+      "path": "backend/app/runtime/persistence/scheduler_lease.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "sqlalchemy.orm"
       ],
       "imports": [],
@@ -9247,7 +9309,7 @@
         "app.domains.runtime.constants",
         "app.domains.runtime.contracts.lease",
         "app.domains.runtime.exceptions",
-        "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease",
+        "app.domains.runtime.models",
         "app.domains.runtime.policies.lease"
       ],
       "module": "app.runtime.persistence.sqlite_scheduler_lease",
@@ -9366,6 +9428,8 @@
         "app.core.db",
         "app.domains.routines.schemas",
         "app.domains.runtime.public",
+        "app.runtime.persistence.scheduler_fence",
+        "app.runtime.persistence.scheduler_lease",
         "app.runtime.routines.lifecycle_references",
         "app.services.agent_runs"
       ],

@@ -9,10 +9,8 @@ from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import Session, sessionmaker
 
 from app import models
-from app.domains.runtime.public import (
-    SchedulerLeaseHeldError,
-    SqlAlchemySchedulerLeaseRepository,
-)
+from app.domains.runtime.public import SchedulerLeaseHeldError
+from app.runtime.persistence.scheduler_lease import SqlAlchemySchedulerLeaseRepository
 
 
 DATABASE_URL = os.getenv("L2_SCHEDULER_POSTGRES_DATABASE_URL")

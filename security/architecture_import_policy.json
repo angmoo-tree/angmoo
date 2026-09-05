@@ -1195,10 +1195,13 @@
       "app.domains.runtime.contracts.transaction",
       "app.domains.runtime.contracts.vector_recall",
       "app.domains.runtime.exceptions",
+      "app.domains.runtime.models",
       "app.domains.runtime.policies.lease",
+      "app.domains.runtime.repository.scheduler_lease",
       "app.domains.runtime.repository.status",
       "app.domains.runtime.schemas",
       "app.domains.runtime.service.components",
+      "app.domains.runtime.service.scheduler_lease",
       "app.domains.runtime.service.status",
       "app.domains.social.constants",
       "app.domains.social.contracts",
@@ -1416,6 +1419,7 @@
       "app.domains.runtime.contracts.vector_recall",
       "app.domains.runtime.schemas",
       "app.domains.runtime.service.components",
+      "app.domains.runtime.service.scheduler_lease",
       "app.domains.runtime.service.status",
       "app.domains.social.contracts",
       "app.domains.social.contracts.actors",
@@ -3023,38 +3027,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease",
-        "target": "app.domains.runtime.constants",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
-        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease",
-        "target": "app.domains.runtime.exceptions",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
-        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease",
-        "target": "app.domains.runtime.contracts.lease",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
-        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.runtime.infrastructure.sqlalchemy_scheduler_lease",
-        "target": "app.domains.runtime.policies.lease",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
-        "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.domains.runtime.ports",
         "target": "app.domains.runtime.contracts.status_reader",
         "owner_stage": "AR-B8-A",
@@ -3092,6 +3064,30 @@
         "owner_stage": "AR-B8-A",
         "removal_condition": "Remove when the Runtime status/lease implementations and their actual consumers use explicit service/repository/contracts; complete before AR-B8-B.",
         "reason": "One-way existing Runtime consumer of the same moved type/function during the A1 source transition; no new implementation imports the legacy owner.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.public",
+        "target": "app.domains.runtime.models",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove the Runtime model aggregate exports when their actual callers and G5 model registration consume the defining role before AR-B8-B.",
+        "reason": "Existing Runtime aggregate exposes the same moved scheduler ORM class during the bounded source transition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.runtime.infrastructure",
+        "target": "app.domains.runtime.models",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove the Runtime model aggregate exports when their actual callers and G5 model registration consume the defining role before AR-B8-B.",
+        "reason": "Existing Runtime aggregate exposes the same moved scheduler ORM class during the bounded source transition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.runtime.models",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove the Runtime model aggregate exports when their actual callers and G5 model registration consume the defining role before AR-B8-B.",
+        "reason": "Existing Runtime aggregate exposes the same moved scheduler ORM class during the bounded source transition.",
         "review_date": "2026-09-06"
       }
     ]
