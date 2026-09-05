@@ -7,7 +7,6 @@ from app.domains.runtime.schemas import (
     AgentActionRangeRead,
     AgentActivitySettingRead,
     AgentActivitySummaryRead,
-    AgentActivityProfileReadinessRead,
 )
 
 from app.domains.identity.schemas import (

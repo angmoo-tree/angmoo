@@ -13,6 +13,10 @@ from test_runtime_mode_repair import _user, _seed_world_scope, _seed_ready_entry
 def test_readiness_keeps_shared_dto_and_world_scope_before_stale_profile():
     from app.schemas.agents import AgentActivityProfileReadinessRead as old_response
     assert old_response is AgentActivityProfileReadinessRead
+    from app.domains.runtime.schemas import AgentActivityProfileReadinessRead as runtime_response
+    from app.domains.characters.schemas import AgentActivityProfileReadinessRead as character_response
+    assert runtime_response is AgentActivityProfileReadinessRead
+    assert character_response is AgentActivityProfileReadinessRead
     engine = create_engine("sqlite://")
     Base.metadata.create_all(engine)
     with Session(engine) as db:
