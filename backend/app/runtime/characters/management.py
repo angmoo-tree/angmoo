@@ -1,3 +1,25 @@
+from __future__ import annotations
+
+from app.domains.characters.service.creator import (
+    llm_credential_error_message,
+)
+
+from app.domains.characters.exceptions import (
+    CredentialRequiredError,
+    CredentialSyncError,
+)
+
+from app.domains.characters.contracts import CharacterManagementWorkflows
+from app.domains.characters.service import management as character_management
+from app.domains.characters.service.management import (
+    _agent_list_sort_key,
+)
+
+from app.domains.characters.exceptions import (
+    AgentActiveHoursInvalidError,
+)
+
+from app.domains.characters.service import mutations as character_mutations
 from datetime import UTC, datetime, timedelta
 import hashlib
 import json
@@ -5,11 +27,46 @@ import re
 from typing import Any, Iterable, Literal
 from uuid import uuid4
 
+from app.domains.characters.service.promotion import (
+    PROMOTION_USAGE_POLICY_VERSION,
+    _set_promotion_usage,
+    _promotion_usage_read,
+)
+
+from app.domains.characters.service.access import (
+    LOCAL_MODE_LLM_BLOCKED_MESSAGE,
+    _get_owned_character,
+    _ensure_not_suspended,
+    _is_local_mode,
+    _ensure_llm_mode,
+    _ensure_local_mode,
+)
+
+from app.domains.characters.service.persona import (
+    PERSONA_PROMPT_SAFETY_FIELDS,
+    ensure_persona_prompt_safety,
+    _field_value,
+)
+
+from app.domains.characters.exceptions import (
+    AgentServiceError,
+    AgentNotFoundError,
+    AgentHandleConflictError,
+    AgentHandleInvalidError,
+    AgentProfileNameInvalidError,
+    InvalidProfileMediaError,
+    PromptInjectionDetectedError,
+    AgentExecutionModeError,
+    AgentSuspendedError,
+)
+
 from pydantic import BaseModel, Field
 from sqlalchemy import delete, or_, select, text, update
 from sqlalchemy.orm import Session
 
 from app import models, schemas
+from app.domains.characters import models as character_models
+from app.domains.characters.service import profile as character_profile
 from app.core import active_hours, security, unit_of_work
 from app.config import settings
 from app.core.image_generation import USER_IMAGE_MODEL_OPTIONS
@@ -33,7 +90,7 @@ from app.domains.identity.service import demo_access as demo_lock
 from app.services import image_prompt_safety
 from app.services import maintenance as maintenance_service
 from app.services import post_image_generation
-from app.services import prompt_safety
+from app.core import prompt_safety
 from app.services import profile_media
 from app.services import service_image_key
 from app.services import operation_settings
@@ -68,7 +125,6 @@ WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE = (
 )
 SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY = 6_180_100
 AGENT_DETAIL_ACTIVITY_LIMIT = 200
-PROMOTION_USAGE_POLICY_VERSION = "2026-06-25"
 RUN_NOW_COOLDOWN = timedelta(minutes=30)
 FIRST_GREETING_COOLDOWN = timedelta(minutes=30)
 FIRST_GREETING_SESSION_MARKER = ":first-greeting:"
@@ -136,18 +192,6 @@ TENDENCY_ACTION_DEFAULTS = {
 # OpenClaw validates the global tool allowlist before honoring tool_choice="none".
 TENDENCY_LLM_TOOLS_ALLOW = ["angmoo_list_feed"]
 LOCAL_KEY_PREFIX = "angmoo_local_"
-LOCAL_MODE_LLM_BLOCKED_MESSAGE = (
-    "로컬 모드 앵무는 서버 LLM 자율활동을 사용할 수 없습니다."
-)
-
-
-PERSONA_PROMPT_SAFETY_FIELDS = (
-    "personality",
-    "speech_style",
-    "worldview",
-    "topic_preferences",
-    "safety_rules",
-)
 
 
 class _TendencyRangePayload(BaseModel):
@@ -223,15 +267,7 @@ TENDENCY_PERSONA_CHARACTER_PATTERN = re.compile(
 )
 
 
-class AgentServiceError(Exception):
-    pass
-
-
 DemoAccountLockedError = demo_lock.DemoAccountLockedError
-
-
-class AgentNotFoundError(AgentServiceError):
-    pass
 
 
 class AgentAutonomyCapacityError(AgentServiceError):
@@ -253,27 +289,7 @@ class AgentAutonomyRetryableError(AgentServiceError):
     reason_code = "autonomy_activation_retryable"
 
 
-class AgentHandleConflictError(AgentServiceError):
-    pass
-
-
-class AgentHandleInvalidError(AgentServiceError):
-    pass
-
-
-class AgentProfileNameInvalidError(AgentServiceError):
-    pass
-
-
-class InvalidProfileMediaError(AgentServiceError):
-    pass
-
-
 class UnsafeImagePromptError(AgentServiceError):
-    pass
-
-
-class PromptInjectionDetectedError(AgentServiceError):
     pass
 
 
@@ -281,8 +297,6 @@ class ImageSettingsInvalidError(AgentServiceError):
     pass
 
 
-class CredentialRequiredError(AgentServiceError):
-    pass
 
 
 class LlmCredentialInvalidError(AgentServiceError):
@@ -293,8 +307,6 @@ class ActiveSlotBusyError(AgentServiceError):
     pass
 
 
-class CredentialSyncError(AgentServiceError):
-    pass
 
 
 class TendencyAnalysisParseError(AgentServiceError):
@@ -321,16 +333,6 @@ class AgentFeedCueUnavailableError(AgentServiceError):
     pass
 
 
-class AgentExecutionModeError(AgentServiceError):
-    pass
-
-
-class AgentActiveHoursInvalidError(AgentServiceError):
-    pass
-
-
-class AgentSuspendedError(AgentServiceError):
-    pass
 
 
 class AgentDeleteConfirmationError(AgentServiceError):
@@ -384,49 +386,11 @@ class RunNowSoonScheduledError(AgentServiceError):
 
 
 def list_agents(db: Session, user: models.User) -> list[schemas.AgentDetailRead]:
-    agents = [
-        _build_agent_detail(db, character)
-        for character in community_crud.list_characters_for_user(db, user.id)
-    ]
-    return sorted(agents, key=_agent_list_sort_key)
+    return character_management.list_agents(db, user, workflows=build_character_management_workflows())
 
 
-def llm_credential_error_message(exc: Exception) -> str | None:
-    message = str(exc)
-    normalized = message.lower()
-    if "api key" not in normalized:
-        return None
-    if not any(
-        marker in normalized
-        for marker in (
-            "expired",
-            "invalid",
-            "not valid",
-            "invalid_argument",
-            "permission",
-            "unauthenticated",
-        )
-    ):
-        return None
-    return (
-        "저장된 LLM API key가 만료되었거나 유효하지 않습니다. "
-        "새 API key를 저장한 뒤 커뮤니티 성향 분석을 다시 실행해주세요."
-    )
 
 
-def ensure_persona_prompt_safety(data: object) -> None:
-    for field in PERSONA_PROMPT_SAFETY_FIELDS:
-        value = _field_value(data, field)
-        if value is None:
-            continue
-        try:
-            prompt_safety.ensure_no_prompt_injection_text(
-                value,
-                field_name=field,
-                field_kind="persona",
-            )
-        except prompt_safety.PromptSafetyError as exc:
-            raise PromptInjectionDetectedError("prompt_injection_detected") from exc
 
 
 def _ensure_feed_cue_prompt_safety(topic: str) -> None:
@@ -457,28 +421,13 @@ def _ensure_tendency_prompt_safety(
         ) from exc
 
 
-def _field_value(data: object, field: str) -> Any:
-    if isinstance(data, dict):
-        return data.get(field)
-    return getattr(data, field, None)
-
-
 def create_agent(
     db: Session, user: models.User, data: schemas.AgentCreate
 ) -> schemas.AgentDetailRead:
-    _validate_initial_activity_settings(data)
-    ensure_persona_prompt_safety(data)
-    try:
-        character = community_crud.create_character(
-            db, user=user, character_id=f"char-{uuid4().hex[:12]}", data=data
-        )
-    except community_crud.CharacterHandleConflictError as exc:
-        raise AgentHandleConflictError(str(exc)) from exc
-    except community_crud.InvalidCharacterHandleError as exc:
-        raise AgentHandleInvalidError(str(exc)) from exc
-    _set_promotion_usage(character, data.promotion_usage_allowed)
-    db.commit()
-    db.refresh(character)
+    return character_management.create_agent(db, user, data, workflows=build_character_management_workflows())
+
+
+def _after_character_created(db, user, character, data) -> schemas.AgentDetailRead:
     setting = agent_crud.ensure_setting(db, character.id)
     _apply_initial_activity_settings(db, setting, data)
     _ensure_initial_image_settings(db, character.id)
@@ -616,10 +565,9 @@ def _log_autonomy_activation_rejection(
 
 
 def get_agent(db: Session, user: models.User, character_id: str) -> schemas.AgentDetailRead:
-    character = _get_owned_character(db, user, character_id)
-    return _build_agent_detail(
-        db, character, recent_activity_limit=AGENT_DETAIL_ACTIVITY_LIMIT
-    )
+    return character_management.get_agent(db, user, character_id, workflows=build_character_management_workflows())
+
+
 
 
 def get_local_connection(
@@ -876,7 +824,7 @@ async def run_first_greeting(
 async def _run_first_greeting_writer(
     *,
     api_key: str,
-    character: models.Character,
+    character: character_models.Character,
     setting: models.AgentActivitySetting,
     credential: models.LlmCredential,
     run_id: str,
@@ -945,7 +893,7 @@ Rules:
 async def _attach_first_greeting_image(
     *,
     db: Session,
-    character: models.Character,
+    character: character_models.Character,
     credential: models.LlmCredential,
     run_id: str,
     tracker: RunLlmTracker,
@@ -986,21 +934,11 @@ def update_profile(
     character_id: str,
     data: schemas.AgentProfileUpdate,
 ) -> schemas.AgentDetailRead:
-    character = _get_owned_character(db, user, character_id)
-    demo_lock.ensure_demo_user_mutable(user)
-    if data.name is not None and name_policy.is_blocked_name(data.name):
-        raise AgentProfileNameInvalidError("사용할 수 없는 닉네임입니다.")
-    if data.handle is not None and name_policy.is_blocked_name(data.handle):
-        raise AgentHandleInvalidError("사용할 수 없는 핸들입니다.")
-    old_avatar_url = character.avatar_url
-    old_banner_url = character.banner_url
-    try:
-        community_crud.update_character_profile(db, character, data)
-    except community_crud.CharacterHandleConflictError as exc:
-        raise AgentHandleConflictError(str(exc)) from exc
-    except community_crud.InvalidCharacterHandleError as exc:
-        raise AgentHandleInvalidError(str(exc)) from exc
-    if character.avatar_url != old_avatar_url or character.banner_url != old_banner_url:
+    return character_management.update_profile(db, user, character_id, data, workflows=build_character_management_workflows())
+
+
+def _after_character_profile_updated(db, user, character, media_changed) -> schemas.AgentDetailRead:
+    if media_changed:
         _invalidate_image_visual_identity_if_present(db, character.id)
     agent_crud.log_activity(
         db,
@@ -1021,12 +959,9 @@ def update_promotion_usage(
     character_id: str,
     data: schemas.AgentPromotionUsageUpdate,
 ) -> schemas.AgentDetailRead:
-    character = _get_owned_character(db, user, character_id)
-    demo_lock.ensure_demo_user_mutable(user)
-    _set_promotion_usage(character, data.promotion_usage_allowed)
-    db.commit()
-    db.refresh(character)
-    return _build_agent_detail(db, character)
+    return character_management.update_promotion_usage(db, user, character_id, data, workflows=build_character_management_workflows())
+
+
 
 
 def update_persona(
@@ -1035,10 +970,10 @@ def update_persona(
     character_id: str,
     data: schemas.AgentPersonaUpdate,
 ) -> schemas.AgentDetailRead:
-    character = _get_owned_character(db, user, character_id)
-    demo_lock.ensure_demo_user_mutable(user)
-    ensure_persona_prompt_safety(data)
-    community_crud.update_character_persona(db, character, data)
+    return character_management.update_persona(db, user, character_id, data, workflows=build_character_management_workflows())
+
+
+def _after_character_persona_updated(db, user, character) -> schemas.AgentDetailRead:
     setting = agent_crud.ensure_setting(db, character.id)
     _clear_tendency_analysis(setting)
     db.commit()
@@ -1374,7 +1309,7 @@ def _ensure_credential_world_scope(
     db: Session,
     *,
     user: models.User,
-    character: models.Character,
+    character: character_models.Character,
     world_id: str | None,
 ) -> None:
     if world_id is None:
@@ -1690,7 +1625,7 @@ def activate_agent(
                 character_id=character_id,
                 commit=True,
             )
-        activated_character = db.get(models.Character, activated_character_id)
+        activated_character = db.get(character_models.Character, activated_character_id)
         if activated_character is None:
             raise AgentNotFoundError(activated_character_id)
         return _build_agent_detail(db, activated_character)
@@ -1962,8 +1897,8 @@ def _quarantine_agent_private_media(
 ) -> profile_media.PrivateMediaQuarantine:
     candidate_ids = list(
         db.scalars(
-            select(models.ProfileImageCandidate.id).where(
-                models.ProfileImageCandidate.character_id == character_id
+            select(character_models.ProfileImageCandidate.id).where(
+                character_models.ProfileImageCandidate.character_id == character_id
             )
         )
     )
@@ -1976,7 +1911,7 @@ def _quarantine_agent_private_media(
     return profile_media.quarantine_private_media(paths)
 
 
-def _build_tendency_analysis_prompt(*, character: models.Character) -> str:
+def _build_tendency_analysis_prompt(*, character: character_models.Character) -> str:
     return f"""You are an Angmoo persona activity analyst.
 
 Task:
@@ -2333,7 +2268,7 @@ def _ensure_tendency_analysis_ready(setting: models.AgentActivitySetting) -> Non
 def _activity_profile_readiness(
     db: Session,
     *,
-    character: models.Character,
+    character: character_models.Character,
     setting: models.AgentActivitySetting,
 ) -> schemas.AgentActivityProfileReadinessRead:
     return activity_profile_readiness.evaluate(
@@ -2346,7 +2281,7 @@ def _activity_profile_readiness(
 def _ensure_activity_profile_ready(
     db: Session,
     *,
-    character: models.Character,
+    character: character_models.Character,
     setting: models.AgentActivitySetting,
 ) -> schemas.AgentActivityProfileReadinessRead:
     readiness = _activity_profile_readiness(
@@ -2381,7 +2316,7 @@ def _bind_slot_auth_profile(
     slot: schemas.AgentSlotRead,
     *,
     user_id: str,
-    character: models.Character,
+    character: character_models.Character,
     credential: models.LlmCredential,
 ) -> None:
     try:
@@ -2525,7 +2460,7 @@ def _ensure_claimed_temporary_run_now_scheduler_safe(
 def _ensure_imported_world_runtime_enabled(
     db: Session,
     *,
-    character: models.Character,
+    character: character_models.Character,
 ) -> None:
     """Keep an imported World inert until its explicit autonomy enable step.
 
@@ -2670,36 +2605,8 @@ async def run_agent_now(
             raise cleanup_error
 
 
-def _get_owned_character(
-    db: Session, user: models.User, character_id: str
-) -> models.Character:
-    character = community_crud.get_character(db, character_id)
-    if character is None or character.deleted_at is not None or character.owner_id != user.id:
-        raise AgentNotFoundError(character_id)
-    return character
-
-
-def _ensure_not_suspended(character: models.Character) -> None:
-    if character.moderation_status == "suspended":
-        raise AgentSuspendedError("character_suspended")
-
-
-def _is_local_mode(character: models.Character) -> bool:
-    return character.execution_mode == "local"
-
-
-def _ensure_llm_mode(character: models.Character) -> None:
-    if _is_local_mode(character):
-        raise AgentExecutionModeError(LOCAL_MODE_LLM_BLOCKED_MESSAGE)
-
-
-def _ensure_local_mode(character: models.Character) -> None:
-    if character.execution_mode != "local":
-        raise AgentExecutionModeError("로컬 모드 앵무에서만 local key를 사용할 수 있습니다.")
-
-
 def _local_connection_read(
-    db: Session, character: models.Character
+    db: Session, character: character_models.Character
 ) -> schemas.AgentLocalConnectionRead:
     active_key = agent_crud.get_active_local_key(db, character.id)
     key = active_key or agent_crud.get_latest_local_key(db, character.id)
@@ -2839,7 +2746,7 @@ def _clear_resident_slots_for_agent(
         slot.last_error = None
 
 
-def _scrub_agent_data(db: Session, character: models.Character) -> None:
+def _scrub_agent_data(db: Session, character: character_models.Character) -> None:
     now = datetime.now(UTC)
     character_id = character.id
 
@@ -2855,9 +2762,9 @@ def _scrub_agent_data(db: Session, character: models.Character) -> None:
     candidate_rows = list(
         db.execute(
             select(
-                models.ProfileImageCandidate.id,
-                models.ProfileImageCandidate.quota_reservation_id,
-            ).where(models.ProfileImageCandidate.character_id == character_id)
+                character_models.ProfileImageCandidate.id,
+                character_models.ProfileImageCandidate.quota_reservation_id,
+            ).where(character_models.ProfileImageCandidate.character_id == character_id)
         )
     )
     candidate_ids = [row.id for row in candidate_rows]
@@ -2868,14 +2775,14 @@ def _scrub_agent_data(db: Session, character: models.Character) -> None:
     ]
     if candidate_ids:
         db.execute(
-            delete(models.ProfileImageCandidate).where(
-                models.ProfileImageCandidate.id.in_(candidate_ids)
+            delete(character_models.ProfileImageCandidate).where(
+                character_models.ProfileImageCandidate.id.in_(candidate_ids)
             )
         )
     if candidate_reservation_ids:
         db.execute(
-            delete(models.ProfileImageQuotaReservation).where(
-                models.ProfileImageQuotaReservation.id.in_(candidate_reservation_ids)
+            delete(character_models.ProfileImageQuotaReservation).where(
+                character_models.ProfileImageQuotaReservation.id.in_(candidate_reservation_ids)
             )
         )
 
@@ -2984,8 +2891,8 @@ def _scrub_agent_data(db: Session, character: models.Character) -> None:
         .values(author_name=DELETED_CHARACTER_NAME)
     )
     db.execute(
-        delete(models.CharacterState).where(
-            models.CharacterState.character_id == character_id
+        delete(character_models.CharacterState).where(
+            character_models.CharacterState.character_id == character_id
         )
     )
     db.execute(
@@ -3033,9 +2940,9 @@ def _deleted_character_handle(db: Session, character_id: str) -> str:
     candidate = base
     index = 2
     while db.scalar(
-        select(models.Character.id).where(
-            models.Character.handle == candidate,
-            models.Character.id != character_id,
+        select(character_models.Character.id).where(
+            character_models.Character.handle == candidate,
+            character_models.Character.id != character_id,
         )
     ):
         suffix_text = f"_{index}"
@@ -3068,7 +2975,7 @@ def _claim_first_greeting_run(
     db: Session,
     *,
     user: models.User,
-    character: models.Character,
+    character: character_models.Character,
     credential: models.LlmCredential,
     run_id: str,
     session_key: str,
@@ -3112,7 +3019,7 @@ def _visible_activity_actions(actions: Iterable[str]) -> list[str]:
 
 
 def _build_agent_detail(
-    db: Session, character: models.Character, *, recent_activity_limit: int = 20
+    db: Session, character: character_models.Character, *, recent_activity_limit: int = 20
 ) -> schemas.AgentDetailRead:
     setting = agent_crud.ensure_setting(db, character.id)
     credential = agent_crud.get_character_credential(db, character.id)
@@ -3183,29 +3090,6 @@ def _build_agent_detail(
     )
 
 
-def _set_promotion_usage(character: models.Character, allowed: bool) -> None:
-    now = datetime.now(UTC)
-    was_allowed = bool(character.promotion_usage_allowed)
-    character.promotion_usage_allowed = allowed
-    if allowed:
-        if not was_allowed:
-            character.promotion_usage_agreed_at = now
-        character.promotion_usage_revoked_at = None
-        character.promotion_usage_policy_version = PROMOTION_USAGE_POLICY_VERSION
-        return
-    if was_allowed:
-        character.promotion_usage_revoked_at = now
-
-
-def _promotion_usage_read(character: models.Character) -> schemas.AgentPromotionUsageRead:
-    return schemas.AgentPromotionUsageRead(
-        promotion_usage_allowed=bool(character.promotion_usage_allowed),
-        promotion_usage_agreed_at=character.promotion_usage_agreed_at,
-        promotion_usage_revoked_at=character.promotion_usage_revoked_at,
-        promotion_usage_policy_version=character.promotion_usage_policy_version,
-    )
-
-
 def _image_generation_setting_read(
     db: Session,
     setting: models.AgentImageGenerationSetting,
@@ -3262,7 +3146,7 @@ def _image_generation_setting_read(
 def _service_image_quota_read(db: Session, character_id: str) -> dict[str, int | str]:
     quota_date = datetime.now(agent_activity_policy.APP_TIMEZONE).date()
     limit = settings.pollinations_service_free_images_per_user_day
-    character = db.get(models.Character, character_id)
+    character = db.get(character_models.Character, character_id)
     used = (
         community_crud.count_service_image_quota_used(
             db,
@@ -3290,26 +3174,6 @@ def _invalidate_image_visual_identity_if_present(db: Session, character_id: str)
     setting.visual_identity_source_hash = None
 
 
-def _agent_list_sort_key(
-    agent: schemas.AgentDetailRead,
-) -> tuple[int, float, str, str]:
-    is_running = agent.assigned_slot is not None and agent.assigned_slot.status == "running"
-    recency_candidates = [
-        value
-        for value in (
-            agent.assigned_slot.last_run_at if agent.assigned_slot else None,
-            agent.activity_summary.last_activity_at,
-        )
-        if value is not None
-    ]
-    latest = max(recency_candidates) if recency_candidates else None
-    latest_timestamp = latest.timestamp() if latest else 0.0
-    return (
-        0 if is_running else 1,
-        -latest_timestamp,
-        agent.character.name.casefold(),
-        agent.character.id,
-    )
 
 
 def _activity_log_read(
@@ -3332,7 +3196,7 @@ def _activity_log_target_profile(
         return None
     profile_type, profile_id = match.group(1), match.group(2)
     if profile_type == "character":
-        character = db.get(models.Character, profile_id)
+        character = db.get(character_models.Character, profile_id)
         if character is None:
             return None
         return {
@@ -3352,3 +3216,19 @@ def _activity_log_target_profile(
         "target_profile_handle": None,
         "target_profile_avatar_url": None,
     }
+
+
+def build_character_management_workflows() -> CharacterManagementWorkflows:
+    """Bind the current runtime callbacks (also honoring caller/test overrides)."""
+    return CharacterManagementWorkflows(
+        validate_initial_activity=_validate_initial_activity_settings,
+        after_create=_after_character_created,
+        build_detail=_build_agent_detail,
+        build_full_detail=_build_full_character_detail,
+        after_profile=_after_character_profile_updated,
+        after_persona=_after_character_persona_updated,
+    )
+
+
+def _build_full_character_detail(db: Session, character: character_models.Character) -> schemas.AgentDetailRead:
+    return _build_agent_detail(db, character, recent_activity_limit=AGENT_DETAIL_ACTIVITY_LIMIT)

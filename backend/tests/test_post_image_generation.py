@@ -24,14 +24,8 @@ from app.core.image_generation import (
 )
 from app.config import settings
 from app.cruds import agents as agent_crud
-from app.services import (
-    agents as agent_service,
-    image_prompt_safety,
-    pollinations_image,
-    post_image_generation,
-    profile_media,
-    service_image_key,
-)
+from app.services import (image_prompt_safety, pollinations_image, post_image_generation, profile_media, service_image_key)
+from app.runtime.characters import management as agent_service
 
 
 def test_image_generation_setting_update_bounds() -> None:

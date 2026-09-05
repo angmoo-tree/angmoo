@@ -5,7 +5,7 @@ from __future__ import annotations
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
-from app.domains.characters.infrastructure.sqlalchemy_models import Character
+from app.domains.characters.models import Character
 from app.domains.chat.domain.retrieval_intent import RetrievalContractError
 from app.domains.chat.infrastructure.sqlalchemy_models import MessageThread
 from app.domains.chat.ports.retrieval_policy import (

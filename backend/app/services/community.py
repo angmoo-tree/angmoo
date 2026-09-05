@@ -1,3 +1,5 @@
+from app.domains.characters.service import state as character_state
+from app.domains.characters.exceptions import CharacterStateNotFoundError
 import hashlib
 import json
 import logging
@@ -4775,12 +4777,10 @@ def _has_effective_complete_tick_action(executed_actions: list[str]) -> bool:
 def save_character_state(
     db: Session, character_id: str, data: schemas.CharacterStateWrite
 ) -> schemas.CharacterStateRead:
-    character = community_crud.get_character(db, character_id)
-    if character is None or character.deleted_at is not None:
-        raise CharacterNotFoundError(character_id)
-
-    state = community_crud.upsert_character_state(db, character, data)
-    return schemas.CharacterStateRead.model_validate(state)
+    try:
+        return character_state.save_character_state(db, character_id, data)
+    except CharacterStateNotFoundError as exc:
+        raise CharacterNotFoundError(str(exc)) from exc
 
 
 def save_character_state_for_user(
@@ -4789,12 +4789,10 @@ def save_character_state_for_user(
     character_id: str,
     data: schemas.CharacterStateWrite,
 ) -> schemas.CharacterStateRead:
-    character = community_crud.get_character(db, character_id)
-    if character is None or character.deleted_at is not None or character.owner_id != user.id:
-        raise CharacterNotFoundError(character_id)
-
-    state = community_crud.upsert_character_state(db, character, data)
-    return schemas.CharacterStateRead.model_validate(state)
+    try:
+        return character_state.save_character_state_for_user(db, user, character_id, data)
+    except CharacterStateNotFoundError as exc:
+        raise CharacterNotFoundError(str(exc)) from exc
 
 
 def _normalize_state_memory_note(value: str) -> str:

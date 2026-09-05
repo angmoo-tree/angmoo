@@ -307,25 +307,40 @@
     {
       "markers": {
         "advisory_lock": [
-          376,
-          1266
+          340,
+          1087
         ],
         "driver_or_url": [
-          373,
-          493,
-          1256
+          337,
+          457,
+          1077
         ],
         "row_lock": [
-          494
+          458
         ],
         "skip_locked": [
-          494
+          458
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/cruds/community.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "97ef9826633ed1077de483f54ef2ae804bd7ef41710645f70a6fbb1bf8caa4fe",
+      "source_sha256": "49fa147559b655afdef296ac799498f8c281131e2bf4265031f4d22114e52912",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          160
+        ],
+        "driver_or_url": [
+          157
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/characters/service/image_quota.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "539e1a4f91c7223f57cadbedaf9f41e6fe16c4686a88ac9d0fae6a4779b22aa4",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -748,6 +763,23 @@
     {
       "markers": {
         "advisory_lock": [
+          508,
+          2994
+        ],
+        "driver_or_url": [
+          505,
+          2985
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/runtime/characters/management.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "67feb99b1309af19a68dcc948726f5762f1be0c15c6414b6792d836213aca707",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
           306,
           561,
           664
@@ -964,38 +996,6 @@
     },
     {
       "markers": {
-        "advisory_lock": [
-          1424
-        ],
-        "driver_or_url": [
-          1421
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/services/agent_creation_drafts.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "9db47420210f30557d46b02c196f26e09a7d8e2bf161a07680968b2332dd6e79",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "advisory_lock": [
-          559,
-          3087
-        ],
-        "driver_or_url": [
-          556,
-          3078
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/services/agents.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "39bbf4efe0126204516a851f3e618bc287b8c4fbacdcbed253223e19ae8afddf",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
         "driver_or_url": [
           461
         ],
@@ -1118,6 +1118,18 @@
     },
     {
       "markers": {
+        "pgvector": [
+          30
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/pyproject.toml",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "795125bab3be5f77aa35ae43d262beac0d7ee5af8fd482b110d98ee94c811a76",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
         "advisory_lock": [
           17,
           33,
@@ -1196,12 +1208,12 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 76,
+  "entry_count": 77,
   "marker_counts": {
     "advisory_lock": 9,
     "driver_or_url": 48,
     "jsonb": 9,
-    "pgvector": 4,
+    "pgvector": 5,
     "row_lock": 31,
     "skip_locked": 7
   },

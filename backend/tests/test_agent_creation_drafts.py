@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.services import agent_creation_drafts as draft_service
+from app.runtime.characters import creator as draft_service
 
 
 PNG_BYTES = base64.b64decode(

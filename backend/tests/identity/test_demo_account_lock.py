@@ -8,10 +8,11 @@ from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from app import models, schemas
 from app.domains.identity import dependencies as api_deps
 from app.api.v1.routes import agents as agent_routes
+from app.domains.characters import router as character_routes
 from app.domains.identity.router import auth as auth_routes
 from app.config import settings
 from app.cruds import agents as agent_crud
-from app.services import agents as agent_service
+from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.services import local_bot as local_bot_service
@@ -383,7 +384,7 @@ def test_agent_route_returns_403_for_locked_demo_error(monkeypatch):
     def raise_locked(*args, **kwargs):
         raise agent_service.DemoAccountLockedError(demo_lock.DEMO_ACCOUNT_LOCKED_MESSAGE)
 
-    monkeypatch.setattr(agent_routes.agent_service, "update_profile", raise_locked)
+    monkeypatch.setattr(character_routes.character_service, "update_profile", raise_locked)
 
     with pytest.raises(HTTPException) as exc_info:
         agent_routes.update_profile(
@@ -398,8 +399,10 @@ def test_agent_route_returns_403_for_locked_demo_error(monkeypatch):
 
 
 def test_agent_service_blocks_profile_update_after_ownership_check(monkeypatch):
+    from app.domains.characters.service import mutations
+
     monkeypatch.setattr(
-        agent_service,
+        mutations,
         "_get_owned_character",
         lambda db, user, character_id: _character(),
     )

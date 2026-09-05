@@ -19,7 +19,7 @@ from app.core.db import Base, get_db
 from app.cruds import agent_runs as agent_run_crud
 from app.domains.world_characters.api.routes import router
 from app.services import agent_runs as agent_run_service
-from app.services import agents as agent_service
+from app.runtime.characters import management as agent_service
 
 
 FRONTEND_HEADERS = {"Origin": "http://127.0.0.1:3000"}

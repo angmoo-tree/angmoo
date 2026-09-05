@@ -66,7 +66,7 @@ from app.runtime.relationships import (
 )
 from app.runtime.search import CallbackSearchIndexAdapter
 from app.services import agent_activity_policy
-from app.services import agents as agent_service
+from app.runtime.characters import management as agent_service
 from app.services import langgraph_resident
 from app.services import (
     world_character_contracts,
