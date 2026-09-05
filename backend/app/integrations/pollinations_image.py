@@ -14,10 +14,11 @@ from urllib.request import Request
 
 from app.config import settings
 from app.integrations import bounded_http
-from app.services import provider_http
+from app.integrations import provider_http
 
 
-logger = logging.getLogger(__name__)
+# Preserve the existing logging category used by deployment filters.
+logger = logging.getLogger("app.services.pollinations_image")
 
 POLLINATIONS_IMAGE_URL = "https://gen.pollinations.ai/image"
 POLLINATIONS_REFERER = "https://angmoo.com"

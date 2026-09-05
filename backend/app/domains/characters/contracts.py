@@ -38,6 +38,8 @@ __all__ = [
     "CharacterOwner",
     "CharacterManagementWorkflows",
     "CreatorWorkflows",
+    "CharacterMediaWorkflows",
+    "CharacterImageGenerationWorkflows",
 ]
 
 
@@ -90,3 +92,30 @@ class CreatorWorkflows:
         [Session, CharacterOwner, schemas.AgentCreate], schemas.AgentDetailRead
     ]
     read_character: Callable[[Session, CharacterOwner, str], schemas.AgentDetailRead]
+
+
+class MediaActivityLog(Protocol):
+    def __call__(
+        self, db: Session, *, user_id: str, character_id: str, action_type: str,
+        target_post_id: str | None, reason: str, result: str,
+    ) -> object: ...
+
+
+@dataclass(frozen=True)
+class CharacterMediaWorkflows:
+    """Activity/image-setting collaboration in the caller's existing Session."""
+
+    invalidate_visual_identity: Callable[[Session, str], None]
+    log_activity: MediaActivityLog
+    build_detail: Callable[[Session, models.Character], schemas.AgentDetailRead]
+
+
+@dataclass(frozen=True)
+class CharacterImageGenerationWorkflows:
+    """External settings/key/translation used at the original admission points."""
+
+    get_model: Callable[[Session], str]
+    get_route_mode: Callable[[Session], str]
+    image_key_available: Callable[[str], bool]
+    resolve_api_key: Callable[[str], str | None]
+    translate_prompt: Callable[[str], str]
