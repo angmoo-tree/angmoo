@@ -681,11 +681,9 @@
         "backend/app/api/v1/routes/character_lore.py",
         "backend/app/api/v1/routes/worlds.py",
         "backend/app/domains/characters/__init__.py",
-        "backend/app/domains/characters/domain/__init__.py",
-        "backend/app/domains/characters/domain/seed.py",
-        "backend/app/domains/characters/infrastructure/__init__.py",
-        "backend/app/domains/characters/infrastructure/sqlalchemy_models.py",
-        "backend/app/domains/characters/infrastructure/sqlalchemy_seed.py",
+        "backend/app/domains/characters/contracts.py",
+        "backend/app/domains/characters/models.py",
+        "backend/app/domains/characters/service/seed.py",
         "backend/app/domains/characters/public.py",
         "backend/app/domains/worlds/__init__.py",
         "backend/app/domains/worlds/api/__init__.py",
@@ -740,7 +738,14 @@
         "frontend/src/features/creator-studio/ui/creator-studio-frame.tsx",
         "frontend/src/features/creator-studio/ui/creator-studio-shell.module.css",
         "frontend/src/features/creator-studio/ui/creator-studio-shell.tsx",
-        "frontend/src/features/creator-studio/ui/studio-world-character-list.tsx"
+        "frontend/src/features/creator-studio/ui/studio-world-character-list.tsx",
+        "backend/app/domains/media/schemas.py",
+        "backend/app/domains/characters/exceptions.py",
+        "backend/app/domains/characters/schemas.py",
+        "backend/app/domains/characters/service/__init__.py",
+        "backend/app/domains/characters/service/profile.py",
+        "backend/app/domains/characters/service/state.py",
+        "backend/tests/characters/test_character_foundation.py"
       ],
       "target_paths": [
         "backend/app/domains/worlds/service.py",
@@ -905,10 +910,11 @@
         "baseline": "security/refactor_source_baseline.json",
         "backend": "1845 passed / 22 skipped, source tree unchanged",
         "item_status": "MAPPED; test association is navigation, not a claim every branch is covered",
-        "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
+        "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending",
+        "character_foundation": "Local focused tests: 32 passed, 1 existing warning. New roles plus existing create/consent/Package/WorldCharacter suites; CI/merge and remaining B2-B pending."
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet. AR-B2-B1 Character foundation moved: same ORM/schema identity, separate profile commit vs seed flush-only, caller-owned state write. Creator/readiness/World/runtime portions remain pending; no whole-domain completion claim.",
       "backend_status": "MAPPED",
       "frontend_status": "MAPPED"
     },
@@ -5888,7 +5894,7 @@
       "status": "MAPPED",
       "current_paths": [
         "backend/app/core/db.py",
-        "backend/app/domains/characters/infrastructure/sqlalchemy_models.py",
+        "backend/app/domains/characters/models.py",
         "backend/app/domains/chat/infrastructure/sqlalchemy_models.py",
         "backend/app/domains/identity/infrastructure/sqlalchemy_auth_models.py",
         "backend/app/domains/identity/infrastructure/sqlalchemy_credential_models.py",
@@ -5946,8 +5952,8 @@
         "backend/app/core/db.py::get_default_session_factory",
         "backend/app/core/db.py::SessionLocal",
         "backend/app/core/db.py::get_db",
-        "backend/app/domains/characters/infrastructure/sqlalchemy_models.py::Character",
-        "backend/app/domains/characters/infrastructure/sqlalchemy_models.py::CharacterState",
+        "backend/app/domains/characters/models.py::Character",
+        "backend/app/domains/characters/models.py::CharacterState",
         "backend/app/domains/chat/infrastructure/sqlalchemy_models.py::_sql_values",
         "backend/app/domains/chat/infrastructure/sqlalchemy_models.py::CharacterMessageSetting",
         "backend/app/domains/chat/infrastructure/sqlalchemy_models.py::UserMessagePreference",
@@ -5988,8 +5994,8 @@
         "backend/app/cruds/agents.py",
         "backend/app/cruds/community.py",
         "backend/app/cruds/tree.py",
-        "backend/app/domains/characters/infrastructure/__init__.py",
-        "backend/app/domains/characters/infrastructure/sqlalchemy_seed.py",
+        "backend/app/domains/characters/models.py",
+        "backend/app/domains/characters/service/seed.py",
         "backend/app/domains/characters/public.py",
         "backend/app/domains/chat/infrastructure/model_binding_migration.py",
         "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py",
@@ -6547,7 +6553,7 @@
         "backend/app/api/v1/deps.py",
         "backend/app/api/v1/routes/manual_social.py",
         "backend/app/api/v1/routes/runtime_status.py",
-        "backend/app/domains/characters/infrastructure/sqlalchemy_models.py",
+        "backend/app/domains/characters/models.py",
         "backend/app/domains/chat/infrastructure/model_binding_migration.py",
         "backend/app/domains/chat/infrastructure/sqlalchemy_models.py",
         "backend/app/domains/chat/infrastructure/world_scope_migration.py",
@@ -10066,7 +10072,7 @@
         "backend/app/schemas/__init__.py",
         "backend/app/schemas/agents.py",
         "backend/app/schemas/maintenance.py",
-        "backend/app/schemas/media_security.py",
+        "backend/app/domains/media/schemas.py",
         "backend/app/schemas/routine_post.py",
         "backend/app/schemas/social_memory.py",
         "backend/app/schemas/tree.py",
@@ -10165,7 +10171,7 @@
         "backend/app/cruds/agent_runs.py",
         "backend/app/cruds/agents.py",
         "backend/app/cruds/community.py",
-        "backend/app/domains/characters/infrastructure/sqlalchemy_seed.py",
+        "backend/app/domains/characters/service/seed.py",
         "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
         "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
         "backend/app/domains/routines/infrastructure/sqlalchemy_daily_activity_plans.py",
@@ -10406,11 +10412,13 @@
           "stage": "AR-B3",
           "status": "MAPPED",
           "source_paths": [
+            "backend/app/domains/media/schemas.py",
             "backend/app/schemas/media_security.py"
           ],
           "target_paths": [
             "backend/app/domains/media/schemas.py"
-          ]
+          ],
+          "notes": "Validator implementation extracted unchanged during AR-B2-B1 into media.schemas. Existing media_security path is the same-function compatibility export; its remaining consumers retire in AR-B3."
         },
         {
           "owner": "activity_maintenance",

@@ -1,7 +1,7 @@
 {
-  "edge_count": 1827,
-  "external_import_count": 2015,
-  "module_count": 591,
+  "edge_count": 1841,
+  "external_import_count": 2024,
+  "module_count": 596,
   "modules": [
     {
       "external_imports": [],
@@ -835,6 +835,9 @@
         "app.core.security",
         "app.core.unit_of_work",
         "app.cruds.agents",
+        "app.domains.characters.exceptions",
+        "app.domains.characters.service.profile",
+        "app.domains.characters.service.state",
         "app.models",
         "app.schemas"
       ],
@@ -869,29 +872,20 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.domains.characters.domain",
-      "path": "backend/app/domains/characters/domain/__init__.py",
-      "wildcard_imports": []
-    },
-    {
       "external_imports": [
         "__future__",
         "dataclasses"
       ],
       "imports": [],
-      "module": "app.domains.characters.domain.seed",
-      "path": "backend/app/domains/characters/domain/seed.py",
+      "module": "app.domains.characters.contracts",
+      "path": "backend/app/domains/characters/contracts.py",
       "wildcard_imports": []
     },
     {
       "external_imports": [],
-      "imports": [
-        "app.domains.characters.infrastructure.sqlalchemy_models"
-      ],
-      "module": "app.domains.characters.infrastructure",
-      "path": "backend/app/domains/characters/infrastructure/__init__.py",
+      "imports": [],
+      "module": "app.domains.characters.exceptions",
+      "path": "backend/app/domains/characters/exceptions.py",
       "wildcard_imports": []
     },
     {
@@ -904,8 +898,57 @@
       "imports": [
         "app.core.db"
       ],
-      "module": "app.domains.characters.infrastructure.sqlalchemy_models",
-      "path": "backend/app/domains/characters/infrastructure/sqlalchemy_models.py",
+      "module": "app.domains.characters.models",
+      "path": "backend/app/domains/characters/models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.characters.contracts",
+        "app.domains.characters.models",
+        "app.domains.characters.service.seed"
+      ],
+      "module": "app.domains.characters.public",
+      "path": "backend/app/domains/characters/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.media.schemas",
+        "app.providers.registry"
+      ],
+      "module": "app.domains.characters.schemas",
+      "path": "backend/app/domains/characters/schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.characters.service",
+      "path": "backend/app/domains/characters/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "re",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.exceptions",
+        "app.domains.characters.models",
+        "app.domains.characters.schemas",
+        "app.domains.identity.public"
+      ],
+      "module": "app.domains.characters.service.profile",
+      "path": "backend/app/domains/characters/service/profile.py",
       "wildcard_imports": []
     },
     {
@@ -918,22 +961,25 @@
       ],
       "imports": [
         "app.core.ids",
-        "app.domains.characters.domain.seed",
-        "app.domains.characters.infrastructure.sqlalchemy_models"
+        "app.domains.characters.contracts",
+        "app.domains.characters.models"
       ],
-      "module": "app.domains.characters.infrastructure.sqlalchemy_seed",
-      "path": "backend/app/domains/characters/infrastructure/sqlalchemy_seed.py",
+      "module": "app.domains.characters.service.seed",
+      "path": "backend/app/domains/characters/service/seed.py",
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
-      "imports": [
-        "app.domains.characters.domain.seed",
-        "app.domains.characters.infrastructure.sqlalchemy_models",
-        "app.domains.characters.infrastructure.sqlalchemy_seed"
+      "external_imports": [
+        "datetime",
+        "sqlalchemy.orm"
       ],
-      "module": "app.domains.characters.public",
-      "path": "backend/app/domains/characters/public.py",
+      "imports": [
+        "app.core.unit_of_work",
+        "app.domains.characters.models",
+        "app.domains.characters.schemas"
+      ],
+      "module": "app.domains.characters.service.state",
+      "path": "backend/app/domains/characters/service/state.py",
       "wildcard_imports": []
     },
     {
@@ -1958,6 +2004,22 @@
       ],
       "module": "app.domains.identity.public",
       "path": "backend/app/domains/identity/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.media",
+      "path": "backend/app/domains/media/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "urllib.parse"
+      ],
+      "imports": [],
+      "module": "app.domains.media.schemas",
+      "path": "backend/app/domains/media/schemas.py",
       "wildcard_imports": []
     },
     {
@@ -5601,6 +5663,7 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.characters.models",
         "app.domains.chat.infrastructure.sqlalchemy_models",
         "app.domains.identity.infrastructure",
         "app.domains.memory.infrastructure.batch_models",
@@ -5618,7 +5681,6 @@
         "app.models.agent_settings",
         "app.models.agent_slots",
         "app.models.character_lore",
-        "app.models.characters",
         "app.models.community",
         "app.models.local_bot_quotas",
         "app.models.profile_images",
@@ -5745,7 +5807,7 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.characters.public"
+        "app.domains.characters.models"
       ],
       "module": "app.models.characters",
       "path": "backend/app/models/characters.py",
@@ -6044,7 +6106,7 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.characters.infrastructure.sqlalchemy_models",
+        "app.domains.characters.models",
         "app.domains.chat.infrastructure.sqlalchemy_models",
         "app.domains.identity.infrastructure",
         "app.domains.identity.public",
@@ -6062,7 +6124,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.domains.characters.infrastructure.sqlalchemy_models",
+        "app.domains.characters.models",
         "app.domains.chat.domain.retrieval_intent",
         "app.domains.chat.infrastructure.sqlalchemy_models",
         "app.domains.chat.ports.retrieval_policy",
@@ -7492,6 +7554,7 @@
       "imports": [
         "app.core.agent_activity_limits",
         "app.core.image_generation",
+        "app.domains.characters.schemas",
         "app.providers.registry",
         "app.schemas.agent_runs",
         "app.schemas.characters",
@@ -7528,6 +7591,7 @@
         "typing"
       ],
       "imports": [
+        "app.domains.characters.schemas",
         "app.schemas.community"
       ],
       "module": "app.schemas.characters",
@@ -7557,10 +7621,10 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "urllib.parse"
+      "external_imports": [],
+      "imports": [
+        "app.domains.media.schemas"
       ],
-      "imports": [],
       "module": "app.schemas.media_security",
       "path": "backend/app/schemas/media_security.py",
       "wildcard_imports": []

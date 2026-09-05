@@ -119,7 +119,13 @@
     "backend/app/alembic/versions/20260831_0086_chat_response_request_lifecycle.py": "backend/alembic/versions/20260831_0086_chat_response_request_lifecycle.py",
     "backend/app/alembic/versions/20260903_0087_world_chat_model_binding.py": "backend/alembic/versions/20260903_0087_world_chat_model_binding.py",
     "backend/app/alembic/versions/20260904_0088_social_action_subjective_context.py": "backend/alembic/versions/20260904_0088_social_action_subjective_context.py",
-    "backend/app/alembic/versions/20260904_0089_memory_batch.py": "backend/alembic/versions/20260904_0089_memory_batch.py"
+    "backend/app/alembic/versions/20260904_0089_memory_batch.py": "backend/alembic/versions/20260904_0089_memory_batch.py",
+    "backend/app/domains/characters/infrastructure/sqlalchemy_models.py": "backend/app/domains/characters/models.py",
+    "backend/app/domains/characters/domain/seed.py": "backend/app/domains/characters/contracts.py",
+    "backend/app/domains/characters/infrastructure/sqlalchemy_seed.py": "backend/app/domains/characters/service/seed.py",
+    "backend/app/schemas/media_security.py": "backend/app/domains/media/schemas.py",
+    "backend/app/domains/characters/domain/__init__.py": "backend/app/domains/characters/contracts.py",
+    "backend/app/domains/characters/infrastructure/__init__.py": "backend/app/domains/characters/models.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -202,6 +208,1726 @@
       "verification": "tests/migrations/test_alembic_layout.py checks PR263 revision Git blobs, actual Alembic graph, external-cwd CLI, and metadata registration on a real in-memory SQLite connection without executing historical upgrades.",
       "remaining": "AR-G5 must reconnect and revalidate the final app.models Base and model registration. G13 final completion and PR/merge/Actions are not claimed by this physical move.",
       "security": "Add only the exact new 0072 revision path to the existing fixed-marker Gitleaks allowance; retain the old path for history scans. No secret-value or rule widening."
+    },
+    "AR-B2-B1": {
+      "reason": "Move Character foundation implementations into flat roles while preserving existing legacy Creator/activity/runtime consumers; remaining source symbols explicitly stay in place. Test links are affected regression navigation, not exhaustive per-symbol coverage.",
+      "split_files": {
+        "backend/app/cruds/community.py": [
+          "backend/app/cruds/community.py",
+          "backend/app/domains/characters/exceptions.py",
+          "backend/app/domains/characters/service/profile.py",
+          "backend/app/domains/characters/service/state.py"
+        ],
+        "backend/app/schemas/characters.py": [
+          "backend/app/domains/characters/schemas.py",
+          "backend/app/schemas/characters.py"
+        ],
+        "backend/app/schemas/agents.py": [
+          "backend/app/domains/characters/schemas.py",
+          "backend/app/schemas/agents.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/cruds/community.py::HIDDEN_AGENT_ACTIVITY_ACTION_TYPES",
+          "new": "backend/app/cruds/community.py::HIDDEN_AGENT_ACTIVITY_ACTION_TYPES",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::PUBLIC_ACTIVITY_ACTION_ALIASES",
+          "new": "backend/app/cruds/community.py::PUBLIC_ACTIVITY_ACTION_ALIASES",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_public_activity_security.py::test_public_activity_event_normalizes_unknown_actions_without_raw_fallback",
+            "tests/test_public_activity_security.py::test_public_activity_event_replaces_raw_reason_and_result_with_safe_summary"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::PUBLIC_ACTIVITY_ACTION_TYPES",
+          "new": "backend/app/cruds/community.py::PUBLIC_ACTIVITY_ACTION_TYPES",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_public_activity_security.py::test_public_activity_event_normalizes_unknown_actions_without_raw_fallback",
+            "tests/test_public_activity_security.py::test_public_activity_event_replaces_raw_reason_and_result_with_safe_summary"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::PUBLIC_ACTIVITY_SUMMARIES",
+          "new": "backend/app/cruds/community.py::PUBLIC_ACTIVITY_SUMMARIES",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_public_activity_security.py::test_public_activity_event_normalizes_unknown_actions_without_raw_fallback",
+            "tests/test_public_activity_security.py::test_public_activity_event_replaces_raw_reason_and_result_with_safe_summary"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::HANDLE_RE",
+          "new": "backend/app/domains/characters/service/profile.py::HANDLE_RE",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::_MULTIPLE_NEWLINES_RE",
+          "new": "backend/app/cruds/community.py::_MULTIPLE_NEWLINES_RE",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_visible_post_text_sanitizer.py::test_visible_body_converts_literal_newline_escapes",
+            "tests/test_visible_post_text_sanitizer.py::test_visible_body_preserves_real_newlines_and_limits_blank_runs",
+            "tests/test_visible_post_text_sanitizer.py::test_visible_sanitizer_does_not_decode_general_json_escapes"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::sanitize_visible_post_title",
+          "new": "backend/app/cruds/community.py::sanitize_visible_post_title",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_visible_post_text_sanitizer.py::test_visible_title_collapses_literal_and_real_newline_escapes"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::sanitize_visible_post_body",
+          "new": "backend/app/cruds/community.py::sanitize_visible_post_body",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_visible_post_text_sanitizer.py::test_visible_body_converts_literal_newline_escapes",
+            "tests/test_visible_post_text_sanitizer.py::test_visible_body_preserves_real_newlines_and_limits_blank_runs",
+            "tests/test_visible_post_text_sanitizer.py::test_visible_sanitizer_does_not_decode_general_json_escapes"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::_visible_post_conditions",
+          "new": "backend/app/cruds/community.py::_visible_post_conditions",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
+            "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
+            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::_visible_reference_conditions",
+          "new": "backend/app/cruds/community.py::_visible_reference_conditions",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
+            "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
+            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::is_report_hidden",
+          "new": "backend/app/cruds/community.py::is_report_hidden",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::CharacterHandleConflictError",
+          "new": "backend/app/domains/characters/exceptions.py::CharacterHandleConflictError",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::InvalidCharacterHandleError",
+          "new": "backend/app/domains/characters/exceptions.py::InvalidCharacterHandleError",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::_like_search_terms",
+          "new": "backend/app/cruds/community.py::_like_search_terms",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::_like_pattern",
+          "new": "backend/app/cruds/community.py::_like_pattern",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::_parse_int_cursor",
+          "new": "backend/app/cruds/community.py::_parse_int_cursor",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_notifications_hide_user_and_recipient_fields"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::normalize_character_handle",
+          "new": "backend/app/domains/characters/service/profile.py::normalize_character_handle",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::_fallback_handle",
+          "new": "backend/app/domains/characters/service/profile.py::_fallback_handle",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::_ensure_available_handle",
+          "new": "backend/app/domains/characters/service/profile.py::_ensure_available_handle",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::validate_character_handle_for_create",
+          "new": "backend/app/domains/characters/service/profile.py::validate_character_handle_for_create",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::character_has_authored_post",
+          "new": "backend/app/cruds/community.py::character_has_authored_post",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_posts",
+          "new": "backend/app/cruds/community.py::list_posts",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
+            "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
+            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::get_post",
+          "new": "backend/app/cruds/community.py::get_post",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::get_post_including_report_hidden",
+          "new": "backend/app/cruds/community.py::get_post_including_report_hidden",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_post_media",
+          "new": "backend/app/cruds/community.py::list_post_media",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::create_post_media",
+          "new": "backend/app/cruds/community.py::create_post_media",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::create_post_image_generation_job",
+          "new": "backend/app/cruds/community.py::create_post_image_generation_job",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::lock_service_image_quota",
+          "new": "backend/app/cruds/community.py::lock_service_image_quota",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_service_image_quota_used",
+          "new": "backend/app/cruds/community.py::count_service_image_quota_used",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_service_image_global_used",
+          "new": "backend/app/cruds/community.py::count_service_image_global_used",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::create_post_image_quota_reservation",
+          "new": "backend/app/cruds/community.py::create_post_image_quota_reservation",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::update_post_image_quota_reservation",
+          "new": "backend/app/cruds/community.py::update_post_image_quota_reservation",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::get_post_image_quota_reservation",
+          "new": "backend/app/cruds/community.py::get_post_image_quota_reservation",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_active_post_image_jobs_for_character_between",
+          "new": "backend/app/cruds/community.py::count_active_post_image_jobs_for_character_between",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::claim_next_post_image_generation_job",
+          "new": "backend/app/cruds/community.py::claim_next_post_image_generation_job",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::mark_stale_post_image_generation_jobs_failed",
+          "new": "backend/app/cruds/community.py::mark_stale_post_image_generation_jobs_failed",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::finish_post_image_generation_job",
+          "new": "backend/app/cruds/community.py::finish_post_image_generation_job",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_post_media_for_character_between",
+          "new": "backend/app/cruds/community.py::count_post_media_for_character_between",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::get_post_report",
+          "new": "backend/app/cruds/community.py::get_post_report",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_post_reports",
+          "new": "backend/app/cruds/community.py::count_post_reports",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::create_post_report",
+          "new": "backend/app/cruds/community.py::create_post_report",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_timeline_posts",
+          "new": "backend/app/cruds/community.py::list_timeline_posts",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_resident_scan_posts",
+          "new": "backend/app/cruds/community.py::list_resident_scan_posts",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_profile_posts",
+          "new": "backend/app/cruds/community.py::list_profile_posts",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_liked_profile_posts",
+          "new": "backend/app/cruds/community.py::list_liked_profile_posts",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::search_posts",
+          "new": "backend/app/cruds/community.py::search_posts",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::search_characters",
+          "new": "backend/app/cruds/community.py::search_characters",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_post_replies",
+          "new": "backend/app/cruds/community.py::list_post_replies",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_post_thread_replies",
+          "new": "backend/app/cruds/community.py::list_post_thread_replies",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_post_comments",
+          "new": "backend/app/cruds/community.py::count_post_comments",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_post_likes",
+          "new": "backend/app/cruds/community.py::count_post_likes",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_post_replies",
+          "new": "backend/app/cruds/community.py::count_post_replies",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
+            "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
+            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_post_reposts",
+          "new": "backend/app/cruds/community.py::count_post_reposts",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
+            "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
+            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_post_quotes",
+          "new": "backend/app/cruds/community.py::count_post_quotes",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_community_posts_route.py::test_list_posts_route_passes_limit",
+            "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
+            "tests/test_m4_tree_public_contract.py::test_tree_list_and_detail_are_readable_without_user_context"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::get_character",
+          "new": "backend/app/domains/characters/service/profile.py::get_character",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_user_characters",
+          "new": "backend/app/domains/characters/service/profile.py::count_user_characters",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_characters_for_user",
+          "new": "backend/app/domains/characters/service/profile.py::list_characters_for_user",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::create_character",
+          "new": "backend/app/domains/characters/service/profile.py::create_character",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::update_character_profile",
+          "new": "backend/app/domains/characters/service/profile.py::update_character_profile",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::update_character_persona",
+          "new": "backend/app/domains/characters/service/profile.py::update_character_persona",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::_build_persona_summary",
+          "new": "backend/app/domains/characters/service/profile.py::_build_persona_summary",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::_raise_handle_conflict_from_integrity",
+          "new": "backend/app/domains/characters/service/profile.py::_raise_handle_conflict_from_integrity",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::create_post",
+          "new": "backend/app/cruds/community.py::create_post",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_failed_domain_write_rolls_back_without_consuming_quota",
+            "tests/test_local_bot_response_contract.py::test_bot_create_post_does_not_store_metadata",
+            "tests/test_local_bot_response_contract.py::test_bot_create_post_queues_image_request"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::create_timeline_post",
+          "new": "backend/app/cruds/community.py::create_timeline_post",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_visible_post_text_sanitizer.py::test_create_timeline_post_sanitizes_reply_and_quote_body_boundary"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::create_comment",
+          "new": "backend/app/cruds/community.py::create_comment",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::like_post",
+          "new": "backend/app/cruds/community.py::like_post",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_direct_user_like_uniqueness.py::test_direct_user_like_is_idempotent_with_database_unique_boundary",
+            "tests/test_local_bot_atomic_quota.py::test_noop_like_commits_without_consuming_quota",
+            "tests/test_postgres_security_concurrency.py::test_direct_user_like_is_unique_across_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::_lock_direct_user_like",
+          "new": "backend/app/cruds/community.py::_lock_direct_user_like",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_direct_user_like_uniqueness.py::test_direct_user_like_is_idempotent_with_database_unique_boundary",
+            "tests/test_local_bot_atomic_quota.py::test_noop_like_commits_without_consuming_quota",
+            "tests/test_postgres_security_concurrency.py::test_direct_user_like_is_unique_across_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::unlike_post",
+          "new": "backend/app/cruds/community.py::unlike_post",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::create_repost",
+          "new": "backend/app/cruds/community.py::create_repost",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::get_timeline_repost",
+          "new": "backend/app/cruds/community.py::get_timeline_repost",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::delete_repost",
+          "new": "backend/app/cruds/community.py::delete_repost",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::delete_timeline_reposts",
+          "new": "backend/app/cruds/community.py::delete_timeline_reposts",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::delete_repost_event_for_timeline_post",
+          "new": "backend/app/cruds/community.py::delete_repost_event_for_timeline_post",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::delete_repost_events_for_post",
+          "new": "backend/app/cruds/community.py::delete_repost_events_for_post",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::soft_delete_timeline_reposts_for_source",
+          "new": "backend/app/cruds/community.py::soft_delete_timeline_reposts_for_source",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::soft_delete_post_tree",
+          "new": "backend/app/cruds/community.py::soft_delete_post_tree",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::get_followed_profiles_for_user",
+          "new": "backend/app/cruds/community.py::get_followed_profiles_for_user",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::get_followed_profiles_for_character",
+          "new": "backend/app/cruds/community.py::get_followed_profiles_for_character",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::get_user",
+          "new": "backend/app/cruds/community.py::get_user",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::create_follow",
+          "new": "backend/app/cruds/community.py::create_follow",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::profile_follow_exists",
+          "new": "backend/app/cruds/community.py::profile_follow_exists",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::delete_follow",
+          "new": "backend/app/cruds/community.py::delete_follow",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_profile_followers",
+          "new": "backend/app/cruds/community.py::count_profile_followers",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_profile_following",
+          "new": "backend/app/cruds/community.py::count_profile_following",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_profile_following",
+          "new": "backend/app/cruds/community.py::list_profile_following",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_profile_followers",
+          "new": "backend/app/cruds/community.py::list_profile_followers",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_profile_posts",
+          "new": "backend/app/cruds/community.py::count_profile_posts",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_profile_replies",
+          "new": "backend/app/cruds/community.py::count_profile_replies",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_profile_received_likes",
+          "new": "backend/app/cruds/community.py::count_profile_received_likes",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::count_profile_likes",
+          "new": "backend/app/cruds/community.py::count_profile_likes",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::create_notification",
+          "new": "backend/app/cruds/community.py::create_notification",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_notifications",
+          "new": "backend/app/cruds/community.py::list_notifications",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_response_contract.py::test_bot_notifications_hide_user_and_recipient_fields"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_notifications_for_agent",
+          "new": "backend/app/cruds/community.py::list_notifications_for_agent",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_notifications_for_agent_page",
+          "new": "backend/app/cruds/community.py::list_notifications_for_agent_page",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_unread_reply_notifications_for_character",
+          "new": "backend/app/cruds/community.py::list_unread_reply_notifications_for_character",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::list_unread_notifications_for_character",
+          "new": "backend/app/cruds/community.py::list_unread_notifications_for_character",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::get_notification_for_agent",
+          "new": "backend/app/cruds/community.py::get_notification_for_agent",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::get_notification_for_user",
+          "new": "backend/app/cruds/community.py::get_notification_for_user",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::mark_notification_read",
+          "new": "backend/app/cruds/community.py::mark_notification_read",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_two_user_object_authorization_matrix_denies_cross_owner_access"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::upsert_character_state",
+          "new": "backend/app/domains/characters/service/state.py::upsert_character_state",
+          "direct_consumers": [
+            "backend/app/cruds/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
+            "tests/characters/test_character_foundation.py::test_state_write_keeps_deferred_commit_participation"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::get_character_activity",
+          "new": "backend/app/cruds/community.py::get_character_activity",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::_public_activity_event",
+          "new": "backend/app/cruds/community.py::_public_activity_event",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_public_activity_security.py::test_public_activity_event_normalizes_unknown_actions_without_raw_fallback",
+            "tests/test_public_activity_security.py::test_public_activity_event_replaces_raw_reason_and_result_with_safe_summary"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::seed_demo_data",
+          "new": "backend/app/cruds/community.py::seed_demo_data",
+          "direct_consumers": [
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/characters.py::CharacterRead",
+          "new": "backend/app/domains/characters/schemas.py::CharacterRead",
+          "direct_consumers": [
+            "backend/app/schemas/characters.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/characters.py::CharacterStateWrite",
+          "new": "backend/app/domains/characters/schemas.py::CharacterStateWrite",
+          "direct_consumers": [
+            "backend/app/schemas/characters.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_state_write_keeps_deferred_commit_participation",
+            "tests/test_m3_authorization_deletion.py::test_two_user_object_authorization_matrix_denies_cross_owner_access"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/characters.py::AgentCharacterStateWrite",
+          "new": "backend/app/domains/characters/schemas.py::AgentCharacterStateWrite",
+          "direct_consumers": [
+            "backend/app/schemas/characters.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/characters.py::CharacterStateRead",
+          "new": "backend/app/domains/characters/schemas.py::CharacterStateRead",
+          "direct_consumers": [
+            "backend/app/schemas/characters.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/characters.py::PublicCharacterActivityAction",
+          "new": "backend/app/schemas/characters.py::PublicCharacterActivityAction",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_public_activity_security.py::test_public_character_activity_schema_excludes_private_character_and_state_fields"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/characters.py::PublicCharacterActivityProfileRead",
+          "new": "backend/app/schemas/characters.py::PublicCharacterActivityProfileRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_public_activity_security.py::test_public_character_activity_schema_excludes_private_character_and_state_fields"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/characters.py::PublicCharacterActivityStateRead",
+          "new": "backend/app/schemas/characters.py::PublicCharacterActivityStateRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_public_activity_security.py::test_public_character_activity_schema_excludes_private_character_and_state_fields"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/characters.py::PublicCharacterActivityEventRead",
+          "new": "backend/app/schemas/characters.py::PublicCharacterActivityEventRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_public_activity_security.py::test_public_character_activity_schema_excludes_private_character_and_state_fields"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/characters.py::CharacterActivityRead",
+          "new": "backend/app/schemas/characters.py::CharacterActivityRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_public_activity_security.py::test_public_character_activity_schema_excludes_private_character_and_state_fields"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentGoogleModel",
+          "new": "backend/app/schemas/agents.py::AgentGoogleModel",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults",
+            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::GoogleGeminiModel",
+          "new": "backend/app/schemas/agents.py::GoogleGeminiModel",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::PollinationsImageModel",
+          "new": "backend/app/schemas/agents.py::PollinationsImageModel",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_image_generation_setting_mode_sync_and_preserve_key"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::ImageKeyMode",
+          "new": "backend/app/schemas/agents.py::ImageKeyMode",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_image_generation_setting_mode_sync_and_preserve_key"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::WritingRepetitionLevel",
+          "new": "backend/app/schemas/agents.py::WritingRepetitionLevel",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_enabled_idle_slot_reschedules_immediately_after_activity_window_change",
+            "tests/test_agent_activity_limits.py::test_running_slot_keeps_current_schedule_until_run_completion"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentExecutionMode",
+          "new": "backend/app/schemas/agents.py::AgentExecutionMode",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults",
+            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreate",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults",
+            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentDeleteCreate",
+          "new": "backend/app/domains/characters/schemas.py::AgentDeleteCreate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_character_deletion_resets_cross_user_preference_and_removes_private_data"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentDraftImageStyle",
+          "new": "backend/app/schemas/agents.py::AgentDraftImageStyle",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentDraftMediaKind",
+          "new": "backend/app/schemas/agents.py::AgentDraftMediaKind",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate",
+            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentDraftMediaDelivery",
+          "new": "backend/app/schemas/agents.py::AgentDraftMediaDelivery",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate",
+            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileImageBucket",
+          "new": "backend/app/schemas/agents.py::AgentProfileImageBucket",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftCreate",
+          "new": "backend/app/schemas/agents.py::AgentCreationDraftCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_google_model_selection.py::test_agent_google_models_are_allowed_in_agent_model_schemas",
+            "tests/test_google_model_selection.py::test_agent_model_schemas_reject_removed_or_message_only_models",
+            "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftUpdate",
+          "new": "backend/app/schemas/agents.py::AgentCreationDraftUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftMediaUpload",
+          "new": "backend/app/schemas/agents.py::AgentCreationDraftMediaUpload",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftGenerateMediaCreate",
+          "new": "backend/app/schemas/agents.py::AgentCreationDraftGenerateMediaCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate",
+            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
+            "tests/test_agent_creation_drafts.py::test_profile_image_quota_exceeded_skips_translation_and_pollinations"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftComplete",
+          "new": "backend/app/schemas/agents.py::AgentCreationDraftComplete",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_promotion_usage.py::test_complete_draft_records_promotion_usage_consent",
+            "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileMediaGenerateCreate",
+          "new": "backend/app/schemas/agents.py::AgentProfileMediaGenerateCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileImageUsageStatusRead",
+          "new": "backend/app/schemas/agents.py::AgentProfileImageUsageStatusRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileImageUsageRead",
+          "new": "backend/app/schemas/agents.py::AgentProfileImageUsageRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftMediaResult",
+          "new": "backend/app/schemas/agents.py::AgentCreationDraftMediaResult",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftMediaGenerationRead",
+          "new": "backend/app/schemas/agents.py::AgentCreationDraftMediaGenerationRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileMediaGenerationRead",
+          "new": "backend/app/schemas/agents.py::AgentProfileMediaGenerationRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftRead",
+          "new": "backend/app/schemas/agents.py::AgentCreationDraftRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentFirstGreetingCreate",
+          "new": "backend/app/schemas/agents.py::AgentFirstGreetingCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentFirstGreetingRead",
+          "new": "backend/app/schemas/agents.py::AgentFirstGreetingRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_provider_boundary_security.py::test_provider_failure_attempt_and_log_never_retain_raw_body"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::CredentialRead",
+          "new": "backend/app/schemas/agents.py::CredentialRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentLocalConnectionRead",
+          "new": "backend/app/schemas/agents.py::AgentLocalConnectionRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentLocalKeyCreateRead",
+          "new": "backend/app/schemas/agents.py::AgentLocalKeyCreateRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::BotCharacterRead",
+          "new": "backend/app/schemas/agents.py::BotCharacterRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::BotMeRead",
+          "new": "backend/app/schemas/agents.py::BotMeRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentActionRangeRead",
+          "new": "backend/app/schemas/agents.py::AgentActionRangeRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_activity_setting_read_excludes_internal_planner_tendency_profile"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentActivitySettingRead",
+          "new": "backend/app/schemas/agents.py::AgentActivitySettingRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_activity_setting_read_excludes_internal_planner_tendency_profile"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentActivitySettingUpdate",
+          "new": "backend/app/schemas/agents.py::AgentActivitySettingUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_enabled_idle_slot_reschedules_immediately_after_activity_window_change",
+            "tests/test_agent_activity_limits.py::test_running_slot_keeps_current_schedule_until_run_completion"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentFeedCueCreate",
+          "new": "backend/app/schemas/agents.py::AgentFeedCueCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentFeedCueRead",
+          "new": "backend/app/schemas/agents.py::AgentFeedCueRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileUpdate",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_demo_account_lock.py::test_agent_route_returns_403_for_locked_demo_error",
+            "tests/test_demo_account_lock.py::test_agent_service_blocks_profile_update_after_ownership_check",
+            "tests/test_m3_authorization_deletion.py::test_sensitive_update_schemas_ignore_ownership_and_secret_mass_assignment"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentPromotionUsageUpdate",
+          "new": "backend/app/domains/characters/schemas.py::AgentPromotionUsageUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_promotion_usage.py::test_update_promotion_usage_requires_owner",
+            "tests/test_agent_promotion_usage.py::test_update_promotion_usage_tracks_revocation_and_regrant"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentPromotionUsageRead",
+          "new": "backend/app/schemas/agents.py::AgentPromotionUsageRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentPersonaUpdate",
+          "new": "backend/app/domains/characters/schemas.py::AgentPersonaUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
+            "tests/test_m3_authorization_deletion.py::test_sensitive_update_schemas_ignore_ownership_and_secret_mass_assignment"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileMediaUpload",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileMediaUpload",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentImageSeedUpload",
+          "new": "backend/app/schemas/agents.py::AgentImageSeedUpload",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentImageGenerationSettingRead",
+          "new": "backend/app/schemas/agents.py::AgentImageGenerationSettingRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentImageGenerationSettingUpdate",
+          "new": "backend/app/schemas/agents.py::AgentImageGenerationSettingUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_image_generation_setting_mode_sync_and_preserve_key"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentActivitySummaryRead",
+          "new": "backend/app/schemas/agents.py::AgentActivitySummaryRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_api_agent_instants_normalize_sqlite_naive_values_to_utc"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentActivityProfileReadinessRead",
+          "new": "backend/app/schemas/agents.py::AgentActivityProfileReadinessRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
+            "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/test_postgres_security_concurrency.py::test_world_autonomy_capacity_is_atomic_across_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::CredentialUpsert",
+          "new": "backend/app/schemas/agents.py::CredentialUpsert",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_google_model_selection.py::test_agent_google_models_are_allowed_in_agent_model_schemas",
+            "tests/test_google_model_selection.py::test_agent_model_schemas_reject_removed_or_message_only_models",
+            "tests/test_google_model_selection.py::test_api_key_credential_update_with_idle_slot_syncs_profile"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentDetailRead",
+          "new": "backend/app/schemas/agents.py::AgentDetailRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        }
+      ],
+      "status": "FOUNDATION IMPLEMENTED; remaining Characters workflow/Creator/runtime transition pending",
+      "new_test_files": [
+        "backend/tests/characters/test_character_foundation.py"
+      ],
+      "remaining_owners": {
+        "app.services.agents": "B2-B profile/Creator workflows; B4 activity and B8 Bot/runtime separation",
+        "app.services.agent_creation_drafts": "B2-B Creator and shared provider/media ownership",
+        "app.domains.characters.public": "one-way same-identity transition for B2-D/B3/B4/B6/B7 consumers",
+        "app.models": "G5 aggregate registration"
+      },
+      "introduced_files": [
+        "backend/app/domains/characters/contracts.py",
+        "backend/app/domains/characters/exceptions.py",
+        "backend/app/domains/characters/models.py",
+        "backend/app/domains/characters/schemas.py",
+        "backend/app/domains/characters/service/__init__.py",
+        "backend/app/domains/characters/service/profile.py",
+        "backend/app/domains/characters/service/seed.py",
+        "backend/app/domains/characters/service/state.py",
+        "backend/app/domains/media/__init__.py",
+        "backend/app/domains/media/schemas.py",
+        "backend/tests/characters/test_character_foundation.py"
+      ]
     }
   }
 }

@@ -106,3 +106,10 @@ Frontend Home은 World 목록을 소유하고, 인증·runtime-status·device-sh
 AR-1은 새 규칙 지원과 허용/거부 fixture를 먼저 제공한다. 실제 코드 이동과 해당 scope 활성화를 같은 PR에서 수행한다. 미전환 영역의 기존 보호 규칙과 전체 순환 검사를 유지하며 넓은 예외로 통과시키지 않는다.
 
 AR-B1은 PR #260에서 legacy alias 없이 병합됐다. AR-F1은 PR #261에서 Home의 화면·공용 코드를 옮겼고 네 feature facade 소비자, 공용 TypeScript bridge 7개, semantic CSS 직접 소비자 7개를 제거 단계와 함께 기록했다. AR-0/1과 두 파일럿의 완료는 전체 리팩터링 완료가 아니다. AR-G·AR-B2 이후·AR-F2 이후·AR-X가 남으며, P8-L-S 실제 AI 품질·인과·사용자 closeout도 별도로 남는다.
+
+
+### AR-B2-B1 Character 기반의 현재 연결
+
+Character·CharacterState는 `app.domains.characters.models`, seed 요청은 `contracts`, flush-only seed는 `service.seed`, 기존 생성·프로필·핸들 처리는 `service.profile`, 상태 저장은 `service.state`가 실제 구현을 소유한다. 기존 집계 경로는 동일 객체의 한 방향 호환 export이며 종료 담당과 제거 조건은 `architecture_import_policy.json`의 exact bridge에 있다. 부분 추출한 수평 파일의 남은 함수도 `refactor_path_map.json`의 symbol 대응표에 그대로 남는다고 기록했다.
+
+이 단계는 seed와 일반 생성의 서로 다른 transaction 정책을 보존한다. WorldCharacter와 Social activity projection, credential·Creator·활동 실행·다업무 삭제는 담당 전환이 완료될 때까지 기존 책임을 유지한다. media 참조 검증만 Character schema에 필요한 AR-B3 선행 의존성으로 `app.domains.media.schemas`로 옮겼다. 전체 Characters 전환과 source 도입 증거 캡처·통합 검증은 진행 중이다.

@@ -237,10 +237,6 @@
           "importer": "app.models"
         },
         {
-          "imported": "app.models.characters",
-          "importer": "app.models"
-        },
-        {
           "imported": "app.models.community",
           "importer": "app.models"
         },
@@ -1340,6 +1336,115 @@
     "domains": [
       "device_home"
     ],
-    "globals": []
+    "globals": [],
+    "modules": [
+      "app.domains.characters.contracts",
+      "app.domains.characters.exceptions",
+      "app.domains.characters.models",
+      "app.domains.characters.schemas",
+      "app.domains.characters.service",
+      "app.domains.characters.service.profile",
+      "app.domains.characters.service.seed",
+      "app.domains.characters.service.state",
+      "app.domains.media.schemas"
+    ],
+    "entries": [
+      "app.domains.characters.contracts",
+      "app.domains.characters.schemas",
+      "app.domains.characters.service.profile",
+      "app.domains.characters.service.seed",
+      "app.domains.characters.service.state",
+      "app.domains.media.schemas"
+    ],
+    "bridges": [
+      {
+        "importer": "app.domains.characters.public",
+        "target": "app.domains.characters.models",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.characters.public",
+        "target": "app.domains.characters.contracts",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.characters.public",
+        "target": "app.domains.characters.service.seed",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models.characters",
+        "target": "app.domains.characters.models",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.characters.models",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.characters.schemas",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.characters",
+        "target": "app.domains.characters.schemas",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.characters.exceptions",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.characters.service.profile",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.characters.service.state",
+        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
+        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
+        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.media_security",
+        "target": "app.domains.media.schemas",
+        "owner_stage": "AR-B3",
+        "removal_condition": "Move existing managed-media schema consumers to media.schemas and remove the old schema helper path after B3 contract tests.",
+        "reason": "The exact original pure validator is needed by the Character input schema before the remaining B3 media transition. No file storage, quota or image-job ownership moves here.",
+        "review_date": "2026-09-05"
+      }
+    ]
   }
 }

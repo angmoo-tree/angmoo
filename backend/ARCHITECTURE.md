@@ -93,6 +93,16 @@ backend/
 
 ## 2. 도메인 안에서 코드 찾기
 
+### Character 정체성 기반의 현재 위치
+
+AR-B2-B의 첫 전환 범위는 캐릭터 자체의 ORM·입력 schema·handle/프로필 저장·상태 저장·Package seed입니다. `characters/models.py`, `schemas.py`, `exceptions.py`, `contracts.py`, `service/profile.py`, `service/state.py`, `service/seed.py`가 실제 구현을 소유합니다. 관리 화면 전체, Creator workflow, 자율활동과 Local Bot은 아직 뒤이은 전환 범위입니다.
+
+`profile.create_character`의 기존 commit/refresh와 `seed.seed_autonomous_character`의 caller-owned flush-only 저장은 별도 계약입니다. 전자는 일반 저장 캐릭터를 inactive 상태로 만들고, 후자는 World Package 등의 transaction에 참여합니다. `state.upsert_character_state`는 기존 `unit_of_work.finish_write`를 사용하므로 지연 commit 구간에서는 flush만 합니다. 이 차이를 일반적인 repository 규칙 하나로 바꾸지 않습니다.
+
+현재 `app.cruds.community`와 `app.schemas` 등의 옛 소비자 경로는 필요한 같은 함수·class 객체를 단방향으로 재노출합니다. 새 Character 구현은 그 호환 경로를 다시 import하지 않습니다. `characters/public.py`도 WorldCharacter·Package·runtime 소비자 전환 동안 동일 모델/seed 객체를 제공하는 임시 표면이며, 전체 도메인 전환 완료를 뜻하지 않습니다.
+
+### 역할별로 문제 찾기
+
 먼저 **어느 업무의 동작인가**를 찾고, 다음으로 **어떤 역할이 달라지는가**를 찾습니다. 예를 들어 게시물 목록에 권한 없는 World의 글이 섞이면 `social`의 조회·권한 경로를 확인합니다. JSON 필드 이름만 잘못됐다면 같은 도메인의 응답 schema와 router 변환이 출발점입니다.
 
 | 파일 | 담당하는 내용 | 판단 예시 |

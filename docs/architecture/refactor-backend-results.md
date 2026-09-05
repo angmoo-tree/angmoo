@@ -13,7 +13,7 @@
 | AR-G2 | NOT STARTED | 실제 공통 오류·pagination |
 | AR-G3 | NOT STARTED | logging.ini·초기화·배포 |
 | AR-G4 | LOCAL VERIFIED · PR PENDING | Alembic 물리 경로·역사 본문 보존; G5 최종 모델 등록 연결 대기 |
-| AR-B2 | NOT STARTED | identity→characters→worlds→world_characters |
+| AR-B2 | IN PROGRESS · Characters foundation local verified | identity→characters→worlds→world_characters; 전체 전환은 미완료 |
 | AR-B3 | NOT STARTED | World Package→media |
 | AR-B4 | NOT STARTED | routines→routine_posts→활동 조립 |
 | AR-B5 | NOT STARTED | social→relationships→projection |
@@ -70,3 +70,16 @@ G13은 물리 경로 이전까지 적용했으며 최종 완료가 아니다. AR
 현재 import inventory는 Alembic을 `app` 밖으로 옮겨 **591 modules / 1,827 internal edges / 311 exact legacy edges**다. 이 수치 감소는 업무 삭제가 아니며, 전체 90개 파일은 이동 전 원본 SHA-256도 일치한다. ER0는 기존 **75 PostgreSQL source / 87 역사 migration / 24 Neo4j query / 44 Next route / 7 parity workload**를 보존했다. P8 D의 현재 업무 계약과 F/J/P/R 및 Memory batch의 기존 역사 연결 검사가 모두 통과했다.
 
 Gitleaks의 기존 공개 World 고정 marker 허용에 새 `0072` revision 경로 하나를 추가했다. 옛 경로는 history 검사를 위해 유지했고 marker 값·검사 rule 범위는 넓히지 않았다. 실제 Gitleaks 8.30.1의 새 Alembic 디렉터리 `--redact` 검사는 **0 findings**였다. 작업 디렉터리 전체 scan의 66건은 G4 base에 남아 있는 G0 체크포인트 hash 오탐 65건과 생성된 테스트 pyc fixture 1건이었다. 이 결과를 전체 보안 검사 PASS로 표시하지 않으며, G0 수정 통합 후 추적 source·PR history 검사에서 다시 확인한다.
+
+
+## AR-B2-B1: Character 기반의 역할별 구현
+
+`characters/models.py`는 기존 Character·CharacterState의 동일 ORM class와 Base를 유지한다. `contracts.py`와 `service/seed.py`는 World Package 호출자의 Session에서 add·flush만 수행하는 seed 계약을 보존한다. `service/profile.py`에는 핸들 정규화·충돌 처리와 프로필 조회·생성·갱신의 실제 구현을, `service/state.py`에는 기존 deferred-commit 계약의 상태 저장을 옮겼다. 일반 생성·갱신의 기존 commit/refresh를 seed의 flush-only 경계와 합치지 않았다.
+
+`characters/schemas.py`가 Character 기본 입출력과 생성·프로필 입력 DTO를 소유한다. Public activity projection과 나머지 활동 DTO는 아직 기존 Social/활동 소유 파일에 있다. managed-media 경로 검증은 AR-B3 선행 의존성으로 `media/schemas.py`에 원문 그대로 옮겼으며 외부 URL·scheme·netloc 거절, `/media/` 경로 규칙과 오류 메시지를 보존한다. 기존 `schemas/media_security.py` 소비자는 동일 함수 객체를 제공하는 임시 호환 경로를 통해 유지하고 AR-B3에서 전환한다.
+
+기존 `models`, `schemas`, `cruds/community`는 기록된 잔여 소비자에 대해 동일 객체를 제공한다. 새로운 Character service가 기존 수평 service/CRUD 계층으로 돌아가지는 않는다. 기존 `characters/domain`·`infrastructure`의 실제 구현과 빈 marker는 제거했고 출발 경로와 목적지를 보존 지도에 등록했다. 완료 도메인은 계속 `device_home`만이며 Characters와 media는 옮긴 module/entry/bridge만 정확히 검사한다.
+
+현재 focused 검증은 **38 passed / 1 warning / 23.53초**다. 실제 SQLite에서 모델·schema 객체 동일성, 일반 생성 commit, seed caller rollback, 상태 저장의 deferred commit을 확인했고 기존 로컬 생성·프로모션·World Package import commit·owner-controlled WorldCharacter 및 media 참조 보안 검사를 함께 실행했다. API/ORM 계약·기존 assertion·node 보존에는 변화가 없었다. 이 작업 트리의 보존 명령 전체 exit 1은 선행 AR-G4 source commit의 신규 Alembic 테스트 8개 도입 증거가 아직 root 통합에 포함되지 않은 상태로 인한 것이며 전체 보존 PASS로 표시하지 않는다.
+
+`services/agents.py`의 다업무 조립과 Creator·실행·삭제 경로, 남은 소비자·API·테스트 이전은 계속 진행 중이다. 이 기반의 로컬 검증으로 Characters 전체, AR-B2, PR-head, merge 또는 Actions 완료를 선언하지 않는다.

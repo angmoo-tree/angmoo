@@ -9,8 +9,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
-from app.domains.characters.domain.seed import AutonomousCharacterSeedData
-from app.domains.characters.infrastructure.sqlalchemy_models import Character
+from app.domains.characters.contracts import AutonomousCharacterSeedData
+from app.domains.characters.models import Character
 
 
 _HANDLE_SEPARATORS = re.compile(r"[^a-z0-9_]+")

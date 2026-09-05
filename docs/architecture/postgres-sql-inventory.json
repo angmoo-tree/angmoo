@@ -307,25 +307,25 @@
     {
       "markers": {
         "advisory_lock": [
-          376,
-          1266
+          340,
+          1087
         ],
         "driver_or_url": [
-          373,
-          493,
-          1256
+          337,
+          457,
+          1077
         ],
         "row_lock": [
-          494
+          458
         ],
         "skip_locked": [
-          494
+          458
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/cruds/community.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "9508dffad905bd5863c8c5e6ca77cd1b76569ae1b3993cbdde9d3dfdbf8972e6",
+      "source_sha256": "1127f16be1928238a98abdd4cbc48ece6a5e496fb61de7ed2e2d9ab8daa25eb9",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
