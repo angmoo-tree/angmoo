@@ -530,3 +530,13 @@ SQL source snapshot의 portable-key/profile 변환과 preview probe의 trust/dup
 보존 guard에서는 고정된 테스트 source의 pathlib anchor·단일 literal binding과 파일 이동표가 정확히 연결된 경우만 chained path를 정규화한다. 임의 root/call/동적 경로·import/함수/클래스/with/except의 재바인딩은 거부한다. Windows 경로는 문자열 전체가 정확히 일치하는 경우만 인정하고 `__init__.py`는 정상 package import 표기를 사용한다. 독립 source `dc3da4b`·`651bded`·`f61cc48`·`1fb943d`에 이를 나눴으며 기존/음성 검사 **67 passed**를 확인했다. 전체 순서 있는 literal tuple에 대한 compiled regex cache만 추가했고, 대표 실제 assertion **122개 출력 동일**, **1.869초→0.057초**를 확인했다. 기존 느린 guard 실행은 중단해 PASS로 사용하지 않았고 최종 수정 이후 전체 검사를 다시 실행했다.
 
 이 결과는 Package의 독립 source 준비와 로컬 회귀 증거다. 선행 B2의 Worlds/Characters/WorldCharacter source가 합류하면 runtime의 해당 지원 import를 canonical 경로로 연결한다. 전체 통합 backend·Docker/Host Tauri/sidecar/NSIS 설치·Hosted Actions·merge는 parent의 순차 검증 대상이며 이 결과로 완료했다고 표시하지 않는다. Shared media 전체는 다음 별도 B3 범위다.
+
+### Package 선형 통합과 전체 백엔드 보존 완료
+
+Worlds·Character·WC의 실제 소유 서비스를 runtime UoW/seed/import/export/preview 조회에서 사용하도록 연결했다. 선행 WC의 동시 replay Hotfix `1666c495`는 이동한 `runtime/world_packages/seed_uow.py`에서 비-import AST 전체가 동일하다. 기존 관찰용 테스트도 실제 registry repository의 같은 Session을 보도록 연결했다. 원래 replay 결과·rollback·digest 충돌·중복 생성 방지 assertion을 유지했으며 집중 **99 passed / 1 warning / 46.12초**다.
+
+source `d80e2ed`·`3205878` 및 guard `dc3da4b`·`651bded`·`1fb943d`, 조립 `a61a0ae`를 선형 introduction 기록에 추가했다. 컴파일 캐시 source `f61cc48`는 새로운 파일/node가 없어 별도 추가 snapshot을 만들지 않았다. `ed89fde`의 stock 전체 보존은 **2,175 protected/current nodes / items37 PASS**다. 첫 검사의 split behavior-test 참조 27개는 모두 원본 Package import test의 이동 전 경로였으며, 기존 source/symbol map을 유지하고 실제 `tests/world_packages/test_import_commit.py`의 같은 node로 연결한 뒤 통과했다.
+
+WC current 구조 검사 보완을 합친 고정 source `1f74549`의 **전체 백엔드 2,153 passed / 기존 22 skipped / 27 warnings / 481.15초**가 통과했다. API·OpenAPI·ORM, JSON v1·deterministic ZIP·미디어 staging/복구·caller transaction·기존 기능의 보존 검사를 유지한다. current architecture **631/2028/legacy272**, public196 및 ER0/L4/Memory batch 현재 경로 검사를 앞선 통합에서 확인했다. 추적 archive **19.30MB**, HEAD 전체 **371 commits / 21.69MB** Gitleaks findings0이다. 이 source 이후 final WC 결과 합류는 문서 한 파일뿐이다.
+
+Package의 application/domain/infrastructure/ports/public.py 생산 구현은 실제 역할 파일로 이전했고, 같은 업무의 불필요한 전달 계층은 제거했다. G5의 등록을 위한 원래 aggregate ORM 소비자는 그 종료 조건으로 추적한다. Media provider/Character·World 이미지 업무 전체는 다음 PR 범위다. 선행 #278 다음 순차 PR-head Actions·실제 Installer·merge·post-merge를 확인하며 이 로컬 결과만으로 §8.2 전체 종료를 선언하지 않는다.
