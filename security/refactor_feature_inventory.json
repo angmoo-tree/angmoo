@@ -192,7 +192,6 @@
         "backend/app/services/agent_runs.py",
         "backend/app/services/agents.py",
         "backend/app/services/character_lore.py",
-        "backend/app/services/feed_reaction_planner.py",
         "backend/app/services/langgraph_resident.py",
         "backend/app/services/local_bot.py",
         "backend/app/services/post_image_generation.py",
@@ -204,7 +203,9 @@
         "backend/app/domains/world_characters/client.py",
         "backend/app/domains/world_characters/service/autonomous_setup.py",
         "backend/app/domains/world_characters/service/owner_identity.py",
-        "backend/app/runtime/routines/plan_references.py"
+        "backend/app/runtime/routines/plan_references.py",
+        "backend/app/runtime/social/feed_reaction_provider.py",
+        "backend/app/domains/social/service/feed_reaction_prompts.py"
       ],
       "test_paths": [
         "backend/tests/config/test_startup_security.py",
@@ -1373,12 +1374,13 @@
         "backend/app/domains/identity/service/auth.py",
         "backend/app/services/character_lore.py",
         "backend/app/services/community.py",
-        "backend/app/services/feed_reaction_planner.py",
         "backend/app/runtime/social/langgraph_actions.py",
         "backend/app/services/local_bot.py",
         "backend/app/services/local_bot_quota.py",
         "backend/app/services/post_image_generation.py",
-        "backend/app/runtime/social/world_feed_actions.py"
+        "backend/app/runtime/social/world_feed_actions.py",
+        "backend/app/runtime/social/feed_reaction_provider.py",
+        "backend/app/domains/social/service/feed_reaction_prompts.py"
       ],
       "test_paths": [
         "backend/tests/routines/test_daily_activity_runtime.py",
@@ -1632,7 +1634,6 @@
         "backend/app/runtime/social/timeline.py",
         "backend/app/services/community.py",
         "backend/app/services/community_abuse_quota.py",
-        "backend/app/services/feed_reaction_planner.py",
         "backend/app/services/social_routine_interactions.py",
         "backend/tests/social/test_foundation_contracts.py",
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts",
@@ -1744,7 +1745,9 @@
         "backend/app/runtime/social/world_feed_queries.py",
         "backend/app/runtime/social/world_feed_search.py",
         "backend/app/domains/social/service/feed_reaction_validation.py",
-        "backend/app/domains/social/contracts/feed_execution.py"
+        "backend/app/domains/social/contracts/feed_execution.py",
+        "backend/app/runtime/social/feed_reaction_provider.py",
+        "backend/app/domains/social/service/feed_reaction_prompts.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",
@@ -1975,12 +1978,13 @@
         "backend/app/runtime/memory/recall_projection.py",
         "backend/app/schemas/__init__.py",
         "backend/app/services/community.py",
-        "backend/app/services/feed_reaction_planner.py",
         "backend/app/runtime/social/world_feed_actions.py",
         "backend/app/domains/social/service/feed_cycle.py",
         "backend/app/domains/social/service/feed_cycle_values.py",
         "backend/app/domains/social/service/feed_cycle_publishing.py",
-        "backend/app/runtime/social/feed_cycle.py"
+        "backend/app/runtime/social/feed_cycle.py",
+        "backend/app/runtime/social/feed_reaction_provider.py",
+        "backend/app/domains/social/service/feed_reaction_prompts.py"
       ],
       "test_paths": [
         "backend/tests/test_l3_er2_sqlite_fts5_search.py",
@@ -3241,14 +3245,15 @@
         "backend/app/domains/identity/service/auth.py",
         "backend/app/services/character_lore.py",
         "backend/app/services/community.py",
-        "backend/app/services/feed_reaction_planner.py",
         "backend/app/services/langgraph_resident.py",
         "backend/app/services/local_bot.py",
         "backend/app/domains/identity/client.py",
         "backend/app/domains/social/service/feed_cycle.py",
         "backend/app/domains/social/service/feed_cycle_values.py",
         "backend/app/domains/social/service/feed_cycle_publishing.py",
-        "backend/app/runtime/social/feed_cycle.py"
+        "backend/app/runtime/social/feed_cycle.py",
+        "backend/app/runtime/social/feed_reaction_provider.py",
+        "backend/app/domains/social/service/feed_reaction_prompts.py"
       ],
       "test_paths": [
         "backend/tests/characters/test_character_image_generation_workflows.py",
@@ -7039,12 +7044,13 @@
         "backend/app/domains/device_home/repository.py",
         "backend/app/runtime/world_packages/import_commit.py",
         "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-        "backend/app/services/feed_reaction_planner.py",
         "backend/app/runtime/social/world_feed_actions.py",
         "backend/app/domains/social/service/feed_cycle.py",
         "backend/app/domains/social/service/feed_cycle_values.py",
         "backend/app/domains/social/service/feed_cycle_publishing.py",
-        "backend/app/runtime/social/feed_cycle.py"
+        "backend/app/runtime/social/feed_cycle.py",
+        "backend/app/runtime/social/feed_reaction_provider.py",
+        "backend/app/domains/social/service/feed_reaction_prompts.py"
       ],
       "test_paths": [
         "backend/tests/common/test_errors_pagination.py",
@@ -10859,7 +10865,6 @@
         "backend/app/domains/identity/service/auth.py",
         "backend/app/services/character_lore.py",
         "backend/app/services/community.py",
-        "backend/app/services/feed_reaction_planner.py",
         "backend/app/domains/routines/service/joint_activity/__init__.py",
         "backend/app/services/langgraph_resident.py",
         "backend/app/services/local_bot.py",
@@ -10887,7 +10892,9 @@
         "backend/app/domains/social/service/feed_cycle.py",
         "backend/app/domains/social/service/feed_cycle_values.py",
         "backend/app/domains/social/service/feed_cycle_publishing.py",
-        "backend/app/runtime/social/feed_cycle.py"
+        "backend/app/runtime/social/feed_cycle.py",
+        "backend/app/runtime/social/feed_reaction_provider.py",
+        "backend/app/domains/social/service/feed_reaction_prompts.py"
       ],
       "preserved_contracts": [
         "Tree board API/schema/posts and existing support functions/consumers survive. Common UI primitives keep visual and interaction contracts. Compatibility sources remain until consumer-free evidence. This is not a deletion allowlist."

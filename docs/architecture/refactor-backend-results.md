@@ -1279,3 +1279,12 @@ WorldFeed 원래9함수와 반응 검증2/error/provider 계약을 Social servic
 기존 반응·Search·World Package 집중 회귀는 **27 PASS / 31.50초 / 기존 warning 1개**다. 새로운 실패 주입 회귀의 첫 실행은 기존7 PASS/신규1 FAIL이었으며, 새 테스트가 잘못 참조한 observation 필드·상태 이름을 실제 post_id/retryable_failed로 고쳤다. 제품/기존 assertion/상태 모델은 변경하지 않았다. Community87·provider client/prompt 마무리·G07·full B5·capture/Hosted는 후속 범위다.
 
 C18 최종 확대 검증은 **330 PASS / 83.41초 / 기존 Starlette warning 1개**다. 새 실패 주입 회귀가 반응·실행·성공 이벤트 rollback, 이전 관찰/친숙함 유지, retryable_failed claim 저장을 확인했다. 경계 **823 module / 2904 edge / legacy179**, L4 parity99와 ER0 84/87/24/44/7, PR #258/#263 API/schema/ORM·변경 보호 테스트2파일 assertion·전체 split evidence도 통과했다. 기존 L6 네 client/owner 연결만 runtime의 정확한 새 위치로 승계했고, 옛 runtime과 aggregate 의존 등 stale8개를 제거했다. 부정확한 테스트 파일명을 지정한 확대 명령은 수집 전 중단돼 실행0이었고, 실제 경로를 확인한 최종 명령의330 PASS만 결과로 사용한다.
+
+
+## AR-B5-C19 — World Feed prompt 정책·provider 연결 종료
+
+원래 prompt 값2와 planner/writer prompt 조립2를 Social service에, credential·trace·직접 LLM provider 실제 구현은 runtime에 두고 옛 services/feed_reaction_planner를 제거했다. 기존3 provider 정의/2 값 정의/4 상수는 prompt block 복원 후 전체 AST가 동일하다. Direct provider의 네트워크만 대체한 새 회귀는 context/tracker/schema 동일 객체와900/1000 token·medium·planner JSON 재시도 금지·writer 기본값 및 원래 공개 근거 구성을 검사한다.
+
+최초 자동 추출은 multi-line 문자열 내부 들여쓰기 때문에 syntax 수집3오류가 났다. AST statement를 그대로 추출해 문자열 값까지 보존하도록 수정했으며, 새 텍스트나 검증 완화는 추가하지 않았다. Community87 및 G07/full B5/capture/Hosted 종료는 후속이다.
+
+C19 최종 직접/검색/Package/보안 검증은 **37 PASS / 35.38초 / 기존 Starlette warning 1개**다. 경계 **824 module / 2908 edge / legacy177**, L4 parity99·ER0 84/87/24/44/7과 PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence가 통과했다. 첫 split 진단의 이전 단계 실제 이동4정의 누락은 원래 C18 전체 추적 행을 승계해 보완했다. 같은 원래 검사 재실행0오류이며 보호 baseline·assertion은 변경하지 않았다.

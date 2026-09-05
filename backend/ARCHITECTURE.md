@@ -744,3 +744,6 @@ World Feed 검색의 준비 상태, 공개·차단 조건, 순위, 관찰 claim�
 
 
 World Feed의 실행 판단은 `social/service/feed_cycle.py`가 소유한다. 관찰을 LLM 계획 전에 저장하는 순서, NO_ACTION·중복 실행·대상 재검증·재시도와 공개 성공 트랜잭션은 이곳에서 결정한다. 주기 ID/결과 값은 `feed_cycle_values.py`, 단일 Social 행동 선택/반환은 `feed_cycle_publishing.py`, 서버 후보·작성 근거 검증은 `feed_reaction_validation.py`의 실제 정책이다. `runtime/social/feed_cycle.py`는 같은 resident context/Session/attached 결과를 보존하면서 다른 업무와 provider를 연결한다. 구성 객체를 만들 때 SQL·provider·commit을 미리 실행하지 않는다. 원래 max3 LLM 제한과 관찰/공개 성공의 서로 다른 저장 시점을 유지한다.
+
+
+World Feed의 bounded prompt와 서버 후보/의도/공개 근거 지침은 `social/service/feed_reaction_prompts.py`의 실제 정책이다. `runtime/social/feed_reaction_provider.py`는 기존 credential resolver·Gemini 응답 schema·DirectLlm transport·trace context를 연결한다. prompt를 이동하면서 문자열·후보 목록·중립화/길이 제한·응답 계약을 바꾸지 않으며, 실제 네트워크나 자격 증명 해석을 service의 import/구성 단계에서 실행하지 않는다.

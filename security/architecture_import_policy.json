@@ -521,14 +521,6 @@
           "imported": "app.models"
         },
         {
-          "importer": "app.services.feed_reaction_planner",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.feed_reaction_planner",
-          "imported": "app.services.direct_llm"
-        },
-        {
           "importer": "app.services.langgraph_resident",
           "imported": "app.cruds.agent_runs"
         },
@@ -777,7 +769,7 @@
     {
       "id": "ar-b5-feed-cycle-owner-bindings",
       "owner_stage": "L6",
-      "reason": "AR-B5 / AR-B4 / AR-B8 ownership transition of the existing L6 exact four WorldFeed owner/client edges. The former WorldFeed runtime exact four owner/client imports now belong to runtime/social/feed_cycle; actual Social cycle policy imports none of them. No additional legacy implementation is introduced.",
+      "reason": "AR-B5 / AR-B4 / AR-B8 ownership transition of the existing L6 exact four WorldFeed owner/client edges. The former WorldFeed runtime exact four owner/client imports now belong to runtime/social/feed_cycle; actual Social cycle policy imports none of them. No additional legacy implementation is introduced. AR-B5-C19 replaces the old planner with the actual runtime provider, retaining only its original DirectLlm transport edge until parent canonical integration.",
       "removal_condition": "Replace execution bindings with the already prepared Routines canonical source, DirectLlm with integrations.direct_llm on parent merge; finish Community publishing and direct provider ownership then remove these exact runtime edges.",
       "review_date": "2026-09-06",
       "edges": [
@@ -794,8 +786,8 @@
           "imported": "app.services.direct_llm"
         },
         {
-          "importer": "app.runtime.social.feed_cycle",
-          "imported": "app.services.feed_reaction_planner"
+          "importer": "app.runtime.social.feed_reaction_provider",
+          "imported": "app.services.direct_llm"
         }
       ]
     }
@@ -1095,6 +1087,7 @@
       "app.domains.social.service.feed_cycle",
       "app.domains.social.service.feed_cycle_publishing",
       "app.domains.social.service.feed_cycle_values",
+      "app.domains.social.service.feed_reaction_prompts",
       "app.domains.social.service.feed_reaction_validation",
       "app.domains.social.service.image_attachment",
       "app.domains.social.service.image_attempts",
@@ -1339,6 +1332,7 @@
       "app.domains.social.service.feed_cycle",
       "app.domains.social.service.feed_cycle_publishing",
       "app.domains.social.service.feed_cycle_values",
+      "app.domains.social.service.feed_reaction_prompts",
       "app.domains.social.service.feed_reaction_validation",
       "app.domains.social.service.image_attachment",
       "app.domains.social.service.image_attempts",
@@ -3098,38 +3092,6 @@
         "owner_stage": "AR-B5",
         "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
         "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.feed_reaction_planner",
-        "target": "app.domains.social.contracts.world_feed",
-        "owner_stage": "AR-B5",
-        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
-        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.feed_reaction_planner",
-        "target": "app.domains.social.contracts.feed_execution",
-        "owner_stage": "AR-B5",
-        "reason": "Retained direct provider client consumes the actual Social reaction protocol/error/validation; no rule implementation remains in the old imported symbols.",
-        "removal_condition": "Finish provider-client/prompt ownership and remove this exact old client import while retaining actual Social validation and identical errors.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.feed_reaction_planner",
-        "target": "app.domains.social.exceptions",
-        "owner_stage": "AR-B5",
-        "reason": "Retained direct provider client consumes the actual Social reaction protocol/error/validation; no rule implementation remains in the old imported symbols.",
-        "removal_condition": "Finish provider-client/prompt ownership and remove this exact old client import while retaining actual Social validation and identical errors.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.feed_reaction_planner",
-        "target": "app.domains.social.service.feed_reaction_validation",
-        "owner_stage": "AR-B5",
-        "reason": "Retained direct provider client consumes the actual Social reaction protocol/error/validation; no rule implementation remains in the old imported symbols.",
-        "removal_condition": "Finish provider-client/prompt ownership and remove this exact old client import while retaining actual Social validation and identical errors.",
         "review_date": "2026-09-06"
       }
     ]

@@ -14,7 +14,7 @@ from app.runtime.social.observations import observe_source
 from app.runtime.social.subjective_composition import record_declared_subjective_context
 from app.cruds import agent_runs as agent_run_crud
 from app.services import community as community_service
-from app.services.feed_reaction_planner import DirectFeedReactionProvider
+from app.runtime.social.feed_reaction_provider import DirectFeedReactionProvider
 from app.services.direct_llm import (
     DirectLlmDeferred,
     DirectLlmError,

@@ -2,9 +2,9 @@
   "architecture": {
     "backend": {
       "external_import_count": 2438,
-      "internal_edge_count": 2904,
+      "internal_edge_count": 2908,
       "legacy_import_exception_count": 0,
-      "module_count": 823,
+      "module_count": 824,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1221,6 +1221,16 @@
           },
           {
             "imports": [
+              "app.core.context_text",
+              "app.domains.social.constants",
+              "app.domains.social.contracts.world_feed",
+              "app.domains.social.schemas.feed"
+            ],
+            "module": "app.domains.social.service.feed_reaction_prompts",
+            "path": "backend/app/domains/social/service/feed_reaction_prompts.py"
+          },
+          {
+            "imports": [
               "app.domains.social.exceptions",
               "app.domains.social.schemas.feed"
             ],
@@ -1871,16 +1881,32 @@
               "app.domains.world_characters.models",
               "app.runtime.activity_proposals.composition",
               "app.runtime.resident.context",
+              "app.runtime.social.feed_reaction_provider",
               "app.runtime.social.observations",
               "app.runtime.social.subjective_composition",
               "app.runtime.social.world_feed_actions",
               "app.runtime.social.world_feed_queries",
               "app.services.community",
-              "app.services.direct_llm",
-              "app.services.feed_reaction_planner"
+              "app.services.direct_llm"
             ],
             "module": "app.runtime.social.feed_cycle",
             "path": "backend/app/runtime/social/feed_cycle.py"
+          },
+          {
+            "imports": [
+              "app.credentials",
+              "app.domains.social.contracts.feed_execution",
+              "app.domains.social.contracts.world_feed",
+              "app.domains.social.exceptions",
+              "app.domains.social.schemas.feed",
+              "app.domains.social.service.feed_reaction_prompts",
+              "app.domains.social.service.feed_reaction_validation",
+              "app.providers.gemini",
+              "app.runtime.resident.context",
+              "app.services.direct_llm"
+            ],
+            "module": "app.runtime.social.feed_reaction_provider",
+            "path": "backend/app/runtime/social/feed_reaction_provider.py"
           },
           {
             "imports": [
@@ -2196,22 +2222,6 @@
             ],
             "module": "app.schemas.social_memory",
             "path": "backend/app/schemas/social_memory.py"
-          },
-          {
-            "imports": [
-              "app.core.context_text",
-              "app.credentials",
-              "app.domains.social.contracts.feed_execution",
-              "app.domains.social.contracts.world_feed",
-              "app.domains.social.exceptions",
-              "app.domains.social.service.feed_reaction_validation",
-              "app.providers.gemini",
-              "app.runtime.resident.context",
-              "app.schemas",
-              "app.services.direct_llm"
-            ],
-            "module": "app.services.feed_reaction_planner",
-            "path": "backend/app/services/feed_reaction_planner.py"
           },
           {
             "imports": [

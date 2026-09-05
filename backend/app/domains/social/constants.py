@@ -145,3 +145,6 @@ OBSERVATION_LEASE = timedelta(minutes=10)
 
 
 WORLD_FEED_RUNTIME_VERSION = "world-keyword-feed-runtime-v1"
+
+
+FEED_REACTION_CONTRACT_VERSION = "world-keyword-feed-intent-v1"

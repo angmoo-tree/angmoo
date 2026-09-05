@@ -1,7 +1,7 @@
 {
-  "edge_count": 2904,
+  "edge_count": 2908,
   "external_import_count": 2438,
-  "module_count": 823,
+  "module_count": 824,
   "modules": [
     {
       "external_imports": [],
@@ -6276,6 +6276,20 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "json"
+      ],
+      "imports": [
+        "app.core.context_text",
+        "app.domains.social.constants",
+        "app.domains.social.contracts.world_feed",
+        "app.domains.social.schemas.feed"
+      ],
+      "module": "app.domains.social.service.feed_reaction_prompts",
+      "path": "backend/app/domains/social/service/feed_reaction_prompts.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.social.exceptions",
@@ -10994,16 +11008,37 @@
         "app.domains.world_characters.models",
         "app.runtime.activity_proposals.composition",
         "app.runtime.resident.context",
+        "app.runtime.social.feed_reaction_provider",
         "app.runtime.social.observations",
         "app.runtime.social.subjective_composition",
         "app.runtime.social.world_feed_actions",
         "app.runtime.social.world_feed_queries",
         "app.services.community",
-        "app.services.direct_llm",
-        "app.services.feed_reaction_planner"
+        "app.services.direct_llm"
       ],
       "module": "app.runtime.social.feed_cycle",
       "path": "backend/app/runtime/social/feed_cycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "pydantic"
+      ],
+      "imports": [
+        "app.credentials",
+        "app.domains.social.contracts.feed_execution",
+        "app.domains.social.contracts.world_feed",
+        "app.domains.social.exceptions",
+        "app.domains.social.schemas.feed",
+        "app.domains.social.service.feed_reaction_prompts",
+        "app.domains.social.service.feed_reaction_validation",
+        "app.providers.gemini",
+        "app.runtime.resident.context",
+        "app.services.direct_llm"
+      ],
+      "module": "app.runtime.social.feed_reaction_provider",
+      "path": "backend/app/runtime/social/feed_reaction_provider.py",
       "wildcard_imports": []
     },
     {
@@ -12045,28 +12080,6 @@
       ],
       "module": "app.services.direct_llm",
       "path": "backend/app/services/direct_llm.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "json",
-        "pydantic"
-      ],
-      "imports": [
-        "app.core.context_text",
-        "app.credentials",
-        "app.domains.social.contracts.feed_execution",
-        "app.domains.social.contracts.world_feed",
-        "app.domains.social.exceptions",
-        "app.domains.social.service.feed_reaction_validation",
-        "app.providers.gemini",
-        "app.runtime.resident.context",
-        "app.schemas",
-        "app.services.direct_llm"
-      ],
-      "module": "app.services.feed_reaction_planner",
-      "path": "backend/app/services/feed_reaction_planner.py",
       "wildcard_imports": []
     },
     {

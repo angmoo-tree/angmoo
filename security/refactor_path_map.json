@@ -401,7 +401,8 @@
     "backend/app/domains/social/application/keyword_feed.py": "backend/app/domains/social/service/keyword_feed.py",
     "backend/app/domains/social/application/search_runtime.py": "backend/app/runtime/search/binding.py",
     "backend/app/domains/social/ports/search_index.py": "backend/app/domains/social/contracts/search_index.py",
-    "backend/app/services/world_feed_runtime.py": "backend/app/domains/social/service/feed_cycle.py"
+    "backend/app/services/world_feed_runtime.py": "backend/app/domains/social/service/feed_cycle.py",
+    "backend/app/services/feed_reaction_planner.py": "backend/app/runtime/social/feed_reaction_provider.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -25337,7 +25338,7 @@
           "new": "backend/app/runtime/resident/context.py::LangGraphResidentContext",
           "direct_consumers": [
             "backend/app/services/langgraph_resident.py",
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle.py",
             "backend/app/compatibility/routine_posts/legacy.py"
           ],
@@ -47867,7 +47868,7 @@
             "backend/app/domains/social/repository/world_feed.py",
             "backend/app/domains/social/service/world_feed.py",
             "backend/app/runtime/social/world_feed_search.py",
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -47885,7 +47886,7 @@
             "backend/app/domains/social/repository/world_feed.py",
             "backend/app/domains/social/service/world_feed.py",
             "backend/app/runtime/social/world_feed_search.py",
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -47903,7 +47904,7 @@
             "backend/app/domains/social/repository/world_feed.py",
             "backend/app/domains/social/service/world_feed.py",
             "backend/app/runtime/social/world_feed_search.py",
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -47921,7 +47922,7 @@
             "backend/app/domains/social/repository/world_feed.py",
             "backend/app/domains/social/service/world_feed.py",
             "backend/app/runtime/social/world_feed_search.py",
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -48521,7 +48522,7 @@
             "backend/app/domains/social/repository/world_feed.py",
             "backend/app/domains/social/service/world_feed.py",
             "backend/app/runtime/social/world_feed_search.py",
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -48540,7 +48541,7 @@
             "backend/app/domains/social/repository/world_feed.py",
             "backend/app/domains/social/service/world_feed.py",
             "backend/app/runtime/social/world_feed_search.py",
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -48559,7 +48560,7 @@
             "backend/app/domains/social/repository/world_feed.py",
             "backend/app/domains/social/service/world_feed.py",
             "backend/app/runtime/social/world_feed_search.py",
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -48578,7 +48579,7 @@
             "backend/app/domains/social/repository/world_feed.py",
             "backend/app/domains/social/service/world_feed.py",
             "backend/app/runtime/social/world_feed_search.py",
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -48597,7 +48598,7 @@
             "backend/app/domains/social/repository/world_feed.py",
             "backend/app/domains/social/service/world_feed.py",
             "backend/app/runtime/social/world_feed_search.py",
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -48616,7 +48617,7 @@
             "backend/app/domains/social/repository/world_feed.py",
             "backend/app/domains/social/service/world_feed.py",
             "backend/app/runtime/social/world_feed_search.py",
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -48634,7 +48635,7 @@
             "backend/app/domains/social/repository/world_feed.py",
             "backend/app/domains/social/service/world_feed.py",
             "backend/app/runtime/social/world_feed_search.py",
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -48734,10 +48735,12 @@
           "backend/app/domains/social/service/feed_cycle_values.py"
         ],
         "backend/app/services/feed_reaction_planner.py": [
+          "backend/app/domains/social/constants.py",
           "backend/app/domains/social/contracts/feed_execution.py",
           "backend/app/domains/social/exceptions.py",
+          "backend/app/domains/social/service/feed_reaction_prompts.py",
           "backend/app/domains/social/service/feed_reaction_validation.py",
-          "backend/app/services/feed_reaction_planner.py"
+          "backend/app/runtime/social/feed_reaction_provider.py"
         ]
       },
       "split_symbols": [
@@ -48886,61 +48889,57 @@
         },
         {
           "old": "backend/app/services/feed_reaction_planner.py::FEED_REACTION_CONTRACT_VERSION",
-          "new": "backend/app/services/feed_reaction_planner.py::FEED_REACTION_CONTRACT_VERSION",
+          "new": "backend/app/domains/social/constants.py::FEED_REACTION_CONTRACT_VERSION",
           "direct_consumers": [
-            "backend/app/runtime/social/feed_cycle.py"
+            "backend/app/domains/social/service/feed_reaction_prompts.py"
           ],
           "test_nodes": [
-            "tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
-            "tests/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
-            "tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
-            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation"
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
           ]
         },
         {
           "old": "backend/app/services/feed_reaction_planner.py::GEMINI_FEED_REACTION_RESPONSE_SCHEMA",
-          "new": "backend/app/services/feed_reaction_planner.py::GEMINI_FEED_REACTION_RESPONSE_SCHEMA",
+          "new": "backend/app/runtime/social/feed_reaction_provider.py::GEMINI_FEED_REACTION_RESPONSE_SCHEMA",
           "direct_consumers": [
             "backend/app/runtime/social/feed_cycle.py"
           ],
           "test_nodes": [
-            "tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
-            "tests/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
-            "tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
-            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation"
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
           ]
         },
         {
           "old": "backend/app/services/feed_reaction_planner.py::GEMINI_FEED_COMMENT_RESPONSE_SCHEMA",
-          "new": "backend/app/services/feed_reaction_planner.py::GEMINI_FEED_COMMENT_RESPONSE_SCHEMA",
+          "new": "backend/app/runtime/social/feed_reaction_provider.py::GEMINI_FEED_COMMENT_RESPONSE_SCHEMA",
           "direct_consumers": [
             "backend/app/runtime/social/feed_cycle.py"
           ],
           "test_nodes": [
-            "tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
-            "tests/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
-            "tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
-            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation"
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
           ]
         },
         {
           "old": "backend/app/services/feed_reaction_planner.py::GEMINI_PROPOSAL_PREVIEW_RESPONSE_SCHEMA",
-          "new": "backend/app/services/feed_reaction_planner.py::GEMINI_PROPOSAL_PREVIEW_RESPONSE_SCHEMA",
+          "new": "backend/app/runtime/social/feed_reaction_provider.py::GEMINI_PROPOSAL_PREVIEW_RESPONSE_SCHEMA",
           "direct_consumers": [
             "backend/app/runtime/social/feed_cycle.py"
           ],
           "test_nodes": [
-            "tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
-            "tests/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
-            "tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
-            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation"
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
           ]
         },
         {
           "old": "backend/app/services/feed_reaction_planner.py::FeedReactionValidationError",
           "new": "backend/app/domains/social/exceptions.py::FeedReactionValidationError",
           "direct_consumers": [
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_reaction_validation.py",
             "backend/app/domains/social/service/feed_cycle_publishing.py",
             "backend/app/domains/social/service/feed_cycle.py"
@@ -48956,7 +48955,7 @@
           "old": "backend/app/services/feed_reaction_planner.py::FeedReactionProvider",
           "new": "backend/app/domains/social/contracts/feed_execution.py::FeedReactionProvider",
           "direct_consumers": [
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle_values.py",
             "backend/app/domains/social/service/feed_cycle_publishing.py",
             "backend/app/domains/social/service/feed_cycle.py",
@@ -48971,61 +48970,57 @@
         },
         {
           "old": "backend/app/services/feed_reaction_planner.py::_api_key",
-          "new": "backend/app/services/feed_reaction_planner.py::_api_key",
+          "new": "backend/app/runtime/social/feed_reaction_provider.py::_api_key",
           "direct_consumers": [
             "backend/app/runtime/social/feed_cycle.py"
           ],
           "test_nodes": [
-            "tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
-            "tests/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
-            "tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
-            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation"
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
           ]
         },
         {
           "old": "backend/app/services/feed_reaction_planner.py::_llm_context",
-          "new": "backend/app/services/feed_reaction_planner.py::_llm_context",
+          "new": "backend/app/runtime/social/feed_reaction_provider.py::_llm_context",
           "direct_consumers": [
             "backend/app/runtime/social/feed_cycle.py"
           ],
           "test_nodes": [
-            "tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
-            "tests/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
-            "tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
-            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation"
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
           ]
         },
         {
           "old": "backend/app/services/feed_reaction_planner.py::_clip",
-          "new": "backend/app/services/feed_reaction_planner.py::_clip",
+          "new": "backend/app/domains/social/service/feed_reaction_prompts.py::_clip",
           "direct_consumers": [
-            "backend/app/runtime/social/feed_cycle.py"
+            "backend/app/runtime/social/feed_reaction_provider.py"
           ],
           "test_nodes": [
-            "tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
-            "tests/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
-            "tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
-            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation"
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
           ]
         },
         {
           "old": "backend/app/services/feed_reaction_planner.py::_action_notes",
-          "new": "backend/app/services/feed_reaction_planner.py::_action_notes",
+          "new": "backend/app/domains/social/service/feed_reaction_prompts.py::_action_notes",
           "direct_consumers": [
-            "backend/app/runtime/social/feed_cycle.py"
+            "backend/app/runtime/social/feed_reaction_provider.py"
           ],
           "test_nodes": [
-            "tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
-            "tests/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
-            "tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
-            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation"
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
           ]
         },
         {
           "old": "backend/app/services/feed_reaction_planner.py::validate_reaction_decision",
           "new": "backend/app/domains/social/service/feed_reaction_validation.py::validate_reaction_decision",
           "direct_consumers": [
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -49039,7 +49034,7 @@
           "old": "backend/app/services/feed_reaction_planner.py::validate_comment_draft",
           "new": "backend/app/domains/social/service/feed_reaction_validation.py::validate_comment_draft",
           "direct_consumers": [
-            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/runtime/social/feed_reaction_provider.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -49051,15 +49046,14 @@
         },
         {
           "old": "backend/app/services/feed_reaction_planner.py::DirectFeedReactionProvider",
-          "new": "backend/app/services/feed_reaction_planner.py::DirectFeedReactionProvider",
+          "new": "backend/app/runtime/social/feed_reaction_provider.py::DirectFeedReactionProvider",
           "direct_consumers": [
             "backend/app/runtime/social/feed_cycle.py"
           ],
           "test_nodes": [
-            "tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
-            "tests/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
-            "tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
-            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation"
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
           ]
         }
       ],
@@ -49080,6 +49074,209 @@
       ],
       "same_session_evidence": "Original18 whole definitions including async cycle body compare equal after exact typed-callback and lookup expansion. Existing zero-call, ordinary comment, minute replay and durable observation tests retain all assertions. New rollback-after-flush regression proves source+execution+event rollback while committed feed observation/relationship familiarity survives and claim becomes retryable_failed.",
       "remaining": "Community87 actual definitions, retained feed-reaction provider client/prompt role and final aliases/G07/capture/Hosted remain pending. Routines existing execution functions and Community publishing callbacks bind at their original positions; parent linear integration will connect completed canonical owners without source duplication."
+    },
+    "AR-B5-C19": {
+      "status": "IMPLEMENTED source; actual direct reaction provider and prompt rules; capture pending",
+      "scope": "World-feed prompt clipping/action context and plan/comment prompt rules are Social policy. Runtime owns the original credential resolve/reveal, provider JSON schema construction, tracing context and direct LLM transport. Original callback/tracker/context identity,900/1000 token limits,medium reasoning, planner no JSON retry and writer default remain. Old services.feed_reaction_planner is removed with exact consumers/secret reveal allowlist moved.",
+      "split_files": {
+        "backend/app/services/feed_reaction_planner.py": [
+          "backend/app/domains/social/constants.py",
+          "backend/app/domains/social/contracts/feed_execution.py",
+          "backend/app/domains/social/exceptions.py",
+          "backend/app/domains/social/service/feed_reaction_prompts.py",
+          "backend/app/domains/social/service/feed_reaction_validation.py",
+          "backend/app/runtime/social/feed_reaction_provider.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/feed_reaction_planner.py::_api_key",
+          "new": "backend/app/runtime/social/feed_reaction_provider.py::_api_key",
+          "direct_consumers": [
+            "backend/app/runtime/social/feed_cycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
+          ]
+        },
+        {
+          "old": "backend/app/services/feed_reaction_planner.py::_llm_context",
+          "new": "backend/app/runtime/social/feed_reaction_provider.py::_llm_context",
+          "direct_consumers": [
+            "backend/app/runtime/social/feed_cycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
+          ]
+        },
+        {
+          "old": "backend/app/services/feed_reaction_planner.py::_clip",
+          "new": "backend/app/domains/social/service/feed_reaction_prompts.py::_clip",
+          "direct_consumers": [
+            "backend/app/runtime/social/feed_reaction_provider.py"
+          ],
+          "test_nodes": [
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
+          ]
+        },
+        {
+          "old": "backend/app/services/feed_reaction_planner.py::_action_notes",
+          "new": "backend/app/domains/social/service/feed_reaction_prompts.py::_action_notes",
+          "direct_consumers": [
+            "backend/app/runtime/social/feed_reaction_provider.py"
+          ],
+          "test_nodes": [
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
+          ]
+        },
+        {
+          "old": "backend/app/services/feed_reaction_planner.py::DirectFeedReactionProvider",
+          "new": "backend/app/runtime/social/feed_reaction_provider.py::DirectFeedReactionProvider",
+          "direct_consumers": [
+            "backend/app/runtime/social/feed_cycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
+          ]
+        },
+        {
+          "old": "backend/app/services/feed_reaction_planner.py::FEED_REACTION_CONTRACT_VERSION",
+          "new": "backend/app/domains/social/constants.py::FEED_REACTION_CONTRACT_VERSION",
+          "direct_consumers": [
+            "backend/app/domains/social/service/feed_reaction_prompts.py"
+          ],
+          "test_nodes": [
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
+          ]
+        },
+        {
+          "old": "backend/app/services/feed_reaction_planner.py::GEMINI_FEED_REACTION_RESPONSE_SCHEMA",
+          "new": "backend/app/runtime/social/feed_reaction_provider.py::GEMINI_FEED_REACTION_RESPONSE_SCHEMA",
+          "direct_consumers": [
+            "backend/app/runtime/social/feed_cycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
+          ]
+        },
+        {
+          "old": "backend/app/services/feed_reaction_planner.py::GEMINI_FEED_COMMENT_RESPONSE_SCHEMA",
+          "new": "backend/app/runtime/social/feed_reaction_provider.py::GEMINI_FEED_COMMENT_RESPONSE_SCHEMA",
+          "direct_consumers": [
+            "backend/app/runtime/social/feed_cycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
+          ]
+        },
+        {
+          "old": "backend/app/services/feed_reaction_planner.py::GEMINI_PROPOSAL_PREVIEW_RESPONSE_SCHEMA",
+          "new": "backend/app/runtime/social/feed_reaction_provider.py::GEMINI_PROPOSAL_PREVIEW_RESPONSE_SCHEMA",
+          "direct_consumers": [
+            "backend/app/runtime/social/feed_cycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_feed_reaction_intent.py::test_server_rejects_action_not_present_in_candidate_affordances",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation",
+            "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
+          ]
+        },
+        {
+          "old": "backend/app/services/feed_reaction_planner.py::FeedReactionValidationError",
+          "new": "backend/app/domains/social/exceptions.py::FeedReactionValidationError",
+          "direct_consumers": [
+            "backend/app/runtime/social/feed_reaction_provider.py",
+            "backend/app/domains/social/service/feed_reaction_validation.py",
+            "backend/app/domains/social/service/feed_cycle_publishing.py",
+            "backend/app/domains/social/service/feed_cycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
+            "tests/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
+            "tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation"
+          ]
+        },
+        {
+          "old": "backend/app/services/feed_reaction_planner.py::FeedReactionProvider",
+          "new": "backend/app/domains/social/contracts/feed_execution.py::FeedReactionProvider",
+          "direct_consumers": [
+            "backend/app/runtime/social/feed_reaction_provider.py",
+            "backend/app/domains/social/service/feed_cycle_values.py",
+            "backend/app/domains/social/service/feed_cycle_publishing.py",
+            "backend/app/domains/social/service/feed_cycle.py",
+            "backend/app/runtime/social/feed_cycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
+            "tests/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
+            "tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation"
+          ]
+        },
+        {
+          "old": "backend/app/services/feed_reaction_planner.py::validate_reaction_decision",
+          "new": "backend/app/domains/social/service/feed_reaction_validation.py::validate_reaction_decision",
+          "direct_consumers": [
+            "backend/app/runtime/social/feed_reaction_provider.py",
+            "backend/app/domains/social/service/feed_cycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
+            "tests/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
+            "tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation"
+          ]
+        },
+        {
+          "old": "backend/app/services/feed_reaction_planner.py::validate_comment_draft",
+          "new": "backend/app/domains/social/service/feed_reaction_validation.py::validate_comment_draft",
+          "direct_consumers": [
+            "backend/app/runtime/social/feed_reaction_provider.py",
+            "backend/app/domains/social/service/feed_cycle.py"
+          ],
+          "test_nodes": [
+            "tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls",
+            "tests/test_feed_reaction_intent.py::test_ordinary_comment_is_world_scoped_and_execution_keeps_intent_evidence",
+            "tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call",
+            "tests/test_feed_reaction_intent.py::test_writer_failure_does_not_erase_committed_feed_observation"
+          ]
+        }
+      ],
+      "new_tests": [
+        "tests/social/test_feed_reaction_provider_contract.py::test_direct_reaction_provider_keeps_context_schema_and_call_limits"
+      ],
+      "statement_extractions": [
+        {
+          "old": "backend/app/services/feed_reaction_planner.py::DirectFeedReactionProvider.plan",
+          "new": "backend/app/domains/social/service/feed_reaction_prompts.py::build_reaction_prompts",
+          "meaning": "Original system_prompt and json.dumps user_prompt assignments, identical AST and string values."
+        },
+        {
+          "old": "backend/app/services/feed_reaction_planner.py::DirectFeedReactionProvider.write_comment",
+          "new": "backend/app/domains/social/service/feed_reaction_prompts.py::build_comment_prompts",
+          "meaning": "Original default/proposal system_prompt branch and json.dumps user_prompt, same precomputed is_proposal."
+        }
+      ],
+      "evidence": "Provider3/prompt2 full AST and constants4 are identical after exact prompt block expansion. New direct-client regression stubs only network/credential transport and verifies schemas/context/tracker, token/reasoning/retry contracts and bounded server evidence. Existing behavior/security assertions unchanged.",
+      "remaining": "Community87 history/auth/actions/complete-tick, G07 and final aliases/capture/Hosted remain; parent joins canonical DirectLlm transport on integration.",
+      "retained_evidence_from": "AR-B5-C18 original planner whole-file symbols, including earlier moved provider/error/validation definitions, remain mapped to their actual owners."
     }
   }
 }

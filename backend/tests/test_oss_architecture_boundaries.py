@@ -128,7 +128,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
             "_google_embedding_credential_for_character",
             "_google_api_key_for_character",
         },
-        "services/feed_reaction_planner.py": {"_api_key"},
+        "runtime/social/feed_reaction_provider.py": {"_api_key"},
         "services/langgraph_resident.py": {"_decrypt_api_key"},
         "runtime/chat/sqlalchemy_service.py": {"_resolve_message_credential"},
         "runtime/social/image_generation.py": {
