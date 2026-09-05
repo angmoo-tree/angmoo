@@ -405,3 +405,13 @@ runtime mode repair 정책은 WC service, 시작 시 session_factory/SQLite imme
 Setup·runtime repair·Agent capacity/동시 활성화·Package UoW는 **101 passed / 기존 3 warnings / 22.44초**였다. 기존 setup/runtime repair 테스트 두 파일을 `tests/world_characters/`로 옮겼고 assertion을 유지한다. 4개 정확한 module을 scope에 추가하고 실제 사라진 bridge를 제거했다. 현재 architecture **619 modules / 1,946 edges / exact legacy 281 PASS**, ER0 **75/87/24/44/7 PASS**, L4 parity **97**, Memory batch current이다. 잔여 setup/entry HTTP, readiness와 여러 업무 cleanup의 최종 소유 전환은 다음 slice다.
 
 Setup slice의 최종 현재 API·ORM 및 전체 split evidence 검사도 PASS였다. immutable Git blob 읽기 memoization만 사용했고 frozen source/checkpoint 내용은 변경하지 않았다.
+
+## AR-B6-A1 Chat 모델 정책·요청 계약 준비
+
+고정 source `9c1ad0f07cb824c158e07618d7b2ec1eca5f3135`에서 Chat의 schemas·exceptions·policies·model_binding 계약 네 파일을 실제 역할 경로로 옮겼다. 함수·클래스 본문 AST와 정책 상수는 동일하며 20개 실제 소비자와 기존 테스트의 module 참조를 바꿨다. Gemini HIGH/LOW, Gemma의 미설정 reasoning, token cap 및 lease 정책은 그대로다. 신규 행위나 신규 test node를 추가하지 않았다. Frozen migration 및 과거 inventory branch는 변경하지 않았다.
+
+- Chat B/D domain·identity/migration·모델 Hotfix·쪽지 회귀: **83 passed / 16.37초**, 고정 source에서 완료.
+- Live architecture **627 modules / 2,003 edges / exact legacy 281 PASS**. Deferred 22, L4 parity 97, ER0 76/87/24/44/7, P8-R current inventory PASS.
+- 정확한 기반 module 5개·entry 3개와 임시 소비 연결 8개만 scope에 반영했다. Thread repository/service, generation lifecycle 및 HTTP endpoint 구현은 아직 이전하지 않았다.
+
+이는 AR-B5 후 순차 통합할 독립 준비 source다. 전체 보존 계보 capture·통합 회귀·PR·merge·post-merge 및 AR-B6 완료로 표시하지 않는다.

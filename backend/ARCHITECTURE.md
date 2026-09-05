@@ -468,3 +468,9 @@ WorldCharacter의 공개 프로필·Studio·후보 조회와 퇴장 정책은 `s
 
 
 WorldCharacter의 생성·재시도·승인·거절·입장 정책은 `service/autonomous_setup.py`에 있습니다. Character 조회, nullable World/membership 조회·입장 membership seed·World contract version 쓰기, agent-purpose credential 조회는 각 소유 서비스와 같은 Session으로 협력합니다. `infrastructure/autonomous_setup_models.py`의 외부 ORM 집합은 제거했습니다. Provider budget·쿼터·실패 상태 기록과 commit 경계는 WC 서비스에 유지합니다. Runtime mode의 실제 repair 정책은 `service/runtime_modes.py`, 시작 시 Session factory·SQLite immediate 실행은 `runtime/world_characters/recovery.py`가 소유합니다. Runtime의 capacity query는 원래 WC/Character join을 그대로 유지합니다.
+
+#### Chat 모델 정책과 요청 계약
+
+채팅의 HTTP 입출력은 `domains/chat/schemas.py`, 공통 업무 오류는 `exceptions.py`, 모델 선택·reasoning·토큰 및 generation lease 규칙은 `policies.py`에 있습니다. `contracts/model_binding.py`는 thread 모델 연결 방식과 값의 계약을 소유합니다. 소비자는 이 실제 파일을 import하며 옛 `api/schemas.py`와 `domain/` 계약 파일의 재수출 경로는 두지 않습니다.
+
+이 기반 이전은 Chat 실행 서비스 전체의 이전 완료와 구분합니다. Thread SQL, generation 시작·재연결·취소·최종 저장, SSE와 provider 실행은 후속 Chat 단계에서 같은 정책과 트랜잭션 경계를 유지하며 이전합니다. API·generation·runtime의 남은 연결은 부분 scope의 정확한 임시 소비자로 기록합니다.
