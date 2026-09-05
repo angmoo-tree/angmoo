@@ -1258,6 +1258,77 @@
       "test_suppressions": {
         "tests/characters/test_creator_workflows.py": {}
       }
+    },
+    {
+      "commit": "81aa413abaf74655c3b3432a52ce10125d9aec53",
+      "feature_id": "AR-B2",
+      "reason": "Creator HTTP error contracts and owner-controlled Character state admission and route preservation",
+      "tracked_files": {
+        "backend/app/domains/media/contracts.py": "e6da72c311a089acac4ffbab302f5be876e2be62",
+        "backend/app/domains/runtime/contracts.py": "2be8383b03f6e3898e3814b1a4539adce5bb38c2",
+        "backend/tests/characters/test_character_state_http.py": "a65825da791ad37f77de9d88f56e69dc231428fe",
+        "backend/tests/characters/test_creator_http_errors.py": "b88d92d56e53cd39e91c32852bac36b0ebee01c6"
+      },
+      "test_nodes": [
+        "tests/characters/test_character_state_http.py::test_state_http_retains_url_owner_visibility_and_same_route",
+        "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write",
+        "tests/characters/test_creator_http_errors.py::test_creator_http_keeps_existing_error_status_and_detail[complete-error6-422-invalid media]",
+        "tests/characters/test_creator_http_errors.py::test_creator_http_keeps_existing_error_status_and_detail[complete-error7-409-handle conflict]",
+        "tests/characters/test_creator_http_errors.py::test_creator_http_keeps_existing_error_status_and_detail[create-error0-502-credential sync failed]",
+        "tests/characters/test_creator_http_errors.py::test_creator_http_keeps_existing_error_status_and_detail[create-error1-409-slot unavailable]",
+        "tests/characters/test_creator_http_errors.py::test_creator_http_keeps_existing_error_status_and_detail[create-error2-502-OpenClaw Gateway authentication failed]",
+        "tests/characters/test_creator_http_errors.py::test_creator_http_keeps_existing_error_status_and_detail[create-error3-400-\\uc800\\uc7a5\\ub41c LLM API key\\uac00 \\ub9cc\\ub8cc\\ub418\\uc5c8\\uac70\\ub098 \\uc720\\ud6a8\\ud558\\uc9c0 \\uc54a\\uc2b5\\ub2c8\\ub2e4. \\uc0c8 API key\\ub97c \\uc800\\uc7a5\\ud55c \\ub4a4 \\ucee4\\ubba4\\ub2c8\\ud2f0 \\uc131\\ud5a5 \\ubd84\\uc11d\\uc744 \\ub2e4\\uc2dc \\uc2e4\\ud589\\ud574\\uc8fc\\uc138\\uc694.]",
+        "tests/characters/test_creator_http_errors.py::test_creator_http_keeps_existing_error_status_and_detail[enhance-error4-429-\\ud398\\ub974\\uc18c\\ub098 \\ubcf4\\uac15\\uc740 2026-09-05T00:00:00+00:00 \\uc774\\ud6c4 \\ub2e4\\uc2dc \\uc2dc\\ub3c4\\ud560 \\uc218 \\uc788\\uc2b5\\ub2c8\\ub2e4.]",
+        "tests/characters/test_creator_http_errors.py::test_creator_http_keeps_existing_error_status_and_detail[enhance-error5-409-credential required]",
+        "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+      ],
+      "test_assertions": {
+        "tests/characters/test_character_state_http.py": {
+          "database": [],
+          "test_state_service_keeps_owner_gate_legacy_error_and_deferred_write": [
+            "pytest.raises(exceptions.CharacterStateNotFoundError)",
+            "pytest.raises(legacy.CharacterNotFoundError)",
+            "assert type(error.value) is legacy.CharacterNotFoundError",
+            "assert str(error.value) == character.id",
+            "assert db.get(models.CharacterState, character.id) is None",
+            "assert db.get(models.CharacterState, character.id) is None",
+            "assert result.memory_note == 'private memory'",
+            "assert commits == []"
+          ],
+          "test_state_http_retains_url_owner_visibility_and_same_route": [
+            "assert original is canonical",
+            "assert response.status_code == 200",
+            "assert response.json()['memory_note'] == 'owner-only'",
+            "assert blocked.status_code == 404",
+            "assert blocked.json() == {'detail': 'Character not found'}",
+            "assert db.get(models.CharacterState, character.id).summary == 'Rested'"
+          ]
+        },
+        "tests/characters/test_creator_http_errors.py": {
+          "test_creator_http_keeps_existing_error_status_and_detail": [
+            "assert response.status_code == status",
+            "assert response.json() == {'detail': detail}"
+          ],
+          "test_error_exports_are_same_objects_and_keep_runtime_diagnostics": [
+            "assert management.CredentialRequiredError is exceptions.CredentialRequiredError",
+            "assert management.CredentialSyncError is exceptions.CredentialSyncError",
+            "assert agent_runs.AgentRunServiceError is runtime_contracts.AgentRunServiceError",
+            "assert agent_runs.AgentSlotUnavailableError is runtime_contracts.AgentSlotUnavailableError",
+            "assert issubclass(agent_runs.AgentSlotUnavailableError, agent_runs.AgentRunServiceError)",
+            "assert profile_media.InvalidProfileMediaError is media_contracts.InvalidProfileMediaError",
+            "assert runtime_boundary.OpenClawGatewayError is runtime_contracts.ResidentRuntimeError",
+            "assert runtime_boundary.OpenClawGatewayAuthError is runtime_contracts.ResidentRuntimeAuthError",
+            "assert str(error) == 'not ready'",
+            "assert error.diagnostics is diagnostics",
+            "assert expected.index('create_agent_draft') < expected.index('get_agent')",
+            "assert expected.index('complete_agent_draft') < expected.index('get_agent')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/characters/test_character_state_http.py": {},
+        "tests/characters/test_creator_http_errors.py": {}
+      }
     }
   ]
 }
