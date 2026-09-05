@@ -4,7 +4,7 @@
 
 ## 기준과 적용 상태
 
-2026-09-05 AR-0의 기준은 PR #258 merge `6e56f0837cc11ff42ccbb520050bbd32c5e9bc14`, tree `99f679acb9aab1e3b28628d0aee6d71ae0364d74`다. 준비·검사 지원 PR #259, backend Device Home PR #260, frontend Device Home PR #261이 차례대로 병합되어 §8.1 준비와 두 파일럿이 완료됐다. 기준선 JSON은 현재 경로로 재생성하지 않으며, 단계별 결과는 [파일럿 결과](refactor-pilot-results.md)에 누적한다. §8.2는 #263 merge `d7037625a19071eb279ad2ea35c3ace6fe5b5289`를 추가 체크포인트로 삼아 AR-G0 검사 지원부터 진행한다. AR-G1 이후 제품 이전·AR-F2 이후·AR-X는 아직 미착수이며, 새 실행 증거는 [백엔드 전환 결과](refactor-backend-results.md)에 누적한다.
+2026-09-05 AR-0의 기준은 PR #258 merge `6e56f0837cc11ff42ccbb520050bbd32c5e9bc14`, tree `99f679acb9aab1e3b28628d0aee6d71ae0364d74`다. 준비·검사 지원 PR #259, backend Device Home PR #260, frontend Device Home PR #261이 차례대로 병합되어 §8.1 준비와 두 파일럿이 완료됐다. 기준선 JSON은 현재 경로로 재생성하지 않으며, 단계별 결과는 [파일럿 결과](refactor-pilot-results.md)에 누적한다. §8.2는 #263 merge `d7037625a19071eb279ad2ea35c3ace6fe5b5289`를 추가 체크포인트로 삼는다. AR-G1에서 설정 구현·소비자·설정 전용 테스트를 새 경로로 옮겼으며 이후 제품 이전·AR-F2 이후·AR-X는 아직 미착수다. 새 실행 증거와 PR·병합 상태는 [백엔드 전환 결과](refactor-backend-results.md)에 누적한다.
 
 | 자료 | 소유하는 정보 |
 | --- | --- |
@@ -66,7 +66,7 @@
 
 | ID | 목표/처리 | 선행조건·보존 의미 |
 | --- | --- | --- |
-| G01 | core/config → app/config | 설정 기본값·우선순위·개발 .env 탐색 위치 |
+| G01 | app/config로 구현·소비자 이전, core/config 제거 | 설정 기본값·우선순위·개발 .env 탐색 위치. 검증·병합 상태는 백엔드 전환 결과 참조 |
 | G02 | app/models.py | 업무 ORM 소비자 이전 후 app/models 패키지 교체. 단일 Base·metadata·class identity |
 | G03 | 공통/도메인 exceptions | HTTP status/code/body/retry 의미 |
 | G04 | app/pagination | 공통 도구와 업무별 cursor·정렬·scope 구분 |
@@ -106,3 +106,5 @@ Frontend Home은 World 목록을 소유하고, 인증·runtime-status·device-sh
 AR-1은 새 규칙 지원과 허용/거부 fixture를 먼저 제공한다. 실제 코드 이동과 해당 scope 활성화를 같은 PR에서 수행한다. 미전환 영역의 기존 보호 규칙과 전체 순환 검사를 유지하며 넓은 예외로 통과시키지 않는다.
 
 AR-B1은 PR #260에서 legacy alias 없이 병합됐다. AR-F1은 PR #261에서 Home의 화면·공용 코드를 옮겼고 네 feature facade 소비자, 공용 TypeScript bridge 7개, semantic CSS 직접 소비자 7개를 제거 단계와 함께 기록했다. AR-0/1과 두 파일럿의 완료는 전체 리팩터링 완료가 아니다. AR-G·AR-B2 이후·AR-F2 이후·AR-X가 남으며, P8-L-S 실제 AI 품질·인과·사용자 closeout도 별도로 남는다.
+
+AR-G1은 공통 설정을 `app/config.py`로 옮기면서 기존 startup-security 25 nodes를 `tests/config/test_startup_security.py`에 그대로 연결한다. 다른 업무·runtime 테스트는 소유 위치를 유지하고 설정 import만 전환한다. 새 설정 경로·cold import 회귀 2개는 별도 도입 증거에 기록한다. 고정 기준선·과거 secret-scan allowlist·검사 fixture의 옛 경로는 역사 또는 검사 입력이며 실행 호환 파일이 아니다. G01 코드 이전은 AR-G 전체나 설치 앱 최종 검증 완료를 뜻하지 않는다.

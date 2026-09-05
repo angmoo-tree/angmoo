@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy.orm import Session
 
 from app.core import browser_session
-from app.core.config import settings
+from app.config import settings
 from app.core.db import get_db
 from app.domains.identity.api.local_schemas import (
     LocalBootstrapChallengeRead,

@@ -12,7 +12,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 
-from app.core.config import settings
+from app.config import settings
 
 
 PASSWORD_ITERATIONS = 120_000

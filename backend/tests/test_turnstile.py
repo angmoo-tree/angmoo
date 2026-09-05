@@ -4,7 +4,7 @@ from urllib.error import URLError
 import pytest
 from pydantic import SecretStr
 
-from app.core.config import settings
+from app.config import settings
 from app.services import turnstile
 
 

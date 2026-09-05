@@ -5,7 +5,7 @@ from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-BACKEND_DIR = Path(__file__).resolve().parents[2]
+BACKEND_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_OPENCLAW_AGENT_IDS = ",".join(f"angmoo-{index}" for index in range(1, 51))
 DEFAULT_APP_SECRET = "angmoo-dev-secret-change-me"
 

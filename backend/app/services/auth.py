@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.core import security
-from app.core.config import settings
+from app.config import settings
 from app.core.redaction import redact_secret_text
 from app.cruds import agent_runs as agent_run_crud
 from app.policies import name_policy

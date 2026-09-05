@@ -14,7 +14,7 @@ from pathlib import Path
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.core.config import Settings
+from app.config import Settings
 from app.core.db import create_database_engine, create_session_factory
 from app.domains.memory.public import CanonicalRecallService
 from app.domains.runtime.ports.runtime_data_path import RuntimeDataPaths

@@ -325,7 +325,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/cruds/community.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "9508dffad905bd5863c8c5e6ca77cd1b76569ae1b3993cbdde9d3dfdbf8972e6",
+      "source_sha256": "97ef9826633ed1077de483f54ef2ae804bd7ef41710645f70a6fbb1bf8caa4fe",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -737,7 +737,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/chat/world_generation.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "cf92fe25ec96fe9de0f27b8a12db5232bb7ac799221947c4ce50ef97854f3d1b",
+      "source_sha256": "1a8c51bcb24c886f52efacf2a9b48366658ef0f2f8a79569cb0aad10d3073d0f",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -923,7 +923,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/agent_creation_drafts.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "18e7c651eeab739496ab0b9a60193d321d821cccdd7aca9709a7fb3fdd7f99b5",
+      "source_sha256": "36af619056d596dfa9656a0e8dc1e940e166766a000623c2a800f0364b52d0c4",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -940,7 +940,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/agents.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "189f0d81b517a4d6cf29845d61c12741db15155c5bde2d8024901d86dd0bcfde",
+      "source_sha256": "9b9e4c7653350d0a8fc6e5bb57811f44de6810f05995dcf30a6d7779ef82e314",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -952,7 +952,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/auth.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "94c9424ef3c5937374d50dc953f0cec6a87f83e8831eca5f0bcdcba9f3957fc3",
+      "source_sha256": "34eeca3ddcd136f331d3a89418c2a05cab4803a1fd5b90469fa62b08b2dd5537",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -980,7 +980,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/community_abuse_quota.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "e3f1250d6945e80c7456dc6f3afb26f93801046a61c307a80ead42cdb802489a",
+      "source_sha256": "7bc2eeb4617ed8987fc80dc97716b396be74286efc514f2006b77fab402b13e6",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -996,7 +996,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/external_auth_verification.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "f1d87d0f7a0b16a28aff2b17dc543bff680624c296586a9361917ec02c750389",
+      "source_sha256": "fc2f94d6626696c51c07d63f39475107cac1894561effff089f73e10a5ce4b67",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1068,7 +1068,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/login_throttle.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "429ad023bd3a8e8c6c72aee5097461778f90f4da5d03bec01020c84938933e2e",
+      "source_sha256": "bc8422f9b9ea96b963068f56b2867aeac3c7f319c743d18fdde433475a5756d4",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1084,7 +1084,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/lore_parser_quota.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "3fc781ea9ccb0caff9a1986e99da09de91abaaefcbd4585019630bd55e746033",
+      "source_sha256": "181d4ce325f93d1086860eae06eed5aa16a116b0d4c6fba3b269e98df3fbe7cc",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1119,7 +1119,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/scripts/migrate_local_credentials.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "755b4e1dee90e5892e5432e0f86cb4bf0eb97de572aa3f4e97d0a873840bd3ef",
+      "source_sha256": "5dbf1d824b5a6d4f4b619d039decfa63eac39b6bea1aec904374edee24164699",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

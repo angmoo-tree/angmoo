@@ -7,7 +7,7 @@ from typing import Literal
 from sqlalchemy.orm import Session
 
 from app import models
-from app.core.config import settings
+from app.config import settings
 
 
 PollinationsFreeImageModel = Literal["flux", "zimage", "sana", "replicate-zimage-turbo-lora"]

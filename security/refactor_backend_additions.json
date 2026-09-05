@@ -482,6 +482,43 @@
       "test_suppressions": {
         "tests/test_t2_secret_allowlist.py": {}
       }
+    },
+    {
+      "commit": "fe7c4ef6fbd20603f469e4d55e4ad9adbc5aeacc",
+      "feature_id": "G01",
+      "reason": "Protect relocated settings path and cold runtime settings identity regression tests",
+      "tracked_files": {
+        "backend/tests/config/test_config_paths.py": "a2ee0369f9f1f493ac2a7002ceda9bf62e5534df"
+      },
+      "test_nodes": [
+        "tests/config/test_config_paths.py::test_cold_runtime_consumers_share_config_without_a_legacy_module",
+        "tests/config/test_config_paths.py::test_relocated_config_preserves_backend_paths_and_dotenv_precedence"
+      ],
+      "test_assertions": {
+        "tests/config/test_config_paths.py": {
+          "_clean_settings_environment": [],
+          "_run": [
+            "assert result.returncode == 0, result.stdout + result.stderr"
+          ],
+          "test_relocated_config_preserves_backend_paths_and_dotenv_precedence": [
+            "assert Path(actual['backend']) == backend",
+            "assert Path(actual['dotenv']) == backend / '.env'",
+            "assert actual['database'] == f\"sqlite+pysqlite:///{(backend / '.angmoo-dev/angmoo.sqlite3').as_posix()}\"",
+            "assert Path(actual['media']) == backend / 'uploads'",
+            "assert Path(actual['graph']) == backend / '.angmoo-dev/graph'",
+            "assert actual['selected'] == 'from-dotenv'",
+            "assert actual['explicit'] == 'explicit-constructor'",
+            "assert overridden['selected'] == 'from-environment'",
+            "assert overridden['explicit'] == 'explicit-constructor'"
+          ],
+          "test_cold_runtime_consumers_share_config_without_a_legacy_module": [
+            "assert actual == {'shared': True, 'type': True, 'legacy_spec': True, 'legacy_loaded': False, 'settings_module': 'app.config'}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/config/test_config_paths.py": {}
+      }
     }
   ]
 }
