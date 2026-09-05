@@ -662,3 +662,9 @@ source `67f5178c3ce5d2dcde41700f4ddd251c01300721`에서 owner/World/subject 범�
 Source `7fcecd27fc155242819c3172357da1f8429f3dbf`에서 Memory ORM 13개와 기존 schema 생성 함수의 원문 AST를 유지하면서 `models/items.py`와 `models/batch.py`로 이전했다. 현재 소비자 22개를 연결했고, 고정 Alembic 0085/0089와 SQLite v4→v5/v8→v9의 본문은 변경하지 않았다. 역사적 두 import 경로는 필요한 상수·schema 함수 5개의 같은 객체만 export하며 ORM 구현을 중복하지 않는다.
 
 동일 source의 Memory·retrieval planner·Today SNS·embedded data migration 회귀는 **213 passed / 1,988 deselected / 2 warnings / 102.96초**다. 현재 경계 **642/2089/legacy256**, L4 parity97, ER0 **76/87/24/44/7**과 현재 Memory batch inventory가 통과했다. 원본 API/ORM·기존 assertion·suppression·후속 source/node 계보 보존은 **protected/current 2,201 nodes / 37 items PASS**다. SQL 저장·동일 Session의 타 업무 조회·HTTP/runtime 연결은 다음 전환 대상이며 B7 전체 완료로 표시하지 않는다.
+
+### AR-B7-A4 Memory 저장과 같은 Session의 scope 조회
+
+고정 source `b285eb1db57abdd23ff8a2e24f279683c8b2a9f9`는 item/batch/consolidation/leased queue/activation의 실제 SQL 구현을 `repository/`로 이전한다. 사용자·World·WorldCharacter의 세 조회와 timezone 조회는 `runtime/memory/scope_queries.py`에서 원래 SQL과 호출자 Session을 유지하며, invalid-scope 및 timezone 판단은 Memory repository에 남는다. `composition.py`는 이 같은 Session을 사용하는 typed read 협력을 구성하며 독립 transaction이나 도메인의 runtime 역참조를 추가하지 않는다. 기존 소비자 13개는 실제 factory에 연결했고 원래 constructor-site 이름과 테스트 assertion은 유지했다.
+
+기존 method/module **65개 AST**와 외부 조회 두 본문 AST가 같음을 확인했다. 신규 file SQLite 테스트 4개는 caller의 flush 가시성·observer 비노출·rollback 및 잘못된 owner/World/subject에서도 세 SQL의 원래 순서와 동일 오류를 확인한다. 집중 **33 passed / 19.17초**, Memory·Today SNS·embedded migration 확대 **217 passed / 1,988 deselected / 2 warnings / 111.69초**다. 현재 경계645/2095/legacy256·L4 parity97·ER0 76/87/24/44/7·현재 Memory batch inventory PASS다. Commit 직전 전체 보존은 **기존 2,201 protected / 현재 2,205 nodes / 37 items PASS**다. 신규 source 4개와 신규 test nodes 4개는 B4~B6 이후 순차 통합에서 이 source commit의 도입 증거를 append한다. B7 HTTP·worker 및 나머지 compatibility 종료는 아직 수행 중이다.
