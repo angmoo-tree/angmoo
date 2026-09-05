@@ -669,3 +669,8 @@ Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥�
 `routines/schemas/resident_planning.py`는 LangGraph planner·writer의 실제 Pydantic 응답 모델을 소유합니다. 모델의 기존 private 이름은 provider JSON schema의 title에도 쓰이므로 유지합니다. Topic Arc의 단계 수와 setup/development/conclusion 순서는 `policies/topic_arc_roles.py`가 판단하며, 읽기 전용 역할 계약은 `contracts/topic_arcs.py`에 있습니다. 이 검증 경계는 DB나 provider를 호출하지 않습니다. 실제 토픽·행동 판단과 graph 실행 조립은 LG-B/LG-C에서 이어서 분리하며, 이전을 마친 Memory Daypart/공통 clipping은 최종 통합에서 기존 소유 구현을 연결합니다.
 
 계획과 Social이 함께 사용하는 동기·감정 enum 두 개의 실제 정의는 `app/contracts/action_subjective_context.py`에 있습니다. Social의 subjective DTO·출처·텍스트 검증·저장 규칙은 Social에 유지하며, 값 enum의 같은 객체를 import합니다. 따라서 enum 값·identity·provider schema를 바꾸지 않고 두 업무의 공유 값만 연결합니다.
+
+
+### Resident 계획과 결과를 판단하는 위치
+
+`routines/policies/topic_dates.py`는 상대 날짜의 기준과 이월 상태를, `handoff_coverage.py`는 이미 작성한 내용으로 전날 문맥이 충족됐는지를 판단합니다. `action_matching.py`는 관찰한 항목에 맞는 행동과 허용된 관계 행동을 고르고, `writing_contract.py`는 필수 글과 응답 형식을 결정합니다. `writer_outputs.py`는 task id로 writer 결과를 대응시키고 누락·출처 복사·잘못된 멘션을 검사하며 실제 결과를 조립합니다. 이 파일들은 받은 값만 사용하고 DB나 provider를 호출하지 않습니다. 활동 허용 입력은 기존 context의 `activity_policy` 속성만 읽는 계약이며 복제된 상태를 만들지 않습니다.

@@ -1040,3 +1040,12 @@ B4 C5e `b71c0e3`를 기준으로 LangGraph의 25개 실제 Pydantic 모델·버�
 계획과 Social이 함께 사용하는 동기·감정 enum 두 개의 실제 정의는 `app/contracts/action_subjective_context.py`에 있습니다. Social의 subjective DTO·출처·텍스트 검증·저장 규칙은 Social에 유지하며, 값 enum의 같은 객체를 import합니다. 따라서 enum 값·identity·provider schema를 바꾸지 않고 두 업무의 공유 값만 연결합니다.
 
 LG-A 최종 고정 후보 검증: 관련 **372 passed / 기존 warnings2 / 111.95초**. 전체 provider JSON schema25개 동일, 원문27정의와 공유enum2정의 AST 동일(validator 입력 Protocol 타입명1곳 정규화). 경계736모듈/2463edges/206legacy, L4 736/14/97, deferred22 PASS. 원래 보존 6검사 진단은 sources/split/assertions/suppressions/API·ORM/missing-nodes 모두0이며 protected2139/current2257입니다. signed 최초869bae55의 두 Routines 파일 blob만 읽기 메모리 보충한 진단으로, stock 전체 PASS나 신규 도입 캡처를 주장하지 않습니다. 기존 테스트 수정·노드 추가0, 신규 제품 파일4개이며 root가 source 고정 후 순차 도입 증거를 합칩니다.
+
+
+## AR-B4 LG-B1 — Resident 계획·출력의 실제 순수 판단
+
+원래43함수와11상수를 날짜/이월·문맥 충족·행동 대응·필수 출력·writer 결과 역할의 Routines policies로 이전했다. 전체 본문 AST는 원문과 같고 관계 허용 함수의 입력 타입만 기존 `activity_policy`를 읽는 구조 계약으로 표현한다. 응답 필터·순서·중복 제거·문자열·source-copy 판단을 바꾸지 않았고 실제 함수의 전역 의존을 검사해 누락0을 확인했다. 정책을 호출하는 실행 조립은 아직 옛 resident 모듈에서 실제 같은 함수를 import하며 LG-C에서 runtime으로 옮긴다.
+
+보존 검사에는 부모가 이미 검증하고 고정한 `6d9e342`의 invocation 내부 동일 내용 parse cache 19줄 diff만 적용했다. 모든 경로는 원래 시점마다 다시 읽고, 같은 경로의 바뀐 내용은 다시 분석한다. 원래 frozen·assertion·error 규칙과 추가 도입 ledger는 바꾸지 않았고 부모 source의 테스트나 snapshot을 복사하지 않았다.
+
+LG-B1 최종 후보 검증: 기존 LangGraph·Today·Routines와 보존 검사 회귀 **553 passed / 기존 warnings2 / 137.22초**. 경계742/2470/206legacy, L4 742/14/97, deferred22 PASS. 원래6검사 진단 sources/split/assertions/suppressions/API·ORM/missing-nodes 모두0(protected2139/current2257)이며 stock은 부모 최초 source 도입 캡처 대기입니다. 새 도입6제품 파일, 새 테스트 노드0, 기존 테스트 본문 변경0입니다.

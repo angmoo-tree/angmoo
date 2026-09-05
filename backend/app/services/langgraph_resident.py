@@ -1,4 +1,68 @@
 from __future__ import annotations
+from app.domains.routines.policies.topic_dates import (
+    _CARRYOVER_ACTIVE,
+    _CARRYOVER_COMPLETED,
+    _CARRYOVER_EXPIRED,
+    _CARRYOVER_DUE_TODAY,
+    _CARRYOVER_FUTURE,
+    _CARRYOVER_NONE,
+    _normalize_iso_date,
+    _normalized_relative_text,
+    _detect_relative_date_anchor,
+    _attach_step_date_anchors,
+    _parse_target_date,
+    _carryover_phase,
+    _carryover_phase_label,
+)
+from app.domains.routines.policies.handoff_coverage import (
+    _TOPIC_ARC_EVENT_TYPE,
+    _normalize_coverage_text,
+    _coverage_word_tokens,
+    _coverage_char_ngrams,
+    _handoff_covered_by_today_post,
+    _handoff_coverage,
+    _handoff_continuity_kind,
+)
+from app.domains.routines.policies.action_matching import (
+    _action_name_for_policy,
+    _relationship_allowed_actions,
+    _strip_action_from_affordance,
+    _dedupe_relationship_candidates,
+    _coerce_item_index,
+    _observation_items,
+    _normalize_planned_action_for_item,
+    _normalize_planned_action,
+    _relationship_candidate_counts,
+    _matching_relationship_candidate,
+)
+from app.domains.routines.policies.writing_contract import (
+    _OWNER_FEED_CUE_MODE,
+    _RELATIONSHIP_POINT_MODE,
+    _POST_TEXT_WRITING_MODES,
+    _PERSONA_WRITER_MISSING_POST_TEXT,
+    _coerce_writing_form,
+    _coerce_action_step_count,
+    _subjective_plan_fields,
+    _mandatory_post_required,
+    _writing_plan_requires_post_text,
+    _persona_writer_validation_meta,
+    _persona_writer_has_required_post_text,
+    _with_persona_writer_validation,
+)
+from app.domains.routines.policies.writer_outputs import (
+    _reply_task_results_by_id,
+    _reply_tasks_by_id,
+    _missing_reply_task_ids,
+    _required_handle_text,
+    _post_body_missing_required_mention,
+    _post_body_has_forbidden_structure_label,
+    _source_copy_windows,
+    _post_body_copies_source,
+    _post_task_needs_repair,
+    _write_task_summary,
+    _mandatory_post_missing_reason,
+    _apply_reply_writer_output,
+)
 from app.domains.routines.schemas.resident_planning import (
     _PlannedAction,
     _TopicArcStep,
@@ -101,31 +165,14 @@ logger = logging.getLogger(__name__)
 
 _PUBLIC_ACTIONS = {"post", "reply", "like", "repost", "follow", "unfollow"}
 _GRAPH_SEMAPHORE = asyncio.Semaphore(settings.langgraph_max_concurrent_graphs)
-_OWNER_FEED_CUE_MODE = "owner_feed_cue"
-_RELATIONSHIP_POINT_MODE = "relationship_point"
-_POST_TEXT_WRITING_MODES = {
-    "independent",
-    "post_seed",
-    "arc_continuation",
-    _OWNER_FEED_CUE_MODE,
-    _RELATIONSHIP_POINT_MODE,
-}
-_PERSONA_WRITER_MISSING_POST_TEXT = "persona_writer_missing_post_text"
 _REPLY_WRITER_MAX_TASKS_PER_RUN = 9
 _REPLY_WRITER_BUCKET_MAX_TASKS = 3
 _REPLY_TARGET_ALREADY_ANSWERED = "reply_target_already_answered_by_character"
-_TOPIC_ARC_EVENT_TYPE = "writing_topic_arc"
 _MANDATORY_POST_ALLOWED_SKIP_REASONS = {
     "action_budget_trimmed",
     "feed_cue_pending_post_blocked",
 }
 _TOPIC_ARC_LOOKBACK = timedelta(hours=48)
-_CARRYOVER_ACTIVE = "active"
-_CARRYOVER_COMPLETED = "completed"
-_CARRYOVER_EXPIRED = "expired"
-_CARRYOVER_DUE_TODAY = "due_today"
-_CARRYOVER_FUTURE = "future"
-_CARRYOVER_NONE = "none"
 _INDEPENDENT_TOPIC_PROMPT_COUNT = 10
 _INDEPENDENT_TOPIC_SELECTION_SALT = "independent_topics"
 _INBOX_CONVERSATION_JUDGMENTS = {
@@ -186,14 +233,6 @@ def _topic_arc_step_dict(step: Any) -> dict[str, Any] | None:
     return result
 
 
-def _normalize_iso_date(value: Any) -> str | None:
-    text = str(value or "").strip()
-    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", text):
-        return None
-    try:
-        return date.fromisoformat(text).isoformat()
-    except ValueError:
-        return None
 
 
 def _current_kst_date(ctx: LangGraphResidentContext) -> date:
@@ -207,67 +246,16 @@ def _event_kst_date(event: Any) -> date | None:
     return provided_at.astimezone(agent_activity_policy.APP_TIMEZONE).date()
 
 
-def _normalized_relative_text(text: Any) -> str:
-    return unicodedata.normalize("NFKC", str(text or "")).lower()
 
 
-def _detect_relative_date_anchor(text: Any, base_date: date) -> dict[str, str] | None:
-    normalized = _normalized_relative_text(text)
-    relative_specs = (
-        ("\uc624\ub298", 0, "\uc624\ub298"),
-        ("\ub0b4\uc77c", 1, "\ub0b4\uc77c"),
-        ("\uc5b4\uc81c", -1, "\uc5b4\uc81c"),
-        ("today", 0, "today"),
-        ("tomorrow", 1, "tomorrow"),
-        ("yesterday", -1, "yesterday"),
-    )
-    for marker, offset, original in relative_specs:
-        if marker in normalized:
-            return {
-                "target_date": (base_date + timedelta(days=offset)).isoformat(),
-                "relative_time_original": original,
-            }
-    return None
 
 
-def _attach_step_date_anchors(
-    steps: list[dict[str, Any]], base_date: date
-) -> list[dict[str, Any]]:
-    anchored: list[dict[str, Any]] = []
-    for step in steps:
-        item = dict(step)
-        item.pop("target_date", None)
-        item.pop("relative_time_original", None)
-        anchor = _detect_relative_date_anchor(item.get("brief"), base_date)
-        if anchor:
-            item.update(anchor)
-        anchored.append(item)
-    return anchored
 
 
-def _parse_target_date(value: Any) -> date | None:
-    normalized = _normalize_iso_date(value)
-    if normalized is None:
-        return None
-    return date.fromisoformat(normalized)
 
 
-def _carryover_phase(target_date: date | None, current_date: date) -> str:
-    if target_date is None:
-        return _CARRYOVER_NONE
-    if target_date == current_date:
-        return _CARRYOVER_DUE_TODAY
-    if target_date < current_date:
-        return _CARRYOVER_EXPIRED
-    return _CARRYOVER_FUTURE
 
 
-def _carryover_phase_label(phase: str) -> str:
-    return {
-        _CARRYOVER_DUE_TODAY: "Use today's framing for this event.",
-        _CARRYOVER_FUTURE: "Use future framing based on the actual target date.",
-        _CARRYOVER_EXPIRED: "Do not continue this stale event as active.",
-    }.get(phase, "No relative-date carryover.")
 
 
 def _carryover_time_context(
@@ -632,8 +620,6 @@ def _attach_topic_arc_to_new_writing(
     return result
 
 
-def _action_name_for_policy(action_type: str) -> str:
-    return "post" if action_type == "create_post" else action_type
 
 
 def _decrypt_api_key(credential: models.LlmCredential) -> str:
@@ -910,14 +896,6 @@ def _target_character_following(
     )
 
 
-def _relationship_allowed_actions(ctx: LangGraphResidentContext) -> list[str]:
-    allowed = set(ctx.activity_policy.allowed_actions)
-    result: list[str] = []
-    if "follow" in allowed:
-        result.append("follow")
-    if "unfollow" in allowed:
-        result.extend(["unfollow_watch", "unfollow"])
-    return result
 
 
 def _tendency_action_note(ctx: LangGraphResidentContext, action: str) -> str:
@@ -930,16 +908,6 @@ def _tendency_action_note(ctx: LangGraphResidentContext, action: str) -> str:
     return _clip(item.get("note"), 500)
 
 
-def _strip_action_from_affordance(
-    affordance: dict[str, Any], action_type: str
-) -> dict[str, Any]:
-    updated = dict(affordance)
-    available = list(updated.get("available_actions") or [])
-    updated["available_actions"] = [item for item in available if item != action_type]
-    targets = dict(updated.get("action_targets") or {})
-    targets.pop(action_type, None)
-    updated["action_targets"] = targets
-    return updated
 
 
 def _relationship_candidate_from_item(
@@ -995,28 +963,6 @@ def _relationship_candidate_from_item(
     }
 
 
-def _dedupe_relationship_candidates(
-    candidates: Iterable[dict[str, Any]],
-) -> list[dict[str, Any]]:
-    deduped: list[dict[str, Any]] = []
-    seen: set[tuple[str, str, str]] = set()
-    evidence_counts: dict[tuple[str, str], int] = {}
-    for candidate in candidates:
-        target_id = str(candidate.get("target_id") or "").strip()
-        action_type = str(candidate.get("candidate_action") or "").strip()
-        source_key = str(
-            candidate.get("post_id") or candidate.get("notification_id") or ""
-        )
-        key = (action_type, target_id, source_key)
-        if not target_id or not action_type or key in seen:
-            continue
-        seen.add(key)
-        evidence_key = (action_type, target_id)
-        evidence_counts[evidence_key] = evidence_counts.get(evidence_key, 0) + 1
-        updated = dict(candidate)
-        updated["evidence_count"] = evidence_counts[evidence_key]
-        deduped.append(updated)
-    return deduped[:12]
 
 
 def _relationship_candidates_from_daypart_memory(
@@ -1369,54 +1315,12 @@ def _today_root_writing_memory_for_prompt(
     ]
 
 
-def _normalize_coverage_text(value: Any) -> str:
-    text = unicodedata.normalize("NFKC", str(value or "")).lower()
-    text = re.sub(r"https?://\S+", " ", text)
-    text = re.sub(r"[^\w\s가-힣]", " ", text)
-    return re.sub(r"\s+", " ", text).strip()
 
 
-def _coverage_word_tokens(text: str) -> set[str]:
-    normalized = _normalize_coverage_text(text)
-    return {
-        token
-        for token in normalized.split()
-        if len(token) >= 2 and not token.isdigit()
-    }
 
 
-def _coverage_char_ngrams(text: str) -> set[str]:
-    compact = re.sub(r"\s+", "", _normalize_coverage_text(text))
-    if len(compact) < 2:
-        return set()
-    grams: set[str] = set()
-    for size in (2, 3, 4):
-        if len(compact) < size:
-            continue
-        grams.update(compact[index : index + size] for index in range(len(compact) - size + 1))
-    return grams
 
 
-def _handoff_covered_by_today_post(handoff_text: Any, post_text: Any) -> bool:
-    handoff = _normalize_coverage_text(handoff_text)
-    post = _normalize_coverage_text(post_text)
-    if not handoff or not post:
-        return False
-    handoff_tokens = _coverage_word_tokens(handoff)
-    post_tokens = _coverage_word_tokens(post)
-    shared_tokens = handoff_tokens & post_tokens
-    if len(shared_tokens) >= 3:
-        return True
-    if handoff_tokens and len(handoff_tokens) <= 4 and len(shared_tokens) >= max(
-        2, len(handoff_tokens) - 1
-    ):
-        return True
-    handoff_grams = _coverage_char_ngrams(handoff)
-    post_grams = _coverage_char_ngrams(post)
-    if not handoff_grams or not post_grams:
-        return False
-    shared_grams = len(handoff_grams & post_grams)
-    return shared_grams >= 8 and shared_grams / max(1, len(handoff_grams)) >= 0.35
 
 
 def _coverage_text_from_payload(payload: Any) -> str:
@@ -1446,31 +1350,8 @@ def _coverage_text_from_payload(payload: Any) -> str:
     return " ".join(part for part in parts if part)
 
 
-def _handoff_coverage(
-    handoff_text: str, coverage_posts: list[dict[str, Any]]
-) -> dict[str, Any]:
-    for post in coverage_posts:
-        if _handoff_covered_by_today_post(handoff_text, post.get("coverage_text")):
-            return {
-                "already_covered_today": True,
-                "covered_by_recent_post_id": post.get("post_id"),
-                "coverage_reason": "today_root_post_overlap",
-            }
-    return {
-        "already_covered_today": False,
-        "covered_by_recent_post_id": None,
-        "coverage_reason": None,
-    }
 
 
-def _handoff_continuity_kind(event_type: str) -> str:
-    return {
-        _TOPIC_ARC_EVENT_TYPE: "writing_memory",
-        "langgraph_tick": "activity_memory",
-        "observation_feed": "feed_memory",
-        "observation_inbox": "inbox_memory",
-        "relationship_review": "relationship_memory",
-    }.get(event_type, "activity_memory")
 
 
 def _compact_yesterday_handoff_event(
@@ -2461,33 +2342,10 @@ def _normalize_independent_topic_composition(
     }
 
 
-def _subjective_plan_fields(value: dict[str, Any]) -> dict[str, Any]:
-    return {
-        key: value.get(key)
-        for key in (
-            "motivation_kind",
-            "motivation_text",
-            "emotion_label",
-            "emotion_text",
-            "emotion_intensity",
-        )
-        if value.get(key) is not None
-    }
 
 
-def _coerce_writing_form(value: Any) -> str:
-    text = str(value or "").strip()
-    if text in {"thought", "community_observation", "monologue", "action"}:
-        return text
-    return "thought"
 
 
-def _coerce_action_step_count(value: Any) -> int:
-    try:
-        count = int(value)
-    except (TypeError, ValueError):
-        return 1
-    return max(1, min(3, count))
 
 
 def _writing_from_topic_composition(
@@ -2555,12 +2413,6 @@ def _writing_from_topic_composition(
     return writing
 
 
-def _mandatory_post_required(mandatory_context: dict[str, Any] | None) -> bool:
-    return bool(
-        isinstance(mandatory_context, dict)
-        and mandatory_context.get("post_required")
-        and not mandatory_context.get("blocked_reason")
-    )
 
 
 def _mandatory_root_writing_from_composition(
@@ -2877,67 +2729,12 @@ def _build_system_prompt(ctx: LangGraphResidentContext) -> str:
     )
 
 
-def _writing_plan_requires_post_text(action_plan: dict[str, Any]) -> bool:
-    writing = action_plan.get("writing") if isinstance(action_plan, dict) else None
-    mode = writing.get("mode") if isinstance(writing, dict) else None
-    return str(mode or "") in _POST_TEXT_WRITING_MODES
 
 
-def _persona_writer_validation_meta(
-    action_plan: dict[str, Any],
-    writing: dict[str, Any],
-    *,
-    repair_attempted: bool,
-    repair_succeeded: bool,
-) -> dict[str, Any]:
-    has_title = bool(
-        str(writing.get("post_title") or "").strip() if isinstance(writing, dict) else ""
-    )
-    has_body = bool(
-        str(writing.get("post_body") or "").strip() if isinstance(writing, dict) else ""
-    )
-    required = _writing_plan_requires_post_text(action_plan)
-    meta: dict[str, Any] = {
-        "required_post_text": required,
-        "has_post_title": has_title,
-        "has_post_body": has_body,
-        "repair_attempted": repair_attempted,
-        "repair_succeeded": repair_succeeded,
-    }
-    if required and not (has_title and has_body):
-        meta["failure_class"] = _PERSONA_WRITER_MISSING_POST_TEXT
-    return meta
 
 
-def _persona_writer_has_required_post_text(
-    action_plan: dict[str, Any], writing: dict[str, Any]
-) -> bool:
-    meta = _persona_writer_validation_meta(
-        action_plan,
-        writing,
-        repair_attempted=False,
-        repair_succeeded=False,
-    )
-    if not meta["required_post_text"]:
-        return True
-    return bool(meta["has_post_title"] and meta["has_post_body"])
 
 
-def _with_persona_writer_validation(
-    action_plan: dict[str, Any],
-    writing: dict[str, Any],
-    *,
-    repair_attempted: bool,
-    repair_succeeded: bool,
-) -> dict[str, Any]:
-    result = dict(writing) if isinstance(writing, dict) else {}
-    result["persona_writer_validation"] = _persona_writer_validation_meta(
-        action_plan,
-        result,
-        repair_attempted=repair_attempted,
-        repair_succeeded=repair_succeeded,
-    )
-    return result
 
 
 def _task_id_part(value: Any, *, fallback: str = "none") -> str:
@@ -3260,186 +3057,26 @@ def _compile_write_tasks(
     return {"reply_tasks": reply_tasks, "post_task": post_task}
 
 
-def _reply_task_results_by_id(writing: dict[str, Any]) -> dict[str, dict[str, Any]]:
-    results: dict[str, dict[str, Any]] = {}
-    raw_results = writing.get("reply_task_results", []) if isinstance(writing, dict) else []
-    if not isinstance(raw_results, list):
-        return results
-    for item in raw_results:
-        if isinstance(item, dict):
-            task_id = str(item.get("task_id") or "").strip()
-            if task_id:
-                results[task_id] = item
-    return results
 
 
-def _reply_tasks_by_id(tasks: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
-    return {
-        str(task.get("task_id")): task
-        for task in tasks
-        if isinstance(task, dict) and task.get("task_id")
-    }
 
 
-def _missing_reply_task_ids(
-    writing: dict[str, Any], tasks: list[dict[str, Any]]
-) -> list[str]:
-    results = _reply_task_results_by_id(writing)
-    missing: list[str] = []
-    for task in tasks:
-        task_id = str(task.get("task_id") or "")
-        result = results.get(task_id)
-        if not result or not str(result.get("body") or "").strip():
-            missing.append(task_id)
-    return missing
 
 
-def _post_task_needs_repair(writing: dict[str, Any], post_task: dict[str, Any] | None) -> bool:
-    if not isinstance(post_task, dict):
-        return False
-    result = writing.get("post_task_result") if isinstance(writing, dict) else None
-    if not isinstance(result, dict) or result.get("task_id") != post_task.get("task_id"):
-        return True
-    title = str(result.get("post_title") or "").strip()
-    body = str(result.get("post_body") or "").strip()
-    if not title or not body:
-        return True
-    if _post_body_missing_required_mention(post_task, body):
-        return True
-    if _post_body_has_forbidden_structure_label(body):
-        return True
-    if _post_body_copies_source(post_task, body):
-        return True
-    return False
 
 
-def _required_handle_text(post_task: dict[str, Any] | None) -> str | None:
-    if not isinstance(post_task, dict) or not post_task.get("mention_required"):
-        return None
-    handle = str(post_task.get("mention_target_handle") or "").strip()
-    if not handle:
-        return None
-    return handle if handle.startswith("@") else f"@{handle}"
 
 
-def _post_body_missing_required_mention(
-    post_task: dict[str, Any] | None, body: str
-) -> bool:
-    required = _required_handle_text(post_task)
-    if not required:
-        return False
-    return required.lower() not in body.lower()
 
 
-def _post_body_has_forbidden_structure_label(body: str) -> bool:
-    return bool(
-        re.search(
-            r"(^|\s)(발단|전개|결말|setup|development|conclusion)\s*[:：]",
-            body,
-            flags=re.IGNORECASE,
-        )
-    )
 
 
-def _source_copy_windows(source: str) -> list[str]:
-    normalized = re.sub(r"\s+", " ", source or "").strip()
-    if len(normalized) < 40:
-        return []
-    windows: list[str] = []
-    for index in range(0, max(1, len(normalized) - 39), 40):
-        window = normalized[index : index + 60].strip()
-        if len(window) >= 40:
-            windows.append(window)
-        if len(windows) >= 4:
-            break
-    return windows
 
 
-def _post_body_copies_source(post_task: dict[str, Any] | None, body: str) -> bool:
-    if not isinstance(post_task, dict):
-        return False
-    sources: list[str] = []
-    source_body = str(post_task.get("source_body") or "").strip()
-    if source_body:
-        sources.append(source_body)
-    seed = post_task.get("selected_feed_seed")
-    if isinstance(seed, dict):
-        for key in ("source_body", "seed_brief"):
-            text = str(seed.get(key) or "").strip()
-            if text:
-                sources.append(text)
-    normalized_body = re.sub(r"\s+", " ", body or "").strip()
-    return any(
-        window and window in normalized_body
-        for source in sources
-        for window in _source_copy_windows(source)
-    )
 
 
-def _write_task_summary(
-    write_tasks: dict[str, Any],
-    writing: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    writing = writing if isinstance(writing, dict) else {}
-    reply_tasks = write_tasks.get("reply_tasks", []) if isinstance(write_tasks, dict) else []
-    if not isinstance(reply_tasks, list):
-        reply_tasks = []
-    post_task = write_tasks.get("post_task") if isinstance(write_tasks, dict) else None
-    reply_results = _reply_task_results_by_id(writing)
-    reply_written = [
-        task_id
-        for task_id, result in reply_results.items()
-        if str(result.get("body") or "").strip()
-    ]
-    reply_repaired = [
-        task_id
-        for task_id, result in reply_results.items()
-        if result.get("repair_attempted")
-        and str(result.get("body") or "").strip()
-    ]
-    post_result = writing.get("post_task_result") if isinstance(writing, dict) else None
-    post_written = bool(
-        isinstance(post_result, dict)
-        and str(post_result.get("post_title") or "").strip()
-        and str(post_result.get("post_body") or "").strip()
-    )
-    topic_arc = None
-    if isinstance(post_task, dict):
-        topic_arc = post_task.get("topic_arc")
-    return {
-        "reply_task_count": len(reply_tasks),
-        "reply_written_count": len(reply_written),
-        "reply_repaired_count": len(reply_repaired),
-        "reply_missing_count": max(0, len(reply_tasks) - len(reply_written)),
-        "post_task_required": isinstance(post_task, dict),
-        "post_task_mode": post_task.get("mode") if isinstance(post_task, dict) else None,
-        "topic_arc": topic_arc,
-        "post_written": post_written,
-        "post_repaired": bool(
-            isinstance(post_result, dict)
-            and post_result.get("repair_attempted")
-            and post_written
-        ),
-    }
 
 
-def _mandatory_post_missing_reason(
-    writing: dict[str, Any],
-    action_budget_trim_summary: dict[str, Any] | None,
-) -> str | None:
-    reason = str(writing.get("skip_reason") or "").strip()
-    if reason:
-        return reason
-    if isinstance(action_budget_trim_summary, dict):
-        for item in action_budget_trim_summary.get("trimmed_actions", []):
-            if (
-                isinstance(item, dict)
-                and item.get("scope") == "writing"
-                and item.get("action_type") == "post"
-            ):
-                return str(item.get("reason") or "action_budget_trimmed")
-    mode = str(writing.get("mode") or "").strip()
-    return f"missing_post_task_for_mode_{mode or 'unknown'}"
 
 
 def _build_reply_writer_user_prompt(
@@ -3838,85 +3475,6 @@ def _build_post_writer_user_prompt(
     return "\n".join(lines)
 
 
-def _apply_reply_writer_output(
-    writing: dict[str, Any],
-    reply_tasks: list[dict[str, Any]],
-    output: dict[str, Any],
-    *,
-    repair_attempted: bool,
-    writer_node: str,
-) -> tuple[dict[str, Any], dict[str, Any]]:
-    result = dict(writing) if isinstance(writing, dict) else {}
-    task_by_id = _reply_tasks_by_id(reply_tasks)
-    existing = _reply_task_results_by_id(result)
-    replies = output.get("replies", []) if isinstance(output, dict) else []
-    if not isinstance(replies, list):
-        replies = []
-    for item in replies:
-        if not isinstance(item, dict):
-            continue
-        task_id = str(item.get("task_id") or "").strip()
-        task = task_by_id.get(task_id)
-        body = str(item.get("body") or "").strip()
-        if task is None or not body:
-            continue
-        proposal = task.get("activity_proposal")
-        proposal_response = None
-        if isinstance(proposal, dict):
-            decision = str(item.get("proposal_decision") or "").strip()
-            if decision not in {"accept", "reject", "counter"}:
-                continue
-            proposal_response = {
-                "proposal_id": proposal.get("proposal_id"),
-                "decision": decision,
-                "counter_activity_seed": item.get("counter_activity_seed"),
-                "counter_place_key": item.get("counter_place_key"),
-                "counter_target_daypart": item.get("counter_target_daypart"),
-                "counter_date_policy": item.get("counter_date_policy"),
-                "counter_target_date": item.get("counter_target_date"),
-            }
-        existing[task_id] = {
-            "task_id": task_id,
-            "scope": task.get("scope"),
-            "index": task.get("action_index"),
-            "post_id": task.get("target_post_id"),
-            "body": body,
-            "writer_node": writer_node,
-            "repair_attempted": repair_attempted,
-            "repair_succeeded": repair_attempted,
-            "proposal_response": proposal_response,
-        }
-    ordered_results = [
-        existing[task["task_id"]]
-        for task in reply_tasks
-        if task.get("task_id") in existing
-    ]
-    result["reply_task_results"] = ordered_results
-    result["reply_bodies"] = [
-        {
-            "scope": item.get("scope"),
-            "index": item.get("index"),
-            "post_id": item.get("post_id"),
-            "body": item.get("body"),
-            "task_id": item.get("task_id"),
-            "proposal_response": item.get("proposal_response"),
-        }
-        for item in ordered_results
-        if str(item.get("body") or "").strip()
-    ]
-    missing = _missing_reply_task_ids(result, reply_tasks)
-    writer_result = {
-        "writer_node": writer_node,
-        "task_count": len(reply_tasks),
-        "written_task_ids": [
-            item.get("task_id")
-            for item in ordered_results
-            if str(item.get("body") or "").strip()
-        ],
-        "missing_task_ids": missing,
-        "repair_attempted": repair_attempted,
-    }
-    return result, writer_result
 
 
 def _apply_post_writer_output(
@@ -4670,116 +4228,12 @@ async def _run_state_recorder(
     }
 
 
-def _coerce_item_index(value: Any) -> int | None:
-    try:
-        index = int(value)
-    except (TypeError, ValueError):
-        return None
-    return index if index >= 0 else None
 
 
-def _observation_items(observation: dict[str, Any], *, scope: str) -> list[Any]:
-    items_key = "selected_posts" if scope == "feed" else "items"
-    items = observation.get(items_key, [])
-    return items if isinstance(items, list) else []
 
 
-def _normalize_planned_action_for_item(
-    action: dict[str, Any],
-    *,
-    scope: str,
-    item: dict[str, Any],
-    action_type: str,
-) -> dict[str, Any] | None:
-    available = item.get("available_actions")
-    if not isinstance(available, list) or action_type not in available:
-        return None
-    all_targets = item.get("action_targets")
-    if not isinstance(all_targets, dict):
-        return None
-    target = all_targets.get(action_type)
-    if not isinstance(target, dict):
-        return None
-    target_post_id = str(target.get("post_id") or "").strip() or None
-    target_type = str(target.get("target_type") or "").strip() or None
-    target_id = str(target.get("target_id") or "").strip() or None
-    normalized = {
-        key: value
-        for key, value in action.items()
-        if key not in {"item_index", "source_item_index"}
-    }
-    normalized["scope"] = scope
-    normalized["action_type"] = action_type
-    if target_post_id:
-        normalized["post_id"] = target_post_id
-    if target_type and target_id:
-        normalized["target_type"] = target_type
-        normalized["target_id"] = target_id
-    if scope == "inbox" and item.get("notification_id") is not None:
-        normalized["notification_id"] = int(item["notification_id"])
-        notification_type = str(item.get("notification_type") or "").strip()
-        if notification_type in {"reply", "mention", "joint_activity_started"}:
-            normalized["notification_type"] = notification_type
-        activity_proposal = item.get("activity_proposal")
-        if isinstance(activity_proposal, dict):
-            normalized["activity_proposal"] = dict(activity_proposal)
-    return normalized
 
 
-def _normalize_planned_action(
-    action: dict[str, Any], *, scope: str, observation: dict[str, Any]
-) -> dict[str, Any] | None:
-    action_type = str(action.get("action_type") or "").strip()
-    if not action_type:
-        return None
-    items = _observation_items(observation, scope=scope)
-    if "item_index" in action:
-        item_index = _coerce_item_index(action.get("item_index"))
-        if item_index is None or item_index >= len(items):
-            return None
-        item = items[item_index]
-        if not isinstance(item, dict):
-            return None
-        return _normalize_planned_action_for_item(
-            action, scope=scope, item=item, action_type=action_type
-        )
-    for item in items:
-        if not isinstance(item, dict):
-            continue
-        available = item.get("available_actions")
-        if not isinstance(available, list) or action_type not in available:
-            continue
-        all_targets = item.get("action_targets")
-        if not isinstance(all_targets, dict):
-            continue
-        target = all_targets.get(action_type)
-        if not isinstance(target, dict):
-            continue
-        target_post_id = str(target.get("post_id") or "").strip() or None
-        target_type = str(target.get("target_type") or "").strip() or None
-        target_id = str(target.get("target_id") or "").strip() or None
-        action_post_id = str(action.get("post_id") or "").strip() or None
-        action_target_id = str(action.get("target_id") or "").strip() or None
-        action_notification_id = action.get("notification_id")
-        item_notification_id = item.get("notification_id")
-        matched = False
-        if scope == "inbox" and action_notification_id is not None:
-            try:
-                matched = int(action_notification_id) == int(item_notification_id or -1)
-            except (TypeError, ValueError):
-                matched = False
-        if not matched and action_post_id and target_post_id:
-            matched = action_post_id == target_post_id
-        if not matched and action_target_id and target_id:
-            matched = action_target_id == target_id
-        if not matched and scope == "feed" and action_post_id == item.get("post_id"):
-            matched = True
-        if not matched:
-            continue
-        return _normalize_planned_action_for_item(
-            action, scope=scope, item=item, action_type=action_type
-        )
-    return None
 
 
 def _character_already_replied_to_target(
@@ -5705,30 +5159,8 @@ def _normalize_inbox_action_plan(
     )
 
 
-def _relationship_candidate_counts(
-    candidates: list[dict[str, Any]]
-) -> dict[tuple[str, str], int]:
-    counts: dict[tuple[str, str], int] = {}
-    for candidate in candidates:
-        action_type = str(candidate.get("candidate_action") or "").strip()
-        target_id = str(candidate.get("target_id") or "").strip()
-        if not action_type or not target_id:
-            continue
-        key = (action_type, target_id)
-        counts[key] = counts.get(key, 0) + 1
-    return counts
 
 
-def _matching_relationship_candidate(
-    candidates: list[dict[str, Any]], *, action_type: str, target_id: str
-) -> dict[str, Any] | None:
-    for candidate in candidates:
-        if (
-            str(candidate.get("candidate_action") or "") == action_type
-            and str(candidate.get("target_id") or "") == target_id
-        ):
-            return candidate
-    return None
 
 
 def _has_unfollow_watch(

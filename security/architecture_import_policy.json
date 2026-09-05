@@ -1019,6 +1019,7 @@
       "app.domains.routines.contracts.feed_cues",
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
+      "app.domains.routines.contracts.planning_context",
       "app.domains.routines.contracts.plans",
       "app.domains.routines.contracts.prompt_context",
       "app.domains.routines.contracts.resident",
@@ -1030,9 +1031,14 @@
       "app.domains.routines.models.plans",
       "app.domains.routines.models.resident",
       "app.domains.routines.policies",
+      "app.domains.routines.policies.action_matching",
       "app.domains.routines.policies.activity_state",
+      "app.domains.routines.policies.handoff_coverage",
       "app.domains.routines.policies.planning",
       "app.domains.routines.policies.topic_arc_roles",
+      "app.domains.routines.policies.topic_dates",
+      "app.domains.routines.policies.writer_outputs",
+      "app.domains.routines.policies.writing_contract",
       "app.domains.routines.repository",
       "app.domains.routines.repository.activity_counts",
       "app.domains.routines.repository.activity_evidence",
@@ -1229,6 +1235,7 @@
       "app.domains.routines.contracts.execution_errors",
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
+      "app.domains.routines.contracts.planning_context",
       "app.domains.routines.contracts.plans",
       "app.domains.routines.contracts.resident",
       "app.domains.routines.contracts.topic_arcs",
@@ -2885,6 +2892,46 @@
         "owner_stage": "AR-B4-LG-C",
         "reason": "Existing graph uses the identical actual provider schemas and role validator after ownership extraction; no wrapper implementation.",
         "removal_condition": "Move actual graph workflow to runtime/resident and close this exact legacy consumer in LG-C.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.policies.action_matching",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing resident execution consumes the actual planning/output rules after full body extraction; no copied implementation or wrapper.",
+        "removal_condition": "Move remaining resident graph/runtime workflows and remove this exact old services consumer in LG-C.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.policies.handoff_coverage",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing resident execution consumes the actual planning/output rules after full body extraction; no copied implementation or wrapper.",
+        "removal_condition": "Move remaining resident graph/runtime workflows and remove this exact old services consumer in LG-C.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.policies.topic_dates",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing resident execution consumes the actual planning/output rules after full body extraction; no copied implementation or wrapper.",
+        "removal_condition": "Move remaining resident graph/runtime workflows and remove this exact old services consumer in LG-C.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.policies.writer_outputs",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing resident execution consumes the actual planning/output rules after full body extraction; no copied implementation or wrapper.",
+        "removal_condition": "Move remaining resident graph/runtime workflows and remove this exact old services consumer in LG-C.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.policies.writing_contract",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing resident execution consumes the actual planning/output rules after full body extraction; no copied implementation or wrapper.",
+        "removal_condition": "Move remaining resident graph/runtime workflows and remove this exact old services consumer in LG-C.",
         "review_date": "2026-09-06"
       }
     ]

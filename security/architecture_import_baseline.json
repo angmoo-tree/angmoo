@@ -1,7 +1,7 @@
 {
-  "edge_count": 2463,
-  "external_import_count": 2304,
-  "module_count": 736,
+  "edge_count": 2470,
+  "external_import_count": 2322,
+  "module_count": 742,
   "modules": [
     {
       "external_imports": [],
@@ -3768,6 +3768,17 @@
     },
     {
       "external_imports": [
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.activity_policy"
+      ],
+      "module": "app.domains.routines.contracts.planning_context",
+      "path": "backend/app/domains/routines/contracts/planning_context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "collections.abc",
         "dataclasses",
@@ -3897,9 +3908,34 @@
         "collections.abc",
         "typing"
       ],
+      "imports": [
+        "app.domains.routines.contracts.planning_context"
+      ],
+      "module": "app.domains.routines.policies.action_matching",
+      "path": "backend/app/domains/routines/policies/action_matching.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "typing"
+      ],
       "imports": [],
       "module": "app.domains.routines.policies.activity_state",
       "path": "backend/app/domains/routines/policies/activity_state.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "re",
+        "typing",
+        "unicodedata"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.policies.handoff_coverage",
+      "path": "backend/app/domains/routines/policies/handoff_coverage.py",
       "wildcard_imports": []
     },
     {
@@ -3929,6 +3965,40 @@
       ],
       "module": "app.domains.routines.policies.topic_arc_roles",
       "path": "backend/app/domains/routines/policies/topic_arc_roles.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "re",
+        "typing",
+        "unicodedata"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.policies.topic_dates",
+      "path": "backend/app/domains/routines/policies/topic_dates.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "re",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.policies.writer_outputs",
+      "path": "backend/app/domains/routines/policies/writer_outputs.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.policies.writing_contract",
+      "path": "backend/app/domains/routines/policies/writing_contract.py",
       "wildcard_imports": []
     },
     {
@@ -10618,7 +10688,12 @@
         "app.cruds.agents",
         "app.cruds.community",
         "app.domains.routines.contracts.resident",
+        "app.domains.routines.policies.action_matching",
+        "app.domains.routines.policies.handoff_coverage",
         "app.domains.routines.policies.topic_arc_roles",
+        "app.domains.routines.policies.topic_dates",
+        "app.domains.routines.policies.writer_outputs",
+        "app.domains.routines.policies.writing_contract",
         "app.domains.routines.repository.public_action_executions",
         "app.domains.routines.schemas.resident_planning",
         "app.domains.routines.service.public_action_executions",
