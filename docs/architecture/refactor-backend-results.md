@@ -602,3 +602,11 @@ M6 고정 후보에서 `--contracts --nodes`는 현재 **2,151 nodes**를 수집
 실제 write/recall/consolidation/selection 정책과 SQL·FTS·maintenance queue, batch admission·예약·종료·provider 및 HTTP 서비스 소유권은 다음 B7 범위다. 이 기반 source의 집중 검증·원본 도입 계보 통합·순차 PR/merge는 별도로 기록하며 기존 구현 전체가 이전됐다는 의미가 아니다.
 
 Memory 기반 source `70b74395cb91f383c5f48a530af1cf2a173cb397`의 기존 write/recall inspector/consolidation/owner 제어·batch API/정책/안전·frozen inventory 집중은 **105 passed / 기존 2 warnings / 31.13초**다. 실제 Memory 정책과 SQL 구현은 이 세 파일 이동에서 바꾸지 않았다. 전체 source/node 계보는 선행 B4~B6와 함께 순차 통합하며 B7 전체 완료로 판정하지 않는다.
+
+### AR-B7-A1 Memory 값·정책의 실제 소유권
+
+source `67f5178c3ce5d2dcde41700f4ddd251c01300721`에서 owner/World/subject 범위·저장 항목·회상·retrieval plan·닫힌 source vocabulary는 `contracts/`의 실제 값 정의로, 유효기간·검증·정리 eligibility·provider 출력 검증·배치 일정과 선택 예산은 `policies/`의 실제 판단으로 배치했다. 13개 모듈의 함수/클래스 83개는 import 경로만 정규화하면 원래 AST 전체와 동일하다. 별도 forwarding service를 추가하지 않았다.
+
+같은 고정 후보에서 `pytest -q tests -k 'memory or canonical_retrieval_planner or today_sns'`는 **190 passed / 2,011 deselected / 2 warnings / 67.41초**다. 이는 실제 기억 저장·회상·owner 제어·scope/CSRF·배치 consent·selection 실패·migration·Today SNS 회귀를 포함한다. 경계 **640 modules / 2,087 edges / legacy256**, ER0 **76/87/24/44/7**, L4 parity97 및 현재 Memory batch inventory를 확인했다. 원래 P8-L predecessor JSON과 migration 본문은 재생성하지 않았다. 이동하여 사라진 여덟 old consumer의 exact bridge는 제거하고 아직 전환 전인 실제 Memory consumer만 후속 B7/B8 제거 조건으로 기록했다.
+
+이 단계는 값과 정책의 실제 배치다. SQL·FTS·queue repository, 저장/회상/정리 service, HTTP와 startup/shutdown 조립, 남은 domain/public aggregate 종료는 후속 B7 범위이며 전체 전환 완료로 표시하지 않는다. 최초 도입 기록은 선행 B4~B6 source와 선형 통합 후 고정 commit 기준으로 연결한다.
