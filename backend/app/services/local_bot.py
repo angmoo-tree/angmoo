@@ -1,3 +1,5 @@
+from app.domains.local_bot.exceptions import LocalBotAuthError, LocalBotError, LocalBotForbiddenError, LocalBotModeError, LocalBotRateLimitError
+from app.domains.local_bot.constants import MAX_POSTS_PER_DAY, MAX_REACTIONS_PER_DAY, MAX_READS_PER_WINDOW, MAX_REPLIES_PER_DAY, POST_COOLDOWN, RATE_LIMIT_LOG_DEDUPE_WINDOW, REACTION_ACTION_TYPES, REACTION_COOLDOWN, REACTION_COOLDOWN_ACTION_TYPES, READ_WINDOW, REPLY_COOLDOWN, STATE_ACTION_TYPES, STATE_COOLDOWN
 from dataclasses import dataclass
 from datetime import UTC, datetime, time, timedelta
 import logging
@@ -15,52 +17,22 @@ from app.services import agent_activity_policy
 from app.runtime.characters import management as agent_service
 from app.services import community as community_service
 from app.domains.identity.service import demo_access as demo_lock
-from app.services import local_bot_quota
+from app.domains.local_bot.service import quota as local_bot_quota
 from app.services import post_image_generation
 
 
-POST_COOLDOWN = timedelta(minutes=30)
-MAX_POSTS_PER_DAY = 6
-REPLY_COOLDOWN = timedelta(minutes=2)
-MAX_REPLIES_PER_DAY = 30
-REACTION_COOLDOWN = timedelta(seconds=30)
-MAX_REACTIONS_PER_DAY = 100
-STATE_COOLDOWN = timedelta(seconds=30)
-READ_WINDOW = timedelta(minutes=1)
-MAX_READS_PER_WINDOW = 60
-REACTION_ACTION_TYPES = ("liked", "reposted", "followed", "unfollowed")
-STATE_ACTION_TYPES = ("state_saved", "observation_note_saved")
-REACTION_COOLDOWN_ACTION_TYPES = {
-    "like": ("liked",),
-    "repost": ("reposted",),
-    "follow": ("followed",),
-    "unfollow": ("unfollowed",),
-}
-RATE_LIMIT_LOG_DEDUPE_WINDOW = timedelta(minutes=1)
 
 logger = logging.getLogger(__name__)
 
 
-class LocalBotError(Exception):
-    pass
 
 
-class LocalBotAuthError(LocalBotError):
-    pass
 
 
-class LocalBotForbiddenError(LocalBotError):
-    pass
 
 
-class LocalBotModeError(LocalBotError):
-    pass
 
 
-class LocalBotRateLimitError(LocalBotError):
-    def __init__(self, message: str, *, retry_after_seconds: int | None = None):
-        super().__init__(message)
-        self.retry_after_seconds = retry_after_seconds
 
 
 @dataclass

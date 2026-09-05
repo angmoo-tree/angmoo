@@ -1,7 +1,7 @@
 {
-  "edge_count": 2489,
-  "external_import_count": 2280,
-  "module_count": 751,
+  "edge_count": 2495,
+  "external_import_count": 2283,
+  "module_count": 757,
   "modules": [
     {
       "external_imports": [],
@@ -2622,6 +2622,102 @@
       ],
       "module": "app.domains.identity.service.world_character_credentials",
       "path": "backend/app/domains/identity/service/world_character_credentials.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.local_bot",
+      "path": "backend/app/domains/local_bot/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime"
+      ],
+      "imports": [],
+      "module": "app.domains.local_bot.constants",
+      "path": "backend/app/domains/local_bot/constants.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses"
+      ],
+      "imports": [],
+      "module": "app.domains.local_bot.exceptions",
+      "path": "backend/app/domains/local_bot/exceptions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.local_bot.models",
+      "path": "backend/app/domains/local_bot/models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.local_bot.repository",
+      "path": "backend/app/domains/local_bot/repository/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.local_bot.models"
+      ],
+      "module": "app.domains.local_bot.repository.quota",
+      "path": "backend/app/domains/local_bot/repository/quota.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "pydantic"
+      ],
+      "imports": [
+        "app.core.response_schemas",
+        "app.domains.characters.schemas"
+      ],
+      "module": "app.domains.local_bot.schemas",
+      "path": "backend/app/domains/local_bot/schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.local_bot.service",
+      "path": "backend/app/domains/local_bot/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses",
+        "datetime",
+        "math",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.local_bot.exceptions",
+        "app.domains.local_bot.models",
+        "app.domains.local_bot.repository.quota",
+        "app.domains.routines.service.tick_schedule"
+      ],
+      "module": "app.domains.local_bot.service.quota",
+      "path": "backend/app/domains/local_bot/service/quota.py",
       "wildcard_imports": []
     },
     {
@@ -7899,6 +7995,7 @@
         "app.domains.characters.models",
         "app.domains.chat.infrastructure.sqlalchemy_models",
         "app.domains.identity.models",
+        "app.domains.local_bot.models",
         "app.domains.memory.models.batch",
         "app.domains.memory.models.daypart",
         "app.domains.memory.models.items",
@@ -7913,9 +8010,7 @@
         "app.domains.social.models.subjective_context",
         "app.domains.tree.models",
         "app.domains.world_packages.models",
-        "app.models.agent_local_keys",
         "app.models.agent_runs",
-        "app.models.local_bot_quotas",
         "app.models.world_activity_runtime",
         "app.models.world_character_setup",
         "app.models.worlds"
@@ -7931,19 +8026,6 @@
       ],
       "module": "app.models.agent_creation_drafts",
       "path": "backend/app/models/agent_creation_drafts.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.core.db"
-      ],
-      "module": "app.models.agent_local_keys",
-      "path": "backend/app/models/agent_local_keys.py",
       "wildcard_imports": []
     },
     {
@@ -7986,19 +8068,6 @@
       ],
       "module": "app.models.credentials",
       "path": "backend/app/models/credentials.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.core.db"
-      ],
-      "module": "app.models.local_bot_quotas",
-      "path": "backend/app/models/local_bot_quotas.py",
       "wildcard_imports": []
     },
     {
@@ -10403,6 +10472,7 @@
         "app.core.image_generation",
         "app.domains.characters.schemas",
         "app.domains.identity.schemas",
+        "app.domains.local_bot.schemas",
         "app.domains.routines.schemas",
         "app.domains.routines.schemas.runs",
         "app.domains.social.schemas.community",
@@ -10858,33 +10928,18 @@
         "app.core.unit_of_work",
         "app.cruds.agents",
         "app.domains.identity.service.demo_access",
+        "app.domains.local_bot.constants",
+        "app.domains.local_bot.exceptions",
+        "app.domains.local_bot.service.quota",
         "app.models",
         "app.runtime.characters.management",
         "app.schemas",
         "app.services.agent_activity_policy",
         "app.services.community",
-        "app.services.local_bot_quota",
         "app.services.post_image_generation"
       ],
       "module": "app.services.local_bot",
       "path": "backend/app/services/local_bot.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "dataclasses",
-        "datetime",
-        "math",
-        "sqlalchemy",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.models",
-        "app.services.agent_activity_policy"
-      ],
-      "module": "app.services.local_bot_quota",
-      "path": "backend/app/services/local_bot_quota.py",
       "wildcard_imports": []
     },
     {

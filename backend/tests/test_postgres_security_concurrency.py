@@ -22,7 +22,7 @@ from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
 from app.services import community_abuse_quota
 from app.domains.identity.service import external_verification as external_auth_verification
-from app.services import local_bot_quota
+from app.domains.local_bot.service import quota as local_bot_quota
 from app.domains.identity.service import login_throttle
 from app.domains.character_lore.service import parser_quota as lore_parser_quota
 from app.services import messages as message_service

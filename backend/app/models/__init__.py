@@ -13,11 +13,8 @@ from app.domains.characters.models import Character, CharacterState
 from app.domains.character_lore.models import CharacterLoreChunk, CharacterLoreSource, LoreParserLease
 from app.domains.characters.models import AgentImageGenerationSetting
 from app.domains.routines.models import AgentActivitySetting
-from app.models.agent_local_keys import AgentLocalKey
-from app.models.local_bot_quotas import (
-    LocalBotActionQuotaBucket,
-    LocalBotReadQuotaBucket,
-)
+from app.domains.local_bot.models import AgentLocalKey
+from app.domains.local_bot.models import LocalBotActionQuotaBucket, LocalBotReadQuotaBucket
 from app.domains.routines.models import AgentSlot
 from app.domains.social.models.posts import (
     Comment,

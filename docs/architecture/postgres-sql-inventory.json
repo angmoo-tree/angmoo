@@ -457,6 +457,19 @@
     {
       "markers": {
         "row_lock": [
+          59,
+          71
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/local_bot/repository/quota.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "e2be33d54fddfe17d7b0a63c0767f6ec5508e37c9324f388cd8e04361f6a3bd4",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
           180,
           320
         ]
@@ -1135,19 +1148,6 @@
       "path": "backend/app/services/community_abuse_quota.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "c2e41950d1f32e95ae0c32ac57d3a5196abe6c42e1c6e6880edd422ee2e0fc51",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "row_lock": [
-          91,
-          118
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/services/local_bot_quota.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "3ad187dd3c7af40882b79ca086eeb911cd18cecacd9848a5092b3895a1e12f2a",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

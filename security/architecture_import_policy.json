@@ -129,15 +129,7 @@
           "importer": "app.main"
         },
         {
-          "imported": "app.models.agent_local_keys",
-          "importer": "app.models"
-        },
-        {
           "imported": "app.models.agent_runs",
-          "importer": "app.models"
-        },
-        {
-          "imported": "app.models.local_bot_quotas",
           "importer": "app.models"
         },
         {
@@ -525,20 +517,8 @@
           "importer": "app.services.local_bot"
         },
         {
-          "imported": "app.services.local_bot_quota",
-          "importer": "app.services.local_bot"
-        },
-        {
           "imported": "app.services.post_image_generation",
           "importer": "app.services.local_bot"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.local_bot_quota"
-        },
-        {
-          "imported": "app.services.agent_activity_policy",
-          "importer": "app.services.local_bot_quota"
         },
         {
           "imported": "app.cruds.agents",
@@ -932,6 +912,12 @@
       "app.domains.identity.service.owner_context",
       "app.domains.identity.service.profile",
       "app.domains.identity.service.world_character_credentials",
+      "app.domains.local_bot.constants",
+      "app.domains.local_bot.exceptions",
+      "app.domains.local_bot.models",
+      "app.domains.local_bot.repository.quota",
+      "app.domains.local_bot.schemas",
+      "app.domains.local_bot.service.quota",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
       "app.domains.memory.contracts",
@@ -1201,6 +1187,8 @@
       "app.domains.identity.service.owner_context",
       "app.domains.identity.service.profile",
       "app.domains.identity.service.world_character_credentials",
+      "app.domains.local_bot.schemas",
+      "app.domains.local_bot.service.quota",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
       "app.domains.memory.contracts",
@@ -2909,6 +2897,46 @@
         "owner_stage": "AR-B5",
         "removal_condition": "Remove exact existing legacy consumer after its actual owner transition; all temporary consumers retire before AR-B8-B.",
         "reason": "Original same-object model/input or same-Session image setting access during source transition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.local_bot.models",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove original aggregate/workflow caller after remaining LocalBot roles and G5 registration transition; none remain at AR-B8-B.",
+        "reason": "Existing same-object value/model/quota caller during actual LocalBot source migration.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.local_bot.schemas",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove original aggregate/workflow caller after remaining LocalBot roles and G5 registration transition; none remain at AR-B8-B.",
+        "reason": "Existing same-object value/model/quota caller during actual LocalBot source migration.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.local_bot",
+        "target": "app.domains.local_bot.service.quota",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove original aggregate/workflow caller after remaining LocalBot roles and G5 registration transition; none remain at AR-B8-B.",
+        "reason": "Existing same-object value/model/quota caller during actual LocalBot source migration.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.local_bot",
+        "target": "app.domains.local_bot.exceptions",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove original aggregate/workflow caller after remaining LocalBot roles and G5 registration transition; none remain at AR-B8-B.",
+        "reason": "Existing same-object value/model/quota caller during actual LocalBot source migration.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.local_bot",
+        "target": "app.domains.local_bot.constants",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove original aggregate/workflow caller after remaining LocalBot roles and G5 registration transition; none remain at AR-B8-B.",
+        "reason": "Existing same-object value/model/quota caller during actual LocalBot source migration.",
         "review_date": "2026-09-06"
       }
     ]

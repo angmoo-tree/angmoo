@@ -420,7 +420,10 @@
     "backend/app/services/operation_settings.py": "backend/app/domains/operations/service/settings.py",
     "backend/app/services/maintenance.py": "backend/app/domains/operations/service/maintenance.py",
     "backend/app/schemas/maintenance.py": "backend/app/domains/operations/schemas.py",
-    "backend/app/models/agent_settings.py": "backend/app/domains/characters/models.py"
+    "backend/app/models/agent_settings.py": "backend/app/domains/characters/models.py",
+    "backend/app/models/agent_local_keys.py": "backend/app/domains/local_bot/models.py",
+    "backend/app/models/local_bot_quotas.py": "backend/app/domains/local_bot/models.py",
+    "backend/app/services/local_bot_quota.py": "backend/app/domains/local_bot/service/quota.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -5540,7 +5543,8 @@
           "backend/app/domains/characters/schemas.py",
           "backend/app/domains/identity/schemas.py",
           "backend/app/domains/routines/schemas/resident.py",
-          "backend/app/schemas/agents.py"
+          "backend/app/schemas/agents.py",
+          "backend/app/domains/local_bot/schemas.py"
         ]
       },
       "split_symbols": [
@@ -6996,7 +7000,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentLocalConnectionRead",
-          "new": "backend/app/schemas/agents.py::AgentLocalConnectionRead",
+          "new": "backend/app/domains/local_bot/schemas.py::AgentLocalConnectionRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -7006,7 +7010,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentLocalKeyCreateRead",
-          "new": "backend/app/schemas/agents.py::AgentLocalKeyCreateRead",
+          "new": "backend/app/domains/local_bot/schemas.py::AgentLocalKeyCreateRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -7016,7 +7020,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::BotCharacterRead",
-          "new": "backend/app/schemas/agents.py::BotCharacterRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotCharacterRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -7026,7 +7030,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::BotMeRead",
-          "new": "backend/app/schemas/agents.py::BotMeRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotMeRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -23737,7 +23741,8 @@
           "backend/app/domains/characters/schemas.py",
           "backend/app/domains/identity/schemas.py",
           "backend/app/domains/routines/schemas/resident.py",
-          "backend/app/schemas/agents.py"
+          "backend/app/schemas/agents.py",
+          "backend/app/domains/local_bot/schemas.py"
         ]
       },
       "split_symbols": [
@@ -24650,7 +24655,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentLocalConnectionRead",
-          "new": "backend/app/schemas/agents.py::AgentLocalConnectionRead",
+          "new": "backend/app/domains/local_bot/schemas.py::AgentLocalConnectionRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -24660,7 +24665,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentLocalKeyCreateRead",
-          "new": "backend/app/schemas/agents.py::AgentLocalKeyCreateRead",
+          "new": "backend/app/domains/local_bot/schemas.py::AgentLocalKeyCreateRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -24670,7 +24675,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::BotCharacterRead",
-          "new": "backend/app/schemas/agents.py::BotCharacterRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotCharacterRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -24680,7 +24685,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::BotMeRead",
-          "new": "backend/app/schemas/agents.py::BotMeRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotMeRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -34180,19 +34185,7 @@
           "old": "backend/app/services/character_lore.py::APP_TIMEZONE",
           "new": "backend/app/domains/character_lore/constants.py::APP_TIMEZONE",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py",
-            "backend/app/services/agent_runs.py",
-            "backend/app/services/agent_writing.py",
-            "backend/app/services/community.py",
-            "backend/app/services/langgraph_resident.py",
-            "backend/app/services/local_bot.py",
-            "backend/app/services/local_bot_quota.py",
-            "backend/app/services/post_image_generation.py",
-            "backend/app/runtime/characters/management.py",
-            "backend/app/domains/worlds/service/scheduling.py",
-            "backend/app/domains/routines/service/tick_schedule.py",
-            "backend/app/domains/character_lore/service/documents.py",
-            "backend/app/domains/characters/service/image_quota.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -35081,34 +35074,6 @@
           "old": "backend/app/services/lore_parser_quota.py::_aware_utc",
           "new": "backend/app/domains/character_lore/service/parser_quota.py::_aware_utc",
           "direct_consumers": [
-            "backend/app/services/activity_proposal_runtime.py",
-            "backend/app/services/agent_activity_policy.py",
-            "backend/app/services/agent_runs.py",
-            "backend/app/services/community_abuse_quota.py",
-            "backend/app/services/local_bot_quota.py",
-            "backend/app/services/world_feed_runtime.py",
-            "backend/app/services/world_feed_search.py",
-            "backend/app/runtime/characters/management.py",
-            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py",
-            "backend/app/runtime/relationships/sqlalchemy_social_event.py",
-            "backend/app/runtime/social/sqlalchemy_inbox.py",
-            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
-            "backend/app/domains/world_packages/service/staging.py",
-            "backend/app/domains/world_packages/storage/staging.py",
-            "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py",
-            "backend/app/domains/routine_posts/service/context.py",
-            "backend/app/domains/routine_posts/service/event_context.py",
-            "backend/app/domains/routines/policies/planning.py",
-            "backend/app/domains/routines/service/joint_reservations.py",
-            "backend/app/domains/routines/service/joint_scheduling.py",
-            "backend/app/domains/routines/service/plans.py",
-            "backend/app/domains/routines/service/execution/claims.py",
-            "backend/app/domains/routines/service/execution/lifecycle.py",
-            "backend/app/domains/routines/service/joint_activity/execution.py",
-            "backend/app/domains/routines/service/joint_activity/planning.py",
-            "backend/app/domains/memory/policies/retention.py",
-            "backend/app/domains/identity/service/external_verification.py",
-            "backend/app/domains/identity/service/login_throttle.py",
             "backend/app/domains/character_lore/service/parser_quota.py"
           ],
           "test_nodes": [
@@ -36195,7 +36160,8 @@
           "backend/app/schemas/agents.py",
           "backend/app/domains/characters/schemas.py",
           "backend/app/domains/identity/schemas.py",
-          "backend/app/domains/routines/schemas/resident.py"
+          "backend/app/domains/routines/schemas/resident.py",
+          "backend/app/domains/local_bot/schemas.py"
         ]
       },
       "split_symbols": [
@@ -36586,7 +36552,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentLocalConnectionRead",
-          "new": "backend/app/schemas/agents.py::AgentLocalConnectionRead",
+          "new": "backend/app/domains/local_bot/schemas.py::AgentLocalConnectionRead",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py",
             "backend/app/schemas/agents.py"
@@ -36599,7 +36565,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentLocalKeyCreateRead",
-          "new": "backend/app/schemas/agents.py::AgentLocalKeyCreateRead",
+          "new": "backend/app/domains/local_bot/schemas.py::AgentLocalKeyCreateRead",
           "direct_consumers": [
             "backend/app/runtime/characters/management.py"
           ],
@@ -36611,7 +36577,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::BotCharacterRead",
-          "new": "backend/app/schemas/agents.py::BotCharacterRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotCharacterRead",
           "direct_consumers": [
             "backend/app/schemas/agents.py"
           ],
@@ -36623,7 +36589,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::BotMeRead",
-          "new": "backend/app/schemas/agents.py::BotMeRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotMeRead",
           "direct_consumers": [
             "backend/app/schemas/agents.py"
           ],
@@ -37179,6 +37145,1587 @@
       ],
       "preserved": "Existing key precedence, disabled mode synchronization, same SecretScope, visual manual-prompt hash invalidation, same commit/refresh and clear(commit=False) flush semantics. Existing response/DDL unchanged.",
       "remaining": "Owner HTTP workflow/media integration A2; Social visual prompt writer same-Session binding; G5 global aliases"
+    },
+    "AR-B8-LOCAL-BOT-A1": {
+      "status": "SOURCE PREPARATION; original97 whole definitions/values AST identical after actual SQL expansion;50PASS/20.07s; boundary757/2495/182legacy; original source/assertion/suppression/APIORM/node diagnostics0 and final split0 after correcting two old Lore consumer entries; protected2201/current2255; source introduction pending",
+      "split_files": {
+        "backend/app/services/local_bot.py": [
+          "backend/app/services/local_bot.py",
+          "backend/app/domains/local_bot/constants.py",
+          "backend/app/domains/local_bot/exceptions.py"
+        ],
+        "backend/app/schemas/agents.py": [
+          "backend/app/schemas/agents.py",
+          "backend/app/domains/local_bot/schemas.py",
+          "backend/app/domains/characters/schemas.py",
+          "backend/app/domains/identity/schemas.py",
+          "backend/app/domains/routines/schemas/resident.py"
+        ],
+        "backend/app/services/local_bot_quota.py": [
+          "backend/app/domains/local_bot/service/quota.py",
+          "backend/app/domains/local_bot/repository/quota.py",
+          "backend/app/domains/local_bot/exceptions.py"
+        ],
+        "backend/app/models/local_bot_quotas.py": [
+          "backend/app/domains/local_bot/models.py",
+          "backend/app/domains/local_bot/constants.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/local_bot.py::POST_COOLDOWN",
+          "new": "backend/app/domains/local_bot/constants.py::POST_COOLDOWN",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::MAX_POSTS_PER_DAY",
+          "new": "backend/app/domains/local_bot/constants.py::MAX_POSTS_PER_DAY",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py",
+            "backend/app/domains/routines/schemas/resident.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::REPLY_COOLDOWN",
+          "new": "backend/app/domains/local_bot/constants.py::REPLY_COOLDOWN",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::MAX_REPLIES_PER_DAY",
+          "new": "backend/app/domains/local_bot/constants.py::MAX_REPLIES_PER_DAY",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::REACTION_COOLDOWN",
+          "new": "backend/app/domains/local_bot/constants.py::REACTION_COOLDOWN",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::MAX_REACTIONS_PER_DAY",
+          "new": "backend/app/domains/local_bot/constants.py::MAX_REACTIONS_PER_DAY",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::STATE_COOLDOWN",
+          "new": "backend/app/domains/local_bot/constants.py::STATE_COOLDOWN",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::READ_WINDOW",
+          "new": "backend/app/domains/local_bot/constants.py::READ_WINDOW",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::MAX_READS_PER_WINDOW",
+          "new": "backend/app/domains/local_bot/constants.py::MAX_READS_PER_WINDOW",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::REACTION_ACTION_TYPES",
+          "new": "backend/app/domains/local_bot/constants.py::REACTION_ACTION_TYPES",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::STATE_ACTION_TYPES",
+          "new": "backend/app/domains/local_bot/constants.py::STATE_ACTION_TYPES",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::REACTION_COOLDOWN_ACTION_TYPES",
+          "new": "backend/app/domains/local_bot/constants.py::REACTION_COOLDOWN_ACTION_TYPES",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::RATE_LIMIT_LOG_DEDUPE_WINDOW",
+          "new": "backend/app/domains/local_bot/constants.py::RATE_LIMIT_LOG_DEDUPE_WINDOW",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::logger",
+          "new": "backend/app/services/local_bot.py::logger",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::LocalBotError",
+          "new": "backend/app/domains/local_bot/exceptions.py::LocalBotError",
+          "direct_consumers": [
+            "backend/app/domains/local_bot/exceptions.py",
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::LocalBotAuthError",
+          "new": "backend/app/domains/local_bot/exceptions.py::LocalBotAuthError",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::LocalBotForbiddenError",
+          "new": "backend/app/domains/local_bot/exceptions.py::LocalBotForbiddenError",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::LocalBotModeError",
+          "new": "backend/app/domains/local_bot/exceptions.py::LocalBotModeError",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::LocalBotRateLimitError",
+          "new": "backend/app/domains/local_bot/exceptions.py::LocalBotRateLimitError",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::LocalBotContext",
+          "new": "backend/app/services/local_bot.py::LocalBotContext",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::authenticate_local_bot",
+          "new": "backend/app/services/local_bot.py::authenticate_local_bot",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::get_me",
+          "new": "backend/app/services/local_bot.py::get_me",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::get_state",
+          "new": "backend/app/services/local_bot.py::get_state",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::save_state",
+          "new": "backend/app/services/local_bot.py::save_state",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::list_feed",
+          "new": "backend/app/services/local_bot.py::list_feed",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::list_following_feed",
+          "new": "backend/app/services/local_bot.py::list_following_feed",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::get_post_thread",
+          "new": "backend/app/services/local_bot.py::get_post_thread",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::list_notifications",
+          "new": "backend/app/services/local_bot.py::list_notifications",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::get_character_profile",
+          "new": "backend/app/services/local_bot.py::get_character_profile",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::get_activity",
+          "new": "backend/app/services/local_bot.py::get_activity",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::mark_notification_read",
+          "new": "backend/app/services/local_bot.py::mark_notification_read",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::create_post",
+          "new": "backend/app/services/local_bot.py::create_post",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py",
+            "backend/tests/test_local_bot_atomic_quota.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::create_reply",
+          "new": "backend/app/services/local_bot.py::create_reply",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::like_post",
+          "new": "backend/app/services/local_bot.py::like_post",
+          "direct_consumers": [
+            "backend/tests/test_postgres_security_concurrency.py",
+            "backend/app/services/local_bot.py",
+            "backend/tests/test_local_bot_atomic_quota.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::unlike_post",
+          "new": "backend/app/services/local_bot.py::unlike_post",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::repost_post",
+          "new": "backend/app/services/local_bot.py::repost_post",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::unrepost_post",
+          "new": "backend/app/services/local_bot.py::unrepost_post",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::follow_profile",
+          "new": "backend/app/services/local_bot.py::follow_profile",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::unfollow_profile",
+          "new": "backend/app/services/local_bot.py::unfollow_profile",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_bot_post_reference",
+          "new": "backend/app/services/local_bot.py::_bot_post_reference",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_bot_post_summary",
+          "new": "backend/app/services/local_bot.py::_bot_post_summary",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_bot_post_detail",
+          "new": "backend/app/services/local_bot.py::_bot_post_detail",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_bot_feed_page",
+          "new": "backend/app/services/local_bot.py::_bot_feed_page",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_bot_post_thread",
+          "new": "backend/app/services/local_bot.py::_bot_post_thread",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_bot_notification_read",
+          "new": "backend/app/services/local_bot.py::_bot_notification_read",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_bot_notification_page",
+          "new": "backend/app/services/local_bot.py::_bot_notification_page",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_bot_profile_ref",
+          "new": "backend/app/services/local_bot.py::_bot_profile_ref",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_bot_follow_read",
+          "new": "backend/app/services/local_bot.py::_bot_follow_read",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_bot_profile_read",
+          "new": "backend/app/services/local_bot.py::_bot_profile_read",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_ensure_post_rate_limit",
+          "new": "backend/app/services/local_bot.py::_ensure_post_rate_limit",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_bot_activity_limits",
+          "new": "backend/app/services/local_bot.py::_bot_activity_limits",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_post_limit_status",
+          "new": "backend/app/services/local_bot.py::_post_limit_status",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_activity_limit_status",
+          "new": "backend/app/services/local_bot.py::_activity_limit_status",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_latest_activity_at",
+          "new": "backend/app/services/local_bot.py::_latest_activity_at",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_count_activities_today",
+          "new": "backend/app/services/local_bot.py::_count_activities_today",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_remaining_seconds",
+          "new": "backend/app/services/local_bot.py::_remaining_seconds",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_ensure_reaction_rate_limit",
+          "new": "backend/app/services/local_bot.py::_ensure_reaction_rate_limit",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_ensure_reaction_daily_limit",
+          "new": "backend/app/services/local_bot.py::_ensure_reaction_daily_limit",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_ensure_activity_rate_limit",
+          "new": "backend/app/services/local_bot.py::_ensure_activity_rate_limit",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_ensure_read_rate_limit",
+          "new": "backend/app/services/local_bot.py::_ensure_read_rate_limit",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_complete_action_quota",
+          "new": "backend/app/services/local_bot.py::_complete_action_quota",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_rollback_action_quota",
+          "new": "backend/app/services/local_bot.py::_rollback_action_quota",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_post_like_exists",
+          "new": "backend/app/services/local_bot.py::_post_like_exists",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_post_repost_exists",
+          "new": "backend/app/services/local_bot.py::_post_repost_exists",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_profile_follow_exists",
+          "new": "backend/app/services/local_bot.py::_profile_follow_exists",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_local_day_start_utc",
+          "new": "backend/app/services/local_bot.py::_local_day_start_utc",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_next_local_day_start_utc",
+          "new": "backend/app/services/local_bot.py::_next_local_day_start_utc",
+          "direct_consumers": [
+            "backend/app/domains/local_bot/service/quota.py",
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_seconds_until",
+          "new": "backend/app/services/local_bot.py::_seconds_until",
+          "direct_consumers": [
+            "backend/app/domains/local_bot/service/quota.py",
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_raise_rate_limit",
+          "new": "backend/app/services/local_bot.py::_raise_rate_limit",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_log_rate_limit",
+          "new": "backend/app/services/local_bot.py::_log_rate_limit",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_log_auth_failure",
+          "new": "backend/app/services/local_bot.py::_log_auth_failure",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot.py::_redacted_token_prefix",
+          "new": "backend/app/services/local_bot.py::_redacted_token_prefix",
+          "direct_consumers": [
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentGoogleModel",
+          "new": "backend/app/schemas/agents.py::AgentGoogleModel",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py",
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::GoogleGeminiModel",
+          "new": "backend/app/schemas/agents.py::GoogleGeminiModel",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::ImageKeyMode",
+          "new": "backend/app/schemas/agents.py::ImageKeyMode",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::WritingRepetitionLevel",
+          "new": "backend/app/schemas/agents.py::WritingRepetitionLevel",
+          "direct_consumers": [
+            "backend/app/domains/routines/schemas/resident.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentExecutionMode",
+          "new": "backend/app/schemas/agents.py::AgentExecutionMode",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentFirstGreetingCreate",
+          "new": "backend/app/schemas/agents.py::AgentFirstGreetingCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentFirstGreetingRead",
+          "new": "backend/app/schemas/agents.py::AgentFirstGreetingRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentLocalConnectionRead",
+          "new": "backend/app/domains/local_bot/schemas.py::AgentLocalConnectionRead",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentLocalKeyCreateRead",
+          "new": "backend/app/domains/local_bot/schemas.py::AgentLocalKeyCreateRead",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::BotCharacterRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotCharacterRead",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py",
+            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::BotMeRead",
+          "new": "backend/app/domains/local_bot/schemas.py::BotMeRead",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py",
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::CredentialUpsert",
+          "new": "backend/app/schemas/agents.py::CredentialUpsert",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot_quota.py::QuotaExceeded",
+          "new": "backend/app/domains/local_bot/exceptions.py::QuotaExceeded",
+          "direct_consumers": [
+            "backend/tests/test_postgres_security_concurrency.py",
+            "backend/app/domains/local_bot/service/quota.py",
+            "backend/app/services/local_bot.py",
+            "backend/tests/test_local_bot_atomic_quota.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot_quota.py::ActionQuota",
+          "new": "backend/app/domains/local_bot/service/quota.py::ActionQuota",
+          "direct_consumers": [
+            "backend/app/domains/local_bot/service/quota.py",
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot_quota.py::lock_action_quota",
+          "new": "backend/app/domains/local_bot/service/quota.py::lock_action_quota",
+          "direct_consumers": [
+            "backend/tests/test_postgres_security_concurrency.py",
+            "backend/app/services/local_bot.py",
+            "backend/tests/test_local_bot_atomic_quota.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot_quota.py::consume_read",
+          "new": "backend/app/domains/local_bot/service/quota.py::consume_read",
+          "direct_consumers": [
+            "backend/tests/test_postgres_security_concurrency.py",
+            "backend/app/services/local_bot.py",
+            "backend/tests/test_local_bot_atomic_quota.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot_quota.py::_ensure_action_bucket",
+          "new": "backend/app/domains/local_bot/repository/quota.py::_ensure_action_bucket",
+          "direct_consumers": [
+            "backend/app/domains/local_bot/service/quota.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot_quota.py::_ensure_read_bucket",
+          "new": "backend/app/domains/local_bot/repository/quota.py::_ensure_read_bucket",
+          "direct_consumers": [
+            "backend/app/domains/local_bot/service/quota.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot_quota.py::_next_local_day_start_utc",
+          "new": "backend/app/domains/local_bot/service/quota.py::_next_local_day_start_utc",
+          "direct_consumers": [
+            "backend/app/domains/local_bot/service/quota.py",
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot_quota.py::_aware_utc",
+          "new": "backend/app/domains/local_bot/service/quota.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/domains/local_bot/service/quota.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot_quota.py::_seconds_until",
+          "new": "backend/app/domains/local_bot/service/quota.py::_seconds_until",
+          "direct_consumers": [
+            "backend/app/domains/local_bot/service/quota.py",
+            "backend/app/services/local_bot.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/models/local_bot_quotas.py::LOCAL_BOT_ACTION_LABELS",
+          "new": "backend/app/domains/local_bot/constants.py::LOCAL_BOT_ACTION_LABELS",
+          "direct_consumers": [
+            "backend/app/domains/local_bot/constants.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/models/local_bot_quotas.py::LocalBotActionQuotaBucket",
+          "new": "backend/app/domains/local_bot/models.py::LocalBotActionQuotaBucket",
+          "direct_consumers": [
+            "backend/app/models/__init__.py",
+            "backend/app/domains/local_bot/repository/quota.py",
+            "backend/tests/test_postgres_security_concurrency.py",
+            "backend/app/domains/local_bot/service/quota.py",
+            "backend/tests/test_local_bot_atomic_quota.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/models/local_bot_quotas.py::LocalBotReadQuotaBucket",
+          "new": "backend/app/domains/local_bot/models.py::LocalBotReadQuotaBucket",
+          "direct_consumers": [
+            "backend/app/models/__init__.py",
+            "backend/app/domains/local_bot/repository/quota.py",
+            "backend/tests/test_postgres_security_concurrency.py",
+            "backend/tests/test_local_bot_atomic_quota.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot_quota.py::consume_read",
+          "new": "backend/app/domains/local_bot/repository/quota.py::read_read_bucket",
+          "direct_consumers": [
+            "backend/app/domains/local_bot/service/quota.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/services/local_bot_quota.py::lock_action_quota",
+          "new": "backend/app/domains/local_bot/repository/quota.py::read_action_buckets",
+          "direct_consumers": [
+            "backend/app/domains/local_bot/service/quota.py"
+          ],
+          "test_nodes": [
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
+            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::PollinationsImageModel",
+          "new": "backend/app/domains/characters/schemas.py::PollinationsImageModel",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py",
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_image_generation_setting_mode_sync_and_preserve_key"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreate",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py",
+            "backend/tests/test_postgres_security_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentDeleteCreate",
+          "new": "backend/app/domains/characters/schemas.py::AgentDeleteCreate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_character_deletion_resets_cross_user_preference_and_removes_private_data"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentDraftImageStyle",
+          "new": "backend/app/domains/characters/schemas.py::AgentDraftImageStyle",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py",
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentDraftMediaKind",
+          "new": "backend/app/domains/characters/schemas.py::AgentDraftMediaKind",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py",
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate",
+            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentDraftMediaDelivery",
+          "new": "backend/app/domains/characters/schemas.py::AgentDraftMediaDelivery",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py",
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate",
+            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileImageBucket",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileImageBucket",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py",
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftCreate",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftCreate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_google_model_selection.py::test_agent_google_models_are_allowed_in_agent_model_schemas",
+            "tests/test_google_model_selection.py::test_agent_model_schemas_reject_removed_or_message_only_models",
+            "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftUpdate",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftMediaUpload",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftMediaUpload",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftGenerateMediaCreate",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftGenerateMediaCreate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate",
+            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
+            "tests/test_agent_creation_drafts.py::test_profile_image_quota_exceeded_skips_translation_and_pollinations"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftComplete",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftComplete",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_promotion_usage.py::test_complete_draft_records_promotion_usage_consent",
+            "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileMediaGenerateCreate",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileMediaGenerateCreate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileImageUsageStatusRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileImageUsageStatusRead",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py",
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileImageUsageRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileImageUsageRead",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftMediaResult",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftMediaResult",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py",
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftMediaGenerationRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftMediaGenerationRead",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileMediaGenerationRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileMediaGenerationRead",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftRead",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::CredentialRead",
+          "new": "backend/app/domains/identity/schemas.py::CredentialRead",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py",
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentActionRangeRead",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentActionRangeRead",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py",
+            "backend/app/domains/routines/schemas/resident.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_activity_setting_read_excludes_internal_planner_tendency_profile"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentActivitySettingRead",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentActivitySettingRead",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py",
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_activity_setting_read_excludes_internal_planner_tendency_profile"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentActivitySettingUpdate",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentActivitySettingUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_enabled_idle_slot_reschedules_immediately_after_activity_window_change",
+            "tests/routines/test_activity_limits.py::test_running_slot_keeps_current_schedule_until_run_completion"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentFeedCueCreate",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentFeedCueCreate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentFeedCueRead",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentFeedCueRead",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileUpdate",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_demo_account_lock.py::test_agent_route_returns_403_for_locked_demo_error",
+            "tests/identity/test_demo_account_lock.py::test_agent_service_blocks_profile_update_after_ownership_check",
+            "tests/test_m3_authorization_deletion.py::test_sensitive_update_schemas_ignore_ownership_and_secret_mass_assignment"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentPromotionUsageUpdate",
+          "new": "backend/app/domains/characters/schemas.py::AgentPromotionUsageUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_promotion_usage.py::test_update_promotion_usage_requires_owner",
+            "tests/test_agent_promotion_usage.py::test_update_promotion_usage_tracks_revocation_and_regrant"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentPromotionUsageRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentPromotionUsageRead",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py",
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentPersonaUpdate",
+          "new": "backend/app/domains/characters/schemas.py::AgentPersonaUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
+            "tests/test_m3_authorization_deletion.py::test_sensitive_update_schemas_ignore_ownership_and_secret_mass_assignment"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileMediaUpload",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileMediaUpload",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentImageSeedUpload",
+          "new": "backend/app/domains/characters/schemas.py::AgentImageSeedUpload",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentImageGenerationSettingRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentImageGenerationSettingRead",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py",
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentImageGenerationSettingUpdate",
+          "new": "backend/app/domains/characters/schemas.py::AgentImageGenerationSettingUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_image_generation_setting_mode_sync_and_preserve_key"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentActivitySummaryRead",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentActivitySummaryRead",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py",
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_api_agent_instants_normalize_sqlite_naive_values_to_utc"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentActivityProfileReadinessRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentActivityProfileReadinessRead",
+          "direct_consumers": [
+            "backend/app/domains/characters/schemas.py",
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py",
+            "backend/tests/test_postgres_security_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_readiness_contract.py::test_readiness_keeps_shared_dto_and_world_scope_before_stale_profile"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentDetailRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentDetailRead",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        }
+      ],
+      "direct_consumers": [
+        "backend/tests/test_local_bot_atomic_quota.py",
+        "backend/tests/test_postgres_security_concurrency.py",
+        "backend/app/models/__init__.py",
+        "backend/app/services/local_bot.py"
+      ],
+      "preserved": "Original quota row locks, nested insert/IntegrityError behavior, day reset/cooldown, caller-owned action completion and consume_read explicit commit. All DTO/ORM definitions unchanged.",
+      "remaining": "LocalBot main workflow/auth/owner key/HTTP, Social DTO ownership, global aggregates and final boundary retirement."
     }
   }
 }

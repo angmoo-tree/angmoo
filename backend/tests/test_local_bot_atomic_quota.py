@@ -9,7 +9,7 @@ from sqlalchemy.pool import StaticPool
 from app import models
 from app import schemas
 from app.services import local_bot
-from app.services import local_bot_quota
+from app.domains.local_bot.service import quota as local_bot_quota
 
 
 def _session() -> Session:
