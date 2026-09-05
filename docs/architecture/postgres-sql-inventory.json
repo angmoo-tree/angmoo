@@ -890,7 +890,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/characters/management.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "84dcef338e766d88b0351df51ae5f7147b5bd3fd133fb3ec1632402a73a1cf28",
+      "source_sha256": "b9bcf84c6ddd86314d12173175f0efdb5817813c4bfe401e37b6dea8b4348e86",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1135,7 +1135,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/local_bot_quota.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "3ad187dd3c7af40882b79ca086eeb911cd18cecacd9848a5092b3895a1e12f2a",
+      "source_sha256": "ddd94036fab73990b8c7c805c780d777e43f08e6cc3704c8923274a10226c7ec",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

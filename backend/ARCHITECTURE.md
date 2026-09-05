@@ -620,4 +620,4 @@ Resident Context는 Character/CharacterState, LlmCredential, AgentFeedCue와 Act
 
 `routines/service/activity_policy.py`가 실제 활동 시간·허용 행동·일일 제한·cooldown·수동 세션의 예외를 판단하고, `repository/activity_counts.py`가 같은 Session에서 자기 ActivityLog의 횟수와 최근 시각을 조회합니다. `ActivityTimezoneReader`는 설정 확보 뒤 원래 위치에서 현재 World 시간을 읽는 협력입니다. 시간을 먼저 읽거나 새로운 Session을 만들지 않습니다.
 
-기존 설정이 없으면 ensure_setting의 원래 commit/refresh가 유지되고, 이미 있는 설정을 caller가 수정한 경우에는 정책 조회가 새 commit을 만들지 않습니다. C3b의 임시 기존 service 표면은 동일 timezone 함수를 공급하는 세 연결 함수만 정책 쪽에 남깁니다. World/Package scope의 네 실제 조회/판정 함수는 C3c에서 역할을 분리한 뒤 그 경로를 제거합니다.
+기존 설정이 없으면 ensure_setting의 원래 commit/refresh가 유지되고, 이미 있는 설정을 caller가 수정한 경우에는 정책 조회가 새 commit을 만들지 않습니다. World 선택에 따른 시간대와 가져온 World의 활성화 여부는 `routines/service/activity_scope.py`가 판단합니다. `runtime/resident/activity_scope.py`는 동일 Session에서 실제 World/Character/Package 조회만 수행하며, `runtime/resident/activity_policy.py`가 두 역할을 연결합니다. Inspector도 첫 table check에 만들어 활동이 허용된 캐릭터의 조회 이전 반환을 유지합니다. 예전 `services/agent_activity_policy.py`는 직접 소비자 전환 후 제거했습니다.

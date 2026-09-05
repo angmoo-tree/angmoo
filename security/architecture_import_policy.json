@@ -229,10 +229,6 @@
           "importer": "app.runtime.characters.creator"
         },
         {
-          "imported": "app.services.agent_activity_policy",
-          "importer": "app.runtime.characters.creator"
-        },
-        {
           "imported": "app.services.agent_runs",
           "importer": "app.runtime.characters.creator"
         },
@@ -270,10 +266,6 @@
         },
         {
           "imported": "app.schemas",
-          "importer": "app.runtime.characters.management"
-        },
-        {
-          "imported": "app.services.agent_activity_policy",
           "importer": "app.runtime.characters.management"
         },
         {
@@ -377,10 +369,6 @@
           "importer": "app.services.activity_proposal_runtime"
         },
         {
-          "imported": "app.models",
-          "importer": "app.services.agent_activity_policy"
-        },
-        {
           "imported": "app.cruds.agent_runs",
           "importer": "app.services.agent_runs"
         },
@@ -398,10 +386,6 @@
         },
         {
           "imported": "app.schemas",
-          "importer": "app.services.agent_runs"
-        },
-        {
-          "imported": "app.services.agent_activity_policy",
           "importer": "app.services.agent_runs"
         },
         {
@@ -513,10 +497,6 @@
           "importer": "app.services.community"
         },
         {
-          "imported": "app.services.agent_activity_policy",
-          "importer": "app.services.community"
-        },
-        {
           "imported": "app.services.agent_briefs",
           "importer": "app.services.community"
         },
@@ -558,10 +538,6 @@
         },
         {
           "imported": "app.schemas",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.services.agent_activity_policy",
           "importer": "app.services.langgraph_resident"
         },
         {
@@ -617,10 +593,6 @@
           "importer": "app.services.local_bot"
         },
         {
-          "imported": "app.services.agent_activity_policy",
-          "importer": "app.services.local_bot"
-        },
-        {
           "imported": "app.services.community",
           "importer": "app.services.local_bot"
         },
@@ -634,10 +606,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.services.local_bot_quota"
-        },
-        {
-          "imported": "app.services.agent_activity_policy",
           "importer": "app.services.local_bot_quota"
         },
         {
@@ -670,10 +638,6 @@
         },
         {
           "imported": "app.schemas",
-          "importer": "app.services.post_image_generation"
-        },
-        {
-          "imported": "app.services.agent_activity_policy",
           "importer": "app.services.post_image_generation"
         },
         {
@@ -811,10 +775,6 @@
         },
         {
           "imported": "app.services.activity_state_contracts",
-          "importer": "app.compatibility.routine_posts.legacy"
-        },
-        {
-          "imported": "app.services.agent_activity_policy",
           "importer": "app.compatibility.routine_posts.legacy"
         },
         {
@@ -1072,6 +1032,7 @@
       "app.domains.routines.contracts",
       "app.domains.routines.contracts.activity",
       "app.domains.routines.contracts.activity_policy",
+      "app.domains.routines.contracts.activity_scope",
       "app.domains.routines.contracts.clock",
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
@@ -1096,6 +1057,7 @@
       "app.domains.routines.service",
       "app.domains.routines.service.activity_logs",
       "app.domains.routines.service.activity_policy",
+      "app.domains.routines.service.activity_scope",
       "app.domains.routines.service.activity_sessions",
       "app.domains.routines.service.activity_settings",
       "app.domains.routines.service.execution",
@@ -1262,6 +1224,7 @@
       "app.domains.routines.service",
       "app.domains.routines.service.activity_logs",
       "app.domains.routines.service.activity_policy",
+      "app.domains.routines.service.activity_scope",
       "app.domains.routines.service.activity_sessions",
       "app.domains.routines.service.activity_settings",
       "app.domains.routines.service.execution",
@@ -2604,14 +2567,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.agent_activity_policy",
-        "target": "app.domains.routines.service.tick_schedule",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing not-yet-migrated activity runtime/CRUD uses the identical owner clock or pure graph-state contract. All policy is in the canonical module; no new legacy body is introduced.",
-        "removal_condition": "Switch remaining agent-run/LLM graph/activity CRUD roles in later B4-C slices and remove this exact legacy consumer edge.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.services.agent_runs",
         "target": "app.domains.routines.service.tick_schedule",
         "owner_stage": "AR-B4-C",
@@ -2644,59 +2599,27 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.agent_activity_policy",
-        "target": "app.domains.routines.constants",
+        "importer": "app.services.local_bot",
+        "target": "app.domains.routines.service.tick_schedule",
         "owner_stage": "AR-B4-C",
-        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
-        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "reason": "Existing constant-only caller imports the same canonical APP_TIMEZONE object after the old mixed activity-policy module is removed. No policy/runtime lookup occurs here.",
+        "removal_condition": "Retire this precise legacy consumer edge when the Bot/media actual owner moves by B8-A; canonical clock contract remains supported.",
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.agent_activity_policy",
-        "target": "app.domains.routines.contracts.activity_policy",
+        "importer": "app.services.local_bot_quota",
+        "target": "app.domains.routines.service.tick_schedule",
         "owner_stage": "AR-B4-C",
-        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
-        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "reason": "Existing constant-only caller imports the same canonical APP_TIMEZONE object after the old mixed activity-policy module is removed. No policy/runtime lookup occurs here.",
+        "removal_condition": "Retire this precise legacy consumer edge when the Bot/media actual owner moves by B8-A; canonical clock contract remains supported.",
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.agent_activity_policy",
-        "target": "app.domains.routines.exceptions",
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.routines.service.tick_schedule",
         "owner_stage": "AR-B4-C",
-        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
-        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_activity_policy",
-        "target": "app.domains.routines.service.activity_sessions",
-        "owner_stage": "AR-B4-C",
-        "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
-        "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_activity_policy",
-        "target": "app.domains.routines.repository.activity_counts",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing activity policy surface connects the original lazy same-Session timezone read and same actual count function; no new legacy policy body.",
-        "removal_condition": "C3c moves the remaining World/import scope collaboration and closes this precise legacy activity-policy surface before B4 completion.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_activity_policy",
-        "target": "app.domains.routines.service.activity_policy",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing activity policy surface connects the original lazy same-Session timezone read and same actual count function; no new legacy policy body.",
-        "removal_condition": "C3c moves the remaining World/import scope collaboration and closes this precise legacy activity-policy surface before B4 completion.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_activity_policy",
-        "target": "app.domains.routines.utils.activity_actions",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing activity policy surface connects the original lazy same-Session timezone read and same actual count function; no new legacy policy body.",
-        "removal_condition": "C3c moves the remaining World/import scope collaboration and closes this precise legacy activity-policy surface before B4 completion.",
+        "reason": "Existing constant-only caller imports the same canonical APP_TIMEZONE object after the old mixed activity-policy module is removed. No policy/runtime lookup occurs here.",
+        "removal_condition": "Retire this precise legacy consumer edge when the Bot/media actual owner moves by B8-A; canonical clock contract remains supported.",
         "review_date": "2026-09-06"
       }
     ]

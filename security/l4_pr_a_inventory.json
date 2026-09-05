@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2184,
-      "internal_edge_count": 2332,
+      "external_import_count": 2190,
+      "internal_edge_count": 2340,
       "legacy_import_exception_count": 0,
-      "module_count": 697,
+      "module_count": 700,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1331,7 +1331,7 @@
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
-        "sha256": "bd1e83111413a0e8d66ac185b326bf70e8fb19e90632950cfcdf8d00149207f3"
+        "sha256": "f9d7e8c2df57bd7650abe7085ba0d67d08c0beaf799df5d5910c3fd5cfb3712c"
       },
       {
         "path": "backend/tests/test_graph_projection_replay.py",
@@ -1347,7 +1347,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "119af4aafa8ba1388a9868641cfb47f9542efb334acafc232b4ffe34bed32ce1"
+        "sha256": "4ad74fe1ada420bdffc8f335456c4c6e91eecddbeedadf5f2d951a638a39ea3f"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",

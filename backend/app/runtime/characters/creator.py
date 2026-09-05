@@ -82,7 +82,7 @@ from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.policies import name_policy
 from app.runtime.characters import management as agent_service
-from app.services import agent_activity_policy
+from app.runtime.resident import activity_policy as agent_activity_policy
 from app.services import agent_runs as agent_run_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.services.direct_llm import DirectLlmCallContext, RunLlmTracker, generate_text

@@ -45,7 +45,7 @@ from app.runtime.routine_posts.sqlalchemy_runtime import (
     routine_world_character_for_character,
     run_routine_post_runtime,
 )
-from app.services import agent_activity_policy
+from app.runtime.resident import activity_policy as agent_activity_policy
 from app.services import character_lore as character_lore_service
 from app.services import community as community_service
 from app.services import langgraph_social_apply

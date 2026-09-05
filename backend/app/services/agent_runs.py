@@ -37,7 +37,7 @@ from app.domains.world_characters.public import (
     is_owner_controlled_character,
     owner_controlled_character_ids,
 )
-from app.services import agent_activity_policy
+from app.runtime.resident import activity_policy as agent_activity_policy
 from app.domains.world_characters.service import readiness as activity_profile_readiness
 from app.services.agent_briefs import (
     PREPARED_CREATE_POST_BRIEF_SENTINEL,

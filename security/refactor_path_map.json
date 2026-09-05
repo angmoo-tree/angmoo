@@ -353,7 +353,8 @@
     "backend/app/services/resident_contracts.py": "backend/app/runtime/resident/context.py",
     "backend/tests/test_agent_activity_limits.py": "backend/tests/routines/test_activity_limits.py",
     "backend/tests/test_l2_scheduler_singleton.py": "backend/tests/routines/test_scheduler_singleton.py",
-    "backend/app/schemas/agent_runs.py": "backend/app/domains/routines/schemas/runs.py"
+    "backend/app/schemas/agent_runs.py": "backend/app/domains/routines/schemas/runs.py",
+    "backend/app/services/agent_activity_policy.py": "backend/app/domains/routines/service/activity_policy.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -24832,134 +24833,171 @@
           "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/repository/activity_counts.py",
           "backend/app/domains/routines/service/activity_policy.py",
+          "backend/app/domains/routines/service/activity_scope.py",
           "backend/app/domains/routines/service/activity_sessions.py",
           "backend/app/domains/routines/utils/activity_actions.py",
-          "backend/app/services/agent_activity_policy.py"
+          "backend/app/runtime/resident/activity_policy.py"
         ]
       },
       "split_symbols": [
         {
           "old": "backend/app/services/agent_activity_policy.py::APP_TIMEZONE",
-          "new": "backend/app/services/agent_activity_policy.py::APP_TIMEZONE",
+          "new": "backend/app/runtime/resident/activity_policy.py::APP_TIMEZONE",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::TickSchedule",
-          "new": "backend/app/services/agent_activity_policy.py::TickSchedule",
+          "new": "backend/app/runtime/resident/activity_policy.py::TickSchedule",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::tick_interval_seconds",
-          "new": "backend/app/services/agent_activity_policy.py::tick_interval_seconds",
+          "new": "backend/app/runtime/resident/activity_policy.py::tick_interval_seconds",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::next_tick_schedule",
-          "new": "backend/app/services/agent_activity_policy.py::next_tick_schedule",
+          "new": "backend/app/runtime/resident/activity_policy.py::next_tick_schedule",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::initial_tick_schedule",
-          "new": "backend/app/services/agent_activity_policy.py::initial_tick_schedule",
+          "new": "backend/app/runtime/resident/activity_policy.py::initial_tick_schedule",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::retry_tick_schedule",
-          "new": "backend/app/services/agent_activity_policy.py::retry_tick_schedule",
+          "new": "backend/app/runtime/resident/activity_policy.py::retry_tick_schedule",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::recovery_tick_schedule",
-          "new": "backend/app/services/agent_activity_policy.py::recovery_tick_schedule",
+          "new": "backend/app/runtime/resident/activity_policy.py::recovery_tick_schedule",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::_is_within_active_hours",
-          "new": "backend/app/services/agent_activity_policy.py::_is_within_active_hours",
+          "new": "backend/app/runtime/resident/activity_policy.py::_is_within_active_hours",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::_aware_utc",
-          "new": "backend/app/services/agent_activity_policy.py::_aware_utc",
+          "new": "backend/app/runtime/resident/activity_policy.py::_aware_utc",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::PUBLIC_ACTION_TYPES",
           "new": "backend/app/domains/routines/constants.py::PUBLIC_ACTION_TYPES",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -24971,7 +25009,7 @@
           "old": "backend/app/services/agent_activity_policy.py::POLICY_ACTION_NAMES",
           "new": "backend/app/domains/routines/constants.py::POLICY_ACTION_NAMES",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -24983,7 +25021,7 @@
           "old": "backend/app/services/agent_activity_policy.py::TENDENCY_PUBLIC_ACTION_NAMES",
           "new": "backend/app/domains/routines/constants.py::TENDENCY_PUBLIC_ACTION_NAMES",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -24995,7 +25033,7 @@
           "old": "backend/app/services/agent_activity_policy.py::POLICY_SESSION_MARKER",
           "new": "backend/app/domains/routines/constants.py::POLICY_SESSION_MARKER",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25007,7 +25045,7 @@
           "old": "backend/app/services/agent_activity_policy.py::MANUAL_POLICY_SESSION_MARKER",
           "new": "backend/app/domains/routines/constants.py::MANUAL_POLICY_SESSION_MARKER",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25019,7 +25057,7 @@
           "old": "backend/app/services/agent_activity_policy.py::ActivityPolicyDeniedError",
           "new": "backend/app/domains/routines/exceptions.py::ActivityPolicyDeniedError",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25031,7 +25069,7 @@
           "old": "backend/app/services/agent_activity_policy.py::ActivityPolicy",
           "new": "backend/app/domains/routines/contracts/activity_policy.py::ActivityPolicy",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25041,35 +25079,39 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::activity_timezone",
-          "new": "backend/app/services/agent_activity_policy.py::activity_timezone",
+          "new": "backend/app/domains/routines/service/activity_scope.py::activity_timezone",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::activity_timezone_name",
-          "new": "backend/app/services/agent_activity_policy.py::activity_timezone_name",
+          "new": "backend/app/domains/routines/service/activity_scope.py::activity_timezone_name",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::is_policy_enforced_session",
           "new": "backend/app/domains/routines/service/activity_sessions.py::is_policy_enforced_session",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25081,7 +25123,7 @@
           "old": "backend/app/services/agent_activity_policy.py::is_manual_policy_session",
           "new": "backend/app/domains/routines/service/activity_sessions.py::is_manual_policy_session",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25091,35 +25133,39 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked",
-          "new": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked",
+          "new": "backend/app/domains/routines/service/activity_scope.py::is_imported_world_runtime_locked",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked_for_character",
-          "new": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked_for_character",
+          "new": "backend/app/domains/routines/service/activity_scope.py::is_imported_world_runtime_locked_for_character",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::_format_tendency_prompt",
           "new": "backend/app/domains/routines/contracts/activity_policy.py::_format_tendency_prompt",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25131,7 +25177,7 @@
           "old": "backend/app/services/agent_activity_policy.py::build_activity_policy",
           "new": "backend/app/domains/routines/service/activity_policy.py::build_activity_policy",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25145,7 +25191,7 @@
           "old": "backend/app/services/agent_activity_policy.py::assert_action_allowed",
           "new": "backend/app/domains/routines/service/activity_policy.py::assert_action_allowed",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25159,7 +25205,7 @@
           "old": "backend/app/services/agent_activity_policy.py::count_public_actions_since",
           "new": "backend/app/domains/routines/repository/activity_counts.py::count_public_actions_since",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25173,7 +25219,7 @@
           "old": "backend/app/services/agent_activity_policy.py::count_action_today",
           "new": "backend/app/domains/routines/service/activity_policy.py::count_action_today",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25187,7 +25233,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_evaluate_counted_actions",
           "new": "backend/app/domains/routines/service/activity_policy.py::_evaluate_counted_actions",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25201,7 +25247,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_count_action_today",
           "new": "backend/app/domains/routines/repository/activity_counts.py::_count_action_today",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25215,7 +25261,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_latest_action_at",
           "new": "backend/app/domains/routines/repository/activity_counts.py::_latest_action_at",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25229,7 +25275,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_block_actions",
           "new": "backend/app/domains/routines/service/activity_policy.py::_block_actions",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25243,7 +25289,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_normalize_action_types",
           "new": "backend/app/domains/routines/utils/activity_actions.py::_normalize_action_types",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25257,7 +25303,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_public_action_log_types",
           "new": "backend/app/domains/routines/utils/activity_actions.py::_public_action_log_types",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25280,134 +25326,171 @@
           "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/repository/activity_counts.py",
           "backend/app/domains/routines/service/activity_policy.py",
+          "backend/app/domains/routines/service/activity_scope.py",
           "backend/app/domains/routines/service/activity_sessions.py",
           "backend/app/domains/routines/utils/activity_actions.py",
-          "backend/app/services/agent_activity_policy.py"
+          "backend/app/runtime/resident/activity_policy.py"
         ]
       },
       "split_symbols": [
         {
           "old": "backend/app/services/agent_activity_policy.py::APP_TIMEZONE",
-          "new": "backend/app/services/agent_activity_policy.py::APP_TIMEZONE",
+          "new": "backend/app/runtime/resident/activity_policy.py::APP_TIMEZONE",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::TickSchedule",
-          "new": "backend/app/services/agent_activity_policy.py::TickSchedule",
+          "new": "backend/app/runtime/resident/activity_policy.py::TickSchedule",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::tick_interval_seconds",
-          "new": "backend/app/services/agent_activity_policy.py::tick_interval_seconds",
+          "new": "backend/app/runtime/resident/activity_policy.py::tick_interval_seconds",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::next_tick_schedule",
-          "new": "backend/app/services/agent_activity_policy.py::next_tick_schedule",
+          "new": "backend/app/runtime/resident/activity_policy.py::next_tick_schedule",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::initial_tick_schedule",
-          "new": "backend/app/services/agent_activity_policy.py::initial_tick_schedule",
+          "new": "backend/app/runtime/resident/activity_policy.py::initial_tick_schedule",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::retry_tick_schedule",
-          "new": "backend/app/services/agent_activity_policy.py::retry_tick_schedule",
+          "new": "backend/app/runtime/resident/activity_policy.py::retry_tick_schedule",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::recovery_tick_schedule",
-          "new": "backend/app/services/agent_activity_policy.py::recovery_tick_schedule",
+          "new": "backend/app/runtime/resident/activity_policy.py::recovery_tick_schedule",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::_is_within_active_hours",
-          "new": "backend/app/services/agent_activity_policy.py::_is_within_active_hours",
+          "new": "backend/app/runtime/resident/activity_policy.py::_is_within_active_hours",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::_aware_utc",
-          "new": "backend/app/services/agent_activity_policy.py::_aware_utc",
+          "new": "backend/app/runtime/resident/activity_policy.py::_aware_utc",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::PUBLIC_ACTION_TYPES",
           "new": "backend/app/domains/routines/constants.py::PUBLIC_ACTION_TYPES",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25419,7 +25502,7 @@
           "old": "backend/app/services/agent_activity_policy.py::POLICY_ACTION_NAMES",
           "new": "backend/app/domains/routines/constants.py::POLICY_ACTION_NAMES",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25431,7 +25514,7 @@
           "old": "backend/app/services/agent_activity_policy.py::TENDENCY_PUBLIC_ACTION_NAMES",
           "new": "backend/app/domains/routines/constants.py::TENDENCY_PUBLIC_ACTION_NAMES",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25443,7 +25526,7 @@
           "old": "backend/app/services/agent_activity_policy.py::POLICY_SESSION_MARKER",
           "new": "backend/app/domains/routines/constants.py::POLICY_SESSION_MARKER",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25455,7 +25538,7 @@
           "old": "backend/app/services/agent_activity_policy.py::MANUAL_POLICY_SESSION_MARKER",
           "new": "backend/app/domains/routines/constants.py::MANUAL_POLICY_SESSION_MARKER",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25467,7 +25550,7 @@
           "old": "backend/app/services/agent_activity_policy.py::ActivityPolicyDeniedError",
           "new": "backend/app/domains/routines/exceptions.py::ActivityPolicyDeniedError",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25479,7 +25562,7 @@
           "old": "backend/app/services/agent_activity_policy.py::ActivityPolicy",
           "new": "backend/app/domains/routines/contracts/activity_policy.py::ActivityPolicy",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25489,35 +25572,39 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::activity_timezone",
-          "new": "backend/app/services/agent_activity_policy.py::activity_timezone",
+          "new": "backend/app/domains/routines/service/activity_scope.py::activity_timezone",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::activity_timezone_name",
-          "new": "backend/app/services/agent_activity_policy.py::activity_timezone_name",
+          "new": "backend/app/domains/routines/service/activity_scope.py::activity_timezone_name",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::is_policy_enforced_session",
           "new": "backend/app/domains/routines/service/activity_sessions.py::is_policy_enforced_session",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25529,7 +25616,7 @@
           "old": "backend/app/services/agent_activity_policy.py::is_manual_policy_session",
           "new": "backend/app/domains/routines/service/activity_sessions.py::is_manual_policy_session",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25539,35 +25626,39 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked",
-          "new": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked",
+          "new": "backend/app/domains/routines/service/activity_scope.py::is_imported_world_runtime_locked",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked_for_character",
-          "new": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked_for_character",
+          "new": "backend/app/domains/routines/service/activity_scope.py::is_imported_world_runtime_locked_for_character",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
             "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
-            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
           ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::_format_tendency_prompt",
           "new": "backend/app/domains/routines/contracts/activity_policy.py::_format_tendency_prompt",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25579,7 +25670,7 @@
           "old": "backend/app/services/agent_activity_policy.py::build_activity_policy",
           "new": "backend/app/domains/routines/service/activity_policy.py::build_activity_policy",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25593,7 +25684,7 @@
           "old": "backend/app/services/agent_activity_policy.py::assert_action_allowed",
           "new": "backend/app/domains/routines/service/activity_policy.py::assert_action_allowed",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25607,7 +25698,7 @@
           "old": "backend/app/services/agent_activity_policy.py::count_public_actions_since",
           "new": "backend/app/domains/routines/repository/activity_counts.py::count_public_actions_since",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25621,7 +25712,7 @@
           "old": "backend/app/services/agent_activity_policy.py::count_action_today",
           "new": "backend/app/domains/routines/service/activity_policy.py::count_action_today",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25635,7 +25726,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_evaluate_counted_actions",
           "new": "backend/app/domains/routines/service/activity_policy.py::_evaluate_counted_actions",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25649,7 +25740,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_count_action_today",
           "new": "backend/app/domains/routines/repository/activity_counts.py::_count_action_today",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25663,7 +25754,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_latest_action_at",
           "new": "backend/app/domains/routines/repository/activity_counts.py::_latest_action_at",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25677,7 +25768,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_block_actions",
           "new": "backend/app/domains/routines/service/activity_policy.py::_block_actions",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25691,7 +25782,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_normalize_action_types",
           "new": "backend/app/domains/routines/utils/activity_actions.py::_normalize_action_types",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25705,7 +25796,7 @@
           "old": "backend/app/services/agent_activity_policy.py::_public_action_log_types",
           "new": "backend/app/domains/routines/utils/activity_actions.py::_public_action_log_types",
           "direct_consumers": [
-            "backend/app/services/agent_activity_policy.py"
+            "backend/app/runtime/resident/activity_policy.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
@@ -25717,59 +25808,741 @@
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::build_activity_policy",
-          "new": "backend/app/services/agent_activity_policy.py::build_activity_policy",
-          "source_member": "The existing call now supplies the same activity_timezone function lazily; original decision body is in canonical service.",
+          "new": "backend/app/runtime/resident/activity_policy.py::build_activity_policy",
+          "source_member": "The original caller Session and lazy timezone supplier are connected in runtime; actual permission logic remains the mapped routines service.",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
             "backend/app/services/agent_runs.py",
-            "backend/app/services/community.py"
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
             "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope",
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
-            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled"
-          ],
-          "removal_condition": "C3c moves the World/import scope collaborator and removes this temporary same-Session composition path."
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::assert_action_allowed",
-          "new": "backend/app/services/agent_activity_policy.py::assert_action_allowed",
-          "source_member": "The existing call now supplies the same activity_timezone function lazily; original decision body is in canonical service.",
+          "new": "backend/app/runtime/resident/activity_policy.py::assert_action_allowed",
+          "source_member": "The original caller Session and lazy timezone supplier are connected in runtime; actual permission logic remains the mapped routines service.",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
             "backend/app/services/agent_runs.py",
-            "backend/app/services/community.py"
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
             "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope",
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
-            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled"
-          ],
-          "removal_condition": "C3c moves the World/import scope collaborator and removes this temporary same-Session composition path."
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
         },
         {
           "old": "backend/app/services/agent_activity_policy.py::count_action_today",
-          "new": "backend/app/services/agent_activity_policy.py::count_action_today",
-          "source_member": "The existing call now supplies the same activity_timezone function lazily; original decision body is in canonical service.",
+          "new": "backend/app/runtime/resident/activity_policy.py::count_action_today",
+          "source_member": "The original caller Session and lazy timezone supplier are connected in runtime; actual permission logic remains the mapped routines service.",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py",
             "backend/app/services/agent_runs.py",
-            "backend/app/services/community.py"
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
             "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope",
             "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
-            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled"
-          ],
-          "removal_condition": "C3c moves the World/import scope collaborator and removes this temporary same-Session composition path."
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
         }
       ],
       "ownership": "Actual build/assert/count permission flow and counted-action decisions are routines/service/activity_policy; actual own ActivityLog SQL is repository/activity_counts and log-type normalization utils/activity_actions. ActivityTimezoneReader is a lazy same-Session callable invoked at the original point after ensure_setting/now.",
       "preservation": "Original allow/disabled/observe/manual marker/default errors/cooldown/query/order/return contracts remain. Three boundary functions supply only the existing timezone reader; they do not contain a second policy implementation. First settings creation still commits/refreshes; existing settings and counter reads stay in the caller transaction.",
       "remaining": "Four World/Package scope read/guard functions and historical clock exports remain actual legacy implementation for C3c, which will split scope reads/decisions before removing this path. AgentRun/graph/runtime HTTP remain subsequent C stages."
+    },
+    "AR-B4-C3c-activity-world-scope": {
+      "status": "IMPLEMENTED — 544 focused passed, existing PG skip1; four decision/two query ASTs preserved; boundary700/2340/211; read-only split/APIORM/node errors0 and representative file-map correction source/assertion/suppression errors0; root linear introductions and stock integration gate pending",
+      "split_files": {
+        "backend/app/services/agent_activity_policy.py": [
+          "backend/app/domains/routines/constants.py",
+          "backend/app/domains/routines/contracts/activity_policy.py",
+          "backend/app/domains/routines/exceptions.py",
+          "backend/app/domains/routines/repository/activity_counts.py",
+          "backend/app/domains/routines/service/activity_policy.py",
+          "backend/app/domains/routines/service/activity_scope.py",
+          "backend/app/domains/routines/service/activity_sessions.py",
+          "backend/app/domains/routines/utils/activity_actions.py",
+          "backend/app/runtime/resident/activity_policy.py",
+          "backend/app/runtime/resident/activity_scope.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/agent_activity_policy.py::APP_TIMEZONE",
+          "new": "backend/app/runtime/resident/activity_policy.py::APP_TIMEZONE",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::TickSchedule",
+          "new": "backend/app/runtime/resident/activity_policy.py::TickSchedule",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::tick_interval_seconds",
+          "new": "backend/app/runtime/resident/activity_policy.py::tick_interval_seconds",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::next_tick_schedule",
+          "new": "backend/app/runtime/resident/activity_policy.py::next_tick_schedule",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::initial_tick_schedule",
+          "new": "backend/app/runtime/resident/activity_policy.py::initial_tick_schedule",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::retry_tick_schedule",
+          "new": "backend/app/runtime/resident/activity_policy.py::retry_tick_schedule",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::recovery_tick_schedule",
+          "new": "backend/app/runtime/resident/activity_policy.py::recovery_tick_schedule",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::_is_within_active_hours",
+          "new": "backend/app/runtime/resident/activity_policy.py::_is_within_active_hours",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::_aware_utc",
+          "new": "backend/app/runtime/resident/activity_policy.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::PUBLIC_ACTION_TYPES",
+          "new": "backend/app/domains/routines/constants.py::PUBLIC_ACTION_TYPES",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::POLICY_ACTION_NAMES",
+          "new": "backend/app/domains/routines/constants.py::POLICY_ACTION_NAMES",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::TENDENCY_PUBLIC_ACTION_NAMES",
+          "new": "backend/app/domains/routines/constants.py::TENDENCY_PUBLIC_ACTION_NAMES",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::POLICY_SESSION_MARKER",
+          "new": "backend/app/domains/routines/constants.py::POLICY_SESSION_MARKER",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::MANUAL_POLICY_SESSION_MARKER",
+          "new": "backend/app/domains/routines/constants.py::MANUAL_POLICY_SESSION_MARKER",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::ActivityPolicyDeniedError",
+          "new": "backend/app/domains/routines/exceptions.py::ActivityPolicyDeniedError",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::ActivityPolicy",
+          "new": "backend/app/domains/routines/contracts/activity_policy.py::ActivityPolicy",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::activity_timezone",
+          "new": "backend/app/domains/routines/service/activity_scope.py::activity_timezone",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::activity_timezone_name",
+          "new": "backend/app/domains/routines/service/activity_scope.py::activity_timezone_name",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::is_policy_enforced_session",
+          "new": "backend/app/domains/routines/service/activity_sessions.py::is_policy_enforced_session",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::is_manual_policy_session",
+          "new": "backend/app/domains/routines/service/activity_sessions.py::is_manual_policy_session",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked",
+          "new": "backend/app/domains/routines/service/activity_scope.py::is_imported_world_runtime_locked",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked_for_character",
+          "new": "backend/app/domains/routines/service/activity_scope.py::is_imported_world_runtime_locked_for_character",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::_format_tendency_prompt",
+          "new": "backend/app/domains/routines/contracts/activity_policy.py::_format_tendency_prompt",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::build_activity_policy",
+          "new": "backend/app/domains/routines/service/activity_policy.py::build_activity_policy",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
+            "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::assert_action_allowed",
+          "new": "backend/app/domains/routines/service/activity_policy.py::assert_action_allowed",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
+            "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::count_public_actions_since",
+          "new": "backend/app/domains/routines/repository/activity_counts.py::count_public_actions_since",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
+            "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::count_action_today",
+          "new": "backend/app/domains/routines/service/activity_policy.py::count_action_today",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
+            "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::_evaluate_counted_actions",
+          "new": "backend/app/domains/routines/service/activity_policy.py::_evaluate_counted_actions",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
+            "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::_count_action_today",
+          "new": "backend/app/domains/routines/repository/activity_counts.py::_count_action_today",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
+            "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::_latest_action_at",
+          "new": "backend/app/domains/routines/repository/activity_counts.py::_latest_action_at",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
+            "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::_block_actions",
+          "new": "backend/app/domains/routines/service/activity_policy.py::_block_actions",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
+            "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::_normalize_action_types",
+          "new": "backend/app/domains/routines/utils/activity_actions.py::_normalize_action_types",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
+            "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::_public_action_log_types",
+          "new": "backend/app/domains/routines/utils/activity_actions.py::_public_action_log_types",
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once",
+            "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
+            "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::build_activity_policy",
+          "new": "backend/app/runtime/resident/activity_policy.py::build_activity_policy",
+          "source_member": "The original caller Session and lazy timezone supplier are connected in runtime; actual permission logic remains the mapped routines service.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
+            "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope",
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::assert_action_allowed",
+          "new": "backend/app/runtime/resident/activity_policy.py::assert_action_allowed",
+          "source_member": "The original caller Session and lazy timezone supplier are connected in runtime; actual permission logic remains the mapped routines service.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
+            "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope",
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::count_action_today",
+          "new": "backend/app/runtime/resident/activity_policy.py::count_action_today",
+          "source_member": "The original caller Session and lazy timezone supplier are connected in runtime; actual permission logic remains the mapped routines service.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction",
+            "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope",
+            "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+            "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::activity_timezone",
+          "new": "backend/app/runtime/resident/activity_scope.py::SqlAlchemyActivityScopeReads",
+          "source_member": "Original inspect/get/scalar expressions only; lazy Inspector construction preserves pre-read enabled guard. SQL exact nullable get/join/order/limit remain on the supplied Session.",
+          "destination_members": [
+            "_table_exists",
+            "has_active_world_table",
+            "has_world_character_table",
+            "has_world_table",
+            "get_active_world",
+            "get_world_character",
+            "get_world"
+          ],
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py",
+            "backend/app/domains/routines/service/activity_scope.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked",
+          "new": "backend/app/runtime/resident/activity_scope.py::SqlAlchemyActivityScopeReads",
+          "source_member": "Original inspect/get/scalar expressions only; lazy Inspector construction preserves pre-read enabled guard. SQL exact nullable get/join/order/limit remain on the supplied Session.",
+          "destination_members": [
+            "_table_exists",
+            "has_import_table",
+            "get_import_id"
+          ],
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py",
+            "backend/app/domains/routines/service/activity_scope.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked_for_character",
+          "new": "backend/app/runtime/resident/activity_scope.py::SqlAlchemyActivityScopeReads",
+          "source_member": "Original inspect/get/scalar expressions only; lazy Inspector construction preserves pre-read enabled guard. SQL exact nullable get/join/order/limit remain on the supplied Session.",
+          "destination_members": [
+            "_table_exists",
+            "has_import_table",
+            "get_active_world",
+            "get_world_character",
+            "get_latest_imported_world_character",
+            "get_import_id"
+          ],
+          "direct_consumers": [
+            "backend/app/runtime/resident/activity_policy.py",
+            "backend/app/domains/routines/service/activity_scope.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::activity_timezone_name",
+          "new": "backend/app/runtime/resident/activity_policy.py::activity_timezone_name",
+          "source_member": "Bind the caller Session to lazy reads at the original entry; actual decisions and SQL are separately mapped.",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::activity_timezone",
+          "new": "backend/app/runtime/resident/activity_policy.py::activity_timezone",
+          "source_member": "Bind the caller Session to lazy reads at the original entry; actual decisions and SQL are separately mapped.",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked_for_character",
+          "new": "backend/app/runtime/resident/activity_policy.py::is_imported_world_runtime_locked_for_character",
+          "source_member": "Bind the caller Session to lazy reads at the original entry; actual decisions and SQL are separately mapped.",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_activity_policy.py::is_imported_world_runtime_locked",
+          "new": "backend/app/runtime/resident/activity_policy.py::is_imported_world_runtime_locked",
+          "source_member": "Bind the caller Session to lazy reads at the original entry; actual decisions and SQL are separately mapped.",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py",
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+            "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing",
+            "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world"
+          ]
+        }
+      ],
+      "ownership": "Actual timezone fallback/import activation decisions live in routines/service/activity_scope. Cross-domain nullable get and original two scalar/join expressions are same-Session runtime/resident/activity_scope. Runtime activity_policy constructs this collaboration; all direct consumers are switched and the old service is deleted. Constant-only consumers use actual tick_schedule and ActivityPolicy-only consumers use the same contract.",
+      "preservation": "Four decision ASTs and two SQL ASTs match after exact collaborator/parameter substitution. An enabled WorldCharacter causes no inspect/query/transaction. Import lookup order, absent registry fallback, two distinct active/no-active branches, selected-world character check, ZoneInfo fallback and original Session autoflush are unchanged. No new flush/commit/provider call.",
+      "remaining": "Resident AgentRun/slot/feed cue/graph actual execution, ownership-specific writes and mixed HTTP remain named B4-C followups. This ends only the old activity policy path and its exact legacy edges; no full B4 completion claim."
     }
   }
 }

@@ -85,7 +85,7 @@ from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
 from app.policies import name_policy
-from app.services import agent_activity_policy
+from app.runtime.resident import activity_policy as agent_activity_policy
 from app.domains.world_characters.service import readiness as activity_profile_readiness
 from app.services import community as community_service
 from app.services import agent_runs as agent_run_service

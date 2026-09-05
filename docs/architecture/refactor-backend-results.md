@@ -925,3 +925,16 @@ build/assert/count의 실제 허용·차단·제한·cooldown 흐름은 `routine
 C3b 최종 후보 검증은 **467 passed / 기존 PG 1 skip / 기존 warnings 5 / 156.24초**다. 신규 실제 SQLite 3 nodes와 영향 범위 검증은 **99 passed / 기존 PG 1 skip / 기존 warnings 2 / 22.71초**였으며 설정 commit/동일 Session/격리/rollback과 조회 이전 guard를 확인했다. 원래 실제 함수 10개의 AST는 명시한 timezone reader 전달만 원래 호출로 복원했을 때 차이 0이다. 경계는 **697 modules / 2,332 edges / exact legacy 221 / cycle 0**, L4 parity 97·ER0 81/87/24/44/7·Memory batch 현재 inventory도 통과했다.
 
 읽기 전용 원래 보존 함수 진단은 **source/split/assertion/suppression/API·ORM/node 각각 오류 0**, 기존 보호 **2,139 / 현재 2,236 nodes**다. 앞 단계와 동일하게 signed 최초 도입 두 blob만 메모리에 보충했으며 tracked frozen/checkpoint/additions와 검사 구현은 수정하지 않았다. 부모의 선형 도입 append 후 stock 전체 보존 검사와 통합 Actions/installer 검증은 남아 있다.
+
+
+## AR-B4-C3c — World 범위 읽기·활성화 판단·실행 연결
+
+World timezone의 fallback과 imported activation 판단은 `routines/service/activity_scope.py`, 실제 nullable get/has_table/두 scalar·join SQL은 `runtime/resident/activity_scope.py`가 소유한다. Attached read Protocol은 기존 ORM 객체를 그대로 전달하며 runtime activity_policy가 caller Session으로 조립한다. Inspector는 첫 table check에서 lazy 생성하므로 enabled WC의 조회 이전 반환과 timezone의 한 inspector 재사용을 유지한다. 이전 네 함수의 서로 다른 active/no-active 조건과 원래 character 확인 위치를 합치지 않았다.
+
+모든 직접 소비자를 canonical 역할에 연결하고 옛 `services/agent_activity_policy.py`를 제거했다. 시간 상수만 쓰는 소비자는 tick_schedule, ActivityPolicy 값만 쓰는 소비자는 계약을 직접 참조한다. 원래 clock export/monkeypatch의 같은 객체와 runtime의 실제 permission construction은 유지한다. 실제 판단 4개 및 scalar/join SQL 2개의 AST는 정확 read 협력/인자 표현만 복원하면 차이 0이다.
+
+신규 SQLite 3 nodes는 enabled WC가 DB transaction/statement를 만들지 않는 조건과 selected World 유무 두 경우의 미커밋 import registry를 검증한다. Caller의 activation guard는 새 기록을 읽고, 별도 observer는 보지 못하며 rollback 후 잠금이 해제된다. 기존 테스트와 함께 **308 passed / 기존 PG 1 skip / 기존 warnings 3 / 111.01초**다. 최종 경계·보존 검사와 부모 선형 source introduction/통합 Actions는 이어서 기록한다.
+
+C3c 최종 확장 검증은 **544 passed / 기존 PG 1 skip / 기존 warnings 5 / 421.71초**다. 경계 **700 modules / 2,340 edges / exact legacy 211 / cycle 0**, L4 parity 97·ER0 81/87/24/44/7·Memory batch 현재 inventory도 통과했다. 읽기 전용 보존 진단에서 split/assertion/suppression/API·ORM/node는 각각 오류 0(보호 2,139 / 현재 2,239)이었고, source 검사는 삭제된 옛 activity-policy 파일의 대표 목적지 한 항목 누락을 잡았다. 전체 symbol 분할 증거는 이미 모두 존재하므로 대표 file map을 실제 canonical activity-policy 서비스로 연결했다. 제품 코드·테스트·frozen 자료·검사 predicate는 수정하지 않았다.
+
+대표 file map 정정 후 영향을 받는 원래 source/assertion/suppression 함수만 다시 실행하여 **각각 오류 0**을 확인했다. 직전 동일 코드의 split/API·ORM/node 오류 0과 함께 C3c 지역 보존 진단을 닫는다. 부모의 선형 source introduction append 후 stock 전체 보존 검사·Actions·installer는 여전히 별도 완료 조건이다.

@@ -71,7 +71,7 @@ from app.core.search_text import build_post_search_document
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
-from app.services import agent_activity_policy
+from app.runtime.resident import activity_policy as agent_activity_policy
 from app.services import community_abuse_quota
 from app.services.agent_briefs import (
     is_feed_scan_community_theme_brief,

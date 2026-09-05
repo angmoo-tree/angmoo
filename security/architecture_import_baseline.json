@@ -1,7 +1,7 @@
 {
-  "edge_count": 2332,
-  "external_import_count": 2184,
-  "module_count": 697,
+  "edge_count": 2340,
+  "external_import_count": 2190,
+  "module_count": 700,
   "modules": [
     {
       "external_imports": [],
@@ -445,9 +445,9 @@
         "app.domains.social.schemas.community",
         "app.models",
         "app.runtime.relationships.sqlalchemy_social_event",
+        "app.runtime.resident.activity_policy",
         "app.runtime.resident.context",
         "app.services.activity_state_contracts",
-        "app.services.agent_activity_policy",
         "app.services.community"
       ],
       "module": "app.compatibility.routine_posts.legacy",
@@ -3681,6 +3681,16 @@
     {
       "external_imports": [
         "__future__",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.contracts.activity_scope",
+      "path": "backend/app/domains/routines/contracts/activity_scope.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "datetime",
         "typing"
       ],
@@ -4005,6 +4015,18 @@
       ],
       "module": "app.domains.routines.service.activity_policy",
       "path": "backend/app/domains/routines/service/activity_policy.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.activity_scope",
+        "app.domains.routines.service.tick_schedule"
+      ],
+      "module": "app.domains.routines.service.activity_scope",
+      "path": "backend/app/domains/routines/service/activity_scope.py",
       "wildcard_imports": []
     },
     {
@@ -7585,8 +7607,8 @@
         "app.models",
         "app.policies.name_policy",
         "app.runtime.characters.management",
+        "app.runtime.resident.activity_policy",
         "app.schemas",
-        "app.services.agent_activity_policy",
         "app.services.agent_runs",
         "app.services.direct_llm",
         "app.services.operation_settings",
@@ -7644,10 +7666,10 @@
         "app.models",
         "app.policies.name_policy",
         "app.runtime.memory_privacy",
+        "app.runtime.resident.activity_policy",
         "app.runtime.world_characters.cleanup",
         "app.runtime.world_characters.queries",
         "app.schemas",
-        "app.services.agent_activity_policy",
         "app.services.agent_runs",
         "app.services.community",
         "app.services.direct_llm",
@@ -8840,6 +8862,46 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy.orm",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.contracts.activity_scope",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.repository.activity_counts",
+        "app.domains.routines.service.activity_policy",
+        "app.domains.routines.service.activity_scope",
+        "app.domains.routines.service.activity_sessions",
+        "app.domains.routines.service.tick_schedule",
+        "app.domains.routines.utils.activity_actions",
+        "app.runtime.resident.activity_scope"
+      ],
+      "module": "app.runtime.resident.activity_policy",
+      "path": "backend/app/runtime/resident/activity_policy.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.engine.reflection",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.world_characters.models",
+        "app.domains.world_packages.models",
+        "app.domains.worlds.models"
+      ],
+      "module": "app.runtime.resident.activity_scope",
+      "path": "backend/app/runtime/resident/activity_scope.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "collections.abc",
         "dataclasses",
@@ -9728,28 +9790,6 @@
     },
     {
       "external_imports": [
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "zoneinfo"
-      ],
-      "imports": [
-        "app.domains.routines.constants",
-        "app.domains.routines.contracts.activity_policy",
-        "app.domains.routines.exceptions",
-        "app.domains.routines.repository.activity_counts",
-        "app.domains.routines.service.activity_policy",
-        "app.domains.routines.service.activity_sessions",
-        "app.domains.routines.service.tick_schedule",
-        "app.domains.routines.utils.activity_actions",
-        "app.models"
-      ],
-      "module": "app.services.agent_activity_policy",
-      "path": "backend/app/services/agent_activity_policy.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
         "typing"
       ],
       "imports": [
@@ -9791,9 +9831,9 @@
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",
         "app.models",
+        "app.runtime.resident.activity_policy",
         "app.runtime.routine_posts",
         "app.schemas",
-        "app.services.agent_activity_policy",
         "app.services.agent_briefs",
         "app.services.community",
         "app.services.direct_llm",
@@ -9910,9 +9950,9 @@
         "app.domains.social.service.timeline",
         "app.domains.social.service.visibility",
         "app.models",
+        "app.runtime.resident.activity_policy",
         "app.runtime.social.timeline",
         "app.schemas",
-        "app.services.agent_activity_policy",
         "app.services.agent_briefs",
         "app.services.community_abuse_quota"
       ],
@@ -10033,12 +10073,12 @@
         "app.domains.social.contracts.subjective_context",
         "app.domains.world_characters.contracts.runtime_modes",
         "app.models",
+        "app.runtime.resident.activity_policy",
         "app.runtime.resident.context",
         "app.runtime.routine_posts.sqlalchemy_runtime",
         "app.runtime.social.observations",
         "app.runtime.social.subjective_context",
         "app.schemas",
-        "app.services.agent_activity_policy",
         "app.services.character_lore",
         "app.services.community",
         "app.services.direct_llm",
@@ -10083,10 +10123,10 @@
         "app.core.unit_of_work",
         "app.cruds.agents",
         "app.domains.identity.service.demo_access",
+        "app.domains.routines.service.tick_schedule",
         "app.models",
         "app.runtime.characters.management",
         "app.schemas",
-        "app.services.agent_activity_policy",
         "app.services.community",
         "app.services.local_bot_quota",
         "app.services.post_image_generation"
@@ -10105,8 +10145,8 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.models",
-        "app.services.agent_activity_policy"
+        "app.domains.routines.service.tick_schedule",
+        "app.models"
       ],
       "module": "app.services.local_bot_quota",
       "path": "backend/app/services/local_bot_quota.py",
@@ -10194,6 +10234,7 @@
         "app.credentials",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.routines.service.tick_schedule",
         "app.domains.social.service.media_storage",
         "app.integrations.image_provider",
         "app.integrations.media.files",
@@ -10201,7 +10242,6 @@
         "app.integrations.replicate_image",
         "app.models",
         "app.schemas",
-        "app.services.agent_activity_policy",
         "app.services.direct_llm",
         "app.services.image_prompt_safety",
         "app.services.operation_settings",

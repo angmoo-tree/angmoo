@@ -37,12 +37,8 @@ from app.cruds import community as community_crud
 from app.integrations import image_provider, pollinations_image, replicate_image
 from app.domains.social.service import media_storage as profile_media
 from app.integrations.media import files as media_files
-from app.services import (
-    agent_activity_policy,
-    image_prompt_safety,
-    operation_settings,
-    service_image_key,
-)
+from app.domains.routines.service import tick_schedule as agent_activity_policy
+from app.services import image_prompt_safety, operation_settings, service_image_key
 from app.services.direct_llm import (
     DirectLlmCallContext,
     DirectLlmError,
