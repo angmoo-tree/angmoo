@@ -512,7 +512,9 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "K02",
@@ -661,7 +663,9 @@
         "frontend_pilot": "AR-F1 PR #261 head 31fd5b052e9b910c8ac48027065753faa0a7ab5b passed local lint/type/build/proxy, source contracts, Home web/static scenarios, and all 22 registered Hosted checks; merged as 5b83fee1625fdd490051b840790683114d7daaab."
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "The repository is an existing read-only identity/World/membership projection. Service functions share the caller Session; this is not permission for arbitrary cross-domain writes."
+      "notes": "The repository is an existing read-only identity/World/membership projection. Service functions share the caller Session; this is not permission for arbitrary cross-domain writes.",
+      "backend_status": "VERIFIED",
+      "frontend_status": "VERIFIED"
     },
     {
       "id": "K03",
@@ -904,7 +908,9 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "K04",
@@ -1120,13 +1126,15 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "K05",
       "title": "일일 활동·episode·beat·cursor",
       "owner": "routines / routine_posts / runtime",
-      "stage": "AR-B3",
+      "stage": "AR-B4",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/alembic/versions/20260511_0003_agent_slots.py",
@@ -1412,13 +1420,15 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "K06",
       "title": "SNS·Inbox·관찰·자율 후속",
       "owner": "social",
-      "stage": "AR-B3 / AR-F3",
+      "stage": "AR-B5 / AR-F3",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/alembic/versions/20260510_0001_initial_community_schema.py",
@@ -1657,13 +1667,15 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "K07",
       "title": "Feed 검색·FTS·범위",
       "owner": "social / search runtime",
-      "stage": "AR-B3",
+      "stage": "AR-B5",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/core/search_text.py",
@@ -1762,13 +1774,15 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "K08",
       "title": "SocialEvent·관계·outbox",
       "owner": "social / relationships",
-      "stage": "AR-B3",
+      "stage": "AR-B5",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/domains/relationships/__init__.py",
@@ -1971,13 +1985,15 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "K09",
       "title": "SQLite canonical·Ladybug projection",
       "owner": "graph projection / persistence",
-      "stage": "AR-B3",
+      "stage": "AR-B5",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/domains/relationships/__init__.py",
@@ -2468,13 +2484,14 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED"
     },
     {
       "id": "K10",
       "title": "World Package v1",
       "owner": "world_packages",
-      "stage": "AR-B4 / AR-F2",
+      "stage": "AR-B3 / AR-F2",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/domains/world_packages/__init__.py",
@@ -2700,13 +2717,15 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "K11",
       "title": "이미지·media·provider",
       "owner": "integrations / providers / credentials",
-      "stage": "AR-B7 / AR-F4",
+      "stage": "AR-B3 / AR-B8-A / AR-F4",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/core/image_generation.py",
@@ -2991,7 +3010,14 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED",
+      "stage_responsibilities": {
+        "AR-B3": "World Package and profile/post media ownership, validation and assets",
+        "AR-B8-A": "shared provider/SDK/credential transport and registry",
+        "AR-F4": "frontend common media transport and presentation"
+      }
     },
     {
       "id": "K12",
@@ -3383,7 +3409,9 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "K13",
@@ -3573,13 +3601,15 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "K14",
       "title": "P8 A-E World Chat",
       "owner": "chat / identity",
-      "stage": "AR-B5 / AR-F3",
+      "stage": "AR-B6 / AR-F3",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/api/v1/routes/messages.py",
@@ -3844,13 +3874,15 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "K15",
       "title": "P8 F-G Memory 쓰기·관리",
       "owner": "memory",
-      "stage": "AR-B6 / AR-F3",
+      "stage": "AR-B7 / AR-F3",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/api/v1/routes/memory.py",
@@ -4032,13 +4064,15 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "K16",
       "title": "P8 H-I 근거 회상",
       "owner": "memory recall / graph",
-      "stage": "AR-B6",
+      "stage": "AR-B7",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/domains/memory/__init__.py",
@@ -4244,13 +4278,14 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED"
     },
     {
       "id": "K17",
       "title": "P8 J-N 응답 실행·planner",
       "owner": "chat / retrieval workflow",
-      "stage": "AR-B5",
+      "stage": "AR-B6",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/api/v1/routes/world_chat_response.py",
@@ -4475,13 +4510,14 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED"
     },
     {
       "id": "K18",
       "title": "P8 O-P HotBrief·근거·stream",
       "owner": "memory consolidation / chat",
-      "stage": "AR-B5 / AR-B6",
+      "stage": "AR-B6 / AR-B7",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/api/v1/routes/world_chat_response.py",
@@ -4747,13 +4783,19 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED",
+      "stage_responsibilities": {
+        "AR-B6": "response/evidence/stream consumers",
+        "AR-B7": "Memory consolidation and Hot Brief production"
+      }
     },
     {
       "id": "K19",
       "title": "P8 Q-R Memory inspector·owner UI",
       "owner": "memory UI / owner API",
-      "stage": "AR-B6 / AR-F3",
+      "stage": "AR-B7 / AR-F3",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/api/v1/routes/memory.py",
@@ -5003,13 +5045,15 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "K20",
       "title": "Today SNS #251",
       "owner": "social / chat context",
-      "stage": "AR-B3 / AR-B5",
+      "stage": "AR-B5 / AR-B6",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/domains/chat/__init__.py",
@@ -5203,13 +5247,14 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED"
     },
     {
       "id": "K21",
       "title": "#258 A-B SQLite v9·source delivery",
       "owner": "memory / source delivery",
-      "stage": "AR-B6",
+      "stage": "AR-B7",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/alembic/versions/20260904_0089_memory_batch.py",
@@ -5399,13 +5444,15 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "K22",
       "title": "#258 C-D AI 배치·예약",
       "owner": "memory batch / scheduler",
-      "stage": "AR-B6 / AR-F3",
+      "stage": "AR-B7 / AR-F3",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/alembic/versions/20260904_0089_memory_batch.py",
@@ -5557,13 +5604,15 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "K23",
       "title": "#258 E 종료 저장",
       "owner": "desktop shutdown / memory",
-      "stage": "AR-B8 / AR-F4",
+      "stage": "AR-B7 / AR-B8-A / AR-F4",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/runtime/memory/__init__.py",
@@ -5716,13 +5765,15 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "G01",
       "title": "전역 설정",
       "owner": "configuration",
-      "stage": "AR-G",
+      "stage": "AR-G1",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/core/config.py",
@@ -5826,13 +5877,14 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED"
     },
     {
       "id": "G02",
       "title": "공통 모델·단일 Base",
       "owner": "persistence / domain ORM",
-      "stage": "AR-G",
+      "stage": "EACH_DOMAIN_PR / AR-G5",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/core/db.py",
@@ -6179,13 +6231,14 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED"
     },
     {
       "id": "G03",
       "title": "공통·업무 오류",
       "owner": "HTTP / domain exceptions",
-      "stage": "AR-G / AR-B1",
+      "stage": "AR-G2 / EACH_DOMAIN_PR",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/domains/chat/domain/errors.py",
@@ -6340,13 +6393,14 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED"
     },
     {
       "id": "G04",
       "title": "pagination",
       "owner": "scoped query owners",
-      "stage": "AR-G",
+      "stage": "AR-G2",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/domains/device_home/__init__.py",
@@ -6437,13 +6491,14 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED"
     },
     {
       "id": "G05",
       "title": "DB engine·session",
       "owner": "database / persistence",
-      "stage": "AR-G",
+      "stage": "AR-G5",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/core/db.py",
@@ -6675,13 +6730,14 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED"
     },
     {
       "id": "G06",
-      "title": "진입점·라우터 조립",
+      "title": "main.py 단일 앱 생성·임시 public_main 호환 제거",
       "owner": "bootstrap / runtime",
-      "stage": "AR-B8",
+      "stage": "AR-B8-A / AR-B8-B",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/api/v1/main.py",
@@ -6692,7 +6748,7 @@
       ],
       "target_paths": [
         "backend/app/main.py",
-        "backend/app/public_main.py",
+        "backend/app/runtime",
         "backend/app/api"
       ],
       "entrypoints": [
@@ -6928,7 +6984,8 @@
         "tests/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides9-invalid_oci_auth_mode]"
       ],
       "preserved_contracts": [
-        "same router order and registration count, startup/shutdown and owned worker/handshake"
+        "same router order and registration count, startup/shutdown and owned worker/handshake",
+        "One app factory in app.main preserves Local RuntimeConfig, supported profile contracts, startup/recovery/Memory shutdown and DB/session identity. Migrate static/dynamic/ASGI/test/CI/bundle consumers, validate, remove public_main, then verify the file-free candidate in AR-B8-B."
       ],
       "runtime_paths": [
         "Docker Browser Run",
@@ -6942,8 +6999,9 @@
         "item_status": "MAPPED; test association is navigation, not a claim every branch is covered",
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
-      "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "disposition": "CONSOLIDATE_MAIN_THEN_REMOVE_PUBLIC_MAIN_AFTER_VERIFICATION",
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED"
     },
     {
       "id": "G07",
@@ -9071,13 +9129,14 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED"
     },
     {
       "id": "G08",
       "title": "조건부 templates",
       "owner": "HTTP / packaging",
-      "stage": "AR-G",
+      "stage": "AR-G0 / AR-B8-B",
       "status": "MAPPED",
       "current_paths": [
         "backend/pyproject.toml",
@@ -9218,13 +9277,15 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "CONDITIONAL_NO_EMPTY_DIRECTORY",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "G09",
       "title": "의존성 관리",
       "owner": "uv / CI / packaging",
-      "stage": "AR-G",
+      "stage": "AR-G0 / AR-B8-B",
       "status": "MAPPED",
       "current_paths": [
         ".github/workflows/ci.yml",
@@ -9310,13 +9371,14 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED"
     },
     {
       "id": "G10",
       "title": "환경 예시·설치 독립성",
       "owner": "configuration / credentials",
-      "stage": "AR-G",
+      "stage": "AR-G1 / AR-B8-B",
       "status": "MAPPED",
       "current_paths": [
         "backend/.env.example",
@@ -9480,13 +9542,15 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED"
     },
     {
       "id": "G11",
       "title": "Git·패키징 제외",
       "owner": "repository / packaging",
-      "stage": "AR-G",
+      "stage": "AR-G0 / AR-B8-B",
       "status": "MAPPED",
       "current_paths": [
         ".dockerignore",
@@ -9578,13 +9642,14 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED"
     },
     {
       "id": "G12",
       "title": "로그 설정",
       "owner": "bootstrap / sidecar",
-      "stage": "AR-G",
+      "stage": "AR-G3",
       "status": "MAPPED",
       "current_paths": [
         "backend/app/core/redaction.py",
@@ -9698,13 +9763,14 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED"
     },
     {
       "id": "G13",
       "title": "Alembic·embedded migration",
       "owner": "persistence / migration",
-      "stage": "AR-G",
+      "stage": "AR-G4 / AR-G5",
       "status": "MAPPED",
       "current_paths": [
         "backend/alembic.ini",
@@ -9954,7 +10020,8 @@
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
       "disposition": "PRESERVE_AND_MOVE_WITH_CONSUMERS",
-      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet."
+      "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
+      "backend_status": "MAPPED"
     },
     {
       "id": "K24",
@@ -10166,42 +10233,42 @@
         "status": "MAPPED; not moved, not independently feature-verified"
       },
       "disposition": "KEEP_UNTIL_OWNING_STAGE",
-      "notes": "G items separately own Base/config/model/migration sources. K24 keeps Tree board and residual bootstrap/UI compatibility. Every current file has a future owner below.",
+      "notes": "Backend residual sources are exhaustively classified in backend_work_items, with no generic unowned bucket. Targets are planned responsibilities; empty package markers can collapse only with explicit path-map evidence. Frontend AR-F4 remains separate.",
       "file_owners": {
-        "backend/app/__init__.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/api/v1/__init__.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/api/v1/routes/__init__.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/api/v1/routes/agents.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/api/v1/routes/tree.py": "tree / AR-B8 / AR-F4",
-        "backend/app/compatibility/__init__.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/compatibility/routine_posts/__init__.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/compatibility/routine_posts/canonical_interactions.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/compatibility/routine_posts/legacy.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/contracts/__init__.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/contracts/core_experience.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/core/__init__.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/core/ids.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/core/prompt_safety.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/core/request_limits.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/core/sqlite_concurrency.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/core/unit_of_work.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/cruds/__init__.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/cruds/tree.py": "tree / AR-B8 / AR-F4",
-        "backend/app/domains/__init__.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/policies/__init__.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/policies/name_policy.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/repositories/__init__.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/schemas/__init__.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/schemas/agents.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/schemas/maintenance.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/schemas/media_security.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/schemas/routine_post.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/schemas/social_memory.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/schemas/tree.py": "tree / AR-B8 / AR-F4",
-        "backend/app/services/__init__.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/services/prompt_safety.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/services/runtime_boundary.py": "common bootstrap and compatibility / AR-G / AR-B8",
-        "backend/app/services/tree.py": "tree / AR-B8 / AR-F4",
+        "backend/app/__init__.py": "package_and_router_assembly / AR-B8-B",
+        "backend/app/api/v1/__init__.py": "package_and_router_assembly / AR-B8-B",
+        "backend/app/api/v1/routes/__init__.py": "package_and_router_assembly / AR-B8-B",
+        "backend/app/api/v1/routes/agents.py": "character_configuration / AR-B2",
+        "backend/app/api/v1/routes/tree.py": "tree / AR-B8-A",
+        "backend/app/compatibility/__init__.py": "package_and_router_assembly / AR-B8-B",
+        "backend/app/compatibility/routine_posts/__init__.py": "routine_post_compatibility / AR-B4",
+        "backend/app/compatibility/routine_posts/canonical_interactions.py": "routine_post_compatibility / AR-B4",
+        "backend/app/compatibility/routine_posts/legacy.py": "routine_post_compatibility / AR-B4",
+        "backend/app/contracts/__init__.py": "contract_fixture_support / AR-B8-A",
+        "backend/app/contracts/core_experience.py": "contract_fixture_support / AR-B8-A",
+        "backend/app/core/__init__.py": "package_and_router_assembly / AR-B8-B",
+        "backend/app/core/ids.py": "shared_transaction_and_limits / AR-G2 / AR-B8-A",
+        "backend/app/core/prompt_safety.py": "prompt_and_name_policy / AR-B8-A",
+        "backend/app/core/request_limits.py": "shared_transaction_and_limits / AR-G2 / AR-B8-A",
+        "backend/app/core/sqlite_concurrency.py": "shared_transaction_and_limits / AR-G2 / AR-B8-A",
+        "backend/app/core/unit_of_work.py": "shared_transaction_and_limits / AR-G2 / AR-B8-A",
+        "backend/app/cruds/__init__.py": "package_and_router_assembly / AR-B8-B",
+        "backend/app/cruds/tree.py": "tree / AR-B8-A",
+        "backend/app/domains/__init__.py": "package_and_router_assembly / AR-B8-B",
+        "backend/app/policies/__init__.py": "prompt_and_name_policy / AR-B8-A",
+        "backend/app/policies/name_policy.py": "prompt_and_name_policy / AR-B8-A",
+        "backend/app/repositories/__init__.py": "package_and_router_assembly / AR-B8-B",
+        "backend/app/schemas/__init__.py": "package_and_router_assembly / AR-B8-B",
+        "backend/app/schemas/agents.py": "character_configuration / AR-B2",
+        "backend/app/schemas/maintenance.py": "activity_maintenance / AR-B4",
+        "backend/app/schemas/media_security.py": "media_validation / AR-B3",
+        "backend/app/schemas/routine_post.py": "routine_post_compatibility / AR-B4",
+        "backend/app/schemas/social_memory.py": "social_evidence / AR-B5",
+        "backend/app/schemas/tree.py": "tree / AR-B8-A",
+        "backend/app/services/__init__.py": "package_and_router_assembly / AR-B8-B",
+        "backend/app/services/prompt_safety.py": "prompt_and_name_policy / AR-B8-A",
+        "backend/app/services/runtime_boundary.py": "runtime_adapter_registry / AR-B8-A",
+        "backend/app/services/tree.py": "tree / AR-B8-A",
         "frontend/src/app/agents/[characterId]/page.tsx": "shared frontend and route composition / AR-F4",
         "frontend/src/app/agents/new/page.tsx": "shared frontend and route composition / AR-F4",
         "frontend/src/app/agents/page.tsx": "shared frontend and route composition / AR-F4",
@@ -10263,7 +10330,170 @@
         "frontend/src/shared/ui/status-badge.tsx": "shared frontend and route composition / AR-F4",
         "frontend/src/shared/ui/status.tsx": "shared frontend and route composition / AR-F4",
         "frontend/src/shared/ui/surfaces.tsx": "shared frontend and route composition / AR-F4"
-      }
+      },
+      "backend_status": "MAPPED",
+      "frontend_status": "MAPPED",
+      "backend_work_items": [
+        {
+          "owner": "tree",
+          "stage": "AR-B8-A",
+          "status": "MAPPED",
+          "source_paths": [
+            "backend/app/api/v1/routes/tree.py",
+            "backend/app/cruds/tree.py",
+            "backend/app/schemas/tree.py",
+            "backend/app/services/tree.py"
+          ],
+          "target_paths": [
+            "backend/app/domains/tree/router.py",
+            "backend/app/domains/tree/repository.py",
+            "backend/app/domains/tree/schemas.py",
+            "backend/app/domains/tree/service.py"
+          ]
+        },
+        {
+          "owner": "character_configuration",
+          "stage": "AR-B2",
+          "status": "MAPPED",
+          "source_paths": [
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/schemas/agents.py"
+          ],
+          "target_paths": [
+            "backend/app/domains/characters/router",
+            "backend/app/domains/characters/schemas"
+          ]
+        },
+        {
+          "owner": "routine_post_compatibility",
+          "stage": "AR-B4",
+          "status": "MAPPED",
+          "source_paths": [
+            "backend/app/compatibility/routine_posts/__init__.py",
+            "backend/app/compatibility/routine_posts/canonical_interactions.py",
+            "backend/app/compatibility/routine_posts/legacy.py",
+            "backend/app/schemas/routine_post.py"
+          ],
+          "target_paths": [
+            "backend/app/domains/routine_posts",
+            "backend/app/compatibility/routine_posts"
+          ]
+        },
+        {
+          "owner": "social_evidence",
+          "stage": "AR-B5",
+          "status": "MAPPED",
+          "source_paths": [
+            "backend/app/schemas/social_memory.py"
+          ],
+          "target_paths": [
+            "backend/app/domains/social/schemas",
+            "backend/app/domains/relationships/schemas"
+          ]
+        },
+        {
+          "owner": "media_validation",
+          "stage": "AR-B3",
+          "status": "MAPPED",
+          "source_paths": [
+            "backend/app/schemas/media_security.py"
+          ],
+          "target_paths": [
+            "backend/app/domains/media/schemas.py"
+          ]
+        },
+        {
+          "owner": "activity_maintenance",
+          "stage": "AR-B4",
+          "status": "MAPPED",
+          "source_paths": [
+            "backend/app/schemas/maintenance.py"
+          ],
+          "target_paths": [
+            "backend/app/domains/routines/schemas"
+          ]
+        },
+        {
+          "owner": "prompt_and_name_policy",
+          "stage": "AR-B8-A",
+          "status": "MAPPED",
+          "source_paths": [
+            "backend/app/core/prompt_safety.py",
+            "backend/app/services/prompt_safety.py",
+            "backend/app/policies/name_policy.py",
+            "backend/app/policies/__init__.py"
+          ],
+          "target_paths": [
+            "backend/app/policies",
+            "backend/app/integrations/llm"
+          ]
+        },
+        {
+          "owner": "runtime_adapter_registry",
+          "stage": "AR-B8-A",
+          "status": "MAPPED",
+          "source_paths": [
+            "backend/app/services/runtime_boundary.py"
+          ],
+          "target_paths": [
+            "backend/app/runtime/adapters.py"
+          ]
+        },
+        {
+          "owner": "shared_transaction_and_limits",
+          "stage": "AR-G2 / AR-B8-A",
+          "status": "MAPPED",
+          "source_paths": [
+            "backend/app/core/ids.py",
+            "backend/app/core/request_limits.py",
+            "backend/app/core/sqlite_concurrency.py",
+            "backend/app/core/unit_of_work.py"
+          ],
+          "target_paths": [
+            "backend/app/core/ids.py",
+            "backend/app/core/request_limits.py",
+            "backend/app/core/sqlite_concurrency.py",
+            "backend/app/core/unit_of_work.py",
+            "backend/app/exceptions.py"
+          ]
+        },
+        {
+          "owner": "contract_fixture_support",
+          "stage": "AR-B8-A",
+          "status": "MAPPED",
+          "source_paths": [
+            "backend/app/contracts/__init__.py",
+            "backend/app/contracts/core_experience.py"
+          ],
+          "target_paths": [
+            "backend/app/contracts"
+          ]
+        },
+        {
+          "owner": "package_and_router_assembly",
+          "stage": "AR-B8-B",
+          "status": "MAPPED",
+          "source_paths": [
+            "backend/app/__init__.py",
+            "backend/app/api/v1/__init__.py",
+            "backend/app/api/v1/routes/__init__.py",
+            "backend/app/compatibility/__init__.py",
+            "backend/app/core/__init__.py",
+            "backend/app/cruds/__init__.py",
+            "backend/app/domains/__init__.py",
+            "backend/app/repositories/__init__.py",
+            "backend/app/schemas/__init__.py",
+            "backend/app/services/__init__.py"
+          ],
+          "target_paths": [
+            "backend/app/__init__.py",
+            "backend/app/api",
+            "backend/app/compatibility",
+            "backend/app/core/__init__.py",
+            "backend/app/domains/__init__.py"
+          ]
+        }
+      ]
     }
   ],
   "coverage": {
@@ -10274,5 +10504,27 @@
   },
   "frontend_test_support": {
     "src/testing": "Not introduced: no actual shared unit-test consumer/runner exists. Playwright and Node helpers stay with their projects."
+  },
+  "backend_transition": {
+    "checkpoint_commit": "d7037625a19071eb279ad2ea35c3ace6fe5b5289",
+    "stage": "AR-G0",
+    "status": "IN_PROGRESS",
+    "sequence": [
+      "AR-G0",
+      "AR-G1",
+      "AR-G2",
+      "AR-G3",
+      "AR-G4",
+      "AR-B2",
+      "AR-B3",
+      "AR-B4",
+      "AR-B5",
+      "AR-B6",
+      "AR-B7",
+      "AR-B8-A",
+      "AR-G5",
+      "AR-B8-B"
+    ],
+    "status_rule": "backend_status records backend evidence only; overall VERIFIED requires all applicable frontend and runtime evidence. AR-G0 does not activate new product scopes."
   }
 }

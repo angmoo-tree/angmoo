@@ -1,0 +1,487 @@
+{
+  "schema_version": 1,
+  "checkpoint_commit": "d7037625a19071eb279ad2ea35c3ace6fe5b5289",
+  "description": "Append immutable evidence after each source commit introduces regression tests or source files. Preserve earlier records and the PR263 checkpoint; use capture_refactor_backend_checkpoint.py --append with an exact introduction commit and feature ID.",
+  "records": [
+    {
+      "commit": "c45edca0dd1d8a2426f47a37219dd740823ab902",
+      "feature_id": "AR-G0",
+      "reason": "Backend transition guards and regression coverage",
+      "tracked_files": {
+        "backend/tests/test_refactor_backend_checkpoint.py": "3fc5533d78cbaa52307c56a8478f54c5398bdfb6",
+        "backend/tests/test_refactor_backend_partial_scopes.py": "1ff8d0dbf22a68ac894c9da54c4bca5a26416bc2",
+        "backend/tests/test_refactor_public_node_moves.py": "31697f4a61c7d1c19441da43f53f0b22ccc11173",
+        "docs/architecture/refactor-backend-results.md": "12a384570fa0b314e927a4449600000f91b3e5d6",
+        "scripts/ci/capture_refactor_backend_checkpoint.py": "67247c197d480ff8d130ae08666d9feef348afa7",
+        "security/refactor_backend_additions.json": "9e43fb367c75e616822f3fae8dbc11f5681a7789",
+        "security/refactor_backend_checkpoint.json": "a4ec6e0870d39a1afffa6357a5922f1b5c164219"
+      },
+      "test_nodes": [
+        "tests/test_refactor_backend_checkpoint.py::test_addition_commit_source_and_assertion_provenance_are_checked",
+        "tests/test_refactor_backend_checkpoint.py::test_addition_history_cannot_be_removed_or_rewritten",
+        "tests/test_refactor_backend_checkpoint.py::test_addition_records_require_commit_feature_and_reason",
+        "tests/test_refactor_backend_checkpoint.py::test_assertions_accept_explicit_path_move_and_additional_checks",
+        "tests/test_refactor_backend_checkpoint.py::test_assertions_inside_local_test_helpers_cannot_disappear",
+        "tests/test_refactor_backend_checkpoint.py::test_capture_does_not_call_surviving_frozen_bridge_a_new_source",
+        "tests/test_refactor_backend_checkpoint.py::test_checkpoint_cannot_be_recaptured_to_hide_a_regression[contracts]",
+        "tests/test_refactor_backend_checkpoint.py::test_checkpoint_cannot_be_recaptured_to_hide_a_regression[test_assertions]",
+        "tests/test_refactor_backend_checkpoint.py::test_checkpoint_cannot_be_recaptured_to_hide_a_regression[test_nodes]",
+        "tests/test_refactor_backend_checkpoint.py::test_checkpoint_cannot_be_recaptured_to_hide_a_regression[test_suppressions]",
+        "tests/test_refactor_backend_checkpoint.py::test_checkpoint_cannot_be_recaptured_to_hide_a_regression[tracked_files]",
+        "tests/test_refactor_backend_checkpoint.py::test_existing_skips_are_preserved_and_collection_hook_suppression_is_guarded",
+        "tests/test_refactor_backend_checkpoint.py::test_later_commit_cannot_claim_it_introduced_an_older_unrecorded_source",
+        "tests/test_refactor_backend_checkpoint.py::test_missing_or_empty_marker_cannot_preserve_a_source_implementation",
+        "tests/test_refactor_backend_checkpoint.py::test_move_cannot_swallow_an_independent_existing_destination",
+        "tests/test_refactor_backend_checkpoint.py::test_moved_test_cannot_keep_its_name_and_delete_assertion_or_raises",
+        "tests/test_refactor_backend_checkpoint.py::test_new_committed_source_requires_record_and_mapped_destinations_are_not_new_work",
+        "tests/test_refactor_backend_checkpoint.py::test_new_skip_or_xfail_cannot_hide_a_collected_regression[import pytest\\n@pytest.mark.skip(reason='hide regression')\\ndef test_contract():\\n    assert result == 42\\n]",
+        "tests/test_refactor_backend_checkpoint.py::test_new_skip_or_xfail_cannot_hide_a_collected_regression[import pytest\\n@pytest.mark.skipif(True, reason='hide regression')\\ndef test_contract():\\n    assert result == 42\\n]",
+        "tests/test_refactor_backend_checkpoint.py::test_new_skip_or_xfail_cannot_hide_a_collected_regression[import pytest\\n@pytest.mark.xfail\\ndef test_contract():\\n    assert result == 42\\n]",
+        "tests/test_refactor_backend_checkpoint.py::test_new_skip_or_xfail_cannot_hide_a_collected_regression[import pytest\\ndef test_contract():\\n    pytest.skip('hide regression')\\n    assert result == 42\\n]",
+        "tests/test_refactor_backend_checkpoint.py::test_new_skip_or_xfail_cannot_hide_a_collected_regression[import pytest\\npytestmark = pytest.mark.skip(reason='hide module')\\ndef test_contract():\\n    assert result == 42\\n]",
+        "tests/test_refactor_backend_checkpoint.py::test_new_split_requires_real_symbols_consumers_and_behavior_test_evidence",
+        "tests/test_refactor_backend_checkpoint.py::test_nodes_follow_second_move_and_count_checkpoint_lineage_once",
+        "tests/test_refactor_backend_checkpoint.py::test_original_baseline_and_wrong_checkpoint_commit_are_rejected",
+        "tests/test_refactor_backend_checkpoint.py::test_parameterized_nodes_preserve_the_underlying_class_assertions",
+        "tests/test_refactor_backend_checkpoint.py::test_pr263_checkpoint_preserves_hotfix_regressions_beyond_pr258",
+        "tests/test_refactor_backend_checkpoint.py::test_source_moves_follow_multiple_steps_and_reject_unsafe_destination",
+        "tests/test_refactor_backend_checkpoint.py::test_unchanged_synthetic_legacy_path_fixture_survives_real_move_without_weakening_expectations",
+        "tests/test_refactor_backend_checkpoint.py::test_unexplained_missing_renamed_or_merged_test_nodes_are_rejected[moves0-absent from frozen]",
+        "tests/test_refactor_backend_checkpoint.py::test_unexplained_missing_renamed_or_merged_test_nodes_are_rejected[moves1-cyclic]",
+        "tests/test_refactor_backend_checkpoint.py::test_unexplained_missing_renamed_or_merged_test_nodes_are_rejected[moves2-one-to-one]",
+        "tests/test_refactor_backend_checkpoint.py::test_unexplained_missing_renamed_or_merged_test_nodes_are_rejected[moves3-cyclic]",
+        "tests/test_refactor_backend_partial_scopes.py::test_a_partial_package_does_not_expose_all_descendants_or_private_modules[app.domains.memory.service.recall.internal]",
+        "tests/test_refactor_backend_partial_scopes.py::test_a_partial_package_does_not_expose_all_descendants_or_private_modules[app.domains.memory.service.recall]",
+        "tests/test_refactor_backend_partial_scopes.py::test_bridge_never_allows_a_second_unregistered_old_consumer",
+        "tests/test_refactor_backend_partial_scopes.py::test_bridge_rejects_wildcards_missing_ownership_and_unknown_fields[change0]",
+        "tests/test_refactor_backend_partial_scopes.py::test_bridge_rejects_wildcards_missing_ownership_and_unknown_fields[change1]",
+        "tests/test_refactor_backend_partial_scopes.py::test_bridge_rejects_wildcards_missing_ownership_and_unknown_fields[change2]",
+        "tests/test_refactor_backend_partial_scopes.py::test_bridge_rejects_wildcards_missing_ownership_and_unknown_fields[change3]",
+        "tests/test_refactor_backend_partial_scopes.py::test_bridge_rejects_wildcards_missing_ownership_and_unknown_fields[change4]",
+        "tests/test_refactor_backend_partial_scopes.py::test_bridge_rejects_wildcards_missing_ownership_and_unknown_fields[change5]",
+        "tests/test_refactor_backend_partial_scopes.py::test_bridge_rejects_wildcards_missing_ownership_and_unknown_fields[change6]",
+        "tests/test_refactor_backend_partial_scopes.py::test_bridge_target_must_be_a_migrated_inventory_module",
+        "tests/test_refactor_backend_partial_scopes.py::test_compatibility_does_not_allow_cross_domain_storage_access",
+        "tests/test_refactor_backend_partial_scopes.py::test_completed_domain_submodules_need_an_exact_supported_entry",
+        "tests/test_refactor_backend_partial_scopes.py::test_cross_domain_consumers_cannot_use_unlisted_siblings_or_storage[app.domains.memory.models.items]",
+        "tests/test_refactor_backend_partial_scopes.py::test_cross_domain_consumers_cannot_use_unlisted_siblings_or_storage[app.domains.memory.repository.items]",
+        "tests/test_refactor_backend_partial_scopes.py::test_cross_domain_consumers_cannot_use_unlisted_siblings_or_storage[app.domains.memory.router]",
+        "tests/test_refactor_backend_partial_scopes.py::test_cross_domain_consumers_cannot_use_unlisted_siblings_or_storage[app.domains.memory.schemas.internal]",
+        "tests/test_refactor_backend_partial_scopes.py::test_cross_domain_consumers_cannot_use_unlisted_siblings_or_storage[app.domains.memory.service.batch]",
+        "tests/test_refactor_backend_partial_scopes.py::test_cross_domain_cycle_detection_survives_precise_supported_entries",
+        "tests/test_refactor_backend_partial_scopes.py::test_duplicate_bridge_is_rejected",
+        "tests/test_refactor_backend_partial_scopes.py::test_exact_global_scope_does_not_exempt_old_model_submodules",
+        "tests/test_refactor_backend_partial_scopes.py::test_exact_old_non_domain_alias_to_migrated_implementation_is_recorded[app.core.old_memory]",
+        "tests/test_refactor_backend_partial_scopes.py::test_exact_old_non_domain_alias_to_migrated_implementation_is_recorded[app.models.memory]",
+        "tests/test_refactor_backend_partial_scopes.py::test_exact_old_non_domain_alias_to_migrated_implementation_is_recorded[app.services.memory]",
+        "tests/test_refactor_backend_partial_scopes.py::test_migrated_implementation_cannot_import_a_registered_alias_in_another_layer",
+        "tests/test_refactor_backend_partial_scopes.py::test_new_role_cannot_disguise_itself_as_an_old_compatibility_alias",
+        "tests/test_refactor_backend_partial_scopes.py::test_nonexistent_migrated_entry_is_not_an_import_allowlist",
+        "tests/test_refactor_backend_partial_scopes.py::test_old_alias_requires_an_exact_one_way_bridge_and_keeps_old_public_consumers",
+        "tests/test_refactor_backend_partial_scopes.py::test_old_allowlisted_cycle_does_not_hide_a_new_partial_module_cycle",
+        "tests/test_refactor_backend_partial_scopes.py::test_old_business_service_may_consume_approved_shared_globals_without_alias_metadata[app.config]",
+        "tests/test_refactor_backend_partial_scopes.py::test_old_business_service_may_consume_approved_shared_globals_without_alias_metadata[app.database]",
+        "tests/test_refactor_backend_partial_scopes.py::test_old_business_service_may_consume_approved_shared_globals_without_alias_metadata[app.exceptions]",
+        "tests/test_refactor_backend_partial_scopes.py::test_old_business_service_may_consume_approved_shared_globals_without_alias_metadata[app.models]",
+        "tests/test_refactor_backend_partial_scopes.py::test_old_business_service_may_consume_approved_shared_globals_without_alias_metadata[app.pagination]",
+        "tests/test_refactor_backend_partial_scopes.py::test_old_horizontal_layer_consumer_also_requires_a_registered_transition[app.cruds.memory]",
+        "tests/test_refactor_backend_partial_scopes.py::test_old_horizontal_layer_consumer_also_requires_a_registered_transition[app.models.memory]",
+        "tests/test_refactor_backend_partial_scopes.py::test_old_horizontal_layer_consumer_also_requires_a_registered_transition[app.models]",
+        "tests/test_refactor_backend_partial_scopes.py::test_old_horizontal_layer_consumer_also_requires_a_registered_transition[app.repositories.memory]",
+        "tests/test_refactor_backend_partial_scopes.py::test_old_horizontal_layer_consumer_also_requires_a_registered_transition[app.schemas.memory]",
+        "tests/test_refactor_backend_partial_scopes.py::test_old_horizontal_layer_consumer_also_requires_a_registered_transition[app.services.memory]",
+        "tests/test_refactor_backend_partial_scopes.py::test_partial_implementation_cannot_hide_dependencies_in_unscoped_new_siblings",
+        "tests/test_refactor_backend_partial_scopes.py::test_partial_policy_has_the_same_pure_role_restriction_as_completed_domains",
+        "tests/test_refactor_backend_partial_scopes.py::test_partial_scope_keeps_new_role_and_runtime_provider_rules[imports0-external0-refactor_service_imports_http]",
+        "tests/test_refactor_backend_partial_scopes.py::test_partial_scope_keeps_new_role_and_runtime_provider_rules[imports1-external1-refactor_new_imports_legacy]",
+        "tests/test_refactor_backend_partial_scopes.py::test_partial_scope_keeps_new_role_and_runtime_provider_rules[imports2-external2-domain_imports_runtime]",
+        "tests/test_refactor_backend_partial_scopes.py::test_partial_scope_keeps_new_role_and_runtime_provider_rules[imports3-external3-domain_runtime_imports_provider_sdk]",
+        "tests/test_refactor_backend_partial_scopes.py::test_partial_service_and_schema_entries_work_without_completing_the_domain",
+        "tests/test_refactor_backend_partial_scopes.py::test_pure_shared_error_and_pagination_modules_cannot_import_framework_or_io[app.exceptions-fastapi]",
+        "tests/test_refactor_backend_partial_scopes.py::test_pure_shared_error_and_pagination_modules_cannot_import_framework_or_io[app.pagination-httpx]",
+        "tests/test_refactor_backend_partial_scopes.py::test_pure_shared_error_and_pagination_modules_cannot_import_framework_or_io[app.pagination-sqlalchemy]",
+        "tests/test_refactor_backend_partial_scopes.py::test_reverse_bridge_and_new_module_cycle_are_both_rejected",
+        "tests/test_refactor_backend_partial_scopes.py::test_scope_cannot_promote_a_domain_or_expose_unmigrated_and_unsafe_entries[entries-value5]",
+        "tests/test_refactor_backend_partial_scopes.py::test_scope_cannot_promote_a_domain_or_expose_unmigrated_and_unsafe_entries[entries-value6]",
+        "tests/test_refactor_backend_partial_scopes.py::test_scope_cannot_promote_a_domain_or_expose_unmigrated_and_unsafe_entries[entries-value7]",
+        "tests/test_refactor_backend_partial_scopes.py::test_scope_cannot_promote_a_domain_or_expose_unmigrated_and_unsafe_entries[modules-value0]",
+        "tests/test_refactor_backend_partial_scopes.py::test_scope_cannot_promote_a_domain_or_expose_unmigrated_and_unsafe_entries[modules-value1]",
+        "tests/test_refactor_backend_partial_scopes.py::test_scope_cannot_promote_a_domain_or_expose_unmigrated_and_unsafe_entries[modules-value2]",
+        "tests/test_refactor_backend_partial_scopes.py::test_scope_cannot_promote_a_domain_or_expose_unmigrated_and_unsafe_entries[modules-value3]",
+        "tests/test_refactor_backend_partial_scopes.py::test_scope_cannot_promote_a_domain_or_expose_unmigrated_and_unsafe_entries[modules-value4]",
+        "tests/test_refactor_backend_partial_scopes.py::test_scope_must_not_mark_a_domain_both_partial_and_complete",
+        "tests/test_refactor_backend_partial_scopes.py::test_unconverted_domain_still_requires_its_old_public_boundary",
+        "tests/test_refactor_backend_partial_scopes.py::test_unconverted_sibling_keeps_legacy_pure_layer_protection",
+        "tests/test_refactor_backend_partial_scopes.py::test_unused_compatibility_bridge_fails_instead_of_becoming_a_future_exception",
+        "tests/test_refactor_public_node_moves.py::test_approved_subset_follows_transitive_moves_and_ignores_unrelated_origins",
+        "tests/test_refactor_public_node_moves.py::test_cli_rejects_an_independent_case_absorbed_by_an_unmoved_target",
+        "tests/test_refactor_public_node_moves.py::test_cli_rejects_missing_final_node_even_when_intermediate_still_collects",
+        "tests/test_refactor_public_node_moves.py::test_cli_uses_the_final_destination_and_never_rewrites_approved_nodes",
+        "tests/test_refactor_public_node_moves.py::test_independent_approved_cases_cannot_be_absorbed_into_one_destination[moves0]",
+        "tests/test_refactor_public_node_moves.py::test_independent_approved_cases_cannot_be_absorbed_into_one_destination[moves1]",
+        "tests/test_refactor_public_node_moves.py::test_independent_approved_cases_cannot_be_absorbed_into_one_destination[moves2]",
+        "tests/test_refactor_public_node_moves.py::test_independent_approved_cases_cannot_be_absorbed_into_one_destination[moves3]",
+        "tests/test_refactor_public_node_moves.py::test_invalid_move_map_is_reported_without_a_type_error[moves0]",
+        "tests/test_refactor_public_node_moves.py::test_invalid_move_map_is_reported_without_a_type_error[moves1]",
+        "tests/test_refactor_public_node_moves.py::test_invalid_move_map_is_reported_without_a_type_error[moves2]",
+        "tests/test_refactor_public_node_moves.py::test_invalid_move_map_is_reported_without_a_type_error[moves3]",
+        "tests/test_refactor_public_node_moves.py::test_original_baseline_counts_and_public_evidence_remain_unchanged",
+        "tests/test_refactor_public_node_moves.py::test_profile_collection_keeps_existing_ignore_rules[private]",
+        "tests/test_refactor_public_node_moves.py::test_profile_collection_keeps_existing_ignore_rules[public]",
+        "tests/test_refactor_public_node_moves.py::test_reachable_cycle_is_an_error[moves0]",
+        "tests/test_refactor_public_node_moves.py::test_reachable_cycle_is_an_error[moves1]",
+        "tests/test_refactor_public_node_moves.py::test_reachable_cycle_is_an_error[moves2]",
+        "tests/test_refactor_public_node_moves.py::test_unrelated_profile_move_does_not_count_as_a_second_approved_origin"
+      ],
+      "test_assertions": {
+        "tests/test_refactor_backend_checkpoint.py": {
+          "test_pr263_checkpoint_preserves_hotfix_regressions_beyond_pr258": [
+            "assert p.checkpoint_errors(checkpoint, p.BASELINE.read_bytes()) == []",
+            "assert hotfix",
+            "assert p.missing_nodes(approved, remaining, moves, node_snapshots=[baseline['test_nodes'], checkpoint['test_nodes']]) == [deleted]"
+          ],
+          "test_checkpoint_cannot_be_recaptured_to_hide_a_regression": [
+            "assert any(('checkpoint mutated' in error for error in p.checkpoint_errors(checkpoint, p.BASELINE.read_bytes())))"
+          ],
+          "test_original_baseline_and_wrong_checkpoint_commit_are_rejected": [
+            "assert any(('exact PR263 commit' in error for error in errors))",
+            "assert any(('PR258 source baseline mutated' in error for error in errors))"
+          ],
+          "test_nodes_follow_second_move_and_count_checkpoint_lineage_once": [
+            "assert p.missing_nodes(['old::test', 'pilot::test', 'hotfix::test'], ['final::test', 'hotfix::test', 'new::test'], {'old::test': 'pilot::test', 'pilot::test': 'final::test'}, node_snapshots=[['old::test'], ['pilot::test', 'hotfix::test']]) == []"
+          ],
+          "test_move_cannot_swallow_an_independent_existing_destination": [
+            "pytest.raises(ValueError, match='independent cases cannot collapse')"
+          ],
+          "test_unexplained_missing_renamed_or_merged_test_nodes_are_rejected": [
+            "pytest.raises(ValueError, match=match)"
+          ],
+          "write": [],
+          "snapshot": [],
+          "test_moved_test_cannot_keep_its_name_and_delete_assertion_or_raises": [
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: target}, {}, tmp_path)))"
+          ],
+          "test_assertions_inside_local_test_helpers_cannot_disappear": [
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: node}, {}, tmp_path)))"
+          ],
+          "test_new_skip_or_xfail_cannot_hide_a_collected_regression": [
+            "assert any(('skip/xfail suppression changed' in error for error in p.check_suppressions([expected], {}, tmp_path)))"
+          ],
+          "test_existing_skips_are_preserved_and_collection_hook_suppression_is_guarded": [
+            "assert p.check_suppressions([expected], {}, tmp_path) == []",
+            "assert p.check_suppressions([expected], {}, tmp_path)"
+          ],
+          "test_assertions_accept_explicit_path_move_and_additional_checks": [
+            "assert p.check_assertions([expected], {node: target}, {'backend/app/core/config.py': 'backend/app/config.py'}, tmp_path) == []",
+            "assert p.check_assertions([expected], {node: target}, {}, tmp_path)"
+          ],
+          "test_unchanged_synthetic_legacy_path_fixture_survives_real_move_without_weakening_expectations": [
+            "assert p.check_assertions([expected], {node: node}, files, tmp_path) == []",
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: node}, files, tmp_path)))"
+          ],
+          "test_parameterized_nodes_preserve_the_underlying_class_assertions": [
+            "assert p.check_assertions([expected], {node: target}, {}, tmp_path) == []",
+            "assert p.missing_nodes([node], [target.replace('[v8]', '[v9]')], {node: target}) == [target]"
+          ],
+          "test_missing_or_empty_marker_cannot_preserve_a_source_implementation": [
+            "assert any(('empty package marker' in error for error in p.check_sources([old], {old: target}, tmp_path)))",
+            "assert any(('source missing' in error for error in p.check_sources([old], {old: 'backend/app/missing.py'}, tmp_path)))",
+            "pytest.raises(ValueError, match='absent from frozen')"
+          ],
+          "test_source_moves_follow_multiple_steps_and_reject_unsafe_destination": [
+            "assert p.check_sources(['backend/app/old.py'], {'backend/app/old.py': 'backend/app/intermediate.py', 'backend/app/intermediate.py': 'backend/app/current.py'}, tmp_path) == []",
+            "assert p.check_sources(['backend/app/old.py'], {'backend/app/old.py': '../outside.py'}, tmp_path)"
+          ],
+          "test_addition_records_require_commit_feature_and_reason": [
+            "assert any(('exact introduction commit' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_addition_history_cannot_be_removed_or_rewritten": [
+            "assert any(('history was changed or removed' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_addition_commit_source_and_assertion_provenance_are_checked": [
+            "assert p.addition_errors(additions, checkpoint, tmp_path) == []",
+            "assert any(('source provenance changed' in error for error in errors))",
+            "assert any(('assertion provenance changed' in error for error in errors))"
+          ],
+          "test_later_commit_cannot_claim_it_introduced_an_older_unrecorded_source": [
+            "assert any(('first introduction commit' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_new_committed_source_requires_record_and_mapped_destinations_are_not_new_work": [
+            "assert p.unrecorded_committed_sources(checkpoint, [], targets, tmp_path) == ['committed source lacks append-only introduction evidence: backend/app/new.py']",
+            "assert p.unrecorded_committed_sources(checkpoint, [{'tracked_files': {'backend/app/new.py': 'blob'}}], targets, tmp_path) == []"
+          ],
+          "test_capture_does_not_call_surviving_frozen_bridge_a_new_source": [
+            "assert capture.unprotected_files(tracked, [old], {old: new}) == {added: 'new-test-blob'}"
+          ],
+          "test_new_split_requires_real_symbols_consumers_and_behavior_test_evidence": [
+            "assert p.check_split_evidence({'details': {'AR-B2': detail}}, snapshots, tmp_path) == []",
+            "assert any(('split omits' in error for error in p.check_split_evidence({'details': {'AR-B2': broken}}, snapshots, tmp_path)))",
+            "assert any(('does not define' in error for error in p.check_split_evidence({'details': {'AR-B2': broken}}, snapshots, tmp_path)))"
+          ]
+        },
+        "tests/test_refactor_backend_partial_scopes.py": {
+          "policy": [],
+          "bridge": [],
+          "errors": [],
+          "test_partial_service_and_schema_entries_work_without_completing_the_domain": [
+            "assert result == []"
+          ],
+          "test_cross_domain_consumers_cannot_use_unlisted_siblings_or_storage": [
+            "assert any(('cross_domain_deep_import' in error for error in result))"
+          ],
+          "test_a_partial_package_does_not_expose_all_descendants_or_private_modules": [
+            "assert any(('cross_domain_deep_import' in error for error in result))"
+          ],
+          "test_completed_domain_submodules_need_an_exact_supported_entry": [
+            "assert any(('cross_domain_deep_import' in error for error in errors(*fixture, scope=scope)))",
+            "assert errors(*fixture, scope=scope) == []"
+          ],
+          "test_scope_cannot_promote_a_domain_or_expose_unmigrated_and_unsafe_entries": [
+            "assert any(('refactor_invalid_scope' in error for error in errors(b._module(SERVICE), scope=scope)))"
+          ],
+          "test_scope_must_not_mark_a_domain_both_partial_and_complete": [
+            "assert any(('refactor_invalid_scope' in error for error in errors(b._module(SERVICE), scope=scope)))"
+          ],
+          "test_nonexistent_migrated_entry_is_not_an_import_allowlist": [
+            "assert any(('refactor_stale_scope' in error for error in result))"
+          ],
+          "test_unconverted_sibling_keeps_legacy_pure_layer_protection": [
+            "assert any(('domain_pure_layer_imports_framework' in error for error in result))"
+          ],
+          "test_unconverted_domain_still_requires_its_old_public_boundary": [
+            "assert any(('cross_domain_deep_import' in error for error in result))"
+          ],
+          "test_partial_implementation_cannot_hide_dependencies_in_unscoped_new_siblings": [
+            "assert any(('refactor_unmigrated_module_dependency' in error for error in result))"
+          ],
+          "test_old_alias_requires_an_exact_one_way_bridge_and_keeps_old_public_consumers": [
+            "assert any(('refactor_unregistered_legacy_consumer' in error for error in errors(*fixture)))",
+            "assert errors(*fixture, scope=policy(bridges=(bridge(),))) == []"
+          ],
+          "test_bridge_never_allows_a_second_unregistered_old_consumer": [
+            "assert any(('refactor_unregistered_legacy_consumer' in error and OLD + '_other' in error for error in result))"
+          ],
+          "test_exact_old_non_domain_alias_to_migrated_implementation_is_recorded": [
+            "assert any(('core_dependency_direction' in error for error in result))",
+            "assert result == []"
+          ],
+          "test_old_horizontal_layer_consumer_also_requires_a_registered_transition": [
+            "assert any(('refactor_unregistered_legacy_consumer' in error for error in result))"
+          ],
+          "test_old_business_service_may_consume_approved_shared_globals_without_alias_metadata": [
+            "assert result == []"
+          ],
+          "test_pure_shared_error_and_pagination_modules_cannot_import_framework_or_io": [
+            "assert any(('refactor_pure_imports_framework' in error and source in error for error in result))",
+            "assert not any(('refactor_pure_imports_framework' in error and 'app.models ->' in error for error in result))"
+          ],
+          "test_unused_compatibility_bridge_fails_instead_of_becoming_a_future_exception": [
+            "assert any(('refactor_stale_bridge' in error for error in result))"
+          ],
+          "test_bridge_rejects_wildcards_missing_ownership_and_unknown_fields": [
+            "assert any(('refactor_invalid_bridge' in error for error in result))"
+          ],
+          "test_duplicate_bridge_is_rejected": [
+            "assert any(('refactor_invalid_bridge' in error for error in result))"
+          ],
+          "test_bridge_target_must_be_a_migrated_inventory_module": [
+            "assert any(('refactor_unmigrated_bridge_target' in error for error in result))"
+          ],
+          "test_new_role_cannot_disguise_itself_as_an_old_compatibility_alias": [
+            "assert any(('refactor_invalid_bridge_source' in error for error in result))"
+          ],
+          "test_compatibility_does_not_allow_cross_domain_storage_access": [
+            "assert any(('refactor_cross_domain_bridge' in error for error in result))",
+            "assert any(('refactor_cross_domain_role' in error for error in result))"
+          ],
+          "test_reverse_bridge_and_new_module_cycle_are_both_rejected": [
+            "assert any(('refactor_reverse_bridge' in error for error in result))",
+            "assert any(('refactor_new_imports_legacy' in error for error in result))",
+            "assert any(('[module_cycle]' in error for error in result))"
+          ],
+          "test_migrated_implementation_cannot_import_a_registered_alias_in_another_layer": [
+            "assert any(('refactor_new_imports_legacy' in error for error in result))"
+          ],
+          "test_partial_scope_keeps_new_role_and_runtime_provider_rules": [
+            "assert any((expected in error for error in errors(*fixture, scope=policy(modules=scope_modules))))"
+          ],
+          "test_partial_policy_has_the_same_pure_role_restriction_as_completed_domains": [
+            "assert any(('refactor_pure_imports_framework' in error for error in result))"
+          ],
+          "test_exact_global_scope_does_not_exempt_old_model_submodules": [
+            "assert any(('legacy_edge_not_allowlisted' in error and 'app.models.memory' in error for error in result))",
+            "assert not any(('legacy_edge_not_allowlisted' in error and ' -> app.models;' in error for error in result))"
+          ],
+          "test_old_allowlisted_cycle_does_not_hide_a_new_partial_module_cycle": [
+            "assert any(('[module_cycle]' in error and SERVICE in error for error in result))",
+            "assert not any(('[stale_legacy_cycle]' in error for error in result))"
+          ],
+          "test_cross_domain_cycle_detection_survives_precise_supported_entries": [
+            "assert any(('[package_cycle]' in error for error in result))",
+            "assert any(('[module_cycle]' in error for error in result))"
+          ]
+        },
+        "tests/test_refactor_public_node_moves.py": {
+          "test_approved_subset_follows_transitive_moves_and_ignores_unrelated_origins": [
+            "assert baseline.resolve_approved_nodes(['old::test', 'unchanged::test'], moves) == ['final::test', 'unchanged::test']"
+          ],
+          "test_unrelated_profile_move_does_not_count_as_a_second_approved_origin": [
+            "assert baseline.resolve_approved_nodes(['public_old::test'], {'public_old::test': 'final::test', 'private_only::test': 'final::test'}) == ['final::test']"
+          ],
+          "test_independent_approved_cases_cannot_be_absorbed_into_one_destination": [
+            "pytest.raises(RuntimeError, match='one-to-one')"
+          ],
+          "test_reachable_cycle_is_an_error": [
+            "pytest.raises(RuntimeError, match='cyclic')"
+          ],
+          "test_invalid_move_map_is_reported_without_a_type_error": [
+            "pytest.raises(RuntimeError, match='exact string nodes')"
+          ],
+          "test_original_baseline_counts_and_public_evidence_remain_unchanged": [
+            "assert public_count == 604",
+            "assert private_count == 641",
+            "assert public_file.name == 'm3_public_test_nodes.txt'",
+            "assert private_file.name == 'm3_private_test_nodes.txt'",
+            "assert len(public_file.read_text(encoding='utf-8').splitlines()) == 604"
+          ],
+          "test_profile_collection_keeps_existing_ignore_rules": [
+            "assert baseline.collect_nodes(profile) == ['tests/test_a.py::test_case']",
+            "assert command[:6] == [baseline.sys.executable, '-m', 'pytest', '--collect-only', '-q', 'tests']",
+            "assert options['cwd'] == baseline.BACKEND_ROOT",
+            "assert ignores == ([f'--ignore={path}' for path in baseline.IGNORED_TESTS] if profile == 'public' else [])"
+          ],
+          "configure_cli": [],
+          "test_cli_uses_the_final_destination_and_never_rewrites_approved_nodes": [
+            "assert baseline.main() == 0",
+            "assert 'public:approved=2' in capsys.readouterr().out",
+            "assert approved.read_bytes() == before"
+          ],
+          "test_cli_rejects_missing_final_node_even_when_intermediate_still_collects": [
+            "assert baseline.main() == 1",
+            "assert 'missing=1' in capsys.readouterr().err"
+          ],
+          "test_cli_rejects_an_independent_case_absorbed_by_an_unmoved_target": [
+            "assert baseline.main() == 1",
+            "assert 'one-to-one' in capsys.readouterr().err"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_refactor_backend_checkpoint.py": {},
+        "tests/test_refactor_backend_partial_scopes.py": {},
+        "tests/test_refactor_public_node_moves.py": {}
+      }
+    },
+    {
+      "commit": "5f7a184ecce29a06b5ef91b9521e9ec1945395a7",
+      "feature_id": "AR-G0",
+      "reason": "Protect exact synthetic checkpoint fixture exception and negative scanner regressions",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[checkpoint_git_blob-0000000000000000000000000000000000000000]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[evidence_commit-0000000000000000000000000000000000000000]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[path-security/*]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[rule-openai-api-key]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[value-different-fixture-value]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence[value_sha256-0000000000000000000000000000000000000000000000000000000000000000]",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_does_not_suppress_another_value_path_or_rule",
+        "tests/test_t2_secret_allowlist.py::test_checkpoint_exception_matches_only_the_existing_frozen_synthetic_fixture"
+      ],
+      "test_assertions": {
+        "tests/test_t2_secret_allowlist.py": {
+          "test_current_exact_allowlist_metadata_passes": [
+            "assert checker.validate() == []"
+          ],
+          "test_broad_scope_and_missing_review_metadata_are_rejected": [
+            "assert any(('scope must stay exact' in error for error in errors))",
+            "assert any(('missing metadata fields' in error for error in errors))"
+          ],
+          "test_checkpoint_exception_matches_only_the_existing_frozen_synthetic_fixture": [
+            "assert entry['value'] == original['value']",
+            "assert hashlib.sha256(entry['value'].encode()).hexdigest() == checker.CHECKPOINT_FIXTURE_SHA256",
+            "assert any((entry['value'] in assertion for assertion in assertions))",
+            "assert checkpoint['commit'] == entry['evidence_commit']",
+            "assert hashlib.sha1(f'blob {len(checkpoint_bytes)}\\x00'.encode() + checkpoint_bytes).hexdigest() == entry['checkpoint_git_blob']"
+          ],
+          "test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence": [
+            "assert checker.validate(fixture)"
+          ],
+          "test_checkpoint_exception_does_not_suppress_another_value_path_or_rule": [
+            "assert list(scanner.scan_text(entry.path, entry.value, allowlist=allowlist)) == []",
+            "assert {finding.rule for finding in scanner.scan_text('security/another-checkpoint.json', entry.value, allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, entry.value + '1', allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, another_rule.value, allowlist=allowlist)} == {'openai-api-key'}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_t2_secret_allowlist.py": {}
+      }
+    },
+    {
+      "commit": "2583af6032d2d78632c78732ef0035fd88cc0580",
+      "feature_id": "AR-G0",
+      "reason": "Preserve exact Gitleaks fingerprint allowlist and negative scope regression coverage",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_t2_secret_allowlist.py::test_gitleaks_checkpoint_allowlist_contains_only_exact_frozen_fingerprints",
+        "tests/test_t2_secret_allowlist.py::test_gitleaks_checkpoint_fingerprints_do_not_allow_other_keys_values_paths_or_rules"
+      ],
+      "test_assertions": {
+        "tests/test_t2_secret_allowlist.py": {
+          "test_current_exact_allowlist_metadata_passes": [
+            "assert checker.validate() == []"
+          ],
+          "test_broad_scope_and_missing_review_metadata_are_rejected": [
+            "assert any(('scope must stay exact' in error for error in errors))",
+            "assert any(('missing metadata fields' in error for error in errors))"
+          ],
+          "test_checkpoint_exception_matches_only_the_existing_frozen_synthetic_fixture": [
+            "assert entry['value'] == original['value']",
+            "assert hashlib.sha256(entry['value'].encode()).hexdigest() == checker.CHECKPOINT_FIXTURE_SHA256",
+            "assert any((entry['value'] in assertion for assertion in assertions))",
+            "assert checkpoint['commit'] == entry['evidence_commit']",
+            "assert hashlib.sha1(f'blob {len(checkpoint_bytes)}\\x00'.encode() + checkpoint_bytes).hexdigest() == entry['checkpoint_git_blob']"
+          ],
+          "test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence": [
+            "assert checker.validate(fixture)"
+          ],
+          "test_checkpoint_exception_does_not_suppress_another_value_path_or_rule": [
+            "assert list(scanner.scan_text(entry.path, entry.value, allowlist=allowlist)) == []",
+            "assert {finding.rule for finding in scanner.scan_text('security/another-checkpoint.json', entry.value, allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, entry.value + '1', allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, another_rule.value, allowlist=allowlist)} == {'openai-api-key'}"
+          ],
+          "_checkpoint_gitleaks_fingerprints": [
+            "assert len(entries) == 1",
+            "assert all((re.fullmatch('[a-f0-9]{40}|[a-f0-9]{64}', value) for _, value in pairs))"
+          ],
+          "test_gitleaks_checkpoint_allowlist_contains_only_exact_frozen_fingerprints": [
+            "assert set(entry) == {'targetRules', 'description', 'condition', 'regexTarget', 'paths', 'regexes'}",
+            "assert entry['targetRules'] == ['generic-api-key']",
+            "assert entry['condition'] == 'AND'",
+            "assert entry['regexTarget'] == 'line'",
+            "assert entry['paths'] == ['(^|/)security/refactor_backend_checkpoint\\\\.json$']",
+            "assert len(entry['regexes']) == len(set(entry['regexes'])) == 55",
+            "assert set(entry['regexes']) <= reviewed.keys()"
+          ],
+          "test_gitleaks_checkpoint_fingerprints_do_not_allow_other_keys_values_paths_or_rules": [
+            "assert not allowed(checker.CHECKPOINT_PATH, f'''\"api_key\": \"{fixture['value']}\"''')",
+            "assert allowed(checker.CHECKPOINT_PATH, line)",
+            "assert allowed('/snapshot/' + checker.CHECKPOINT_PATH, line)",
+            "assert not allowed('security/another-checkpoint.json', line)",
+            "assert not allowed(checker.CHECKPOINT_PATH + '.bak', line)",
+            "assert not allowed('security/not_refactor_backend_checkpoint.json', line)",
+            "assert not allowed(checker.CHECKPOINT_PATH, f'\"{key}\": \"{changed}\"')",
+            "assert not allowed(checker.CHECKPOINT_PATH, f'\"api_key\": \"{value}\"')",
+            "assert not allowed(checker.CHECKPOINT_PATH, line + ' \"api_key\": \"another-value\"')",
+            "assert not allowed(checker.CHECKPOINT_PATH, line, 'openai-api-key')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_t2_secret_allowlist.py": {}
+      }
+    }
+  ]
+}

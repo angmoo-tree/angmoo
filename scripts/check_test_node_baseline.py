@@ -11,6 +11,9 @@ import sys
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 BACKEND_ROOT = REPO_ROOT / "backend"
+sys.path.insert(0, str(REPO_ROOT / "scripts/ci"))
+from check_refactor_preservation import mapped_targets  # noqa: E402
+
 BASELINES = {
     "public": (BACKEND_ROOT / "security" / "m3_public_test_nodes.txt", 604),
     "private": (BACKEND_ROOT / "security" / "m3_private_test_nodes.txt", 641),
@@ -20,6 +23,34 @@ IGNORED_TESTS = (
     "tests/test_openclaw_gateway.py",
     "tests/test_inject_replicate_token_for_catgirl.py",
 )
+
+
+def resolve_approved_nodes(approved: list[str], moves: dict[str, str]) -> list[str]:
+    """Resolve this profile's historical cases through successive exact moves.
+
+    The shared map includes later tests and other profiles. Only reachable edges
+    participate here; the full preservation check validates all map origins.
+    Every approved case in this one snapshot must retain its own final node.
+    """
+    if not isinstance(moves, dict) or any(
+        not isinstance(old, str) or not isinstance(new, str) or not old or not new
+        for old, new in moves.items()
+    ):
+        raise RuntimeError("test-node moves must contain nonempty exact string nodes")
+    reachable: dict[str, str] = {}
+    for origin in approved:
+        node, seen = origin, set()
+        while node in moves:
+            if node in seen:
+                raise RuntimeError(f"approved test-node moves contain a cyclic path: {origin}")
+            seen.add(node)
+            reachable[node] = moves[node]
+            node = moves[node]
+    try:
+        targets = mapped_targets(approved, reachable, nodes=True)
+    except ValueError as exc:
+        raise RuntimeError(f"approved test-node moves: {exc}") from exc
+    return [targets[node] for node in approved]
 
 
 def collect_nodes(profile: str) -> list[str]:
@@ -85,9 +116,7 @@ def main() -> int:
             ]
             path_map = REPO_ROOT / "security/refactor_path_map.json"
             moves = json.loads(path_map.read_text(encoding="utf-8"))["test_nodes"] if path_map.exists() else {}
-            approved_targets = [moves.get(node, node) for node in approved]
-            if len(set(approved_targets)) != len(approved_targets):
-                raise RuntimeError("approved test-node moves must be one-to-one")
+            approved_targets = resolve_approved_nodes(approved, moves)
             missing = sorted(set(approved_targets) - set(current))
             if len(approved) != expected_count or missing:
                 raise RuntimeError(
@@ -98,7 +127,7 @@ def main() -> int:
                 f"{profile}:approved={len(approved)} "
                 f"current={len(current)} new={len(set(current) - set(approved))}"
             )
-    except (OSError, RuntimeError) as exc:
+    except (OSError, RuntimeError, ValueError) as exc:
         print(f"Test node baseline failed: {exc}", file=sys.stderr)
         return 1
     print("Test node baseline passed: " + " ".join(summaries))

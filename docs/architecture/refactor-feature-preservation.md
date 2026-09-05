@@ -4,7 +4,7 @@
 
 ## 기준과 적용 상태
 
-2026-09-05 AR-0의 기준은 PR #258 merge `6e56f0837cc11ff42ccbb520050bbd32c5e9bc14`, tree `99f679acb9aab1e3b28628d0aee6d71ae0364d74`다. 준비·검사 지원 PR #259, backend Device Home PR #260, frontend Device Home PR #261이 차례대로 병합되어 §8.1 준비와 두 파일럿이 완료됐다. 기준선 JSON은 현재 경로로 재생성하지 않으며, 단계별 결과는 [파일럿 결과](refactor-pilot-results.md)에 누적한다. AR-G·AR-B2 이후·AR-F2 이후·AR-X는 후속 범위다.
+2026-09-05 AR-0의 기준은 PR #258 merge `6e56f0837cc11ff42ccbb520050bbd32c5e9bc14`, tree `99f679acb9aab1e3b28628d0aee6d71ae0364d74`다. 준비·검사 지원 PR #259, backend Device Home PR #260, frontend Device Home PR #261이 차례대로 병합되어 §8.1 준비와 두 파일럿이 완료됐다. 기준선 JSON은 현재 경로로 재생성하지 않으며, 단계별 결과는 [파일럿 결과](refactor-pilot-results.md)에 누적한다. §8.2는 #263 merge `d7037625a19071eb279ad2ea35c3ace6fe5b5289`를 추가 체크포인트로 삼아 AR-G0 검사 지원부터 진행한다. AR-G1 이후 제품 이전·AR-F2 이후·AR-X는 아직 미착수이며, 새 실행 증거는 [백엔드 전환 결과](refactor-backend-results.md)에 누적한다.
 
 | 자료 | 소유하는 정보 |
 | --- | --- |
@@ -12,8 +12,10 @@
 | [고정 기준선](../../security/refactor_source_baseline.json) | 기준 commit/tree의 추적 파일 blob, 원래 test node, API·schema·ORM 계약, backend import 연결, 인계 문서 hash |
 | [경로 대응표](../../security/refactor_path_map.json) | 검토한 old→new 파일과 test node. 기준선 자체를 새 경로로 재생성하지 않음 |
 | [파일럿 결과](refactor-pilot-results.md) | 단계별 실제 변경·검증·잔여 호환·PR/head/merge 결과 — 파일럿에서 작성 |
+| [백엔드 체크포인트](../../security/refactor_backend_checkpoint.json) | #263까지 도입된 파일·테스트·계약의 고정 후속 기준. #258 원본과 함께 보존 |
+| [후속 추가 이력](../../security/refactor_backend_additions.json) | 이후 처음 도입된 commit·기능 ID별 source/test 보호. 기존 체크포인트 재생성으로 대체하지 않음 |
 
-`MAPPED`는 위치와 책임을 조사했다는 뜻이다. 실제 이전 후 `MOVED`, 해당 기능의 검증 근거가 연결됐을 때 `VERIFIED`로 바뀐다. 폴더 생성이나 테스트 수집만으로 동작이 검증됐다고 표시하지 않는다. 삭제는 `PROVEN_UNUSED`와 정적·동적·등록·빌드 소비자 부재 근거가 있어야 한다.
+`MAPPED`는 위치와 책임을 조사했다는 뜻이다. 실제 이전 후 `MOVED`, 해당 기능의 검증 근거가 연결됐을 때 `VERIFIED`로 바뀐다. `backend_status`와 해당하는 `frontend_status`를 구분하며, backend만 완료해서 전체 `status`를 올리지 않는다. 폴더 생성이나 테스트 수집만으로 동작이 검증됐다고 표시하지 않는다. 삭제는 `PROVEN_UNUSED`와 정적·동적·등록·빌드 소비자 부재 근거가 있어야 한다.
 
 ## AR-0 검증
 
@@ -69,7 +71,7 @@
 | G03 | 공통/도메인 exceptions | HTTP status/code/body/retry 의미 |
 | G04 | app/pagination | 공통 도구와 업무별 cursor·정렬·scope 구분 |
 | G05 | app/database | engine/session·SQLite PRAGMA·transaction·종료. Base 중복 생성 금지 |
-| G06 | main/public_main/sidecar 유지 | 각 profile의 라우터·worker·startup/shutdown·로그 조립 |
+| G06 | main.py 단일 앱 생성·public_main 임시 호환 후 제거 | Local RuntimeConfig·profile·복구·Memory 종료·DB/session 보존. B8-A에서 통합/호환/참조 전환, G5 뒤 B8-B에서 검증·제거·삭제 후 실행 확인 |
 | G07 | 업무별 tests | test node·conftest·fixture·CI의 old→new 연결과 수집 누락 방지 |
 | G08 | templates 조건부 | 실제 서버 HTML 소비가 없으면 미생성. 기존 package resource 보존 |
 | G09 | pyproject/uv.lock 유지 | requirements 수동 이중 원본 도입 없음. 개발/CI/sidecar 의존성 유지 |
