@@ -1626,6 +1626,42 @@
       "test_suppressions": {
         "tests/world_packages/test_seed_replay_race.py": {}
       }
+    },
+    {
+      "commit": "0de8d4a4e4daaa983d32ce13fb92499566e25094",
+      "feature_id": "AR-B2",
+      "reason": "WorldCharacter entry setup HTTP readiness shared contracts and runtime cleanup ownership",
+      "tracked_files": {
+        "backend/app/api/world_errors.py": "858a9d72a4b5d7eafa0b3827f830ad52d868b626",
+        "backend/app/domains/world_characters/contracts/readiness.py": "b61c1d106f91bc00f87f353e366049080444b19b",
+        "backend/app/domains/world_characters/router/setup.py": "f06c10eb5a548e1869c12ce918d470ae7203228b",
+        "backend/app/domains/world_characters/schemas/readiness.py": "ce5f74494734c80ca38a34a8cd70cbfd0525769f",
+        "backend/app/runtime/world_characters/lifecycle.py": "803ae85460f9bfbe1b15e8fbed24e59544344d4e",
+        "backend/tests/world_characters/test_readiness_contract.py": "5da7ce414be3aae7e76acfc91f3cf66b3be5379a"
+      },
+      "test_nodes": [
+        "tests/world_characters/test_readiness_contract.py::test_missing_active_world_retains_legacy_tendency_readiness",
+        "tests/world_characters/test_readiness_contract.py::test_readiness_keeps_shared_dto_and_world_scope_before_stale_profile"
+      ],
+      "test_assertions": {
+        "tests/world_characters/test_readiness_contract.py": {
+          "test_readiness_keeps_shared_dto_and_world_scope_before_stale_profile": [
+            "assert old_response is AgentActivityProfileReadinessRead",
+            "assert result.reason_code == 'world_scope_not_ready'",
+            "assert result.world_id == 'world-local' and result.world_character_id == target.id",
+            "assert result.source == 'world_community_profile' and (not result.ready)",
+            "assert all((statement.lstrip().upper().startswith('SELECT') for statement in statements))",
+            "assert writes == []"
+          ],
+          "test_missing_active_world_retains_legacy_tendency_readiness": [
+            "assert ready.model_dump() == {'ready': True, 'source': 'legacy_tendency', 'reason_code': None, 'world_id': None, 'world_character_id': None}",
+            "assert not unready.ready and unready.reason_code == 'legacy_tendency_not_ready'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/world_characters/test_readiness_contract.py": {}
+      }
     }
   ]
 }
