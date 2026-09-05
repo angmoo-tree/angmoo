@@ -1154,3 +1154,12 @@ claim/stale/완료 3개 원래 상태 정책을 Social service로 이동하고 �
 실제 첨부2/reference6/provider 실패 결과2 정의 본문을 그대로 Social 서비스에 이전했다. 저장 기술은 기존 Social media storage가 처리하고, 수락된 결과를 PostMedia와 quota에 어떤 순서로 기록하는가는 attachment service가 판단한다. 미디어 참조 판단은 공개 URL만 읽는 구조적 계약을 사용하며 외부 ORM을 import하지 않는다.
 
 최종 집중 **79 PASS/22.03초**. 신규2 parameter node는 실제 DB에서 저장 성공 시 media commit→quota attached commit, 저장 실패 시 media 없음·quota failed commit과 원래 변환 크기/품질 전달을 확인한다. 기존 assertion과10개 원래 함수 본문 동일. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
+
+
+## AR-B5-C10-D — 실제 이미지 요청·생성 준비 정책
+
+원래 request/prepare/model·mode/허용 7개 정의를 Social service로 옮겼다. Character 설정/비밀/운영 설정/LLM/활동 로그는 기존 구현을 같은 Session의 명시적 협력으로 제공한다. Service는 기존 provider integration을 호출하지만 외부 ORM과 옛 services/CRUD 모듈을 직접 사용하지 않는다. 동일 BotImageRequestRead class와 provider 실패/작업량/processing 시각/참조 fallback 의미를 유지한다.
+
+원래7 정책의 협력 호출을 확장한 AST 및 남은11 정의 본문 동일. 첫 생성 코드의 keyword 배치 문법 오류를 compile 단계에서 수정했다. 집중에서 원래 positional fake callback을 keyword로 바꾼 차이와 이전 quota monkeypatch 대상을 확인해 호출 형식과 실제 새 대상만 바로잡았다. 신규 request fixture는 Post당 job unique 제약을 유지하며 서로 다른 두 Post에 요청해 queued가 다음 요청 한도에 반영되는지를 검증한다. 기존 assert·DB 제약을 변경하지 않았다. 신규1 node는 실제 same-Session 설정·동일 응답 class·요청 AI0·queued job 집계와 commit을 확인한다. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C10-D 최종 집중 **80 PASS / 28.12초**. 원래7 실제 정책 확장 및 남은11 본문 AST 동일, API/schema/ORM·기존 test1 assertion·전체 split evidence PASS. 경계 787 modules / 2727 edges / legacy 200, L4/ER0 PASS.

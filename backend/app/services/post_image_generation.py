@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from app.domains.social.service import image_generation as image_policy
+from app.domains.social.service.image_generation import _image_key_source, _has_user_image_key
+
 from app.domains.social.service.image_attachment import (
     attach_prepared_post_image,
     release_prepared_post_image_quota,
@@ -141,223 +144,21 @@ async def prepare_post_image(
     run_started_at: datetime,
     on_rate_limit_wait: Callable[[float], Awaitable[None]] | None = None,
 ) -> PreparedPostImage:
-    setting = agent_crud.get_image_generation_setting(db, character.id)
-    if setting is None:
-        return _skipped("no_image_key")
-    key_source = _image_key_source(setting)
-    model = _image_model_for_key_source(setting, key_source, db=db)
-    provider = "replicate" if image_provider.is_replicate_model(model) else "pollinations"
-    base_attempt = {"provider": provider, "model": model}
-    if key_source == "disabled":
-        return _skipped("disabled", **base_attempt)
-    if key_source == "service" and not service_image_key.is_service_image_available_for_model(model):
-        return _skipped("service_key_missing", **base_attempt)
-    if key_source == "user" and not _has_user_image_key(setting, model):
-        return _skipped("replicate_key_missing" if provider == "replicate" else "no_image_key", **base_attempt)
-    if model not in IMAGE_MODEL_OPTIONS:
-        return _failed("unsupported_model", **base_attempt)
-    if key_source == "user" and (
-        _daily_image_usage(db, character_id=character.id, at=run_started_at)
-        >= setting.max_images_per_day
-    ):
-        return _skipped("limit_exceeded", **base_attempt)
-    reservation: models.PostImageQuotaReservation | None = None
-    if key_source == "service":
-        try:
-            reservation = _reserve_service_image_quota(
-                db,
-                user_id=character.owner_id,
-                character_id=character.id,
-                source="resident",
-                at=run_started_at,
-            )
-        except ServiceImageQuotaError as exc:
-            return _skipped(exc.reason, **base_attempt)
-    reference = _select_reference_image(character, setting)
-    reference_source = reference.source if reference is not None else None
-    reference_image_url = _reference_image_url(model, reference)
-    if _requires_reference(model) and not reference_image_url:
-        _finalize_service_image_quota(db, reservation, status="released")
-        return _skipped(
-            "reference_required",
-            reference_source=reference_source,
-            **base_attempt,
-        )
-
-    prompt = ""
-    prompt_hash = ""
-    reference_sent = bool(reference_image_url)
-    route_mode = "replicate" if provider == "replicate" else operation_settings.get_pollinations_image_route_mode(db)
-    try:
-        if _requires_reference(model):
-            assert reference is not None
-            visual_identity = await _ensure_visual_identity(
-                db=db,
-                setting=setting,
-                character=character,
-                credential=credential,
-                reference=reference,
-                tracker=tracker,
-                run_id=run_id,
-                on_rate_limit_wait=on_rate_limit_wait,
-                model_override=_image_llm_model_for_writing_mode(writing_mode),
-            )
-            if not visual_identity:
-                _finalize_service_image_quota(db, reservation, status="released")
-                return _skipped(
-                    "reference_unusable",
-                    reference_source=reference_source,
-                    **base_attempt,
-                )
-        else:
-            if key_source == "service":
-                if setting.visual_identity_prompt and setting.visual_identity_source_hash is None:
-                    visual_identity = setting.visual_identity_prompt.strip()
-                elif reference is not None:
-                    visual_identity = await _ensure_visual_identity(
-                        db=db,
-                        setting=setting,
-                        character=character,
-                        credential=credential,
-                        reference=reference,
-                        tracker=tracker,
-                        run_id=run_id,
-                        on_rate_limit_wait=on_rate_limit_wait,
-                        model_override=_image_llm_model_for_writing_mode(writing_mode),
-                    )
-                else:
-                    visual_identity = None
-            else:
-                visual_identity = await _resolve_visual_identity(
-                    db=db,
-                    setting=setting,
-                    character=character,
-                    credential=credential,
-                    reference=reference,
-                    tracker=tracker,
-                    run_id=run_id,
-                    on_rate_limit_wait=on_rate_limit_wait,
-                    model_override=_image_llm_model_for_writing_mode(writing_mode),
-                )
-            if not visual_identity:
-                _finalize_service_image_quota(db, reservation, status="released")
-                return _skipped(
-                    "visual_identity_required",
-                    reference_source=reference_source,
-                    **base_attempt,
-                )
-        refined = await _refine_image_prompt(
-            character=character,
-            credential=credential,
-            tracker=tracker,
-            run_id=run_id,
-            image_model=model,
-            current_time_text=current_time_text,
-            post_title=post_title,
-            post_body=post_body,
-            writing_plan=writing_plan,
-            visual_identity=visual_identity,
-            on_rate_limit_wait=on_rate_limit_wait,
-            model_override=_image_llm_model_for_writing_mode(writing_mode),
-        )
-        prompt = _compose_pollinations_prompt(refined, model=model)
-        prompt_hash = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
-        image_key = _image_key_for_source(setting, key_source, model, character=character)
-        if image_key is None:
-            _finalize_service_image_quota(db, reservation, status="released")
-            return _skipped(
-                "service_key_missing"
-                if key_source == "service"
-                else ("replicate_key_missing" if provider == "replicate" else "no_image_key"),
-                **base_attempt,
-            )
-        generated = await image_provider.generate_image(
-            api_key=image_key,
-            model=model,
-            prompt=prompt,
-            reference_image_url=reference_image_url,
-            allow_reference_fallback=_allows_reference_fallback(model),
-            timeout_seconds=POLLINATIONS_IMAGE_TIMEOUT_SECONDS,
-            prompt_hash=prompt_hash,
-            route_mode=route_mode,
-            width=640 if provider == "replicate" else 1024,
-            height=480 if provider == "replicate" else 768,
-            log_context={
-                "key_source": key_source,
-                "character_id": character.id,
-                "run_id": run_id,
-                "reference_source": reference_source,
-                "route_mode": route_mode,
-            },
-        )
-        return PreparedPostImage(
-            attempt={
-                "status": "ready",
-                "provider": provider,
-                "model": model,
-                "route_mode": route_mode,
-                "reference_source": reference_source,
-                "reference_sent": reference_sent,
-                "fallback_used": generated.fallback_used,
-                "safe_filter": getattr(
-                    generated,
-                    "safe_filter",
-                    pollinations_image.POLLINATIONS_SAFE_FILTER,
-                ),
-                "relay_elapsed_ms": getattr(generated, "relay_elapsed_ms", None),
-                "prompt_hash": prompt_hash,
-                "key_source": key_source,
-                "quota_reservation_id": reservation.id if reservation is not None else None,
-                "provider_prediction_id": getattr(generated, "prediction_id", None),
-                "provider_elapsed_ms": getattr(generated, "elapsed_ms", None),
-            },
-            content_type=generated.content_type,
-            content=generated.content,
-            alt_text=refined["alt_text"],
-            prompt_hash=prompt_hash,
-            model=model,
-            key_source=key_source,
-            quota_reservation_id=reservation.id if reservation is not None else None,
-        )
-    except DirectLlmError as exc:
-        _finalize_service_image_quota(db, reservation, status="failed")
-        return _failed(
-            type(exc).__name__,
-            reference_source=reference_source,
-            **base_attempt,
-        )
-    except pollinations_image.PollinationsImageError as exc:
-        _finalize_service_image_quota(db, reservation, status="failed")
-        return _pollinations_failed(
-            exc,
-            key_source=key_source,
-            reference_source=reference_source,
-            reference_sent=reference_sent,
-            prompt_hash=prompt_hash,
-            prompt_length=len(prompt),
-            quota_reservation_id=reservation.id if reservation is not None else None,
-            route_mode=route_mode,
-            **base_attempt,
-        )
-    except replicate_image.ReplicateImageError as exc:
-        _finalize_service_image_quota(db, reservation, status="failed")
-        return _replicate_failed(
-            exc,
-            key_source=key_source,
-            reference_source=reference_source,
-            prompt_hash=prompt_hash,
-            prompt_length=len(prompt),
-            quota_reservation_id=reservation.id if reservation is not None else None,
-            route_mode=route_mode,
-            **base_attempt,
-        )
-    except Exception as exc:
-        _finalize_service_image_quota(db, reservation, status="failed")
-        return _failed(
-            type(exc).__name__,
-            reference_source=reference_source,
-            **base_attempt,
-        )
+    return await image_policy.prepare_post_image(
+        workflows=RuntimeImageGenerationWorkflows(),
+        db=db,
+        character=character,
+        credential=credential,
+        run_id=run_id,
+        tracker=tracker,
+        writing_mode=writing_mode,
+        post_title=post_title,
+        post_body=post_body,
+        writing_plan=writing_plan,
+        current_time_text=current_time_text,
+        run_started_at=run_started_at,
+        on_rate_limit_wait=on_rate_limit_wait,
+    )
 
 
 def create_local_api_post_image_request(
@@ -370,109 +171,16 @@ def create_local_api_post_image_request(
     image_prompt: str,
     requested_at: datetime,
 ) -> schemas.BotImageRequestRead:
-    setting = agent_crud.get_image_generation_setting(db, character.id)
-    key_source = _image_key_source(setting)
-    model = _image_model_for_key_source(setting, key_source, db=db)
-    skip_reason = _local_api_image_skip_reason(
+    return image_policy.create_local_api_post_image_request(
+        workflows=RuntimeImageGenerationWorkflows(),
         db=db,
-        setting=setting,
+        user_id=user_id,
+        local_key_prefix=local_key_prefix,
         character=character,
+        post_id=post_id,
         image_prompt=image_prompt,
         requested_at=requested_at,
-        key_source=key_source,
     )
-    if skip_reason is not None:
-        if skip_reason == "unsafe_prompt":
-            _log_local_api_image_rejected(
-                db=db,
-                user_id=user_id,
-                character_id=character.id,
-                post_id=post_id,
-                local_key_prefix=local_key_prefix,
-            )
-        job = community_crud.create_post_image_generation_job(
-            db,
-            post_id=post_id,
-            user_id=user_id,
-            character_id=character.id,
-            source="local_api",
-            status="skipped",
-            key_source=key_source if key_source != "disabled" else "none",
-            image_model=model,
-            image_prompt=image_prompt,
-            skip_reason=skip_reason,
-        )
-        return schemas.BotImageRequestRead(
-            status="skipped",
-            job_id=job.id,
-            skip_reason=skip_reason,
-        )
-    if model not in IMAGE_MODEL_OPTIONS:
-        job = community_crud.create_post_image_generation_job(
-            db,
-            post_id=post_id,
-            user_id=user_id,
-            character_id=character.id,
-            source="local_api",
-            status="failed",
-            key_source=key_source if key_source != "disabled" else "none",
-            image_model=model,
-            image_prompt=image_prompt,
-            failure_class="unsupported_model",
-        )
-        return schemas.BotImageRequestRead(
-            status="failed",
-            job_id=job.id,
-            failure_class="unsupported_model",
-        )
-    reservation: models.PostImageQuotaReservation | None = None
-    if key_source == "service":
-        try:
-            reservation = _reserve_service_image_quota(
-                db,
-                user_id=user_id,
-                character_id=character.id,
-                source="local_api",
-                at=requested_at,
-                status="queued",
-                post_id=post_id,
-            )
-        except ServiceImageQuotaError as exc:
-            job = community_crud.create_post_image_generation_job(
-                db,
-                post_id=post_id,
-                user_id=user_id,
-                character_id=character.id,
-                source="local_api",
-                status="skipped",
-                key_source="service",
-                image_model=model,
-                image_prompt=image_prompt,
-                skip_reason=exc.reason,
-            )
-            return schemas.BotImageRequestRead(
-                status="skipped",
-                job_id=job.id,
-                skip_reason=exc.reason,
-            )
-    job = community_crud.create_post_image_generation_job(
-        db,
-        post_id=post_id,
-        user_id=user_id,
-        character_id=character.id,
-        source="local_api",
-        status="queued",
-        key_source=key_source,
-        quota_reservation_id=reservation.id if reservation is not None else None,
-        image_model=model,
-        image_prompt=image_prompt,
-    )
-    if reservation is not None:
-        community_crud.update_post_image_quota_reservation(
-            db, reservation, status="queued", post_id=post_id, job_id=job.id
-        )
-        db.commit()
-    return schemas.BotImageRequestRead(status="queued", job_id=job.id)
 
 
 async def prepare_local_api_post_image(
@@ -486,138 +194,16 @@ async def prepare_local_api_post_image(
     post_id: str | None = None,
     job_id: int | None = None,
 ) -> PreparedPostImage:
-    setting = agent_crud.get_image_generation_setting(db, character.id)
-    if setting is None:
-        return _skipped("no_image_key")
-    key_source = key_source if key_source in {"service", "user"} else _image_key_source(setting)
-    model = _image_model_for_key_source(setting, key_source, db=db)
-    provider = "replicate" if image_provider.is_replicate_model(model) else "pollinations"
-    base_attempt = {"provider": provider, "model": model}
-    if key_source == "disabled":
-        return _skipped("disabled", **base_attempt)
-    if key_source == "service" and not service_image_key.is_service_image_available_for_model(model):
-        return _skipped("service_key_missing", **base_attempt)
-    if key_source == "user" and not _has_user_image_key(setting, model):
-        return _skipped("replicate_key_missing" if provider == "replicate" else "no_image_key", **base_attempt)
-    if model not in IMAGE_MODEL_OPTIONS:
-        return _failed("unsupported_model", **base_attempt)
-    visual_identity = (setting.visual_identity_prompt or "").strip()
-    if not visual_identity or setting.visual_identity_source_hash is not None:
-        return _skipped("visual_identity_required", **base_attempt)
-    if (
-        key_source == "user"
-        and _daily_image_usage(db, character_id=character.id, at=run_started_at)
-        >= setting.max_images_per_day
-    ):
-        return _skipped("limit_exceeded", **base_attempt)
-    if _unsafe_image_text_reason(image_prompt) or _unsafe_image_text_reason(visual_identity):
-        return _skipped("unsafe_prompt", **base_attempt)
-    reference = _select_reference_image(character, setting)
-    reference_source = reference.source if reference is not None else None
-    reference_image_url = _reference_image_url(model, reference)
-    if _requires_reference(model) and not reference_image_url:
-        return _skipped(
-            "reference_required",
-            reference_source=reference_source,
-            **base_attempt,
-        )
-    prompt = _compose_local_api_pollinations_prompt(
-        visual_identity=visual_identity,
+    return await image_policy.prepare_local_api_post_image(
+        workflows=RuntimeImageGenerationWorkflows(),
+        db=db,
+        character=character,
         image_prompt=image_prompt,
-        model=model,
-    )
-    if _unsafe_image_text_reason(prompt):
-        return _skipped("unsafe_prompt", reference_source=reference_source, **base_attempt)
-    prompt_hash = hashlib.sha256(prompt.encode("utf-8")).hexdigest()
-    reference_sent = bool(reference_image_url)
-    route_mode = "replicate" if provider == "replicate" else operation_settings.get_pollinations_image_route_mode(db)
-    try:
-        image_key = _image_key_for_source(setting, key_source, model, character=character)
-        if image_key is None:
-            return _skipped(
-                "service_key_missing"
-                if key_source == "service"
-                else ("replicate_key_missing" if provider == "replicate" else "no_image_key"),
-                **base_attempt,
-            )
-        generated = await image_provider.generate_image(
-            api_key=image_key,
-            model=model,
-            prompt=prompt,
-            reference_image_url=reference_image_url,
-            allow_reference_fallback=_allows_reference_fallback(model),
-            timeout_seconds=POLLINATIONS_IMAGE_TIMEOUT_SECONDS,
-            prompt_hash=prompt_hash,
-            route_mode=route_mode,
-            width=640 if provider == "replicate" else 1024,
-            height=480 if provider == "replicate" else 768,
-            log_context={
-                "key_source": key_source,
-                "character_id": character.id,
-                "post_id": post_id,
-                "job_id": job_id,
-                "reference_source": reference_source,
-                "source": "local_api",
-                "route_mode": route_mode,
-            },
-        )
-    except pollinations_image.PollinationsImageError as exc:
-        return _pollinations_failed(
-            exc,
-            key_source=key_source,
-            reference_source=reference_source,
-            reference_sent=reference_sent,
-            prompt_hash=prompt_hash,
-            prompt_length=len(prompt),
-            quota_reservation_id=quota_reservation_id,
-            route_mode=route_mode,
-            **base_attempt,
-        )
-    except replicate_image.ReplicateImageError as exc:
-        return _replicate_failed(
-            exc,
-            key_source=key_source,
-            reference_source=reference_source,
-            prompt_hash=prompt_hash,
-            prompt_length=len(prompt),
-            quota_reservation_id=quota_reservation_id,
-            route_mode=route_mode,
-            **base_attempt,
-        )
-    except Exception as exc:
-        return _failed(
-            type(exc).__name__,
-            reference_source=reference_source,
-            **base_attempt,
-        )
-    return PreparedPostImage(
-        attempt={
-            "status": "ready",
-            "provider": provider,
-            "model": model,
-            "route_mode": route_mode,
-            "reference_source": reference_source,
-            "reference_sent": reference_sent,
-            "fallback_used": generated.fallback_used,
-            "safe_filter": getattr(
-                generated,
-                "safe_filter",
-                pollinations_image.POLLINATIONS_SAFE_FILTER,
-            ),
-            "relay_elapsed_ms": getattr(generated, "relay_elapsed_ms", None),
-            "prompt_hash": prompt_hash,
-            "key_source": key_source,
-            "quota_reservation_id": quota_reservation_id,
-            "provider_prediction_id": getattr(generated, "prediction_id", None),
-            "provider_elapsed_ms": getattr(generated, "elapsed_ms", None),
-        },
-        content_type=generated.content_type,
-        content=generated.content,
-        alt_text=f"{character.name}의 게시글에 첨부된 AI 생성 이미지",
-        prompt_hash=prompt_hash,
-        model=model,
+        run_started_at=run_started_at,
         key_source=key_source,
         quota_reservation_id=quota_reservation_id,
+        post_id=post_id,
+        job_id=job_id,
     )
 
 
@@ -858,32 +444,13 @@ def _mime_type_from_url(url: str) -> str:
     return "image/jpeg"
 
 
-def _image_key_source(setting: models.AgentImageGenerationSetting | None) -> str:
-    if setting is None:
-        return "disabled"
-    mode = (getattr(setting, "image_key_mode", "") or "").strip()
-    if mode in {"service", "user", "disabled"}:
-        return mode
-    return "user" if setting.image_generation_enabled else "disabled"
-
-
-def _has_user_image_key(setting: models.AgentImageGenerationSetting, model: str) -> bool:
-    if image_provider.is_replicate_model(model):
-        return bool(setting.encrypted_replicate_api_token)
-    return bool(setting.encrypted_pollinations_api_key)
-
-
 def _image_model_for_key_source(
     setting: models.AgentImageGenerationSetting | None,
     key_source: str,
     *,
     db: Session | None = None,
 ) -> str:
-    if key_source == "service":
-        return operation_settings.get_pollinations_free_image_model(db)
-    if setting is None:
-        return DEFAULT_POLLINATIONS_IMAGE_MODEL
-    return setting.pollinations_image_model
+    return image_policy._image_model_for_key_source(workflows=RuntimeImageGenerationWorkflows(), setting=setting, key_source=key_source, db=db)
 
 
 def _image_key_for_source(
@@ -931,41 +498,15 @@ def _local_api_image_skip_reason(
     requested_at: datetime,
     key_source: str,
 ) -> str | None:
-    if setting is None:
-        return "disabled"
-    if key_source == "disabled":
-        return "disabled"
-    model = _image_model_for_key_source(setting, key_source, db=db)
-    provider = "replicate" if image_provider.is_replicate_model(model) else "pollinations"
-    if key_source == "service" and not service_image_key.is_service_image_available_for_model(model):
-        return "service_key_missing"
-    if key_source == "user" and not _has_user_image_key(setting, model):
-        return "replicate_key_missing" if provider == "replicate" else "no_image_key"
-    visual_identity = (setting.visual_identity_prompt or "").strip()
-    if not visual_identity or setting.visual_identity_source_hash is not None:
-        return "visual_identity_required"
-    if model not in IMAGE_MODEL_OPTIONS:
-        return None
-    if (
-        key_source == "user"
-        and _daily_image_usage(db, character_id=character.id, at=requested_at)
-        >= setting.max_images_per_day
-    ):
-        return "limit_exceeded"
-    if _unsafe_image_text_reason(image_prompt) or _unsafe_image_text_reason(visual_identity):
-        return "unsafe_prompt"
-    reference = _select_reference_image(character, setting)
-    reference_image_url = _reference_image_url(model, reference)
-    if _requires_reference(model) and not reference_image_url:
-        return "reference_required"
-    prompt = _compose_local_api_pollinations_prompt(
-        visual_identity=visual_identity,
+    return image_policy._local_api_image_skip_reason(
+        workflows=RuntimeImageGenerationWorkflows(),
+        db=db,
+        setting=setting,
+        character=character,
         image_prompt=image_prompt,
-        model=model,
+        requested_at=requested_at,
+        key_source=key_source,
     )
-    if _unsafe_image_text_reason(prompt):
-        return "unsafe_prompt"
-    return None
 
 
 def _unsafe_image_text_reason(text: str | None) -> str | None:
@@ -989,3 +530,127 @@ def _log_local_api_image_rejected(
         reason="unsafe_prompt",
         result=f"skip_reason=unsafe_prompt; token_prefix={local_key_prefix}",
     )
+
+
+class RuntimeImageGenerationWorkflows:
+    @property
+    def llm_error(self) -> type[Exception]:
+        return DirectLlmError
+
+    def get_image_generation_setting(self, db: Session, character_id: str):
+        return agent_crud.get_image_generation_setting(db, character_id)
+
+    def service_image_available(self, model: str) -> bool:
+        return service_image_key.is_service_image_available_for_model(model)
+
+    def free_image_model(self, db: Session | None) -> str:
+        return operation_settings.get_pollinations_free_image_model(db)
+
+    def image_route_mode(self, db: Session) -> str:
+        return operation_settings.get_pollinations_image_route_mode(db)
+
+    def select_reference_image(self,
+        character: models.Character,
+        setting: models.AgentImageGenerationSetting,
+    ) -> _ReferenceImage | None:
+        return _select_reference_image(character, setting)
+
+    async def ensure_visual_identity(self,
+        *,
+        db: Session,
+        setting: models.AgentImageGenerationSetting,
+        character: models.Character,
+        credential: models.LlmCredential,
+        reference: _ReferenceImage,
+        tracker: RunLlmTracker,
+        run_id: str,
+        on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
+        model_override: str | None = None,
+    ) -> str | None:
+        return await _ensure_visual_identity(
+            db=db,
+            setting=setting,
+            character=character,
+            credential=credential,
+            reference=reference,
+            tracker=tracker,
+            run_id=run_id,
+            on_rate_limit_wait=on_rate_limit_wait,
+            model_override=model_override,
+        )
+
+    async def resolve_visual_identity(self,
+        *,
+        db: Session,
+        setting: models.AgentImageGenerationSetting,
+        character: models.Character,
+        credential: models.LlmCredential,
+        reference: _ReferenceImage | None,
+        tracker: RunLlmTracker,
+        run_id: str,
+        on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
+        model_override: str | None = None,
+    ) -> str:
+        return await _resolve_visual_identity(
+            db=db,
+            setting=setting,
+            character=character,
+            credential=credential,
+            reference=reference,
+            tracker=tracker,
+            run_id=run_id,
+            on_rate_limit_wait=on_rate_limit_wait,
+            model_override=model_override,
+        )
+
+    async def refine_image_prompt(self,
+        *,
+        character: models.Character,
+        credential: models.LlmCredential,
+        tracker: RunLlmTracker,
+        run_id: str,
+        image_model: str,
+        current_time_text: str,
+        post_title: str,
+        post_body: str,
+        writing_plan: dict[str, Any],
+        visual_identity: str,
+        on_rate_limit_wait: Callable[[float], Awaitable[None]] | None,
+        model_override: str | None = None,
+    ) -> dict[str, str]:
+        return await _refine_image_prompt(
+            character=character,
+            credential=credential,
+            tracker=tracker,
+            run_id=run_id,
+            image_model=image_model,
+            current_time_text=current_time_text,
+            post_title=post_title,
+            post_body=post_body,
+            writing_plan=writing_plan,
+            visual_identity=visual_identity,
+            on_rate_limit_wait=on_rate_limit_wait,
+            model_override=model_override,
+        )
+
+    def image_key_for_source(self,
+        setting: models.AgentImageGenerationSetting,
+        key_source: str,
+        model: str,
+        *,
+        character: models.Character,
+    ) -> str | None:
+        return _image_key_for_source(setting, key_source, model, character=character)
+
+    def unsafe_image_text_reason(self, text: str | None) -> str | None:
+        return _unsafe_image_text_reason(text)
+
+    def log_local_api_image_rejected(self,
+        *,
+        db: Session,
+        user_id: str,
+        character_id: str,
+        post_id: str,
+        local_key_prefix: str,
+    ) -> None:
+        return _log_local_api_image_rejected(db=db, user_id=user_id, character_id=character_id, post_id=post_id, local_key_prefix=local_key_prefix)

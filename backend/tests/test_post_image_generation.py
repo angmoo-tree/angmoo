@@ -25,6 +25,7 @@ from app.core.image_generation import (
 from app.config import settings
 from app.cruds import agents as agent_crud
 from app.services import image_prompt_safety, post_image_generation, profile_media, service_image_key
+from app.domains.social.service import image_generation as image_policy
 from app.integrations import pollinations_image
 from app.runtime.characters import management as agent_service
 
@@ -1020,7 +1021,7 @@ def test_pruna_edit_prepare_skips_without_reference(monkeypatch) -> None:
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
-    monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
+    monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
 
     result = asyncio.run(
         post_image_generation.prepare_post_image(
@@ -1098,7 +1099,7 @@ def test_prepare_post_image_does_not_skip_new_root_post_modes(
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
-    monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
+    monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(
         post_image_generation,
@@ -1176,7 +1177,7 @@ def test_prepare_post_image_flux_uses_visual_identity_without_reference(monkeypa
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
-    monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
+    monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(post_image_generation, "_refine_image_prompt", fake_refine_image_prompt)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
@@ -1256,7 +1257,7 @@ def test_prepare_post_image_reads_route_mode_at_processing_time(monkeypatch) -> 
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
-    monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
+    monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(post_image_generation, "_refine_image_prompt", fake_refine_image_prompt)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
@@ -1330,7 +1331,7 @@ def test_prepare_post_image_flux_failure_keeps_pollinations_diagnostics(
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
-    monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
+    monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(post_image_generation, "_refine_image_prompt", fake_refine_image_prompt)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
@@ -1405,7 +1406,7 @@ def test_local_api_prepare_uses_deterministic_prompt_without_llm(monkeypatch) ->
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
-    monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
+    monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
     monkeypatch.setattr(post_image_generation, "_refine_image_prompt", fail_refiner)
@@ -1470,7 +1471,7 @@ def test_local_api_prepare_reads_route_mode_at_worker_processing_time(monkeypatc
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
-    monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
+    monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
 
@@ -1522,7 +1523,7 @@ def test_local_api_prepare_flux_uses_visual_identity_without_reference(monkeypat
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
-    monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
+    monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
 
@@ -1581,7 +1582,7 @@ def test_local_api_prepare_failure_propagates_attempt_metadata(monkeypatch) -> N
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
-    monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
+    monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(post_image_generation.security, "decrypt_secret", lambda value, **_kwargs: value)
     monkeypatch.setattr(post_image_generation.pollinations_image, "generate_image", fake_generate_image)
 
@@ -1669,7 +1670,7 @@ def test_prepare_post_image_service_mode_uses_service_key_and_reservation(
         POLLINATIONS_IMAGE_MODEL_ZIMAGE,
     )
     monkeypatch.setattr(
-        post_image_generation,
+        image_policy,
         "_reserve_service_image_quota",
         fake_reserve,
     )
@@ -1771,12 +1772,12 @@ def test_prepare_post_image_service_failure_keeps_service_mapping_and_diagnostic
         SecretStr("service-key"),
     )
     monkeypatch.setattr(
-        post_image_generation,
+        image_policy,
         "_reserve_service_image_quota",
         lambda *_args, **_kwargs: SimpleNamespace(id=321),
     )
     monkeypatch.setattr(
-        post_image_generation,
+        image_policy,
         "_finalize_service_image_quota",
         lambda *_args, **_kwargs: None,
     )
@@ -1882,7 +1883,7 @@ def test_pruna_edit_prepare_skips_without_public_reference_url(monkeypatch) -> N
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
-    monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
+    monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(
         post_image_generation,
         "_select_reference_image",
@@ -1941,7 +1942,7 @@ def test_pruna_edit_prepare_skips_unusable_reference(monkeypatch) -> None:
         "get_image_generation_setting",
         lambda _db, _character_id: setting,
     )
-    monkeypatch.setattr(post_image_generation, "_daily_image_usage", lambda *_args, **_kwargs: 0)
+    monkeypatch.setattr(image_policy, "_daily_image_usage", lambda *_args, **_kwargs: 0)
     monkeypatch.setattr(
         post_image_generation,
         "_select_reference_image",

@@ -1,7 +1,7 @@
 {
-  "edge_count": 2710,
-  "external_import_count": 2356,
-  "module_count": 785,
+  "edge_count": 2727,
+  "external_import_count": 2366,
+  "module_count": 787,
   "modules": [
     {
       "external_imports": [],
@@ -5359,6 +5359,21 @@
     {
       "external_imports": [
         "__future__",
+        "collections.abc",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.image_generation"
+      ],
+      "module": "app.domains.social.contracts.image_workflows",
+      "path": "backend/app/domains/social/contracts/image_workflows.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "dataclasses",
         "datetime"
       ],
@@ -5999,6 +6014,35 @@
       ],
       "module": "app.domains.social.service.image_attempts",
       "path": "backend/app/domains/social/service/image_attempts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "datetime",
+        "hashlib",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.image_generation",
+        "app.domains.social.constants",
+        "app.domains.social.contracts.image_generation",
+        "app.domains.social.contracts.image_workflows",
+        "app.domains.social.exceptions",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.media",
+        "app.domains.social.schemas.community",
+        "app.domains.social.service.image_attempts",
+        "app.domains.social.service.image_prompts",
+        "app.domains.social.service.image_quota",
+        "app.domains.social.service.image_reference_policy",
+        "app.integrations.image_provider",
+        "app.integrations.pollinations_image",
+        "app.integrations.replicate_image"
+      ],
+      "module": "app.domains.social.service.image_generation",
+      "path": "backend/app/domains/social/service/image_generation.py",
       "wildcard_imports": []
     },
     {
@@ -11520,6 +11564,7 @@
         "app.domains.social.schemas.image_generation",
         "app.domains.social.service.image_attachment",
         "app.domains.social.service.image_attempts",
+        "app.domains.social.service.image_generation",
         "app.domains.social.service.image_prompts",
         "app.domains.social.service.image_quota",
         "app.domains.social.service.image_reference_policy",

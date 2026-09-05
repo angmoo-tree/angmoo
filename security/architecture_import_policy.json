@@ -1103,6 +1103,7 @@
       "app.domains.social.contracts.discovery",
       "app.domains.social.contracts.image_generation",
       "app.domains.social.contracts.image_jobs",
+      "app.domains.social.contracts.image_workflows",
       "app.domains.social.contracts.inbox",
       "app.domains.social.contracts.inbox_reads",
       "app.domains.social.contracts.manual_feed",
@@ -1146,6 +1147,7 @@
       "app.domains.social.service.feed",
       "app.domains.social.service.image_attachment",
       "app.domains.social.service.image_attempts",
+      "app.domains.social.service.image_generation",
       "app.domains.social.service.image_jobs",
       "app.domains.social.service.image_prompts",
       "app.domains.social.service.image_quota",
@@ -1336,6 +1338,7 @@
       "app.domains.social.contracts.discovery",
       "app.domains.social.contracts.image_generation",
       "app.domains.social.contracts.image_jobs",
+      "app.domains.social.contracts.image_workflows",
       "app.domains.social.contracts.inbox",
       "app.domains.social.contracts.inbox_reads",
       "app.domains.social.contracts.manual_feed",
@@ -1358,6 +1361,7 @@
       "app.domains.social.service.feed",
       "app.domains.social.service.image_attachment",
       "app.domains.social.service.image_attempts",
+      "app.domains.social.service.image_generation",
       "app.domains.social.service.image_jobs",
       "app.domains.social.service.image_prompts",
       "app.domains.social.service.image_quota",
@@ -3127,6 +3131,14 @@
         "owner_stage": "AR-B5",
         "reason": "Legacy generation orchestration imports the identical actual Social attachment/reference decision function during migration.",
         "removal_condition": "Remove the old image generation consumer after its remaining provider and Character callback wiring moves to canonical runtime.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.social.service.image_generation",
+        "owner_stage": "AR-B5",
+        "reason": "Remaining original Character/LLM/secret/settings binding constructs the real Social generation service calls while its last client responsibilities move.",
+        "removal_condition": "Move the concrete binding to runtime/social and remove the old image generation module after all exact consumers/monkeypatch targets are canonical.",
         "review_date": "2026-09-06"
       }
     ]

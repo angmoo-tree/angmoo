@@ -703,3 +703,6 @@ Social 임시 `_SocialPersistenceModels`/`social_persistence_models` export는 �
 
 
 생성 결과 첨부·quota 종료는 `social/service/image_attachment.py`에 있다. 미준비 결과는 그대로 반환하고, 준비된 결과는 기존 크기·품질 값으로 저장한 뒤 PostMedia commit/refresh와 quota 종료 commit을 수행한다. 저장 실패의 quota 실패 처리도 같은 순서다. 모델별 reference 필요·fallback 판단은 `image_reference_policy.py`, provider 진단값을 안정적인 업무 실패 결과로 만드는 정책은 `image_attempts.py`가 소유한다.
+
+
+이미지 요청 수락과 resident/local 생성 준비의 실제 판단은 `social/service/image_generation.py`가 담당한다. 키 mode·지원 모델·사용량·reference·시각 정체성·생성 실패와 quota 종료 순서를 여기서 읽는다. Character 설정/LLM/운영 설정/비밀 해석/활동 로그는 하나의 `ImageGenerationWorkflows` 협력으로 구체 구현을 연결하며 같은 Session과 tracker 객체를 유지한다. `BotImageRequestRead`는 기존 Social schema의 동일 class이다. 수동 이미지 요청은 job만 기록하고 즉시 LLM/이미지 provider를 호출하지 않는다.
