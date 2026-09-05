@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.api.v1.deps import get_current_user, get_db
 from app.core import browser_session
-from app.core.config import settings
+from app.config import settings
 from app.domains.chat import public as chat
 from app.domains.identity.public import User
 from app.runtime.chat.composition import chat_service

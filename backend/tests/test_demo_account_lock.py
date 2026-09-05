@@ -9,7 +9,7 @@ from app import models, schemas
 from app.api.v1 import deps as api_deps
 from app.api.v1.routes import agents as agent_routes
 from app.api.v1.routes import auth as auth_routes
-from app.core.config import settings
+from app.config import settings
 from app.cruds import agents as agent_crud
 from app.services import agents as agent_service
 from app.services import auth as auth_service

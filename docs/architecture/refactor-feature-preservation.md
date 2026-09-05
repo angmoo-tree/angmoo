@@ -4,7 +4,7 @@
 
 ## 기준과 적용 상태
 
-2026-09-05 AR-0의 기준은 PR #258 merge `6e56f0837cc11ff42ccbb520050bbd32c5e9bc14`, tree `99f679acb9aab1e3b28628d0aee6d71ae0364d74`다. 준비·검사 지원 PR #259, backend Device Home PR #260, frontend Device Home PR #261이 차례대로 병합되어 §8.1 준비와 두 파일럿이 완료됐다. 기준선 JSON은 현재 경로로 재생성하지 않으며, 단계별 결과는 [파일럿 결과](refactor-pilot-results.md)에 누적한다. §8.2는 #263 merge `d7037625a19071eb279ad2ea35c3ace6fe5b5289`를 추가 체크포인트로 삼아 AR-G0 검사 지원부터 진행한다. §8.2 공통 기반 전환은 단계별로 진행하며, AR-G4의 Alembic 물리 경로는 로컬 검증 후 PR 대기 상태다. AR-F2 이후·AR-X는 아직 미착수이며, 새 실행 증거는 [백엔드 전환 결과](refactor-backend-results.md)에 누적한다.
+2026-09-05 AR-0의 기준은 PR #258 merge `6e56f0837cc11ff42ccbb520050bbd32c5e9bc14`, tree `99f679acb9aab1e3b28628d0aee6d71ae0364d74`다. 준비·검사 지원 PR #259, backend Device Home PR #260, frontend Device Home PR #261이 차례대로 병합되어 §8.1 준비와 두 파일럿이 완료됐다. 기준선 JSON은 현재 경로로 재생성하지 않으며, 단계별 결과는 [파일럿 결과](refactor-pilot-results.md)에 누적한다. §8.2는 #263 merge `d7037625a19071eb279ad2ea35c3ace6fe5b5289`를 추가 체크포인트로 삼아 AR-G0 검사 지원부터 진행한다. §8.2 공통 기반의 설정·공통 오류·logging·Alembic 이전은 별도 branch에서 구현·집중 검증 후 순차 PR·병합을 준비하고 있다. AR-F2 이후·AR-X는 아직 미착수이며, 새 실행 증거는 [백엔드 전환 결과](refactor-backend-results.md)에 누적한다.
 
 | 자료 | 소유하는 정보 |
 | --- | --- |
@@ -66,7 +66,7 @@
 
 | ID | 목표/처리 | 선행조건·보존 의미 |
 | --- | --- | --- |
-| G01 | core/config → app/config | 설정 기본값·우선순위·개발 .env 탐색 위치 |
+| G01 | app/config로 구현·소비자 이전, core/config 제거 | 설정 기본값·우선순위·개발 .env 탐색 위치. 검증·병합 상태는 백엔드 전환 결과 참조 |
 | G02 | app/models.py | 업무 ORM 소비자 이전 후 app/models 패키지 교체. 단일 Base·metadata·class identity |
 | G03 | 공통/도메인 exceptions | HTTP status/code/body/retry 의미 |
 | G04 | app/pagination | 공통 도구와 업무별 cursor·정렬·scope 구분 |
@@ -81,6 +81,8 @@
 | G13 | backend/alembic 물리 경로 적용·G5 최종 연결 대기 | 전체 88개 역사 revision 본문·그래프와 embedded SQLite frozen migration 보존. G4는 경로/CLI/등록 검증, G5는 최종 Base·등록 경로 재검증 |
 
 공통 기반의 최종 이전은 AR-G다. AR-B1은 기존 Base/DB를 사용하며 G02/G05 완료를 주장하지 않는다. `runtime`, `integrations`, `providers`, `credentials`도 역할과 소비자가 있으므로 유지한다.
+
+AR-G2는 공통 오류 4개와 cursor byte encoding을 실제 전역 파일에 추출했다. SQLite retry·queue, request-body middleware, Device Home/Social의 payload·암호화·query는 기존 파일에 남으며, 전체 원본 파일을 이동한 것으로 처리하지 않는다. `refactor_path_map.json`의 `details.AR-G2`는 남은 심볼과 추출 심볼의 실제 소비자·행위 테스트를 모두 기록한다. 기존 request-body 테스트는 `backend/tests/common/test_request_body_limits.py`로 이동했고 승인 node map에 연결했다. 새 회귀와 구현의 commit별 증거는 [백엔드 전환 결과](refactor-backend-results.md)에 기록한다.
 
 ## 실행 경로와 테스트 소유권
 
@@ -106,3 +108,5 @@ Frontend Home은 World 목록을 소유하고, 인증·runtime-status·device-sh
 AR-1은 새 규칙 지원과 허용/거부 fixture를 먼저 제공한다. 실제 코드 이동과 해당 scope 활성화를 같은 PR에서 수행한다. 미전환 영역의 기존 보호 규칙과 전체 순환 검사를 유지하며 넓은 예외로 통과시키지 않는다.
 
 AR-B1은 PR #260에서 legacy alias 없이 병합됐다. AR-F1은 PR #261에서 Home의 화면·공용 코드를 옮겼고 네 feature facade 소비자, 공용 TypeScript bridge 7개, semantic CSS 직접 소비자 7개를 제거 단계와 함께 기록했다. AR-0/1과 두 파일럿의 완료는 전체 리팩터링 완료가 아니다. AR-G·AR-B2 이후·AR-F2 이후·AR-X가 남으며, P8-L-S 실제 AI 품질·인과·사용자 closeout도 별도로 남는다.
+
+AR-G1은 공통 설정을 `app/config.py`로 옮기면서 기존 startup-security 25 nodes를 `tests/config/test_startup_security.py`에 그대로 연결한다. 다른 업무·runtime 테스트는 소유 위치를 유지하고 설정 import만 전환한다. 새 설정 경로·cold import 회귀 2개는 별도 도입 증거에 기록한다. 고정 기준선·과거 secret-scan allowlist·검사 fixture의 옛 경로는 역사 또는 검사 입력이며 실행 호환 파일이 아니다. G01 코드 이전은 AR-G 전체나 설치 앱 최종 검증 완료를 뜻하지 않는다.

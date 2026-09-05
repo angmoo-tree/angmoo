@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import models
-from app.core.config import settings
+from app.config import settings
 
 
 @dataclass(frozen=True)

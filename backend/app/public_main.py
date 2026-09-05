@@ -7,11 +7,13 @@ import logging
 from typing import Any
 
 import uvicorn
+
+from app.runtime.logging_config import configure_application_logging, uvicorn_logging_config
 from fastapi import APIRouter, FastAPI, HTTPException, Request, status
 from sqlalchemy import text
 
 from app.api.v1.public import create_public_api_router
-from app.core.config import Settings, settings
+from app.config import Settings, settings
 from app.core.db import SessionLocal, get_db
 from app.core.request_limits import RequestBodyLimitMiddleware
 from app.core.public_media import mount_public_media
@@ -211,6 +213,7 @@ def create_app(
     runtime_config: RuntimeConfig | None = None,
     prepare_media_directories: bool = True,
 ) -> FastAPI:
+    configure_application_logging()
     composition: RuntimeComposition | None = None
     world_package_import_committer = None
     runtime_settings = settings
@@ -408,7 +411,7 @@ app = create_app(
 
 
 def main() -> None:
-    uvicorn.run("app.public_main:app", host="0.0.0.0", port=8080, reload=True)
+    uvicorn.run("app.public_main:app", host="0.0.0.0", port=8080, reload=True, log_config=uvicorn_logging_config())
 
 
 if __name__ == "__main__":

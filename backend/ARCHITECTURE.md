@@ -4,7 +4,9 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 
 이 문서는 기능을 추가하거나 버그를 수정하는 기여자가 코드의 위치와 연결 방식을 이해하기 위한 설명서입니다. [FastAPI Best Practices](https://github.com/zhanymkanov/fastapi-best-practices#project-structure)의 도메인별 구성을 바탕으로, Angmoo의 로컬 실행·AI 호출·기억·World 경계를 설명합니다.
 
-> **적용 상태 — 2026-09-05:** AR-0 기준선과 AR-1 검사 지원은 PR #259에서 병합됐습니다. `device_home` 첫 backend 파일럿은 PR #260, merge commit `a55c521b9adad624ae1342b2a7b270abc2237f79`로 병합됐고 역할별 파일과 새 경계 검사를 사용합니다. §8.2는 #263 기준의 AR-G0 후속 보존·부분 전환 검사 지원부터 진행 중입니다. 다른 도메인과 전역 기반은 아직 기존 경로와 규칙을 사용합니다. 실제 범위와 검증은 [보존 지도](../docs/architecture/refactor-feature-preservation.md)와 [백엔드 전환 결과](../docs/architecture/refactor-backend-results.md)에 기록합니다.
+> **적용 상태 — 2026-09-05:** AR-0 기준선과 AR-1 검사 지원은 PR #259에서 병합됐습니다. `device_home` 첫 backend 파일럿은 PR #260, merge commit `a55c521b9adad624ae1342b2a7b270abc2237f79`로 병합됐고 역할별 파일과 새 경계 검사를 사용합니다. §8.2는 #263 기준의 AR-G0 후속 보존·부분 전환 검사 지원을 바탕으로 진행 중입니다. AR-G1에서 공통 설정 구현과 실제 소비자를 `app/config.py`로 옮겼습니다. 다른 도메인과 전역 기반은 아직 기존 경로와 규칙을 사용합니다. 실제 범위와 검증·PR·병합 상태는 [보존 지도](../docs/architecture/refactor-feature-preservation.md)와 [백엔드 전환 결과](../docs/architecture/refactor-backend-results.md)에 기록합니다.
+
+> **AR-G2 적용 범위:** 공통 오류 4개는 `app/exceptions.py`, Device Home·Social profile이 함께 사용하는 cursor bytes 변환은 `app/pagination.py`가 소유합니다. 기존 core 모듈은 동시성·middleware 구현과 동일 오류 객체의 export를 유지합니다. 다른 업무 오류·cursor payload·query·실행 계약은 기존 소유 모듈에서 계속 관리합니다. 병합 및 통합 검증 상태는 위 실행 결과 문서에서 구분합니다.
 
 ## 목차
 
@@ -78,7 +80,7 @@ backend/
 ├── .python-version
 ├── .env.example                    # 비밀 없는 개발 설정 예시
 ├── .env                            # 선택적 개발 설정·Git/제품 배포 제외
-├── logging.ini                     # 목표: 앱 로그 설정
+├── logging.ini                     # 앱 기본 level·Uvicorn console 설정
 └── alembic.ini                     # backend/alembic 연결
 
 저장소 root/
@@ -251,6 +253,10 @@ ORM과 응답 schema는 같은 객체가 아닙니다. ORM의 내부 필드·암
 
 업무 오류는 안정된 code와 의미를 가지고, HTTP 상태·응답 body로 바꾸는 처리는 router 또는 공통 HTTP 경계가 맡습니다. Provider 원문·stack trace·비밀을 그대로 사용자에게 전달하지 않습니다. `pagination.py`는 공유 가능한 cursor·limit 도구를 제공하며, API마다 다른 정렬·scope·기본값은 소유 도메인에서 보존합니다.
 
+현재 [`app/exceptions.py`](app/exceptions.py)는 SQLite 동시성 오류 3개와 요청 body 크기 초과 오류를 정의합니다. DB retry·queue와 ASGI middleware는 오류를 발생시키고 처리하는 실행 코드입니다. 이 코드를 오류 선언 파일에 합치지 않습니다. 같은 SQLite busy라도 Social은 HTTP 503, 자율활동 설정은 기존 업무 오류를 거쳐 HTTP 409를 반환하므로 공통 class의 존재가 동일 HTTP 응답을 뜻하지 않습니다.
+
+[`app/pagination.py`](app/pagination.py)의 `encode_cursor_bytes`·`decode_cursor_bytes`는 bytes와 URL-safe Base64 문자열만 변환합니다. Device Home은 JSON cursor를, Social profile은 AESGCM으로 인증·암호화한 cursor를 이 도구에 전달합니다. 암호화 key·version·World/캐릭터/tab scope·timestamp·정렬·limit·업무별 오류는 각 소유 모듈에 남습니다. 따라서 같은 보조 함수를 쓴다는 이유로 두 cursor 형식을 서로 바꿔 사용할 수 없습니다.
+
 ### `async def`는 호출하는 도구에 맞춥니다
 
 현재 [DB 기반](app/core/db.py)은 동기 SQLAlchemy `Session`·`create_engine`을 사용합니다. 폴더를 바꾸는 작업에 `AsyncSession` 전환을 포함하지 않습니다. 비동기 I/O는 `await`로 호출하고, 동기 DB·파일·SDK 호출이 event loop를 막지 않도록 기존 실행 경계를 확인합니다. `async def` 안에서 보통의 동기 helper를 호출한다고 FastAPI가 자동으로 thread pool에 옮겨 주지는 않습니다. [FastAPI 동시성 설명](https://fastapi.tiangolo.com/async/)
@@ -292,15 +298,17 @@ Streaming에서는 사용자에게 허용된 응답 event만 전달합니다. �
 
 ### 전역 설정과 업무 설정
 
-목표 `app/config.py`는 공통 환경 설정·타입·기본값을, 도메인 `config.py`는 그 업무의 설정 의미를 담당합니다. 같은 `.env`를 각 서비스에서 새로 읽거나 서로 다른 기본값으로 해석하지 않습니다. 실제 설치 경로·저장된 사용자 설정은 기존 `runtime/configuration.py`와 연결합니다.
+[app/config.py](app/config.py)는 공통 환경 설정·타입·기본값과 단일 `Settings`/`settings`를 소유합니다. 소비자는 `from app.config import ...`로 이를 사용하고, 도메인 `config.py`는 그 업무의 설정 의미를 담당합니다. 같은 `.env`를 각 서비스에서 새로 읽거나 서로 다른 기본값으로 해석하지 않습니다. 실제 설치 경로·저장된 사용자 설정은 기존 `runtime/configuration.py`와 연결합니다.
 
-기존 `app/core/config.py`를 옮길 때도 개발 `.env` 위치는 `backend/.env`로 유지합니다. 소스 파일의 부모 경로가 달라졌다는 이유로 설정 탐색 위치가 바뀌면 안 됩니다. 설치 앱에 개발 `.env`를 필수로 추가하지 않으며, 비밀은 [credential resolver](app/credentials/resolver.py)의 경계를 따릅니다.
+기존 `app/core/config.py`는 제거했고 설정 구현을 중복하거나 호환 alias를 남기지 않습니다. `BACKEND_DIR`는 이동 후에도 `backend`를 가리켜 개발 `.env`, 기본 SQLite, media, graph 경로를 보존합니다. 작업 디렉터리가 달라도 `backend/.env`를 읽고, 환경 변수는 dotenv보다 우선하며 명시적 생성 인자는 환경 변수보다 우선합니다. 이 계약과 cold import의 단일 설정 사용은 [설정 경로 검사](tests/config/test_config_paths.py), 기존 시작 보안 계약은 [시작 보안 검사](tests/config/test_startup_security.py)에서 확인합니다. 설치 앱에 개발 `.env`를 필수로 추가하지 않으며, 비밀은 [credential resolver](app/credentials/resolver.py)의 경계를 따릅니다.
 
 ### 로그와 배포 파일
 
-목표 `backend/logging.ini`는 앱 로그 level·format·handler 설정을 담고, 각 진입점이 자신의 실행 profile에 맞춰 명시적으로 연결합니다. Python filter의 redaction이나 동적 경로 처리까지 INI만으로 대체한다고 가정하지 않습니다. Import만으로 handler·engine·worker를 시작하지 않습니다.
+[`backend/logging.ini`](logging.ini)는 기존 root `WARNING` 기본값과 Uvicorn `INFO`·format·console stream 설정을 담습니다. [`runtime/logging_config.py`](app/runtime/logging_config.py)가 파일을 읽고, 앱 factory는 자원을 검증하면서 기존 root handler와 명시적 level을 보존합니다. Factory를 반복 호출해도 `fileConfig`·`dictConfig`로 외부 handler·pytest caplog를 닫거나 새 handler를 설치하지 않습니다. Uvicorn CLI와 contributor reloader는 기존 server 시작 지점에서 같은 설정 dictionary를 사용합니다. 기존 Python redaction 처리는 그대로 유지합니다.
 
-Sidecar의 stdout/stderr·handshake·진단 필드와 중복 handler 방지를 유지합니다. Alembic 자체의 logging section은 `alembic.ini`에 있으며 앱 로그 설정과 역할이 다릅니다. 두 파일은 내용뿐 아니라 실행 디렉터리·패키징에 포함되는 경로도 중요합니다.
+Sidecar는 `log_config=None`·`access_log=False`를 유지합니다. 설치 작업의 JSON stdout, content-free fatal stderr, endpoint 파일과 종료 handshake를 일반 server access log로 바꾸지 않습니다. GUI 프로세스에서 stdout/stderr가 없더라도 logging 설정을 읽을 수 있습니다. 기존 앱에 파일 로그·rotation handler가 없었으므로 이 변경에서도 새 파일 저장 정책을 도입하지 않습니다.
+
+소스 실행은 `backend/logging.ini`, PyInstaller OneFile·OneDir 실행은 `sys._MEIPASS/logging.ini`를 읽습니다. Docker `COPY`와 sidecar `--add-data`에 이 자원이 포함되며, 누락 시 다른 작업 디렉터리의 파일로 대체하지 않고 시작을 실패시킵니다. Alembic 자체의 logging section은 `alembic.ini`에 있으며 앱 설정과 역할이 다릅니다. AR-G3의 로컬 검증과 실제 제품 bundle·설치·CI 판정은 [백엔드 전환 결과](../docs/architecture/refactor-backend-results.md)에서 구분합니다.
 
 현재 의존성은 [pyproject.toml](pyproject.toml)과 [uv.lock](uv.lock)이 관리합니다. `requirements/*.txt` 방식을 별도로 채택하기 전에는 수동 관리 원본을 둘로 만들지 않습니다. 개발·CI·sidecar 빌드의 필요한 의존성을 보존하며 구조 변경에 라이브러리 업그레이드를 섞지 않습니다. `.gitignore`는 저장소 루트의 파일을 사용하고, Git 제외와 Docker·installer 배포 제외를 각각 확인합니다.
 
@@ -365,7 +373,8 @@ Import inventory는 현재 사실을 기록하고 import policy는 허용 경계
 | 도메인 `infrastructure`의 ORM·SQL | 같은 도메인 `models.py`·필요한 repository |
 | `ports`, `public.py` | 실제 교체 경계·지원 타입·호환 alias만 필요한 동안 유지 |
 | 전역 `services/cruds/schemas`의 업무 구현 | 해당 업무 도메인 |
-| `app/core/config.py`, `app/core/db.py` | 전역 `app/config.py`, `app/models.py`, `app/database.py` |
+| `app/config.py` | AR-G1에서 전역 설정 구현·소비자 이전, `app/core/config.py` 제거 |
+| `app/core/db.py` | 목표 전역 `app/models.py`, `app/database.py` |
 | 기존 `app/models/`의 업무 ORM | 소유 도메인 모델, 등록은 실행 조립 |
 
 `core`의 나머지 유틸리티와 기존 runtime·provider 코드는 각각의 실제 역할에 따라 유지하거나 옮깁니다. 모든 파일을 여섯 전역 파일에 합치지 않습니다. 사용 중인 구현과 위임만 남은 alias를 구분하고 import·동적 등록·migration·패키징 소비자가 없어진 뒤 옛 파일을 제거합니다.

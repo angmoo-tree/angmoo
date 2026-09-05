@@ -1340,6 +1340,10 @@
     "domains": [
       "device_home"
     ],
-    "globals": []
+    "globals": [
+      "app.config",
+      "app.exceptions",
+      "app.pagination"
+    ]
   }
 }

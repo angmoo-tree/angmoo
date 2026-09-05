@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.core.config import settings
+from app.config import settings
 from app.core.db import Base
 from app.credentials import (
     CredentialPurpose,

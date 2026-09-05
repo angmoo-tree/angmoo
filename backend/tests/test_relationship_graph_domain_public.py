@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.runtime.graph_projection.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
 )
-from app.core.config import Settings
+from app.config import Settings
 from app.domains.relationships import public as relationships
 from app.domains.relationships.graph_read.errors import GraphReadBackendError
 from p7_graph_support import seed_projection_fixture, sqlite_engine

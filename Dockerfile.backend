@@ -57,6 +57,7 @@ COPY --chown=angmoo:angmoo backend/app ./app
 COPY --chown=angmoo:angmoo backend/alembic ./alembic
 COPY --chown=angmoo:angmoo backend/scripts ./scripts
 COPY --chown=angmoo:angmoo backend/alembic.ini ./
+COPY --chown=angmoo:angmoo backend/logging.ini ./
 COPY --chown=angmoo:angmoo scripts/docker/backend-entrypoint.sh /usr/local/bin/angmoo-backend-entrypoint
 RUN chmod 0555 /usr/local/bin/angmoo-backend-entrypoint
 

@@ -16,7 +16,7 @@ from sqlalchemy.pool import StaticPool
 from app import models
 from app.api.v1 import deps as api_deps
 from app.api.v1.routes import worlds as world_routes
-from app.core.config import settings
+from app.config import settings
 from app.core.db import Base
 from app.domains.worlds.infrastructure.sqlalchemy_reserved_roles import (
     ensure_no_specific_role,

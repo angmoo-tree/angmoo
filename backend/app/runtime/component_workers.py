@@ -6,7 +6,7 @@ import socket
 import threading
 from typing import Any, Protocol
 
-from app.core.config import Settings, settings
+from app.config import Settings, settings
 from app.core.db import SessionLocal
 from app.domains.relationships.ports.projection import (
     RelationshipProjectionBackendError,
