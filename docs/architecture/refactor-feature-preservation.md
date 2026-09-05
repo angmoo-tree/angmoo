@@ -112,3 +112,7 @@ AR-B1은 PR #260에서 legacy alias 없이 병합됐다. AR-F1은 PR #261에서 
 AR-G1은 공통 설정을 `app/config.py`로 옮기면서 기존 startup-security 25 nodes를 `tests/config/test_startup_security.py`에 그대로 연결한다. 다른 업무·runtime 테스트는 소유 위치를 유지하고 설정 import만 전환한다. 새 설정 경로·cold import 회귀 2개는 별도 도입 증거에 기록한다. 고정 기준선·과거 secret-scan allowlist·검사 fixture의 옛 경로는 역사 또는 검사 입력이며 실행 호환 파일이 아니다. G01 코드 이전은 AR-G 전체나 설치 앱 최종 검증 완료를 뜻하지 않는다.
 
 AR-B2의 identity 구현은 15개 소유 테스트 파일·기존 133 nodes와 함께 역할 파일로 이전했다. Auth의 계정 삭제 부분은 runtime의 같은 session/UoW workflow로 분리했고 실패 시 DB rollback·비공개 media 복구, 성공 후 purge 순서를 유지한다. Local owner의 실패한 claim 시도 횟수 commit과 session 발급 제한도 보존한다. 두 factory의 callback 연결, HTTP dependency의 같은 객체 identity, 기존 model/schema aggregate 호환은 G06·G05 후속 단계에서 이어받을 계약이다. 현재 적용·검증·PR·병합 결과는 [백엔드 전환 결과](refactor-backend-results.md)에 별도로 기록한다.
+
+AR-B2 Worlds는 정의·생성·readiness·배너를 12개 실제 역할 module로 이전한다. 기존 Creator 테스트 2파일·11 nodes는 `tests/worlds/`로 옮기며 local-smoke·ER0·L4의 실제 실행 경로도 연결한다. Mixed Worlds router의 14개 endpoint 중 World 10개는 새 router로, WorldCharacter 4개와 leave runtime guard는 기존 경로에 남긴다. 두 앱의 router 순서와 WC에서 전달된 World 오류의 HTTP 변환도 보존한다.
+
+Worlds 부분 전환은 K03 전체 또는 WC·Package·활동·frontend 완료가 아니다. Package seed의 flush-only, 기존 World mutation의 commit, 이전 배너 정리, timezone 재예약의 같은 Session을 유지한다. `worlds.public`의 미전환 ORM 소비자와 immutable v2→v3 import 호환 4개는 정확한 bridge·후속 종료 조건으로 관리한다. 새 서비스에서 ORM 클래스를 export해 다른 업무의 저장 접근을 위장하지 않는다. 원본 3파일을 분리한 63개 symbol에는 실제 목적지·소비자·검증 node가 있으며, frozen migration과 기준선 본문은 바꾸지 않는다.

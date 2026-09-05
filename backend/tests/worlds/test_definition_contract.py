@@ -6,8 +6,8 @@ from sqlalchemy.pool import StaticPool
 
 from app import models, schemas
 from app.core.db import Base
-from app.services import world_definitions
-from app.services import worlds as world_service
+from app.domains.worlds.service import definition as world_definitions
+from app.domains.worlds import service as world_service
 
 
 def _engine():

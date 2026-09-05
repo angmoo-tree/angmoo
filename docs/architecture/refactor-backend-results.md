@@ -184,3 +184,23 @@ Identity의 실제 역할 20개 module에 부분 scope를 적용했다. `identit
 - 변경·신규 파일 120개에 대해 기존 exact allowlist를 적용한 secret scanner는 **findings 0**이었다. 실제 credential 값이나 새 예외는 추가하지 않았다.
 
 Architecture/L4/ER0/Memory batch의 live inventory를 현재 코드로 갱신했다. 고정 #258 baseline·#263 checkpoint·승인 test node·frozen migration과 선행 Today SNS inventory는 수정하지 않았다. Source commit 후 새 파일·신규 5개 test node의 도입 증거를 별도 capture하며 Git 추적 파일을 사용하는 inventory도 다시 갱신한다. 최신 G0와 G1~G4 통합, 최종 backend 검증, PR-head Actions, merge와 post-merge는 후속 결과를 확인할 때 기록한다. 이 Identity 검증은 전체 AR-B2 또는 설치 앱·실제 AI 검증 완료를 뜻하지 않는다.
+
+## AR-B2 Worlds: 정의·Creator·배너 역할 이전
+
+`refactor/ar-b2-worlds`는 G0~G4 통합 `bfa6321`에 Identity source `abbd08c`를 fast-forward한 상태에서 진행했다. 아래는 Worlds의 로컬 구현·검증 기록이며 전체 B2, PR·merge·post-merge 또는 설치 앱 완료 판정이 아니다.
+
+- World의 7개 ORM, schema, system-role contract, 업무 오류와 실제 Creator·definition/readiness·generation context·배너 구현을 `models.py`, `schemas.py`, `contracts.py`, `exceptions.py`, `storage.py`, `service/`로 옮겼다. 불필요한 repository 단계를 추가하지 않았다. 원래 Creator의 함수·class 38개 AST 본문은 세 역할 파일로 분리한 뒤에도 모두 일치했다.
+- 기존 mixed router의 World endpoint 10개를 `worlds/router.py`로 옮기고 두 앱 조립에서 WC 4개 endpoint 다음에 한 번만 연결한다. WC leave runtime guard와 실제 WC 서비스는 다음 PR 범위로 남겼다. WC leave가 World 오류를 받을 때도 같은 HTTP 변환 함수를 사용한다.
+- `seed_world`는 caller Session에서 flush만 하고, 일반 생성·편집·게시·보관의 commit/replay/row version 의미는 그대로다. 배너 commit 실패 시 새 파일만 삭제하고 이전 파일은 성공한 commit 뒤에 제거한다. timezone 변경의 기존 협력 query는 `service/scheduling.py`에서 같은 트랜잭션에 참여하며 active autonomous·enabled activity·idle slot·UTC·dialect row lock 조건을 유지한다. Worker 실행과 runtime 역참조는 없다. 이 활동·scheduler 협력 경계의 후속 소유 전환은 AR-B4다.
+- Immutable SQLite v2→v3가 사용하는 옛 World 모델·정의·system role 경로 4개는 새 정의와 같은 객체를 제공하는 정확한 alias로 유지했다. 모델을 중복 정의하지 않으며 migration 본문을 수정하지 않았다. `worlds.public`의 WC/Package/Routines ORM 소비자 및 기존 model/schema aggregate는 후속 소유 단계에서 닫는다. 새 service에는 `World`·`WorldMembership` 같은 ORM class를 export하지 않는다.
+- Worlds 12개 실제 새 module에 partial scope를 적용하고 14개 정확 bridge를 기록했다. 분리 원본 3파일의 63개 symbol에 실제 목적지·직접 소비자·검증 node가 있다. 기존 Creator 테스트 2파일·11 nodes는 `tests/worlds/`로 이동했으며 승인 baseline은 그대로다. 두 불필요한 전역 definition/context facade와 빈 Worlds api 초기화 파일은 실제 소비자 전환 뒤 제거했다.
+
+### 검증과 남은 증거
+
+최종 Worlds·timezone·구조 경계·보존 guard·L4 inventory 집중 실행은 **134 passed / 4 기존 deprecation warnings / 33.83초**였다. 새 HTTP 오류 회귀의 첫 실행은 TestClient 기본 `testserver` host 때문에 기존 Local Origin 보호가 403을 반환했다. 제품 보호 규칙을 바꾸지 않고 실제 허용 Local base URL을 fixture에 지정한 뒤 동일 묶음 전체를 통과했다. 새 회귀 7개 node는 frozen import의 동일 객체, 배너 commit 실패 정리, timezone 동일 Session의 성공·실패, seed rollback, 14개 endpoint 조립, WC의 World 오류 HTTP 변환을 직접 검증한다.
+
+별도 Device Home·World Package UoW/import/export·WC setup/leave·embedded migration 소비자 묶음은 **77 passed / 3 기존 warnings / 113.22초**였다. 원자 import rollback, approval과 autonomy의 분리, 명시적 역할·기존 v2→v3 upgrade 계약을 포함하며 전체 backend suite의 결과로 확대하지 않는다.
+
+승인 public node 검사는 **604 유지 / current 2,092 PASS**였다. `--contracts --nodes`는 **#258 1,867 / #263 1,907 / 보호 계보 2,080 / current 2,092**를 수집했고 기존 API·OpenAPI·ORM·assertion·split 검사에서 변경/누락을 보고하지 않았다. 단, 선행 Identity `abbd08c`의 신규 source 9개와 node 5개가 아직 append-only introduction metadata에 없어서 전체 명령은 exit 1이었다. 이 검사 전체를 PASS로 기록하지 않으며, Identity와 Worlds source를 순서대로 capture한 뒤 통합 후보에서 다시 판정한다. Worlds source의 도입 증거도 부모 작업에서 해당 실제 commit을 기준으로 추가한다.
+
+Live architecture는 **598 modules / 1,878 internal edges / 2,021 external imports / exact legacy 287 PASS**다. ER0는 **76 PostgreSQL source / 기존 역사 migration 부분집합 87 / Neo4j query 24 / Next route 44 / parity workload 7**로 통과했다. PostgreSQL source 하나의 증가는 원래 timezone query를 별도 service 파일에 배치한 결과다. L4의 parity 97 nodes, Memory batch live inventory, local-smoke의 이동한 두 테스트 경로도 연결했다. frozen source baseline·checkpoint·승인 node·SQLite/Alembic 본문과 역사 inventory는 재작성하지 않았다. PR-head CI와 최종 G5·G06·백엔드 통합 검증은 별도 절차로 남는다.

@@ -1,9 +1,9 @@
 """Compatibility imports for world HTTP schemas.
 
-The canonical schema definitions live in ``app.domains.worlds.api.schemas``.
+The canonical schema definitions live in ``app.domains.worlds.schemas``.
 """
 
-from app.domains.worlds.api.schemas import (
+from app.domains.worlds.schemas import (
     WorldBannerUpload,
     WorldCreatorContextRead,
     WorldDaypart,

@@ -1,8 +1,8 @@
-"""Temporary compatibility exports for unmigrated World consumers.
+"""Supported World use cases and definition queries.
 
-New calls use worlds.service, worlds.schemas and worlds.contracts. ORM exports
-remain here only for the individually tracked WC/Package/Routines consumers;
-canonical World implementations never import this module.
+seed_world and ensure_no_specific_role join the supplied Session and only flush.
+Creator mutation functions own commit/rollback as documented in creator.py; no
+ORM model is exported as a substitute for a cross-domain service.
 """
 
 from app.domains.worlds.service.creator import (
@@ -44,40 +44,12 @@ from app.domains.worlds.service.definition import (
     refresh_world_contract,
     world_contract_hash,
 )
-from app.domains.worlds.contracts import (
-    NO_SPECIFIC_ROLE_DESCRIPTION,
-    NO_SPECIFIC_ROLE_KEY,
-    NO_SPECIFIC_ROLE_NAME,
-    NO_SPECIFIC_ROLE_PORTABLE_REF,
-    is_canonical_no_specific_role,
-)
 from app.domains.worlds.service.reserved_roles import (
     ReservedWorldRoleConflictError,
     ensure_no_specific_role,
 )
-from app.domains.worlds.schemas import (
-    WorldDaypartProfileInput,
-    WorldDraftCreate,
-    WorldGenerationContextRead,
-    WorldGlossaryTermInput,
-    WorldPlaceInput,
-    WorldRoleInput,
-    WorldRuleInput,
-)
-from app.domains.worlds.models import (
-    JSON_DOCUMENT,
-    World,
-    WorldMembership,
-    WorldRole,
-)
 
 __all__ = [
-    "JSON_DOCUMENT",
-    "NO_SPECIFIC_ROLE_DESCRIPTION",
-    "NO_SPECIFIC_ROLE_KEY",
-    "NO_SPECIFIC_ROLE_NAME",
-    "NO_SPECIFIC_ROLE_PORTABLE_REF",
-    "ReservedWorldRoleConflictError",
     "WorldArchivedError",
     "WorldBannerValidationError",
     "WorldCreatorRoleRequiredError",
@@ -89,19 +61,7 @@ __all__ = [
     "WorldRowVersionConflictError",
     "WorldServiceError",
     "WorldSeedOutcome",
-    "WORLD_CONTRACT_VERSION",
-    "World",
-    "WorldDaypartProfileInput",
-    "WorldDraftCreate",
-    "WorldGenerationContextRead",
-    "WorldGlossaryTermInput",
-    "WorldMembership",
-    "WorldPlaceInput",
-    "WorldRoleInput",
-    "WorldRuleInput",
-    "WorldRole",
     "archive_world",
-    "build_world_generation_context",
     "create_world",
     "get_active_membership",
     "get_creator_context",
@@ -109,12 +69,9 @@ __all__ = [
     "is_enabled_world_role",
     "get_world",
     "get_world_read",
-    "ensure_no_specific_role",
-    "is_canonical_no_specific_role",
     "publish_world",
     "remove_world_banner",
     "reschedule_world_autonomy_slots",
-    "refresh_world_contract",
     "seed_world",
     "require_creator_access",
     "require_owner_access",
@@ -122,5 +79,10 @@ __all__ = [
     "update_world",
     "upload_world_banner",
     "validate_world_definition",
+    "build_world_generation_context",
+    "WORLD_CONTRACT_VERSION",
+    "refresh_world_contract",
     "world_contract_hash",
+    "ReservedWorldRoleConflictError",
+    "ensure_no_specific_role",
 ]

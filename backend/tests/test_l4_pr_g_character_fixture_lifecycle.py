@@ -11,6 +11,7 @@ from sqlalchemy.pool import StaticPool
 from app import models
 from app.domains.identity.dependencies import get_current_user
 from app.api.v1.routes.worlds import router as worlds_router
+from app.domains.worlds.router import router as world_creator_router
 from app.core.db import Base, get_db
 from app.domains.world_characters.api.routes import router as studio_router
 
@@ -46,6 +47,7 @@ def _fixture():
     app = FastAPI()
     app.include_router(studio_router, prefix="/api/v1")
     app.include_router(worlds_router, prefix="/api/v1")
+    app.include_router(world_creator_router, prefix="/api/v1")
 
     def db_dependency():
         with Session(engine) as db:

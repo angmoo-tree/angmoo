@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from sqlalchemy.orm import Session
 
-from app.domains.worlds.api import schemas
-from app.domains.worlds.infrastructure import definition_repository as world_definitions
-from app.domains.worlds.infrastructure import sqlalchemy_models as models
+from app.domains.worlds import schemas
+from app.domains.worlds.service import definition as world_definitions
+from app.domains.worlds import models
 
 
 def build_world_generation_context(

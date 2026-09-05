@@ -8,6 +8,8 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 
 > **AR-G2 적용 범위:** 공통 오류 4개는 `app/exceptions.py`, Device Home·Social profile이 함께 사용하는 cursor bytes 변환은 `app/pagination.py`가 소유합니다. 기존 core 모듈은 동시성·middleware 구현과 동일 오류 객체의 export를 유지합니다. 다른 업무 오류·cursor payload·query·실행 계약은 기존 소유 모듈에서 계속 관리합니다. 병합 및 통합 검증 상태는 위 실행 결과 문서에서 구분합니다.
 
+> **AR-B2 Worlds 적용 범위:** World 정의·readiness·생성·배너와 10개 HTTP 경로는 `worlds/models.py`, `schemas.py`, `contracts.py`, `exceptions.py`, `storage.py`, `service/`, `router.py`가 소유합니다. WorldCharacter의 4개 기존 HTTP 경로와 setup/lifecycle은 다음 B2 PR 범위입니다. Worlds 전체를 완료 scope로 올리지 않고 실제 새 역할 12개 module만 검사합니다. `worlds.public` 및 frozen SQLite v2→v3가 사용하는 옛 경로 4개는 같은 객체를 제공하는 추적된 호환 경로입니다.
+
 ## 목차
 
 1. [프로젝트 구조](#1-프로젝트-구조)
@@ -109,6 +111,10 @@ backend/
 | `utils.py` | 업무 판단 없는 작은 보조 함수 | 정해진 형식의 문자열을 변환함 |
 
 DB 조회가 복잡하거나 여러 서비스에서 함께 쓰이면 **`repository.py`**에 모읍니다. 순수한 업무 판단을 따로 테스트하고 싶다면 **`policies.py`**, 실제 교체 가능한 외부 경계의 타입이 필요하면 **`contracts.py`**를 사용할 수 있습니다. 이 세 파일은 Angmoo에서 추가한 선택지이며, 모든 서비스가 반드시 통과하는 계층이 아닙니다.
+
+Worlds의 `service/creator.py`는 권한·row version·상태 전이·commit을, `service/definition.py`는 canonical hash와 readiness·정의 조회를, `service/generation_context.py`는 생성에 제공할 World 정보를 소유합니다. 배너 파일 검증·변환·저장은 `storage.py`에 있고, DB commit 실패 시 새 파일을 정리하고 성공 후 이전 파일을 지우는 순서는 creator service에 있습니다. `seed_world`와 system role의 `ensure_no_specific_role`은 전달받은 Session에서 flush만 수행하므로 Package의 원자 import가 commit/rollback을 소유합니다.
+
+World timezone 변경과 자율활동 슬롯 재예약은 기존과 같이 한 트랜잭션입니다. `service/scheduling.py`는 이 변경에 참여하는 한정된 기존 협력 query이며 worker를 시작하거나 commit하지 않습니다. active autonomous resident·enabled activity·idle slot 필터와 UTC/World timezone 의미를 유지합니다. 활동·scheduler 소유권의 AR-B4 전환은 이 함수의 같은 Session 계약을 이어받으며, creator service에서 runtime을 역으로 import하지 않습니다.
 
 외부 서비스 통신을 한 도메인만 소유한다면 그 안의 `client.py`가 가능하고, 여러 업무가 사용하는 AI·이미지·graph 통신은 기존 `integrations`·`providers`에 둡니다. URL 호출·SDK 응답 변환과 업무 권한 판단은 구분합니다.
 

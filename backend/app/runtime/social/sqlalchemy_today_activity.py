@@ -17,7 +17,7 @@ from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
 from app.domains.social.infrastructure.sqlalchemy_subjective_context_models import (
     SocialActionSubjectiveContext,
 )
-from app.domains.worlds.infrastructure.sqlalchemy_models import World
+from app.domains.worlds.models import World
 from app.runtime.social.sqlalchemy_read_repository import (
     social_persistence_models as models,
 )

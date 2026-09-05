@@ -60,10 +60,10 @@ from app.domains.world_packages.infrastructure.sqlalchemy_source_snapshot import
 from app.domains.world_packages.infrastructure.zip_archive import (
     DeterministicWorldPackageZipArchive,
 )
-from app.domains.worlds.domain.reserved_roles import (
+from app.domains.worlds.contracts import (
     NO_SPECIFIC_ROLE_PORTABLE_REF,
 )
-from app.domains.worlds.infrastructure.sqlalchemy_reserved_roles import (
+from app.domains.worlds.service.reserved_roles import (
     ensure_no_specific_role,
 )
 from app.domains.worlds.public import world_contract_hash

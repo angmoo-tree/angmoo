@@ -24,7 +24,7 @@ from app.domains.memory.infrastructure.sqlalchemy_models import (
 from app.domains.world_characters.infrastructure.sqlalchemy_models import (
     WorldCharacter,
 )
-from app.domains.worlds.infrastructure.sqlalchemy_models import World, WorldMembership
+from app.domains.worlds.models import World, WorldMembership
 from app.runtime.relationships.sqlalchemy_social_event import (
     world_character_pair_is_blocked,
 )
