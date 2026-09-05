@@ -813,10 +813,6 @@
           "importer": "app.services.post_image_generation"
         },
         {
-          "imported": "app.services.profile_media",
-          "importer": "app.services.post_image_generation"
-        },
-        {
           "imported": "app.services.service_image_key",
           "importer": "app.services.post_image_generation"
         },
@@ -1676,9 +1672,9 @@
       {
         "importer": "app.services.profile_media",
         "target": "app.domains.media.contracts",
-        "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
+        "owner_stage": "AR-B8-A",
         "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
-        "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
+        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
         "review_date": "2026-09-05"
       },
       {
@@ -1820,17 +1816,33 @@
       {
         "importer": "app.services.profile_media",
         "target": "app.domains.characters.service.media_storage",
-        "owner_stage": "AR-B3 media / AR-B5 Social",
-        "removal_condition": "Move the recorded remaining profile-media/preview consumers in AR-B3 and Social job consumers in AR-B5 to the exact owner service, then remove this same-object export.",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
         "reason": "The historical mixed media module re-exports the actual Character or Social file-placement implementation; it no longer owns that function body.",
         "review_date": "2026-09-05"
       },
       {
         "importer": "app.services.profile_media",
         "target": "app.domains.social.service.media_storage",
-        "owner_stage": "AR-B3 media / AR-B5 Social",
-        "removal_condition": "Move the recorded remaining profile-media/preview consumers in AR-B3 and Social job consumers in AR-B5 to the exact owner service, then remove this same-object export.",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
         "reason": "The historical mixed media module re-exports the actual Character or Social file-placement implementation; it no longer owns that function body.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.profile_media",
+        "target": "app.domains.worlds.storage",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
+        "reason": "The historical unused World image entry keeps its original exception class through this same-object compatibility export.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.social.service.media_storage",
+        "owner_stage": "AR-B5",
+        "removal_condition": "Retire the recorded legacy consumer when its remaining tests/job responsibilities move to the canonical owner.",
+        "reason": "Social quota/job attachment calls its actual Social file-placement function; shared paths use integrations.media.files.",
         "review_date": "2026-09-05"
       }
     ]

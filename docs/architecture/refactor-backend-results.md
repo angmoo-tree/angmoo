@@ -431,3 +431,14 @@ Key 없는 경우 reserve 이전 종료, quota 소진 시 번역/provider 0, 기
 신규 **5 nodes**는 `tests/characters/test_character_image_generation_workflows.py`에 있다. 세 실패 종류의 실제 SQLite failed reservation 저장과 후보 없음, key 없는 경우 quota/provider 0, 두 factory의 원래 callback 동일성을 확인한다. 최종 집중 검증은 **145 passed / 2 warnings / 12.18s**, #258/#263 대비 API/ORM 차이 0이다. Architecture는 621 modules / 2022 edges / 267 exact legacy edges, public route inventory는 196 operations로 통과했다. 기존 complete split의 목적지 10개를 갱신했으며 신규 기준선을 재생성하지 않았다.
 
 Media 후속 정리는 World banner의 공유 codec 연결, 실제 남은 외부 번역·legacy URL-helper, mixed profile_media 호환 소비자 종료다. Social quota/job/publication은 B5, image settings와 multi-domain 삭제는 B8-A의 기존 소유 계획을 유지한다. Source introduction capture·통합 Actions·PR/merge는 root가 순차 수행한다.
+
+
+## AR-B3-M5 — World 공통 이미지 처리·옛 media 소비자 종료
+
+Worlds 통합 `1213b3063c39e32f2928d0bba9719f32106ab5ac`를 합친 뒤 canonical `worlds/storage.py`를 공통 `integrations/media`에 연결했다. World의 upload decode/encode 오류는 기존 `InvalidWorldBannerMediaError`와 같은 메시지로 변환한다. 업로드 원본 크기·signature·frame·geometry·EXIF·흰색 alpha 처리·1024×384 한도·WebP quality 80/method 6은 같고, World service의 commit 실패 시 새 파일 제거/이전 배너 보존 순서는 수정하지 않았다. Package의 별도 lossless codec은 이 규칙에 합치지 않는다.
+
+역사적 `profile_media.save_world_banner` 본문은 World storage의 `save_legacy_world_banner`가 소유한다. 이전 helper의 `InvalidProfileMediaError` 계약을 보존하는 동일 객체 export이며 생산 호출은 없다. Post 파일 저장과 URL 해석의 실제 소비자도 Social 저장 service와 공통 files로 연결했다. 따라서 `services/profile_media.py`는 함수 본문과 생산 소비자가 없는 옛 테스트용 export만 남으며 B8-A 제거 대상으로 명시한다. Social quota/job/게시 부착 자체는 정확한 B5 잔여다.
+
+신규 8 nodes는 잘못된 World 이미지의 오류/파일 없음, 공유 정제 결과와 thumbnail/alpha, legacy 오류 동일성, root 밖 삭제 방지를 검증한다. 통합 Actions/Installer/새 source 도입 capture는 root의 별도 Gate이며 이 절에서는 그 완료를 주장하지 않는다.
+
+M5 고정 후보의 집중 검증은 **133 passed / 2 warnings / 12.30s**이며 World 배너 교체 commit 실패 복구를 포함한다. #258/#263 API/ORM 차이는 0, architecture는 **626 modules / 2,043 edges / 265 exact legacy edges**였다.

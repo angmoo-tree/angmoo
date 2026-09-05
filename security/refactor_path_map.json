@@ -8894,9 +8894,9 @@
           "backend/app/domains/characters/service/media_storage.py",
           "backend/app/domains/media/contracts.py",
           "backend/app/domains/social/service/media_storage.py",
+          "backend/app/domains/worlds/storage.py",
           "backend/app/integrations/media/files.py",
-          "backend/app/integrations/media/images.py",
-          "backend/app/services/profile_media.py"
+          "backend/app/integrations/media/images.py"
         ]
       },
       "split_symbols": [
@@ -11373,12 +11373,12 @@
         },
         {
           "old": "backend/app/services/profile_media.py::save_world_banner",
-          "new": "backend/app/services/profile_media.py::save_world_banner",
+          "new": "backend/app/domains/worlds/storage.py::save_legacy_world_banner",
           "direct_consumers": [
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_world_banner_codec.py::test_world_banner_uses_shared_sanitized_bytes_and_legacy_exception_contract"
           ]
         },
         {
@@ -15121,6 +15121,16 @@
         "same model/route selection timing, prompt/seed and ordering; no new public media mount"
       ],
       "remaining": "Legacy URL/translation helper transport cleanup and World banner integration are separate media follow-up. Social quota/job remains AR-B5; image settings and multi-domain deletion remain AR-B8-A."
+    },
+    "AR-B3-M5": {
+      "status": "World canonical storage uses shared image decoding/encoding and containment with World-specific error translation; Post storage consumers now call the actual Social service and common files directly.",
+      "legacy_media_export": "profile_media now has no function bodies or production consumers; only frozen compatibility tests remain until B8-A.",
+      "world_codec_equivalence": "Same MIME/base64/signature/dimensions/frames, source-byte limit, EXIF/white flatten, 1024x384 thumbnail and WebP quality80/method6. World upload commit compensation remains in worlds.service.creator.",
+      "world_package_distinction": "World Package lossless export codec is intentionally not replaced by profile quality80.",
+      "test_paths": [
+        "backend/tests/media/test_world_banner_codec.py",
+        "backend/tests/worlds/test_transition_contracts.py"
+      ]
     }
   }
 }

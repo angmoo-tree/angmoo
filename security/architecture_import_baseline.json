@@ -1,6 +1,6 @@
 {
-  "edge_count": 2039,
-  "external_import_count": 2070,
+  "edge_count": 2043,
+  "external_import_count": 2065,
   "module_count": 626,
   "modules": [
     {
@@ -5906,16 +5906,15 @@
     },
     {
       "external_imports": [
-        "PIL",
         "__future__",
-        "base64",
-        "io",
         "pathlib",
-        "uuid",
-        "warnings"
+        "uuid"
       ],
       "imports": [
-        "app.config"
+        "app.config",
+        "app.domains.media.contracts",
+        "app.integrations.media.files",
+        "app.integrations.media.images"
       ],
       "module": "app.domains.worlds.storage",
       "path": "backend/app/domains/worlds/storage.py",
@@ -9097,7 +9096,9 @@
         "app.credentials",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.social.service.media_storage",
         "app.integrations.image_provider",
+        "app.integrations.media.files",
         "app.integrations.pollinations_image",
         "app.integrations.replicate_image",
         "app.models",
@@ -9106,7 +9107,6 @@
         "app.services.direct_llm",
         "app.services.image_prompt_safety",
         "app.services.operation_settings",
-        "app.services.profile_media",
         "app.services.service_image_key"
       ],
       "module": "app.services.post_image_generation",
@@ -9132,14 +9132,12 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "uuid"
-      ],
+      "external_imports": [],
       "imports": [
-        "app.config",
         "app.domains.characters.service.media_storage",
         "app.domains.media.contracts",
         "app.domains.social.service.media_storage",
+        "app.domains.worlds.storage",
         "app.integrations.media.files",
         "app.integrations.media.images"
       ],

@@ -1,11 +1,8 @@
 """Temporary media compatibility surface; actual implementations have role owners.
 
-Character/preview callers are being migrated in AR-B3; Social job consumers end
-their bridge in AR-B5. The historical World helper is closed with Worlds storage.
+All production consumers use their actual role owner. Existing imported names
+remain the same objects until the frozen compatibility tests retire in B8.
 """
-from uuid import uuid4
-
-from app.config import settings
 from app.domains.media.contracts import InvalidProfileMediaError
 from app.integrations.media.images import (
     CONTENT_TYPES,
@@ -51,27 +48,4 @@ from app.domains.characters.service.media_storage import (
 from app.domains.social.service.media_storage import (
     save_generated_post_image_bytes,
 )
-
-
-def save_world_banner(
-    *,
-    world_id: str,
-    content_type: str,
-    data_base64: str,
-) -> str:
-    content = decode_profile_media(content_type=content_type, data_base64=data_base64)
-    normalized_content_type = content_type.strip().lower()
-    if normalized_content_type not in CONTENT_TYPES:
-        raise InvalidProfileMediaError("Only jpg, png, and webp images are allowed")
-    validate_profile_media_content(normalized_content_type, content)
-    encoded = encode_profile_media_webp(
-        media_type="banner",
-        content=content,
-    )
-
-    world_dir = settings.media_root_path / "worlds" / world_id
-    world_dir.mkdir(parents=True, exist_ok=True)
-    filename = f"banner-{uuid4().hex}.webp"
-    path = world_dir / filename
-    path.write_bytes(encoded)
-    return f"{settings.media_url_path}/worlds/{world_id}/{filename}"
+from app.domains.worlds.storage import save_legacy_world_banner as save_world_banner
