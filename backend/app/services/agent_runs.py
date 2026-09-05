@@ -1,3 +1,6 @@
+from app.domains.routines.service import activity_logs
+from app.domains.routines.service.execution_admission import _read_available_run_character, _resolve_run_owner, _resolve_run_credential
+from app.domains.identity.service import credential_cooldown
 from app.domains.characters.service import state as character_state_service
 from app.domains.routines.service import activity_settings
 from app.domains.routines.service.post_selection import _select_tick_post_id, _select_resident_run_post_id
@@ -851,7 +854,7 @@ def assign_resident_slot(
 ) -> schemas.AgentSlotRead:
     maintenance_service.ensure_auto_ticks_available(db)
     _validate_character_and_credential(
-        SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential),
+        SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential, default_credential_lookup=agent_run_crud.get_default_credential),
         user_id=user_id,
         character_id=character_id,
         credential_id=credential_id,
@@ -895,7 +898,7 @@ def claim_temporary_resident_slot(
 ) -> models.AgentSlot:
     maintenance_service.ensure_run_now_available(db)
     _validate_character_and_credential(
-        SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential),
+        SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential, default_credential_lookup=agent_run_crud.get_default_credential),
         user_id=user_id,
         character_id=character_id,
         credential_id=credential_id,
@@ -950,44 +953,19 @@ async def run_community_once(
     if not use_langgraph_resident and token is None:
         raise OpenClawNotConfiguredError("OPENCLAW_GATEWAY_TOKEN is missing")
 
-    character = community_crud.get_character(db, data.character_id)
-    if character is None or character.deleted_at is not None:
-        raise community_service.CharacterNotFoundError(data.character_id)
-    if character.moderation_status == "suspended":
-        raise community_service.CharacterSuspendedError("character_suspended")
+    character = _read_available_run_character(
+        SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential, default_credential_lookup=agent_run_crud.get_default_credential), data.character_id
+    )
     post_id = _select_tick_post_id(
         SqlAlchemyPostSelectionReferences(db), preferred_post_id=data.post_id, character_id=character.id
     )
     post = community_service.get_post(db, post_id) if post_id else None
-    user_id = data.user_id or character.owner_id
-    if character.owner_id != user_id:
-        raise CharacterOwnershipError(
-            f"user {user_id} cannot run character {character.id}"
-        )
+    user_id = _resolve_run_owner(character, data.user_id)
 
-    credential = None
-    if data.credential_id:
-        credential = agent_run_crud.get_credential(db, data.credential_id)
-        if credential is None:
-            raise CredentialNotFoundError(data.credential_id)
-        if credential.owner_id != user_id:
-            raise CredentialOwnershipError(
-                f"user {user_id} cannot use credential {data.credential_id}"
-            )
-        if credential.character_id is not None and credential.character_id != character.id:
-            raise CredentialOwnershipError(
-                f"credential {data.credential_id} is not assigned to character {character.id}"
-            )
-        if not credential.enabled:
-            raise CredentialDisabledError(data.credential_id)
-    else:
-        credential = agent_run_crud.get_default_credential(
-            db, user_id, character_id=character.id
-        )
-        if credential is None:
-            raise CredentialNotFoundError(
-                f"No enabled credential is assigned to character {character.id}"
-            )
+    credential = _resolve_run_credential(
+        SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential, default_credential_lookup=agent_run_crud.get_default_credential),
+        user_id=user_id, character=character, credential_id=data.credential_id,
+    )
 
     state = character_state_service.get_character_state(db, character.id)
 
@@ -1199,7 +1177,7 @@ async def run_community_once(
                     action_types=("observed",),
                 )
             ):
-                agent_crud.log_activity(
+                activity_logs.log_activity(
                     db,
                     user_id=user_id,
                     character_id=character.id,
@@ -1717,7 +1695,7 @@ async def _run_resident_individual_tool_flow(
                 },
                 ensure_ascii=False,
             )
-        agent_crud.log_activity(
+        activity_logs.log_activity(
             db,
             user_id=user_id,
             character_id=character.id,
@@ -2156,7 +2134,7 @@ async def _run_resident_slot_once(
     selected_post_id = post_id
     try:
         character, credential = _validate_character_and_credential(
-            SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential),
+            SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential, default_credential_lookup=agent_run_crud.get_default_credential),
             user_id=slot.assigned_user_id,
             character_id=slot.assigned_character_id,
             credential_id=slot.assigned_credential_id,
@@ -2236,7 +2214,7 @@ async def _run_resident_slot_once(
                 gateway_result=gateway_payload,
             )
         if cooldown_until is not None and cooldown_until <= now:
-            credential.cooldown_until = None
+            credential_cooldown.set_cooldown_until(credential, cooldown_until=None)
         readiness = (
             activity_profile_readiness.evaluate(
                 db,
@@ -2284,7 +2262,7 @@ async def _run_resident_slot_once(
                 "skipped",
                 gateway_result=_stored_gateway_result(gateway_payload),
             )
-            agent_crud.log_activity(
+            activity_logs.log_activity(
                 db,
                 user_id=slot.assigned_user_id,
                 character_id=character.id,
@@ -2550,7 +2528,7 @@ async def _run_resident_slot_once(
                     action_types=("observed",),
                 )
             ):
-                agent_crud.log_activity(
+                activity_logs.log_activity(
                     db,
                     user_id=slot.assigned_user_id,
                     character_id=character.id,
@@ -2568,7 +2546,7 @@ async def _run_resident_slot_once(
                 gateway_result=_stored_gateway_result(gateway_result),
             )
             if credential.cooldown_until is not None:
-                credential.cooldown_until = None
+                credential_cooldown.set_cooldown_until(credential, cooldown_until=None)
             slot_leases.complete_resident_slot_run(
                 db,
                 agent_id=slot.agent_id,
@@ -2889,7 +2867,7 @@ async def _run_resident_slot_once(
                 raw=redact_secret_text(str(exc)),
             )
             if kind == "model_rate_limit" and credential is not None:
-                credential.cooldown_until = runtime_retry_at
+                credential_cooldown.set_cooldown_until(credential, cooldown_until=runtime_retry_at)
         if run_created:
             if enforce_activity_policy:
                 try:
@@ -2926,7 +2904,7 @@ async def _run_resident_slot_once(
                                 run_id,
                                 slot.agent_id,
                             )
-                        agent_crud.log_activity(
+                        activity_logs.log_activity(
                             db,
                             user_id=slot.assigned_user_id,
                             character_id=character.id,
@@ -3176,7 +3154,7 @@ async def _run_resident_slot_once(
                     gateway_result["memory_note_refine_warning"] = (
                         "memory_note_refine_failed: no state save activity was created"
                     )
-                    agent_crud.log_activity(
+                    activity_logs.log_activity(
                         db,
                         user_id=slot.assigned_user_id,
                         character_id=character.id,
@@ -3191,7 +3169,7 @@ async def _run_resident_slot_once(
                     "error": redact_secret_text(str(exc))[:500],
                 }
                 gateway_result["memory_note_refined"] = False
-                agent_crud.log_activity(
+                activity_logs.log_activity(
                     db,
                     user_id=slot.assigned_user_id,
                     character_id=character.id,
@@ -3270,7 +3248,7 @@ async def _run_resident_slot_once(
                     run_id,
                     slot.agent_id,
                 )
-            agent_crud.log_activity(
+            activity_logs.log_activity(
                 db,
                 user_id=slot.assigned_user_id,
                 character_id=character.id,
@@ -3280,7 +3258,7 @@ async def _run_resident_slot_once(
                 result=observation_result,
             )
     if credential.cooldown_until is not None:
-        credential.cooldown_until = None
+        credential_cooldown.set_cooldown_until(credential, cooldown_until=None)
     slot_leases.complete_resident_slot_run(
         db,
         agent_id=slot.agent_id,
@@ -3324,11 +3302,9 @@ async def run_assigned_resident_slot_once(
     enforce_activity_policy: bool = False,
 ) -> schemas.OpenClawAgentRunRead:
     maintenance_service.ensure_run_now_available(db)
-    character = community_crud.get_character(db, character_id)
-    if character is None or character.deleted_at is not None:
-        raise community_service.CharacterNotFoundError(character_id)
-    if character.moderation_status == "suspended":
-        raise community_service.CharacterSuspendedError("character_suspended")
+    character = _read_available_run_character(
+        SqlAlchemyRunIdentityReferences(db, credential_lookup=agent_run_crud.get_credential, default_credential_lookup=agent_run_crud.get_default_credential), character_id
+    )
     timeout = timeout_seconds or settings.openclaw_timeout_seconds
     slot = resident_slots.claim_resident_slot_assignment(
         db,

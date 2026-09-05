@@ -1,7 +1,7 @@
 {
-  "edge_count": 2576,
-  "external_import_count": 2358,
-  "module_count": 761,
+  "edge_count": 2582,
+  "external_import_count": 2360,
+  "module_count": 763,
   "modules": [
     {
       "external_imports": [],
@@ -2257,6 +2257,17 @@
     },
     {
       "external_imports": [
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.identity.models"
+      ],
+      "module": "app.domains.identity.service.credential_cooldown",
+      "path": "backend/app/domains/identity/service/credential_cooldown.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "dataclasses"
       ],
@@ -4423,6 +4434,18 @@
       ],
       "module": "app.domains.routines.service.execution.lifecycle",
       "path": "backend/app/domains/routines/service/execution/lifecycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.run_identity",
+        "app.domains.routines.exceptions"
+      ],
+      "module": "app.domains.routines.service.execution_admission",
+      "path": "backend/app/domains/routines/service/execution_admission.py",
       "wildcard_imports": []
     },
     {
@@ -10717,6 +10740,7 @@
         "app.cruds.agents",
         "app.cruds.community",
         "app.domains.characters.service.state",
+        "app.domains.identity.service.credential_cooldown",
         "app.domains.routines.constants",
         "app.domains.routines.exceptions",
         "app.domains.routines.repository.feed_cues",
@@ -10727,7 +10751,9 @@
         "app.domains.routines.service.action_menu",
         "app.domains.routines.service.action_prompts",
         "app.domains.routines.service.activity_evidence",
+        "app.domains.routines.service.activity_logs",
         "app.domains.routines.service.activity_settings",
+        "app.domains.routines.service.execution_admission",
         "app.domains.routines.service.execution_prompts",
         "app.domains.routines.service.execution_results",
         "app.domains.routines.service.feed_context",

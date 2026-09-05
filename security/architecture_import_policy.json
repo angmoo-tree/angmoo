@@ -978,6 +978,7 @@
       "app.domains.identity.schemas",
       "app.domains.identity.service",
       "app.domains.identity.service.auth",
+      "app.domains.identity.service.credential_cooldown",
       "app.domains.identity.service.credential_migration",
       "app.domains.identity.service.credential_resolution",
       "app.domains.identity.service.demo_access",
@@ -1063,6 +1064,7 @@
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.execution_admission",
       "app.domains.routines.service.execution_prompts",
       "app.domains.routines.service.execution_results",
       "app.domains.routines.service.feed_context",
@@ -1215,6 +1217,7 @@
       "app.domains.identity.schemas",
       "app.domains.identity.service",
       "app.domains.identity.service.auth",
+      "app.domains.identity.service.credential_cooldown",
       "app.domains.identity.service.credential_migration",
       "app.domains.identity.service.credential_resolution",
       "app.domains.identity.service.demo_access",
@@ -1269,6 +1272,7 @@
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.execution_admission",
       "app.domains.routines.service.execution_prompts",
       "app.domains.routines.service.execution_results",
       "app.domains.routines.service.feed_context",
@@ -3034,6 +3038,30 @@
         "target": "app.domains.routines.service.activity_settings",
         "owner_stage": "AR-B4-C",
         "reason": "Exact existing execution setting db.get calls reuse canonical same-Session get_setting; no ensure mutation or copied query.",
+        "removal_condition": "Move actual execution composition in C6d and remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.identity.service.credential_cooldown",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact original execution calls actual admission, ActivityLog or bounded Identity cooldown owner with unchanged Session and original error/transaction order.",
+        "removal_condition": "Move actual execution composition in C6d and remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.activity_logs",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact original execution calls actual admission, ActivityLog or bounded Identity cooldown owner with unchanged Session and original error/transaction order.",
+        "removal_condition": "Move actual execution composition in C6d and remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.execution_admission",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact original execution calls actual admission, ActivityLog or bounded Identity cooldown owner with unchanged Session and original error/transaction order.",
         "removal_condition": "Move actual execution composition in C6d and remove exact legacy consumer before B8-A.",
         "review_date": "2026-09-06"
       }

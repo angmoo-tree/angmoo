@@ -10897,6 +10897,7 @@
         ],
         "backend/app/services/agent_runs.py": [
           "backend/app/domains/characters/service/state.py",
+          "backend/app/domains/identity/service/credential_cooldown.py",
           "backend/app/domains/routines/constants.py",
           "backend/app/domains/routines/contracts/backoff.py",
           "backend/app/domains/routines/exceptions.py",
@@ -10913,6 +10914,7 @@
           "backend/app/domains/routines/service/activity_evidence.py",
           "backend/app/domains/routines/service/activity_settings.py",
           "backend/app/domains/routines/service/decision_results.py",
+          "backend/app/domains/routines/service/execution_admission.py",
           "backend/app/domains/routines/service/execution_prompts.py",
           "backend/app/domains/routines/service/execution_results.py",
           "backend/app/domains/routines/service/feed_context.py",
@@ -14964,6 +14966,76 @@
             "tests/routines/test_execution_owner_reads.py::test_target_queries_keep_visibility_nonself_priority_and_pending_rollback",
             "tests/routines/test_execution_owner_reads.py::test_nullable_owner_reads_keep_attached_identity_without_flush_or_commit",
             "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::run_community_once",
+          "new": "backend/app/domains/routines/service/execution_admission.py::_read_available_run_character",
+          "source_member": "Exact original nullable Character lookup and missing/deleted/suspended checks only; two existing callers share the identical three statements.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_execution_admission.py::test_run_admission_preserves_owner_default_credential_scope_and_pending_visibility",
+            "tests/identity/test_credential_cooldown.py::test_credential_cooldown_mutation_keeps_caller_identity_no_sql_and_rollback",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
+            "tests/routines/test_run_identity.py::test_run_identity_reads_attached_pending_values_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::run_community_once",
+          "new": "backend/app/domains/routines/service/execution_admission.py::_resolve_run_owner",
+          "source_member": "Exact original data.user_id-or-owner resolution and owner mismatch guard, still after the original selected-post query.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_execution_admission.py::test_run_admission_preserves_owner_default_credential_scope_and_pending_visibility",
+            "tests/identity/test_credential_cooldown.py::test_credential_cooldown_mutation_keeps_caller_identity_no_sql_and_rollback",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
+            "tests/routines/test_run_identity.py::test_run_identity_reads_attached_pending_values_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::run_community_once",
+          "new": "backend/app/domains/routines/service/execution_admission.py::_resolve_run_credential",
+          "source_member": "Exact original explicit credential lookup/ownership/assignment/enabled branch versus default owner+character credential lookup branch. Original missing-default error remains; queries occur only in their original branch.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_execution_admission.py::test_run_admission_preserves_owner_default_credential_scope_and_pending_visibility",
+            "tests/identity/test_credential_cooldown.py::test_credential_cooldown_mutation_keeps_caller_identity_no_sql_and_rollback",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
+            "tests/routines/test_run_identity.py::test_run_identity_reads_attached_pending_values_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::run_assigned_resident_slot_once",
+          "new": "backend/app/domains/routines/service/execution_admission.py::_read_available_run_character",
+          "source_member": "Exact original nullable Character lookup and missing/deleted/suspended checks only; two existing callers share the identical three statements.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_execution_admission.py::test_run_admission_preserves_owner_default_credential_scope_and_pending_visibility",
+            "tests/identity/test_credential_cooldown.py::test_credential_cooldown_mutation_keeps_caller_identity_no_sql_and_rollback",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
+            "tests/routines/test_run_identity.py::test_run_identity_reads_attached_pending_values_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_run_resident_slot_once",
+          "new": "backend/app/domains/identity/service/credential_cooldown.py::set_cooldown_until",
+          "source_member": "Exact original credential.cooldown_until assignment only, three None assignments and one runtime_retry_at assignment in their original conditional positions. Caller still owns the original Session, flush/commit/rollback and surrounding policy.",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_execution_admission.py::test_run_admission_preserves_owner_default_credential_scope_and_pending_visibility",
+            "tests/identity/test_credential_cooldown.py::test_credential_cooldown_mutation_keeps_caller_identity_no_sql_and_rollback",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
+            "tests/routines/test_run_identity.py::test_run_identity_reads_attached_pending_values_without_committing"
           ]
         }
       ]
@@ -32938,6 +33010,24 @@
       "ownership": "Social owns original latest visible root ID SQL2; Routines owns preferred/scoped/fallback policy2. Character state and Routines slot/setting owners supply original9 nullable reads. Runtime binds one Session, no eager fetch/commit.",
       "preservation": "Original two SQL expressions and all AgentRun function bodies are AST-identical after exact read-binding restoration. Original scoped2tests retain every assertion/exception and expected branch: their test-only old call shape composes the actual new service with SqlAlchemyPostSelectionReferences; monkeypatch targets now name defining modules. New SQLite2 verifies nonself/null-author/hidden/deleted/root/order/fallback/pending rollback and loaded-object identity/no flush/no commit.",
       "remaining": "Actual AgentRun execution composition C6d4; Character management and HTTP C7. Memory Daypart and other domain owners remain later same-implementation bindings, no future ancestry merged."
+    },
+    "AR-B4-C6d4a-execution-admission-cooldown": {
+      "status": "SOURCE READY — 480 passed / existing PostgreSQL 1 skipped; read-only original six checks 0, root linear source introductions pending",
+      "actual_paths": [
+        "backend/app/domains/identity/service/credential_cooldown.py",
+        "backend/app/domains/routines/contracts/run_identity.py",
+        "backend/app/domains/routines/service/execution_admission.py",
+        "backend/app/runtime/resident/identity_references.py"
+      ],
+      "test_nodes": [
+        "tests/routines/test_execution_admission.py::test_run_admission_preserves_owner_default_credential_scope_and_pending_visibility",
+        "tests/identity/test_credential_cooldown.py::test_credential_cooldown_mutation_keeps_caller_identity_no_sql_and_rollback",
+        "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies",
+        "tests/routines/test_run_identity.py::test_run_identity_reads_attached_pending_values_without_committing"
+      ],
+      "ownership": "Routines owns actual available-Character, requester-owner and optional credential admission. Identity owns the bounded attached cooldown assignment; execution still decides original values and transaction timing. Runtime binds exact caller Session and existing credential lookup/default lookup without eager queries. Existing ActivityLog write8 calls now directly use the canonical original Routines function.",
+      "preservation": "Original3 admission blocks, both available-Character callers, cooldown4 assignments and all remaining AgentRun bodies are AST-identical after exact binding restoration. Original role-dependent order remains: post is read before owner resolution; explicit credential branch retains checks, default branch retains owner+character query and exact missing error. New SQLite2 covers deleted/suspended precedence, explicit/default nullable/owner scope and pending rollback, plus cooldown assignment with SQL increment0 and caller rollback.",
+      "remaining": "Root Identity c2cd2a64 supplies same canonical lookup2 at integration. Slot setup, resident admission/lifecycle decisions and actual execution composition continue C6d; management/HTTP/credential owner4+HTTP3 follow C7."
     }
   },
   "test_symbols": {

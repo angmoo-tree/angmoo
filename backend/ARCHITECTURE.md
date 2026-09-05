@@ -705,3 +705,8 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 ### 실행 대상 선택과 상태 조회
 
 `routines/service/post_selection.py`는 명시된 대상 우선, 자기 글 제외 조회, 마지막 공개 루트 글 fallback 순서를 담당합니다. Scoped routine이 연결된 경우에는 전역 피드 대상을 만들지 않습니다. 실제 두 SQL은 Social의 `repository/resident_context.py`에 있고 runtime이 같은 Session을 연결합니다. 캐릭터 상태는 `characters/service/state.py::get_character_state`, 슬롯은 `routines/repository/slots.py::get_agent_slot`, 활동 설정은 기존 `activity_settings.get_setting`에서 읽습니다. 이 nullable 조회는 원래 attached 객체를 반환하며 별도 flush/commit을 추가하지 않습니다.
+
+
+### 실행 요청의 진입 판단
+
+`routines/service/execution_admission.py`는 사용 가능한 캐릭터, 요청 소유자, 명시 또는 기본 자격 증명을 판단합니다. 명시 자격 증명과 기본 선택은 기존 검증 조건이 다르므로 두 흐름을 그대로 구분합니다. 런타임은 게시물 조회 뒤 소유자를 정하는 원래 순서를 유지합니다. `identity/service/credential_cooldown.py`는 이미 붙어 있는 credential의 대기 시각만 변경하며, 대기 여부와 저장 시점은 해당 실행 흐름이 결정합니다. 설정 변경을 이유로 먼저 commit하거나 자격 증명을 다시 읽지 않습니다.

@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 import pytest
 from sqlalchemy.orm import Session
-from app.cruds.agent_runs import get_credential
+from app.cruds.agent_runs import get_credential, get_default_credential
 from app.domains.characters.models import Character
 from app.domains.identity.models import LlmCredential
 from app.domains.routines import exceptions
@@ -21,7 +21,7 @@ def test_run_identity_reads_attached_pending_values_without_committing(tmp_path)
         def lookup(session, key):
             reads.append((session, key))
             return get_credential(session, key)
-        references = SqlAlchemyRunIdentityReferences(db, credential_lookup=lookup)
+        references = SqlAlchemyRunIdentityReferences(db, credential_lookup=lookup, default_credential_lookup=get_default_credential)
         assert reads == []
         fixture.character.name = 'uncommitted identity read'
         credential.label = 'uncommitted credential read'
@@ -47,7 +47,7 @@ def test_run_identity_preserves_error_precedence_and_stops_before_credential_rea
         def lookup(session, key):
             calls.append((session, key))
             return get_credential(session, key)
-        references = SqlAlchemyRunIdentityReferences(db, credential_lookup=lookup)
+        references = SqlAlchemyRunIdentityReferences(db, credential_lookup=lookup, default_credential_lookup=get_default_credential)
         values = dict(user_id=fixture.user.id, character_id=fixture.character.id, credential_id=credential.id)
         with pytest.raises(CharacterNotFoundError) as missing:
             validate(references, **(values | {'character_id': 'missing'}))

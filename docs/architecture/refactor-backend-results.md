@@ -1106,3 +1106,11 @@ C6d2 최종 고정 tree **476 passed /기존 PostgreSQL1 skipped/기존warnings4
 
 
 C6d3 최종 고정 제품 tree **478 passed /기존 PostgreSQL1 skipped/기존warnings4/231.18초**. 마지막 정적 검사에서는 repo를 entry가 아닌 scope module로 등록하고 새기존get_setting소비자 한edge를 기한있는 bridge로명시했다. 경계 **761modules/2576edges/exact legacy205/cycle0**, L4 **761/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2282**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions 불변이다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 뒤 확인한다.
+
+
+## AR-B4-C6d4a — 실행 진입 판단·credential 대기 시각
+
+실제admission3block을 Routines로 옮기고 동일available Character3문장은 두원래caller에서같은정책을사용한다. 명시credential검증과기본owner+character조회는기존차이를유지하며 post조회→owner판단순서도그대로다. Identity의boundedcooldown은4원래대입만담당하고Caller의flush/commit/rollback은변경하지않았다. log_activity8호출은C1의samefunction actualowner로직접연결했다. 원문3block·전체남은AgentRun본문 AST는exact호출복원후동일하다. 초기72PASS/기존warnings2/21.90초. 신규SQLite2는기본queryscope·실제행identity·pending/rollback과cooldownSQL증분0을확인한다.
+
+
+C6d4a 최종 고정 tree **480 passed /기존 PostgreSQL1 skipped/기존warnings4/192.09초**. 경계 **763modules/2582edges/exact legacy205/cycle0**, L4 **763/14/97**, ER0 **85/87/24/44/7**, Memory batch 현재 inventory PASS. 읽기 전용 원래6검사는 오류0, **보호2139/current2284**다. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions 불변이다. Stock 전체 게이트는 root의 순차 최초도입 원장 연결 뒤 확인한다.
