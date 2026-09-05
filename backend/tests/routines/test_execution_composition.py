@@ -8,7 +8,7 @@ from app.core.db import Base
 from app.domains.routines import models
 from app.domains.routines.policies.activity_state import initial_state
 from app.domains.routines.service.execution import claims
-from app.models.community import Post
+from app.domains.social.models.posts import Post
 from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
 from routines.test_daily_activity_runtime import _prepare, _seed, _utc
 

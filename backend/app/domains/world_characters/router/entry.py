@@ -1,87 +1,22 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app import models, schemas
-from app.domains.identity.dependencies import get_current_user
+from app.domains.world_characters.schemas import setup as schemas
+from app.api.identity_dependencies import get_current_user
 from app.core.db import get_db
-from app.domains.identity import browser_session
-from app.domains.world_characters import public as world_character_setup
-from app.domains.worlds import public as world_service
-from app.domains.worlds.router import _raise_world_error
-from app.api.world_character_dependencies import lifecycle_service
+from app.api.identity_dependencies import browser_session
+from app.domains.world_characters.service import autonomous_setup as world_character_setup
+from app.domains.world_characters import exceptions as wc_errors
+from app.domains.worlds import service as world_service
+from app.api.world_errors import _raise_world_error
+from app.api.world_character_dependencies import leave_service
 
 
 router = APIRouter(prefix="/worlds", tags=["worlds"])
 
 
-class _WorldCharacterLeaveRuntimeGuard:
-    """Bridge frozen scheduler persistence into the canonical leave command.
-
-    ``app.api.v1.routes.worlds`` already owns the reviewed compatibility import
-    of ``app.models``. Keeping the bridge here avoids introducing a new domain
-    dependency on pre-L6 agent-run and slot persistence.
-    """
-
-    def __init__(self, db: Session) -> None:
-        self.db = db
-
-    def require_idle(
-        self,
-        *,
-        owner_user_id: str,
-        character_id: str,
-        world_character_id: str,
-        selected_active_world: bool,
-    ) -> None:
-        setup_running = self.db.scalar(
-            select(models.WorldCharacterSetupAttempt.id)
-            .where(
-                models.WorldCharacterSetupAttempt.world_character_id
-                == world_character_id,
-                models.WorldCharacterSetupAttempt.status == "running",
-            )
-            .limit(1)
-        )
-        if setup_running is not None:
-            raise world_character_setup.StudioWorldCharacterBusyError(
-                "world_character_setup_in_progress"
-            )
-        if not selected_active_world:
-            return
-
-        active_run = self.db.scalar(
-            select(models.AgentRun.id)
-            .where(
-                models.AgentRun.user_id == owner_user_id,
-                models.AgentRun.character_id == character_id,
-                models.AgentRun.status == "running",
-            )
-            .limit(1)
-        )
-        if active_run is not None:
-            raise world_character_setup.StudioWorldCharacterBusyError(
-                "world_character_run_in_progress"
-            )
-        assigned_slot = self.db.scalar(
-            select(models.AgentSlot.agent_id)
-            .where(
-                models.AgentSlot.assigned_user_id == owner_user_id,
-                models.AgentSlot.assigned_character_id == character_id,
-            )
-            .limit(1)
-        )
-        if assigned_slot is not None:
-            raise world_character_setup.StudioWorldCharacterBusyError(
-                "scheduler_assignment_active"
-            )
-        setting = self.db.get(models.AgentActivitySetting, character_id)
-        if setting is not None and setting.auto_enabled:
-            raise world_character_setup.StudioWorldCharacterConflictError(
-                "world_character_autonomy_enabled"
-            )
 
 
 def _raise_world_character_error(exc: world_character_setup.WorldCharacterSetupError) -> None:
@@ -97,17 +32,17 @@ def _raise_world_character_error(exc: world_character_setup.WorldCharacterSetupE
 
 
 def _raise_world_character_lifecycle_error(
-    exc: world_character_setup.StudioWorldCharacterLifecycleError,
+    exc: wc_errors.StudioWorldCharacterLifecycleError,
 ) -> None:
-    if isinstance(exc, world_character_setup.StudioWorldCharacterNotFoundError):
+    if isinstance(exc, wc_errors.StudioWorldCharacterNotFoundError):
         status_code = status.HTTP_404_NOT_FOUND
-    elif isinstance(exc, world_character_setup.StudioWorldCharacterForbiddenError):
+    elif isinstance(exc, wc_errors.StudioWorldCharacterForbiddenError):
         status_code = status.HTTP_403_FORBIDDEN
     elif isinstance(
         exc,
         (
-            world_character_setup.StudioWorldCharacterBusyError,
-            world_character_setup.StudioWorldCharacterConflictError,
+            wc_errors.StudioWorldCharacterBusyError,
+            wc_errors.StudioWorldCharacterConflictError,
         ),
     ):
         status_code = status.HTTP_409_CONFLICT
@@ -124,7 +59,7 @@ def get_world_character_entry(
     world_id: str,
     character_id: str,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user = Depends(get_current_user),
 ) -> schemas.WorldCharacterEntryRead:
     try:
         return world_character_setup.get_world_entry(
@@ -147,7 +82,7 @@ def enter_world_with_character(
     world_id: str,
     data: schemas.WorldCharacterEntryCreate,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user = Depends(get_current_user),
 ) -> schemas.WorldCharacterEntryRead:
     try:
         return world_character_setup.enter_world(
@@ -170,7 +105,7 @@ def update_world_character_role(
     character_id: str,
     data: schemas.WorldCharacterRoleUpdate,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user = Depends(get_current_user),
 ) -> schemas.WorldCharacterEntryRead:
     try:
         return world_character_setup.update_world_character_role(
@@ -195,13 +130,11 @@ def leave_world_with_character(
     data: schemas.WorldCharacterLeaveCreate,
     request: Request,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user = Depends(get_current_user),
 ) -> schemas.WorldCharacterLeaveRead:
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
-        result = lifecycle_service(
-            db, runtime_guard=_WorldCharacterLeaveRuntimeGuard(db),
-        ).leave(
+        result = leave_service(db).leave(
             world_id=world_id,
             character_id=character_id,
             current_user_id=user.id,
@@ -210,7 +143,7 @@ def leave_world_with_character(
             confirmation_name=data.confirmation_name,
             idempotency_key=data.idempotency_key,
         )
-    except world_character_setup.StudioWorldCharacterLifecycleError as exc:
+    except wc_errors.StudioWorldCharacterLifecycleError as exc:
         _raise_world_character_lifecycle_error(exc)
         raise AssertionError("unreachable")
     except world_service.WorldServiceError as exc:

@@ -8,6 +8,8 @@ from collections.abc import Callable
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import Session
 
+from app.domains.worlds.service import WorldDefinitionValidationError
+
 from app.domains.world_packages.contracts.seed import (
     WorldPackageDestinationSeedRequest,
     WorldPackageDestinationSeedResult,
@@ -38,14 +40,25 @@ class SqlAlchemyWorldPackageSeedUnitOfWork:
     def execute(
         self, request: WorldPackageDestinationSeedRequest
     ) -> WorldPackageDestinationSeedResult:
-        last_error: IntegrityError | OperationalError | None = None
+        last_error: (
+            IntegrityError | OperationalError | WorldDefinitionValidationError | None
+        ) = None
         for attempt in range(1, self._max_attempts + 1):
             with self._session_factory() as db:
                 try:
                     result = SqlAlchemyWorldPackageDestinationSeed(db).seed(request)
                     db.commit()
                     return result
-                except (IntegrityError, OperationalError) as exc:
+                except (
+                    IntegrityError, OperationalError, WorldDefinitionValidationError,
+                ) as exc:
+                    # A concurrent committed import can become visible between
+                    # World slug selection and its final uniqueness read. Only
+                    # that exact validation failure may consult replay state.
+                    if isinstance(exc, WorldDefinitionValidationError) and exc.args != (
+                        "world_slug_unavailable",
+                    ):
+                        raise
                     db.rollback()
                     last_error = exc
 
@@ -56,6 +69,10 @@ class SqlAlchemyWorldPackageSeedUnitOfWork:
                 )
                 if replay is not None:
                     return resolve_world_package_import_replay(request, replay)
+            if isinstance(last_error, WorldDefinitionValidationError):
+                # No completed same-owner/key import exists. Keep the original
+                # validation failure; it is never a reason to retry the seed.
+                raise last_error
             if attempt < self._max_attempts:
                 time.sleep(0.05 * attempt)
 

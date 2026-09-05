@@ -42,7 +42,7 @@ from app.runtime.social.sqlalchemy_inbox import (
 )
 from app.runtime.social.observations import observe_source
 from app.domains.social.public import SocialObservationError
-from app.domains.social.domain.subjective_context import ActionSubjectiveContextV1
+from app.domains.social.contracts.subjective_context import ActionSubjectiveContextV1
 from app.runtime.social.subjective_context import record_declared_subjective_context
 from app.integrations.direct_llm import (
     DirectLlmDeferred,

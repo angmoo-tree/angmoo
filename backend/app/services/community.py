@@ -1,3 +1,41 @@
+from app.domains.social.exceptions import (
+    AgentRunAuthorizationError,
+    CharacterNotFoundError,
+    CharacterOwnershipError,
+    CharacterSuspendedError,
+    CommunityRateLimitedError,
+    CommunityServiceError,
+    FollowSelfError,
+    LegacyCommentsDisabledError,
+    NotificationNotFoundError,
+    PostNotFoundError,
+    PostReportNotAllowedError,
+    PostWorldScopeError,
+    ProfileNotFoundError,
+)
+from app.domains.social.service.posts import (
+    get_post,
+    get_post_thread,
+)
+from app.domains.social.service.presentation import (
+    _hidden_post_detail,
+    _mentioned_characters_for_texts,
+    _notification_actor_identity,
+    _notification_post_preview,
+    _notification_read,
+    _notification_recipient_identity,
+    _post_author_identity,
+    _post_detail,
+    _post_media_reads,
+    _post_reference,
+    _post_summary,
+)
+from app.domains.social.service.visibility import (
+    _is_post_public_context_visible,
+    is_post_public_context_visible,
+)
+from app.domains.social.constants import DELETED_CHARACTER_NAME, MENTION_HANDLE_RE, REPORT_HIDDEN_MESSAGE, REPORT_HIDDEN_TITLE
+
 from app.domains.characters.service import state as character_state
 from app.domains.characters.exceptions import CharacterStateNotFoundError
 import hashlib
@@ -29,7 +67,6 @@ from app.services.llm_context import neutralize_context_text
 
 logger = logging.getLogger(__name__)
 
-DELETED_CHARACTER_NAME = "삭제한 앵무"
 COMPLETE_TICK_POLICY_ACTIONS = {
     "create_post": "post",
     "reply": "reply",
@@ -58,9 +95,6 @@ RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS = 48
 RECENT_OWN_ROOT_TOPIC_HISTORY_LIMIT = 5
 RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT = 20
 FEED_SCAN_BODY_PREVIEW_CHARS = 300
-MENTION_HANDLE_RE = re.compile(
-    r"(?<![A-Za-z0-9_.])@([a-z0-9_]{2,40})(?=$|[^A-Za-z0-9_.]|\.(?=$|[^A-Za-z0-9_]))"
-)
 
 
 def _diagnostic_hash(value: str | None) -> str | None:
@@ -87,32 +121,20 @@ def _feed_history_sanitize_payload_bytes(
 
 def _elapsed_ms(started_at: float) -> int:
     return int((time_module.monotonic() - started_at) * 1000)
-REPORT_HIDDEN_TITLE = "숨김 처리된 글"
-REPORT_HIDDEN_MESSAGE = "신고 누적으로 숨김 처리된 글입니다."
 FEED_HISTORY_STYLE_MARKER_RE = re.compile(
     r"(냐하하|푸훽|ㅋㅋ+|ㅎㅎ+|하하하?|헤헤|히히|후훗|우효|앗싸)",
     re.IGNORECASE,
 )
 
 
-class CommunityServiceError(Exception):
-    pass
 
 
-class PostNotFoundError(CommunityServiceError):
-    pass
 
 
-class CharacterNotFoundError(CommunityServiceError):
-    pass
 
 
-class AgentRunAuthorizationError(CommunityServiceError):
-    pass
 
 
-class PostWorldScopeError(CommunityServiceError):
-    pass
 
 
 def _reject_complete_tick(
@@ -1338,38 +1360,20 @@ def _complete_tick_representative_target(
     return current or candidate
 
 
-class CharacterOwnershipError(CommunityServiceError):
-    pass
 
 
-class CharacterSuspendedError(CharacterOwnershipError):
-    pass
 
 
-class ProfileNotFoundError(CommunityServiceError):
-    pass
 
 
-class FollowSelfError(CommunityServiceError):
-    pass
 
 
-class NotificationNotFoundError(CommunityServiceError):
-    pass
 
 
-class LegacyCommentsDisabledError(CommunityServiceError):
-    pass
 
 
-class PostReportNotAllowedError(CommunityServiceError):
-    pass
 
 
-class CommunityRateLimitedError(CommunityServiceError):
-    def __init__(self, retry_after_seconds: int) -> None:
-        self.retry_after_seconds = max(1, retry_after_seconds)
-        super().__init__("Community action temporarily rate limited")
 
 
 def _session_fingerprint(session_key: str) -> str:
@@ -1658,30 +1662,8 @@ def list_character_following_feed(
     )
 
 
-def get_post(db: Session, post_id: str) -> schemas.PostDetail:
-    post = community_crud.get_post_including_report_hidden(db, post_id)
-    if post is None:
-        raise PostNotFoundError(post_id)
-    if not _is_post_public_context_visible(db, post):
-        return _hidden_post_detail(db, post)
-    return _post_detail(db, post)
 
 
-def get_post_thread(db: Session, post_id: str) -> schemas.PostThreadRead:
-    post = community_crud.get_post_including_report_hidden(db, post_id)
-    if post is None:
-        raise PostNotFoundError(post_id)
-    if not _is_post_public_context_visible(db, post):
-        return schemas.PostThreadRead(post=_hidden_post_detail(db, post), replies=[])
-    replies = community_crud.list_post_thread_replies(db, post_id)
-    return schemas.PostThreadRead(
-        post=_post_detail(db, post),
-        replies=[
-            _post_summary(db, reply)
-            for reply in replies
-            if _is_post_public_context_visible(db, reply)
-        ],
-    )
 
 
 def report_post(
@@ -5158,38 +5140,6 @@ def _character_search_result(
     )
 
 
-def _notification_read(
-    db: Session, notification: models.Notification
-) -> schemas.NotificationRead:
-    actor = _notification_actor_identity(db, notification)
-    recipient = _notification_recipient_identity(db, notification)
-    post_preview = _notification_post_preview(db, notification.post_id)
-    source_post_preview = _notification_post_preview(db, notification.source_post_id)
-    return schemas.NotificationRead.model_validate(
-        {
-            "id": notification.id,
-            "notification_type": notification.notification_type,
-            "post_id": notification.post_id,
-            "source_post_id": notification.source_post_id,
-            "actor_user_id": notification.actor_user_id,
-            "actor_character_id": notification.actor_character_id,
-            "recipient_user_id": notification.recipient_user_id,
-            "recipient_character_id": notification.recipient_character_id,
-            "data": notification.data,
-            "actor_name": actor["name"],
-            "actor_handle": actor["handle"],
-            "actor_avatar_url": actor["avatar_url"],
-            "recipient_name": recipient["name"],
-            "recipient_handle": recipient["handle"],
-            "recipient_avatar_url": recipient["avatar_url"],
-            "post_title": post_preview["title"],
-            "post_body": post_preview["body"],
-            "source_post_title": source_post_preview["title"],
-            "source_post_body": source_post_preview["body"],
-            "read_at": notification.read_at,
-            "created_at": notification.created_at,
-        }
-    )
 
 
 def _compact_agent_notification_read(
@@ -5210,65 +5160,10 @@ def _compact_agent_notification_read(
     )
 
 
-def _notification_actor_identity(
-    db: Session, notification: models.Notification
-) -> dict[str, str | None]:
-    if notification.actor_character_id:
-        character = community_crud.get_character(db, notification.actor_character_id)
-        if character is not None:
-            if character.deleted_at is not None:
-                return {
-                    "name": DELETED_CHARACTER_NAME,
-                    "handle": None,
-                    "avatar_url": None,
-                }
-            return {
-                "name": character.name,
-                "handle": character.handle,
-                "avatar_url": character.avatar_url,
-            }
-    if notification.actor_user_id:
-        user = community_crud.get_user(db, notification.actor_user_id)
-        if user is not None:
-            return {"name": user.display_name, "handle": None, "avatar_url": None}
-    return {"name": None, "handle": None, "avatar_url": None}
 
 
-def _notification_recipient_identity(
-    db: Session, notification: models.Notification
-) -> dict[str, str | None]:
-    if notification.recipient_character_id:
-        character = community_crud.get_character(db, notification.recipient_character_id)
-        if character is not None:
-            if character.deleted_at is not None:
-                return {
-                    "name": DELETED_CHARACTER_NAME,
-                    "handle": None,
-                    "avatar_url": None,
-                }
-            return {
-                "name": character.name,
-                "handle": character.handle,
-                "avatar_url": character.avatar_url,
-            }
-    if notification.recipient_user_id:
-        user = community_crud.get_user(db, notification.recipient_user_id)
-        if user is not None:
-            return {"name": user.display_name, "handle": None, "avatar_url": None}
-    return {"name": None, "handle": None, "avatar_url": None}
 
 
-def _notification_post_preview(
-    db: Session, post_id: str | None
-) -> dict[str, str | None]:
-    if post_id is None:
-        return {"title": None, "body": None}
-    post = community_crud.get_post_including_report_hidden(db, post_id)
-    if post is None:
-        return {"title": None, "body": None}
-    if not _is_post_public_context_visible(db, post):
-        return {"title": REPORT_HIDDEN_TITLE, "body": REPORT_HIDDEN_MESSAGE}
-    return {"title": post.title, "body": post.body}
 
 
 def _resolve_follower(
@@ -5350,254 +5245,22 @@ def _notify_mentioned_characters(
         )
 
 
-def _post_summary(db: Session, post: models.Post) -> schemas.PostSummary:
-    comment_count = community_crud.count_post_comments(db, post.id)
-    author = _post_author_identity(db, post)
-    media = _post_media_reads(db, post)
-    return schemas.PostSummary.model_validate(
-        {
-            "id": post.id,
-            "author_name": author["name"],
-            "author_handle": author["handle"],
-            "author_avatar_url": author["avatar_url"],
-            "title": post.title,
-            "body": post.body,
-            "info_kind": post.info_kind,
-            "source_name": post.source_name,
-            "source_url": post.source_url,
-            "observed_at": post.observed_at,
-            "location_label": post.location_label,
-            "created_at": post.created_at,
-            "post_type": post.post_type,
-            "author_user_id": post.author_user_id,
-            "author_character_id": post.author_character_id,
-            "world_id": getattr(post, "world_id", None),
-            "author_world_character_id": getattr(
-                post, "author_world_character_id", None
-            ),
-            "mentioned_characters": _mentioned_characters_for_texts(
-                db, post.title, post.body
-            ),
-            "reply_to_post_id": post.reply_to_post_id,
-            "quote_post_id": post.quote_post_id,
-            "repost_of_post_id": post.repost_of_post_id,
-            "comment_count": comment_count,
-            "like_count": community_crud.count_post_likes(db, post.id),
-            "reply_count": community_crud.count_post_replies(db, post.id),
-            "repost_count": community_crud.count_post_reposts(db, post.id),
-            "quote_count": community_crud.count_post_quotes(db, post.id),
-            "quoted_post": _post_reference(db, post.quote_post_id),
-            "reposted_post": _post_reference(db, post.repost_of_post_id),
-            "report_hidden": community_crud.is_report_hidden(post),
-            "media": media,
-        }
-    )
 
 
-def _post_detail(db: Session, post) -> schemas.PostDetail:
-    author = _post_author_identity(db, post)
-    media = _post_media_reads(db, post)
-    return schemas.PostDetail.model_validate(
-        {
-            "id": post.id,
-            "author_name": author["name"],
-            "author_handle": author["handle"],
-            "author_avatar_url": author["avatar_url"],
-            "title": post.title,
-            "body": post.body,
-            "info_kind": post.info_kind,
-            "source_name": post.source_name,
-            "source_url": post.source_url,
-            "observed_at": post.observed_at,
-            "location_label": post.location_label,
-            "created_at": post.created_at,
-            "post_type": post.post_type,
-            "author_user_id": post.author_user_id,
-            "author_character_id": post.author_character_id,
-            "world_id": getattr(post, "world_id", None),
-            "author_world_character_id": getattr(
-                post, "author_world_character_id", None
-            ),
-            "mentioned_characters": _mentioned_characters_for_texts(
-                db, post.title, post.body
-            ),
-            "reply_to_post_id": post.reply_to_post_id,
-            "quote_post_id": post.quote_post_id,
-            "repost_of_post_id": post.repost_of_post_id,
-            "comments": [],
-            "like_count": community_crud.count_post_likes(db, post.id),
-            "reply_count": community_crud.count_post_replies(db, post.id),
-            "repost_count": community_crud.count_post_reposts(db, post.id),
-            "quote_count": community_crud.count_post_quotes(db, post.id),
-            "quoted_post": _post_reference(db, post.quote_post_id),
-            "reposted_post": _post_reference(db, post.repost_of_post_id),
-            "report_hidden": community_crud.is_report_hidden(post),
-            "media": media,
-        }
-    )
 
 
-def _hidden_post_detail(db: Session, post: models.Post) -> schemas.PostDetail:
-    author = _post_author_identity(db, post)
-    return schemas.PostDetail.model_validate(
-        {
-            "id": post.id,
-            "author_name": author["name"],
-            "author_handle": author["handle"],
-            "author_avatar_url": author["avatar_url"],
-            "title": REPORT_HIDDEN_TITLE,
-            "body": REPORT_HIDDEN_MESSAGE,
-            "created_at": post.created_at,
-            "post_type": post.post_type,
-            "author_user_id": post.author_user_id,
-            "author_character_id": post.author_character_id,
-            "world_id": getattr(post, "world_id", None),
-            "author_world_character_id": getattr(
-                post, "author_world_character_id", None
-            ),
-            "mentioned_characters": [],
-            "reply_to_post_id": post.reply_to_post_id,
-            "quote_post_id": None,
-            "repost_of_post_id": None,
-            "comments": [],
-            "like_count": 0,
-            "reply_count": 0,
-            "repost_count": 0,
-            "quote_count": 0,
-            "quoted_post": None,
-            "reposted_post": None,
-            "report_hidden": True,
-        }
-    )
 
 
-def is_post_public_context_visible(db: Session, post: models.Post) -> bool:
-    return _is_post_public_context_visible(db, post)
 
 
-def _is_post_public_context_visible(db: Session, post: models.Post) -> bool:
-    if post.deleted_at is not None or community_crud.is_report_hidden(post):
-        return False
-    if (
-        post.quote_post_id is not None
-        and community_crud.get_post(db, post.quote_post_id) is None
-    ):
-        return False
-    if (
-        post.repost_of_post_id is not None
-        and community_crud.get_post(db, post.repost_of_post_id) is None
-    ):
-        return False
-    seen = {post.id}
-    current = post
-    while current.reply_to_post_id is not None:
-        parent = community_crud.get_post(db, current.reply_to_post_id)
-        if parent is None or parent.id in seen:
-            return False
-        seen.add(parent.id)
-        current = parent
-    return True
 
 
-def _post_reference(db: Session, post_id: str | None) -> schemas.PostReference | None:
-    if post_id is None:
-        return None
-    post = community_crud.get_post(db, post_id)
-    if post is None or not _is_post_public_context_visible(db, post):
-        return None
-    author = _post_author_identity(db, post)
-    return schemas.PostReference.model_validate(
-        {
-            "id": post.id,
-            "author_name": author["name"],
-            "author_handle": author["handle"],
-            "author_avatar_url": author["avatar_url"],
-            "title": post.title,
-            "body": post.body,
-            "info_kind": post.info_kind,
-            "source_name": post.source_name,
-            "source_url": post.source_url,
-            "observed_at": post.observed_at,
-            "location_label": post.location_label,
-            "created_at": post.created_at,
-            "post_type": post.post_type,
-            "author_user_id": post.author_user_id,
-            "author_character_id": post.author_character_id,
-            "world_id": getattr(post, "world_id", None),
-            "author_world_character_id": getattr(
-                post, "author_world_character_id", None
-            ),
-            "mentioned_characters": _mentioned_characters_for_texts(
-                db, post.title, post.body
-            ),
-            "media": _post_media_reads(db, post),
-        }
-    )
 
 
-def _post_media_reads(db: Session, post: models.Post) -> list[schemas.PostMediaRead]:
-    if community_crud.is_report_hidden(post):
-        return []
-    return [
-        schemas.PostMediaRead.model_validate(media)
-        for media in community_crud.list_post_media(db, post.id)
-    ]
 
 
-def _post_author_identity(db: Session, post: models.Post) -> dict[str, str | None]:
-    if post.author_character_id:
-        character = community_crud.get_character(db, post.author_character_id)
-        if character is not None:
-            if character.deleted_at is not None:
-                return {
-                    "name": DELETED_CHARACTER_NAME,
-                    "handle": None,
-                    "avatar_url": None,
-                }
-            return {
-                "name": character.name,
-                "handle": character.handle,
-                "avatar_url": character.avatar_url,
-            }
-    return {"name": post.author_name, "handle": None, "avatar_url": None}
 
 
-def _mentioned_characters_for_texts(
-    db: Session, *texts: str | None
-) -> list[schemas.MentionedCharacterRef]:
-    handles: list[str] = []
-    seen: set[str] = set()
-    for text in texts:
-        if not text:
-            continue
-        for match in MENTION_HANDLE_RE.finditer(text):
-            handle = match.group(1)
-            if handle in seen:
-                continue
-            seen.add(handle)
-            handles.append(handle)
-    if not handles:
-        return []
-
-    characters = list(
-        db.scalars(
-            select(models.Character).where(
-                models.Character.handle.in_(handles),
-                models.Character.deleted_at.is_(None),
-                models.Character.moderation_status == "active",
-            )
-        )
-    )
-    by_handle = {character.handle: character for character in characters}
-    return [
-        schemas.MentionedCharacterRef(
-            handle=handle,
-            character_id=character.id,
-            name=character.name,
-        )
-        for handle in handles
-        if (character := by_handle.get(handle)) is not None
-    ]
 
 
 def _can_delete_post(db: Session, user: models.User, post: models.Post) -> bool:

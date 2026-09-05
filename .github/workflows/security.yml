@@ -62,7 +62,9 @@ jobs:
           tar -xzf "$archive" -C "$RUNNER_TEMP/gitleaks" gitleaks
           git archive HEAD | tar -x -C "$RUNNER_TEMP/tracked-tree"
           "$RUNNER_TEMP/gitleaks/gitleaks" dir "$RUNNER_TEMP/tracked-tree" --config .gitleaks.toml --redact --no-banner
-          "$RUNNER_TEMP/gitleaks/gitleaks" git . --config .gitleaks.toml --redact --no-banner
+          # Match this candidate configuration to its complete ancestor history.
+          # Other fetched PR refs may contain later source-evidence fingerprints.
+          "$RUNNER_TEMP/gitleaks/gitleaks" git . --log-opts="HEAD" --config .gitleaks.toml --redact --no-banner
 
   dependency-license:
     runs-on: ubuntu-latest

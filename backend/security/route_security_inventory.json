@@ -4,7 +4,7 @@
   "routes": {
     "DELETE /api/v1/agents/drafts/{draft_id}/media-candidates/{candidate_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "discard_agent_draft_media_candidate"
     },
     "DELETE /api/v1/agents/{character_id}": {
@@ -34,7 +34,7 @@
     },
     "DELETE /api/v1/agents/{character_id}/media-candidates/{candidate_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "discard_profile_media_candidate"
     },
     "DELETE /api/v1/auth/me": {
@@ -119,17 +119,17 @@
     },
     "GET /api/v1/agents/drafts/{draft_id}/media-candidates/{candidate_id}/content": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "get_agent_draft_media_candidate_content"
     },
     "GET /api/v1/agents/drafts/{draft_id}/media-usage": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "get_agent_draft_media_usage"
     },
     "GET /api/v1/agents/drafts/{draft_id}/media/{media_type}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "get_agent_draft_media"
     },
     "GET /api/v1/agents/{character_id}": {
@@ -164,12 +164,12 @@
     },
     "GET /api/v1/agents/{character_id}/media-candidates/{candidate_id}/content": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "get_agent_profile_media_candidate_content"
     },
     "GET /api/v1/agents/{character_id}/media-usage": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "get_profile_media_usage"
     },
     "GET /api/v1/agents/{character_id}/settings": {
@@ -379,7 +379,7 @@
     },
     "GET /api/v1/world-characters/{world_character_id}/autonomy-setup": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_character_setup",
+      "module": "app.domains.world_characters.router.setup",
       "endpoint": "get_autonomy_setup"
     },
     "GET /api/v1/world-characters/{world_character_id}/feed-status": {
@@ -414,7 +414,7 @@
     },
     "GET /api/v1/worlds/{world_id}/characters/{character_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.world_characters.router.entry",
       "endpoint": "get_world_character_entry"
     },
     "GET /api/v1/worlds/{world_id}/creator-context": {
@@ -584,7 +584,7 @@
     },
     "PATCH /api/v1/worlds/{world_id}/characters/{character_id}/role": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.world_characters.router.entry",
       "endpoint": "update_world_character_role"
     },
     "PATCH /api/v1/worlds/{world_id}/chat/threads/{thread_id}/model": {
@@ -619,17 +619,17 @@
     },
     "POST /api/v1/agents/drafts/{draft_id}/generate-media": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "generate_agent_draft_media"
     },
     "POST /api/v1/agents/drafts/{draft_id}/media": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "upload_agent_draft_media"
     },
     "POST /api/v1/agents/drafts/{draft_id}/media-candidates/{candidate_id}/apply": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "apply_agent_draft_media_candidate"
     },
     "POST /api/v1/agents/{character_id}/activate": {
@@ -654,7 +654,7 @@
     },
     "POST /api/v1/agents/{character_id}/generate-media": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "generate_profile_media"
     },
     "POST /api/v1/agents/{character_id}/image-settings/seed": {
@@ -679,12 +679,12 @@
     },
     "POST /api/v1/agents/{character_id}/media": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "upload_profile_media"
     },
     "POST /api/v1/agents/{character_id}/media-candidates/{candidate_id}/apply": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "apply_profile_media_candidate"
     },
     "POST /api/v1/agents/{character_id}/run-now": {
@@ -839,27 +839,27 @@
     },
     "POST /api/v1/world-characters/{world_character_id}/autonomy-setup/approve": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_character_setup",
+      "module": "app.domains.world_characters.router.setup",
       "endpoint": "approve_autonomy_setup"
     },
     "POST /api/v1/world-characters/{world_character_id}/autonomy-setup/generate": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_character_setup",
+      "module": "app.domains.world_characters.router.setup",
       "endpoint": "generate_autonomy_setup"
     },
     "POST /api/v1/world-characters/{world_character_id}/autonomy-setup/preflight": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_character_setup",
+      "module": "app.domains.world_characters.router.setup",
       "endpoint": "preflight_autonomy_setup"
     },
     "POST /api/v1/world-characters/{world_character_id}/autonomy-setup/reject": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_character_setup",
+      "module": "app.domains.world_characters.router.setup",
       "endpoint": "reject_autonomy_setup"
     },
     "POST /api/v1/world-characters/{world_character_id}/autonomy-setup/retry": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_character_setup",
+      "module": "app.domains.world_characters.router.setup",
       "endpoint": "retry_autonomy_setup"
     },
     "POST /api/v1/worlds": {
@@ -904,12 +904,12 @@
     },
     "POST /api/v1/worlds/{world_id}/characters": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.world_characters.router.entry",
       "endpoint": "enter_world_with_character"
     },
     "POST /api/v1/worlds/{world_id}/characters/{character_id}/leave": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.world_characters.router.entry",
       "endpoint": "leave_world_with_character"
     },
     "POST /api/v1/worlds/{world_id}/chat/threads": {

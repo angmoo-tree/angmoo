@@ -66,7 +66,7 @@ from app.domains.worlds.contracts import (
 from app.domains.worlds.service.reserved_roles import (
     ensure_no_specific_role,
 )
-from app.domains.worlds.public import world_contract_hash
+from app.domains.worlds.service.definition import world_contract_hash
 
 
 FIXTURE_ROOT = (

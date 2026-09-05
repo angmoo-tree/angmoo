@@ -6,7 +6,7 @@ from app.core.image_generation import (
     REPLICATE_IMAGE_MODEL_PRUNA_EDIT,
     REPLICATE_IMAGE_MODEL_ZIMAGE_TURBO_LORA,
 )
-from app.services import pollinations_image, replicate_image
+from app.integrations import pollinations_image, replicate_image
 
 
 def is_replicate_model(model: str) -> bool:

@@ -312,8 +312,12 @@ def create_app(
     configure_routines_runtime(runtime_app)
     from app.runtime.characters.management import build_character_management_workflows
     runtime_app.state.character_management_workflows = build_character_management_workflows
+    from app.runtime.characters.management import build_character_media_workflows
+    runtime_app.state.character_media_workflows = build_character_media_workflows
     from app.runtime.characters.creator import build_creator_workflows
     runtime_app.state.creator_workflows = build_creator_workflows
+    from app.runtime.characters.creator import build_image_generation_workflows
+    runtime_app.state.image_generation_workflows = build_image_generation_workflows
     runtime_app.add_middleware(RequestBodyLimitMiddleware)
     runtime_app.include_router(
         create_public_api_router(extension.routers if extension else ()),

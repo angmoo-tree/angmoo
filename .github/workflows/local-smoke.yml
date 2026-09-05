@@ -158,6 +158,8 @@ jobs:
             tests/world_packages/test_ui_contract.py \
             tests/world_packages/test_closeout.py \
             tests/world_packages/test_closeout_contract.py \
+            tests/world_packages/test_uow_registry.py \
+            tests/world_packages/test_seed_replay_race.py \
             tests/test_l4_pr_f_closeout_contract.py \
             tests/test_feed_reaction_intent.py \
             tests/test_world_feed_search.py \

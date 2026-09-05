@@ -139,6 +139,14 @@ PR #267의 첫 head `ab8fa23`에서 Gitleaks가 새 cursor 호환 회귀의 공�
 
 G1 merge의 Core CI frontend에서 Chat 입력 중 표시 검사가 첫 실행·자동 재시도 모두 실패했다. 해당 테스트는 실제 backend 없이 route fixture로 응답하며 650ms 뒤 응답을 끝내므로 CI의 assertion 진행보다 중간 UI 상태가 먼저 사라질 수 있었다. 가상 stream을 입력 중 표시·모델 잠금 확인까지 유지하고 finally에서 완료시키는 동기화로 바꿨다. 제품 UI/API 동작과 기존 expect 표현식 331개는 TypeScript AST로 정확히 같음을 확인했다. 로컬 Chromium에서 해당 시나리오를 재시도 없이 3회 연속 통과했다(1.3분). G1 실패 job은 동일 merge에서 한 번 재실행해 post-merge 결과를 별도로 확인하며, 이후 후보에는 시간 경합을 제거한 검사를 포함한다.
 
+### AR-G2 post-merge 보안 이력 범위 Hotfix
+
+G2 merge `8a72078`의 Security run `33961102583`은 현재 추적 source 검사에 통과했으나 Gitleaks history가 329 commits에서 후속 Character PR의 source Git fingerprint를 탐지해 실패했다. 기본 Gitleaks는 함께 fetch된 다른 ref를 포함하며, 해당 fingerprint의 정확한 허용은 후속 PR 설정에만 있었다. 앞선 후보의 설정으로 미래 PR을 판단하므로 같은 SHA의 결과가 fetch된 refs에 따라 달라졌다.
+
+Gitleaks에 `--log-opts="HEAD"`를 명시해 현재 후보의 **전체 조상 이력**을 검사한다. depth 제한·변경분만 검사·exit-code 무시는 추가하지 않는다. 현재 tracked-tree scan, SHA 고정 binary/checksum, redaction, 기존 별도 Angmoo scanner의 모든 ref·무제한 history 검사는 유지한다. 공개 전 저장소 전체 이력 감사도 이 후보별 Gitleaks 결과로 대체하지 않는다.
+
+실제 Gitleaks8.30.1과 새 synthetic Git fixture에서 (1) 기본값은 무관한 다른 branch의 canary를 탐지, (2) clean HEAD의 전체 이력은 통과, (3) 그 branch를 병합한 뒤 현재 파일에서 삭제된 과거 canary도 HEAD 이력에서 탐지됨을 확인했다. G2 후보 전체 조상 scan은 312 commits·19.65MB·findings0, 기존 CI policy도 PASS다. 원래 G2 post-merge 실패는 역사로 남기고 이 후속 Hotfix의 필수 PR·merge/post-merge 확인으로 종료한다.
+
 ## AR-G3: 기존 로그 기본값과 배포 자원 연결
 
 별도 `refactor/ar-g3-logging` 작업트리의 기준은 `de83dae`다. AR-G1·G2의 설정/공통 모듈 이전과 섞지 않고, 현재 진입점에 logging 자원을 연결했다. 이 절은 로컬 구현·검증 기록이며 PR·merge·실제 제품 installer 완료 판정은 아니다.
@@ -407,6 +415,12 @@ Creator 조회/수정 2개 endpoint가 canonical router에 추가되었다. 기�
 이번 감사에서 찾은 순수 B2 Character state 잔여는 본문처럼 해결했다. 위에 명시한 다른 업무/후속 단계와 별개로 남겨 둔 미분류 B2 Character 기본 구현은 없다. PR-head CI·전체 병합 후 검증과 후속 domain/bridge 종료는 root의 순차 통합 Gate에서 판정한다.
 - 마지막 고정 후보 `--contracts --nodes`는 현재 **2,118 nodes**를 수집했고, #258/#263 대비 API/OpenAPI/ORM·기존 assertion/suppression·source split 증거 오류는 없었다. 미합류 Identity/Character source 도입의 append-only 증거 오류만 root 선형 capture 대상으로 남았다. 이 기록을 전체 CI PASS로 확대하지 않는다.
 
+### Creator 완료 후보의 선형 통합 검증
+
+Creator lifecycle source `63034348e71ab4ae0bd0611a2ad04e1036244d42`와 HTTP/state source `81aa413abaf74655c3b3432a52ce10125d9aec53`를 하나의 후속 PR로 묶었다. 각 고정 source의 신규 파일·테스트 도입 증거를 선행 메타데이터 뒤에 추가했다. 고정 통합 후보 `49c4d214240b4c473eab3a6caf540f876625787d`에서 전체 backend suite는 **2,096 passed / 기존 22 skipped / 27 warnings, 450.38초**, 보존 검사는 **protected/current 2,118 nodes / items 37 PASS**였다. 이 실행 중 source·test·metadata를 수정하지 않았다.
+
+API/OpenAPI/ORM, 기존 assertion·suppression, 분할 source와 테스트 계보 검사가 모두 통과했다. 공통 CI 계약 7개와 architecture/deferred/L4/embedded/P8-R inventory도 통과했다. 실제 Gitleaks 8.30.1은 추적 archive 18.89MB와 후보의 전체 336 ancestor commits 20.83MB에서 findings 0이었다. 이 기록 뒤에는 문서만 추가한다. PR-head CI, 실제 Installer, 순차 병합과 post-merge는 각각 확인하며, 위 B3~B8의 남은 업무를 Character PR의 완료로 표시하지 않는다.
+
 ## AR-B2 Worlds: 정의·Creator·배너 역할 이전
 
 `refactor/ar-b2-worlds`는 G0~G4 통합 `bfa6321`에 Identity source `abbd08c`를 fast-forward한 상태에서 진행했다. 아래는 Worlds의 로컬 구현·검증 기록이며 전체 B2, PR·merge·post-merge 또는 설치 앱 완료 판정이 아니다.
@@ -426,6 +440,14 @@ Creator 조회/수정 2개 endpoint가 canonical router에 추가되었다. 기�
 승인 public node 검사는 **604 유지 / current 2,092 PASS**였다. `--contracts --nodes`는 **#258 1,867 / #263 1,907 / 보호 계보 2,080 / current 2,092**를 수집했고 기존 API·OpenAPI·ORM·assertion·split 검사에서 변경/누락을 보고하지 않았다. 단, 선행 Identity `abbd08c`의 신규 source 9개와 node 5개가 아직 append-only introduction metadata에 없어서 전체 명령은 exit 1이었다. 이 검사 전체를 PASS로 기록하지 않으며, Identity와 Worlds source를 순서대로 capture한 뒤 통합 후보에서 다시 판정한다. Worlds source의 도입 증거도 부모 작업에서 해당 실제 commit을 기준으로 추가한다.
 
 Live architecture는 **598 modules / 1,878 internal edges / 2,021 external imports / exact legacy 287 PASS**다. ER0는 **76 PostgreSQL source / 기존 역사 migration 부분집합 87 / Neo4j query 24 / Next route 44 / parity workload 7**로 통과했다. PostgreSQL source 하나의 증가는 원래 timezone query를 별도 service 파일에 배치한 결과다. L4의 parity 97 nodes, Memory batch live inventory, local-smoke의 이동한 두 테스트 경로도 연결했다. frozen source baseline·checkpoint·승인 node·SQLite/Alembic 본문과 역사 inventory는 재작성하지 않았다. PR-head CI와 최종 G5·G06·백엔드 통합 검증은 별도 절차로 남는다.
+
+### Worlds 선형 통합 검증
+
+Character 완료 source와 모든 선행 introduction 증거 뒤에 Worlds source `38c26102a7d1f576d4eb9686f4cb9fb3585f75f2`의 신규 파일 5개·회귀 7개를 캡처했다. 현재 보안 route inventory는 실제 World router의 module 필드 10개를 반영하며 URL·method·access·endpoint 계약은 그대로다.
+
+Worlds·권한·Package import·WorldCharacter lifecycle/setup·활동 소비자 집중 검사는 **129 passed / 6 warnings, 33.27초**였다. 이 집중 실행 시작과 Git metadata commit 완료가 잠시 겹쳤으므로 해당 실행을 고정 HEAD 전체 증거로 쓰지 않는다. 고정 후보 `6b9e77d`에서 권한/삭제 회귀 **8 passed, 6.19초**, public **196 operations**, 전체 보존 **2,125 protected/current nodes / items 37 PASS**를 다시 확인했다. 후자의 실행 중 source·test·metadata는 수정하지 않았다.
+
+같은 후보에서 공통 CI 계약 7개, architecture **618 modules / 1,988 edges / exact legacy 281**, deferred **22 files**, L4 **97 parity nodes**, ER0 **77/87/24/44/7**, P8-R inventory가 모두 통과했다. 실제 Gitleaks는 추적 archive **18.97MB**와 후보의 전체 **338 ancestor commits / 20.96MB**에서 findings 0이었다. 이후 선행 Creator 결과를 합친 변경은 문서 한 파일뿐이다. PR-head의 전체 backend·실제 Installer와 순차 merge/post-merge 결과는 별도로 확인한다.
 
 ## AR-B2 WorldCharacter 기반: 모델·계약·검증·생성기
 
@@ -449,6 +471,11 @@ Foundation 이후 Character source `fe022c3`를 merge `7bc58b1`로 합쳤다. �
 
 Live architecture는 **618 modules / 1,937 edges / legacy exact 281 PASS**, ER0 **75/87/24/44/7 PASS**, L4 parity **97**, Memory batch current이다. Owner 서비스 3개 exact module만 추가하고 기존 임시 bridge 중 실제로 사라진 연결을 제거했다. WC profile/Studio/entry/setup/runtime repair/readiness와 최종 HTTP 이전은 다음 slice다.
 
+### WorldCharacter 기반·owner 통합 검증
+
+Foundation source `64537c7694819f5840aab9106f969f80c6c82d53`의 신규 파일 7개·회귀 2개, owner source `cb9b18d67daf42fd8c9d93c68108e27a7cbc08e1`의 신규 파일 3개·회귀 2개를 선행 Character/Worlds 뒤에 캡처했다. 고정 후보 `81724a5`에서 WorldCharacter owner/setup, Package import/UoW, runtime-mode repair, 권한/삭제 검사는 **63 passed / 2 warnings, 39.83초**였다. 전체 보존 검사는 **2,129 protected/current nodes / items 37 PASS**이며 API/OpenAPI/ORM·기존 assertion·suppression·source split도 유지했다. 검사 중 source·test·metadata는 수정하지 않았다.
+
+공통 CI 계약 7개, architecture **625 modules / 1,993 edges / exact legacy 281**, deferred 22, L4 parity 97, ER0 **76/87/24/44/7**, P8-R 및 public **196 operations**가 통과했다. 실제 Gitleaks 추적 archive **19.06MB**와 전체 **341 ancestor commits / 21.13MB**도 findings 0이었다. 이후 선행 Worlds PR의 결과를 통합한 차이는 문서 한 파일이다. Profile/Studio/setup workflow·entry/readiness HTTP는 다음 독립 범위이며, PR-head CI·설치·순차 merge/post-merge를 확인하기 전 전체 B2 완료로 표시하지 않는다.
 
 ### AR-B2 WC profile·Studio·lifecycle와 동일 SQL 조회 조립
 
@@ -549,3 +576,212 @@ A3a source `0945889` 이후 `services/activity_runtime.py`의 실제 beat/consum
 추가 경계·L4·ER7·OSS 검사에서 **34 passed / 1 failed**를 확인했다. 실패는 선행 WorldCharacter client 이전 뒤 plaintext reveal allowlist가 옛 provider 파일을 가리키던 1개 exact 경로였다. 허용 함수 `generate_community_profile`·`generate_repertoire`와 equality 검사를 그대로 두고 실제 `domains/world_characters/client.py`로 연결한 뒤 해당 회귀 **1 passed / 1.71초**를 확인했다. B4 claim/scheduling에는 credential reveal 이동이나 허용 범위 추가가 없다.
 
 전체 보존 검사는 PR258 **1,867** / PR263 **1,907** / 보호 **2,129** / 현재 **2,175** node를 확인했다. API·ORM·원본 assertion/exception·suppression·split·기존 node 손실이 없으며, exit 1의 남은 항목은 선형 통합에서 root가 연결할 source/test introduction metadata다. `routines-a3c-preservation.log`에 결과를 보존했다.
+
+### AR-B2 WC 통합 중 발견한 Package seed replay 경합 Hotfix
+
+기존 `test_concurrent_same_idempotency_key_commits_one_import`가 간헐적으로 World slug validation 오류를 냈다. Seed UoW의 registry 조회와 World idempotency 조회가 모두 miss한 뒤 `_available_slug`가 후보를 고르고, 그 직후 다른 스레드가 같은 요청의 import를 commit하면 마지막 slug 재조회가 `world_slug_unavailable`을 발생시킨다. 기존 UoW는 IntegrityError/OperationalError만 replay 복구해 이 validation 오류를 놓쳤다.
+
+이 경로는 구조 이전으로 추가된 동작이 아니다. Frozen PR #263 `d7037625a19071eb279ad2ea35c3ace6fe5b5289`의 `worlds/infrastructure/sqlalchemy_world_creator.py`에서 `_available_slug`와 `seed_world`의 전체 함수 AST가 현재 `worlds/service/creator.py`와 동일하며, 수정 전 Package seed UoW 전체 모듈 AST도 해당 checkpoint와 동일하다.
+
+수정은 `WorldDefinitionValidationError` 중 `args == ("world_slug_unavailable",)`인 경우로 제한한다. 이 class의 reason_code는 범용 `world_definition_incomplete`라 reason_code만으로 분류하지 않는다. 원래 Session을 rollback/종료한 뒤 별도 Session으로 같은 local_owner_id/idempotency_key의 registry를 조회한다. 실제 원자 commit으로 보이는 완료 기록이 있을 때만 기존 replay resolver가 package id/version/content digest를 검증해 결과를 돌려준다. 기록이 없으면 원래 validation 오류를 다시 내며 재시도하지 않는다. 다른 validation과 비슷한 문자열도 원래 오류 객체를 그대로 전달한다. 기존 DB 충돌 retry 한도·delay·resolver와 World seed 본문은 유지한다.
+
+결정적 회귀는 실제 file-backed SQLite에서 slug 후보 조회 직후 다른 스레드의 commit을 완료시킨다. 수정 전 **4 failed / 2 passed / 18.49초**로 실패를 재현했다. 수정 후 새 6개 사례와 기존 Package UoW/Import Commit은 **26 passed / 기존 1 warning / 37.76초**였다. 새 사례는 rollback→별도 observer 순서, 한 번의 실행, 동일 replay 결과, digest 충돌, 다른 owner/key의 기록 배제, 다른 validation의 미복구를 검증한다. ASCII 이름을 사용해 fallback UUID 시간 구간과 무관하게 동일 slug 경합이 발생한다.
+
+`local-smoke`에 기존 UoW 전체 파일과 새 결정적 회귀를 명시적으로 연결했다. World API·ORM·historical migration·기존 assertion은 수정하지 않았다. 이 hotfix는 seed UoW의 한 경로이며 `BEGIN IMMEDIATE`를 사용하는 media import commit 흐름의 트랜잭션 설계는 바꾸지 않는다. 후속 Package runtime UoW로 파일이 옮겨질 때도 같은 수정이 유지되어야 한다. Source introduction capture 및 PR/merge 검증은 root의 선형 통합 단계가 담당한다.
+
+최종 고정 구현·CI 목록·현재 inventory에서 새 경합 6개, 기존 UoW/Import Commit/Preview, World 정의·Creator API, CI policy를 함께 실행한 결과는 **60 passed / 기존 2 warnings / 42.29초**다. 현재 경계 검사는 **626 modules / 2,003 internal edges / exact legacy 281 PASS**, L4 parity **97**이다.
+
+### AR-B2 WC entry/setup HTTP·readiness·혼합 삭제 소유권 종료
+
+`router/entry.py`에 입장·역할·퇴장 4개 HTTP를, `router/setup.py`에 설정 6개 HTTP를 이전했다. 기존 setup route는 피드 상태 1개만 계속 소유하고, main/public route 조립은 feed→setup 순서와 WC entry→World Creator의 기존 순서를 보존한다. World 접근 오류의 변환 구현은 `app/api/world_errors.py` 한 곳에 두며 두 도메인 router가 소비한다. Scheduler/AgentRun/Slot/setup busy 판단은 runtime guard로 같은 Session에서 조립한다.
+
+활동 준비 상태는 WC `service/readiness.py`, 공유 응답의 실제 정의는 `schemas/readiness.py`로 이전했다. 기존 schema는 동일 class alias다. Character 후속 HTTP source가 추가한 `runtime.schemas`의 동일 DTO는 root 통합 시 WC 정의의 alias로 맞춘다. World/membership nullable 조회 순서, profile/hash/repertoire/daypart 판단 순서와 읽기 전용 동작을 보존했다. 남은 WC membership helper의 오류는 원래 WorldServiceError 계층을 유지한다.
+
+Character·Account 삭제가 함께 사용하는 여러 업무 SQL은 `runtime/world_characters/cleanup.py`로 이전했다. 해당 함수와 공통 World HTTP mapper는 이전 함수 본문 AST와 정확히 같다. 기존 joint participant ID materialization→관련 행 삭제 순서와 caller commit 계약을 유지했다. 실제 소비자 전환 뒤 옛 World/Setup/Readiness 서비스 파일과 옛 Worlds HTTP 파일을 삭제했다. WC의 frozen SQLite ORM alias와 미전환 외부 public/모델 소비자는 정확한 후속 G5/B4–B8-A 경계로 남긴다.
+
+- World/WC·활동 계획·피드·Today SNS·Agent 한도·Package UoW 및 현재 inventory 묶음: **234 passed / 기존 1 skipped / 기존 6 warnings / 73.34초**.
+- 전체 수집이 Package import 테스트의 여러 줄 legacy import 한 건을 발견했다. canonical setup service로 연결한 뒤 해당 Package 회귀 **10 passed / 기존 1 warning / 20.48초**, public 승인 **604 유지 / 현재 2,114 PASS**였다.
+- HTTP 설정은 실제 WC 오류 모듈을 직접 사용하며 기존 architecture assertion과 예외 기대를 유지한다. 마지막 설정·membership·경계 회귀 **30 passed / 기존 1 warning / 11.97초**. 이번 변경 test 파일의 모든 이전 assertion/예외 기대를 frozen 및 추가 snapshot에 대조한 검사 **PASS**다.
+- 현재 API·OpenAPI·ORM 및 모든 split symbol/직접 소비자/행위 test 증거 **PASS**. 기존 World 14개 route와 Character schema의 전체 split 지도를 최종 실제 소유자에 연결했다. 새 부분 split으로 이전 symbol을 누락하지 않는다.
+- 새 readiness 회귀는 동일 DTO identity, World scope 오류가 stale profile보다 먼저 나오는 순서, no flush/commit 및 legacy tendency fallback을 검증한다. B4에 제공한 `set_activity_runtime_mode`의 두 대입 helper는 source `0c76205`이며 실제 Session rollback/no flush/no commit 회귀 **1 passed / 4.11초**다.
+- 최종 현재 architecture **624 modules / 1,963 internal edges / exact legacy 272 PASS**. ER0 **75/87/24/44/7**, L4 parity **97**, Memory batch current를 유지한다. Frozen migration/승인 baseline/checkpoint는 변경하지 않았다.
+
+장시간 전체 보존 명령은 위 수집 오류를 발견한 상태에서 중단하고, 수정 후 전체 수집·계약/split·변경 assertion 검사를 개별 완료했다. 모든 선행 source의 introduction capture, 전체 assertion/node 계보 검사와 PR/merge/설치 검증은 root의 순차 통합 단계에서 이어진다. 이 소스의 집중 검증을 전체 AR-B2 또는 §8.2 완료로 확대하지 않는다.
+
+
+## AR-B5-A Social 모델·계약 기반
+
+- 기준 `e6cfca2e724d6c7f928cc169117d836df3698354`; 실제 소유 원본 13개를 `social/models/`, `contracts/`, `schemas/manual.py`로 이전했습니다. Social ORM 16개, 클래스·함수 69개 전체 AST는 원본과 같습니다. `feed.py`의 JSON/JSONB type는 World ORM의 import 대신 동일 dialect 구성을 로컬 정의하며 table/type 계약은 동일합니다.
+- `models/community.py`, `models/world_feed.py`, `social/infrastructure/sqlalchemy_models.py`는 실제 Python 소비자가 canonical 모델로 바뀐 뒤 제거했습니다. frozen SQLite v7→v8/Alembic 0088이 사용하는 subjective-context 경로만 동일 객체 alias로 유지했습니다. revision 본문과 DB schema는 수정하지 않았습니다.
+- 수동 owner 요청의 즉시 AI 0회, inbox pending 후보, replay·observation, World별 Today 증거·검증된 자기 설명, 기존 마이그레이션과 registry class identity 회귀: **35 passed, 1 기존 warning / 23.77s**.
+- API·schema·ORM fingerprint는 PR #258과 #263 기준 모두 동일합니다. 변경된 기존 테스트 6개 파일의 assertion/raises/warns와 기존 split evidence는 보존됐습니다. 최초 자체 검사 wrapper에서 전체 test_nodes를 남긴 채 일부 assertion만 필터하여 허위 missing evidence가 출력되어, test_nodes와 assertion을 함께 필터한 검사로 다시 확인했습니다. 제품·보존 검사 코드는 변경하지 않았습니다.
+- L4 live inventory `backend_modules=634 / parity_nodes=97`, ER0 `postgres_files=77 / migrations=87 / neo4j_queries=24 / next_routes=44` 생성이 통과했습니다. architecture partial Social scope 위반은 없지만 e6 기준의 Character–Runtime–WorldCharacter package cycle이 남아 root WC 통합에서 수정 중입니다. 이 source에서 예외를 추가하지 않았습니다.
+- 신규 테스트: `tests/social/test_foundation_contracts.py::test_all_social_models_share_registered_metadata_and_original_tables`, `::test_frozen_subjective_migration_and_public_values_keep_single_definitions`. 기존 테스트 노드를 삭제·완화하지 않았습니다.
+- **B5 전체 완료가 아닙니다.** 실제 Social 서비스/SQL/HTTP, Relationship의 원자 갱신, projection/outbox 및 Today 소비 경로 전환은 다음 source 단위에서 계속합니다. source introduction capture·전체 CI·병합은 root 선형 통합에서 진행합니다.
+
+### WC 최종 통합의 응답 소유권 정정
+
+WC 최종 source와 Character HTTP source를 합친 첫 고정 후보의 집중 회귀는 215 passed였지만 package 경계 검사에서 Character→WC→Character 및 Runtime alias가 포함된 순환을 발견했다. 위 최초 WC 응답 위치 기록은 이 통합 전에 해당한다. 최종 배치에서는 Character 상세 API의 `AgentActivityProfileReadinessRead` 정의를 동일 본문 그대로 `characters/schemas.py`로 옮기고 WC readiness 정책이 같은 class를 소비한다. 기존 aggregate도 이 실제 class를 가리킨다. 생산 소비자가 없는 Runtime alias와 WC schema 조각을 제거하고 source map과 실제 소비자를 갱신했다. 경계 예외를 추가하지 않았으며 준비 상태 판단 정책과 HTTP schema는 변경하지 않는다. 이 수정 전 진행 중이던 전체 보존 검사는 중단했으며 PASS로 기록하지 않는다.
+
+
+## AR-B5-B1 Social SQL·알림 처리·HTTP DTO
+
+- `cruds/community.py` 원본 중 Social 테이블만 다루는 실제 SQL·변환·알림 생성 함수 **61개**를 이전했습니다. 원본 61개 함수 AST와 Community/WorldFeed schema 전체 AST는 그대로입니다. 단순 export를 새 구현으로 만들지 않았으며 SQL 본문은 repository 4개, 알림 수신자/자기 자신 제외 판단과 저장은 `service/notifications.py`, 문자열·정수 cursor 변환은 utils 2개가 실제 소유합니다.
+- User/Character/Agent ORM을 함께 사용하는 나머지 조회와 Creator demo/activity 함수는 다음 소유자 분리 범위입니다. 새 SQL 모듈은 Social ORM·schema만 읽으며 외부 도메인 ORM/레거시 service/repository를 import하지 않습니다. 기존 `finish_write`·flush·refresh·락·SQL dialect 분기와 같은 Session을 보존했습니다.
+- 기존 AR-B2-B1의 `cruds/community.py` 전체 symbol 지도를 유지하면서 이전한 함수 61개와 정규식 상수 목적지만 갱신했습니다. 별도의 불완전 split을 추가하지 않았습니다. 기존 schema 2개의 실제 Python 소비자를 전환한 뒤 옛 파일을 제거했습니다.
+- 게시물 HTTP·abuse·이미지 job/quota·Feed 검색·수동 Social UoW·inbox·World profile·registry 회귀: **90 passed, 1 기존 warning / 20.32s**. 새 테스트 노드 없음.
+- architecture 경계 **643 modules / 2037 edges / legacy 263 PASS**, L4 parity97 및 ER0 live generation PASS. root의 WC readiness 순환 수정 `77081dc`는 앞선 merge `3258b69`로 포함했고 순환 예외는 추가하지 않았습니다.
+- API/ORM/원본 assertion 및 split 최종 확인과 root source capture는 별도 기록합니다. 게시물 자체의 권한·서비스 흐름, 교차 업무 query/runtime, 관계/관찰/outbox/projection 전체 전환은 아직 진행 중입니다.
+
+- B5-B1 최종 보존 확인: PR258/PR263 API·schema·ORM 모두 동일, 변경 기존 테스트 1개 파일의 assertion/raises/warns PASS, 전체 split evidence PASS. 첫 split 검사에서 root가 이미 발견한 WC readiness 목적지 한 줄만 남아 있어 `4f95df7`과 동일한 metadata 정정을 적용했습니다. split 재검사는 immutable Git read와 순수 AST 해석 함수 결과만 메모이즈한 read-only wrapper로 수행했으며 CI 검사 규칙은 수정하지 않았습니다.
+
+## AR-B3 Package foundation — 계약·ORM·registry 첫 source slice
+
+G0~G4와 Identity source가 합류한 `abbd08c`의 별도 작업트리에서 시작했다. Python v1/HTTP schema, 불변 request/result, archive/license/collision 정책과 canonical digest를 새 역할로 옮겼다. JSON `schemas/v1`와 synthetic fixtures·golden bytes, 네 ORM의 table/column/FK/constraint는 변경하지 않았다. Registry의 동일 seed version 재사용·전달 충돌 판단은 service가, 동일 Session SQL·flush는 repository가 소유한다. 두 구현 모두 commit하지 않으며 원래 caller의 commit/rollback 경계를 유지한다.
+
+v1 계약과 UoW/registry 테스트 두 파일을 `tests/world_packages`로 옮기고 fixture·Alembic 상대 경로와 실제 CI suite 경로를 함께 전환했다. 원래 assertion/parametrize/node는 보존했다. Pure-source 검사에는 실제 새 역할 파일을 추가해 빈 옛 폴더를 검사하는 통과를 막았고, public의 역사적 pure-contract assertion은 이동표의 정확한 module 대응만 정규화한다. 임의 prefix 치환은 사용하지 않는다.
+
+- Package 8 suites: **89 passed / 1 warning / 46.50초**. JSON schema golden, deterministic ZIP, managed-media stripping, seed/rollback/concurrent replay, browser/native delivery/cancel, preview/archive limits, import/media recovery와 UI·closeout 계약 포함.
+- Architecture boundary: **599 modules / 1,864 edges / legacy exact edges 288, PASS**. 새 계약·정책·ORM·registry **23개 exact module**만 opt-in하며 같은 업무의 옛 소비자 **94개 exact bridge**는 뒤이은 AR-B3 export/staging/import slice에서 제거한다. aggregate ORM 등록은 G5에서 닫는다.
+- API/ORM와 원본 assertion/split/node 보존: 변경·누락 오류 없음. PR258 1,867 / PR263 1,907 / 보호 lineage 2,080 / 현재 2,085. 종료 코드 1의 원인은 선행 Identity의 introduction metadata 미합류 9 source·5 test node뿐이며 root의 선형 source→append capture 단계에서 처리한다. frozen checkpoint·기준선·승인 node는 변경하지 않았다.
+
+이 기록은 첫 source slice의 로컬 검증이며 Package 전체·shared media·순차 PR/Hosted Actions·merge 검증 완료를 뜻하지 않는다. 다음은 export/staging, 이어 import UoW/복구/runtime 조립 전환이다.
+
+
+## AR-B3 Package processing — export·staging·ZIP·media 정제 두 번째 source slice
+
+첫 source `d80e2ed` 위에서 export/staging 실제 서비스, deterministic ZIP writer, bounded ZIP reader, exclusion scanner, staging/export artifact/export-media 저장소를 각 역할 package로 옮겼다. ZIP 제한·이미지 lossless 정제·token 바인딩·expiry·cancel·retry·preview 입력/출력의 구현 조건은 유지했다. 실제 fake/UoW 소비자가 있는 Protocol 10개는 `contracts/interfaces.py`에 모았고, export asset 클래스/Protocol의 호출자 없는 NotImplementedError 메서드 세 개만 제거했다. 실제 import media 파일 보상은 다음 slice 대상이며 삭제하지 않았다.
+
+SQL source snapshot의 portable-key/profile 변환과 preview probe의 trust/duplicate/tamper/collision 판단은 새 service로 분리했다. SQL 조회 class를 먼저 runtime으로 옮기면 옛 router/import committer에서 domain→runtime 역방향이 발생하므로, 이 물리 이전은 마지막 조립 slice와 함께 수행한다. 현재 partial 범위는 36개 실제 역할 module이며 남은 exact bridge는 94→55개로 줄었다. 새 경계 예외는 확대하지 않았다.
+
+- Package 8 suites: **89 passed / 1 warning / 39.41초**. 고정 v1 JSON/ZIP, archive 악성 입력, 이미지 정제, same-session 원자성·replay, 전달/ack/cancel 및 import 복구의 기존 assertion을 유지했다.
+- Architecture boundary: **594 modules / 1,850 edges / legacy exact edges 288, PASS**.
+- 소유 테스트: export·preview 두 파일을 `tests/world_packages`로 추가 이전하고 fixture와 CI source literal을 함께 전환했다. 기존 test node·parameter·assertion은 보존한다.
+- 남은 범위: router/dependencies, import 승인·동일 Session commit/복구 및 startup read projection 조립. source 이후 parent가 선형 introduction capture와 통합/CI/merge 증거를 기록한다.
+
+
+## AR-B3 Package composition — HTTP·delivery·same-session import 최종 source slice
+
+`d80e2ed`의 계약/registry와 `3205878`의 export/staging/archive 처리에 이어 Package 역할 전환을 연결했다. `router.py`는 HTTP 입력·권한·오류/응답을, `dependencies.py`는 기존 요청 Session과 app state의 저장소·runtime factory를, `service/import_approval.py`는 digest에 바인딩된 승인과 preview 복원을 맡는다. `service/delivery.py`로 export preview/준비/native acknowledgment의 commit·rollback·artifact 정리 책임을 옮겼다. Browser stream은 원래처럼 정상 소진 후에만 전달을 기록하고, native stream은 저장 완료 acknowledgment를 기다린다.
+
+여러 도메인의 읽기 projection, World/Character/참여 관계 생성과 import commit/복구는 `app/runtime/world_packages`로 이동했다. 두 app factory가 constructor callback을 연결하며 Package 도메인이 runtime을 import하지 않는다. 기존 Session/sessionmaker, 행 잠금, bounded replay, commit 결과 불명 관찰, media journal 복구 및 importer의 기본 비활성 상태는 유지했다. `storage/import_media.py`가 파일 promotion·compensation을 소유한다. 원래 pure `public.py` export 집합은 `contracts/__init__.py`로 옮겼고 실제 소비자를 전환했다.
+
+- 고정 제품 source의 Package 93 nodes와 L3/L4·architecture·security-route·보존 guard 집중 검사는 **190 passed / 1 warning / 41.26초**였다. 원래 Package 89 nodes를 보존하고 동일 Session/factory 연결·복구 1회·준비 commit 실패 보상·native ack 실패 시 retry artifact 보존 4 nodes를 추가했다.
+- 현재 scope는 `world_packages` 전체다. Package 내부 `api/application/domain/infrastructure/ports/public.py` 파일과 같은 도메인 임시 bridge는 남지 않는다. 네 ORM을 재등록하는 기존 `app.models` aggregate의 incoming edge **1개**만 G5 종료 조건을 갖고 남아 있다.
+- 구조 검사는 **594 modules / 1,861 internal edges / legacy exact 288 PASS**, L4는 **parity nodes 97 PASS**다. ER0는 기존 **75 PostgreSQL source / 87 역사 migration / 24 Neo4j query / 44 Next route / 7 parity workload**를 유지했다. v1 JSON schema `--check`도 통과했다.
+- API/ORM/schema·원래 assertion·split-symbol/consumer·test node 보존 오류는 **0**이다. PR258 **1,867**, PR263 **1,907**, 현재 보호 계보 **2,080**, 수집 **2,121**이다. guard의 종료 코드 1은 선행 Identity/Package/guard source의 append-only introduction metadata가 이 독립 branch에 아직 합류하지 않은 것만 남으며, parent의 source commit 후 선형 capture로 처리한다. 고정 checkpoint·baseline·승인 node·v1/golden·역사 migration은 변경하지 않았다.
+- Route inventory는 Package 9개와 선행 Identity local/auth의 13개 실제 module 경로만 갱신했다. operation·endpoint 이름·접근 분류·권한 assertion은 유지했고 현재 API의 전체 보안 inventory 검사를 통과했다. Windows/Linux CI의 실제 소유 테스트 경로, fixture 상대 경로와 현재 ER0/L4/Memory batch inventory를 함께 연결했다.
+
+보존 guard에서는 고정된 테스트 source의 pathlib anchor·단일 literal binding과 파일 이동표가 정확히 연결된 경우만 chained path를 정규화한다. 임의 root/call/동적 경로·import/함수/클래스/with/except의 재바인딩은 거부한다. Windows 경로는 문자열 전체가 정확히 일치하는 경우만 인정하고 `__init__.py`는 정상 package import 표기를 사용한다. 독립 source `dc3da4b`·`651bded`·`f61cc48`·`1fb943d`에 이를 나눴으며 기존/음성 검사 **67 passed**를 확인했다. 전체 순서 있는 literal tuple에 대한 compiled regex cache만 추가했고, 대표 실제 assertion **122개 출력 동일**, **1.869초→0.057초**를 확인했다. 기존 느린 guard 실행은 중단해 PASS로 사용하지 않았고 최종 수정 이후 전체 검사를 다시 실행했다.
+
+이 결과는 Package의 독립 source 준비와 로컬 회귀 증거다. 선행 B2의 Worlds/Characters/WorldCharacter source가 합류하면 runtime의 해당 지원 import를 canonical 경로로 연결한다. 전체 통합 backend·Docker/Host Tauri/sidecar/NSIS 설치·Hosted Actions·merge는 parent의 순차 검증 대상이며 이 결과로 완료했다고 표시하지 않는다. Shared media 전체는 다음 별도 B3 범위다.
+
+## AR-B3-M1 — 공유 media 처리와 저장 소유 기반
+
+별도 media 작업트리는 Character source `81aa413abaf74655c3b3432a52ce10125d9aec53`에서 시작했다. `profile_media.py`의 36개 기존 함수/class/상수 본문을 수정 없이 공통 `integrations/media/{images,files}.py`와 Character·Social `service/media_storage.py`에 옮겼다. 실제 Character runtime와 account deletion의 소비자도 새 파일·codec 소유자로 연결했다. 호환 export의 오류와 callable 객체는 같으며 ORM·transaction·provider·HTTP 계약은 이 범위에서 바꾸지 않았다.
+
+- Shared 처리: MIME/base64/기하·frame 검사, WebP 변환, root containment, private 경로 검사, quarantine 복구.
+- Character 저장: profile/draft/candidate/seed의 기존 디렉터리와 promotion/delete 순서.
+- Social 저장: 이미 승인된 생성 결과의 Post 파일 기록. quota/job/공개 부착은 B5 소유이며 기존 mixed service 소비자의 정확한 bridge 종료 조건을 기록했다.
+- 후속 B3: Character 후보 업무·private HTTP·generation transport, Worlds 실제 storage 연결. 직접 사용되지 않는 역사 `save_world_banner`는 그 연결 검증 전까지 기존 export에 남는다.
+
+Frozen 원본과 checkpoint는 수정하지 않았다. 원본 profile_media 전체 symbol split은 기존 AR-B2-B5 기록에서 실제 목적지와 소비자를 갱신했고 Character/Social 저장소만 exact partial scope로 추가했다. PR·병합·설치 및 B3 전체 종료는 별도 기록한다.
+
+
+M1 집중 검증은 **136 passed / 3 warnings / 14.01s**다. 새 회귀 3개는 Character 원본 upload 한도와 Post encoded 크기 계약의 구별, quarantine 두 번째 파일 이동 실패 시 첫 파일 복원, 기존 export의 동일 함수·오류 객체를 검증한다. 추출한 36개 원본 symbol의 AST 본문 비교 차이는 0개다. Architecture는 619 modules / 1991 edges / 279 exact legacy edges로 통과했다.
+
+`check_refactor_preservation.py --contracts --nodes`는 원본 #258 1867 / #263 1907 / protected lineages 2080 / current 2121을 수집했다. API/ORM·assertion·suppression·node 누락·split 오류는 없고 선행 source 74건의 append-only introduction 기록만 root 선형 통합 대기다. 따라서 전체 CLI 성공이나 신규 source capture 완료로 표시하지 않는다. 이 source의 신규 node 3개는 `tests/media/test_media_storage_boundaries.py`에 있다.
+
+
+## AR-B3-M2 — 이미지 provider 실제 전송 소유
+
+`services/{image_provider,pollinations_image,replicate_image,provider_http}.py`의 실제 구현을 같은 이름의 `integrations` 파일로 옮겼다. 모든 Python 제품·테스트 import를 전환했으며 옛 파일/새 호환 facade는 남기지 않았다. 모델별 dispatch, required-reference preflight, 안전 필터/relay/fallback, public HTTPS/DNS/redirect/민감 헤더, 응답 byte bound, 오류 redaction, polling/timeout과 요청 횟수는 원래 구현이다. Pollinations logger는 기존 `app.services.pollinations_image` category를 명시적으로 유지한다.
+
+두 Replicate 전용 suite는 `tests/media`로 이동했고 기존 node 이름·assertion을 유지했다. 혼합 Post/provider security suite는 소유 범위를 바꾸지 않았다. 원본 file/node map과 K11/current deferred path를 갱신했으며, 없어져야 할 옛 provider legacy edge 11개를 제거했다. Social quota/job, 서비스 이미지 key 소유, Character 후보 업무는 각각 기존 명시 단계에서 이어진다.
+
+
+M2 집중 검증은 **135 passed / 2 warnings / 12.49s**이며 전체 **2121 tests collected / 6.43s**, protected mapped node loss 0이다. 네 transport 파일의 기존 함수/class 45개 AST 본문 차이는 0개다. Architecture는 619 modules / 1991 edges / 268 exact legacy edges로 통과했다. 신규 test node는 없으며 기존 Replicate 두 suite의 one-to-one node map을 유지했다. source/메타데이터 도입 capture와 전체 API/ORM 재검증은 root의 선형 통합에서 이어진다.
+
+
+## AR-B3-M3 — Character 미디어 서비스와 HTTP
+
+기존 Character media 함수 13개(비공개 조회·소유 후보/만료·usage·apply/discard·upload)의 실제 구현은 `characters/service/media.py`로, HTTP 11개는 `characters/router.py`로 옮겼다. Runtime에는 실제 남은 호출자와 테스트용 같은 서명 forwarding만 남겼다. Draft expiry는 기존 Creator lifecycle에 같은 workflow를 전달하고, Profile 시각 정체성/활동/detail 조립은 `CharacterMediaWorkflows`가 같은 Session으로 실행한다.
+
+원래 upload의 commit→log→refresh와 apply의 quota finalize→candidate delete→log→commit→refresh→파일 삭제→detail 차이를 보존했다. 두 factory의 구성, 원래 route 순서/같은 APIRoute·인증 dependency, private no-store/nosniff 및 기존 오류 변환을 유지했다. Root 독립 읽기 리뷰도 이 범위에서 추가 수정 요청 없이 이를 확인했다.
+
+새 회귀 **5 nodes**는 `tests/characters/test_character_media_workflows.py`에 있으며 실제 SQLite transaction과 callback Session, commit 후 파일 정리, private HTTP 헤더와 두 factory 연결을 검증한다. 최초 fixture의 필수 persona_summary/filename 누락을 보완한 최종 혼합 matrix는 **165 passed / 2 warnings / 15.76s**다. 원본 #258·#263 대비 API/ORM contract 차이 0, complete split evidence 오류 0이다. Architecture는 620 modules / 2005 edges / 267 exact legacy edges, public route inventory는 기존 196 operations로 통과했다. 원래 split 목적지 24개(13 service + 11 HTTP)를 갱신했고 frozen 증거는 수정하지 않았다.
+
+이 source는 generate_media/generate_profile_media와 quota 예약/provider 수행을 완료했다고 표시하지 않는다. 두 generation endpoint와 해당 Character 업무는 다음 B3 source에서 이동한다. 활동/settings/multi-domain deletion은 이전에 명시한 B4/B8-A 소유 범위를 유지한다. source introduction capture·통합 CI·PR/merge는 root가 순차 기록한다.
+
+
+## AR-B3-M4 — Character 이미지 생성·quota·실패 상태
+
+`generate_media`, `generate_profile_media`, `_generate_profile_image_candidate`의 실제 업무와 prompt/seed/size 관련 5개 원래 symbol을 `characters/service/image_generation.py`로 옮겼다. 두 생성 HTTP 함수도 Character router에 놓고 기존 API 조립 위치에 같은 route 객체를 연결했다. Runtime은 기존 model/route 설정, 서비스 key availability/해석과 translation을 `CharacterImageGenerationWorkflows`로 제공한다.
+
+Key 없는 경우 reserve 이전 종료, quota 소진 시 번역/provider 0, 기존 lock/count/reserve commit, 성공 candidate 기록/commit, Pollinations/Replicate/정제 실패별 failed 예약 finalize/commit을 보존한다. Draft 사전 cooldown/설정 저장과 마지막 commit, Profile 생성의 별도 순서를 하나로 합치지 않았다. M2의 실제 provider 객체를 그대로 사용하며 새로운 provider 요청을 추가하지 않았다.
+
+신규 **5 nodes**는 `tests/characters/test_character_image_generation_workflows.py`에 있다. 세 실패 종류의 실제 SQLite failed reservation 저장과 후보 없음, key 없는 경우 quota/provider 0, 두 factory의 원래 callback 동일성을 확인한다. 최종 집중 검증은 **145 passed / 2 warnings / 12.18s**, #258/#263 대비 API/ORM 차이 0이다. Architecture는 621 modules / 2022 edges / 267 exact legacy edges, public route inventory는 196 operations로 통과했다. 기존 complete split의 목적지 10개를 갱신했으며 신규 기준선을 재생성하지 않았다.
+
+Media 후속 정리는 World banner의 공유 codec 연결, 실제 남은 외부 번역·legacy URL-helper, mixed profile_media 호환 소비자 종료다. Social quota/job/publication은 B5, image settings와 multi-domain 삭제는 B8-A의 기존 소유 계획을 유지한다. Source introduction capture·통합 Actions·PR/merge는 root가 순차 수행한다.
+
+
+## AR-B3-M5 — World 공통 이미지 처리·옛 media 소비자 종료
+
+Worlds 통합 `1213b3063c39e32f2928d0bba9719f32106ab5ac`를 합친 뒤 canonical `worlds/storage.py`를 공통 `integrations/media`에 연결했다. World의 upload decode/encode 오류는 기존 `InvalidWorldBannerMediaError`와 같은 메시지로 변환한다. 업로드 원본 크기·signature·frame·geometry·EXIF·흰색 alpha 처리·1024×384 한도·WebP quality 80/method 6은 같고, World service의 commit 실패 시 새 파일 제거/이전 배너 보존 순서는 수정하지 않았다. Package의 별도 lossless codec은 이 규칙에 합치지 않는다.
+
+역사적 `profile_media.save_world_banner` 본문은 World storage의 `save_legacy_world_banner`가 소유한다. 이전 helper의 `InvalidProfileMediaError` 계약을 보존하는 동일 객체 export이며 생산 호출은 없다. Post 파일 저장과 URL 해석의 실제 소비자도 Social 저장 service와 공통 files로 연결했다. 따라서 `services/profile_media.py`는 함수 본문과 생산 소비자가 없는 옛 테스트용 export만 남으며 B8-A 제거 대상으로 명시한다. Social quota/job/게시 부착 자체는 정확한 B5 잔여다.
+
+신규 8 nodes는 잘못된 World 이미지의 오류/파일 없음, 공유 정제 결과와 thumbnail/alpha, legacy 오류 동일성, root 밖 삭제 방지를 검증한다. 통합 Actions/Installer/새 source 도입 capture는 root의 별도 Gate이며 이 절에서는 그 완료를 주장하지 않는다.
+
+M5 고정 후보의 집중 검증은 **133 passed / 2 warnings / 12.30s**이며 World 배너 교체 commit 실패 복구를 포함한다. #258/#263 API/ORM 차이는 0, architecture는 **626 modules / 2,043 edges / 265 exact legacy edges**였다.
+
+
+## AR-B3-M6 — Azure 통신·제공자 사용량 분리와 media 잔여 감사
+
+Azure의 실제 통신/응답 크기 제한·monthly usage 파일·Lock을 `integrations/azure_translation.py`로 옮겼다. 기존 6개 함수와 Lock의 내용을 바꾸지 않았고 Character prompt 선택·Hangul 확인·256개 cache는 runtime 조립 callback에 남겼다. 신규 **5 nodes**는 같은 문장 cache/provider 1회, Hangul이 있는 prompt의 변환 조건, quota 초과 시 provider 0, transport/response 실패 시 예약 문자 복구, 비활성 key의 파일/요청 없음, 월 변경과 한도 경계를 검증한다.
+
+M1 뒤 남아 있던 기존 credential privacy 테스트의 monkeypatch 위치 한 곳을 실제 `creator.media_images.validate_profile_media_content`로 고쳤다. 비밀키가 URL에 없고 Authorization에만 들어간다는 원래 assertion은 그대로다. Private preview·계정 삭제·기존 provider 경계와 함께 실행한 집중 검증은 **82 passed / 1 warning / 12.68s**다. Architecture는 **627 modules / 2,047 edges / 265 exact legacy edges**로 통과했다.
+
+### Media 실제 소유권과 후속 단계
+
+| 책임 | 현재 구현 / 후속 종료 |
+|---|---|
+| 프로필·Draft 입력/권한/정제/후보 apply·discard/만료/비공개 HTTP | Character `router`, `service/media`, `service/image_generation`, `service/image_quota`, `service/media_storage`; 기존 commit·실패·provider 수 보존 |
+| World 배너 권한·row version·commit 보상과 파일 위치 | `worlds/service/creator.py`, `worlds/storage.py`; 공통 codec 예외를 기존 World 오류로 번역 |
+| 공통 MIME/EXIF/WebP/이미지 한계·containment/private paths/quarantine | `integrations/media/{images,files}.py`; 어떤 owner/공개 정책도 결정하지 않음 |
+| 실제 이미지 provider·validated HTTP / Azure | `integrations/{image_provider,pollinations_image,replicate_image,provider_http,azure_translation}.py` |
+| Post 파일 기록 / quota·job·공개 부착 | 파일은 `social/service/media_storage.py`; 기존 `services/post_image_generation.py`, `post_image_job_worker.py`의 quota/job/부착은 정확한 AR-B5 업무 소유 |
+| World Package export/import 이미지 | Package의 별도 B3 source가 소유; lossless 재인코딩·journal/보상 경로는 profile codec에 합치지 않음 |
+| 생산 호출 없는 옛 `services/profile_media.py` export | 함수 본문은 없고 frozen compatibility tests만 남음. AR-B8-A에서 source/test 계보와 함께 제거 |
+| Runtime의 옛 Pollinations model-list·URL/download helper 7개 | 기존 model-list/credential/validated-transport 테스트만 직접 호출. 새 생성 흐름에 연결하지 않으며 AR-B8-A가 정확한 테스트 호환 표면을 종료 |
+| 이미지 설정·서비스 key·Creator LLM·Local Bot·다중 owner 삭제 | 기존 runtime/credentials·AR-B8-A 실제 조립 소유. 동일 Session/credential/provider/log/cleanup 의미를 바꾸지 않음 |
+
+공개 media mount는 기존 characters/posts/world-package-imports만 유지한다. World/draft/candidate를 anonymous 정적 경로에 추가하지 않았다. 관련 권한/비공개 검증의 통과를 실제 Installer/real-provider 검증으로 확대하지 않는다. 현재 Media M1~M6의 새 nodes는 26개이며 source introduction·통합 Actions·순차 merge는 root가 관리한다.
+
+M6 고정 후보에서 `--contracts --nodes`는 현재 **2,151 nodes**를 수집했다. 보호 계보 2,125개 대비 API/ORM·기존 assertion/suppression·누락 node·source split 오류는 없었다. 실패 목록은 M1~M5의 root 선형 capture를 기다리는 source 12개·test 21개뿐이며 M6 새 5개는 이 검사 당시 미커밋 도입이었다. source 고정 후 root가 M1~M6의 각 첫 도입 SHA에서 append-only 증거를 추가한다.
+
+
+## AR-B5-B2 — Social 공개 판단·읽기·응답 조립과 소유 조회
+
+기존 Community 오류 13개와 상수 4개를 Social의 `exceptions.py`와 `constants.py`로 옮겼다. 게시물과 thread 읽기, 공개 판단, 응답 조립 함수의 실제 본문은 `service/{posts,visibility,presentation}.py`가 소유한다. 삭제·신고·인용·reply 조상 체인 판단 순서와 숨김 응답은 같으며 기존 service의 남은 기능은 같은 함수 객체를 연결한다.
+
+응답 조립의 User 조회는 Identity `service/profile.py::get_user`, Character 조회와 멘션 SQL은 Character `service/profile.py`가 소유한다. User 조회의 nullable `db.get`와 attached identity, 멘션의 기존 한 번의 SQL/active·not-deleted 조건은 같다. 응답에서 멘션 순서와 중복 제거를 유지하고 새로운 flush·commit·refresh를 추가하지 않았다. 서로 다른 도메인의 ORM을 Social에서 직접 조회하지 않는다.
+
+신규 **2 nodes**는 `tests/social/test_identity_read_collaboration.py`에 있다. 실제 SQLite에서 멘션의 한 번의 조회·입력 순서·삭제/정지 필터·빈 입력 0쿼리, User의 같은 attached 객체·미저장 변경·없는 대상 None·flush/commit 0을 검증한다. 기존 게시물 테스트는 monkeypatch를 실제 새 소유 함수에 연결했고 assertion/raises/warns는 동일하다. 초기 2개 실패는 아직 이전하지 않은 mention notification의 patch 위치를 너무 넓게 바꾼 fixture 문제였으며 실제 남은 caller 위치로 좁혀 수정했다.
+
+최종 집중 검증은 **107 passed / 1 existing warning / 21.68s**다. #258/#263 API·schema·ORM 차이 0, 변경 기존 테스트 1개 파일의 assertion 계약 PASS, 전체 split evidence PASS다. Media/Package 통합 후 기존 B2 split evidence 27개의 Package 테스트 경로만 이미 승인된 exact node map의 현재 목적지로 연결했다. 보호 원본 node, 기준선, 검사 규칙은 변경하지 않았다. Architecture는 **658 modules / 2,129 edges / 247 exact legacy edges**, L4 inventory는 **658 modules / parity 97**, ER0는 **Postgres 78 files / historical migration subset 87 / Neo4j 24 / Next 44 / parity 7**로 통과했다.
+
+Social 쓰기·프로필·Inbox·agent 도구·미디어 job, Relationships 및 projection은 B5 잔여 구현이다. 이번 source 고정과 새 nodes 도입은 root가 선형 capture·통합 Actions·PR/merge로 이어가며 이 기록은 전체 B5 완료를 주장하지 않는다.
+
+
+## AR-B5-B3 — 공동 활동의 Post 필드 변경 협력
+
+기존 `apply_joint_post`의 Post `joint_activity_id` 1곳과 `opening_post_id` 2곳 대입을 `social/service/joint_posts.py`의 두 한정 함수가 소유한다. 한 함수당 원래 필드 대입만 수행하며 호출 위치는 같다. 공동 활동 validation 전에 joint ID가 기록되는 원래 순서와 이후 opening 분기, 기존 caller의 flush·commit·rollback 책임을 보존한다. Routines의 Joint 자체 필드와 participant/claim 변경은 그대로 Routines 소유에 남는다.
+
+신규 **1 node**는 `tests/social/test_joint_post_links.py::test_joint_links_keep_assignment_stages_and_caller_rollback`이다. 실제 Session의 attached Post에서 두 단계 사이 opening 값이 유지되고 자동 flush·commit이 없으며 caller rollback으로 두 값이 복구되는지 검사한다. 기존 proposal/opening 회귀와 합쳐 **6 passed / 7.58s**다. 초기 신규 fixture는 존재하지 않는 content 인자를 사용해 실패했으며 실제 Post의 body/author_name 필드로 고쳤다. 기존 제품 assertion은 바꾸지 않았다. B4의 실제 joint 서비스가 합류하면 동일 helper를 runtime의 typed collaborator로 연결하고 이 legacy consumer bridge를 종료한다.
+
+## AR-B4 준비 — 공동 게시 소유 함수를 위한 Social 선행 소스 합류
+
+A3c `ac57f1e`에서 B5 source `f8d173d`의 실제 ancestry를 연결했다. 각 factory의 Package·routines·Character management/media·Creator/image generation 등록을 모두 보존하고, 겹친 Package 등록만 같은 한 번의 호출로 정리했다. Post evidence 조회와 그 실제 Session 테스트는 `social.models.posts.Post`로 연결해 A3b의 한시적 legacy Post read edge를 제거했다. 선행 Package replay hotfix와 canonical `runtime/world_packages/seed_uow.py`, Media·WC·Social 계약도 함께 유지한다.
+
+routines·proposal·routine 게시·Social joint 링크·Package seed 경합 집중 검증은 **57 passed / 1 기존 PostgreSQL skip / 56.24초**다. 현재 경계는 **669 modules / 2,192 edges / legacy exact 244 PASS**, ER0 **80/87/24/44/7**, L4 parity **97**이다. JSON 지도 병합은 원본 `old`와 실제 `new` 쌍을 함께 식별하여 하나의 원본 함수가 여러 책임으로 나뉜 증거를 잃지 않게 했다. frozen source와 기존 introduction 기록은 재작성하지 않고 합류한 기록을 보존한다. Notification의 add-only 후속 협력 source를 연결한 뒤 A3d 실제 소유 전환·최종 통합 보존 검증을 이어간다.

@@ -11,7 +11,7 @@ from app.core.redaction import redact_secret_text
 from app.cruds import agent_runs as agent_run_crud
 
 
-from app.services import profile_media
+from app.integrations.media import files as profile_media
 from app.services.runtime_boundary import (
     OpenClawGatewayClient,
     OpenClawGatewayError,
@@ -200,7 +200,7 @@ def _scrub_account_data(
     now = auth_service._utcnow()
     character_condition = _character_id_condition
 
-    from app.services import world_character_setup
+    from app.runtime.world_characters import cleanup as world_character_setup
 
     from app.runtime.memory_privacy import scrub_memory_data
 

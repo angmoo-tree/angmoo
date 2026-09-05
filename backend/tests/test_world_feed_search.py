@@ -13,7 +13,8 @@ from app.core.search_text import build_post_search_document, normalize_search_te
 from app.domains.runtime.public import SearchIndexHit
 from app.domains.social.public import SocialSearchState
 from app.runtime.search import CallbackSearchIndexAdapter
-from app.services import world_character_contracts, world_character_setup
+from app.services import world_character_contracts
+from app.runtime.world_characters import cleanup as world_character_setup
 from app.services.world_feed_search import (
     WorldFeedReadinessError,
     claim_cycle_keywords,

@@ -2,7 +2,7 @@
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models.community import Post
+from app.domains.social.models.posts import Post
 from app.domains.world_characters.models import WorldCharacter
 from app.domains.worlds.models import WorldMembership
 

@@ -25,7 +25,7 @@ from app.domains.chat.ports.character_response_generator import (
     CharacterResponseGeneratorRequest,
     CharacterResponseProfile,
 )
-from app.domains.social.domain.subjective_context import (
+from app.domains.social.contracts.subjective_context import (
     ActionEmotionLabel,
     ActionMotivationKind,
     ActionSubjectiveContextV1,
@@ -839,7 +839,7 @@ def test_response_manifest_reports_details_omitted_by_evidence_budget(today_sess
 
 def test_character_scrub_removes_subjective_rows_before_action_executions(today_session):
     from sqlalchemy import func, select
-    from app.services.world_character_setup import delete_setup_data_for_characters
+    from app.runtime.world_characters.cleanup import delete_setup_data_for_characters
 
     db, fixture = today_session
     _seed_today_activity(db, fixture)

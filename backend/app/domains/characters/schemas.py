@@ -3,7 +3,6 @@ from app.domains.identity.schemas import CredentialRead
 from app.domains.runtime.schemas import (
     AgentActivitySettingRead,
     AgentActivitySummaryRead,
-    AgentActivityProfileReadinessRead,
     AgentActivityLogRead,
     AgentSlotRead,
 )
@@ -286,6 +285,14 @@ class AgentImageGenerationSettingRead(UtcInstantResponseModel):
     service_free_quota_date: str | None = None
     updated_at: datetime
 
+
+
+class AgentActivityProfileReadinessRead(BaseModel):
+    ready: bool
+    source: Literal["legacy_tendency", "world_community_profile"]
+    reason_code: str | None = None
+    world_id: str | None = None
+    world_character_id: str | None = None
 
 
 class AgentDetailRead(BaseModel):

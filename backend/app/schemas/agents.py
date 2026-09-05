@@ -7,7 +7,6 @@ from app.domains.runtime.schemas import (
     AgentActionRangeRead,
     AgentActivitySettingRead,
     AgentActivitySummaryRead,
-    AgentActivityProfileReadinessRead,
 )
 
 from app.domains.identity.schemas import (
@@ -37,6 +36,8 @@ from app.domains.characters.schemas import (
     AgentPromotionUsageRead,
 )
 
+from app.domains.characters.schemas import AgentActivityProfileReadinessRead
+
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.core.agent_activity_limits import MAX_COMMENTS_PER_DAY, MAX_POSTS_PER_DAY
@@ -56,7 +57,7 @@ from app.domains.characters.schemas import (
     AgentProfileMediaUpload,
     AgentPromotionUsageUpdate,
 )
-from app.schemas.community import PostDetail
+from app.domains.social.schemas.community import PostDetail
 from app.schemas.media_security import validate_profile_media_reference
 
 

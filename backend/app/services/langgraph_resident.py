@@ -35,7 +35,7 @@ from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_FEED_RUNTIME_MODE,
     LEGACY_FEED_RUNTIME_MODE,
 )
-from app.domains.social.domain.subjective_context import (
+from app.domains.social.contracts.subjective_context import (
     ActionEmotionLabel,
     ActionMotivationKind,
     ActionSubjectiveContextV1,

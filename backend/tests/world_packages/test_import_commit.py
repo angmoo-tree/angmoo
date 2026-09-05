@@ -71,8 +71,8 @@ from app.services import langgraph_resident
 from app.services import (
     world_character_contracts,
     world_character_provider,
-    world_character_setup,
 )
+from app.domains.world_characters.service import autonomous_setup as world_character_setup
 from app.services.resident_contracts import LangGraphResidentContext
 from app.services.world_feed_runtime import run_world_keyword_feed
 

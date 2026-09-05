@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.ids import uuid7_string
+from app.domains.social.service import joint_posts
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )
@@ -825,13 +826,13 @@ def apply_joint_post(
     )
     if participant is None:
         raise JointActivityRuntimeError("joint_activity_participant_invalid")
-    post.joint_activity_id = joint.id
+    joint_posts.set_joint_activity_id(post, joint_activity_id=joint.id)
     if joint.opening_post_id is not None:
         if opening_claim is not None:
             raise JointActivityRuntimeError("joint_activity_already_opened")
         if joint.status != "active":
             raise JointActivityRuntimeError("joint_activity_not_active")
-        post.opening_post_id = joint.opening_post_id
+        joint_posts.set_opening_post_id(post, opening_post_id=joint.opening_post_id)
         participant.last_joint_post_id = post.id
         participant.represented_at = participant.represented_at or current
         db.flush()
@@ -862,7 +863,7 @@ def apply_joint_post(
     joint.represented_at = current
     joint.status = "active"
     joint.version += 1
-    post.opening_post_id = post.id
+    joint_posts.set_opening_post_id(post, opening_post_id=post.id)
     claim.representation_status = "represented"
     claim.representation_post_id = post.id
     claim.claim_expires_at = None

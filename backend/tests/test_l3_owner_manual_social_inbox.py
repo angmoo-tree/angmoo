@@ -16,7 +16,7 @@ from sqlalchemy.pool import StaticPool
 from app import models
 from app.domains.identity.dependencies import get_current_user
 from app.core.db import Base, get_db
-from app.domains.social.api.schemas import ManualSocialPostRead
+from app.domains.social.schemas.manual import ManualSocialPostRead
 from app.api.v1.routes.manual_social import router as manual_social_router
 from app.domains.world_characters.router.profile import router as owner_identity_router
 from app.runtime.social.sqlalchemy_read_repository import list_owner_world_feed

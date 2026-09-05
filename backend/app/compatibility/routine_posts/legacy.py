@@ -13,7 +13,7 @@ from app.compatibility.routine_posts.canonical_interactions import (
     CanonicalRoutineInteractionSource,
 )
 from app.cruds import agent_runs as agent_run_crud
-from app.schemas.community import PostCreate
+from app.domains.social.schemas.community import PostCreate
 from app.services import (
     activity_state_contracts,
     agent_activity_policy,

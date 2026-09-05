@@ -27,7 +27,7 @@ from app.domains.identity.service import login_throttle
 from app.services import lore_parser_quota
 from app.services import messages as message_service
 from app.services import daily_activity_plans
-from app.services import worlds as world_service
+from app.domains.worlds import service as world_service
 from app.services import world_character_contracts
 from app.services.direct_llm import DirectLlmResponse
 

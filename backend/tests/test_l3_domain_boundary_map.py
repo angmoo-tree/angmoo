@@ -104,11 +104,12 @@ def test_world_creator_route_uses_worlds_public_boundary() -> None:
 
 
 def test_autonomous_setup_routes_use_world_characters_public_boundary() -> None:
-    for route_name in ("worlds.py", "world_character_setup.py"):
-        route = APP_ROOT / "api" / "v1" / "routes" / route_name
+    for route_name in ("entry.py", "setup.py"):
+        route = APP_ROOT / "domains" / "world_characters" / "router" / route_name
         imports = _imports(route)
 
         assert "app.domains.world_characters" in imports
+        assert "app.domains.world_characters.service" in imports
         assert "app.services.world_character_setup" not in imports
 
 
