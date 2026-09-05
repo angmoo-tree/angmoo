@@ -7264,12 +7264,14 @@
           "backend/app/domains/routines/service/first_greeting.py",
           "backend/app/domains/routines/service/manual_activity.py",
           "backend/app/domains/routines/service/tendency.py",
+          "backend/app/domains/routines/service/tendency_analysis.py",
           "backend/app/domains/routines/service/tendency_settings.py",
           "backend/app/domains/routines/service/tick_schedule.py",
           "backend/app/exceptions.py",
           "backend/app/runtime/characters/management.py",
           "backend/app/runtime/resident/autonomy_reads.py",
-          "backend/app/runtime/resident/first_greeting.py"
+          "backend/app/runtime/resident/first_greeting.py",
+          "backend/app/runtime/resident/tendency_analysis.py"
         ],
         "backend/app/services/agent_creation_drafts.py": [
           "backend/app/domains/characters/exceptions.py",
@@ -7598,14 +7600,16 @@
         },
         {
           "old": "backend/app/services/agents.py::TENDENCY_LLM_TOOLS_ALLOW",
-          "new": "backend/app/runtime/characters/management.py::TENDENCY_LLM_TOOLS_ALLOW",
+          "new": "backend/app/domains/routines/constants.py::TENDENCY_LLM_TOOLS_ALLOW",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/tendency_analysis.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
-          ]
+          ],
+          "source_member": "Original complete provider async body, exact constant or original error class. Expanding the actual preparation and two setting-storage blocks restores the full original AST, with exact Direct/OpenClaw catches/profile release/slot release and output/thinking settings."
         },
         {
           "old": "backend/app/services/agents.py::LOCAL_KEY_PREFIX",
@@ -7909,15 +7913,17 @@
         },
         {
           "old": "backend/app/services/agents.py::LlmCredentialInvalidError",
-          "new": "backend/app/runtime/characters/management.py::LlmCredentialInvalidError",
+          "new": "backend/app/domains/routines/exceptions.py::LlmCredentialInvalidError",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/tendency_analysis.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget",
             "tests/routines/test_tendency.py::test_tendency_analysis_route_keeps_non_json_errors"
-          ]
+          ],
+          "source_member": "Original complete provider async body, exact constant or original error class. Expanding the actual preparation and two setting-storage blocks restores the full original AST, with exact Direct/OpenClaw catches/profile release/slot release and output/thinking settings."
         },
         {
           "old": "backend/app/services/agents.py::ActiveSlotBusyError",
@@ -8643,14 +8649,16 @@
         },
         {
           "old": "backend/app/services/agents.py::analyze_tendency",
-          "new": "backend/app/runtime/characters/management.py::analyze_tendency",
+          "new": "backend/app/runtime/resident/tendency_analysis.py::analyze_tendency",
           "direct_consumers": [
-            "backend/app/runtime/characters/management.py"
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/resident/tendency_analysis.py"
           ],
           "test_nodes": [
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/routines/test_tendency.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
-          ]
+          ],
+          "source_member": "Original complete provider async body, exact constant or original error class. Expanding the actual preparation and two setting-storage blocks restores the full original AST, with exact Direct/OpenClaw catches/profile release/slot release and output/thinking settings."
         },
         {
           "old": "backend/app/services/agents.py::activate_agent",
@@ -10543,6 +10551,29 @@
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/test_postgres_security_concurrency.py::test_first_greeting_claim_is_single_flight_across_postgres_sessions"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::analyze_tendency",
+          "new": "backend/app/domains/routines/service/tendency_analysis.py::prepare_tendency_analysis",
+          "source_member": "Original first seven statements: owned Character, demo guard, LLM mode, importedWorld guard, attached setting, sameSession credential and missing/disabled credential committed error. Return only the same three attached values; original failure order and exact error class remain.",
+          "direct_consumers": [
+            "backend/app/runtime/resident/tendency_analysis.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::analyze_tendency",
+          "new": "backend/app/domains/routines/service/tendency_analysis.py::store_tendency_analysis",
+          "source_member": "Identical original setting field writes then commit/refresh then activity log from both Direct and OpenClaw branches. Pass original user/character objects so their IDs are loaded after commit at the same keyword evaluation point; branch-specific result_factory executes only at the original final log argument, retaining tracker.summary timing. No extra commit/flush/read/retry.",
+          "direct_consumers": [
+            "backend/app/runtime/resident/tendency_analysis.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_tendency_result_transaction.py::test_tendency_result_is_evaluated_after_setting_commit_before_activity_log[direct]",
+            "tests/routines/test_tendency_result_transaction.py::test_tendency_result_is_evaluated_after_setting_commit_before_activity_log[openclaw]"
           ]
         }
       ],
@@ -33549,6 +33580,23 @@
       "preservation": "Original standalone first-greeting lane and owner30minute cooldown; commit claim before provider; duplicate authored-post recheck under original PostgreSQL lock; created-post log then image attempt then refreshed response; deferred-vs-failed run state and usage; exact secret purpose and raise-from are unchanged. Schema class names, fields/defaults and PostDetail reference remain identical. An initial reciprocal domain edge through Social.PostDetail was removed by the actual API response composition and typed value/factory contracts, not a boundary exception.",
       "test_bindings": "Existing source inspection reads actual service functions; PostgreSQL same-Session claim invokes the actual service with original Social nullable/exists collaboration. Plaintext equality allowlist moves only original first-greeting reveal to its exact new runtime helper. No broad allowlist/checker exemption.",
       "remaining": "Current mixed management entry binds only actual service/provider functions until C7 HTTP/composition. Tendency and Character credential workflows remain next. Root later connects B5 canonical image generation and Identity lookup sources."
+    },
+    "AR-B4-C7-E-tendency-execution": {
+      "status": "IMPLEMENTED — focused68PASS then lazy expired-identity SQL/late result2PASS; final relevant/diagnostic pending",
+      "actual_paths": [
+        "backend/app/domains/routines/contracts/tendency_analysis.py",
+        "backend/app/domains/routines/service/tendency_analysis.py",
+        "backend/app/runtime/resident/tendency_analysis.py",
+        "backend/app/domains/routines/exceptions.py",
+        "backend/tests/routines/test_tendency_result_transaction.py"
+      ],
+      "ownership": "Routines owns original seven-statement admission and actual tendency result storage/log. Runtime owns actual Direct/OpenClaw provider/profile/credential reveal/lease compensation. Original error class and tool allowlist now have actual Routines owners.",
+      "preservation": "Exact complete original async workflow AST restored by inlining original extracted members. Both sameSession user/character identity reads and result/usage evaluation remain after setting commit/refresh and before log. Direct error categories, gateway final release precedence and source thinking/output constants are unchanged.",
+      "new_regression": [
+        "tests/routines/test_tendency_result_transaction.py::test_tendency_result_is_evaluated_after_setting_commit_before_activity_log[direct]",
+        "tests/routines/test_tendency_result_transaction.py::test_tendency_result_is_evaluated_after_setting_commit_before_activity_log[openclaw]"
+      ],
+      "remaining": "C7 actual HTTP/composition, credential owner4, final presentation and exact old aliases remain. Root joins Runtime actual gateway constructor source and removes this exact old runtime boundary edge before B8-A."
     }
   },
   "test_symbols": {

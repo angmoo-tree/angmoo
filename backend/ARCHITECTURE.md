@@ -747,3 +747,8 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 `routines/service/first_greeting.py`는 첫 게시글의 자격, 별도 사용자 쿨다운, 중복 확인, 실행 기록 확정과 결과 상태를 소유합니다. PostgreSQL의 원래 사용자별 잠금은 같은 Session의 repository에서 얻고, 잠금 뒤 게시글과 쿨다운을 다시 확인합니다. 실행 기록의 원래 commit은 글 생성 호출보다 먼저 끝납니다.
 
 첫 인사의 입력과 writer JSON은 `routines/schemas/first_greeting.py`에 있습니다. Routines 실행 결과와 Social 게시글을 함께 담는 HTTP 응답은 `api/schemas/first_greeting.py`에 실제 정의합니다. 서비스에는 원래 PostCreate와 응답 생성자를 연결하므로 도메인 간 역방향 schema 의존 없이 같은 응답 클래스·필드가 유지됩니다. runtime의 실제 writer와 이미지 IO는 해당 DTO를 사용하고, 키 해석은 `runtime/resident/first_greeting.py`의 한정 함수에서 수행합니다. Social 게시글의 저장·조회는 같은 Session의 Social 기능을 연결합니다. 이미지 실패와 글 생성 실패, provider 지연은 기존의 서로 다른 결과 처리를 유지합니다.
+
+
+### 성향 분석 결과 저장
+
+`routines/service/tendency_analysis.py`는 성향 분석의 준비 조건과 결과 저장을 소유하고, `runtime/resident/tendency_analysis.py`는 Direct/OpenClaw provider 호출과 profile·슬롯 정리를 수행합니다. Direct와 OpenClaw의 원래 오류 처리 및 마지막 정리 규칙은 각각 유지합니다. 결과 필드 저장·commit·refresh가 끝난 뒤 기존 객체의 ID를 읽고 사용량 요약을 계산하며 활동 로그를 저장합니다. 호출자가 ID나 요약 문자열을 미리 평가하여 ORM 조회 또는 provider 사용량 평가 순서를 바꾸지 않습니다.

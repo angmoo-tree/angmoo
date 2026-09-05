@@ -348,6 +348,8 @@ def test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term():
 def test_tendency_analysis_uses_medium_thinking_and_larger_output_budget(
     monkeypatch,
 ) -> None:
+    from app.runtime.resident import tendency_analysis as agent_service
+
     monkeypatch.setattr(
         agent_service.settings, "TENDENCY_ANALYSIS_THINKING_LEVEL", "Medium"
     )

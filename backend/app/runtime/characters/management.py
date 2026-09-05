@@ -1,4 +1,8 @@
 from __future__ import annotations
+from app.domains.routines.exceptions import LlmCredentialInvalidError
+from app.domains.routines.contracts.tendency_analysis import TendencyAnalysisWorkflows
+from app.domains.routines.constants import TENDENCY_LLM_TOOLS_ALLOW
+from app.runtime.resident import tendency_analysis
 from app.domains.routines.service import first_greeting
 from app.domains.routines.service.first_greeting import _first_greeting_available_at
 from app.domains.routines.schemas.first_greeting import _FirstGreetingWriterPayload
@@ -198,7 +202,6 @@ AGENT_DETAIL_ACTIVITY_LIMIT = 200
 DELETED_CHARACTER_NAME = "삭제한 앵무"
 DELETED_CHARACTER_PLACEHOLDER = "삭제된 앵무입니다."
 # OpenClaw validates the global tool allowlist before honoring tool_choice="none".
-TENDENCY_LLM_TOOLS_ALLOW = ["angmoo_list_feed"]
 LOCAL_KEY_PREFIX = "angmoo_local_"
 
 
@@ -235,8 +238,7 @@ class ImageSettingsInvalidError(AgentServiceError):
 
 
 
-class LlmCredentialInvalidError(AgentServiceError):
-    pass
+
 
 
 class ActiveSlotBusyError(AgentServiceError):
@@ -813,203 +815,6 @@ def _ensure_credential_world_scope(
 
 
 
-async def analyze_tendency(
-    db: Session, user: models.User, character_id: str
-) -> schemas.AgentDetailRead:
-    character = _get_owned_character(db, user, character_id)
-    demo_lock.ensure_demo_user_mutable(user)
-    _ensure_llm_mode(character)
-    _ensure_imported_world_runtime_enabled(db, character=character)
-    setting = agent_crud.ensure_setting(db, character.id)
-    credential = agent_crud.get_character_credential(db, character.id)
-    if credential is None or not credential.enabled:
-        _mark_tendency_error(
-            db, setting, "Agent credential is required before tendency analysis"
-        )
-        raise CredentialRequiredError(
-            "Agent credential is required before tendency analysis"
-        )
-
-    if settings.server_llm_engine == "direct":
-        run_id = str(uuid4())
-        try:
-            material = CredentialResolver.resolve_llm_credential(
-                credential,
-                purpose=CredentialPurpose.RESIDENT_LLM,
-                owner_id=user.id,
-                character_id=character.id,
-            )
-            api_key = material.reveal()
-            tracker = RunLlmTracker()
-
-            def _validator(payload: dict[str, Any]) -> dict[str, Any]:
-                return _TendencyAnalysisPayload.model_validate(payload).model_dump()
-
-            payload = await generate_json(
-                api_key=api_key,
-                context=DirectLlmCallContext(
-                    credential_id=credential.id,
-                    character_id=character.id,
-                    agent_run_id=run_id,
-                    node="TendencyAnalysis",
-                    lane="server_llm",
-                    provider=credential.provider,
-                    model=credential.model,
-                    key_fingerprint=credential.key_fingerprint,
-                ),
-                tracker=tracker,
-                system_prompt=_build_tendency_analysis_prompt(character=character),
-                user_prompt=(
-                    "Analyze this Angmoo persona for community activity. "
-                    "Return only the requested JSON object."
-                ),
-                response_schema=_TendencyAnalysisPayload,
-                validator=_validator,
-                max_output_tokens=TENDENCY_ANALYSIS_MAX_OUTPUT_TOKENS,
-                thinking_level=settings.tendency_analysis_thinking_level,
-            )
-            summary, action_ranges, planner_profile = _normalize_tendency_payload(payload)
-            setting.tendency_summary = summary
-            setting.tendency_action_ranges = action_ranges
-            setting.planner_tendency_profile = planner_profile
-            setting.tendency_updated_at = datetime.now(UTC)
-            setting.tendency_error = None
-            db.commit()
-            db.refresh(setting)
-            agent_crud.log_activity(
-                db,
-                user_id=user.id,
-                character_id=character.id,
-                action_type="tendency_analyzed",
-                target_post_id=None,
-                reason="user_requested_tendency_analysis_direct",
-                result=(
-                    "Community activity tendency was analyzed with direct LLM; "
-                    f"llm_call_count={tracker.summary().get('call_count', 0)}."
-                ),
-            )
-            db.refresh(character)
-            return _build_agent_detail(db, character)
-        except ValueError as exc:
-            message = "Agent credential key cannot be decrypted"
-            _mark_tendency_error(db, setting, message)
-            raise CredentialRequiredError(message) from exc
-        except DirectLlmError as exc:
-            message = redact_secret_text(str(exc))[:1000]
-            _mark_tendency_error(db, setting, message)
-            raise
-
-    token = settings.openclaw_gateway_token
-    if token is None:
-        _mark_tendency_error(db, setting, "OPENCLAW_GATEWAY_TOKEN is missing")
-        raise agent_run_service.OpenClawNotConfiguredError(
-            "OPENCLAW_GATEWAY_TOKEN is missing"
-        )
-
-    run_id = str(uuid4())
-    timeout_seconds = settings.openclaw_timeout_seconds
-    slot = slot_pool.claim_agent_slot(
-        db,
-        run_id=run_id,
-        agent_ids=settings.openclaw_agent_ids,
-        lease_seconds=timeout_seconds + 90,
-    )
-    if slot is None:
-        raise agent_run_service.AgentSlotUnavailableError(
-            f"No OpenClaw slot is available for {', '.join(settings.openclaw_agent_ids)}"
-        )
-
-    bound_profile = False
-    last_error: str | None = None
-    client = OpenClawGatewayClient(
-        url=settings.openclaw_gateway_url,
-        token=token,
-        timeout_seconds=timeout_seconds,
-    )
-    try:
-        _bind_slot_auth_profile(
-            slot, user_id=user.id, character=character, credential=credential
-        )
-        bound_profile = True
-        await client.reload_secrets()
-        gateway_result = await client.run_agent(
-            message="Analyze this Angmoo persona for community activity. Return only JSON.",
-            agent_id=slot.agent_id,
-            session_key=(
-                f"agent:{slot.agent_id}:angmoo:tendency:{user.id}:{character.id}:{run_id}"
-            ),
-            provider=credential.provider,
-            model=credential.model,
-            auth_profile_id=credential.auth_profile_id,
-            tool_choice="none",
-            tools_allow=TENDENCY_LLM_TOOLS_ALLOW,
-            prompt_mode="minimal",
-            bootstrap_context_mode="lightweight",
-            bootstrap_context_run_kind="default",
-            idempotency_key=run_id,
-            thinking=settings.tendency_analysis_thinking_level,
-            extra_system_prompt=_build_tendency_analysis_prompt(character=character),
-        )
-        raw_text = _extract_gateway_result_text(gateway_result)
-        payload = _parse_tendency_json(raw_text)
-        summary, action_ranges, planner_profile = _normalize_tendency_payload(payload)
-        setting.tendency_summary = summary
-        setting.tendency_action_ranges = action_ranges
-        setting.planner_tendency_profile = planner_profile
-        setting.tendency_updated_at = datetime.now(UTC)
-        setting.tendency_error = None
-        db.commit()
-        db.refresh(setting)
-        agent_crud.log_activity(
-            db,
-            user_id=user.id,
-            character_id=character.id,
-            action_type="tendency_analyzed",
-            target_post_id=None,
-            reason="user_requested_tendency_analysis",
-            result="Community activity tendency was analyzed with the user's API key.",
-        )
-        db.refresh(character)
-        return _build_agent_detail(db, character)
-    except OpenClawGatewayError as exc:
-        friendly_error = llm_credential_error_message(exc)
-        if friendly_error is not None:
-            last_error = friendly_error
-            _mark_tendency_error(db, setting, friendly_error)
-            raise LlmCredentialInvalidError(friendly_error) from exc
-        last_error = redact_secret_text(str(exc))
-        _mark_tendency_error(db, setting, last_error)
-        raise
-    except Exception as exc:
-        last_error = redact_secret_text(str(exc))
-        _mark_tendency_error(db, setting, last_error)
-        raise
-    finally:
-        release_error = None
-        if bound_profile:
-            try:
-                _release_slot_auth_profile(
-                    slot,
-                    user_id=user.id,
-                    character_id=character.id,
-                    credential=credential,
-                )
-                await client.reload_secrets()
-            except CredentialSyncError as exc:
-                release_error = redact_secret_text(str(exc))
-                if last_error is None:
-                    last_error = release_error
-                    _mark_tendency_error(db, setting, release_error)
-            except OpenClawGatewayError as exc:
-                release_error = redact_secret_text(str(exc))
-                if last_error is None:
-                    last_error = release_error
-                    _mark_tendency_error(db, setting, release_error)
-        slot_pool.release_agent_slot(
-            db, agent_id=slot.agent_id, run_id=run_id, last_error=last_error
-        )
-        if release_error is not None and last_error == release_error:
-            raise CredentialSyncError(release_error)
 
 
 
@@ -1934,3 +1739,21 @@ def build_first_greeting_workflows() -> FirstGreetingWorkflows:
 
 async def run_first_greeting(db: Session, user: models.User, character_id: str, data: schemas.AgentFirstGreetingCreate) -> schemas.AgentFirstGreetingRead:
     return await first_greeting.run_first_greeting(db, user, character_id, data, workflows=build_first_greeting_workflows())
+
+
+def build_tendency_analysis_workflows() -> TendencyAnalysisWorkflows[schemas.AgentDetailRead]:
+    return TendencyAnalysisWorkflows(
+        get_owned_character=_get_owned_character,
+        ensure_mutable=demo_lock.ensure_demo_user_mutable,
+        ensure_llm_mode=_ensure_llm_mode,
+        ensure_imported_world_runtime_enabled=_ensure_imported_world_runtime_enabled,
+        get_credential=agent_crud.get_character_credential,
+        bind_profile=_bind_slot_auth_profile,
+        release_profile=_release_slot_auth_profile,
+        build_detail=_build_agent_detail,
+        credential_required_error=CredentialRequiredError,
+    )
+
+
+async def analyze_tendency(db: Session, user: models.User, character_id: str) -> schemas.AgentDetailRead:
+    return await tendency_analysis.analyze_tendency(db, user, character_id, workflows=build_tendency_analysis_workflows())

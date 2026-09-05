@@ -1,7 +1,7 @@
 {
-  "edge_count": 2735,
-  "external_import_count": 2420,
-  "module_count": 784,
+  "edge_count": 2764,
+  "external_import_count": 2432,
+  "module_count": 787,
   "modules": [
     {
       "external_imports": [],
@@ -3972,6 +3972,22 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "dataclasses",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.autonomy_management",
+        "app.domains.routines.contracts.manual_activity"
+      ],
+      "module": "app.domains.routines.contracts.tendency_analysis",
+      "path": "backend/app/domains/routines/contracts/tendency_analysis.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "fastapi",
         "sqlalchemy.orm"
       ],
@@ -5285,6 +5301,26 @@
       ],
       "module": "app.domains.routines.service.tendency",
       "path": "backend/app/domains/routines/service/tendency.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.autonomy_management",
+        "app.domains.routines.contracts.tendency_analysis",
+        "app.domains.routines.models",
+        "app.domains.routines.service.activity_logs",
+        "app.domains.routines.service.activity_settings",
+        "app.domains.routines.service.tendency_settings"
+      ],
+      "module": "app.domains.routines.service.tendency_analysis",
+      "path": "backend/app/domains/routines/service/tendency_analysis.py",
       "wildcard_imports": []
     },
     {
@@ -8717,6 +8753,7 @@
         "app.domains.routines.contracts.feed_cues",
         "app.domains.routines.contracts.first_greeting",
         "app.domains.routines.contracts.manual_activity",
+        "app.domains.routines.contracts.tendency_analysis",
         "app.domains.routines.exceptions",
         "app.domains.routines.repository.autonomy",
         "app.domains.routines.repository.feed_cues",
@@ -8748,6 +8785,7 @@
         "app.runtime.resident.autonomy_reads",
         "app.runtime.resident.execution",
         "app.runtime.resident.first_greeting",
+        "app.runtime.resident.tendency_analysis",
         "app.runtime.world_characters.cleanup",
         "app.runtime.world_characters.queries",
         "app.schemas",
@@ -10328,6 +10366,36 @@
       ],
       "module": "app.runtime.resident.slots",
       "path": "backend/app/runtime/resident/slots.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm",
+        "typing",
+        "uuid"
+      ],
+      "imports": [
+        "app.config",
+        "app.core.redaction",
+        "app.domains.characters.exceptions",
+        "app.domains.characters.service.creator",
+        "app.domains.identity.contracts",
+        "app.domains.identity.service.credential_resolution",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.tendency_analysis",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.schemas.tendency",
+        "app.domains.routines.service.slot_pool",
+        "app.domains.routines.service.tendency",
+        "app.domains.routines.service.tendency_analysis",
+        "app.domains.routines.service.tendency_settings",
+        "app.integrations.direct_llm",
+        "app.services.runtime_boundary"
+      ],
+      "module": "app.runtime.resident.tendency_analysis",
+      "path": "backend/app/runtime/resident/tendency_analysis.py",
       "wildcard_imports": []
     },
     {

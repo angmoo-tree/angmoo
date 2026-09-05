@@ -1157,3 +1157,10 @@ C7-C 현재 경계는 777 modules / 2691 edges / exact legacy 202 / cycle0이다
 복합 응답의 직접 도메인 참조로 발견한 순환은 API 응답 조립과 typed value/factory로 제거했고 경계 예외는 추가하지 않았다. 최종 연결 후 같은 관련156회귀를 다시 통과했다. 현재784 modules / 2735 edges / exact legacy203 / cycle0이다. 추가 legacy1은 원래 image IO가 이동한 정확1 import이며, 이미 별도 작성된 B5 Social image source의 순차합류 때 제거한다. 새 API schema도 기존 모든 schemas 경로의 비밀 필드 검사 범위에 포함된다.
 
 C7-D 최종 원래 six 읽기 전용 진단은 모두 오류0, 보호2139/현재2287이다. API/ORM·원본 assertion·기존 노드가 보존됐고 검사기/동결/additions 변경은 없다. L4 784/14/97, ER0 86/87/24/44/7, Memory current이다. stock 증명은 root의 순차 source introduction 연결 뒤 확인한다.
+
+
+## AR-B4-C7-E — 성향 분석 준비·저장·provider 실행
+
+기존 준비7문장과 양쪽 provider의 동일한 설정 저장/로그 부분을 Routines 실제 서비스로 이전했다. Direct/OpenClaw 호출·오류·profile release·slot release는 실제 runtime에 두었다. 원래 함수의 전체 AST는 추출된 두 구간을 되붙이고 callback을 복원하면 동일하며, 원래 오류 class와 tool allowlist도 같은 정의이다. 객체 ID를 선평가하지 않고 원래 붙어있는 User/Character를 전달하여 commit 뒤의 지연 SELECT를 유지했다. result_factory는 원래 마지막 log 인자 위치에서만 평가한다. 실제 SQLite의 Direct/OpenClaw 두 회귀는 setting commit → 만료된 User/Character 조회 → result → log 순서와 별도 connection의 durable 값을 검증한다.
+
+최종 관련 검증은 **68 passed / 기존 경고3 / 28.53초**이다. 현재 경계는 787 modules / 2764 edges / exact legacy204 / cycle0이며 L4 787/14/97, ER0 86/87/24/44/7, Memory inventory는 current이다. 원래 여섯 보존 검사의 읽기 전용 진단은 모두 오류0, 보호2139/현재2289이다. 실제 provider gateway의 정확한 기존 import1은 별도 작성된 Runtime 소유 source 합류 때 연결한다. 원래 frozen/checkpoint/additions는 수정하지 않았으며 stock gate는 root의 순차 도입 원장 연결 후 확인한다.

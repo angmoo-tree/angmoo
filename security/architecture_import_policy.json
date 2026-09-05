@@ -894,6 +894,19 @@
       "owner_stage": "L4",
       "review_date": "2026-09-06",
       "removal_condition": "Root sequential AR-B5 joins the already-authored actual Social image runtime and attachment service, replaces this exact moved IO import without a compatibility alias, and removes this edge before AR-B8-A."
+    },
+    {
+      "id": "AR-B4-C7-E-tendency-runtime-constructor",
+      "owner_stage": "L4",
+      "review_date": "2026-09-06",
+      "reason": "Exact original registered gateway constructor/error is used by the moved actual provider IO, with unchanged lazy construction/profile/lease behavior.",
+      "removal_condition": "Root joins the already-authored Runtime source, connects its actual same constructor/error identity, and removes this exact import before AR-B8-A.",
+      "edges": [
+        {
+          "importer": "app.runtime.resident.tendency_analysis",
+          "imported": "app.services.runtime_boundary"
+        }
+      ]
     }
   ],
   "legacy_module_cycles": [],
@@ -1031,6 +1044,7 @@
       "app.domains.routines.contracts.run_identity",
       "app.domains.routines.contracts.slot_requests",
       "app.domains.routines.contracts.slots",
+      "app.domains.routines.contracts.tendency_analysis",
       "app.domains.routines.dependencies",
       "app.domains.routines.exceptions",
       "app.domains.routines.models",
@@ -1114,6 +1128,7 @@
       "app.domains.routines.service.social_context",
       "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tendency",
+      "app.domains.routines.service.tendency_analysis",
       "app.domains.routines.service.tendency_settings",
       "app.domains.routines.service.tick_schedule",
       "app.domains.routines.service.tool_policy",
@@ -1275,6 +1290,7 @@
       "app.domains.routines.contracts.resident",
       "app.domains.routines.contracts.run_identity",
       "app.domains.routines.contracts.slot_requests",
+      "app.domains.routines.contracts.tendency_analysis",
       "app.domains.routines.schemas",
       "app.domains.routines.schemas.first_greeting",
       "app.domains.routines.schemas.plans",
@@ -1336,6 +1352,7 @@
       "app.domains.routines.service.social_context",
       "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tendency",
+      "app.domains.routines.service.tendency_analysis",
       "app.domains.routines.service.tendency_settings",
       "app.domains.routines.service.tick_schedule",
       "app.domains.routines.service.tool_policy",
