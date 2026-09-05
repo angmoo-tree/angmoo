@@ -74,6 +74,58 @@ def write(root: Path, path: str, source: str) -> None:
     target.write_text(source, encoding="utf-8")
 
 
+@pytest.mark.parametrize("changed_kind", ["source", "test"])
+def test_split_content_cache_still_detects_same_path_edits_during_a_check(monkeypatch, tmp_path, changed_kind):
+    old = "backend/old.py"
+    first = "backend/new_one.py"
+    second = "backend/new_two.py"
+    behavior = "backend/tests/test_behavior.py"
+    write(tmp_path, first, "def first(): pass\ndef second(): pass\n")
+    write(tmp_path, second, "def third(): pass\n")
+    write(tmp_path, behavior, "def test_behavior():\n    assert value == 1\n")
+    original = "def first(): pass\ndef second(): pass\ndef third(): pass\n"
+
+    def git(*args, **kwargs):
+        if args[0] == "show":
+            return b'{"details":{}}'
+        assert args[:2] == ("cat-file", "blob")
+        return original.encode()
+
+    monkeypatch.setattr(p, "git_bytes", git)
+    detail = {
+        "split_files": {old: [first, second]},
+        "split_symbols": [
+            {"old": old + "::" + name, "new": target + "::" + name,
+             "direct_consumers": [second], "test_nodes": ["tests/test_behavior.py::test_behavior"]}
+            for name, target in [("first", first), ("second", first), ("third", second)]
+        ],
+    }
+    snapshots = [{"tracked_files": {old: "original-blob"}}]
+    read_text = Path.read_text
+    target = tmp_path / (first if changed_kind == "source" else behavior)
+    changed = False
+
+    def read_then_change(path, *args, **kwargs):
+        nonlocal changed
+        text = read_text(path, *args, **kwargs)
+        if path == target and not changed:
+            changed = True
+            path.write_text(
+                "def first(): pass\ndef renamed(): pass\n" if changed_kind == "source"
+                else "def unrelated():\n    assert value == 1\n",
+                encoding="utf-8",
+            )
+        return text
+
+    monkeypatch.setattr(Path, "read_text", read_then_change)
+    errors = p.check_split_evidence({"details": {"AR-B7": detail}}, snapshots, tmp_path)
+    assert changed
+    if changed_kind == "source":
+        assert any("does not define" in error and "second" in error for error in errors)
+    else:
+        assert any("behavior test missing" in error for error in errors)
+
+
 def snapshot(source: str, node: str = "tests/test_old.py::test_contract") -> dict:
     path, _ = p.node_function(node)
     return {"test_nodes": [node], "test_assertions": {path: p.assertion_contracts(source)}}

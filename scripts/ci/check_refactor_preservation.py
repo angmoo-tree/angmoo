@@ -482,6 +482,21 @@ def check_split_evidence(moves: dict, snapshots: list[dict], root: Path = ROOT) 
     new: 'path.py::symbol', direct_consumers: ['path'], test_nodes: ['node']}.
     The already-reviewed pilot detail format is frozen at PR263, not extended.
     """
+    # Read every file at every original check site. Cache only parsing of the
+    # exact contents within this invocation, so same-path edits remain visible.
+    symbols_by_text = {}
+    assertions_by_text = {}
+
+    def memo_symbols(source):
+        if source not in symbols_by_text:
+            symbols_by_text[source] = defined_symbols(source)
+        return symbols_by_text[source]
+
+    def memo_assertions(source):
+        if source not in assertions_by_text:
+            assertions_by_text[source] = assertion_contracts(source)
+        return assertions_by_text[source]
+
     historical = json.loads(git_bytes("show", f"{CHECKPOINT_COMMIT}:security/refactor_path_map.json", root=root)).get("details", {})
     errors = []
     for stage, detail in moves.get("details", {}).items():
@@ -512,7 +527,7 @@ def check_split_evidence(moves: dict, snapshots: list[dict], root: Path = ROOT) 
                 if old_symbol not in owned or new_path not in destinations or not destination.is_relative_to(root.resolve()) or not destination.is_file():
                     errors.append(f"{stage}: unknown or unsafe split symbol: {entry}")
                     continue
-                if new_symbol not in defined_symbols(destination.read_text(encoding="utf-8-sig")):
+                if new_symbol not in memo_symbols(destination.read_text(encoding="utf-8-sig")):
                     errors.append(f"{stage}: split destination does not define the mapped symbol: {entry['new']}")
                 consumers, tests = entry.get("direct_consumers", []), entry.get("test_nodes", [])
                 if not consumers or not tests:
@@ -524,7 +539,7 @@ def check_split_evidence(moves: dict, snapshots: list[dict], root: Path = ROOT) 
                 for test in tests:
                     test_path, function = node_function(test)
                     candidate = (root / "backend" / test_path).resolve()
-                    if not candidate.is_relative_to((root / "backend/tests").resolve()) or not candidate.is_file() or function not in assertion_contracts(candidate.read_text(encoding="utf-8-sig")):
+                    if not candidate.is_relative_to((root / "backend/tests").resolve()) or not candidate.is_file() or function not in memo_assertions(candidate.read_text(encoding="utf-8-sig")):
                         errors.append(f"{stage}: split behavior test missing or unsafe: {test}")
                 covered.add(old_symbol)
                 covered_destinations.add(new_path)
