@@ -417,6 +417,71 @@
       "test_suppressions": {
         "tests/test_t2_secret_allowlist.py": {}
       }
+    },
+    {
+      "commit": "2583af6032d2d78632c78732ef0035fd88cc0580",
+      "feature_id": "AR-G0",
+      "reason": "Preserve exact Gitleaks fingerprint allowlist and negative scope regression coverage",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_t2_secret_allowlist.py::test_gitleaks_checkpoint_allowlist_contains_only_exact_frozen_fingerprints",
+        "tests/test_t2_secret_allowlist.py::test_gitleaks_checkpoint_fingerprints_do_not_allow_other_keys_values_paths_or_rules"
+      ],
+      "test_assertions": {
+        "tests/test_t2_secret_allowlist.py": {
+          "test_current_exact_allowlist_metadata_passes": [
+            "assert checker.validate() == []"
+          ],
+          "test_broad_scope_and_missing_review_metadata_are_rejected": [
+            "assert any(('scope must stay exact' in error for error in errors))",
+            "assert any(('missing metadata fields' in error for error in errors))"
+          ],
+          "test_checkpoint_exception_matches_only_the_existing_frozen_synthetic_fixture": [
+            "assert entry['value'] == original['value']",
+            "assert hashlib.sha256(entry['value'].encode()).hexdigest() == checker.CHECKPOINT_FIXTURE_SHA256",
+            "assert any((entry['value'] in assertion for assertion in assertions))",
+            "assert checkpoint['commit'] == entry['evidence_commit']",
+            "assert hashlib.sha1(f'blob {len(checkpoint_bytes)}\\x00'.encode() + checkpoint_bytes).hexdigest() == entry['checkpoint_git_blob']"
+          ],
+          "test_checkpoint_exception_cannot_expand_or_change_its_exact_evidence": [
+            "assert checker.validate(fixture)"
+          ],
+          "test_checkpoint_exception_does_not_suppress_another_value_path_or_rule": [
+            "assert list(scanner.scan_text(entry.path, entry.value, allowlist=allowlist)) == []",
+            "assert {finding.rule for finding in scanner.scan_text('security/another-checkpoint.json', entry.value, allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, entry.value + '1', allowlist=allowlist)} == {'google-api-key'}",
+            "assert {finding.rule for finding in scanner.scan_text(entry.path, another_rule.value, allowlist=allowlist)} == {'openai-api-key'}"
+          ],
+          "_checkpoint_gitleaks_fingerprints": [
+            "assert len(entries) == 1",
+            "assert all((re.fullmatch('[a-f0-9]{40}|[a-f0-9]{64}', value) for _, value in pairs))"
+          ],
+          "test_gitleaks_checkpoint_allowlist_contains_only_exact_frozen_fingerprints": [
+            "assert set(entry) == {'targetRules', 'description', 'condition', 'regexTarget', 'paths', 'regexes'}",
+            "assert entry['targetRules'] == ['generic-api-key']",
+            "assert entry['condition'] == 'AND'",
+            "assert entry['regexTarget'] == 'line'",
+            "assert entry['paths'] == ['(^|/)security/refactor_backend_checkpoint\\\\.json$']",
+            "assert len(entry['regexes']) == len(set(entry['regexes'])) == 55",
+            "assert set(entry['regexes']) <= reviewed.keys()"
+          ],
+          "test_gitleaks_checkpoint_fingerprints_do_not_allow_other_keys_values_paths_or_rules": [
+            "assert not allowed(checker.CHECKPOINT_PATH, f'''\"api_key\": \"{fixture['value']}\"''')",
+            "assert allowed(checker.CHECKPOINT_PATH, line)",
+            "assert allowed('/snapshot/' + checker.CHECKPOINT_PATH, line)",
+            "assert not allowed('security/another-checkpoint.json', line)",
+            "assert not allowed(checker.CHECKPOINT_PATH + '.bak', line)",
+            "assert not allowed('security/not_refactor_backend_checkpoint.json', line)",
+            "assert not allowed(checker.CHECKPOINT_PATH, f'\"{key}\": \"{changed}\"')",
+            "assert not allowed(checker.CHECKPOINT_PATH, f'\"api_key\": \"{value}\"')",
+            "assert not allowed(checker.CHECKPOINT_PATH, line + ' \"api_key\": \"another-value\"')",
+            "assert not allowed(checker.CHECKPOINT_PATH, line, 'openai-api-key')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_t2_secret_allowlist.py": {}
+      }
     }
   ]
 }
