@@ -53,10 +53,6 @@
           "importer": "app.api.v1.routes.agents"
         },
         {
-          "imported": "app.services.profile_media",
-          "importer": "app.api.v1.routes.agents"
-        },
-        {
           "imported": "app.services.runtime_boundary",
           "importer": "app.api.v1.routes.agents"
         },
@@ -249,27 +245,7 @@
           "importer": "app.runtime.characters.creator"
         },
         {
-          "imported": "app.services.image_provider",
-          "importer": "app.runtime.characters.creator"
-        },
-        {
           "imported": "app.services.operation_settings",
-          "importer": "app.runtime.characters.creator"
-        },
-        {
-          "imported": "app.services.pollinations_image",
-          "importer": "app.runtime.characters.creator"
-        },
-        {
-          "imported": "app.services.profile_media",
-          "importer": "app.runtime.characters.creator"
-        },
-        {
-          "imported": "app.services.provider_http",
-          "importer": "app.runtime.characters.creator"
-        },
-        {
-          "imported": "app.services.replicate_image",
           "importer": "app.runtime.characters.creator"
         },
         {
@@ -330,10 +306,6 @@
         },
         {
           "imported": "app.services.post_image_generation",
-          "importer": "app.runtime.characters.management"
-        },
-        {
-          "imported": "app.services.profile_media",
           "importer": "app.runtime.characters.management"
         },
         {
@@ -625,14 +597,6 @@
           "importer": "app.services.feed_reaction_planner"
         },
         {
-          "imported": "app.services.pollinations_image",
-          "importer": "app.services.image_provider"
-        },
-        {
-          "imported": "app.services.replicate_image",
-          "importer": "app.services.image_provider"
-        },
-        {
           "imported": "app.models",
           "importer": "app.services.joint_activity_runtime"
         },
@@ -765,10 +729,6 @@
           "importer": "app.services.operation_settings"
         },
         {
-          "imported": "app.services.provider_http",
-          "importer": "app.services.pollinations_image"
-        },
-        {
           "imported": "app.cruds.agents",
           "importer": "app.services.post_image_generation"
         },
@@ -797,23 +757,7 @@
           "importer": "app.services.post_image_generation"
         },
         {
-          "imported": "app.services.image_provider",
-          "importer": "app.services.post_image_generation"
-        },
-        {
           "imported": "app.services.operation_settings",
-          "importer": "app.services.post_image_generation"
-        },
-        {
-          "imported": "app.services.pollinations_image",
-          "importer": "app.services.post_image_generation"
-        },
-        {
-          "imported": "app.services.profile_media",
-          "importer": "app.services.post_image_generation"
-        },
-        {
-          "imported": "app.services.replicate_image",
           "importer": "app.services.post_image_generation"
         },
         {
@@ -831,10 +775,6 @@
         {
           "imported": "app.services.post_image_generation",
           "importer": "app.services.post_image_job_worker"
-        },
-        {
-          "imported": "app.services.provider_http",
-          "importer": "app.services.replicate_image"
         },
         {
           "imported": "app.models",
@@ -1109,10 +1049,6 @@
         },
         {
           "importer": "app.runtime.account_deletion",
-          "imported": "app.services.profile_media"
-        },
-        {
-          "importer": "app.runtime.account_deletion",
           "imported": "app.services.runtime_boundary"
         }
       ]
@@ -1155,7 +1091,8 @@
   "schema_version": 1,
   "refactor": {
     "domains": [
-      "device_home"
+      "device_home",
+      "world_packages"
     ],
     "globals": [
       "app.config",
@@ -1164,17 +1101,13 @@
     ],
     "modules": [
       "app.domains.characters.contracts",
-      "app.domains.characters.dependencies",
       "app.domains.characters.exceptions",
       "app.domains.characters.models",
-      "app.domains.characters.router",
       "app.domains.characters.schemas",
       "app.domains.characters.service",
       "app.domains.characters.service.access",
       "app.domains.characters.service.creator",
-      "app.domains.characters.service.drafts",
       "app.domains.characters.service.image_quota",
-      "app.domains.characters.service.management",
       "app.domains.characters.service.mutations",
       "app.domains.characters.service.owner_controlled",
       "app.domains.characters.service.persona",
@@ -1205,37 +1138,7 @@
       "app.domains.identity.service.login_throttle",
       "app.domains.identity.service.owner_context",
       "app.domains.identity.service.world_character_credentials",
-      "app.domains.media.contracts",
       "app.domains.media.schemas",
-      "app.domains.runtime.contracts",
-      "app.domains.runtime.schemas",
-      "app.domains.social.contracts",
-      "app.domains.social.contracts.inbox",
-      "app.domains.social.contracts.observations",
-      "app.domains.social.contracts.profile_activity",
-      "app.domains.social.contracts.search_state",
-      "app.domains.social.contracts.subjective_context",
-      "app.domains.social.contracts.today_activity",
-      "app.domains.social.contracts.writes",
-      "app.domains.social.models",
-      "app.domains.social.models.feed",
-      "app.domains.social.models.manual_writes",
-      "app.domains.social.models.posts",
-      "app.domains.social.models.subjective_context",
-      "app.domains.social.repository",
-      "app.domains.social.repository.inbox",
-      "app.domains.social.repository.media",
-      "app.domains.social.repository.posts",
-      "app.domains.social.repository.profiles",
-      "app.domains.social.schemas",
-      "app.domains.social.schemas.community",
-      "app.domains.social.schemas.feed",
-      "app.domains.social.schemas.manual",
-      "app.domains.social.service",
-      "app.domains.social.service.notifications",
-      "app.domains.social.utils",
-      "app.domains.social.utils.cursors",
-      "app.domains.social.utils.text",
       "app.domains.world_characters.client",
       "app.domains.world_characters.contracts",
       "app.domains.world_characters.contracts.lifecycle",
@@ -1281,16 +1184,52 @@
       "app.domains.worlds.service.generation_context",
       "app.domains.worlds.service.reserved_roles",
       "app.domains.worlds.service.scheduling",
-      "app.domains.worlds.storage"
+      "app.domains.worlds.storage",
+      "app.domains.characters.dependencies",
+      "app.domains.characters.router",
+      "app.domains.characters.service.drafts",
+      "app.domains.characters.service.management",
+      "app.domains.media.contracts",
+      "app.domains.runtime.contracts",
+      "app.domains.runtime.schemas",
+      "app.domains.social.contracts",
+      "app.domains.social.contracts.inbox",
+      "app.domains.social.contracts.observations",
+      "app.domains.social.contracts.profile_activity",
+      "app.domains.social.contracts.search_state",
+      "app.domains.social.contracts.subjective_context",
+      "app.domains.social.contracts.today_activity",
+      "app.domains.social.contracts.writes",
+      "app.domains.social.models",
+      "app.domains.social.models.feed",
+      "app.domains.social.models.manual_writes",
+      "app.domains.social.models.posts",
+      "app.domains.social.models.subjective_context",
+      "app.domains.social.repository",
+      "app.domains.social.repository.inbox",
+      "app.domains.social.repository.media",
+      "app.domains.social.repository.posts",
+      "app.domains.social.repository.profiles",
+      "app.domains.social.schemas",
+      "app.domains.social.schemas.community",
+      "app.domains.social.schemas.feed",
+      "app.domains.social.schemas.manual",
+      "app.domains.social.service",
+      "app.domains.social.service.notifications",
+      "app.domains.social.utils",
+      "app.domains.social.utils.cursors",
+      "app.domains.social.utils.text",
+      "app.domains.characters.service.image_generation",
+      "app.domains.characters.service.media",
+      "app.domains.characters.service.media_storage",
+      "app.domains.social.service.media_storage"
     ],
     "entries": [
       "app.domains.characters.contracts",
       "app.domains.characters.schemas",
       "app.domains.characters.service.access",
       "app.domains.characters.service.creator",
-      "app.domains.characters.service.drafts",
       "app.domains.characters.service.image_quota",
-      "app.domains.characters.service.management",
       "app.domains.characters.service.mutations",
       "app.domains.characters.service.owner_controlled",
       "app.domains.characters.service.persona",
@@ -1311,23 +1250,7 @@
       "app.domains.identity.service.login_throttle",
       "app.domains.identity.service.owner_context",
       "app.domains.identity.service.world_character_credentials",
-      "app.domains.media.contracts",
       "app.domains.media.schemas",
-      "app.domains.runtime.contracts",
-      "app.domains.runtime.schemas",
-      "app.domains.social.contracts",
-      "app.domains.social.contracts.inbox",
-      "app.domains.social.contracts.observations",
-      "app.domains.social.contracts.profile_activity",
-      "app.domains.social.contracts.search_state",
-      "app.domains.social.contracts.subjective_context",
-      "app.domains.social.contracts.today_activity",
-      "app.domains.social.contracts.writes",
-      "app.domains.social.schemas",
-      "app.domains.social.schemas.community",
-      "app.domains.social.schemas.feed",
-      "app.domains.social.schemas.manual",
-      "app.domains.social.service.notifications",
       "app.domains.world_characters.contracts",
       "app.domains.world_characters.contracts.lifecycle",
       "app.domains.world_characters.contracts.owner_identity",
@@ -1358,7 +1281,49 @@
       "app.domains.worlds.schemas",
       "app.domains.worlds.service",
       "app.domains.worlds.service.character_entry",
-      "app.domains.worlds.service.definition"
+      "app.domains.worlds.service.definition",
+      "app.domains.characters.service.drafts",
+      "app.domains.characters.service.management",
+      "app.domains.media.contracts",
+      "app.domains.runtime.contracts",
+      "app.domains.runtime.schemas",
+      "app.domains.social.contracts",
+      "app.domains.social.contracts.inbox",
+      "app.domains.social.contracts.observations",
+      "app.domains.social.contracts.profile_activity",
+      "app.domains.social.contracts.search_state",
+      "app.domains.social.contracts.subjective_context",
+      "app.domains.social.contracts.today_activity",
+      "app.domains.social.contracts.writes",
+      "app.domains.social.schemas",
+      "app.domains.social.schemas.community",
+      "app.domains.social.schemas.feed",
+      "app.domains.social.schemas.manual",
+      "app.domains.social.service.notifications",
+      "app.domains.characters.service.image_generation",
+      "app.domains.characters.service.media",
+      "app.domains.characters.service.media_storage",
+      "app.domains.social.service.media_storage",
+      "app.domains.world_packages.contracts",
+      "app.domains.world_packages.contracts.export",
+      "app.domains.world_packages.contracts.import_commit",
+      "app.domains.world_packages.contracts.interfaces",
+      "app.domains.world_packages.contracts.preview",
+      "app.domains.world_packages.contracts.runtime",
+      "app.domains.world_packages.contracts.seed",
+      "app.domains.world_packages.schemas",
+      "app.domains.world_packages.schemas.content",
+      "app.domains.world_packages.schemas.http",
+      "app.domains.world_packages.schemas.manifest",
+      "app.domains.world_packages.schemas.v1",
+      "app.domains.world_packages.service",
+      "app.domains.world_packages.service.delivery",
+      "app.domains.world_packages.service.export",
+      "app.domains.world_packages.service.export_projection",
+      "app.domains.world_packages.service.import_approval",
+      "app.domains.world_packages.service.preview",
+      "app.domains.world_packages.service.registry",
+      "app.domains.world_packages.service.staging"
     ],
     "bridges": [
       {
@@ -2044,9 +2009,9 @@
       {
         "importer": "app.services.profile_media",
         "target": "app.domains.media.contracts",
-        "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
+        "owner_stage": "AR-B8-A",
         "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
-        "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
+        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
         "review_date": "2026-09-05"
       },
       {
@@ -2295,6 +2260,46 @@
         "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
         "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
         "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.profile_media",
+        "target": "app.domains.characters.service.media_storage",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
+        "reason": "The historical mixed media module re-exports the actual Character or Social file-placement implementation; it no longer owns that function body.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.profile_media",
+        "target": "app.domains.social.service.media_storage",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
+        "reason": "The historical mixed media module re-exports the actual Character or Social file-placement implementation; it no longer owns that function body.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.profile_media",
+        "target": "app.domains.worlds.storage",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "No production module imports profile_media after AR-B3-M5. Retire this same-object surface with its frozen compatibility tests in AR-B8-A.",
+        "reason": "The historical unused World image entry keeps its original exception class through this same-object compatibility export.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.social.service.media_storage",
+        "owner_stage": "AR-B5",
+        "removal_condition": "Retire the recorded legacy consumer when its remaining tests/job responsibilities move to the canonical owner.",
+        "reason": "Social quota/job attachment calls its actual Social file-placement function; shared paths use integrations.media.files.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.world_packages.models",
+        "owner_stage": "AR-G5",
+        "removal_condition": "Move aggregate model registration to runtime.persistence while installing the single app.models Base in G5.",
+        "reason": "Existing aggregate imports the same four ORM classes; no alternate implementation or reverse edge.",
         "review_date": "2026-09-05"
       }
     ]

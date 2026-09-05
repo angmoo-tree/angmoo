@@ -85,11 +85,11 @@ def test_l4_closeout_pins_exact_source_technical_execution_gates() -> None:
     assert "tests\\test_l4_pr_f_closeout_contract.py" in windows_host
     assert "tests\\test_l4_pr_f_closeout_contract.py" in windows_installer
     assert (
-        "            tests/test_l3_5_world_package_import_commit.py \\"
+        "            tests/world_packages/test_import_commit.py \\"
         in local_smoke
     )
     windows_import_fixture = (
-        "            tests\\test_l3_5_world_package_import_commit.py `"
+        "            tests\\world_packages\\test_import_commit.py `"
     )
     assert windows_import_fixture in windows_host
     assert windows_import_fixture in windows_installer

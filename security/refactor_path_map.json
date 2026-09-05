@@ -244,7 +244,67 @@
     "backend/app/domains/social/domain/__init__.py": "backend/app/domains/social/contracts/__init__.py",
     "backend/app/domains/social/api/schemas.py": "backend/app/domains/social/schemas/manual.py",
     "backend/app/schemas/community.py": "backend/app/domains/social/schemas/community.py",
-    "backend/app/schemas/world_feed.py": "backend/app/domains/social/schemas/feed.py"
+    "backend/app/schemas/world_feed.py": "backend/app/domains/social/schemas/feed.py",
+    "backend/app/services/replicate_image.py": "backend/app/integrations/replicate_image.py",
+    "backend/app/services/image_provider.py": "backend/app/integrations/image_provider.py",
+    "backend/app/services/provider_http.py": "backend/app/integrations/provider_http.py",
+    "backend/app/services/pollinations_image.py": "backend/app/integrations/pollinations_image.py",
+    "backend/tests/test_replicate_image.py": "backend/tests/media/test_replicate_image.py",
+    "backend/tests/test_replicate_url_security.py": "backend/tests/media/test_replicate_url_security.py",
+    "backend/app/domains/world_packages/api/schemas.py": "backend/app/domains/world_packages/schemas/http.py",
+    "backend/app/domains/world_packages/domain/content.py": "backend/app/domains/world_packages/schemas/content.py",
+    "backend/app/domains/world_packages/domain/manifest.py": "backend/app/domains/world_packages/schemas/manifest.py",
+    "backend/app/domains/world_packages/domain/errors.py": "backend/app/domains/world_packages/exceptions.py",
+    "backend/app/domains/world_packages/domain/package_policy.py": "backend/app/domains/world_packages/policies/archive.py",
+    "backend/app/domains/world_packages/domain/license_policy.py": "backend/app/domains/world_packages/policies/license.py",
+    "backend/app/domains/world_packages/domain/collision_policy.py": "backend/app/domains/world_packages/policies/collision.py",
+    "backend/app/domains/world_packages/domain/canonical.py": "backend/app/domains/world_packages/utils/canonical.py",
+    "backend/app/domains/world_packages/domain/export.py": "backend/app/domains/world_packages/contracts/export.py",
+    "backend/app/domains/world_packages/domain/seed.py": "backend/app/domains/world_packages/contracts/seed.py",
+    "backend/app/domains/world_packages/domain/preview.py": "backend/app/domains/world_packages/contracts/preview.py",
+    "backend/app/domains/world_packages/domain/import_commit.py": "backend/app/domains/world_packages/contracts/import_commit.py",
+    "backend/app/domains/world_packages/domain/import_state.py": "backend/app/domains/world_packages/constants.py",
+    "backend/app/domains/world_packages/infrastructure/sqlalchemy_models.py": "backend/app/domains/world_packages/models.py",
+    "backend/app/domains/world_packages/infrastructure/sqlalchemy_registry.py": "backend/app/domains/world_packages/service/registry.py",
+    "backend/tests/test_l3_5_world_package_v1_contract.py": "backend/tests/world_packages/test_v1_contract.py",
+    "backend/tests/test_l3_5_world_package_uow_registry.py": "backend/tests/world_packages/test_uow_registry.py",
+    "backend/app/domains/world_packages/application/export_world_package.py": "backend/app/domains/world_packages/service/export.py",
+    "backend/app/domains/world_packages/application/stage_world_package.py": "backend/app/domains/world_packages/service/staging.py",
+    "backend/app/domains/world_packages/application/exclusion_scan.py": "backend/app/domains/world_packages/archive/exclusions.py",
+    "backend/app/domains/world_packages/infrastructure/zip_archive.py": "backend/app/domains/world_packages/archive/export.py",
+    "backend/app/domains/world_packages/infrastructure/zip_import_archive.py": "backend/app/domains/world_packages/archive/validation.py",
+    "backend/app/domains/world_packages/infrastructure/filesystem_staging.py": "backend/app/domains/world_packages/storage/staging.py",
+    "backend/app/domains/world_packages/infrastructure/filesystem_export_artifacts.py": "backend/app/domains/world_packages/storage/exports.py",
+    "backend/app/domains/world_packages/infrastructure/managed_media_assets.py": "backend/app/domains/world_packages/storage/export_assets.py",
+    "backend/tests/test_l3_5_world_package_export.py": "backend/tests/world_packages/test_export.py",
+    "backend/tests/test_l3_5_world_package_preview.py": "backend/tests/world_packages/test_preview.py",
+    "backend/app/domains/world_packages/ports/destination_seed.py": "backend/app/domains/world_packages/contracts/interfaces.py",
+    "backend/app/domains/world_packages/ports/import_commit.py": "backend/app/domains/world_packages/contracts/interfaces.py",
+    "backend/app/domains/world_packages/ports/import_preview.py": "backend/app/domains/world_packages/contracts/interfaces.py",
+    "backend/app/domains/world_packages/ports/managed_assets.py": "backend/app/domains/world_packages/contracts/interfaces.py",
+    "backend/app/domains/world_packages/ports/package_archive.py": "backend/app/domains/world_packages/contracts/interfaces.py",
+    "backend/app/domains/world_packages/ports/package_staging.py": "backend/app/domains/world_packages/contracts/interfaces.py",
+    "backend/app/domains/world_packages/ports/registry.py": "backend/app/domains/world_packages/contracts/interfaces.py",
+    "backend/app/domains/world_packages/ports/source_snapshot.py": "backend/app/domains/world_packages/contracts/interfaces.py",
+    "backend/app/domains/world_packages/ports/unit_of_work.py": "backend/app/domains/world_packages/contracts/interfaces.py",
+    "backend/app/domains/world_packages/ports/__init__.py": "backend/app/domains/world_packages/contracts/interfaces.py",
+    "backend/app/domains/world_packages/api/routes.py": "backend/app/domains/world_packages/router.py",
+    "backend/app/domains/world_packages/application/commit_world_package.py": "backend/app/domains/world_packages/service/import_approval.py",
+    "backend/app/domains/world_packages/infrastructure/filesystem_import_media.py": "backend/app/domains/world_packages/storage/import_media.py",
+    "backend/app/domains/world_packages/infrastructure/sqlalchemy_destination_seed.py": "backend/app/runtime/world_packages/seed.py",
+    "backend/app/domains/world_packages/infrastructure/sqlalchemy_import_commit.py": "backend/app/runtime/world_packages/import_commit.py",
+    "backend/app/domains/world_packages/infrastructure/sqlalchemy_unit_of_work.py": "backend/app/runtime/world_packages/seed_uow.py",
+    "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py": "backend/app/runtime/world_packages/export_source.py",
+    "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py": "backend/app/runtime/world_packages/preview_probe.py",
+    "backend/app/domains/world_packages/public.py": "backend/app/domains/world_packages/contracts/__init__.py",
+    "backend/app/domains/world_packages/api/__init__.py": "backend/app/domains/world_packages/__init__.py",
+    "backend/app/domains/world_packages/application/__init__.py": "backend/app/domains/world_packages/__init__.py",
+    "backend/app/domains/world_packages/domain/__init__.py": "backend/app/domains/world_packages/__init__.py",
+    "backend/app/domains/world_packages/infrastructure/__init__.py": "backend/app/domains/world_packages/models.py",
+    "backend/tests/test_l3_5_world_package_import_commit.py": "backend/tests/world_packages/test_import_commit.py",
+    "backend/tests/test_l3_5_world_package_closeout.py": "backend/tests/world_packages/test_closeout.py",
+    "backend/tests/test_l3_5_world_package_closeout_contract.py": "backend/tests/world_packages/test_closeout_contract.py",
+    "backend/tests/test_l3_5_world_package_ui_contract.py": "backend/tests/world_packages/test_ui_contract.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -427,6 +487,114 @@
     "tests/test_world_definition_contract.py::test_name_only_draft_is_saved_but_not_publish_ready": "tests/worlds/test_definition_contract.py::test_name_only_draft_is_saved_but_not_publish_ready",
     "tests/test_world_definition_contract.py::test_optional_catalog_is_versioned_archived_and_hash_stable_by_order": "tests/worlds/test_definition_contract.py::test_optional_catalog_is_versioned_archived_and_hash_stable_by_order",
     "tests/test_world_definition_contract.py::test_semantic_change_updates_hash_but_banner_and_visibility_do_not": "tests/worlds/test_definition_contract.py::test_semantic_change_updates_hash_but_banner_and_visibility_do_not",
+    "tests/test_replicate_image.py::test_p_image_edit_posts_reference_payload_and_downloads_output": "tests/media/test_replicate_image.py::test_p_image_edit_posts_reference_payload_and_downloads_output",
+    "tests/test_replicate_image.py::test_p_image_edit_requires_reference_in_provider": "tests/media/test_replicate_image.py::test_p_image_edit_requires_reference_in_provider",
+    "tests/test_replicate_url_security.py::test_output_download_never_adds_the_provider_bearer": "tests/media/test_replicate_url_security.py::test_output_download_never_adds_the_provider_bearer",
+    "tests/test_replicate_url_security.py::test_redirect_handler_revalidates_the_destination": "tests/media/test_replicate_url_security.py::test_redirect_handler_revalidates_the_destination",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_accepts_only_documented_paths[https://api.replicate.com/v1/models/prunaai/p-image-edit/predictions]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_accepts_only_documented_paths[https://api.replicate.com/v1/models/prunaai/p-image-edit/predictions]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_accepts_only_documented_paths[https://api.replicate.com/v1/predictions/prediction_123]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_accepts_only_documented_paths[https://api.replicate.com/v1/predictions/prediction_123]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_accepts_only_documented_paths[https://api.replicate.com/v1/predictions]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_accepts_only_documented_paths[https://api.replicate.com/v1/predictions]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[http://api.replicate.com/v1/predictions/prediction_123]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[http://api.replicate.com/v1/predictions/prediction_123]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://api.replicate.com.evil.example/v1/predictions/prediction_123]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://api.replicate.com.evil.example/v1/predictions/prediction_123]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://api.replicate.com/v1/models/other/predictions]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://api.replicate.com/v1/models/other/predictions]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://api.replicate.com:444/v1/predictions/prediction_123]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://api.replicate.com:444/v1/predictions/prediction_123]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://attacker.example/v1/predictions/prediction_123]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://attacker.example/v1/predictions/prediction_123]",
+    "tests/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://user@api.replicate.com/v1/predictions/prediction_123]": "tests/media/test_replicate_url_security.py::test_replicate_api_url_allowlist_rejects_untrusted_destinations[https://user@api.replicate.com/v1/predictions/prediction_123]",
+    "tests/test_replicate_url_security.py::test_replicate_output_url_accepts_only_delivery_hosts[https://pbxt.replicate.delivery/output.png]": "tests/media/test_replicate_url_security.py::test_replicate_output_url_accepts_only_delivery_hosts[https://pbxt.replicate.delivery/output.png]",
+    "tests/test_replicate_url_security.py::test_replicate_output_url_accepts_only_delivery_hosts[https://replicate.delivery/output.png]": "tests/media/test_replicate_url_security.py::test_replicate_output_url_accepts_only_delivery_hosts[https://replicate.delivery/output.png]",
+    "tests/test_replicate_url_security.py::test_replicate_output_url_rejects_lookalike_and_internal_hosts[https://127.0.0.1/output.png]": "tests/media/test_replicate_url_security.py::test_replicate_output_url_rejects_lookalike_and_internal_hosts[https://127.0.0.1/output.png]",
+    "tests/test_replicate_url_security.py::test_replicate_output_url_rejects_lookalike_and_internal_hosts[https://evil.example/output.png]": "tests/media/test_replicate_url_security.py::test_replicate_output_url_rejects_lookalike_and_internal_hosts[https://evil.example/output.png]",
+    "tests/test_replicate_url_security.py::test_replicate_output_url_rejects_lookalike_and_internal_hosts[https://replicate.delivery.evil.example/output.png]": "tests/media/test_replicate_url_security.py::test_replicate_output_url_rejects_lookalike_and_internal_hosts[https://replicate.delivery.evil.example/output.png]",
+    "tests/test_replicate_url_security.py::test_replicate_url_rejects_private_dns_results": "tests/media/test_replicate_url_security.py::test_replicate_url_rejects_private_dns_results",
+    "tests/test_l3_5_world_package_v1_contract.py::test_archive_metadata_policy_accepts_the_synthetic_fixture": "tests/world_packages/test_v1_contract.py::test_archive_metadata_policy_accepts_the_synthetic_fixture",
+    "tests/test_l3_5_world_package_v1_contract.py::test_canonical_json_digest_is_order_independent_and_nfc_normalized": "tests/world_packages/test_v1_contract.py::test_canonical_json_digest_is_order_independent_and_nfc_normalized",
+    "tests/test_l3_5_world_package_v1_contract.py::test_checked_in_json_schemas_are_deterministic_goldens": "tests/world_packages/test_v1_contract.py::test_checked_in_json_schemas_are_deterministic_goldens",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[absolute_path-entries1-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[absolute_path-entries1-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[backslash_path-entries4-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[backslash_path-entries4-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[compression_bomb-entries10-world_package_archive_limit_exceeded]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[compression_bomb-entries10-world_package_archive_limit_exceeded]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[device_entry-entries8-world_package_archive_invalid]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[device_entry-entries8-world_package_archive_invalid]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[encrypted-entries9-world_package_archive_invalid]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[encrypted-entries9-world_package_archive_invalid]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[hardlink-entries7-world_package_archive_invalid]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[hardlink-entries7-world_package_archive_invalid]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[negative_forged_size-entries11-world_package_archive_invalid]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[negative_forged_size-entries11-world_package_archive_invalid]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[nested_archive-entries15-world_package_archive_invalid]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[nested_archive-entries15-world_package_archive_invalid]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[path_depth_limit-entries13-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[path_depth_limit-entries13-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[path_traversal-entries0-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[path_traversal-entries0-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[symlink-entries6-world_package_archive_invalid]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[symlink-entries6-world_package_archive_invalid]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[too_many_entries-entries12-world_package_archive_limit_exceeded]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[too_many_entries-entries12-world_package_archive_limit_exceeded]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[unc_path-entries3-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[unc_path-entries3-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[unknown_root_entry-entries16-world_package_archive_invalid]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[unknown_root_entry-entries16-world_package_archive_invalid]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[windows_casefold_collision-entries5-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[windows_casefold_collision-entries5-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[windows_device_name-entries14-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[windows_device_name-entries14-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[windows_drive_path-entries2-world_package_path_unsafe]": "tests/world_packages/test_v1_contract.py::test_malicious_archive_metadata_corpus_fails_closed[windows_drive_path-entries2-world_package_path_unsafe]",
+    "tests/test_l3_5_world_package_v1_contract.py::test_manifest_rejects_unknown_fields_and_tampered_digest": "tests/world_packages/test_v1_contract.py::test_manifest_rejects_unknown_fields_and_tampered_digest",
+    "tests/test_l3_5_world_package_v1_contract.py::test_optional_unknown_extension_does_not_change_v1_required_gate": "tests/world_packages/test_v1_contract.py::test_optional_unknown_extension_does_not_change_v1_required_gate",
+    "tests/test_l3_5_world_package_v1_contract.py::test_portable_schemas_exclude_runtime_private_and_source_identity_fields": "tests/world_packages/test_v1_contract.py::test_portable_schemas_exclude_runtime_private_and_source_identity_fields",
+    "tests/test_l3_5_world_package_v1_contract.py::test_public_boundary_exports_only_world_package_domain_modules": "tests/world_packages/test_v1_contract.py::test_public_boundary_exports_only_world_package_domain_modules",
+    "tests/test_l3_5_world_package_v1_contract.py::test_synthetic_fixture_validates_and_entry_digests_match": "tests/world_packages/test_v1_contract.py::test_synthetic_fixture_validates_and_entry_digests_match",
+    "tests/test_l3_5_world_package_v1_contract.py::test_unicode_nfc_and_casefold_path_collisions_fail_closed": "tests/world_packages/test_v1_contract.py::test_unicode_nfc_and_casefold_path_collisions_fail_closed",
+    "tests/test_l3_5_world_package_v1_contract.py::test_unknown_required_extension_fails_closed": "tests/world_packages/test_v1_contract.py::test_unknown_required_extension_fails_closed",
+    "tests/test_l3_5_world_package_v1_contract.py::test_v1_trust_labels_do_not_claim_a_verified_author": "tests/world_packages/test_v1_contract.py::test_v1_trust_labels_do_not_claim_a_verified_author",
+    "tests/test_l3_5_world_package_v1_contract.py::test_world_package_domain_and_ports_have_no_framework_dependency": "tests/world_packages/test_v1_contract.py::test_world_package_domain_and_ports_have_no_framework_dependency",
+    "tests/test_l3_5_world_package_uow_registry.py::test_alembic_0082_upgrade_downgrade_upgrade_on_sqlite": "tests/world_packages/test_uow_registry.py::test_alembic_0082_upgrade_downgrade_upgrade_on_sqlite",
+    "tests/test_l3_5_world_package_uow_registry.py::test_caller_rollback_removes_every_seeded_domain_row": "tests/world_packages/test_uow_registry.py::test_caller_rollback_removes_every_seeded_domain_row",
+    "tests/test_l3_5_world_package_uow_registry.py::test_committed_idempotency_replays_without_duplicate_rows": "tests/world_packages/test_uow_registry.py::test_committed_idempotency_replays_without_duplicate_rows",
+    "tests/test_l3_5_world_package_uow_registry.py::test_concurrent_same_idempotency_key_commits_one_import": "tests/world_packages/test_uow_registry.py::test_concurrent_same_idempotency_key_commits_one_import",
+    "tests/test_l3_5_world_package_uow_registry.py::test_destination_seed_is_a_caller_owned_port_and_commit_is_atomic": "tests/world_packages/test_uow_registry.py::test_destination_seed_is_a_caller_owned_port_and_commit_is_atomic",
+    "tests/test_l3_5_world_package_uow_registry.py::test_idempotency_key_cannot_replay_different_package_content": "tests/world_packages/test_uow_registry.py::test_idempotency_key_cannot_replay_different_package_content",
+    "tests/test_l3_5_world_package_uow_registry.py::test_package_routes_do_not_reenter_the_legacy_api_route_folder": "tests/world_packages/test_uow_registry.py::test_package_routes_do_not_reenter_the_legacy_api_route_folder",
+    "tests/test_l3_5_world_package_uow_registry.py::test_registry_schema_freezes_fk_check_unique_and_guarded_downgrade": "tests/world_packages/test_uow_registry.py::test_registry_schema_freezes_fk_check_unique_and_guarded_downgrade",
+    "tests/test_l3_5_world_package_uow_registry.py::test_replay_resolves_when_registry_becomes_visible_after_world_lookup": "tests/world_packages/test_uow_registry.py::test_replay_resolves_when_registry_becomes_visible_after_world_lookup",
+    "tests/test_l3_5_world_package_uow_registry.py::test_unknown_world_character_reference_rolls_back_without_partial_rows": "tests/world_packages/test_uow_registry.py::test_unknown_world_character_reference_rolls_back_without_partial_rows",
+    "tests/test_l3_5_world_package_export.py::test_cancelled_stream_removes_artifact_without_consuming_version": "tests/world_packages/test_export.py::test_cancelled_stream_removes_artifact_without_consuming_version",
+    "tests/test_l3_5_world_package_export.py::test_export_api_records_only_completed_download_and_replays_same_seed": "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+    "tests/test_l3_5_world_package_export.py::test_export_artifact_store_removes_startup_orphans": "tests/world_packages/test_export.py::test_export_artifact_store_removes_startup_orphans",
+    "tests/test_l3_5_world_package_export.py::test_managed_media_is_content_addressed_and_external_media_is_not_fetched": "tests/world_packages/test_export.py::test_managed_media_is_content_addressed_and_external_media_is_not_fetched",
+    "tests/test_l3_5_world_package_export.py::test_native_save_as_requires_ack_and_cancel_does_not_consume_version": "tests/world_packages/test_export.py::test_native_save_as_requires_ack_and_cancel_does_not_consume_version",
+    "tests/test_l3_5_world_package_export.py::test_pending_changed_seed_cannot_reuse_the_same_package_version": "tests/world_packages/test_export.py::test_pending_changed_seed_cannot_reuse_the_same_package_version",
+    "tests/test_l3_5_world_package_export.py::test_same_seed_is_byte_reproducible_and_runtime_noise_is_excluded": "tests/world_packages/test_export.py::test_same_seed_is_byte_reproducible_and_runtime_noise_is_excluded",
+    "tests/test_l3_5_world_package_export.py::test_sqlalchemy_snapshot_allows_world_with_only_owner_controlled_character": "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_allows_world_with_only_owner_controlled_character",
+    "tests/test_l3_5_world_package_export.py::test_sqlalchemy_snapshot_exports_explicit_no_role_portably_and_deterministically": "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_exports_explicit_no_role_portably_and_deterministically",
+    "tests/test_l3_5_world_package_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state": "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state",
+    "tests/test_l3_5_world_package_export.py::test_successful_seed_then_seed_mutation_uses_the_next_version": "tests/world_packages/test_export.py::test_successful_seed_then_seed_mutation_uses_the_next_version",
+    "tests/test_l3_5_world_package_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_archive_invalid0]": "tests/world_packages/test_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_archive_invalid0]",
+    "tests/test_l3_5_world_package_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_archive_invalid1]": "tests/world_packages/test_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_archive_invalid1]",
+    "tests/test_l3_5_world_package_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_archive_invalid2]": "tests/world_packages/test_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_archive_invalid2]",
+    "tests/test_l3_5_world_package_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_archive_invalid3]": "tests/world_packages/test_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_archive_invalid3]",
+    "tests/test_l3_5_world_package_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_archive_limit_exceeded]": "tests/world_packages/test_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_archive_limit_exceeded]",
+    "tests/test_l3_5_world_package_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_integrity_mismatch]": "tests/world_packages/test_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_integrity_mismatch]",
+    "tests/test_l3_5_world_package_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_path_unsafe0]": "tests/world_packages/test_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_path_unsafe0]",
+    "tests/test_l3_5_world_package_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_path_unsafe1]": "tests/world_packages/test_preview.py::test_malicious_archives_fail_closed_without_raw_payload_leakage[<lambda>-world_package_path_unsafe1]",
+    "tests/test_l3_5_world_package_preview.py::test_preview_token_is_owner_bound_expires_and_startup_cleans_orphans": "tests/world_packages/test_preview.py::test_preview_token_is_owner_bound_expires_and_startup_cleans_orphans",
+    "tests/test_l3_5_world_package_preview.py::test_reserved_no_role_payload_is_accepted_only_with_canonical_content": "tests/world_packages/test_preview.py::test_reserved_no_role_payload_is_accepted_only_with_canonical_content",
+    "tests/test_l3_5_world_package_preview.py::test_semantically_invalid_world_references_fail_after_integrity_passes[duplicate_role]": "tests/world_packages/test_preview.py::test_semantically_invalid_world_references_fail_after_integrity_passes[duplicate_role]",
+    "tests/test_l3_5_world_package_preview.py::test_semantically_invalid_world_references_fail_after_integrity_passes[missing_role]": "tests/world_packages/test_preview.py::test_semantically_invalid_world_references_fail_after_integrity_passes[missing_role]",
+    "tests/test_l3_5_world_package_preview.py::test_sql_preview_probe_labels_trust_and_blocks_duplicate_or_tampered_version": "tests/world_packages/test_preview.py::test_sql_preview_probe_labels_trust_and_blocks_duplicate_or_tampered_version",
+    "tests/test_l3_5_world_package_preview.py::test_stage_api_is_owner_only_and_changes_no_world_or_import_rows": "tests/world_packages/test_preview.py::test_stage_api_is_owner_only_and_changes_no_world_or_import_rows",
+    "tests/test_l3_5_world_package_preview.py::test_unknown_license_contract_and_reader_version_fail_closed[contract-future-world-contract-v99-world_package_contract_unsupported]": "tests/world_packages/test_preview.py::test_unknown_license_contract_and_reader_version_fail_closed[contract-future-world-contract-v99-world_package_contract_unsupported]",
+    "tests/test_l3_5_world_package_preview.py::test_unknown_license_contract_and_reader_version_fail_closed[license-value0-world_package_license_missing]": "tests/world_packages/test_preview.py::test_unknown_license_contract_and_reader_version_fail_closed[license-value0-world_package_license_missing]",
+    "tests/test_l3_5_world_package_preview.py::test_unknown_license_contract_and_reader_version_fail_closed[reader-99.0.0-1-world_package_app_version_unsupported]": "tests/world_packages/test_preview.py::test_unknown_license_contract_and_reader_version_fail_closed[reader-99.0.0-1-world_package_app_version_unsupported]",
+    "tests/test_l3_5_world_package_preview.py::test_valid_package_reaches_preview_ready_without_canonical_writes": "tests/world_packages/test_preview.py::test_valid_package_reaches_preview_ready_without_canonical_writes",
+    "tests/test_l3_5_world_package_preview.py::test_webp_preview_is_decoded_bounded_and_metadata_stripped": "tests/world_packages/test_preview.py::test_webp_preview_is_decoded_bounded_and_metadata_stripped",
+    "tests/test_l3_5_world_package_closeout.py::test_exclusion_scanner_rejects_private_value_and_forbidden_field": "tests/world_packages/test_closeout.py::test_exclusion_scanner_rejects_private_value_and_forbidden_field",
+    "tests/test_l3_5_world_package_closeout.py::test_two_data_root_round_trip_excludes_private_runtime_and_evolves_independently": "tests/world_packages/test_closeout.py::test_two_data_root_round_trip_excludes_private_runtime_and_evolves_independently",
+    "tests/test_l3_5_world_package_closeout_contract.py::test_closeout_docs_keep_private_data_and_release_gates_separate": "tests/world_packages/test_closeout_contract.py::test_closeout_docs_keep_private_data_and_release_gates_separate",
+    "tests/test_l3_5_world_package_closeout_contract.py::test_core_ci_runs_the_real_world_package_proxy_smoke": "tests/world_packages/test_closeout_contract.py::test_core_ci_runs_the_real_world_package_proxy_smoke",
+    "tests/test_l3_5_world_package_closeout_contract.py::test_exclusion_scanner_is_allow_listed_and_redacts_private_values": "tests/world_packages/test_closeout_contract.py::test_exclusion_scanner_is_allow_listed_and_redacts_private_values",
+    "tests/test_l3_5_world_package_closeout_contract.py::test_required_linux_workflows_pin_the_closeout_suite": "tests/world_packages/test_closeout_contract.py::test_required_linux_workflows_pin_the_closeout_suite",
+    "tests/test_l3_5_world_package_closeout_contract.py::test_windows_product_paths_pin_file_ux_and_closeout_contracts": "tests/world_packages/test_closeout_contract.py::test_windows_product_paths_pin_file_ux_and_closeout_contracts",
+    "tests/test_l3_5_world_package_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media": "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media",
+    "tests/test_l3_5_world_package_import_commit.py::test_commit_is_atomic_registers_one_home_world_and_replays_without_writes": "tests/world_packages/test_import_commit.py::test_commit_is_atomic_registers_one_home_world_and_replays_without_writes",
+    "tests/test_l3_5_world_package_import_commit.py::test_commit_maps_portable_no_role_to_canonical_reserved_role": "tests/world_packages/test_import_commit.py::test_commit_maps_portable_no_role_to_canonical_reserved_role",
+    "tests/test_l3_5_world_package_import_commit.py::test_commit_revalidates_owner_digest_and_collision_preview": "tests/world_packages/test_import_commit.py::test_commit_revalidates_owner_digest_and_collision_preview",
+    "tests/test_l3_5_world_package_import_commit.py::test_concurrent_idempotency_commits_once": "tests/world_packages/test_import_commit.py::test_concurrent_idempotency_commits_once",
+    "tests/test_l3_5_world_package_import_commit.py::test_duplicate_requires_explicit_independent_copy": "tests/world_packages/test_import_commit.py::test_duplicate_requires_explicit_independent_copy",
+    "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime": "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+    "tests/test_l3_5_world_package_import_commit.py::test_media_journal_recovery_keeps_only_canonical_commits": "tests/world_packages/test_import_commit.py::test_media_journal_recovery_keeps_only_canonical_commits",
+    "tests/test_l3_5_world_package_import_commit.py::test_media_promotion_failure_rolls_back_all_rows_and_is_retryable": "tests/world_packages/test_import_commit.py::test_media_promotion_failure_rolls_back_all_rows_and_is_retryable",
+    "tests/test_l3_5_world_package_import_commit.py::test_seed_failure_after_partial_flush_preserves_existing_data": "tests/world_packages/test_import_commit.py::test_seed_failure_after_partial_flush_preserves_existing_data",
+    "tests/test_l3_5_world_package_ui_contract.py::test_export_ui_has_preview_browser_delivery_and_opaque_native_save_as": "tests/world_packages/test_ui_contract.py::test_export_ui_has_preview_browser_delivery_and_opaque_native_save_as",
+    "tests/test_l3_5_world_package_ui_contract.py::test_import_ui_uses_file_selection_digest_approval_and_atomic_navigation": "tests/world_packages/test_ui_contract.py::test_import_ui_uses_file_selection_digest_approval_and_atomic_navigation",
+    "tests/test_l3_5_world_package_ui_contract.py::test_world_package_import_is_available_from_home_studio_and_static_router": "tests/world_packages/test_ui_contract.py::test_world_package_import_is_available_from_home_studio_and_static_router",
     "tests/test_world_character_contracts.py::test_character_contract_hash_is_stable_and_excludes_unrelated_fields": "tests/world_characters/test_setup_contracts.py::test_character_contract_hash_is_stable_and_excludes_unrelated_fields",
     "tests/test_world_character_contracts.py::test_community_profile_contract_normalizes_and_requires_exact_keys": "tests/world_characters/test_setup_contracts.py::test_community_profile_contract_normalizes_and_requires_exact_keys",
     "tests/test_world_character_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties": "tests/world_characters/test_setup_contracts.py::test_gemini_transport_schemas_use_only_fixed_properties",
@@ -6811,6 +6979,7 @@
           "backend/app/domains/characters/service/access.py",
           "backend/app/domains/characters/service/creator.py",
           "backend/app/domains/characters/service/management.py",
+          "backend/app/domains/characters/service/media.py",
           "backend/app/domains/characters/service/mutations.py",
           "backend/app/domains/characters/service/persona.py",
           "backend/app/domains/characters/service/promotion.py",
@@ -6820,7 +6989,10 @@
           "backend/app/domains/characters/exceptions.py",
           "backend/app/domains/characters/service/creator.py",
           "backend/app/domains/characters/service/drafts.py",
+          "backend/app/domains/characters/service/image_generation.py",
           "backend/app/domains/characters/service/image_quota.py",
+          "backend/app/domains/characters/service/media.py",
+          "backend/app/integrations/azure_translation.py",
           "backend/app/runtime/characters/creator.py"
         ]
       },
@@ -7973,12 +8145,15 @@
         },
         {
           "old": "backend/app/services/agents.py::upload_profile_media",
-          "new": "backend/app/runtime/characters/management.py::upload_profile_media",
+          "new": "backend/app/domains/characters/service/media.py::upload_profile_media",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -8848,12 +9023,14 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::POLLINATIONS_MAX_SEED",
-          "new": "backend/app/runtime/characters/creator.py::POLLINATIONS_MAX_SEED",
+          "new": "backend/app/domains/characters/service/image_generation.py::POLLINATIONS_MAX_SEED",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_draft_media_seed_stays_within_pollinations_limit"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
@@ -8922,13 +9099,14 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::STYLE_PROMPTS",
-          "new": "backend/app/runtime/characters/creator.py::STYLE_PROMPTS",
+          "new": "backend/app/domains/characters/service/image_generation.py::STYLE_PROMPTS",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_avatar_pollinations_prompt_enforces_front_facing_composition",
-            "tests/test_agent_creation_drafts.py::test_banner_pollinations_prompt_does_not_use_avatar_composition"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
@@ -8965,12 +9143,12 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_TRANSLATION_USAGE_LOCK",
-          "new": "backend/app/runtime/characters/creator.py::_TRANSLATION_USAGE_LOCK",
+          "new": "backend/app/integrations/azure_translation.py::_TRANSLATION_USAGE_LOCK",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/media/test_azure_translation.py::test_success_cache_and_monthly_limit_keep_provider_call_count"
           ]
         },
         {
@@ -9136,32 +9314,41 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::get_draft_media_content",
-          "new": "backend/app/runtime/characters/creator.py::get_draft_media_content",
+          "new": "backend/app/domains/characters/service/media.py::get_draft_media_content",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
             "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::get_draft_candidate_content",
-          "new": "backend/app/runtime/characters/creator.py::get_draft_candidate_content",
+          "new": "backend/app/domains/characters/service/media.py::get_draft_candidate_content",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
             "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::get_profile_candidate_content",
-          "new": "backend/app/runtime/characters/creator.py::get_profile_candidate_content",
+          "new": "backend/app/domains/characters/service/media.py::get_profile_candidate_content",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -9188,94 +9375,117 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::upload_draft_media",
-          "new": "backend/app/runtime/characters/creator.py::upload_draft_media",
+          "new": "backend/app/domains/characters/service/media.py::upload_draft_media",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::generate_media",
-          "new": "backend/app/runtime/characters/creator.py::generate_media",
+          "new": "backend/app/domains/characters/service/image_generation.py::generate_media",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
-            "tests/test_agent_creation_drafts.py::test_profile_image_quota_exceeded_skips_translation_and_pollinations",
-            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::generate_profile_media",
-          "new": "backend/app/runtime/characters/creator.py::generate_profile_media",
+          "new": "backend/app/domains/characters/service/image_generation.py::generate_profile_media",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
             "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::get_draft_profile_image_usage",
-          "new": "backend/app/runtime/characters/creator.py::get_draft_profile_image_usage",
+          "new": "backend/app/domains/characters/service/media.py::get_draft_profile_image_usage",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::get_agent_profile_image_usage",
-          "new": "backend/app/runtime/characters/creator.py::get_agent_profile_image_usage",
+          "new": "backend/app/domains/characters/service/media.py::get_agent_profile_image_usage",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::apply_draft_media_candidate",
-          "new": "backend/app/runtime/characters/creator.py::apply_draft_media_candidate",
+          "new": "backend/app/domains/characters/service/media.py::apply_draft_media_candidate",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::apply_profile_media_candidate",
-          "new": "backend/app/runtime/characters/creator.py::apply_profile_media_candidate",
+          "new": "backend/app/domains/characters/service/media.py::apply_profile_media_candidate",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::discard_draft_media_candidate",
-          "new": "backend/app/runtime/characters/creator.py::discard_draft_media_candidate",
+          "new": "backend/app/domains/characters/service/media.py::discard_draft_media_candidate",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::discard_profile_media_candidate",
-          "new": "backend/app/runtime/characters/creator.py::discard_profile_media_candidate",
+          "new": "backend/app/domains/characters/service/media.py::discard_profile_media_candidate",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_m3_authorization_deletion.py::test_two_user_object_authorization_matrix_denies_cross_owner_access"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -9450,14 +9660,14 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_generate_profile_image_candidate",
-          "new": "backend/app/runtime/characters/creator.py::_generate_profile_image_candidate",
+          "new": "backend/app/domains/characters/service/image_generation.py::_generate_profile_image_candidate",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
-            "tests/test_agent_creation_drafts.py::test_profile_image_quota_exceeded_skips_translation_and_pollinations",
-            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
@@ -9504,13 +9714,14 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_get_owned_profile_image_candidate",
-          "new": "backend/app/runtime/characters/creator.py::_get_owned_profile_image_candidate",
+          "new": "backend/app/domains/characters/service/media.py::_get_owned_profile_image_candidate",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate",
-            "tests/test_m3_authorization_deletion.py::test_two_user_object_authorization_matrix_denies_cross_owner_access",
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
             "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
@@ -9557,14 +9768,15 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_cleanup_expired_profile_image_candidates",
-          "new": "backend/app/runtime/characters/creator.py::_cleanup_expired_profile_image_candidates",
+          "new": "backend/app/domains/characters/service/media.py::_cleanup_expired_profile_image_candidates",
           "direct_consumers": [
-            "backend/app/runtime/characters/creator.py"
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
-            "tests/test_agent_creation_drafts.py::test_profile_image_quota_exceeded_skips_translation_and_pollinations",
-            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -9581,12 +9793,12 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_open_translation_request",
-          "new": "backend/app/runtime/characters/creator.py::_open_translation_request",
+          "new": "backend/app/integrations/azure_translation.py::_open_translation_request",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_provider_boundary_security.py::test_provider_call_sites_use_validated_transport"
+            "tests/media/test_azure_translation.py::test_success_cache_and_monthly_limit_keep_provider_call_count"
           ]
         },
         {
@@ -9603,14 +9815,14 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_build_pollinations_prompt",
-          "new": "backend/app/runtime/characters/creator.py::_build_pollinations_prompt",
+          "new": "backend/app/domains/characters/service/image_generation.py::_build_pollinations_prompt",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_avatar_pollinations_prompt_enforces_front_facing_composition",
-            "tests/test_agent_creation_drafts.py::test_banner_pollinations_prompt_does_not_use_avatar_composition",
-            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
@@ -9627,64 +9839,64 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_translate_ko_to_en_with_azure",
-          "new": "backend/app/runtime/characters/creator.py::_translate_ko_to_en_with_azure",
+          "new": "backend/app/integrations/azure_translation.py::_translate_ko_to_en_with_azure",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/media/test_azure_translation.py::test_success_cache_and_monthly_limit_keep_provider_call_count"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_reserve_translation_chars",
-          "new": "backend/app/runtime/characters/creator.py::_reserve_translation_chars",
+          "new": "backend/app/integrations/azure_translation.py::_reserve_translation_chars",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/media/test_azure_translation.py::test_success_cache_and_monthly_limit_keep_provider_call_count"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_release_translation_chars",
-          "new": "backend/app/runtime/characters/creator.py::_release_translation_chars",
+          "new": "backend/app/integrations/azure_translation.py::_release_translation_chars",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/media/test_azure_translation.py::test_success_cache_and_monthly_limit_keep_provider_call_count"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_read_translation_usage",
-          "new": "backend/app/runtime/characters/creator.py::_read_translation_usage",
+          "new": "backend/app/integrations/azure_translation.py::_read_translation_usage",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/media/test_azure_translation.py::test_success_cache_and_monthly_limit_keep_provider_call_count"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_write_translation_usage",
-          "new": "backend/app/runtime/characters/creator.py::_write_translation_usage",
+          "new": "backend/app/integrations/azure_translation.py::_write_translation_usage",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/media/test_azure_translation.py::test_success_cache_and_monthly_limit_keep_provider_call_count"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_pollinations_image_size",
-          "new": "backend/app/runtime/characters/creator.py::_pollinations_image_size",
+          "new": "backend/app/domains/characters/service/image_generation.py::_pollinations_image_size",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
-            "tests/test_agent_creation_drafts.py::test_profile_image_quota_exceeded_skips_translation_and_pollinations",
-            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
@@ -9740,14 +9952,14 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_draft_media_seed",
-          "new": "backend/app/runtime/characters/creator.py::_draft_media_seed",
+          "new": "backend/app/domains/characters/service/image_generation.py::_draft_media_seed",
           "direct_consumers": [
+            "backend/app/domains/characters/router.py",
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_creation_drafts.py::test_draft_media_seed_stays_within_pollinations_limit",
-            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
-            "tests/test_agent_creation_drafts.py::test_profile_image_quota_exceeded_skips_translation_and_pollinations"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
@@ -10026,12 +10238,14 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::get_agent_draft_media",
-          "new": "backend/app/api/v1/routes/agents.py::get_agent_draft_media",
+          "new": "backend/app/domains/characters/router.py::get_agent_draft_media",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -10056,62 +10270,74 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::upload_agent_draft_media",
-          "new": "backend/app/api/v1/routes/agents.py::upload_agent_draft_media",
+          "new": "backend/app/domains/characters/router.py::upload_agent_draft_media",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::generate_agent_draft_media",
-          "new": "backend/app/api/v1/routes/agents.py::generate_agent_draft_media",
+          "new": "backend/app/domains/characters/router.py::generate_agent_draft_media",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::get_agent_draft_media_usage",
-          "new": "backend/app/api/v1/routes/agents.py::get_agent_draft_media_usage",
+          "new": "backend/app/domains/characters/router.py::get_agent_draft_media_usage",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::get_agent_draft_media_candidate_content",
-          "new": "backend/app/api/v1/routes/agents.py::get_agent_draft_media_candidate_content",
+          "new": "backend/app/domains/characters/router.py::get_agent_draft_media_candidate_content",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::apply_agent_draft_media_candidate",
-          "new": "backend/app/api/v1/routes/agents.py::apply_agent_draft_media_candidate",
+          "new": "backend/app/domains/characters/router.py::apply_agent_draft_media_candidate",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::discard_agent_draft_media_candidate",
-          "new": "backend/app/api/v1/routes/agents.py::discard_agent_draft_media_candidate",
+          "new": "backend/app/domains/characters/router.py::discard_agent_draft_media_candidate",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -10226,12 +10452,14 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::upload_profile_media",
-          "new": "backend/app/api/v1/routes/agents.py::upload_profile_media",
+          "new": "backend/app/domains/characters/router.py::upload_profile_media",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -10286,52 +10514,62 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::generate_profile_media",
-          "new": "backend/app/api/v1/routes/agents.py::generate_profile_media",
+          "new": "backend/app/domains/characters/router.py::generate_profile_media",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::get_profile_media_usage",
-          "new": "backend/app/api/v1/routes/agents.py::get_profile_media_usage",
+          "new": "backend/app/domains/characters/router.py::get_profile_media_usage",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::get_agent_profile_media_candidate_content",
-          "new": "backend/app/api/v1/routes/agents.py::get_agent_profile_media_candidate_content",
+          "new": "backend/app/domains/characters/router.py::get_agent_profile_media_candidate_content",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::apply_profile_media_candidate",
-          "new": "backend/app/api/v1/routes/agents.py::apply_profile_media_candidate",
+          "new": "backend/app/domains/characters/router.py::apply_profile_media_candidate",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::discard_profile_media_candidate",
-          "new": "backend/app/api/v1/routes/agents.py::discard_profile_media_candidate",
+          "new": "backend/app/domains/characters/router.py::discard_profile_media_candidate",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
           ]
         },
         {
@@ -10452,8 +10690,12 @@
           "backend/app/services/agent_runs.py"
         ],
         "backend/app/services/profile_media.py": [
+          "backend/app/domains/characters/service/media_storage.py",
           "backend/app/domains/media/contracts.py",
-          "backend/app/services/profile_media.py"
+          "backend/app/domains/social/service/media_storage.py",
+          "backend/app/domains/worlds/storage.py",
+          "backend/app/integrations/media/files.py",
+          "backend/app/integrations/media/images.py"
         ]
       },
       "split_symbols": [
@@ -12749,72 +12991,107 @@
         },
         {
           "old": "backend/app/services/profile_media.py::CONTENT_TYPES",
-          "new": "backend/app/services/profile_media.py::CONTENT_TYPES",
+          "new": "backend/app/integrations/media/images.py::CONTENT_TYPES",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::MEDIA_TARGET_SIZES",
-          "new": "backend/app/services/profile_media.py::MEDIA_TARGET_SIZES",
+          "new": "backend/app/integrations/media/images.py::MEDIA_TARGET_SIZES",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::WEBP_QUALITY",
-          "new": "backend/app/services/profile_media.py::WEBP_QUALITY",
+          "new": "backend/app/integrations/media/images.py::WEBP_QUALITY",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::SEED_IMAGE_TARGET_SIZE",
-          "new": "backend/app/services/profile_media.py::SEED_IMAGE_TARGET_SIZE",
+          "new": "backend/app/integrations/media/images.py::SEED_IMAGE_TARGET_SIZE",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::MAX_IMAGE_DIMENSION",
-          "new": "backend/app/services/profile_media.py::MAX_IMAGE_DIMENSION",
+          "new": "backend/app/integrations/media/images.py::MAX_IMAGE_DIMENSION",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::MAX_IMAGE_PIXELS",
-          "new": "backend/app/services/profile_media.py::MAX_IMAGE_PIXELS",
+          "new": "backend/app/integrations/media/images.py::MAX_IMAGE_PIXELS",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::MAX_IMAGE_FRAMES",
-          "new": "backend/app/services/profile_media.py::MAX_IMAGE_FRAMES",
+          "new": "backend/app/integrations/media/images.py::MAX_IMAGE_FRAMES",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
@@ -12829,302 +13106,402 @@
         },
         {
           "old": "backend/app/services/profile_media.py::PrivateMediaCleanupError",
-          "new": "backend/app/services/profile_media.py::PrivateMediaCleanupError",
+          "new": "backend/app/integrations/media/files.py::PrivateMediaCleanupError",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::PrivateMediaQuarantine",
-          "new": "backend/app/services/profile_media.py::PrivateMediaQuarantine",
+          "new": "backend/app/integrations/media/files.py::PrivateMediaQuarantine",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::quarantine_private_media",
-          "new": "backend/app/services/profile_media.py::quarantine_private_media",
+          "new": "backend/app/integrations/media/files.py::quarantine_private_media",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_profile_media",
-          "new": "backend/app/services/profile_media.py::save_profile_media",
+          "new": "backend/app/domains/characters/service/media_storage.py::save_profile_media",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_profile_media_bytes",
-          "new": "backend/app/services/profile_media.py::save_profile_media_bytes",
+          "new": "backend/app/domains/characters/service/media_storage.py::save_profile_media_bytes",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_world_banner",
-          "new": "backend/app/services/profile_media.py::save_world_banner",
+          "new": "backend/app/domains/worlds/storage.py::save_legacy_world_banner",
           "direct_consumers": [
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_world_banner_codec.py::test_world_banner_uses_shared_sanitized_bytes_and_legacy_exception_contract"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_seed_image",
-          "new": "backend/app/services/profile_media.py::save_seed_image",
+          "new": "backend/app/domains/characters/service/media_storage.py::save_seed_image",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_seed_image_bytes",
-          "new": "backend/app/services/profile_media.py::save_seed_image_bytes",
+          "new": "backend/app/domains/characters/service/media_storage.py::save_seed_image_bytes",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_generated_post_image_bytes",
-          "new": "backend/app/services/profile_media.py::save_generated_post_image_bytes",
+          "new": "backend/app/domains/social/service/media_storage.py::save_generated_post_image_bytes",
           "direct_consumers": [
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_draft_profile_media",
-          "new": "backend/app/services/profile_media.py::save_draft_profile_media",
+          "new": "backend/app/domains/characters/service/media_storage.py::save_draft_profile_media",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_draft_profile_media_bytes",
-          "new": "backend/app/services/profile_media.py::save_draft_profile_media_bytes",
+          "new": "backend/app/domains/characters/service/media_storage.py::save_draft_profile_media_bytes",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::save_profile_image_candidate_bytes",
-          "new": "backend/app/services/profile_media.py::save_profile_image_candidate_bytes",
+          "new": "backend/app/domains/characters/service/media_storage.py::save_profile_image_candidate_bytes",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::promote_draft_profile_media",
-          "new": "backend/app/services/profile_media.py::promote_draft_profile_media",
+          "new": "backend/app/domains/characters/service/media_storage.py::promote_draft_profile_media",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::promote_profile_image_candidate",
-          "new": "backend/app/services/profile_media.py::promote_profile_image_candidate",
+          "new": "backend/app/domains/characters/service/media_storage.py::promote_profile_image_candidate",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::delete_profile_image_candidate",
-          "new": "backend/app/services/profile_media.py::delete_profile_image_candidate",
+          "new": "backend/app/domains/characters/service/media_storage.py::delete_profile_image_candidate",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::delete_draft_media",
-          "new": "backend/app/services/profile_media.py::delete_draft_media",
+          "new": "backend/app/domains/characters/service/media_storage.py::delete_draft_media",
           "direct_consumers": [
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::decode_profile_media",
-          "new": "backend/app/services/profile_media.py::decode_profile_media",
+          "new": "backend/app/integrations/media/images.py::decode_profile_media",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::validate_profile_media_content",
-          "new": "backend/app/services/profile_media.py::validate_profile_media_content",
+          "new": "backend/app/integrations/media/images.py::validate_profile_media_content",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::encode_profile_media_webp",
-          "new": "backend/app/services/profile_media.py::encode_profile_media_webp",
+          "new": "backend/app/integrations/media/images.py::encode_profile_media_webp",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::encode_image_webp_preserve_ratio",
-          "new": "backend/app/services/profile_media.py::encode_image_webp_preserve_ratio",
+          "new": "backend/app/integrations/media/images.py::encode_image_webp_preserve_ratio",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::encode_generated_post_webp",
-          "new": "backend/app/services/profile_media.py::encode_generated_post_webp",
+          "new": "backend/app/integrations/media/images.py::encode_generated_post_webp",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::media_url_to_path",
-          "new": "backend/app/services/profile_media.py::media_url_to_path",
+          "new": "backend/app/integrations/media/files.py::media_url_to_path",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::resolve_private_media_file",
-          "new": "backend/app/services/profile_media.py::resolve_private_media_file",
+          "new": "backend/app/integrations/media/files.py::resolve_private_media_file",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::delete_media_url",
-          "new": "backend/app/services/profile_media.py::delete_media_url",
+          "new": "backend/app/integrations/media/files.py::delete_media_url",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::_media_url_to_path",
-          "new": "backend/app/services/profile_media.py::_media_url_to_path",
+          "new": "backend/app/integrations/media/files.py::_media_url_to_path",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/runtime/account_deletion.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::_assert_image_signature",
-          "new": "backend/app/services/profile_media.py::_assert_image_signature",
+          "new": "backend/app/integrations/media/images.py::_assert_image_signature",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::_assert_decodable_image",
-          "new": "backend/app/services/profile_media.py::_assert_decodable_image",
+          "new": "backend/app/integrations/media/images.py::_assert_decodable_image",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::_assert_safe_image_geometry",
-          "new": "backend/app/services/profile_media.py::_assert_safe_image_geometry",
+          "new": "backend/app/integrations/media/images.py::_assert_safe_image_geometry",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::_content_type_from_suffix",
-          "new": "backend/app/services/profile_media.py::_content_type_from_suffix",
+          "new": "backend/app/integrations/media/images.py::_content_type_from_suffix",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         },
         {
           "old": "backend/app/services/profile_media.py::_flatten_for_webp",
-          "new": "backend/app/services/profile_media.py::_flatten_for_webp",
+          "new": "backend/app/integrations/media/images.py::_flatten_for_webp",
           "direct_consumers": [
+            "backend/app/domains/characters/service/media_storage.py",
+            "backend/app/domains/social/service/media_storage.py",
+            "backend/app/integrations/media/files.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/profile_media.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
           ]
         }
       ]
@@ -16960,6 +17337,623 @@
         ]
       },
       "transaction": "Existing flush, finish_write, deferred commits, refresh, row lock and SQLite/PostgreSQL branches are unchanged."
+    },
+    "AR-B3-M1": {
+      "status": "Shared bounded codec/path/quarantine and Character/Social file placement now have actual role owners. Character candidate workflows and World legacy helper continue in the next media slice; Social job/quota/public attachment closes in AR-B5.",
+      "unchanged_symbols": 36,
+      "split_record": "AR-B2-B5 retains the complete original profile_media symbol inventory; destinations and exact consumers are updated there rather than adding a second partial historical snapshot.",
+      "remaining_owners": {
+        "backend/app/services/profile_media.py::save_world_banner": "AR-B3 World storage integration, historical helper has no production direct caller.",
+        "backend/app/services/post_image_generation.py": "AR-B5 Social quota/job/attachment; shared storage compatibility removed after explicit consumers migrate.",
+        "backend/app/runtime/characters/creator.py": "AR-B3 Character media admission/candidates/private preview and provider composition.",
+        "backend/app/runtime/characters/management.py": "AR-B3 upload flow; activity/settings and multi-domain deletion remain their documented AR-B4/AR-B8-A scopes."
+      }
+    },
+    "AR-B3-M2": {
+      "status": "Shared provider HTTP, Pollinations, Replicate and image-provider dispatch are actual integrations. Every repository Python caller uses the new module; old service files are removed.",
+      "file_moves": {
+        "backend/app/services/replicate_image.py": "backend/app/integrations/replicate_image.py",
+        "backend/app/services/image_provider.py": "backend/app/integrations/image_provider.py",
+        "backend/app/services/provider_http.py": "backend/app/integrations/provider_http.py",
+        "backend/app/services/pollinations_image.py": "backend/app/integrations/pollinations_image.py",
+        "backend/tests/test_replicate_image.py": "backend/tests/media/test_replicate_image.py",
+        "backend/tests/test_replicate_url_security.py": "backend/tests/media/test_replicate_url_security.py"
+      },
+      "preserved": [
+        "same timeouts, response byte bounds and redirect validation",
+        "same Pollinations safety/relay/fallback/request count",
+        "same Replicate reference preflight, poll/retry/cancellation behavior",
+        "unchanged logger category app.services.pollinations_image",
+        "no credential reveal or Social quota/job-policy movement"
+      ],
+      "test_move": "The two provider-specific Replicate suites move to tests/media without changing their test names or assertions. Mixed Social/provider security tests retain their current owner paths."
+    },
+    "AR-B3-M3": {
+      "status": "Character private preview, candidate ownership/expiry/application/discard and upload now use actual service/media implementation. Existing same-Session runtime callbacks own visual-identity invalidation/activity/detail collaboration. Eleven existing HTTP functions moved to Character router and are inserted as the same APIRoute objects at their old positions.",
+      "actual_moved_symbols": {
+        "backend/app/runtime/characters/creator.py::get_draft_media_content": "backend/app/domains/characters/service/media.py::get_draft_media_content",
+        "backend/app/runtime/characters/creator.py::_get_owned_profile_image_candidate": "backend/app/domains/characters/service/media.py::_get_owned_profile_image_candidate",
+        "backend/app/runtime/characters/creator.py::discard_profile_media_candidate": "backend/app/domains/characters/service/media.py::discard_profile_media_candidate",
+        "backend/app/runtime/characters/creator.py::get_agent_profile_image_usage": "backend/app/domains/characters/service/media.py::get_agent_profile_image_usage",
+        "backend/app/runtime/characters/creator.py::get_profile_candidate_content": "backend/app/domains/characters/service/media.py::get_profile_candidate_content",
+        "backend/app/runtime/characters/creator.py::get_draft_candidate_content": "backend/app/domains/characters/service/media.py::get_draft_candidate_content",
+        "backend/app/runtime/characters/creator.py::apply_draft_media_candidate": "backend/app/domains/characters/service/media.py::apply_draft_media_candidate",
+        "backend/app/runtime/characters/creator.py::get_draft_profile_image_usage": "backend/app/domains/characters/service/media.py::get_draft_profile_image_usage",
+        "backend/app/runtime/characters/creator.py::_cleanup_expired_profile_image_candidates": "backend/app/domains/characters/service/media.py::_cleanup_expired_profile_image_candidates",
+        "backend/app/runtime/characters/creator.py::upload_draft_media": "backend/app/domains/characters/service/media.py::upload_draft_media",
+        "backend/app/runtime/characters/creator.py::apply_profile_media_candidate": "backend/app/domains/characters/service/media.py::apply_profile_media_candidate",
+        "backend/app/runtime/characters/creator.py::discard_draft_media_candidate": "backend/app/domains/characters/service/media.py::discard_draft_media_candidate",
+        "backend/app/runtime/characters/management.py::upload_profile_media": "backend/app/domains/characters/service/media.py::upload_profile_media",
+        "backend/app/api/v1/routes/agents.py::get_agent_draft_media": "backend/app/domains/characters/router.py::get_agent_draft_media",
+        "backend/app/api/v1/routes/agents.py::upload_agent_draft_media": "backend/app/domains/characters/router.py::upload_agent_draft_media",
+        "backend/app/api/v1/routes/agents.py::get_agent_draft_media_usage": "backend/app/domains/characters/router.py::get_agent_draft_media_usage",
+        "backend/app/api/v1/routes/agents.py::get_agent_draft_media_candidate_content": "backend/app/domains/characters/router.py::get_agent_draft_media_candidate_content",
+        "backend/app/api/v1/routes/agents.py::apply_agent_draft_media_candidate": "backend/app/domains/characters/router.py::apply_agent_draft_media_candidate",
+        "backend/app/api/v1/routes/agents.py::discard_agent_draft_media_candidate": "backend/app/domains/characters/router.py::discard_agent_draft_media_candidate",
+        "backend/app/api/v1/routes/agents.py::upload_profile_media": "backend/app/domains/characters/router.py::upload_profile_media",
+        "backend/app/api/v1/routes/agents.py::get_profile_media_usage": "backend/app/domains/characters/router.py::get_profile_media_usage",
+        "backend/app/api/v1/routes/agents.py::get_agent_profile_media_candidate_content": "backend/app/domains/characters/router.py::get_agent_profile_media_candidate_content",
+        "backend/app/api/v1/routes/agents.py::apply_profile_media_candidate": "backend/app/domains/characters/router.py::apply_profile_media_candidate",
+        "backend/app/api/v1/routes/agents.py::discard_profile_media_candidate": "backend/app/domains/characters/router.py::discard_profile_media_candidate"
+      },
+      "remaining": "Generation/quota reservation/provider work continues in the next media slice. Two generate HTTP routes still use the old runtime composition; B4/B8 retain only their documented activity/settings/deletion ownership."
+    },
+    "AR-B3-M4": {
+      "status": "Character draft/profile generation and candidate quota/persistence are actual service/image_generation functions. Five policy symbols and two original HTTP endpoints moved; settings, service-key and translation callbacks remain runtime collaborators at their existing call points.",
+      "actual_moved_symbols": {
+        "backend/app/runtime/characters/creator.py::POLLINATIONS_MAX_SEED": "backend/app/domains/characters/service/image_generation.py::POLLINATIONS_MAX_SEED",
+        "backend/app/runtime/characters/creator.py::STYLE_PROMPTS": "backend/app/domains/characters/service/image_generation.py::STYLE_PROMPTS",
+        "backend/app/runtime/characters/creator.py::generate_media": "backend/app/domains/characters/service/image_generation.py::generate_media",
+        "backend/app/runtime/characters/creator.py::generate_profile_media": "backend/app/domains/characters/service/image_generation.py::generate_profile_media",
+        "backend/app/runtime/characters/creator.py::_generate_profile_image_candidate": "backend/app/domains/characters/service/image_generation.py::_generate_profile_image_candidate",
+        "backend/app/runtime/characters/creator.py::_build_pollinations_prompt": "backend/app/domains/characters/service/image_generation.py::_build_pollinations_prompt",
+        "backend/app/runtime/characters/creator.py::_pollinations_image_size": "backend/app/domains/characters/service/image_generation.py::_pollinations_image_size",
+        "backend/app/runtime/characters/creator.py::_draft_media_seed": "backend/app/domains/characters/service/image_generation.py::_draft_media_seed",
+        "backend/app/api/v1/routes/agents.py::generate_agent_draft_media": "backend/app/domains/characters/router.py::generate_agent_draft_media",
+        "backend/app/api/v1/routes/agents.py::generate_profile_media": "backend/app/domains/characters/router.py::generate_profile_media"
+      },
+      "preserved": [
+        "key unavailable before quota reservation",
+        "quota exhaustion skips translation and provider",
+        "reserve commit/lock/count semantics remain in Character image_quota",
+        "one generation result persists candidate then commits; exact provider/storage failure finalizes failed quota and commits",
+        "same model/route selection timing, prompt/seed and ordering; no new public media mount"
+      ],
+      "remaining": "Legacy URL/translation helper transport cleanup and World banner integration are separate media follow-up. Social quota/job remains AR-B5; image settings and multi-domain deletion remain AR-B8-A."
+    },
+    "AR-B3-M5": {
+      "status": "World canonical storage uses shared image decoding/encoding and containment with World-specific error translation; Post storage consumers now call the actual Social service and common files directly.",
+      "legacy_media_export": "profile_media now has no function bodies or production consumers; only frozen compatibility tests remain until B8-A.",
+      "world_codec_equivalence": "Same MIME/base64/signature/dimensions/frames, source-byte limit, EXIF/white flatten, 1024x384 thumbnail and WebP quality80/method6. World upload commit compensation remains in worlds.service.creator.",
+      "world_package_distinction": "World Package lossless export codec is intentionally not replaced by profile quality80.",
+      "test_paths": [
+        "backend/tests/media/test_world_banner_codec.py",
+        "backend/tests/worlds/test_transition_contracts.py"
+      ]
+    },
+    "AR-B3-M6": {
+      "status": "Azure translation transport, bounded response and provider usage file/lock have one integrations owner. Runtime retains Character prompt selection/cache and provides the callback to its generation service.",
+      "unchanged_symbols": 7,
+      "test_paths": [
+        "backend/tests/media/test_azure_translation.py",
+        "backend/tests/test_m3_credential_privacy.py",
+        "backend/tests/test_provider_boundary_security.py"
+      ],
+      "reviewed_test_patch_path": "test_m3_credential_privacy now patches creator.media_images.validate_profile_media_content, the actual shared validator since M1, preserving existing URL/header secrecy assertions."
+    },
+    "AR-B3-package-foundation": {
+      "status": "SOURCE IMPLEMENTED — final Package role tree; focused 190 passed, integration/Hosted and introduction metadata pending",
+      "owners": {
+        "schemas/": "HTTP and portable v1 schemas; schemas/v1 JSON resources unchanged",
+        "contracts/": "immutable export/preview/seed request and result records",
+        "policies/": "archive/license/collision deterministic decisions",
+        "models.py": "the same four ORM classes and shared Base",
+        "service/registry.py": "lineage version/replay/delivery decisions",
+        "repository/registry.py": "same-session SQL and flush-only persistence"
+      },
+      "remaining": "AR-B3 export/staging then import/runtime slices remove the temporary same-domain bridges. Other domains public contracts remain until B2 canonical consumers merge. G5 owns final Base registration.",
+      "test_ownership": {
+        "moved_files": 2,
+        "moved_nodes": 39
+      },
+      "split_files": {
+        "backend/app/domains/world_packages/infrastructure/sqlalchemy_registry.py": [
+          "backend/app/domains/world_packages/service/registry.py",
+          "backend/app/domains/world_packages/repository/registry.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_registry.py::SqlAlchemyWorldPackageRegistry",
+          "new": "backend/app/domains/world_packages/service/registry.py::SqlAlchemyWorldPackageRegistry",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_uow_registry.py::test_caller_rollback_removes_every_seeded_domain_row"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_registry.py::SqlAlchemyWorldPackageRegistry",
+          "new": "backend/app/domains/world_packages/repository/registry.py::WorldPackageRegistryRepository",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/service/registry.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_uow_registry.py::test_caller_rollback_removes_every_seeded_domain_row"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_registry.py::_export_record",
+          "new": "backend/app/domains/world_packages/repository/registry.py::_export_record",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/service/registry.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_uow_registry.py::test_caller_rollback_removes_every_seeded_domain_row"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_registry.py::__all__",
+          "new": "backend/app/domains/world_packages/service/registry.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_uow_registry.py::test_caller_rollback_removes_every_seeded_domain_row"
+          ]
+        }
+      ],
+      "validation": {
+        "package_suites": "89 passed / 1 warning / 46.50 seconds; v1 goldens, UoW, export/ack/cancel, preview, import/recovery, closeout/UI contracts",
+        "scope": "exact modules only; temporary same-domain legacy consumers retire in next AR-B3 slices",
+        "provenance": "source commit first; root appends introduction records after linear integration"
+      }
+    },
+    "AR-B3-package-processing": {
+      "status": "SOURCE IMPLEMENTED — final Package role tree; focused 190 passed, integration/Hosted and introduction metadata pending",
+      "split_files": {
+        "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py": [
+          "backend/app/runtime/world_packages/export_source.py",
+          "backend/app/domains/world_packages/service/export_projection.py"
+        ],
+        "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py": [
+          "backend/app/runtime/world_packages/preview_probe.py",
+          "backend/app/domains/world_packages/service/preview.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::_REF_SEPARATORS",
+          "new": "backend/app/domains/world_packages/service/export_projection.py::_REF_SEPARATORS",
+          "direct_consumers": [
+            "backend/app/runtime/world_packages/export_source.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::_portable_key",
+          "new": "backend/app/domains/world_packages/service/export_projection.py::_portable_key",
+          "direct_consumers": [
+            "backend/app/runtime/world_packages/export_source.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::_portable_map",
+          "new": "backend/app/domains/world_packages/service/export_projection.py::_portable_map",
+          "direct_consumers": [
+            "backend/app/runtime/world_packages/export_source.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::_text_list",
+          "new": "backend/app/domains/world_packages/service/export_projection.py::_text_list",
+          "direct_consumers": [
+            "backend/app/runtime/world_packages/export_source.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::_portable_local_profile",
+          "new": "backend/app/domains/world_packages/service/export_projection.py::_portable_local_profile",
+          "direct_consumers": [
+            "backend/app/runtime/world_packages/export_source.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::SqlAlchemyWorldPackageSourceSnapshot",
+          "new": "backend/app/runtime/world_packages/export_source.py::SqlAlchemyWorldPackageSourceSnapshot",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py::__all__",
+          "new": "backend/app/runtime/world_packages/export_source.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_sqlalchemy_snapshot_filters_owner_controlled_and_runtime_state"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py::SqlAlchemyWorldPackagePreviewProbe",
+          "new": "backend/app/runtime/world_packages/preview_probe.py::SqlAlchemyWorldPackagePreviewProbe",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_preview.py::test_sql_preview_probe_labels_trust_and_blocks_duplicate_or_tampered_version"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py::__all__",
+          "new": "backend/app/runtime/world_packages/preview_probe.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_preview.py::test_sql_preview_probe_labels_trust_and_blocks_duplicate_or_tampered_version"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py::SqlAlchemyWorldPackagePreviewProbe",
+          "new": "backend/app/domains/world_packages/service/preview.py::assess_world_package_preview",
+          "direct_consumers": [
+            "backend/app/runtime/world_packages/preview_probe.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_preview.py::test_sql_preview_probe_labels_trust_and_blocks_duplicate_or_tampered_version"
+          ]
+        }
+      ],
+      "unused_export_seam_removal": "ManagedPackageAssetPort and ManagedMediaPackageAssets formerly declared stage_verified_asset/promote_staged_assets/discard_staged_assets with no consumers and NotImplementedError bodies; real import media remains implemented in filesystem_import_media and migrates next slice.",
+      "scope": "The first 36-module partial scope is superseded by the final whole-world_packages domain scope. Old same-domain caller bridges are removed; only G5 aggregate registration remains.",
+      "validation": {
+        "package_suites": "89 passed / 1 warning / 39.41 seconds",
+        "boundary": "594 modules / 1850 edges / 288 legacy exact edges PASS; 36 exact Package role modules, remaining 55 bridges",
+        "remaining": "Final router/dependencies and import runtime source slice; parent linear introduction capture and CI."
+      }
+    },
+    "AR-B3-package-composition": {
+      "status": "SOURCE IMPLEMENTED — final Package role tree; focused 190 passed, integration/Hosted and introduction metadata pending",
+      "split_files": {
+        "backend/app/domains/world_packages/api/routes.py": [
+          "backend/app/domains/world_packages/router.py",
+          "backend/app/domains/world_packages/dependencies.py",
+          "backend/app/domains/world_packages/service/delivery.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::router",
+          "new": "backend/app/domains/world_packages/router.py::router",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::IdempotencyKey",
+          "new": "backend/app/domains/world_packages/router.py::IdempotencyKey",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::DownloadToken",
+          "new": "backend/app/domains/world_packages/router.py::DownloadToken",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::PreviewToken",
+          "new": "backend/app/domains/world_packages/router.py::PreviewToken",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_STORE_LOCK",
+          "new": "backend/app/domains/world_packages/dependencies.py::_STORE_LOCK",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/dependencies.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_paths",
+          "new": "backend/app/domains/world_packages/dependencies.py::_paths",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_artifacts",
+          "new": "backend/app/domains/world_packages/dependencies.py::_artifacts",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_staging",
+          "new": "backend/app/domains/world_packages/dependencies.py::_staging",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_exporter",
+          "new": "backend/app/domains/world_packages/dependencies.py::_exporter",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_stager",
+          "new": "backend/app/domains/world_packages/dependencies.py::_stager",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_delivery_session_factory",
+          "new": "backend/app/domains/world_packages/dependencies.py::_delivery_session_factory",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_import_committer",
+          "new": "backend/app/domains/world_packages/dependencies.py::_import_committer",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_raise_contract_error",
+          "new": "backend/app/domains/world_packages/router.py::_raise_contract_error",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::stage_world_package_import",
+          "new": "backend/app/domains/world_packages/router.py::stage_world_package_import",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::read_world_package_import_preview",
+          "new": "backend/app/domains/world_packages/router.py::read_world_package_import_preview",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::discard_world_package_import_preview",
+          "new": "backend/app/domains/world_packages/router.py::discard_world_package_import_preview",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::commit_world_package_import",
+          "new": "backend/app/domains/world_packages/router.py::commit_world_package_import",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::preview_world_package_export",
+          "new": "backend/app/domains/world_packages/router.py::preview_world_package_export",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::prepare_world_package_export",
+          "new": "backend/app/domains/world_packages/router.py::prepare_world_package_export",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::download_world_package_export",
+          "new": "backend/app/domains/world_packages/router.py::download_world_package_export",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::acknowledge_world_package_export_delivery",
+          "new": "backend/app/domains/world_packages/router.py::acknowledge_world_package_export_delivery",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::discard_world_package_export",
+          "new": "backend/app/domains/world_packages/router.py::discard_world_package_export",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_stream_pending_native_delivery",
+          "new": "backend/app/domains/world_packages/service/delivery.py::_stream_pending_native_delivery",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::_stream_and_record_delivery",
+          "new": "backend/app/domains/world_packages/service/delivery.py::_stream_and_record_delivery",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::__all__",
+          "new": "backend/app/domains/world_packages/router.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_export_api_records_only_completed_download_and_replays_same_seed",
+            "tests/world_packages/test_import_commit.py::test_ambiguous_commit_result_recovers_promoted_media"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::preview_world_package_export",
+          "new": "backend/app/domains/world_packages/service/delivery.py::preview_export",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_native_save_as_requires_ack_and_cancel_does_not_consume_version"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::prepare_world_package_export",
+          "new": "backend/app/domains/world_packages/service/delivery.py::prepare_export",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_native_save_as_requires_ack_and_cancel_does_not_consume_version"
+          ]
+        },
+        {
+          "old": "backend/app/domains/world_packages/api/routes.py::acknowledge_world_package_export_delivery",
+          "new": "backend/app/domains/world_packages/service/delivery.py::acknowledge_export_delivery",
+          "direct_consumers": [
+            "backend/app/domains/world_packages/router.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_export.py::test_native_save_as_requires_ack_and_cancel_does_not_consume_version"
+          ]
+        }
+      ],
+      "runtime_ownership": "World/Character read projection, destination seed, commit and recovery run under app/runtime/world_packages. App factories inject constructor callbacks into Package dependencies; domain modules never import runtime. Existing Session/sessionmaker and row-lock/commit/rollback/media journal order are preserved.",
+      "remaining_compatibility": "No Package public/api/application/domain/ports/infrastructure implementation or same-domain bridge remains. app.models aggregate registration is the sole Package incoming bridge and retires in AR-G5. Upstream B2 worlds/characters public consumers in runtime migrate when those source branches join."
     }
   }
 }

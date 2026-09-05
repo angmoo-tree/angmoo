@@ -1,5 +1,17 @@
 from __future__ import annotations
 
+from app.domains.characters.service import image_generation as image_generation_service
+from app.domains.characters.service.image_generation import (
+    POLLINATIONS_MAX_SEED,
+    STYLE_PROMPTS,
+    _build_pollinations_prompt,
+    _draft_media_seed,
+    _pollinations_image_size,
+)
+
+from app.domains.characters.service import media as media_service
+from app.domains.characters.service.media import _cleanup_expired_profile_image_candidates, _get_owned_profile_image_candidate
+
 from app.domains.characters.contracts import CreatorWorkflows
 from app.domains.characters.service import drafts as draft_lifecycle
 
@@ -50,10 +62,9 @@ from datetime import UTC, date, datetime, timedelta
 import json
 import logging
 import re
-from threading import Lock
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote, urlencode, urlparse
+from urllib.parse import quote, urlencode
 from urllib.request import Request
 from uuid import uuid4
 
@@ -76,13 +87,24 @@ from app.services import agent_runs as agent_run_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.services.direct_llm import DirectLlmCallContext, RunLlmTracker, generate_text
 from app.services import operation_settings
-from app.services import image_provider
-from app.services import pollinations_image
+from app.integrations import image_provider
+from app.integrations import pollinations_image
 from app.core import prompt_safety
-from app.services import profile_media
+from app.domains.characters.service import media_storage as profile_media
+from app.integrations.media import files as media_files
+from app.integrations.media import images as media_images
 from app.integrations import bounded_http
-from app.services import provider_http
-from app.services import replicate_image
+from app.integrations import provider_http
+from app.integrations.azure_translation import (
+    _open_translation_request,
+    _translate_ko_to_en_with_azure,
+    _reserve_translation_chars,
+    _release_translation_chars,
+    _read_translation_usage,
+    _write_translation_usage,
+    _TRANSLATION_USAGE_LOCK,
+)
+from app.integrations import replicate_image
 from app.services import service_image_key
 from app.services.runtime_boundary import (
     OpenClawGatewayClient,
@@ -92,7 +114,6 @@ from app.services.runtime_boundary import (
 
 
 logger = logging.getLogger(__name__)
-POLLINATIONS_MAX_SEED = 2_147_483_647
 POLLINATIONS_MODELS_URL = "https://gen.pollinations.ai/image/models"
 POLLINATIONS_IMAGE_URL = "https://gen.pollinations.ai/image"
 POLLINATIONS_LEGACY_IMAGE_URL = "https://image.pollinations.ai/prompt"
@@ -106,16 +127,9 @@ PROVIDER_SENSITIVE_HEADERS = frozenset(
 # OpenClaw validates the global tool allowlist before honoring tool_choice="none".
 DRAFT_LLM_TOOLS_ALLOW = ["angmoo_list_feed"]
 HANGUL_RE = re.compile(r"[\uac00-\ud7a3]")
-STYLE_PROMPTS = {
-    "기본": "polished character illustration",
-    "애니메풍": "cinematic anime style",
-    "리얼풍": "realistic digital art style",
-    "3D풍": "stylized 3D character render",
-}
 TRANSLATION_CACHE_MAX = 256
 _POLLINATIONS_MODEL_CHECKED_AT: dict[str, datetime] = {}
 _TRANSLATION_CACHE: dict[str, str] = {}
-_TRANSLATION_USAGE_LOCK = Lock()
 
 
 @dataclass
@@ -145,21 +159,7 @@ def get_draft_media_content(
     draft_id: str,
     media_type: str,
 ):
-    if media_type not in {"avatar", "banner"}:
-        raise AgentPrivateMediaNotFoundError(media_type)
-    draft = _get_owned_draft(db, user, draft_id)
-    media_url = (
-        draft.avatar_temp_url if media_type == "avatar" else draft.banner_temp_url
-    )
-    if media_url is None:
-        raise AgentPrivateMediaNotFoundError(media_type)
-    try:
-        return profile_media.resolve_private_media_file(
-            media_url,
-            expected_directory="drafts",
-        )
-    except profile_media.InvalidProfileMediaError as exc:
-        raise AgentPrivateMediaNotFoundError(media_type) from exc
+    return media_service.get_draft_media_content(db, user, draft_id, media_type, workflows=build_creator_workflows())
 
 
 def get_draft_candidate_content(
@@ -168,22 +168,7 @@ def get_draft_candidate_content(
     draft_id: str,
     candidate_id: str,
 ):
-    draft = _get_owned_draft(db, user, draft_id)
-    candidate = _get_owned_profile_image_candidate(
-        db,
-        user=user,
-        candidate_id=candidate_id,
-        scope="create",
-        draft_id=draft.id,
-        character_id=None,
-    )
-    try:
-        return profile_media.resolve_private_media_file(
-            candidate.url,
-            expected_directory="profile-candidates",
-        )
-    except profile_media.InvalidProfileMediaError as exc:
-        raise AgentProfileImageCandidateNotFoundError(candidate_id) from exc
+    return media_service.get_draft_candidate_content(db, user, draft_id, candidate_id, workflows=build_creator_workflows())
 
 
 def get_profile_candidate_content(
@@ -192,28 +177,7 @@ def get_profile_candidate_content(
     character_id: str,
     candidate_id: str,
 ):
-    character = character_profile.get_character(db, character_id)
-    if (
-        character is None
-        or character.owner_id != user.id
-        or character.deleted_at is not None
-    ):
-        raise agent_service.AgentNotFoundError(character_id)
-    candidate = _get_owned_profile_image_candidate(
-        db,
-        user=user,
-        candidate_id=candidate_id,
-        scope="profile",
-        draft_id=None,
-        character_id=character.id,
-    )
-    try:
-        return profile_media.resolve_private_media_file(
-            candidate.url,
-            expected_directory="profile-candidates",
-        )
-    except profile_media.InvalidProfileMediaError as exc:
-        raise AgentProfileImageCandidateNotFoundError(candidate_id) from exc
+    return media_service.get_profile_candidate_content(db, user, character_id, candidate_id)
 
 
 def update_draft(
@@ -237,20 +201,7 @@ def upload_draft_media(
     draft_id: str,
     data: schemas.AgentCreationDraftMediaUpload,
 ) -> schemas.AgentCreationDraftRead:
-    draft = _get_owned_draft(db, user, draft_id)
-    url = profile_media.save_draft_profile_media(
-        draft_id=draft.id,
-        media_type=data.media_type,
-        content_type=data.content_type,
-        data_base64=data.data_base64,
-    )
-    if data.media_type == "avatar":
-        draft.avatar_temp_url = url
-    else:
-        draft.banner_temp_url = url
-    db.commit()
-    db.refresh(draft)
-    return _draft_read(draft)
+    return media_service.upload_draft_media(db, user, draft_id, data, workflows=build_creator_workflows())
 
 
 async def generate_media(
@@ -259,116 +210,7 @@ async def generate_media(
     draft_id: str,
     data: schemas.AgentCreationDraftGenerateMediaCreate,
 ) -> schemas.AgentCreationDraftMediaGenerationRead:
-    draft = _get_owned_draft(db, user, draft_id)
-    _cleanup_expired_profile_image_candidates(db, user.id)
-    target_media_types = [data.media_type] if data.media_type else ["avatar", "banner"]
-    if data.media_type is None:
-        _ensure_not_in_cooldown(draft.media_generation_available_at)
-    draft.image_style = data.image_style
-    draft.appearance_prompt = data.appearance_prompt.strip()
-    if data.media_type is None:
-        draft.media_generation_available_at = datetime.now(UTC) + DRAFT_COOLDOWN
-    db.commit()
-    db.refresh(draft)
-
-    results: list[schemas.AgentCreationDraftMediaResult] = []
-    image_model = operation_settings.get_pollinations_profile_image_model(db)
-    route_mode = operation_settings.get_pollinations_profile_image_route_mode(db)
-    if image_provider.is_replicate_model(image_model):
-        route_mode = "replicate"
-    generation_seed = uuid4().hex
-    profile_image_key_available = service_image_key.is_profile_image_available_for_model(image_model)
-    needs_generation = any(
-        _profile_image_usage_status(
-            db,
-            user=user,
-            scope="create",
-            media_type=media_type,
-        ).remaining
-        > 0
-        for media_type in target_media_types
-    ) and profile_image_key_available
-    appearance_prompt = (
-        _translate_image_prompt_to_english(draft.appearance_prompt)
-        if needs_generation
-        else draft.appearance_prompt
-    )
-    for media_type in target_media_types:
-        width, height = _pollinations_image_size(media_type)
-        prompt = _build_pollinations_prompt(
-            style=draft.image_style,
-            appearance=appearance_prompt,
-            media_type=media_type,
-        )
-        try:
-            if not profile_image_key_available:
-                raise AgentCreationDraftMediaError("profile_image_key_unavailable")
-            candidate, usage_status = await _generate_profile_image_candidate(
-                db,
-                user=user,
-                scope="create",
-                media_type=media_type,
-                prompt=prompt,
-                seed=_draft_media_seed(draft.id, f"{media_type}:{generation_seed}"),
-                model=image_model,
-                route_mode=route_mode,
-                draft_id=draft.id,
-                character_id=None,
-            )
-            results.append(
-                schemas.AgentCreationDraftMediaResult(
-                    media_type=media_type,
-                    candidate_id=candidate.id,
-                    candidate_url=(
-                        f"/api/v1/agents/drafts/{draft.id}/media-candidates/"
-                        f"{candidate.id}/content"
-                    ),
-                    usage_status=usage_status,
-                    width=width,
-                    height=height,
-                    ok=True,
-                )
-            )
-        except AgentProfileImageQuotaExceededError as exc:
-            results.append(
-                schemas.AgentCreationDraftMediaResult(
-                    media_type=media_type,
-                    usage_status=exc.usage_status,
-                    width=width,
-                    height=height,
-                    ok=False,
-                    error="profile_image_daily_limit_exceeded",
-                )
-            )
-        except AgentCreationDraftMediaError as exc:
-            logger.warning(
-                "agent draft media generation failed: draft_id=%s media_type=%s error=%s",
-                draft.id,
-                media_type,
-                str(exc),
-            )
-            results.append(
-                schemas.AgentCreationDraftMediaResult(
-                    media_type=media_type,
-                    usage_status=_profile_image_usage_status(
-                        db,
-                        user=user,
-                        scope="create",
-                        media_type=media_type,
-                    ),
-                    width=width,
-                    height=height,
-                    ok=False,
-                    error=str(exc),
-                )
-            )
-    db.commit()
-    db.refresh(draft)
-    ordered = sorted(results, key=lambda item: 0 if item.media_type == "avatar" else 1)
-    return schemas.AgentCreationDraftMediaGenerationRead(
-        draft=_draft_read(draft),
-        results=ordered,
-    )
+    return await image_generation_service.generate_media(db, user, draft_id, data, workflows=build_image_generation_workflows(), creator_workflows=build_creator_workflows())
 
 
 async def generate_profile_media(
@@ -377,114 +219,19 @@ async def generate_profile_media(
     character_id: str,
     data: schemas.AgentProfileMediaGenerateCreate,
 ) -> schemas.AgentProfileMediaGenerationRead:
-    character = character_profile.get_character(db, character_id)
-    if (
-        character is None
-        or character.owner_id != user.id
-        or character.deleted_at is not None
-    ):
-        raise agent_service.AgentNotFoundError(character_id)
-    _cleanup_expired_profile_image_candidates(db, user.id)
-
-    results: list[schemas.AgentCreationDraftMediaResult] = []
-    media_type = data.media_type
-    width, height = _pollinations_image_size(media_type)
-    try:
-        image_model = operation_settings.get_pollinations_profile_image_model(db)
-        route_mode = operation_settings.get_pollinations_profile_image_route_mode(db)
-        profile_image_key_available = service_image_key.is_profile_image_available_for_model(image_model)
-        usage_status = _profile_image_usage_status(
-            db,
-            user=user,
-            scope="profile",
-            media_type=media_type,
-        )
-        appearance_prompt = (
-            _translate_image_prompt_to_english(data.appearance_prompt.strip())
-            if usage_status.remaining > 0 and profile_image_key_available
-            else data.appearance_prompt.strip()
-        )
-        prompt = _build_pollinations_prompt(
-            style=data.image_style,
-            appearance=appearance_prompt,
-            media_type=media_type,
-        )
-        if not profile_image_key_available:
-            raise AgentCreationDraftMediaError("profile_image_key_unavailable")
-        candidate, usage_status = await _generate_profile_image_candidate(
-            db,
-            user=user,
-            scope="profile",
-            media_type=media_type,
-            prompt=prompt,
-            seed=_draft_media_seed(character.id, f"{media_type}:{uuid4().hex}"),
-            model=image_model,
-            route_mode=route_mode,
-            draft_id=None,
-            character_id=character.id,
-        )
-        results.append(
-            schemas.AgentCreationDraftMediaResult(
-                media_type=media_type,
-                candidate_id=candidate.id,
-                candidate_url=(
-                    f"/api/v1/agents/{character.id}/media-candidates/"
-                    f"{candidate.id}/content"
-                ),
-                usage_status=usage_status,
-                width=width,
-                height=height,
-                ok=True,
-            )
-        )
-    except AgentProfileImageQuotaExceededError as exc:
-        results.append(
-            schemas.AgentCreationDraftMediaResult(
-                media_type=media_type,
-                usage_status=exc.usage_status,
-                width=width,
-                height=height,
-                ok=False,
-                error="profile_image_daily_limit_exceeded",
-            )
-        )
-    except AgentCreationDraftMediaError as exc:
-        results.append(
-            schemas.AgentCreationDraftMediaResult(
-                media_type=media_type,
-                usage_status=_profile_image_usage_status(
-                    db,
-                    user=user,
-                    scope="profile",
-                    media_type=media_type,
-                ),
-                width=width,
-                height=height,
-                ok=False,
-                error=str(exc),
-            )
-        )
-    return schemas.AgentProfileMediaGenerationRead(results=results)
+    return await image_generation_service.generate_profile_media(db, user, character_id, data, workflows=build_image_generation_workflows())
 
 
 def get_draft_profile_image_usage(
     db: Session, user: models.User, draft_id: str
 ) -> schemas.AgentProfileImageUsageRead:
-    _ = _get_owned_draft(db, user, draft_id)
-    return _profile_image_usage_read(db, user=user, scope="create")
+    return media_service.get_draft_profile_image_usage(db, user, draft_id, workflows=build_creator_workflows())
 
 
 def get_agent_profile_image_usage(
     db: Session, user: models.User, character_id: str
 ) -> schemas.AgentProfileImageUsageRead:
-    character = character_profile.get_character(db, character_id)
-    if (
-        character is None
-        or character.owner_id != user.id
-        or character.deleted_at is not None
-    ):
-        raise agent_service.AgentNotFoundError(character_id)
-    return _profile_image_usage_read(db, user=user, scope="profile")
+    return media_service.get_agent_profile_image_usage(db, user, character_id)
 
 
 def apply_draft_media_candidate(
@@ -493,39 +240,7 @@ def apply_draft_media_candidate(
     draft_id: str,
     candidate_id: str,
 ) -> schemas.AgentCreationDraftRead:
-    draft = _get_owned_draft(db, user, draft_id)
-    candidate = _get_owned_profile_image_candidate(
-        db,
-        user=user,
-        candidate_id=candidate_id,
-        scope="create",
-        draft_id=draft.id,
-        character_id=None,
-    )
-    source_path = profile_media.media_url_to_path(candidate.url)
-    content = source_path.read_bytes()
-    url = profile_media.save_draft_profile_media_bytes(
-        draft_id=draft.id,
-        media_type=candidate.media_type,
-        content_type="image/webp",
-        content=content,
-    )
-    if candidate.media_type == "avatar":
-        draft.avatar_temp_url = url
-    else:
-        draft.banner_temp_url = url
-    candidate_id = candidate.id
-    _finalize_profile_image_quota(
-        db,
-        reservation_id=candidate.quota_reservation_id,
-        status="applied",
-        candidate_id=candidate_id,
-    )
-    db.delete(candidate)
-    db.commit()
-    db.refresh(draft)
-    profile_media.delete_profile_image_candidate(candidate_id, user.id)
-    return _draft_read(draft)
+    return media_service.apply_draft_media_candidate(db, user, draft_id, candidate_id, workflows=build_creator_workflows())
 
 
 def apply_profile_media_candidate(
@@ -534,53 +249,7 @@ def apply_profile_media_candidate(
     character_id: str,
     candidate_id: str,
 ) -> schemas.AgentDetailRead:
-    character = character_profile.get_character(db, character_id)
-    if (
-        character is None
-        or character.owner_id != user.id
-        or character.deleted_at is not None
-    ):
-        raise agent_service.AgentNotFoundError(character_id)
-    demo_lock.ensure_demo_user_mutable(user)
-    candidate = _get_owned_profile_image_candidate(
-        db,
-        user=user,
-        candidate_id=candidate_id,
-        scope="profile",
-        draft_id=None,
-        character_id=character.id,
-    )
-    url = profile_media.promote_profile_image_candidate(
-        character_id=character.id,
-        media_type=candidate.media_type,
-        candidate_media_url=candidate.url,
-    )
-    if candidate.media_type == "avatar":
-        character.avatar_url = url
-    else:
-        character.banner_url = url
-    agent_service._invalidate_image_visual_identity_if_present(db, character.id)
-    candidate_id = candidate.id
-    _finalize_profile_image_quota(
-        db,
-        reservation_id=candidate.quota_reservation_id,
-        status="applied",
-        candidate_id=candidate_id,
-    )
-    db.delete(candidate)
-    agent_crud.log_activity(
-        db,
-        user_id=user.id,
-        character_id=character.id,
-        action_type="profile_updated",
-        target_post_id=None,
-        reason=f"user_applied_generated_{candidate.media_type}",
-        result=f"Agent {candidate.media_type} image candidate was applied.",
-    )
-    db.commit()
-    db.refresh(character)
-    profile_media.delete_profile_image_candidate(candidate_id, user.id)
-    return agent_service._build_agent_detail(db, character)
+    return media_service.apply_profile_media_candidate(db, user, character_id, candidate_id, workflows=agent_service.build_character_media_workflows())
 
 
 def discard_draft_media_candidate(
@@ -589,18 +258,7 @@ def discard_draft_media_candidate(
     draft_id: str,
     candidate_id: str,
 ) -> None:
-    draft = _get_owned_draft(db, user, draft_id)
-    candidate = _get_owned_profile_image_candidate(
-        db,
-        user=user,
-        candidate_id=candidate_id,
-        scope="create",
-        draft_id=draft.id,
-        character_id=None,
-    )
-    profile_media.delete_profile_image_candidate(candidate.id, user.id)
-    db.delete(candidate)
-    db.commit()
+    return media_service.discard_draft_media_candidate(db, user, draft_id, candidate_id, workflows=build_creator_workflows())
 
 
 def discard_profile_media_candidate(
@@ -609,24 +267,7 @@ def discard_profile_media_candidate(
     character_id: str,
     candidate_id: str,
 ) -> None:
-    character = character_profile.get_character(db, character_id)
-    if (
-        character is None
-        or character.owner_id != user.id
-        or character.deleted_at is not None
-    ):
-        raise agent_service.AgentNotFoundError(character_id)
-    candidate = _get_owned_profile_image_candidate(
-        db,
-        user=user,
-        candidate_id=candidate_id,
-        scope="profile",
-        draft_id=None,
-        character_id=character.id,
-    )
-    profile_media.delete_profile_image_candidate(candidate.id, user.id)
-    db.delete(candidate)
-    db.commit()
+    return media_service.discard_profile_media_candidate(db, user, character_id, candidate_id)
 
 
 def complete_draft(
@@ -816,157 +457,11 @@ async def _generate_profile_image_candidate(
     draft_id: str | None,
     character_id: str | None,
 ) -> tuple[character_models.ProfileImageCandidate, schemas.AgentProfileImageUsageStatusRead]:
-    api_key = (
-        service_image_key.get_replicate_image_api_key()
-        if image_provider.is_replicate_model(model)
-        else service_image_key.get_profile_image_api_key()
-    )
-    if api_key is None:
-        raise AgentCreationDraftMediaError("profile_image_key_unavailable")
-    width, height = _pollinations_image_size(media_type)
-    reservation = _reserve_profile_image_quota(
-        db,
-        user=user,
-        scope=scope,
-        media_type=media_type,
-        model=model,
-        route_mode=route_mode,
-    )
-    try:
-        generated = await image_provider.generate_image(
-            api_key=api_key,
-            model=model,
-            prompt=prompt,
-            timeout_seconds=settings.pollinations_timeout_seconds,
-            log_context={
-                "source": "profile_image_generation",
-                "scope": scope,
-                "media_type": media_type,
-                "route_mode": route_mode,
-                "user_id": user.id,
-                "draft_id": draft_id,
-                "character_id": character_id,
-            },
-            route_mode=route_mode,
-            width=width,
-            height=height,
-            seed=seed,
-        )
-        candidate_id = f"profile-candidate-{uuid4().hex[:16]}"
-        saved = profile_media.save_profile_image_candidate_bytes(
-            user_id=user.id,
-            candidate_id=candidate_id,
-            media_type=media_type,
-            content_type=generated.content_type,
-            content=generated.content,
-        )
-        candidate = character_models.ProfileImageCandidate(
-            id=candidate_id,
-            user_id=user.id,
-            draft_id=draft_id,
-            character_id=character_id,
-            quota_reservation_id=reservation.id,
-            scope=scope,
-            bucket=_profile_image_bucket(scope, media_type),
-            media_type=media_type,
-            url=str(saved["url"]),
-            content_type=str(saved["content_type"]),
-            byte_size=int(saved["byte_size"]),
-            width=int(saved["width"]),
-            height=int(saved["height"]),
-            model=model,
-            route_mode=route_mode,
-            expires_at=datetime.now(UTC) + PROFILE_IMAGE_CANDIDATE_TTL,
-        )
-        db.add(candidate)
-        reservation.status = "generated"
-        reservation.candidate_id = candidate.id
-        reservation.finalized_at = datetime.now(UTC)
-        db.commit()
-        db.refresh(candidate)
-        return candidate, _profile_image_usage_status(
-            db,
-            user=user,
-            scope=scope,
-            media_type=media_type,
-        )
-    except pollinations_image.PollinationsImageError as exc:
-        _finalize_profile_image_quota(
-            db,
-            reservation_id=reservation.id,
-            status="failed",
-            candidate_id=None,
-        )
-        db.commit()
-        raise AgentCreationDraftMediaError(exc.failure_class) from exc
-    except replicate_image.ReplicateImageError as exc:
-        _finalize_profile_image_quota(
-            db,
-            reservation_id=reservation.id,
-            status="failed",
-            candidate_id=None,
-        )
-        db.commit()
-        raise AgentCreationDraftMediaError(exc.failure_class) from exc
-    except profile_media.InvalidProfileMediaError as exc:
-        _finalize_profile_image_quota(
-            db,
-            reservation_id=reservation.id,
-            status="failed",
-            candidate_id=None,
-        )
-        db.commit()
-        raise AgentCreationDraftMediaError("candidate_storage_failed") from exc
+    return await image_generation_service._generate_profile_image_candidate(db, user=user, scope=scope, media_type=media_type, prompt=prompt, seed=seed, model=model, route_mode=route_mode, draft_id=draft_id, character_id=character_id, workflows=build_image_generation_workflows())
 
 
-def _get_owned_profile_image_candidate(
-    db: Session,
-    *,
-    user: models.User,
-    candidate_id: str,
-    scope: str,
-    draft_id: str | None,
-    character_id: str | None,
-) -> character_models.ProfileImageCandidate:
-    candidate = db.get(character_models.ProfileImageCandidate, candidate_id)
-    if (
-        candidate is None
-        or candidate.user_id != user.id
-        or candidate.scope != scope
-        or candidate.applied_at is not None
-    ):
-        raise AgentProfileImageCandidateNotFoundError(candidate_id)
-    if draft_id is not None and candidate.draft_id != draft_id:
-        raise AgentProfileImageCandidateNotFoundError(candidate_id)
-    if character_id is not None and candidate.character_id != character_id:
-        raise AgentProfileImageCandidateNotFoundError(candidate_id)
-    expires_at = candidate.expires_at
-    if expires_at.tzinfo is None:
-        expires_at = expires_at.replace(tzinfo=UTC)
-    if expires_at < datetime.now(UTC):
-        profile_media.delete_profile_image_candidate(candidate.id, user.id)
-        raise AgentProfileImageCandidateExpiredError(candidate_id)
-    if not profile_media.media_url_to_path(candidate.url).is_file():
-        raise AgentProfileImageCandidateNotFoundError(candidate_id)
-    return candidate
 
 
-def _cleanup_expired_profile_image_candidates(db: Session, user_id: str) -> None:
-    now = datetime.now(UTC)
-    candidates = list(
-        db.scalars(
-            select(character_models.ProfileImageCandidate)
-            .where(character_models.ProfileImageCandidate.user_id == user_id)
-            .where(character_models.ProfileImageCandidate.expires_at < now)
-            .limit(50)
-        )
-    )
-    if not candidates:
-        return
-    for candidate in candidates:
-        profile_media.delete_profile_image_candidate(candidate.id, user_id)
-        db.delete(candidate)
-    db.commit()
 
 
 def _open_pollinations_request(request: Request, timeout_seconds: float):
@@ -987,26 +482,6 @@ def _open_pollinations_request(request: Request, timeout_seconds: float):
         raise URLError("Pollinations URL was not allowed") from exc
 
 
-def _open_translation_request(request: Request, timeout_seconds: float):
-    endpoint = urlparse(settings.azure_translator_endpoint)
-    if not endpoint.hostname:
-        raise URLError("Azure Translator endpoint was not allowed")
-    translate_path = f"{endpoint.path.rstrip('/')}/translate"
-    try:
-        return provider_http.open_validated_request(
-            request,
-            timeout_seconds=timeout_seconds,
-            initial_validator=lambda url: provider_http.validate_public_https_url(
-                url,
-                allowed_hosts={endpoint.hostname},
-                allowed_path_prefixes={translate_path},
-            ),
-            redirect_validator=provider_http.validate_public_https_url,
-            sensitive_headers=PROVIDER_SENSITIVE_HEADERS,
-            allow_cross_origin_redirects=False,
-        )
-    except provider_http.ProviderUrlError as exc:
-        raise URLError("Azure Translator URL was not allowed") from exc
 
 
 def _ensure_pollinations_model_available(model_name: str) -> None:
@@ -1044,19 +519,6 @@ def _ensure_pollinations_model_available(model_name: str) -> None:
     raise AgentCreationDraftMediaError("현재 선택한 이미지 모델을 찾지 못했습니다.")
 
 
-def _build_pollinations_prompt(*, style: str, appearance: str, media_type: str) -> str:
-    style_prompt = STYLE_PROMPTS.get(style, STYLE_PROMPTS["기본"])
-    if media_type == "avatar":
-        return (
-            f"{style_prompt}, {appearance}, front-facing avatar portrait, "
-            "looking directly at the camera, both eyes visible, centered face, "
-            "head and shoulders visible, symmetrical composition, no side profile, "
-            "no back view, no text"
-        )
-    return (
-        f"{style_prompt}, {appearance}, wide banner composition, atmospheric background, "
-        "character in scene, highly detailed, no text"
-    )
 
 
 def _translate_image_prompt_to_english(text: str) -> str:
@@ -1075,92 +537,16 @@ def _translate_image_prompt_to_english(text: str) -> str:
     return translated
 
 
-def _translate_ko_to_en_with_azure(text: str) -> str | None:
-    if settings.translation_provider != "azure":
-        return None
-    api_key = settings.azure_translator_key
-    if not api_key:
-        return None
-    char_count = len(text)
-    if not _reserve_translation_chars(char_count):
-        return None
-
-    try:
-        query = urlencode({"api-version": "3.0", "from": "ko", "to": "en"})
-        url = f"{settings.azure_translator_endpoint}/translate?{query}"
-        headers = {
-            "Content-Type": "application/json; charset=utf-8",
-            "Ocp-Apim-Subscription-Key": api_key,
-            "User-Agent": "Angmoo/1.0",
-        }
-        region = settings.azure_translator_region
-        if region:
-            headers["Ocp-Apim-Subscription-Region"] = region
-        body = json.dumps([{"Text": text}], ensure_ascii=False).encode("utf-8")
-        request = Request(url, data=body, headers=headers, method="POST")
-        with _open_translation_request(
-            request,
-            settings.translation_timeout_seconds,
-        ) as response:
-            payload = json.loads(
-                bounded_http.read_bounded_response(
-                    response,
-                    max_bytes=bounded_http.MAX_PROVIDER_JSON_BYTES,
-                ).decode("utf-8")
-            )
-        translated = payload[0]["translations"][0]["text"]
-        return translated.strip() if isinstance(translated, str) else None
-    except Exception:
-        _release_translation_chars(char_count)
-        return None
 
 
-def _reserve_translation_chars(char_count: int) -> bool:
-    limit = settings.translation_monthly_char_limit
-    if limit <= 0:
-        return True
-    usage_path = settings.media_root_path / "translation-usage.json"
-    month = datetime.now(UTC).strftime("%Y-%m")
-    with _TRANSLATION_USAGE_LOCK:
-        usage = _read_translation_usage(usage_path, month)
-        if usage["chars"] + char_count > limit:
-            return False
-        usage["chars"] += char_count
-        _write_translation_usage(usage_path, usage)
-    return True
 
 
-def _release_translation_chars(char_count: int) -> None:
-    limit = settings.translation_monthly_char_limit
-    if limit <= 0:
-        return
-    usage_path = settings.media_root_path / "translation-usage.json"
-    month = datetime.now(UTC).strftime("%Y-%m")
-    with _TRANSLATION_USAGE_LOCK:
-        usage = _read_translation_usage(usage_path, month)
-        usage["chars"] = max(0, usage["chars"] - char_count)
-        _write_translation_usage(usage_path, usage)
 
 
-def _read_translation_usage(path: Any, month: str) -> dict[str, Any]:
-    try:
-        raw = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        raw = {}
-    if raw.get("month") != month or not isinstance(raw.get("chars"), int):
-        return {"month": month, "chars": 0}
-    return {"month": month, "chars": max(0, raw["chars"])}
 
 
-def _write_translation_usage(path: Any, usage: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(usage, ensure_ascii=False), encoding="utf-8")
 
 
-def _pollinations_image_size(
-    media_type: str, size: tuple[int, int] | None = None
-) -> tuple[int, int]:
-    return size or ((768, 768) if media_type == "avatar" else (1024, 384))
 
 
 def _pollinations_image_query(
@@ -1248,7 +634,7 @@ def _download_pollinations_image(
                     response,
                     max_bytes=bounded_http.MAX_PROVIDER_IMAGE_BYTES,
                 )
-            profile_media.validate_profile_media_content(content_type, content)
+            media_images.validate_profile_media_content(content_type, content)
             return content_type, content
         except HTTPError as exc:
             last_status = exc.code
@@ -1308,8 +694,6 @@ def _generate_draft_media_file(
     )
 
 
-def _draft_media_seed(draft_id: str, media_type: str) -> int:
-    return int(security.hash_token(f"{draft_id}:{media_type}")[:8], 16) & POLLINATIONS_MAX_SEED
 
 
 def build_creator_workflows() -> CreatorWorkflows:
@@ -1322,4 +706,24 @@ def build_creator_workflows() -> CreatorWorkflows:
         promote_media=profile_media.promote_draft_profile_media,
         create_character=agent_service.create_agent,
         read_character=agent_service.get_agent,
+    )
+
+
+def _resolve_profile_image_api_key(model: str) -> str | None:
+    return (
+        service_image_key.get_replicate_image_api_key()
+        if image_provider.is_replicate_model(model)
+        else service_image_key.get_profile_image_api_key()
+    )
+
+
+def build_image_generation_workflows():
+    from app.domains.characters.contracts import CharacterImageGenerationWorkflows
+
+    return CharacterImageGenerationWorkflows(
+        get_model=operation_settings.get_pollinations_profile_image_model,
+        get_route_mode=operation_settings.get_pollinations_profile_image_route_mode,
+        image_key_available=service_image_key.is_profile_image_available_for_model,
+        resolve_api_key=_resolve_profile_image_api_key,
+        translate_prompt=_translate_image_prompt_to_english,
     )

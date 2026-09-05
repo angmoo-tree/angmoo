@@ -1,3 +1,17 @@
+from app.domains.characters.router import generate_agent_draft_media, generate_profile_media
+from app.domains.characters.router import (
+    get_agent_draft_media,
+    upload_agent_draft_media,
+    get_agent_draft_media_usage,
+    get_agent_draft_media_candidate_content,
+    apply_agent_draft_media_candidate,
+    discard_agent_draft_media_candidate,
+    upload_profile_media,
+    get_profile_media_usage,
+    get_agent_profile_media_candidate_content,
+    apply_profile_media_candidate,
+    discard_profile_media_candidate,
+)
 from app.domains.characters.router import (
     create_agent_draft,
     enhance_agent_draft_persona,
@@ -25,7 +39,6 @@ from app.runtime.characters import management as agent_service
 from app.services import agent_runs as agent_run_service
 from app.services import community as community_service
 from app.services import maintenance as maintenance_service
-from app.services import profile_media
 from app.services.direct_llm import DirectLlmDeferred, DirectLlmError, DirectLlmJsonError
 from app.services.runtime_boundary import OpenClawGatewayAuthError, OpenClawGatewayError
 
@@ -53,36 +66,7 @@ router.routes.append(_character_routes["create_agent_draft"])
 router.routes.append(_character_routes["get_agent_draft"])
 
 
-@router.get("/drafts/{draft_id}/media/{media_type}", response_class=FileResponse)
-def get_agent_draft_media(
-    draft_id: str,
-    media_type: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> FileResponse:
-    try:
-        path, content_type = draft_service.get_draft_media_content(
-            db,
-            user,
-            draft_id,
-            media_type,
-        )
-    except (
-        draft_service.AgentCreationDraftNotFoundError,
-        draft_service.AgentPrivateMediaNotFoundError,
-    ) as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Draft media not found",
-        ) from exc
-    return FileResponse(
-        path,
-        media_type=content_type,
-        headers={
-            "Cache-Control": "private, no-store",
-            "X-Content-Type-Options": "nosniff",
-        },
-    )
+router.routes.append(_character_routes["get_agent_draft_media"])
 
 
 router.routes.append(_character_routes["update_agent_draft"])
@@ -91,129 +75,22 @@ router.routes.append(_character_routes["update_agent_draft"])
 router.routes.append(_character_routes["enhance_agent_draft_persona"])
 
 
-@router.post("/drafts/{draft_id}/media", response_model=schemas.AgentCreationDraftRead)
-def upload_agent_draft_media(
-    draft_id: str,
-    data: schemas.AgentCreationDraftMediaUpload,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentCreationDraftRead:
-    try:
-        return draft_service.upload_draft_media(db, user, draft_id, data)
-    except draft_service.AgentCreationDraftNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Draft not found") from exc
-    except profile_media.InvalidProfileMediaError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+router.routes.append(_character_routes["upload_agent_draft_media"])
 
 
-@router.post(
-    "/drafts/{draft_id}/generate-media",
-    response_model=schemas.AgentCreationDraftMediaGenerationRead,
-)
-async def generate_agent_draft_media(
-    draft_id: str,
-    data: schemas.AgentCreationDraftGenerateMediaCreate,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentCreationDraftMediaGenerationRead:
-    try:
-        return await draft_service.generate_media(db, user, draft_id, data)
-    except draft_service.AgentCreationDraftNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Draft not found") from exc
-    except draft_service.AgentCreationDraftCooldownError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"이미지 생성은 {exc.available_at.isoformat()} 이후 다시 시도할 수 있습니다.",
-        ) from exc
+router.routes.append(_character_routes["generate_agent_draft_media"])
 
 
-@router.get(
-    "/drafts/{draft_id}/media-usage",
-    response_model=schemas.AgentProfileImageUsageRead,
-)
-def get_agent_draft_media_usage(
-    draft_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentProfileImageUsageRead:
-    try:
-        return draft_service.get_draft_profile_image_usage(db, user, draft_id)
-    except draft_service.AgentCreationDraftNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Draft not found") from exc
+router.routes.append(_character_routes["get_agent_draft_media_usage"])
 
 
-@router.get(
-    "/drafts/{draft_id}/media-candidates/{candidate_id}/content",
-    response_class=FileResponse,
-)
-def get_agent_draft_media_candidate_content(
-    draft_id: str,
-    candidate_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> FileResponse:
-    try:
-        path, content_type = draft_service.get_draft_candidate_content(
-            db,
-            user,
-            draft_id,
-            candidate_id,
-        )
-    except (
-        draft_service.AgentCreationDraftNotFoundError,
-        draft_service.AgentProfileImageCandidateNotFoundError,
-    ) as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Candidate not found",
-        ) from exc
-    return FileResponse(
-        path,
-        media_type=content_type,
-        headers={
-            "Cache-Control": "private, no-store",
-            "X-Content-Type-Options": "nosniff",
-        },
-    )
+router.routes.append(_character_routes["get_agent_draft_media_candidate_content"])
 
 
-@router.post(
-    "/drafts/{draft_id}/media-candidates/{candidate_id}/apply",
-    response_model=schemas.AgentCreationDraftRead,
-)
-def apply_agent_draft_media_candidate(
-    draft_id: str,
-    candidate_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentCreationDraftRead:
-    try:
-        return draft_service.apply_draft_media_candidate(db, user, draft_id, candidate_id)
-    except draft_service.AgentCreationDraftNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Draft not found") from exc
-    except draft_service.AgentProfileImageCandidateNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Candidate not found") from exc
-    except profile_media.InvalidProfileMediaError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+router.routes.append(_character_routes["apply_agent_draft_media_candidate"])
 
 
-@router.delete(
-    "/drafts/{draft_id}/media-candidates/{candidate_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
-def discard_agent_draft_media_candidate(
-    draft_id: str,
-    candidate_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> Response:
-    try:
-        draft_service.discard_draft_media_candidate(db, user, draft_id, candidate_id)
-    except draft_service.AgentCreationDraftNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Draft not found") from exc
-    except draft_service.AgentProfileImageCandidateNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Candidate not found") from exc
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+router.routes.append(_character_routes["discard_agent_draft_media_candidate"])
 
 
 router.routes.append(_character_routes["complete_agent_draft"])
@@ -362,21 +239,7 @@ router.routes.append(_character_routes["update_persona"])
 router.routes.append(_character_routes["update_promotion_usage"])
 
 
-@router.post("/{character_id}/media", response_model=schemas.AgentDetailRead)
-def upload_profile_media(
-    character_id: str,
-    data: schemas.AgentProfileMediaUpload,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentDetailRead:
-    try:
-        return agent_service.upload_profile_media(db, user, character_id, data)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except agent_service.InvalidProfileMediaError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+router.routes.append(_character_routes["upload_profile_media"])
 
 
 @router.get(
@@ -489,115 +352,19 @@ def delete_image_seed(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
 
 
-@router.post(
-    "/{character_id}/generate-media",
-    response_model=schemas.AgentProfileMediaGenerationRead,
-)
-async def generate_profile_media(
-    character_id: str,
-    data: schemas.AgentProfileMediaGenerateCreate,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentProfileMediaGenerationRead:
-    try:
-        return await draft_service.generate_profile_media(db, user, character_id, data)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+router.routes.append(_character_routes["generate_profile_media"])
 
 
-@router.get(
-    "/{character_id}/media-usage",
-    response_model=schemas.AgentProfileImageUsageRead,
-)
-def get_profile_media_usage(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentProfileImageUsageRead:
-    try:
-        return draft_service.get_agent_profile_image_usage(db, user, character_id)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+router.routes.append(_character_routes["get_profile_media_usage"])
 
 
-@router.get(
-    "/{character_id}/media-candidates/{candidate_id}/content",
-    response_class=FileResponse,
-)
-def get_agent_profile_media_candidate_content(
-    character_id: str,
-    candidate_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> FileResponse:
-    try:
-        path, content_type = draft_service.get_profile_candidate_content(
-            db,
-            user,
-            character_id,
-            candidate_id,
-        )
-    except (
-        agent_service.AgentNotFoundError,
-        draft_service.AgentProfileImageCandidateNotFoundError,
-    ) as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Candidate not found",
-        ) from exc
-    return FileResponse(
-        path,
-        media_type=content_type,
-        headers={
-            "Cache-Control": "private, no-store",
-            "X-Content-Type-Options": "nosniff",
-        },
-    )
+router.routes.append(_character_routes["get_agent_profile_media_candidate_content"])
 
 
-@router.post(
-    "/{character_id}/media-candidates/{candidate_id}/apply",
-    response_model=schemas.AgentDetailRead,
-)
-def apply_profile_media_candidate(
-    character_id: str,
-    candidate_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.AgentDetailRead:
-    try:
-        return draft_service.apply_profile_media_candidate(
-            db, user, character_id, candidate_id
-        )
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except draft_service.AgentProfileImageCandidateNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Candidate not found") from exc
-    except agent_service.InvalidProfileMediaError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-    except profile_media.InvalidProfileMediaError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+router.routes.append(_character_routes["apply_profile_media_candidate"])
 
 
-@router.delete(
-    "/{character_id}/media-candidates/{candidate_id}",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
-def discard_profile_media_candidate(
-    character_id: str,
-    candidate_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> Response:
-    try:
-        draft_service.discard_profile_media_candidate(db, user, character_id, candidate_id)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except draft_service.AgentProfileImageCandidateNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Candidate not found") from exc
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+router.routes.append(_character_routes["discard_profile_media_candidate"])
 
 
 @router.put("/{character_id}/credential", response_model=schemas.CredentialRead)

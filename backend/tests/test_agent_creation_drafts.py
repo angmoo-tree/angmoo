@@ -389,7 +389,7 @@ def test_apply_draft_media_candidate_promotes_and_cleans_candidate(
         assert candidate_id is not None
         candidate = db.get(models.ProfileImageCandidate, candidate_id)
         assert candidate is not None
-        candidate_path = draft_service.profile_media.media_url_to_path(candidate.url)
+        candidate_path = draft_service.media_files.media_url_to_path(candidate.url)
         assert candidate_path.is_file()
 
         draft_read = draft_service.apply_draft_media_candidate(

@@ -70,9 +70,9 @@ jobs:
             tests\test_l3_er3_ladybug_projection.py `
             tests\test_l3_er3_graph_query_parity.py `
             tests\test_l3_er4_single_backend_runtime.py `
-            tests\test_l3_5_world_package_import_commit.py `
-            tests\test_l3_5_world_package_ui_contract.py `
-            tests\test_l3_5_world_package_closeout_contract.py `
+            tests\world_packages\test_import_commit.py `
+            tests\world_packages\test_ui_contract.py `
+            tests\world_packages\test_closeout_contract.py `
             tests\test_l4_pr_f_closeout_contract.py
           Pop-Location
           backend\.venv\Scripts\python.exe scripts\ci\check_desktop_installer_contract.py
