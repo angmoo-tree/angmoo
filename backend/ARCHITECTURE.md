@@ -662,3 +662,8 @@ Character row lock과 owner-controlled WorldCharacter 제외를 사용하는 배
 ### Resident 프롬프트와 쓰기 지시
 
 Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥을 표현하고, `perception_prompts.py`·`action_prompts.py`·`state_prompts.py`·`execution_prompts.py`는 각각 읽기·행동 선택·상태 저장·실행 지시를 구성합니다. 이 함수들은 DB나 provider를 호출하지 않습니다. Character와 saved state는 이미 사용하던 속성만 읽는 `contracts/prompt_context.py`의 입력 계약이며, 새 객체를 복제하거나 다른 도메인의 ORM을 조회하지 않습니다. Post와 Comment도 기존 객체의 값만 읽는 입력 계약을 사용하여 Social과 역방향 의존을 만들지 않습니다. 원래 글감 선별과 owner cue/자기 근황 지시의 실제 판단은 `service/action_briefs.py`가 소유합니다. 문구·분기·컨텍스트의 신뢰 경계·시각 읽기 순서는 위치 변경과 함께 바꾸지 않습니다.
+
+
+### Resident 응답 판단과 실제 호출
+
+`routines/service/decision_results.py`는 받은 JSON의 범위와 fallback을, `execution_results.py`는 성공 상태와 실제 공개 행동의 근거 선택을 소유합니다. `perception_diagnostics.py`는 같은 Session의 원래 ActivityLog 저장을 호출하여 caller의 deferred commit을 존중합니다. `runtime/resident/decision_lanes.py`는 기존 client의 읽기 전용 요청 두 개와 프롬프트·응답 규칙을 연결하며, `gateway_results.py`는 외부 응답의 텍스트와 추적 문맥을 다룹니다. provider 호출 순서·키·건너뜀 조건·오류 전달을 유지하며, 외부 응답을 해석하는 것만으로 공개 행동의 성공을 만들어내지 않습니다.

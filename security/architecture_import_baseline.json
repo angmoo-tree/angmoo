@@ -1,7 +1,7 @@
 {
-  "edge_count": 2457,
-  "external_import_count": 2297,
-  "module_count": 732,
+  "edge_count": 2483,
+  "external_import_count": 2311,
+  "module_count": 738,
   "modules": [
     {
       "external_imports": [],
@@ -3714,6 +3714,15 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.contracts.decision_lanes",
+      "path": "backend/app/domains/routines/contracts/decision_lanes.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.routines.exceptions"
@@ -4242,6 +4251,23 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "json",
+        "typing"
+      ],
+      "imports": [
+        "app.core.context_text",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.models",
+        "app.domains.routines.utils.context_text"
+      ],
+      "module": "app.domains.routines.service.decision_results",
+      "path": "backend/app/domains/routines/service/decision_results.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.routines.constants",
@@ -4313,6 +4339,19 @@
       ],
       "module": "app.domains.routines.service.execution_prompts",
       "path": "backend/app/domains/routines/service/execution_prompts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.core.redaction",
+        "app.domains.routines.constants"
+      ],
+      "module": "app.domains.routines.service.execution_results",
+      "path": "backend/app/domains/routines/service/execution_results.py",
       "wildcard_imports": []
     },
     {
@@ -4462,6 +4501,22 @@
       ],
       "module": "app.domains.routines.service.lifecycle",
       "path": "backend/app/domains/routines/service/lifecycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "json",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.service.activity_logs",
+        "app.domains.routines.service.decision_results"
+      ],
+      "module": "app.domains.routines.service.perception_diagnostics",
+      "path": "backend/app/domains/routines/service/perception_diagnostics.py",
       "wildcard_imports": []
     },
     {
@@ -9361,6 +9416,39 @@
     {
       "external_imports": [
         "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.core.redaction",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.contracts.decision_lanes",
+        "app.domains.routines.contracts.prompt_context",
+        "app.domains.routines.models",
+        "app.domains.routines.service.action_prompts",
+        "app.domains.routines.service.decision_results",
+        "app.domains.routines.service.perception_prompts",
+        "app.domains.routines.service.prompt_context",
+        "app.domains.routines.utils.context_text",
+        "app.runtime.resident.gateway_results"
+      ],
+      "module": "app.runtime.resident.decision_lanes",
+      "path": "backend/app/runtime/resident/decision_lanes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.runtime.resident.gateway_results",
+      "path": "backend/app/runtime/resident/gateway_results.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "asyncio",
         "datetime",
         "logging",
@@ -10312,7 +10400,9 @@
         "app.domains.routines.service.action_prompts",
         "app.domains.routines.service.activity_evidence",
         "app.domains.routines.service.execution_prompts",
+        "app.domains.routines.service.execution_results",
         "app.domains.routines.service.lifecycle",
+        "app.domains.routines.service.perception_diagnostics",
         "app.domains.routines.service.perception_prompts",
         "app.domains.routines.service.prompt_context",
         "app.domains.routines.service.run_backoff",
@@ -10330,6 +10420,8 @@
         "app.domains.world_characters.service.readiness",
         "app.models",
         "app.runtime.resident.activity_policy",
+        "app.runtime.resident.decision_lanes",
+        "app.runtime.resident.gateway_results",
         "app.runtime.resident.read_only_lanes",
         "app.runtime.resident.slots",
         "app.runtime.routine_posts",

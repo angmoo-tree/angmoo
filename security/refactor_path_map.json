@@ -735,8 +735,8 @@
     "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle": "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
     "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving": "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
     "tests/test_agent_activity_limits.py::test_api_agent_instants_normalize_sqlite_naive_values_to_utc": "tests/routines/test_activity_limits.py::test_api_agent_instants_normalize_sqlite_naive_values_to_utc",
-    "tests/test_agent_activity_limits.py::test_combined_runtime_audit_post_prefers_actual_inbox_target": "tests/routines/test_activity_limits.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
-    "tests/test_agent_activity_limits.py::test_combined_runtime_audit_post_uses_root_or_none": "tests/routines/test_activity_limits.py::test_combined_runtime_audit_post_uses_root_or_none",
+    "tests/test_agent_activity_limits.py::test_combined_runtime_audit_post_prefers_actual_inbox_target": "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+    "tests/test_agent_activity_limits.py::test_combined_runtime_audit_post_uses_root_or_none": "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
     "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings": "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
     "tests/test_agent_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert": "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert",
     "tests/test_agent_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert": "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
@@ -10899,7 +10899,10 @@
           "backend/app/domains/routines/service/action_briefs.py",
           "backend/app/domains/routines/service/action_prompts.py",
           "backend/app/domains/routines/service/activity_evidence.py",
+          "backend/app/domains/routines/service/decision_results.py",
           "backend/app/domains/routines/service/execution_prompts.py",
+          "backend/app/domains/routines/service/execution_results.py",
+          "backend/app/domains/routines/service/perception_diagnostics.py",
           "backend/app/domains/routines/service/perception_prompts.py",
           "backend/app/domains/routines/service/prompt_context.py",
           "backend/app/domains/routines/service/run_backoff.py",
@@ -10907,6 +10910,8 @@
           "backend/app/domains/routines/service/state_prompts.py",
           "backend/app/domains/routines/utils/context_text.py",
           "backend/app/domains/runtime/contracts.py",
+          "backend/app/runtime/resident/decision_lanes.py",
+          "backend/app/runtime/resident/gateway_results.py",
           "backend/app/runtime/resident/read_only_lanes.py",
           "backend/app/services/agent_runs.py"
         ],
@@ -11149,12 +11154,16 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::RUNTIME_LAST_ERROR_PREFIX",
-          "new": "backend/app/services/agent_runs.py::RUNTIME_LAST_ERROR_PREFIX",
+          "new": "backend/app/domains/routines/constants.py::RUNTIME_LAST_ERROR_PREFIX",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/execution_results.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
@@ -11195,12 +11204,16 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::FEED_PERCEPTION_DEBUG_ACTION_TYPE",
-          "new": "backend/app/services/agent_runs.py::FEED_PERCEPTION_DEBUG_ACTION_TYPE",
+          "new": "backend/app/domains/routines/constants.py::FEED_PERCEPTION_DEBUG_ACTION_TYPE",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/perception_diagnostics.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
@@ -11265,12 +11278,16 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_FEED_PERCEPTION",
-          "new": "backend/app/services/agent_runs.py::TOOLS_ALLOW_FEED_PERCEPTION",
+          "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_FEED_PERCEPTION",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/decision_lanes.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
@@ -11573,12 +11590,16 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::ACTION_DECISION_TYPES",
-          "new": "backend/app/services/agent_runs.py::ACTION_DECISION_TYPES",
+          "new": "backend/app/domains/routines/constants.py::ACTION_DECISION_TYPES",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/decision_results.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
@@ -12205,52 +12226,74 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_extract_gateway_result_text",
-          "new": "backend/app/services/agent_runs.py::_extract_gateway_result_text",
+          "new": "backend/app/runtime/resident/gateway_results.py::_extract_gateway_result_text",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/decision_lanes.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_parse_json_object",
-          "new": "backend/app/services/agent_runs.py::_parse_json_object",
+          "new": "backend/app/domains/routines/service/decision_results.py::_parse_json_object",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/decision_results.py",
+            "backend/app/runtime/resident/decision_lanes.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_safe_perception_text",
-          "new": "backend/app/services/agent_runs.py::_safe_perception_text",
+          "new": "backend/app/domains/routines/service/decision_results.py::_safe_perception_text",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/decision_results.py",
+            "backend/app/domains/routines/service/perception_diagnostics.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_normalize_feed_perception_text",
-          "new": "backend/app/services/agent_runs.py::_normalize_feed_perception_text",
+          "new": "backend/app/domains/routines/service/decision_results.py::_normalize_feed_perception_text",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/decision_lanes.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_feed_perception_payload",
-          "new": "backend/app/services/agent_runs.py::_feed_perception_payload",
+          "new": "backend/app/domains/routines/service/decision_results.py::_feed_perception_payload",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/decision_lanes.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
@@ -12435,32 +12478,44 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_run_feed_perception",
-          "new": "backend/app/services/agent_runs.py::_run_feed_perception",
+          "new": "backend/app/runtime/resident/decision_lanes.py::_run_feed_perception",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_fallback_action_decision",
-          "new": "backend/app/services/agent_runs.py::_fallback_action_decision",
+          "new": "backend/app/domains/routines/service/decision_results.py::_fallback_action_decision",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/decision_results.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_normalize_action_decision_text",
-          "new": "backend/app/services/agent_runs.py::_normalize_action_decision_text",
+          "new": "backend/app/domains/routines/service/decision_results.py::_normalize_action_decision_text",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/runtime/resident/decision_lanes.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
@@ -12502,12 +12557,16 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_run_action_decision",
-          "new": "backend/app/services/agent_runs.py::_run_action_decision",
+          "new": "backend/app/runtime/resident/decision_lanes.py::_run_action_decision",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
@@ -12859,12 +12918,16 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_is_success_status",
-          "new": "backend/app/services/agent_runs.py::_is_success_status",
+          "new": "backend/app/domains/routines/service/execution_results.py::_is_success_status",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
@@ -13046,12 +13109,16 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_runtime_last_error",
-          "new": "backend/app/services/agent_runs.py::_runtime_last_error",
+          "new": "backend/app/domains/routines/service/execution_results.py::_runtime_last_error",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
@@ -13383,12 +13450,16 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_llm_trace_context",
-          "new": "backend/app/services/agent_runs.py::_build_llm_trace_context",
+          "new": "backend/app/runtime/resident/gateway_results.py::_build_llm_trace_context",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
@@ -13460,22 +13531,30 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_feed_perception_debug_result",
-          "new": "backend/app/services/agent_runs.py::_format_feed_perception_debug_result",
+          "new": "backend/app/domains/routines/service/perception_diagnostics.py::_format_feed_perception_debug_result",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/perception_diagnostics.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_log_feed_perception_debug",
-          "new": "backend/app/services/agent_runs.py::_log_feed_perception_debug",
+          "new": "backend/app/domains/routines/service/perception_diagnostics.py::_log_feed_perception_debug",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
@@ -13640,12 +13719,16 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_combined_runtime_evidence_post_id",
-          "new": "backend/app/services/agent_runs.py::_combined_runtime_evidence_post_id",
+          "new": "backend/app/domains/routines/service/execution_results.py::_combined_runtime_evidence_post_id",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+            "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+            "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+            "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+            "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
           ]
         },
         {
@@ -32119,6 +32202,33 @@
         "removal_condition": "Review original unused definitions and retained future recovery surface under final original-source preservation; no automatic deletion or feature-loss inference from current zero callers."
       },
       "cycle_resolution": "Direct Social schema use introduced an aggregate Routines/Social package cycle despite a supported entry. It was replaced by exact existing Post/Comment structural read views. No boundary rule or exemption changed; package cycle0 restored."
+    },
+    "AR-B4-C5f-resident-decisions": {
+      "status": "IMPLEMENTED — final432 passed /existing PostgreSQL1skip; boundary738/2483/206 cycle0; readonly6 original checks0/protected2139/current2260; stock gate awaits root first-source append",
+      "checked_source_map": "Existing complete AR-B2-B5 map retargets15 actual helpers/four constants without duplicating original symbols.",
+      "actual_paths": [
+        "backend/app/domains/routines/constants.py",
+        "backend/app/domains/routines/contracts/decision_lanes.py",
+        "backend/app/domains/routines/service/decision_results.py",
+        "backend/app/domains/routines/service/execution_results.py",
+        "backend/app/domains/routines/service/perception_diagnostics.py",
+        "backend/app/runtime/resident/decision_lanes.py",
+        "backend/app/runtime/resident/gateway_results.py"
+      ],
+      "test_nodes": [
+        "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+        "tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none",
+        "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+        "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+        "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
+      ],
+      "test_moves": {
+        "backend/tests/routines/test_activity_limits.py::test_combined_runtime_audit_post_prefers_actual_inbox_target": "backend/tests/routines/test_execution_results.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+        "backend/tests/routines/test_activity_limits.py::test_combined_runtime_audit_post_uses_root_or_none": "backend/tests/routines/test_execution_results.py::test_combined_runtime_audit_post_uses_root_or_none"
+      },
+      "ownership": "Routines owns actual response constraints/fallback and success-evidence decisions plus own activity log. Runtime owns two gateway requests and external payload/trace handling; existing attached values and gateway client are passed through.",
+      "preservation": "Original15 helpers/four constants match full AST after exact client/credential/Character/State annotation-name restoration. The log resolves canonical original activity_logs.log_activity, retaining same Session/finish_write and caller deferral. Original two evidence test bodies unchanged. New three tests verify skip/no-call, one read-only call and idempotency/provider parameters, fallback, original exception identity, SQLite same-Session visibility/rollback/default commit.",
+      "remaining": "Resident Social context/admission and same-Session reads remain C6. AgentRun and LangGraph execution composition may remain large after actual policies/SQL reach owners. Memory Daypart/Operations/B5 consumers remain exact future-owner joins; no future ancestry merged."
     }
   },
   "test_symbols": {

@@ -178,3 +178,20 @@ KOREAN_WEEKDAYS = (
     "토요일",
     "일요일",
 )
+
+
+ACTION_DECISION_TYPES = (
+    "existing_post_interaction",
+    "create_post",
+    "observe",
+    "relationship_review",
+)
+
+
+FEED_PERCEPTION_DEBUG_ACTION_TYPE = "feed_perception_debug"
+
+
+RUNTIME_LAST_ERROR_PREFIX = "angmoo_runtime:"
+
+
+TOOLS_ALLOW_FEED_PERCEPTION = ["angmoo_list_feed"]

@@ -1,3 +1,10 @@
+from app.runtime.resident.gateway_results import _build_llm_trace_context
+from app.domains.routines.service.execution_results import _combined_runtime_evidence_post_id
+from app.domains.routines.service.execution_results import _is_success_status
+from app.domains.routines.service.perception_diagnostics import _log_feed_perception_debug
+from app.runtime.resident.decision_lanes import _run_action_decision
+from app.runtime.resident.decision_lanes import _run_feed_perception
+from app.domains.routines.service.execution_results import _runtime_last_error
 from app.domains.routines.service.prompt_context import (
     _has_recent_feed_roots,
 )
@@ -137,8 +144,6 @@ from app.services.runtime_boundary import (
 logger = logging.getLogger(__name__)
 
 
-RUNTIME_LAST_ERROR_PREFIX = "angmoo_runtime:"
-FEED_PERCEPTION_DEBUG_ACTION_TYPE = "feed_perception_debug"
 TOOL_CHOICE_COMPLETE_TICK = {
     "mode": "ANY",
     "allowedFunctionNames": ["angmoo_complete_tick"],
@@ -155,7 +160,6 @@ TOOLS_ALLOW_COMPLETE_TICK = ["angmoo_complete_tick"]
 TOOLS_ALLOW_THREAD_OR_COMPLETE = ["angmoo_get_post_thread", "angmoo_complete_tick"]
 TOOLS_ALLOW_SAVE_STATE = ["angmoo_save_character_state"]
 # OpenClaw validates the allowlist before honoring tool_choice="none".
-TOOLS_ALLOW_FEED_PERCEPTION = ["angmoo_list_feed"]
 TOOLS_ALLOW_V6_INBOX_LANE = [
     "angmoo_get_notifications",
     "angmoo_get_post_thread",
@@ -238,12 +242,6 @@ COMPLETE_TICK_ACTION_TYPES = (
     "follow",
     "unfollow",
     "observe",
-)
-ACTION_DECISION_TYPES = (
-    "existing_post_interaction",
-    "create_post",
-    "observe",
-    "relationship_review",
 )
 
 
@@ -1737,340 +1735,6 @@ def _v6_unavailable_post_actions(
     return unavailable
 
 
-def _extract_gateway_result_text(gateway_result: dict[str, Any]) -> str:
-    result = gateway_result.get("result")
-    if isinstance(result, dict):
-        meta = result.get("meta")
-        if isinstance(meta, dict):
-            for key in ("finalAssistantVisibleText", "finalAssistantRawText"):
-                text = meta.get(key)
-                if isinstance(text, str) and text.strip():
-                    return text.strip()
-        payloads = result.get("payloads")
-        if isinstance(payloads, list):
-            parts: list[str] = []
-            for payload in payloads:
-                if not isinstance(payload, dict):
-                    continue
-                if payload.get("isError") or payload.get("isReasoning"):
-                    continue
-                text = payload.get("text")
-                if isinstance(text, str) and text.strip():
-                    parts.append(text.strip())
-            if parts:
-                return "\n\n".join(parts)
-    for key in ("text", "content", "message", "output"):
-        text = gateway_result.get(key)
-        if isinstance(text, str) and text.strip():
-            return text.strip()
-    return ""
-
-
-def _parse_json_object(text: str) -> dict[str, Any] | None:
-    cleaned = text.strip()
-    if cleaned.startswith("```"):
-        lines = cleaned.splitlines()
-        if lines and lines[0].strip().startswith("```"):
-            lines = lines[1:]
-        if lines and lines[-1].strip() == "```":
-            lines = lines[:-1]
-        cleaned = "\n".join(lines).strip()
-    try:
-        payload = json.loads(cleaned)
-    except json.JSONDecodeError:
-        start = cleaned.find("{")
-        end = cleaned.rfind("}")
-        if start < 0 or end <= start:
-            return None
-        try:
-            payload = json.loads(cleaned[start : end + 1])
-        except json.JSONDecodeError:
-            return None
-    return payload if isinstance(payload, dict) else None
-
-
-def _safe_perception_text(value: Any, limit: int) -> str:
-    if value is None:
-        return ""
-    return _clip_text(neutralize_context_text(str(value)), limit)
-
-
-def _normalize_feed_perception_text(text: str) -> str:
-    payload = _parse_json_object(text)
-    if payload is None:
-        fallback_text = _safe_perception_text(text, 500)
-        payload = {
-            "interesting_posts": [],
-            "character_thoughts": fallback_text,
-            "post_seed": "",
-            "no_relevant_signal": not bool(fallback_text),
-        }
-
-    interesting_posts: list[dict[str, str]] = []
-    raw_posts = payload.get("interesting_posts")
-    if isinstance(raw_posts, list):
-        for item in raw_posts[:5]:
-            if not isinstance(item, dict):
-                continue
-            post_id = _safe_perception_text(item.get("post_id"), 80)
-            thought = _safe_perception_text(item.get("character_thought"), 180)
-            if post_id and thought:
-                interesting_posts.append(
-                    {
-                        "post_id": post_id,
-                        "character_thought": thought,
-                    }
-                )
-
-    character_thoughts = _safe_perception_text(
-        payload.get("character_thoughts"), 500
-    )
-    post_seed = _safe_perception_text(payload.get("post_seed"), 240)
-    no_relevant_signal = bool(payload.get("no_relevant_signal"))
-    if not interesting_posts and not character_thoughts and not post_seed:
-        no_relevant_signal = True
-
-    normalized = {
-        "interesting_posts": interesting_posts,
-        "character_thoughts": character_thoughts,
-        "post_seed": post_seed,
-        "no_relevant_signal": no_relevant_signal,
-    }
-    return json.dumps(normalized, ensure_ascii=False)
-
-
-def _feed_perception_payload(
-    *,
-    status: str,
-    reason: str,
-    character_thoughts: str = "",
-    post_seed: str = "",
-    no_relevant_signal: bool = True,
-) -> tuple[str, dict[str, Any]]:
-    payload = {
-        "interesting_posts": [],
-        "character_thoughts": character_thoughts,
-        "post_seed": post_seed,
-        "no_relevant_signal": no_relevant_signal,
-    }
-    return (
-        json.dumps(payload, ensure_ascii=False),
-        {"status": status, "reason": reason, "perception": payload},
-    )
-
-
-async def _run_feed_perception(
-    *,
-    client: OpenClawGatewayClient,
-    agent_id: str,
-    session_key: str,
-    run_id: str,
-    character: models.Character,
-    state: models.CharacterState | None,
-    credential: models.LlmCredential | None,
-    activity_policy: agent_activity_policy.ActivityPolicy | None,
-    feed_cue: models.AgentFeedCue | None,
-    recent_feed_roots: str,
-    recent_activity_summary: str,
-) -> tuple[str, dict[str, Any]]:
-    if feed_cue is not None:
-        return _feed_perception_payload(
-            status="skipped",
-            reason="feed cue is present; owner cue create_post flow stays primary",
-        )
-    if not _has_recent_feed_roots(recent_feed_roots):
-        return _feed_perception_payload(
-            status="skipped",
-            reason="no recent feed roots",
-            character_thoughts="최근 루트 글이 없어 커뮤니티 흐름보다 자기 생각을 기준으로 판단한다.",
-        )
-
-    gateway_result = await client.run_agent(
-        message="Read the recent Angmoo feed roots and return feed perception JSON only.",
-        agent_id=agent_id,
-        session_key=f"{session_key}:feed-perception",
-        provider=credential.provider if credential else None,
-        model=credential.model if credential else None,
-        auth_profile_id=credential.auth_profile_id if credential else None,
-        tool_choice="none",
-        tools_allow=TOOLS_ALLOW_FEED_PERCEPTION,
-        prompt_mode="minimal",
-        bootstrap_context_mode="lightweight",
-        bootstrap_context_run_kind="default",
-        idempotency_key=f"{run_id}-feed-perception",
-        extra_system_prompt=_build_feed_perception_prompt(
-            character=character,
-            state=state,
-            activity_policy=activity_policy,
-            recent_feed_roots=recent_feed_roots,
-            recent_activity_summary=recent_activity_summary,
-        ),
-    )
-    raw_text = _extract_gateway_result_text(gateway_result)
-    feed_perception = _normalize_feed_perception_text(raw_text)
-    parsed = _parse_json_object(feed_perception) or {}
-    return (
-        feed_perception,
-        {
-            "status": "ok",
-            "gateway_status": gateway_result.get("status"),
-            "perception": parsed,
-            "raw_text": _clip_text(redact_secret_text(raw_text), 1200),
-        },
-    )
-
-
-def _fallback_action_decision(
-    *,
-    activity_policy: agent_activity_policy.ActivityPolicy | None,
-    feed_cue: models.AgentFeedCue | None,
-    allow_thread_tool: bool,
-) -> str:
-    allowed_actions = (
-        activity_policy.allowed_actions if activity_policy else DEFAULT_ACTIVITY_ACTIONS
-    )
-    allowed = set(allowed_actions)
-    if feed_cue is not None and "post" in allowed:
-        return "create_post"
-    if allow_thread_tool and "reply" in allowed:
-        return "existing_post_interaction"
-    if {"like", "repost", "follow"} & allowed:
-        return "existing_post_interaction"
-    if "post" in allowed:
-        return "create_post"
-    if "observe" in allowed:
-        return "observe"
-    if "unfollow" in allowed:
-        return "relationship_review"
-    return "observe"
-
-
-def _normalize_action_decision_text(
-    text: str,
-    *,
-    activity_policy: agent_activity_policy.ActivityPolicy | None,
-    feed_cue: models.AgentFeedCue | None,
-    allow_thread_tool: bool,
-) -> dict[str, Any]:
-    payload = _parse_json_object(text) or {}
-    decision_type = _safe_perception_text(payload.get("decision_type"), 80)
-    if decision_type not in ACTION_DECISION_TYPES:
-        decision_type = _fallback_action_decision(
-            activity_policy=activity_policy,
-            feed_cue=feed_cue,
-            allow_thread_tool=allow_thread_tool,
-        )
-
-    allowed_actions = (
-        activity_policy.allowed_actions if activity_policy else DEFAULT_ACTIVITY_ACTIONS
-    )
-    allowed = set(allowed_actions)
-    if decision_type == "create_post" and "post" not in allowed:
-        decision_type = _fallback_action_decision(
-            activity_policy=activity_policy,
-            feed_cue=None,
-            allow_thread_tool=allow_thread_tool,
-        )
-    if decision_type == "observe" and "observe" not in allowed:
-        decision_type = _fallback_action_decision(
-            activity_policy=activity_policy,
-            feed_cue=None,
-            allow_thread_tool=allow_thread_tool,
-        )
-
-    needs_thread = (
-        decision_type == "existing_post_interaction"
-        and allow_thread_tool
-        and bool(payload.get("needs_thread"))
-    )
-    focus_post_ids: list[str] = []
-    raw_focus_post_ids = payload.get("focus_post_ids")
-    if isinstance(raw_focus_post_ids, list):
-        for item in raw_focus_post_ids[:5]:
-            value = _safe_perception_text(item, 80)
-            if value:
-                focus_post_ids.append(value)
-    return {
-        "decision_type": decision_type,
-        "needs_thread": needs_thread,
-        "thread_candidate_id": _safe_perception_text(
-            payload.get("thread_candidate_id"), 120
-        ),
-        "focus_post_ids": focus_post_ids,
-        "reason": _safe_perception_text(payload.get("reason"), 400),
-    }
-
-
-async def _run_action_decision(
-    *,
-    client: OpenClawGatewayClient,
-    agent_id: str,
-    session_key: str,
-    run_id: str,
-    character: models.Character,
-    state: models.CharacterState | None,
-    credential: models.LlmCredential | None,
-    activity_policy: agent_activity_policy.ActivityPolicy | None,
-    feed_cue: models.AgentFeedCue | None,
-    inbox_threads: str,
-    recent_feed_roots: str,
-    feed_perception: str,
-    actionable_feed_candidates: str,
-    strong_social_connection_candidate: str,
-    social_connection_candidate: str,
-    relationship_review_candidate: str,
-    recent_activity_summary: str,
-    allow_thread_tool: bool,
-    has_inbox: bool,
-) -> tuple[dict[str, Any], dict[str, Any]]:
-    gateway_result = await client.run_agent(
-        message="Choose the Angmoo resident tick action mode and return JSON only.",
-        agent_id=agent_id,
-        session_key=f"{session_key}:action-decision",
-        provider=credential.provider if credential else None,
-        model=credential.model if credential else None,
-        auth_profile_id=credential.auth_profile_id if credential else None,
-        tool_choice="none",
-        tools_allow=TOOLS_ALLOW_FEED_PERCEPTION,
-        prompt_mode="minimal",
-        bootstrap_context_mode="lightweight",
-        bootstrap_context_run_kind="default",
-        idempotency_key=f"{run_id}-action-decision",
-        extra_system_prompt=_build_action_decision_prompt(
-            character=character,
-            state=state,
-            activity_policy=activity_policy,
-            feed_cue=feed_cue,
-            inbox_threads=inbox_threads,
-            recent_feed_roots=recent_feed_roots,
-            feed_perception=feed_perception,
-            actionable_feed_candidates=actionable_feed_candidates,
-            strong_social_connection_candidate=strong_social_connection_candidate,
-            social_connection_candidate=social_connection_candidate,
-            relationship_review_candidate=relationship_review_candidate,
-            recent_activity_summary=recent_activity_summary,
-            allow_thread_tool=allow_thread_tool,
-            has_inbox=has_inbox,
-        ),
-    )
-    raw_text = _extract_gateway_result_text(gateway_result)
-    action_decision = _normalize_action_decision_text(
-        raw_text,
-        activity_policy=activity_policy,
-        feed_cue=feed_cue,
-        allow_thread_tool=allow_thread_tool,
-    )
-    return (
-        action_decision,
-        {
-            "status": "ok",
-            "gateway_status": gateway_result.get("status"),
-            "decision": action_decision,
-            "raw_text": _clip_text(redact_secret_text(raw_text), 1200),
-        },
-    )
-
-
 def _format_feed_post_action_status(
     *,
     allowed_actions: set[str],
@@ -2744,25 +2408,6 @@ def _policy_allows_observe(
     return activity_policy is not None and "observe" in activity_policy.allowed_actions
 
 
-def _is_success_status(status: str) -> bool:
-    return status.lower() not in {
-        "failed",
-        "failure",
-        "error",
-        "cancelled",
-        "canceled",
-        "tool_call_missing",
-    }
-
-
-def _runtime_last_error(*, kind: str, message: str, raw: str) -> str:
-    raw_text = redact_secret_text(raw.strip() or "empty error message")
-    return (
-        f"{RUNTIME_LAST_ERROR_PREFIX}kind={kind}; "
-        f"message={message}; raw={raw_text[:1500]}"
-    )
-
-
 def _aware_utc(value: datetime) -> datetime:
     if value.tzinfo is None:
         return value.replace(tzinfo=UTC)
@@ -2874,90 +2519,6 @@ async def _release_slot_auth_profile(
         raise CredentialSyncError(redact_secret_text(str(exc))) from exc
     except OpenClawGatewayError as exc:
         raise CredentialSyncError(redact_secret_text(str(exc))) from exc
-
-
-def _build_llm_trace_context(
-    *,
-    character_id: str,
-    agent_run_id: str,
-    lane: str,
-    attempt: int | None = None,
-    call_order_in_run: int | None = None,
-    idempotency_key: str | None = None,
-) -> dict[str, str]:
-    trace_context = {
-        "app": "angmoo",
-        "characterId": character_id,
-        "agentRunId": agent_run_id,
-        "lane": lane,
-    }
-    if attempt is not None:
-        trace_context["attempt"] = str(attempt)
-    if call_order_in_run is not None:
-        trace_context["callOrderInRun"] = str(call_order_in_run)
-    if idempotency_key:
-        trace_context["idempotencyKey"] = idempotency_key
-    return trace_context
-
-
-def _format_feed_perception_debug_result(
-    *, run_id: str, feed_perception_result: dict[str, Any]
-) -> str | None:
-    if feed_perception_result.get("status") != "ok":
-        return None
-    perception = feed_perception_result.get("perception")
-    if not isinstance(perception, dict):
-        return None
-
-    interesting_posts: list[dict[str, str]] = []
-    raw_posts = perception.get("interesting_posts")
-    if isinstance(raw_posts, list):
-        for item in raw_posts[:5]:
-            if not isinstance(item, dict):
-                continue
-            interesting_posts.append(
-                {
-                    "post_id": _safe_perception_text(item.get("post_id"), 80),
-                    "character_thought": _safe_perception_text(
-                        item.get("character_thought"), 180
-                    ),
-                }
-            )
-
-    payload = {
-        "run_id": run_id,
-        "interesting_posts": interesting_posts,
-        "character_thoughts": _safe_perception_text(
-            perception.get("character_thoughts"), 500
-        ),
-        "post_seed": _safe_perception_text(perception.get("post_seed"), 240),
-        "no_relevant_signal": bool(perception.get("no_relevant_signal")),
-    }
-    return json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
-
-
-def _log_feed_perception_debug(
-    db: Session,
-    *,
-    user_id: str,
-    character_id: str,
-    run_id: str,
-    feed_perception_result: dict[str, Any],
-) -> None:
-    result = _format_feed_perception_debug_result(
-        run_id=run_id, feed_perception_result=feed_perception_result
-    )
-    if result is None:
-        return
-    agent_crud.log_activity(
-        db,
-        user_id=user_id,
-        character_id=character_id,
-        action_type=FEED_PERCEPTION_DEBUG_ACTION_TYPE,
-        target_post_id=None,
-        reason=f"{FEED_PERCEPTION_DEBUG_ACTION_TYPE} run_id={run_id}",
-        result=result,
-    )
 
 
 def list_resident_slots(db: Session) -> list[schemas.AgentSlotRead]:
@@ -5731,46 +5292,6 @@ def _select_resident_run_post_id(
         preferred_post_id=preferred_post_id,
         character_id=character_id,
     )
-
-
-def _combined_runtime_evidence_post_id(
-    gateway_result: dict[str, Any],
-) -> str | None:
-    """Choose one truthful representative post for the combined P4/P5/P6 run."""
-    publish_result = gateway_result.get("publish_result")
-    if not isinstance(publish_result, dict):
-        return None
-
-    inbox_result = publish_result.get("inbox")
-    if isinstance(inbox_result, dict):
-        target_post_id = inbox_result.get("target_post_id")
-        if (
-            int(inbox_result.get("public_action_count") or 0) > 0
-            and isinstance(target_post_id, str)
-            and target_post_id
-        ):
-            return target_post_id
-
-    feed_result = publish_result.get("feed")
-    if isinstance(feed_result, dict):
-        target_post_id = feed_result.get("target_post_id")
-        if (
-            int(feed_result.get("public_action_count") or 0) > 0
-            and isinstance(target_post_id, str)
-            and target_post_id
-        ):
-            return target_post_id
-
-    routine_result = publish_result.get("routine")
-    if isinstance(routine_result, dict):
-        post_id = routine_result.get("post_id")
-        if (
-            int(routine_result.get("public_action_count") or 0) > 0
-            and isinstance(post_id, str)
-            and post_id
-        ):
-            return post_id
-    return None
 
 
 def _has_tendency_analysis(setting: models.AgentActivitySetting | None) -> bool:

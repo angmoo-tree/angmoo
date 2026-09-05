@@ -1029,3 +1029,11 @@ Social의 지원 schema를 prompt 타입으로 직접 사용했을 때 기존 So
 
 
 C5e 최종 고정 tree 검증: **429 passed / 기존 PostgreSQL 전용1 skipped / 기존 warnings5 /102.78초**. 현재 boundary **732modules /2457edges /exact legacy206 /cycle0**, L4 **732/14/97**, ER0 **85/87/24/44/7**, Memory batch inventory PASS. 읽기 전용 원래6검사(source/split/assertion/suppression/API·ORM/node)는 전부 오류0이며 **보호2139/current2257**이다. 최초 signed869bae의 두 실제 도입 경로를 메모리에서만 복원하여 비교했으며 frozen/checkpoint/additions는 수정하지 않았다. 따라서 stock 전체 게이트는 root의 순차 최초도입 원장 연결 후 검증 대상이며 현재 전체 PASS로 표시하지 않는다. 원본29함수/4상수/brief9정의 및 기존8테스트 AST 동일 확인. 새 bridge는 실제 구독자만 기록했으며 원래 미호출2함수는 후속B8-A 대상으로 원문을 유지했다.
+
+
+## AR-B4-C5f — Resident 응답 판단·실제 provider 연결
+
+기존15함수·4상수를 응답 제약과 fallback/성공 근거/자기 활동 로그의 실제 Routines 서비스와 provider 요청·외부 payload/trace의 runtime 역할로 이전했다. 공개 행동을 만든 원본 결과에만 근거를 연결하며, 두 읽기 전용 호출의 인자·idempotency key·시각·예외를 바꾸지 않았다. canonical ActivityLog 함수를 동일 인자로 연결해 원래 finish_write 및 deferred commit 의미를 유지한다. 기존 독립 evidence 테스트2개를 본문 그대로 옮겼으며, 신규3개는 no-call/one-call/원래 오류와 실제 SQLite transaction을 검증한다. 최종 검사 결과는 아래에 이어 기록한다.
+
+
+C5f 검증은 초기 **73 passed /기존 warnings2/22.28초**, 최종 고정 tree **432 passed /기존 PostgreSQL1 skipped/기존 warnings5/101.48초**이다. 처음 경계 검사가 runtime의 annotation-only app.models·services.runtime_boundary 의존을 잡아냈다. 해당 생성자를 실제 생성하지 않고 주입된 client만 사용하므로 실제 필요한 `DecisionClient`·`DecisionCredential` 계약과 기존 Character/State readview로 타입을 표현했다. 동작과 인자 전달은 그대로이며 새 legacy 예외는 추가하지 않았다. 현재 boundary **738modules/2483edges/exact legacy206/cycle0**, L4 **738/14/97**, ER0 **85/87/24/44/7**, Memory batch PASS. 원래15함수·4상수는 네 한정 타입명을 복원하면 AST가 같고 이동2테스트 본문도 동일하다. 읽기 전용 원래6검사는 오류0, **보호2139/current2260**이며 최초 signed869bae의2경로만 메모리로 보충했다. frozen/checkpoint/additions 불변, stock 전체 게이트는 root의 선형 최초도입 원장 연결 뒤 검증한다.
