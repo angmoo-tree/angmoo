@@ -1107,19 +1107,6 @@
     },
     {
       "markers": {
-        "row_lock": [
-          555,
-          663
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "448fd8d1d59f471298a7e42644c59a3cc7b3f293ff48bc687a4d2052899c765c",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
         "driver_or_url": [
           461
         ],
@@ -1285,13 +1272,13 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 83,
+  "entry_count": 82,
   "marker_counts": {
     "advisory_lock": 10,
     "driver_or_url": 49,
     "jsonb": 11,
     "pgvector": 5,
-    "row_lock": 36,
+    "row_lock": 35,
     "skip_locked": 7
   },
   "purpose": "Residual PostgreSQL markers retained only as historical schema evidence, serialized compatibility values, and negative reintroduction guards",

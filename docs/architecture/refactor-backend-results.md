@@ -1090,3 +1090,12 @@ Relationships가 진단 소유권·현재 evidence source 상태·공개 응답�
 원문 진단 **4개 및 HTTP 4개 정의 AST 계약이 동일**하다. 첫 검증은 새 test가 hosted factory의 startup 전 runtime_settings를 항상 존재한다고 가정한 1건 때문에 28 PASS/1 FAIL이었다. 제품의 기존 fallback을 그대로 두고 새 test가 실제 전역 fallback과 요청 설정 교체를 확인하도록 고친 뒤 **29 passed / 기존 warning 1 / 17.01초**를 확인했다. 새 HTTP 두 node는 두 factory 등록/같은 객체 설정과 Session, 실제 200 응답/403·404 오류/깊이 422/disabled graph fallback을 검증한다. 기존 assertion은 바꾸지 않았다. Source capture/Hosted CI/installer와 잔여 Social·observation 전환은 후속 통합에서 수행한다.
 
 C6-B 최종 경계 **758 modules / 2,586 edges / exact legacy 205**와 PR258/263 API·응답·ORM 및 전체 split evidence 오류 0을 확인했다. 외부 공개 entry에는 service/schema/contract만 등록하고 router/dependencies는 실제 검사 module과 정확한 기존 API 조립 bridge로 구분했으며 경계 검사를 완화하지 않았다. L4·ER0 current inventory도 통과했다.
+
+
+## AR-B5-C7 — 실제 관찰 receipt·관계 상태·outbox 소유
+
+Relationships가 관찰 원본 적격성·방향·중복 receipt·친숙도 1 증가·outbox 저장을 실제로 소유하고 자체 SQL을 repository로 분리했다. 기존 성공 source를 또 만들거나 affinity/trust/tension을 추론하지 않는다. WC의 실제 active scope 서비스와 Social의 nullable Post/원래 LIMIT 1 양방향 block query를 같은 Session으로 연결했다. 잠금·읽기 순서·flush·caller commit/rollback을 보존하며 동일한 시간/snapshot/clamp/outbox 중복 query는 기존 canonical 구현을 공유한다.
+
+기존 관찰·SQL·공유 정책·WC 검증 12개와 남은 source writer 13개 AST 계약이 동일하다. 첫 범위 회귀는 관찰 추출 중 남은 source 작성이 사용하는 UTC import를 제거한 오류로 30 PASS/10 FAIL이었으며 원래 import를 복원했다. 기존 assertion을 바꾸지 않고 최종 **44 passed / 기존 warning 1 / 22.74초**를 확인했다. 추가 네 node는 같은 Session/attached 객체/lock→Post→target→block 순서와 실제 caller rollback, 비활성 observer·membership 및 역방향 block을 관계 저장 전에 차단하는 동작을 검증한다. Source capture/전체 B5/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C7 최종 경계 **762 modules / 2,607 edges / exact legacy 205**, PR258/263 API·응답·ORM 및 전체 split evidence 오류 0을 확인했다. 전체 원문 분할 지도에는 임시 runtime export의 `__all__`도 포함했고 검사 규칙을 완화하지 않았다. L4·ER0 current inventory도 통과했다.

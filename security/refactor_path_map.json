@@ -31299,6 +31299,544 @@
         "tests/relationships/test_diagnostics_http_ownership.py::test_both_factories_bind_relationship_readers_and_register_each_route_once",
         "tests/relationships/test_diagnostics_http_ownership.py::test_real_diagnostics_http_preserves_session_owner_errors_and_graph_validation"
       ]
+    },
+    "AR-B5-C7": {
+      "status": "IMPLEMENTED; focused44 PASS; observation12 and remaining writer13 original AST contracts PASS; source introduction pending",
+      "scope": "Relationships owns deterministic observation eligibility, directional receipt/state/outbox and its SQL. Social owns the exact write-block LIMIT1 query and observation input/result; WC validates its own active membership. Runtime binds one caller Session without changing original flush/rollback/commit or provider-free semantics.",
+      "split_files": {
+        "backend/app/runtime/social/sqlalchemy_unit_of_work.py": [
+          "backend/app/domains/relationships/constants.py",
+          "backend/app/domains/relationships/contracts/observations.py",
+          "backend/app/domains/relationships/policies/events.py",
+          "backend/app/domains/relationships/repository/events.py",
+          "backend/app/domains/relationships/repository/observations.py",
+          "backend/app/domains/relationships/repository/state.py",
+          "backend/app/domains/relationships/service/observations.py",
+          "backend/app/domains/social/repository/blocks.py",
+          "backend/app/domains/world_characters/service/event_scope.py",
+          "backend/app/runtime/relationships/observation_references.py",
+          "backend/app/runtime/social/sqlalchemy_unit_of_work.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::FailureInjector",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::FailureInjector",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_social_write_uow.py::test_owner_and_autonomous_writers_serialize_and_commit_once",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::OBSERVATION_GRAPH_PAYLOAD_VERSION",
+          "new": "backend/app/domains/relationships/constants.py::OBSERVATION_RELATIONSHIP_PAYLOAD_VERSION",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::SqlAlchemySocialWriteUnitOfWork",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::SqlAlchemySocialWriteUnitOfWork",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_social_write_uow.py::test_owner_and_autonomous_writers_serialize_and_commit_once",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::SqlAlchemySocialObservationUnitOfWork",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::SqlAlchemySocialObservationUnitOfWork",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_social_write_uow.py::test_owner_and_autonomous_writers_serialize_and_commit_once",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_aware_utc",
+          "new": "backend/app/domains/relationships/policies/events.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_relationship_snapshot",
+          "new": "backend/app/domains/relationships/policies/events.py::_snapshot",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_clamp_relationship",
+          "new": "backend/app/domains/relationships/policies/events.py::_clamp",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_observation_world_character",
+          "new": "backend/app/domains/world_characters/service/event_scope.py::validate_event_scope",
+          "direct_consumers": [
+            "backend/app/runtime/relationships/observation_references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_validate_observation_source_post",
+          "new": "backend/app/domains/relationships/service/observations.py::_validate_observation_source_post",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_observation_source_event_for_post",
+          "new": "backend/app/domains/relationships/service/observations.py::_observation_source_event_for_post",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_observation_source_post_for_event",
+          "new": "backend/app/domains/relationships/service/observations.py::_observation_source_post_for_event",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_observation_relationship_state",
+          "new": "backend/app/domains/relationships/service/observations.py::_observation_relationship_state",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_enqueue_observation_outbox",
+          "new": "backend/app/domains/relationships/service/observations.py::_enqueue_observation_outbox",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_observation_result",
+          "new": "backend/app/domains/relationships/service/observations.py::_observation_result",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_owner_actor",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_owner_actor",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_social_write_uow.py::test_owner_and_autonomous_writers_serialize_and_commit_once",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_autonomous_actor",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_autonomous_actor",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_social_write_uow.py::test_owner_and_autonomous_writers_serialize_and_commit_once",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_require_membership",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_require_membership",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_social_write_uow.py::test_owner_and_autonomous_writers_serialize_and_commit_once",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_request_hash",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_request_hash",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_social_write_uow.py::test_owner_and_autonomous_writers_serialize_and_commit_once",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_existing_write",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_existing_write",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_social_write_uow.py::test_owner_and_autonomous_writers_serialize_and_commit_once",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_blocked",
+          "new": "backend/app/domains/social/repository/blocks.py::write_pair_is_blocked",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/relationships/observation_references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_public_root_post",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_public_root_post",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_social_write_uow.py::test_owner_and_autonomous_writers_serialize_and_commit_once",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_owner_reply_target",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_owner_reply_target",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_social_write_uow.py::test_owner_and_autonomous_writers_serialize_and_commit_once",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_autonomous_reply_target",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_autonomous_reply_target",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_social_write_uow.py::test_owner_and_autonomous_writers_serialize_and_commit_once",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_candidate",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_candidate",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_social_write_uow.py::test_owner_and_autonomous_writers_serialize_and_commit_once",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_record_source_event",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_record_source_event",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_social_write_uow.py::test_owner_and_autonomous_writers_serialize_and_commit_once",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_post_snapshot",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_post_snapshot",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_social_write_uow.py::test_owner_and_autonomous_writers_serialize_and_commit_once",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_result",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_result",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_l4_social_write_uow.py::test_owner_and_autonomous_writers_serialize_and_commit_once",
+            "tests/test_l4_social_write_uow.py::test_owner_reply_event_evidence_inbox_are_atomic_without_relationship_delta"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::SqlAlchemySocialObservationUnitOfWork",
+          "new": "backend/app/domains/relationships/service/observations.py::observe",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/tests/relationships/test_observation_ownership.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_observation_world_character",
+          "new": "backend/app/runtime/relationships/observation_references.py::SqlAlchemyObservationReferences",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/tests/relationships/test_observation_ownership.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::SqlAlchemySocialObservationUnitOfWork",
+          "new": "backend/app/domains/relationships/contracts/observations.py::ObservationPost",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py",
+            "backend/app/domains/relationships/repository/observations.py",
+            "backend/app/runtime/relationships/observation_references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::SqlAlchemySocialObservationUnitOfWork",
+          "new": "backend/app/domains/relationships/contracts/observations.py::ObservationWorldCharacter",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py",
+            "backend/app/domains/relationships/repository/observations.py",
+            "backend/app/runtime/relationships/observation_references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::SqlAlchemySocialObservationUnitOfWork",
+          "new": "backend/app/domains/relationships/contracts/observations.py::ObservationReferences",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py",
+            "backend/app/domains/relationships/repository/observations.py",
+            "backend/app/runtime/relationships/observation_references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::SqlAlchemySocialObservationUnitOfWork",
+          "new": "backend/app/domains/relationships/repository/observations.py::get_event",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::SqlAlchemySocialObservationUnitOfWork",
+          "new": "backend/app/domains/relationships/repository/observations.py::find_matching_evidence",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_observation_source_event_for_post",
+          "new": "backend/app/domains/relationships/repository/observations.py::find_source_event_for_post",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_observation_source_post_for_event",
+          "new": "backend/app/domains/relationships/repository/observations.py::find_first_evidence",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_observation_relationship_state",
+          "new": "backend/app/domains/relationships/repository/state.py::find_direction_for_update",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::_enqueue_observation_outbox",
+          "new": "backend/app/domains/relationships/repository/events.py::find_outbox_by_dedupe",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::SqlAlchemySocialObservationUnitOfWork",
+          "new": "backend/app/domains/relationships/repository/events.py::find_replay_change",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/observations.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+            "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::__all__",
+          "new": "backend/app/runtime/social/sqlalchemy_unit_of_work.py::__all__",
+          "direct_consumers": [
+            "backend/app/runtime/social/observations.py"
+          ],
+          "test_nodes": [
+            "tests/test_social_event_runtime.py::test_observation_is_directional_idempotent_and_independent_from_follow_up"
+          ]
+        }
+      ],
+      "new_tests": [
+        "tests/relationships/test_observation_ownership.py::test_observation_uses_same_session_sources_and_caller_rollback",
+        "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[observer_left-world_character_inactive-False]",
+        "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[membership_left-world_membership_inactive-False]",
+        "tests/relationships/test_observation_ownership.py::test_observation_revalidates_active_scope_and_block_before_relation_write[blocked-world_character_blocked-True]"
+      ]
     }
   }
 }

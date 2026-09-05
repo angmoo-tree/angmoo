@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2300,
-      "internal_edge_count": 2586,
+      "external_import_count": 2309,
+      "internal_edge_count": 2607,
       "legacy_import_exception_count": 0,
-      "module_count": 758,
+      "module_count": 762,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -83,6 +83,13 @@
             ],
             "module": "app.domains.relationships.contracts.graph_recall_gateway",
             "path": "backend/app/domains/relationships/contracts/graph_recall_gateway.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.events"
+            ],
+            "module": "app.domains.relationships.contracts.observations",
+            "path": "backend/app/domains/relationships/contracts/observations.py"
           },
           {
             "imports": [
@@ -259,6 +266,14 @@
           },
           {
             "imports": [
+              "app.domains.relationships.contracts.observations",
+              "app.domains.relationships.models"
+            ],
+            "module": "app.domains.relationships.repository.observations",
+            "path": "backend/app/domains/relationships/repository/observations.py"
+          },
+          {
+            "imports": [
               "app.domains.relationships.constants",
               "app.domains.relationships.models"
             ],
@@ -407,6 +422,21 @@
             ],
             "module": "app.domains.relationships.service.graph_recall",
             "path": "backend/app/domains/relationships/service/graph_recall.py"
+          },
+          {
+            "imports": [
+              "app.core.ids",
+              "app.domains.relationships.constants",
+              "app.domains.relationships.contracts.observations",
+              "app.domains.relationships.models",
+              "app.domains.relationships.policies.events",
+              "app.domains.relationships.repository.events",
+              "app.domains.relationships.repository.observations",
+              "app.domains.relationships.repository.state",
+              "app.domains.social.contracts.observations"
+            ],
+            "module": "app.domains.relationships.service.observations",
+            "path": "backend/app/domains/relationships/service/observations.py"
           },
           {
             "imports": [
@@ -1391,13 +1421,16 @@
               "app.core.ids",
               "app.core.sqlite_concurrency",
               "app.core.unit_of_work",
+              "app.domains.relationships.service.observations",
               "app.domains.social.contracts.observations",
               "app.domains.social.contracts.writes",
               "app.domains.social.models.manual_writes",
+              "app.domains.social.repository.blocks",
               "app.domains.social.schemas.community",
               "app.domains.world_characters.public",
               "app.exceptions",
               "app.models",
+              "app.runtime.relationships.observation_references",
               "app.services.community"
             ],
             "module": "app.runtime.social.sqlalchemy_unit_of_work",

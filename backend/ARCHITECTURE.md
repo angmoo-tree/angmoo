@@ -679,3 +679,6 @@ Owner의 Social-memory 진단 응답은 Relationships `schemas.py`가 소유한�
 
 
 Social-memory 진단의 소유권·현재 근거 상태·응답 구성은 `relationships/service/diagnostics.py`를 수정한다. WC의 현재 active membership 상태는 `world_characters/service/projection_scope.py`의 별도 진단 판단이며 과거 projection 복구 허용과 합치지 않는다. Runtime의 `diagnostic_references.py`는 Character·WC·Social·Routines의 같은 Session 조회와 graph gateway를 연결한다. 진단/관계 그래프 HTTP 두 개는 Relationships router가 소유하고 기존 URL prefix·tags 조립은 공통 API가 맡는다. 두 앱 factory는 `configure_relationships_runtime`을 한 번 호출하며 요청마다 실제 설정과 같은 DB Session으로 reader를 만든다.
+
+
+실제 관찰의 원본 적격성·방향별 친숙도·중복 receipt·그래프 outbox는 `relationships/service/observations.py`, 해당 evidence SQL은 `repository/observations.py`가 소유한다. Social의 관찰 입력/결과 계약은 그대로 사용하며 `runtime/relationships/observation_references.py`가 caller의 같은 Session에서 WC active membership과 Social Post/양방향 block 조회를 연결한다. 성공 source 자체를 복제하거나 감정을 추론하지 않으며 기존 flush 위치와 caller rollback/commit 책임을 유지한다. Source 작성 runtime UoW의 나머지 전환은 별도로 이어진다.
