@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2370,
-      "internal_edge_count": 2726,
+      "external_import_count": 2372,
+      "internal_edge_count": 2728,
       "legacy_import_exception_count": 0,
-      "module_count": 788,
+      "module_count": 789,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1232,6 +1232,15 @@
           },
           {
             "imports": [
+              "app.config",
+              "app.domains.social.contracts.profile_activity",
+              "app.pagination"
+            ],
+            "module": "app.domains.social.service.profile_cursor",
+            "path": "backend/app/domains/social/service/profile_cursor.py"
+          },
+          {
+            "imports": [
               "app.domains.characters.service.profile",
               "app.domains.identity.service.profile",
               "app.domains.social.constants",
@@ -1673,15 +1682,14 @@
           },
           {
             "imports": [
-              "app.config",
               "app.domains.characters.models",
               "app.domains.social.models.feed",
               "app.domains.social.models.posts",
               "app.domains.social.public",
+              "app.domains.social.service.profile_cursor",
               "app.domains.world_characters.models",
               "app.domains.world_characters.public",
               "app.domains.worlds.models",
-              "app.pagination",
               "app.runtime.world_characters.composition"
             ],
             "module": "app.runtime.social.sqlalchemy_profile_repository",

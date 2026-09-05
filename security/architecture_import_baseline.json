@@ -1,7 +1,7 @@
 {
-  "edge_count": 2726,
-  "external_import_count": 2370,
-  "module_count": 788,
+  "edge_count": 2728,
+  "external_import_count": 2372,
+  "module_count": 789,
   "modules": [
     {
       "external_imports": [],
@@ -6270,6 +6270,27 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "binascii",
+        "cryptography.exceptions",
+        "cryptography.hazmat.primitives.ciphers.aead",
+        "datetime",
+        "hashlib",
+        "json",
+        "os",
+        "typing"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.social.contracts.profile_activity",
+        "app.pagination"
+      ],
+      "module": "app.domains.social.service.profile_cursor",
+      "path": "backend/app/domains/social/service/profile_cursor.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -10636,29 +10657,21 @@
     {
       "external_imports": [
         "__future__",
-        "binascii",
         "collections",
-        "cryptography.exceptions",
-        "cryptography.hazmat.primitives.ciphers.aead",
         "datetime",
-        "hashlib",
-        "json",
-        "os",
         "re",
         "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
+        "sqlalchemy.orm"
       ],
       "imports": [
-        "app.config",
         "app.domains.characters.models",
         "app.domains.social.models.feed",
         "app.domains.social.models.posts",
         "app.domains.social.public",
+        "app.domains.social.service.profile_cursor",
         "app.domains.world_characters.models",
         "app.domains.world_characters.public",
         "app.domains.worlds.models",
-        "app.pagination",
         "app.runtime.world_characters.composition"
       ],
       "module": "app.runtime.social.sqlalchemy_profile_repository",

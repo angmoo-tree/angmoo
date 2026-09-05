@@ -21,7 +21,7 @@ from app.domains.social.public import (
     WorldCharacterSocialProfileValidationError,
 )
 from app.runtime import persistence
-from app.runtime.social import sqlalchemy_profile_repository as social
+from app.domains.social.service import profile_cursor as social
 
 
 # Compatibility vectors from de83dae's cursor functions, using only the public

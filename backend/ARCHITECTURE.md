@@ -712,3 +712,6 @@ Social 임시 `_SocialPersistenceModels`/`social_persistence_models` export는 �
 
 
 이미지 작업의 실제 실행 조립은 `runtime/social/image_generation.py`, 워커의 Session·시각·반복·취소·로그는 `runtime/social/image_job_worker.py`에 있다. 앞의 파일은 Social 서비스에 Character 설정·비밀 해석·LLM·파일 로딩 협력을 연결한다. 프롬프트/참조 정책이나 quota/첨부를 찾아볼 때는 해당 `social/service/image_*.py`를 사용한다. 옛 이미지 services 두 파일 및 사용하지 않는 private wrapper4·단순 정책 재수출을 제거하고 caller와 테스트를 실제 소유 모듈에 연결했다.
+
+
+World 캐릭터 소셜 프로필의 불투명 커서는 `social/service/profile_cursor.py`가 소유한다. `app/pagination.py`의 공통 bytes 인코딩과 달리 이 파일은 기존 version·AESGCM AAD/nonce·secret 유도 key·payload shape·World/캐릭터/탭 범위를 정한다. 암호화 성공만으로 게시물 공개 판단을 대신하지 않으며 실제 조회는 현재 공개·차단 조건을 적용한다.

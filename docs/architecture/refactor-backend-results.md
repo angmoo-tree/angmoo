@@ -1181,3 +1181,10 @@ API/schema/ORM·기존 protected test2 assertion·전체 split evidence PASS. �
 기존 image/LocalBot/provider 보안/OSS 및 실제 SQLite 회귀 **91 PASS / 26.26초**. 새 테스트 노드는 없으며 기존 assertion을 유지한다. Character 설정·visual write, Operations, DirectLlm 및 공통 이미지 문구 정책의 독립 선행 source는 최종 선형 통합에서 canonical import로 연결한다. 현재 혼합 image 테스트는 Character 설정/외부 provider/공통 키/Social 사례가 섞여 있어 전체를 Social로 잘못 분류하지 않고 G07 실제 소유별 분리 대상으로 기록했다. 전체 B5/source capture/Hosted/installer 종료는 아니다.
 
 보존 검사는 기존 assertion의 receiver 이름도 보호하므로 5개 기존 테스트에서 그 이름을 현재의 실제 정책/상수 모듈에 대한 local import alias로 유지했다. 제품 재수출을 되살리지 않았고 assertion을 삭제·완화하지 않았다. 이동 지도 갱신 중 무관한 역사 split 설명을 재계산한 변경은 검사에서 발견해 원본으로 복구했다. 최종 집중 **91 PASS / 31.19초**, API/schema/ORM·protected test3 assertion·전체 split evidence PASS. 경계 **788 modules / 2726 edges / legacy 197**, L4/ER0 PASS.
+
+
+## AR-B5-C11-A — 프로필의 암호화 커서 소유
+
+원래 runtime profile reader에서 cursor3함수·상수3을 실제 Social service로 이전했다. 전체 함수/상수 AST와 나머지 reader 본문이 동일하다. G2의 동결 AESGCM ciphertext 및 잘못된 key/tag/scope, World별 프로필 탭·count 회귀 **24 PASS / 7.61초**, 기존 Starlette 경고1. 새 node는 없고 기존 테스트는 동일 alias로 실제 cursor 모듈을 import한다. 이 단계는 커서의 실제 소유만 전환했으며 profile 조회 정책·SQL 분리는 다음 단계다.
+
+API/schema/ORM·기존 protected test1 assertion·전체 split evidence PASS. 경계 **789 modules / 2728 edges / legacy 197**, L4/ER0 PASS.
