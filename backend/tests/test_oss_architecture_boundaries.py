@@ -124,7 +124,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
             "analyze_tendency",
             "_bind_slot_auth_profile",
         },
-        "services/character_lore.py": {
+        "runtime/character_lore.py": {
             "_google_embedding_credential_for_character",
             "_google_api_key_for_character",
         },

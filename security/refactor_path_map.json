@@ -413,7 +413,9 @@
     "backend/app/services/lore_parser_quota.py": "backend/app/domains/character_lore/service/parser_quota.py",
     "backend/tests/test_character_lore.py": "backend/tests/character_lore/test_documents.py",
     "backend/tests/test_lore_parser_quota.py": "backend/tests/character_lore/test_parser_quota.py",
-    "backend/tests/test_lore_upload_security.py": "backend/tests/character_lore/test_upload_security.py"
+    "backend/tests/test_lore_upload_security.py": "backend/tests/character_lore/test_upload_security.py",
+    "backend/app/services/character_lore.py": "backend/app/runtime/character_lore.py",
+    "backend/app/api/v1/routes/character_lore.py": "backend/app/domains/character_lore/router.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -33841,9 +33843,12 @@
           "backend/app/domains/character_lore/exceptions.py",
           "backend/app/domains/character_lore/parser.py",
           "backend/app/domains/character_lore/policies/chunking.py",
+          "backend/app/domains/character_lore/policies/ranking.py",
+          "backend/app/domains/character_lore/repository.py",
+          "backend/app/domains/character_lore/service/documents.py",
           "backend/app/domains/character_lore/service/presentation.py",
           "backend/app/domains/character_lore/utils.py",
-          "backend/app/services/character_lore.py"
+          "backend/app/runtime/character_lore.py"
         ],
         "backend/app/services/lore_parser_quota.py": [
           "backend/app/domains/character_lore/constants.py",
@@ -33856,7 +33861,7 @@
           "old": "backend/app/services/character_lore.py::SUPPORTED_EXTENSIONS",
           "new": "backend/app/domains/character_lore/constants.py::SUPPORTED_EXTENSIONS",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -33867,7 +33872,8 @@
           "old": "backend/app/services/character_lore.py::MAX_LORE_FILE_BYTES",
           "new": "backend/app/domains/character_lore/constants.py::MAX_LORE_FILE_BYTES",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py",
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_bounded_upload_reader_rejects_max_plus_one_without_reading_the_rest"
@@ -33877,7 +33883,7 @@
           "old": "backend/app/services/character_lore.py::LORE_UPLOAD_READ_CHUNK_BYTES",
           "new": "backend/app/domains/character_lore/constants.py::LORE_UPLOAD_READ_CHUNK_BYTES",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_bounded_upload_reader_rejects_max_plus_one_without_reading_the_rest"
@@ -33887,7 +33893,7 @@
           "old": "backend/app/services/character_lore.py::DOCX_CONTENT_TYPE",
           "new": "backend/app/domains/character_lore/constants.py::DOCX_CONTENT_TYPE",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -33898,7 +33904,7 @@
           "old": "backend/app/services/character_lore.py::MAX_DOCX_ENTRIES",
           "new": "backend/app/domains/character_lore/constants.py::MAX_DOCX_ENTRIES",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -33909,7 +33915,7 @@
           "old": "backend/app/services/character_lore.py::MAX_DOCX_UNCOMPRESSED_BYTES",
           "new": "backend/app/domains/character_lore/constants.py::MAX_DOCX_UNCOMPRESSED_BYTES",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -33920,7 +33926,7 @@
           "old": "backend/app/services/character_lore.py::MAX_DOCX_XML_BYTES",
           "new": "backend/app/domains/character_lore/constants.py::MAX_DOCX_XML_BYTES",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -33931,7 +33937,7 @@
           "old": "backend/app/services/character_lore.py::MAX_DOCX_ENTRY_BYTES",
           "new": "backend/app/domains/character_lore/constants.py::MAX_DOCX_ENTRY_BYTES",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -33942,7 +33948,7 @@
           "old": "backend/app/services/character_lore.py::MAX_DOCX_COMPRESSION_RATIO",
           "new": "backend/app/domains/character_lore/constants.py::MAX_DOCX_COMPRESSION_RATIO",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -33953,7 +33959,7 @@
           "old": "backend/app/services/character_lore.py::MAX_PDF_PAGES",
           "new": "backend/app/domains/character_lore/constants.py::MAX_PDF_PAGES",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -33964,7 +33970,7 @@
           "old": "backend/app/services/character_lore.py::MAX_PDF_OBJECTS",
           "new": "backend/app/domains/character_lore/constants.py::MAX_PDF_OBJECTS",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -33975,7 +33981,7 @@
           "old": "backend/app/services/character_lore.py::MAX_PARSED_TEXT_CHARS",
           "new": "backend/app/domains/character_lore/constants.py::MAX_PARSED_TEXT_CHARS",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -33986,7 +33992,7 @@
           "old": "backend/app/services/character_lore.py::LORE_PARSER_TIMEOUT_SECONDS",
           "new": "backend/app/domains/character_lore/constants.py::LORE_PARSER_TIMEOUT_SECONDS",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -33997,7 +34003,7 @@
           "old": "backend/app/services/character_lore.py::LORE_PARSER_MEMORY_BYTES",
           "new": "backend/app/domains/character_lore/constants.py::LORE_PARSER_MEMORY_BYTES",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34008,7 +34014,7 @@
           "old": "backend/app/services/character_lore.py::LORE_PARSER_CPU_SECONDS",
           "new": "backend/app/domains/character_lore/constants.py::LORE_PARSER_CPU_SECONDS",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34019,7 +34025,7 @@
           "old": "backend/app/services/character_lore.py::MAX_LORE_SOURCES_PER_CHARACTER",
           "new": "backend/app/domains/character_lore/constants.py::MAX_LORE_SOURCES_PER_CHARACTER",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -34030,7 +34036,7 @@
           "old": "backend/app/services/character_lore.py::MAX_LORE_TEXT_CHARS_PER_CHARACTER",
           "new": "backend/app/domains/character_lore/constants.py::MAX_LORE_TEXT_CHARS_PER_CHARACTER",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34041,7 +34047,7 @@
           "old": "backend/app/services/character_lore.py::MAX_LORE_CHUNKS_PER_CHARACTER",
           "new": "backend/app/domains/character_lore/constants.py::MAX_LORE_CHUNKS_PER_CHARACTER",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34052,7 +34058,7 @@
           "old": "backend/app/services/character_lore.py::TARGET_CHUNK_MIN_CHARS",
           "new": "backend/app/domains/character_lore/constants.py::TARGET_CHUNK_MIN_CHARS",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/tests/character_lore/test_documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34063,7 +34069,7 @@
           "old": "backend/app/services/character_lore.py::TARGET_CHUNK_TARGET_CHARS",
           "new": "backend/app/domains/character_lore/constants.py::TARGET_CHUNK_TARGET_CHARS",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/policies/chunking.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34074,7 +34080,7 @@
           "old": "backend/app/services/character_lore.py::TARGET_CHUNK_MAX_CHARS",
           "new": "backend/app/domains/character_lore/constants.py::TARGET_CHUNK_MAX_CHARS",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/policies/chunking.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34085,7 +34091,10 @@
           "old": "backend/app/services/character_lore.py::EMBEDDING_MODEL",
           "new": "backend/app/domains/character_lore/constants.py::EMBEDDING_MODEL",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/runtime/character_lore.py",
+            "backend/app/domains/character_lore/contracts.py",
+            "backend/app/domains/character_lore/repository.py",
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34096,7 +34105,9 @@
           "old": "backend/app/services/character_lore.py::EMBEDDING_DIMENSION",
           "new": "backend/app/domains/character_lore/constants.py::EMBEDDING_DIMENSION",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/runtime/character_lore.py",
+            "backend/app/domains/character_lore/repository.py",
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34107,7 +34118,7 @@
           "old": "backend/app/services/character_lore.py::RETRIEVAL_CANDIDATE_LIMIT",
           "new": "backend/app/domains/character_lore/constants.py::RETRIEVAL_CANDIDATE_LIMIT",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/repository.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34118,7 +34129,7 @@
           "old": "backend/app/services/character_lore.py::RETRIEVAL_FINAL_LIMIT",
           "new": "backend/app/domains/character_lore/constants.py::RETRIEVAL_FINAL_LIMIT",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/policies/ranking.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34129,7 +34140,7 @@
           "old": "backend/app/services/character_lore.py::RECENT_LORE_USAGE_LIMIT",
           "new": "backend/app/domains/character_lore/constants.py::RECENT_LORE_USAGE_LIMIT",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34140,7 +34151,7 @@
           "old": "backend/app/services/character_lore.py::RECENT_LORE_STRONG_PENALTY_WINDOW",
           "new": "backend/app/domains/character_lore/constants.py::RECENT_LORE_STRONG_PENALTY_WINDOW",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/policies/ranking.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34151,7 +34162,7 @@
           "old": "backend/app/services/character_lore.py::RECENT_LORE_SOFT_PENALTY_WINDOW",
           "new": "backend/app/domains/character_lore/constants.py::RECENT_LORE_SOFT_PENALTY_WINDOW",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/policies/ranking.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34162,7 +34173,19 @@
           "old": "backend/app/services/character_lore.py::APP_TIMEZONE",
           "new": "backend/app/domains/character_lore/constants.py::APP_TIMEZONE",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/services/agent_activity_policy.py",
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/agent_writing.py",
+            "backend/app/services/community.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/services/local_bot.py",
+            "backend/app/services/local_bot_quota.py",
+            "backend/app/services/post_image_generation.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/domains/worlds/service/scheduling.py",
+            "backend/app/domains/routines/service/tick_schedule.py",
+            "backend/app/domains/character_lore/service/documents.py",
+            "backend/app/domains/characters/service/image_quota.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -34173,7 +34196,7 @@
           "old": "backend/app/services/character_lore.py::CharacterLoreError",
           "new": "backend/app/domains/character_lore/exceptions.py::CharacterLoreError",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/exceptions.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -34184,7 +34207,9 @@
           "old": "backend/app/services/character_lore.py::CharacterLoreNotFoundError",
           "new": "backend/app/domains/character_lore/exceptions.py::CharacterLoreNotFoundError",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/repository.py",
+            "backend/app/domains/character_lore/router.py",
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -34195,7 +34220,11 @@
           "old": "backend/app/services/character_lore.py::CharacterLoreValidationError",
           "new": "backend/app/domains/character_lore/exceptions.py::CharacterLoreValidationError",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/exceptions.py",
+            "backend/app/domains/character_lore/parser.py",
+            "backend/app/domains/character_lore/router.py",
+            "backend/app/domains/character_lore/policies/chunking.py",
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -34206,7 +34235,9 @@
           "old": "backend/app/services/character_lore.py::CharacterLoreFileTooLargeError",
           "new": "backend/app/domains/character_lore/exceptions.py::CharacterLoreFileTooLargeError",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py",
+            "backend/app/domains/character_lore/router.py",
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_bounded_upload_reader_rejects_max_plus_one_without_reading_the_rest"
@@ -34216,7 +34247,8 @@
           "old": "backend/app/services/character_lore.py::CharacterLoreEmbeddingError",
           "new": "backend/app/domains/character_lore/exceptions.py::CharacterLoreEmbeddingError",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/runtime/character_lore.py",
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34227,7 +34259,8 @@
           "old": "backend/app/services/character_lore.py::CharacterLoreParserBusyError",
           "new": "backend/app/domains/character_lore/exceptions.py::CharacterLoreParserBusyError",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/router.py",
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34238,7 +34271,9 @@
           "old": "backend/app/services/character_lore.py::LoreChunkDraft",
           "new": "backend/app/domains/character_lore/contracts.py::LoreChunkDraft",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/policies/chunking.py",
+            "backend/app/domains/character_lore/service/documents.py",
+            "backend/app/domains/character_lore/service/presentation.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34249,7 +34284,8 @@
           "old": "backend/app/services/character_lore.py::RetrievedLoreChunk",
           "new": "backend/app/domains/character_lore/contracts.py::RetrievedLoreChunk",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/contracts.py",
+            "backend/app/domains/character_lore/policies/ranking.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34260,7 +34296,10 @@
           "old": "backend/app/services/character_lore.py::LoreRetrievalResult",
           "new": "backend/app/domains/character_lore/contracts.py::LoreRetrievalResult",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/services/agent_writing.py",
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/domains/character_lore/service/documents.py",
+            "backend/app/domains/character_lore/service/presentation.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34271,7 +34310,8 @@
           "old": "backend/app/services/character_lore.py::_GoogleEmbeddingCredential",
           "new": "backend/app/domains/character_lore/contracts.py::_GoogleEmbeddingCredential",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/runtime/character_lore.py",
+            "backend/app/domains/character_lore/contracts.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34282,7 +34322,7 @@
           "old": "backend/app/services/character_lore.py::read_lore_upload_bytes",
           "new": "backend/app/domains/character_lore/parser.py::read_lore_upload_bytes",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/router.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_bounded_upload_reader_rejects_max_plus_one_without_reading_the_rest"
@@ -34290,9 +34330,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::list_lore_sources",
-          "new": "backend/app/services/character_lore.py::list_lore_sources",
+          "new": "backend/app/domains/character_lore/service/documents.py::list_lore_sources",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/router.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -34301,9 +34341,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::lore_status",
-          "new": "backend/app/services/character_lore.py::lore_status",
+          "new": "backend/app/domains/character_lore/service/documents.py::lore_status",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/router.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_lore_status_reports_one_hundred_max_chunks"
@@ -34311,9 +34351,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::upload_lore_source",
-          "new": "backend/app/services/character_lore.py::upload_lore_source",
+          "new": "backend/app/domains/character_lore/service/documents.py::upload_lore_source",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/router.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -34322,9 +34362,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::delete_lore_source",
-          "new": "backend/app/services/character_lore.py::delete_lore_source",
+          "new": "backend/app/domains/character_lore/service/documents.py::delete_lore_source",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/router.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -34333,9 +34373,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::rebuild_lore_source",
-          "new": "backend/app/services/character_lore.py::rebuild_lore_source",
+          "new": "backend/app/domains/character_lore/service/documents.py::rebuild_lore_source",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/router.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -34346,7 +34386,7 @@
           "old": "backend/app/services/character_lore.py::chunk_lore_text",
           "new": "backend/app/domains/character_lore/policies/chunking.py::chunk_lore_text",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34355,9 +34395,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::retrieve_lore_for_self_update",
-          "new": "backend/app/services/character_lore.py::retrieve_lore_for_self_update",
+          "new": "backend/app/domains/character_lore/service/documents.py::retrieve_lore_for_self_update",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/services/agent_writing.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34366,9 +34406,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::has_ready_lore_chunks",
-          "new": "backend/app/services/character_lore.py::has_ready_lore_chunks",
+          "new": "backend/app/domains/character_lore/service/documents.py::has_ready_lore_chunks",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34377,9 +34417,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::retrieve_lore_for_query",
-          "new": "backend/app/services/character_lore.py::retrieve_lore_for_query",
+          "new": "backend/app/domains/character_lore/service/documents.py::retrieve_lore_for_query",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34388,9 +34428,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::retrieve_lore_for_query_tracked",
-          "new": "backend/app/services/character_lore.py::retrieve_lore_for_query_tracked",
+          "new": "backend/app/domains/character_lore/service/documents.py::retrieve_lore_for_query_tracked",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34399,9 +34439,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_retrieve_lore_rows",
-          "new": "backend/app/services/character_lore.py::_retrieve_lore_rows",
+          "new": "backend/app/domains/character_lore/repository.py::_retrieve_lore_rows",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34410,9 +34450,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_cosine_distance",
-          "new": "backend/app/services/character_lore.py::_cosine_distance",
+          "new": "backend/app/domains/character_lore/policies/ranking.py::_cosine_distance",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/repository.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34421,9 +34461,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_lore_result_from_rows",
-          "new": "backend/app/services/character_lore.py::_lore_result_from_rows",
+          "new": "backend/app/domains/character_lore/service/documents.py::_lore_result_from_rows",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -34432,9 +34472,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::build_lore_search_query",
-          "new": "backend/app/services/character_lore.py::build_lore_search_query",
+          "new": "backend/app/domains/character_lore/service/documents.py::build_lore_search_query",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34445,7 +34485,8 @@
           "old": "backend/app/services/character_lore.py::format_lore_prompt_context",
           "new": "backend/app/domains/character_lore/service/presentation.py::format_lore_prompt_context",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/services/agent_writing.py",
+            "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34454,9 +34495,10 @@
         },
         {
           "old": "backend/app/services/character_lore.py::mark_lore_chunks_used",
-          "new": "backend/app/services/character_lore.py::mark_lore_chunks_used",
+          "new": "backend/app/domains/character_lore/service/documents.py::mark_lore_chunks_used",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/services/agent_writing.py",
+            "backend/app/services/langgraph_resident.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34465,9 +34507,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_store_chunks_with_embeddings",
-          "new": "backend/app/services/character_lore.py::_store_chunks_with_embeddings",
+          "new": "backend/app/domains/character_lore/service/documents.py::_store_chunks_with_embeddings",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34476,9 +34518,15 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_get_owned_character",
-          "new": "backend/app/services/character_lore.py::_get_owned_character",
+          "new": "backend/app/domains/character_lore/service/documents.py::_get_owned_character",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/chat/sqlalchemy_service.py",
+            "backend/app/domains/character_lore/service/documents.py",
+            "backend/app/domains/characters/service/access.py",
+            "backend/app/domains/characters/service/management.py",
+            "backend/app/domains/characters/service/media.py",
+            "backend/app/domains/characters/service/mutations.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -34487,9 +34535,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_get_owned_source",
-          "new": "backend/app/services/character_lore.py::_get_owned_source",
+          "new": "backend/app/domains/character_lore/repository.py::_get_owned_source",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -34500,7 +34548,7 @@
           "old": "backend/app/services/character_lore.py::_validated_extension",
           "new": "backend/app/domains/character_lore/parser.py::_validated_extension",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34511,7 +34559,7 @@
           "old": "backend/app/services/character_lore.py::_safe_filename",
           "new": "backend/app/domains/character_lore/parser.py::_safe_filename",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34522,7 +34570,8 @@
           "old": "backend/app/services/character_lore.py::validate_lore_upload_contract",
           "new": "backend/app/domains/character_lore/parser.py::validate_lore_upload_contract",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py",
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34533,7 +34582,7 @@
           "old": "backend/app/services/character_lore.py::_preflight_docx",
           "new": "backend/app/domains/character_lore/parser.py::_preflight_docx",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34544,7 +34593,7 @@
           "old": "backend/app/services/character_lore.py::_extract_text",
           "new": "backend/app/domains/character_lore/parser.py::_extract_text",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34555,7 +34604,7 @@
           "old": "backend/app/services/character_lore.py::_decode_text_file",
           "new": "backend/app/domains/character_lore/parser.py::_decode_text_file",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34566,7 +34615,7 @@
           "old": "backend/app/services/character_lore.py::_extract_pdf_text",
           "new": "backend/app/domains/character_lore/parser.py::_extract_pdf_text",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34577,7 +34626,7 @@
           "old": "backend/app/services/character_lore.py::_extract_docx_text",
           "new": "backend/app/domains/character_lore/parser.py::_extract_docx_text",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34588,7 +34637,7 @@
           "old": "backend/app/services/character_lore.py::_run_document_parser",
           "new": "backend/app/domains/character_lore/parser.py::_run_document_parser",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34599,7 +34648,7 @@
           "old": "backend/app/services/character_lore.py::_run_worker_process",
           "new": "backend/app/domains/character_lore/parser.py::_run_worker_process",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34610,7 +34659,7 @@
           "old": "backend/app/services/character_lore.py::_document_parser_worker",
           "new": "backend/app/domains/character_lore/parser.py::_document_parser_worker",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34621,7 +34670,7 @@
           "old": "backend/app/services/character_lore.py::_extract_pdf_text_in_process",
           "new": "backend/app/domains/character_lore/parser.py::_extract_pdf_text_in_process",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34632,7 +34681,7 @@
           "old": "backend/app/services/character_lore.py::_extract_docx_text_in_process",
           "new": "backend/app/domains/character_lore/parser.py::_extract_docx_text_in_process",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34643,7 +34692,7 @@
           "old": "backend/app/services/character_lore.py::_apply_parser_resource_limits",
           "new": "backend/app/domains/character_lore/parser.py::_apply_parser_resource_limits",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34654,7 +34703,7 @@
           "old": "backend/app/services/character_lore.py::_apply_windows_parser_resource_limits",
           "new": "backend/app/domains/character_lore/parser.py::_apply_windows_parser_resource_limits",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_upload_security.py::test_docx_parser_runs_in_isolated_process",
@@ -34665,7 +34714,9 @@
           "old": "backend/app/services/character_lore.py::_normalize_text",
           "new": "backend/app/domains/character_lore/utils.py::_normalize_text",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/parser.py",
+            "backend/app/domains/worlds/schemas.py",
+            "backend/app/domains/character_lore/policies/chunking.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34676,7 +34727,7 @@
           "old": "backend/app/services/character_lore.py::_split_lore_units",
           "new": "backend/app/domains/character_lore/policies/chunking.py::_split_lore_units",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/policies/chunking.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34687,7 +34738,7 @@
           "old": "backend/app/services/character_lore.py::_looks_like_section_heading",
           "new": "backend/app/domains/character_lore/policies/chunking.py::_looks_like_section_heading",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/policies/chunking.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34698,7 +34749,7 @@
           "old": "backend/app/services/character_lore.py::_clean_heading",
           "new": "backend/app/domains/character_lore/policies/chunking.py::_clean_heading",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/policies/chunking.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34709,7 +34760,7 @@
           "old": "backend/app/services/character_lore.py::_looks_like_boundary_line",
           "new": "backend/app/domains/character_lore/policies/chunking.py::_looks_like_boundary_line",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/policies/chunking.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34720,7 +34771,7 @@
           "old": "backend/app/services/character_lore.py::_split_long_unit",
           "new": "backend/app/domains/character_lore/policies/chunking.py::_split_long_unit",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/policies/chunking.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34729,9 +34780,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_ensure_character_limits",
-          "new": "backend/app/services/character_lore.py::_ensure_character_limits",
+          "new": "backend/app/domains/character_lore/service/documents.py::_ensure_character_limits",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -34740,9 +34791,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_source_count",
-          "new": "backend/app/services/character_lore.py::_source_count",
+          "new": "backend/app/domains/character_lore/repository.py::_source_count",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -34751,9 +34802,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_total_text_chars",
-          "new": "backend/app/services/character_lore.py::_total_text_chars",
+          "new": "backend/app/domains/character_lore/repository.py::_total_text_chars",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34762,9 +34813,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_chunk_count",
-          "new": "backend/app/services/character_lore.py::_chunk_count",
+          "new": "backend/app/domains/character_lore/repository.py::_chunk_count",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34773,9 +34824,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_ready_chunk_count",
-          "new": "backend/app/services/character_lore.py::_ready_chunk_count",
+          "new": "backend/app/domains/character_lore/repository.py::_ready_chunk_count",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34784,9 +34835,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_status_read",
-          "new": "backend/app/services/character_lore.py::_status_read",
+          "new": "backend/app/domains/character_lore/service/documents.py::_status_read",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_lore_status_reports_one_hundred_max_chunks"
@@ -34794,9 +34845,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_google_embedding_credential_for_character",
-          "new": "backend/app/services/character_lore.py::_google_embedding_credential_for_character",
+          "new": "backend/app/runtime/character_lore.py::_google_embedding_credential_for_character",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/runtime/character_lore.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34805,9 +34856,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_google_api_key_for_character",
-          "new": "backend/app/services/character_lore.py::_google_api_key_for_character",
+          "new": "backend/app/runtime/character_lore.py::_google_api_key_for_character",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/runtime/character_lore.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_upload_lore_source_replaces_existing_after_new_file_validation",
@@ -34816,9 +34867,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_existing_embeddings_by_hash",
-          "new": "backend/app/services/character_lore.py::_existing_embeddings_by_hash",
+          "new": "backend/app/domains/character_lore/repository.py::_existing_embeddings_by_hash",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34829,7 +34880,7 @@
           "old": "backend/app/services/character_lore.py::_chunk_embedding_input",
           "new": "backend/app/domains/character_lore/service/presentation.py::_chunk_embedding_input",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34840,7 +34891,7 @@
           "old": "backend/app/services/character_lore.py::_query_embedding_input",
           "new": "backend/app/domains/character_lore/service/presentation.py::_query_embedding_input",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34849,9 +34900,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_embed_text",
-          "new": "backend/app/services/character_lore.py::_embed_text",
+          "new": "backend/app/runtime/character_lore.py::_embed_text",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/runtime/character_lore.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34860,9 +34911,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_embed_text_tracked",
-          "new": "backend/app/services/character_lore.py::_embed_text_tracked",
+          "new": "backend/app/runtime/character_lore.py::_embed_text_tracked",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/runtime/character_lore.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34871,9 +34922,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_format_recent_lore_usage",
-          "new": "backend/app/services/character_lore.py::_format_recent_lore_usage",
+          "new": "backend/app/domains/character_lore/service/documents.py::_format_recent_lore_usage",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34882,9 +34933,9 @@
         },
         {
           "old": "backend/app/services/character_lore.py::_rerank_lore_candidates",
-          "new": "backend/app/services/character_lore.py::_rerank_lore_candidates",
+          "new": "backend/app/domains/character_lore/policies/ranking.py::_rerank_lore_candidates",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_retrieve_lore_for_query_tracked_records_embedding_success",
@@ -34895,7 +34946,8 @@
           "old": "backend/app/services/character_lore.py::_sha256_text",
           "new": "backend/app/domains/character_lore/utils.py::_sha256_text",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/policies/chunking.py",
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_documents.py::test_chunk_lore_text_keeps_section_boundaries",
@@ -34906,7 +34958,7 @@
           "old": "backend/app/services/lore_parser_quota.py::GLOBAL_ACTIVE_LIMIT",
           "new": "backend/app/domains/character_lore/constants.py::GLOBAL_ACTIVE_LIMIT",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/parser_quota.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_parser_quota.py::test_parser_lease_enforces_per_user_and_global_limits",
@@ -34917,7 +34969,7 @@
           "old": "backend/app/services/lore_parser_quota.py::SUBJECT_ACTIVE_LIMIT",
           "new": "backend/app/domains/character_lore/constants.py::SUBJECT_ACTIVE_LIMIT",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/parser_quota.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_parser_quota.py::test_parser_lease_enforces_per_user_and_global_limits",
@@ -34928,7 +34980,7 @@
           "old": "backend/app/services/lore_parser_quota.py::LEASE_SECONDS",
           "new": "backend/app/domains/character_lore/constants.py::LEASE_SECONDS",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/parser_quota.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_parser_quota.py::test_parser_lease_enforces_per_user_and_global_limits",
@@ -34939,7 +34991,8 @@
           "old": "backend/app/services/lore_parser_quota.py::RETRY_AFTER_SECONDS",
           "new": "backend/app/domains/character_lore/constants.py::RETRY_AFTER_SECONDS",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/exceptions.py",
+            "backend/app/domains/character_lore/service/parser_quota.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_parser_quota.py::test_parser_lease_enforces_per_user_and_global_limits",
@@ -34950,7 +35003,7 @@
           "old": "backend/app/services/lore_parser_quota.py::_SQLITE_LOCK",
           "new": "backend/app/domains/character_lore/service/parser_quota.py::_SQLITE_LOCK",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/parser_quota.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_parser_quota.py::test_parser_lease_enforces_per_user_and_global_limits",
@@ -34961,7 +35014,7 @@
           "old": "backend/app/services/lore_parser_quota.py::_POSTGRES_LOCK_ID",
           "new": "backend/app/domains/character_lore/service/parser_quota.py::_POSTGRES_LOCK_ID",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/parser_quota.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_parser_quota.py::test_parser_lease_enforces_per_user_and_global_limits",
@@ -34972,7 +35025,8 @@
           "old": "backend/app/services/lore_parser_quota.py::LoreParserCapacityError",
           "new": "backend/app/domains/character_lore/exceptions.py::LoreParserCapacityError",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py",
+            "backend/app/domains/character_lore/service/parser_quota.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_parser_quota.py::test_parser_lease_enforces_per_user_and_global_limits",
@@ -34983,7 +35037,8 @@
           "old": "backend/app/services/lore_parser_quota.py::LoreParserLeaseUnavailableError",
           "new": "backend/app/domains/character_lore/exceptions.py::LoreParserLeaseUnavailableError",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py",
+            "backend/app/domains/character_lore/service/parser_quota.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_parser_quota.py::test_parser_lease_enforces_per_user_and_global_limits",
@@ -34994,7 +35049,7 @@
           "old": "backend/app/services/lore_parser_quota.py::parser_lease",
           "new": "backend/app/domains/character_lore/service/parser_quota.py::parser_lease",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/domains/character_lore/service/documents.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_parser_quota.py::test_parser_lease_enforces_per_user_and_global_limits",
@@ -35005,7 +35060,10 @@
           "old": "backend/app/services/lore_parser_quota.py::_subject_hash",
           "new": "backend/app/domains/character_lore/service/parser_quota.py::_subject_hash",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/services/community_abuse_quota.py",
+            "backend/app/domains/identity/service/external_verification.py",
+            "backend/app/domains/identity/service/login_throttle.py",
+            "backend/app/domains/character_lore/service/parser_quota.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_parser_quota.py::test_parser_lease_enforces_per_user_and_global_limits",
@@ -35016,7 +35074,35 @@
           "old": "backend/app/services/lore_parser_quota.py::_aware_utc",
           "new": "backend/app/domains/character_lore/service/parser_quota.py::_aware_utc",
           "direct_consumers": [
-            "backend/app/services/character_lore.py"
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/app/services/agent_activity_policy.py",
+            "backend/app/services/agent_runs.py",
+            "backend/app/services/community_abuse_quota.py",
+            "backend/app/services/local_bot_quota.py",
+            "backend/app/services/world_feed_runtime.py",
+            "backend/app/services/world_feed_search.py",
+            "backend/app/runtime/characters/management.py",
+            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py",
+            "backend/app/runtime/relationships/sqlalchemy_social_event.py",
+            "backend/app/runtime/social/sqlalchemy_inbox.py",
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/domains/world_packages/service/staging.py",
+            "backend/app/domains/world_packages/storage/staging.py",
+            "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py",
+            "backend/app/domains/routine_posts/service/context.py",
+            "backend/app/domains/routine_posts/service/event_context.py",
+            "backend/app/domains/routines/policies/planning.py",
+            "backend/app/domains/routines/service/joint_reservations.py",
+            "backend/app/domains/routines/service/joint_scheduling.py",
+            "backend/app/domains/routines/service/plans.py",
+            "backend/app/domains/routines/service/execution/claims.py",
+            "backend/app/domains/routines/service/execution/lifecycle.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/domains/memory/policies/retention.py",
+            "backend/app/domains/identity/service/external_verification.py",
+            "backend/app/domains/identity/service/login_throttle.py",
+            "backend/app/domains/character_lore/service/parser_quota.py"
           ],
           "test_nodes": [
             "tests/character_lore/test_parser_quota.py::test_parser_lease_enforces_per_user_and_global_limits",
@@ -35192,6 +35278,204 @@
       "remaining": [
         "Persistent source/chunk operations, retrieval/ranking, credential/provider tracking and HTTP composition are next actual slice",
         "G5 registry/B8-B and source capture/CI remain pending"
+      ]
+    },
+    "AR-B8-LORE-A3": {
+      "status": "SOURCE PREPARATION VERIFIED: 326 focused PASS; 38 complete AST definitions normalized exact; diagnostics protected2201/current2255 source/assertion/suppression/APIORM/node0; exact split recheck0; stock pending linear source introductions",
+      "scope": "Actual document admission/storage/rebuild/retrieval/query policy, owned SQL/cosine ranking, typed foreign/provider composition, and five HTTP handlers",
+      "moved_symbols": [
+        {
+          "old": "backend/app/services/character_lore.py::list_lore_sources",
+          "new": "backend/app/domains/character_lore/service/documents.py::list_lore_sources",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::lore_status",
+          "new": "backend/app/domains/character_lore/service/documents.py::lore_status",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::upload_lore_source",
+          "new": "backend/app/domains/character_lore/service/documents.py::upload_lore_source",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::delete_lore_source",
+          "new": "backend/app/domains/character_lore/service/documents.py::delete_lore_source",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::rebuild_lore_source",
+          "new": "backend/app/domains/character_lore/service/documents.py::rebuild_lore_source",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::retrieve_lore_for_self_update",
+          "new": "backend/app/domains/character_lore/service/documents.py::retrieve_lore_for_self_update",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::has_ready_lore_chunks",
+          "new": "backend/app/domains/character_lore/service/documents.py::has_ready_lore_chunks",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::retrieve_lore_for_query",
+          "new": "backend/app/domains/character_lore/service/documents.py::retrieve_lore_for_query",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::retrieve_lore_for_query_tracked",
+          "new": "backend/app/domains/character_lore/service/documents.py::retrieve_lore_for_query_tracked",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_retrieve_lore_rows",
+          "new": "backend/app/domains/character_lore/repository.py::_retrieve_lore_rows",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_cosine_distance",
+          "new": "backend/app/domains/character_lore/policies/ranking.py::_cosine_distance",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_lore_result_from_rows",
+          "new": "backend/app/domains/character_lore/service/documents.py::_lore_result_from_rows",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::build_lore_search_query",
+          "new": "backend/app/domains/character_lore/service/documents.py::build_lore_search_query",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::mark_lore_chunks_used",
+          "new": "backend/app/domains/character_lore/service/documents.py::mark_lore_chunks_used",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_store_chunks_with_embeddings",
+          "new": "backend/app/domains/character_lore/service/documents.py::_store_chunks_with_embeddings",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_get_owned_character",
+          "new": "backend/app/domains/character_lore/service/documents.py::_get_owned_character",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_get_owned_source",
+          "new": "backend/app/domains/character_lore/repository.py::_get_owned_source",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_ensure_character_limits",
+          "new": "backend/app/domains/character_lore/service/documents.py::_ensure_character_limits",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_source_count",
+          "new": "backend/app/domains/character_lore/repository.py::_source_count",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_total_text_chars",
+          "new": "backend/app/domains/character_lore/repository.py::_total_text_chars",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_chunk_count",
+          "new": "backend/app/domains/character_lore/repository.py::_chunk_count",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_ready_chunk_count",
+          "new": "backend/app/domains/character_lore/repository.py::_ready_chunk_count",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_status_read",
+          "new": "backend/app/domains/character_lore/service/documents.py::_status_read",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_google_embedding_credential_for_character",
+          "new": "backend/app/runtime/character_lore.py::_google_embedding_credential_for_character",
+          "same": true,
+          "normalization": "none"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_google_api_key_for_character",
+          "new": "backend/app/runtime/character_lore.py::_google_api_key_for_character",
+          "same": true,
+          "normalization": "none"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_existing_embeddings_by_hash",
+          "new": "backend/app/domains/character_lore/repository.py::_existing_embeddings_by_hash",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_embed_text",
+          "new": "backend/app/runtime/character_lore.py::_embed_text",
+          "same": true,
+          "normalization": "none"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_embed_text_tracked",
+          "new": "backend/app/runtime/character_lore.py::_embed_text_tracked",
+          "same": true,
+          "normalization": "none"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_format_recent_lore_usage",
+          "new": "backend/app/domains/character_lore/service/documents.py::_format_recent_lore_usage",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        },
+        {
+          "old": "backend/app/services/character_lore.py::_rerank_lore_candidates",
+          "new": "backend/app/domains/character_lore/policies/ranking.py::_rerank_lore_candidates",
+          "same": true,
+          "normalization": "foreign attached types and explicit workflows callback/argument only"
+        }
+      ],
+      "preserved": [
+        "same Session/commit/flush/refresh and duplicate/replacement ordering",
+        "embedding reuse/model/dimension/provider counts; physical-call tracker error/success records",
+        "same five routes/auth dependency/operation IDs/error and UploadFile.close finally"
+      ],
+      "mapping_note": "The primary old service file target is runtime/character_lore.py because the frozen exact credential-reveal file allowance follows the four actual credential/provider helper bodies. All 107 original source definitions and parser handle retain explicit defining-role split evidence.",
+      "remaining": [
+        "G5 global ORM/schema registration",
+        "B4 existing resident execution callers transition independently",
+        "B8 identity credential query actual owner and B5 recent-topic helper canonical path are runtime composition consumers only; no domain imports legacy services",
+        "linear source capture/CI/G06 final merge remain root-owned"
       ]
     }
   }

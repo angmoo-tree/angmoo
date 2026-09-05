@@ -63,7 +63,10 @@ from app.runtime.routine_posts.sqlalchemy_runtime import (
     run_routine_post_runtime,
 )
 from app.services import agent_activity_policy
-from app.services import character_lore as character_lore_service
+from app.domains.character_lore.service import documents as character_lore_service
+from app.domains.character_lore.service import presentation as lore_presentation
+from app.domains.character_lore.contracts import LoreRetrievalResult
+from app.runtime.character_lore import build_lore_workflows
 from app.services import community as community_service
 from app.services import langgraph_social_apply
 from app.services import post_image_generation
@@ -3085,13 +3088,13 @@ async def _build_lore_query_result(
         )
 
     retrieval = await character_lore_service.retrieve_lore_for_query_tracked(
-        ctx.db,
+        ctx.db, workflows=build_lore_workflows(),
         character=ctx.character,
         query=query,
         tracker=tracker,
         agent_run_id=ctx.run_id,
     )
-    lore_context = character_lore_service.format_lore_prompt_context(
+    lore_context = lore_presentation.format_lore_prompt_context(
         retrieval,
         lore_query_mode=lore_query_mode,
         max_chunks=3,

@@ -70,18 +70,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.api.v1.routes.character_lore"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.api.v1.routes.character_lore"
-        },
-        {
-          "imported": "app.services.character_lore",
-          "importer": "app.api.v1.routes.character_lore"
-        },
-        {
-          "imported": "app.models",
           "importer": "app.api.v1.routes.community"
         },
         {
@@ -183,6 +171,14 @@
         {
           "imported": "app.services.hosted_configuration",
           "importer": "app.public_main"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.runtime.character_lore"
+        },
+        {
+          "imported": "app.services.community",
+          "importer": "app.runtime.character_lore"
         },
         {
           "imported": "app.cruds.agent_runs",
@@ -425,40 +421,12 @@
           "importer": "app.services.agent_writing"
         },
         {
-          "imported": "app.services.character_lore",
-          "importer": "app.services.agent_writing"
-        },
-        {
           "imported": "app.services.community",
           "importer": "app.services.agent_writing"
         },
         {
           "imported": "app.services.runtime_boundary",
           "importer": "app.services.agent_writing"
-        },
-        {
-          "imported": "app.cruds.agents",
-          "importer": "app.services.character_lore"
-        },
-        {
-          "imported": "app.cruds.community",
-          "importer": "app.services.character_lore"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.character_lore"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.character_lore"
-        },
-        {
-          "imported": "app.services.community",
-          "importer": "app.services.character_lore"
-        },
-        {
-          "imported": "app.services.direct_llm",
-          "importer": "app.services.character_lore"
         },
         {
           "imported": "app.cruds.agent_runs",
@@ -530,10 +498,6 @@
         },
         {
           "imported": "app.services.agent_activity_policy",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.services.character_lore",
           "importer": "app.services.langgraph_resident"
         },
         {
@@ -955,11 +919,16 @@
     "modules": [
       "app.domains.character_lore.constants",
       "app.domains.character_lore.contracts",
+      "app.domains.character_lore.dependencies",
       "app.domains.character_lore.exceptions",
       "app.domains.character_lore.models",
       "app.domains.character_lore.parser",
       "app.domains.character_lore.policies.chunking",
+      "app.domains.character_lore.policies.ranking",
+      "app.domains.character_lore.repository",
+      "app.domains.character_lore.router",
       "app.domains.character_lore.schemas",
+      "app.domains.character_lore.service.documents",
       "app.domains.character_lore.service.parser_quota",
       "app.domains.character_lore.service.presentation",
       "app.domains.character_lore.utils",
@@ -1235,6 +1204,7 @@
     "entries": [
       "app.domains.character_lore.contracts",
       "app.domains.character_lore.schemas",
+      "app.domains.character_lore.service.documents",
       "app.domains.character_lore.service.parser_quota",
       "app.domains.character_lore.service.presentation",
       "app.domains.characters.contracts",
@@ -2874,7 +2844,7 @@
         "importer": "app.models",
         "target": "app.domains.character_lore.models",
         "owner_stage": "AR-B8-A / AR-G5",
-        "removal_condition": "Move remaining lore document/parser/retrieval/HTTP consumers to actual roles; retire aggregate model/schema registration in G5.",
+        "removal_condition": "G5 explicit model registration and retirement of global business schema aggregate.",
         "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
         "review_date": "2026-09-06"
       },
@@ -2882,72 +2852,56 @@
         "importer": "app.schemas",
         "target": "app.domains.character_lore.schemas",
         "owner_stage": "AR-B8-A / AR-G5",
-        "removal_condition": "Move remaining lore document/parser/retrieval/HTTP consumers to actual roles; retire aggregate model/schema registration in G5.",
+        "removal_condition": "G5 explicit model registration and retirement of global business schema aggregate.",
         "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.character_lore",
-        "target": "app.domains.character_lore.constants",
-        "owner_stage": "AR-B8-A / AR-G5",
-        "removal_condition": "Move remaining lore document/parser/retrieval/HTTP consumers to actual roles; retire aggregate model/schema registration in G5.",
-        "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
+        "importer": "app.services.agent_writing",
+        "target": "app.domains.character_lore.service.documents",
+        "owner_stage": "AR-B4 / AR-B8-A",
+        "removal_condition": "Move the existing resident execution caller in B4; Lore already has actual service and typed runtime composition.",
+        "reason": "Existing resident work calls exact Lore service/text/value roles at the original execution position.",
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.character_lore",
-        "target": "app.domains.character_lore.exceptions",
-        "owner_stage": "AR-B8-A / AR-G5",
-        "removal_condition": "Move remaining lore document/parser/retrieval/HTTP consumers to actual roles; retire aggregate model/schema registration in G5.",
-        "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.character_lore",
-        "target": "app.domains.character_lore.contracts",
-        "owner_stage": "AR-B8-A / AR-G5",
-        "removal_condition": "Move remaining lore document/parser/retrieval/HTTP consumers to actual roles; retire aggregate model/schema registration in G5.",
-        "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.character_lore",
-        "target": "app.domains.character_lore.service.parser_quota",
-        "owner_stage": "AR-B8-A / AR-G5",
-        "removal_condition": "Move remaining lore document/parser/retrieval/HTTP consumers to actual roles; retire aggregate model/schema registration in G5.",
-        "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.character_lore",
-        "target": "app.domains.character_lore.parser",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Move actual source/chunk document workflows and retrieval/provider composition in the next lore slice; then retire this old service module.",
-        "reason": "Existing document workflow calls the actual moved parser/chunk/format implementation; no reverse import or duplicate function body.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.character_lore",
-        "target": "app.domains.character_lore.policies.chunking",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Move actual source/chunk document workflows and retrieval/provider composition in the next lore slice; then retire this old service module.",
-        "reason": "Existing document workflow calls the actual moved parser/chunk/format implementation; no reverse import or duplicate function body.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.character_lore",
-        "target": "app.domains.character_lore.utils",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Move actual source/chunk document workflows and retrieval/provider composition in the next lore slice; then retire this old service module.",
-        "reason": "Existing document workflow calls the actual moved parser/chunk/format implementation; no reverse import or duplicate function body.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.character_lore",
+        "importer": "app.services.agent_writing",
         "target": "app.domains.character_lore.service.presentation",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Move actual source/chunk document workflows and retrieval/provider composition in the next lore slice; then retire this old service module.",
-        "reason": "Existing document workflow calls the actual moved parser/chunk/format implementation; no reverse import or duplicate function body.",
+        "owner_stage": "AR-B4 / AR-B8-A",
+        "removal_condition": "Move the existing resident execution caller in B4; Lore already has actual service and typed runtime composition.",
+        "reason": "Existing resident work calls exact Lore service/text/value roles at the original execution position.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_writing",
+        "target": "app.domains.character_lore.contracts",
+        "owner_stage": "AR-B4 / AR-B8-A",
+        "removal_condition": "Move the existing resident execution caller in B4; Lore already has actual service and typed runtime composition.",
+        "reason": "Existing resident work calls exact Lore service/text/value roles at the original execution position.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.character_lore.service.documents",
+        "owner_stage": "AR-B4 / AR-B8-A",
+        "removal_condition": "Move the existing resident execution caller in B4; Lore already has actual service and typed runtime composition.",
+        "reason": "Existing resident work calls exact Lore service/text/value roles at the original execution position.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.character_lore.service.presentation",
+        "owner_stage": "AR-B4 / AR-B8-A",
+        "removal_condition": "Move the existing resident execution caller in B4; Lore already has actual service and typed runtime composition.",
+        "reason": "Existing resident work calls exact Lore service/text/value roles at the original execution position.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.character_lore.contracts",
+        "owner_stage": "AR-B4 / AR-B8-A",
+        "removal_condition": "Move the existing resident execution caller in B4; Lore already has actual service and typed runtime composition.",
+        "reason": "Existing resident work calls exact Lore service/text/value roles at the original execution position.",
         "review_date": "2026-09-06"
       }
     ]

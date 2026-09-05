@@ -116,7 +116,9 @@ backend/
 
 `service/parser_quota.py`는 실제 parser 수용량 판단과 SQL·lock·lease 저장/해제를 담당합니다. SQLite 프로세스 lock, PostgreSQL advisory transaction lock, 전역/사용자 한도, HMAC subject hash와 commit/rollback 순서가 원래와 같습니다. `parser.py`는 업로드 바이트·확장자·MIME·ZIP 검증, 제한된 자식 프로세스의 PDF/DOCX 추출과 종료를 실제 소유합니다. `policies/chunking.py`는 문장·섹션 경계를 보존하는 청크 분할, `service/presentation.py`는 검색 결과와 임베딩 입력의 텍스트 표현, `utils.py`는 정규화와 해시를 담당합니다.
 
-문서 저장·검색·임베딩 호출·HTTP 조립은 아직 기존 lore service에 남은 다음 전환 범위입니다. 해당 서비스는 이미 이전된 정의를 같은 함수 객체로 사용합니다. 현재 부분 scope와 정확한 소비자 bridge가 이 차이를 표현하며 전체 lore 전환 완료를 뜻하지 않습니다.
+`service/documents.py`는 소유자 확인, 업로드·교체·재생성·삭제와 검색 실패/fallback 판단을 실제 소유합니다. 조회·집계·재사용 embedding 조회는 `repository.py`, 코사인 거리와 사용 이력·섹션 다양성을 고려한 순위는 `policies/ranking.py`로 구분합니다. 정책은 ORM 대신 읽기 계약을 받아 같은 값을 판단합니다. 문서 transaction의 commit/flush/refresh와 호출자의 같은 Session은 유지합니다.
+
+`LoreWorkflows`는 캐릭터 조회·자격 증명·최근 글 문맥·임베딩/추적 호출만 전달합니다. `runtime/character_lore.py`가 기존 실제 구현과 provider transport를 조립하며 도메인 서비스가 runtime을 import하지 않습니다. `router.py`는 원래 다섯 HTTP 경로·인증·오류를 연결하고, 두 앱 factory가 등록한 의존성을 `dependencies.py`에서 받습니다. 기존 lore service와 HTTP 파일은 제거했습니다. 남은 전역 모델/schema 집합 등록은 G5, 주민 실행 소비자는 B4, runtime의 기존 자격 증명 query와 최근 글 helper 연결은 각각 B8 Identity 및 B5 전환 범위입니다.
 
 ### Tree 게시판의 소유
 

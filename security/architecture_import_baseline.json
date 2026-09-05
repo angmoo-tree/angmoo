@@ -1,7 +1,7 @@
 {
-  "edge_count": 2450,
-  "external_import_count": 2266,
-  "module_count": 739,
+  "edge_count": 2475,
+  "external_import_count": 2278,
+  "module_count": 743,
   "modules": [
     {
       "external_imports": [],
@@ -50,13 +50,13 @@
         "app.api.v1.routes.agent_runs",
         "app.api.v1.routes.agents",
         "app.api.v1.routes.bot",
-        "app.api.v1.routes.character_lore",
         "app.api.v1.routes.community",
         "app.api.v1.routes.messages",
         "app.api.v1.routes.world_activity_runtime",
         "app.api.v1.routes.world_character_setup",
         "app.api.v1.routes.world_chat",
         "app.api.v1.routes.world_chat_response",
+        "app.domains.character_lore.router",
         "app.domains.device_home.router",
         "app.domains.identity.router.auth",
         "app.domains.memory.router",
@@ -80,7 +80,6 @@
         "app.api.v1.routes.agent_runs",
         "app.api.v1.routes.agents",
         "app.api.v1.routes.bot",
-        "app.api.v1.routes.character_lore",
         "app.api.v1.routes.community",
         "app.api.v1.routes.manual_social",
         "app.api.v1.routes.messages",
@@ -89,6 +88,7 @@
         "app.api.v1.routes.world_character_setup",
         "app.api.v1.routes.world_chat",
         "app.api.v1.routes.world_chat_response",
+        "app.domains.character_lore.router",
         "app.domains.device_home.router",
         "app.domains.identity.router.auth",
         "app.domains.identity.router.local",
@@ -164,22 +164,6 @@
       ],
       "module": "app.api.v1.routes.bot",
       "path": "backend/app/api/v1/routes/bot.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "fastapi",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.core.db",
-        "app.domains.identity.dependencies",
-        "app.models",
-        "app.schemas",
-        "app.services.character_lore"
-      ],
-      "module": "app.api.v1.routes.character_lore",
-      "path": "backend/app/api/v1/routes/character_lore.py",
       "wildcard_imports": []
     },
     {
@@ -810,13 +794,30 @@
     },
     {
       "external_imports": [
-        "dataclasses"
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
       ],
       "imports": [
         "app.domains.character_lore.constants"
       ],
       "module": "app.domains.character_lore.contracts",
       "path": "backend/app/domains/character_lore/contracts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi"
+      ],
+      "imports": [
+        "app.api.identity_dependencies",
+        "app.core.db",
+        "app.domains.character_lore.contracts"
+      ],
+      "module": "app.domains.character_lore.dependencies",
+      "path": "backend/app/domains/character_lore/dependencies.py",
       "wildcard_imports": []
     },
     {
@@ -895,6 +896,53 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "datetime",
+        "math"
+      ],
+      "imports": [
+        "app.domains.character_lore.constants",
+        "app.domains.character_lore.contracts"
+      ],
+      "module": "app.domains.character_lore.policies.ranking",
+      "path": "backend/app/domains/character_lore/policies/ranking.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.character_lore.constants",
+        "app.domains.character_lore.exceptions",
+        "app.domains.character_lore.models",
+        "app.domains.character_lore.policies.ranking"
+      ],
+      "module": "app.domains.character_lore.repository",
+      "path": "backend/app/domains/character_lore/repository.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.character_lore.contracts",
+        "app.domains.character_lore.dependencies",
+        "app.domains.character_lore.exceptions",
+        "app.domains.character_lore.parser",
+        "app.domains.character_lore.schemas",
+        "app.domains.character_lore.service.documents"
+      ],
+      "module": "app.domains.character_lore.router",
+      "path": "backend/app/domains/character_lore/router.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "datetime",
         "pydantic"
       ],
@@ -908,6 +956,32 @@
       "imports": [],
       "module": "app.domains.character_lore.service",
       "path": "backend/app/domains/character_lore/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.character_lore.constants",
+        "app.domains.character_lore.contracts",
+        "app.domains.character_lore.exceptions",
+        "app.domains.character_lore.models",
+        "app.domains.character_lore.parser",
+        "app.domains.character_lore.policies.chunking",
+        "app.domains.character_lore.policies.ranking",
+        "app.domains.character_lore.repository",
+        "app.domains.character_lore.schemas",
+        "app.domains.character_lore.service.parser_quota",
+        "app.domains.character_lore.service.presentation",
+        "app.domains.character_lore.utils"
+      ],
+      "module": "app.domains.character_lore.service.documents",
+      "path": "backend/app/domains/character_lore/service/documents.py",
       "wildcard_imports": []
     },
     {
@@ -7660,6 +7734,7 @@
         "app.core.request_limits",
         "app.cruds.community",
         "app.runtime.account_deletion",
+        "app.runtime.character_lore",
         "app.runtime.characters.creator",
         "app.runtime.characters.management",
         "app.runtime.logging_config",
@@ -7980,6 +8055,7 @@
         "app.domains.runtime.public",
         "app.domains.world_packages.storage.import_media",
         "app.runtime.account_deletion",
+        "app.runtime.character_lore",
         "app.runtime.characters.creator",
         "app.runtime.characters.management",
         "app.runtime.component_workers",
@@ -8038,6 +8114,31 @@
       ],
       "module": "app.runtime.account_deletion",
       "path": "backend/app/runtime/account_deletion.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "sqlalchemy.orm",
+        "time"
+      ],
+      "imports": [
+        "app.cruds.agents",
+        "app.domains.character_lore.constants",
+        "app.domains.character_lore.contracts",
+        "app.domains.character_lore.exceptions",
+        "app.domains.characters.service.profile",
+        "app.domains.identity.contracts",
+        "app.domains.identity.exceptions",
+        "app.domains.identity.service.credential_resolution",
+        "app.integrations.direct_llm",
+        "app.providers.contracts",
+        "app.providers.registry",
+        "app.services.community"
+      ],
+      "module": "app.runtime.character_lore",
+      "path": "backend/app/runtime/character_lore.py",
       "wildcard_imports": []
     },
     {
@@ -10425,50 +10526,19 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.character_lore.contracts",
+        "app.domains.character_lore.service.documents",
+        "app.domains.character_lore.service.presentation",
         "app.domains.memory.service.daypart",
         "app.models",
+        "app.runtime.character_lore",
         "app.schemas",
         "app.services.agent_briefs",
-        "app.services.character_lore",
         "app.services.community",
         "app.services.runtime_boundary"
       ],
       "module": "app.services.agent_writing",
       "path": "backend/app/services/agent_writing.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "asyncio",
-        "datetime",
-        "math",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "time",
-        "uuid"
-      ],
-      "imports": [
-        "app.credentials",
-        "app.cruds.agents",
-        "app.cruds.community",
-        "app.domains.character_lore.constants",
-        "app.domains.character_lore.contracts",
-        "app.domains.character_lore.exceptions",
-        "app.domains.character_lore.parser",
-        "app.domains.character_lore.policies.chunking",
-        "app.domains.character_lore.service.parser_quota",
-        "app.domains.character_lore.service.presentation",
-        "app.domains.character_lore.utils",
-        "app.models",
-        "app.providers.contracts",
-        "app.providers.registry",
-        "app.schemas",
-        "app.services.community",
-        "app.services.direct_llm"
-      ],
-      "module": "app.services.character_lore",
-      "path": "backend/app/services/character_lore.py",
       "wildcard_imports": []
     },
     {
@@ -10622,6 +10692,9 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.character_lore.contracts",
+        "app.domains.character_lore.service.documents",
+        "app.domains.character_lore.service.presentation",
         "app.domains.memory.contracts.daypart",
         "app.domains.memory.policies.daypart",
         "app.domains.memory.service.daypart",
@@ -10629,13 +10702,13 @@
         "app.domains.social.contracts.subjective_context",
         "app.domains.world_characters.contracts.runtime_modes",
         "app.models",
+        "app.runtime.character_lore",
         "app.runtime.resident.context",
         "app.runtime.routine_posts.sqlalchemy_runtime",
         "app.runtime.social.observations",
         "app.runtime.social.subjective_context",
         "app.schemas",
         "app.services.agent_activity_policy",
-        "app.services.character_lore",
         "app.services.community",
         "app.services.direct_llm",
         "app.services.langgraph_social_apply",

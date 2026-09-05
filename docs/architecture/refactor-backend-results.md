@@ -1118,3 +1118,15 @@ Lore A1 `f7f303d`의 실제 문서 파서·청크 분할·정규화·해시·입
 Lore/Tree/M3삭제/LangGraph resident **245 passed / 기존 warning1 / 14.74s**, 경계 **739 modules/2,450 edges/legacy208**, 현재 L4 **739/14/97**, deferred22다. 원장을 수정하지 않은 signed869bae55 두 source의 읽기 전용 supplement 진단은 protected2,201/current2,251이며 source/split/assertion/suppression/APIORM/node 손실 **0**이다. stock gate는 선행 source 도입 원장의 순차 통합 대기 상태로 남는다.
 
 새 실제 source 파일은 parser.py, policies/__init__.py·chunking.py, utils.py, service/presentation.py의 5개이며 새 test node는 없다. 문서 저장·검색·provider 추적·HTTP 소유 이전과 G5/G06/B8-B 및 Hosted CI/설치는 아직 다음 범위다.
+
+## AR-B8 Lore A3 문서 서비스·조회·검색 정책·HTTP 준비 — 2026-09-06
+
+실제 문서 저장/교체/재생성/삭제·검색 admission/fallback은 service/documents.py, 자체 조회/집계/embedding 재사용은 repository.py, 코사인 및 사용 이력/섹션 순위는 policies/ranking.py로 이전했다. runtime/character_lore.py는 원래 네 credential/provider helper와 typed LoreWorkflows 조립을 소유한다. 기존 service 및 HTTP 파일은 제거했고 원래 다섯 URL·인증 callable·오류·UploadFile.close finally와 두 factory의 같은 Session 의존성을 연결했다. 순위 입력은 ORM을 직접 import하지 않는 실제 attached view 계약이다.
+
+실제 30개 원래 정의와 HTTP5개/주민 실행3개 변경의 전체 AST는 정확한 callback/인자·역할 type/import 이름만 정규화하면 **38개 모두 동일**하다. 원래 Lore/주민 실행/삭제/쓰기 선택 회귀 **306 passed / 기존 warnings2 / 8.94s**, 새 실제 DB 중복 업로드/재생성 embedding 재사용·실패 저장·scope provider 생략·두 factory 동일 Session 회귀 **4 passed / 기존 warning1 / 5.49s**다. 새 source/node의 최초 도입 고정 전 최종 보존·APIORM·경계를 재검사한다.
+
+원래 plaintext credential reveal 검사의 정확 파일 허용은 실제 네 credential/provider 본문이 위치한 runtime/character_lore.py로 이동한다. 파일 primary map도 해당 실제 구현이며, 원래 모든 정의의 각 최종 목적지는 split 증거로 별도 기록했다. 함수 허용 목록과 assertion 자체를 완화하지 않았다. 남은 두 legacy helper는 runtime의 Identity credential query 및 B5 최근 자기 글 문맥 소비이고, 도메인 코드가 해당 legacy service를 import하지 않는다. G5 global registry·B4 주민 실행 자체·후속 B8 Identity/helper 정리·선형 capture/CI/G06/G8-B는 별도 단계다.
+
+Lore A3 최종 확대 묶음은 **326 passed / 기존 warnings3 / 23.51s**다. 경계743modules/2475edges/legacy199, L4 743/14/97, 공개 inventory196operations가 통과했다. signed869bae55 두 원본 source를 읽기 메모리에서만 보충한 진단은 protected2201/current2255의 source/assertion/suppression/APIORM/node 손실0이다. 첫 split 검사에 남아 있던 parser quota 선행 symbol의 옛 Lore service 소비 경로11개를 실제 현재 호출 파일로 연결했고, 원래 split 검사 재실행은 **0 errors**다. 검사 규칙/동결 원장은 수정하지 않았다. 선행 원장 연결을 포함한 stock 전체 보존은 root 순차 통합 단계의 pending Gate다.
+
+새 회귀는 tests/character_lore/test_lore_role_contracts.py의 4 nodes다. 기존 Tree 회귀 파일과 동일 basename이어서 발생한 pytest 수집 충돌은 새 파일의 최초 source 고정 전에 고유 basename으로 정리했다. 기존 테스트 node/본문은 퇴역시키지 않았으며 최종 확대 묶음에서 함께 실행했다.

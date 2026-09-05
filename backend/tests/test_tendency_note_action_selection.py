@@ -1,3 +1,4 @@
+from app.domains.character_lore import contracts as character_lore
 import asyncio
 import json
 import inspect
@@ -9,7 +10,7 @@ import pytest
 
 from app import schemas
 from app.api.v1.routes import agents as agent_routes
-from app.services import (agent_activity_policy, agent_briefs, agent_runs, agent_writing, character_lore, community as community_service, direct_llm)
+from app.services import (agent_activity_policy, agent_briefs, agent_runs, agent_writing, community as community_service, direct_llm)
 from app.runtime.characters import management as agent_service
 
 

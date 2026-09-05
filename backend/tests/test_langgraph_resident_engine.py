@@ -9,10 +9,10 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 from app import models
+from app.domains.character_lore import contracts as character_lore
 from app.services import (
     agent_runs,
     agent_writing,
-    character_lore,
     direct_llm,
     langgraph_resident,
 )
@@ -2021,7 +2021,7 @@ def test_lore_query_rewriter_success_adds_context_to_independent_post_task(monke
             "focus_terms": ["훈련", "보호대"],
         }
 
-    async def fake_retrieve(_db, *, character, query, tracker, agent_run_id):
+    async def fake_retrieve(_db, *, character, query, tracker, agent_run_id, workflows):
         retrieval_queries.append(query)
         return character_lore.LoreRetrievalResult(
             mode="pgvector",
@@ -2117,7 +2117,7 @@ def test_lore_query_rewriter_falls_back_to_deterministic_query(monkeypatch) -> N
     async def fail_call_json(*_args, **_kwargs):
         raise langgraph_resident.DirectLlmError("provider failed")
 
-    async def fake_retrieve(_db, *, character, query, tracker, agent_run_id):
+    async def fake_retrieve(_db, *, character, query, tracker, agent_run_id, workflows):
         retrieval_queries.append(query)
         return character_lore.LoreRetrievalResult(mode="fallback_no_lore")
 

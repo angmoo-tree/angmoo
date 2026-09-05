@@ -4,7 +4,12 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.services import character_lore
+from app.domains.character_lore.service import documents as character_lore
+from app.domains.character_lore import contracts as lore_contracts
+from app.domains.character_lore import constants as lore_constants
+from app.domains.character_lore.policies import chunking
+from app.domains.character_lore.service import presentation
+from app.runtime import character_lore as lore_runtime
 from app.services import direct_llm
 
 
@@ -55,6 +60,7 @@ def _lore_user_and_character(monkeypatch):
 
 
 def test_chunk_lore_text_keeps_freeform_lines_without_llm():
+    character_lore = chunking
     text = """
 # 취향
 비 오는 날에는 오래된 만년필을 정리한다.
@@ -69,7 +75,9 @@ A: 창가에 앉아 그날의 소리를 기억한다.
     joined = "\n".join(draft.text for draft in drafts)
 
     assert drafts
-    assert all(0 < len(draft.text) <= character_lore.TARGET_CHUNK_MAX_CHARS for draft in drafts)
+    assert all(
+        0 < len(draft.text) <= character_lore.TARGET_CHUNK_MAX_CHARS for draft in drafts
+    )
     assert "만년필" in joined
     assert "은색 라이터" in joined
     assert "창가에 앉아" in joined
@@ -82,7 +90,7 @@ def test_lore_source_limit_is_one_file_per_character():
 
 def test_lore_prompt_context_can_be_compacted_for_post_writer():
     chunks = tuple(
-        character_lore.RetrievedLoreChunk(
+        lore_contracts.RetrievedLoreChunk(
             id=f"lore-chunk-{index}",
             source_id="lore-source-1",
             source_filename="memo.md",
@@ -94,7 +102,7 @@ def test_lore_prompt_context_can_be_compacted_for_post_writer():
     )
     result = character_lore.LoreRetrievalResult(mode="pgvector", chunks=chunks)
 
-    context = character_lore.format_lore_prompt_context(
+    context = presentation.format_lore_prompt_context(
         result,
         lore_query_mode="llm_rewrite",
         max_chunks=3,
@@ -110,6 +118,7 @@ def test_lore_prompt_context_can_be_compacted_for_post_writer():
 
 
 def test_lore_chunk_limit_is_one_hundred():
+    character_lore = lore_constants
     assert character_lore.MAX_LORE_TEXT_CHARS_PER_CHARACTER == 50_000
     assert character_lore.MAX_LORE_CHUNKS_PER_CHARACTER == 100
     assert character_lore.TARGET_CHUNK_MIN_CHARS == 500
@@ -118,6 +127,7 @@ def test_lore_chunk_limit_is_one_hundred():
 
 
 def test_chunk_lore_text_packs_same_section_until_target_size():
+    character_lore = chunking
     paragraphs = ["a" * 190, "b" * 190, "c" * 190, "d" * 190]
     text = "# notes\n" + "\n\n".join(paragraphs)
 
@@ -150,13 +160,16 @@ def test_chunk_lore_text_keeps_section_boundaries():
 
 
 def test_chunk_lore_text_splits_long_fiction_paragraph_by_sentence():
+    character_lore = chunking
     sentence = "a" * 450 + "."
     text = "# fiction\n" + " ".join([sentence, sentence, sentence])
 
     drafts = character_lore.chunk_lore_text(text)
 
     assert len(drafts) == 2
-    assert all(0 < len(draft.text) <= character_lore.TARGET_CHUNK_MAX_CHARS for draft in drafts)
+    assert all(
+        0 < len(draft.text) <= character_lore.TARGET_CHUNK_MAX_CHARS for draft in drafts
+    )
     assert drafts[0].text.count(".") == 2
     assert drafts[1].text.count(".") == 1
 
@@ -235,6 +248,7 @@ def test_upload_lore_source_rejects_second_file_without_replace(monkeypatch):
             filename="next.md",
             content_type="text/markdown",
             file_bytes=b"new lore",
+            workflows=lore_runtime.build_lore_workflows(),
         )
 
     assert "1개만" in str(exc.value)
@@ -255,6 +269,7 @@ def test_upload_lore_source_replaces_existing_after_new_file_validation(monkeypa
         content_type="text/markdown",
         file_bytes=b"new lore",
         replace_existing=True,
+        workflows=lore_runtime.build_lore_workflows(),
     )
 
     assert db.deleted == [existing]
@@ -264,7 +279,9 @@ def test_upload_lore_source_replaces_existing_after_new_file_validation(monkeypa
     assert source.status == "ready"
 
 
-def test_upload_lore_source_keeps_existing_when_replacement_validation_fails(monkeypatch):
+def test_upload_lore_source_keeps_existing_when_replacement_validation_fails(
+    monkeypatch,
+):
     user, _character = _lore_user_and_character(monkeypatch)
     existing = SimpleNamespace(extracted_char_count=100, chunk_count=1)
     db = _FakeLoreDb(existing_sources=[existing])
@@ -278,6 +295,7 @@ def test_upload_lore_source_keeps_existing_when_replacement_validation_fails(mon
             content_type="text/markdown",
             file_bytes=b"x" * (character_lore.MAX_LORE_FILE_BYTES + 1),
             replace_existing=True,
+            workflows=lore_runtime.build_lore_workflows(),
         )
 
     assert db.deleted == []
@@ -291,7 +309,9 @@ def test_embedding_inputs_use_embedding_2_prefix_contract():
         content_hash="hash",
     )
 
-    assert character_lore._chunk_embedding_input(draft).startswith("title: 관계 | text: ")
+    assert character_lore._chunk_embedding_input(draft).startswith(
+        "title: 관계 | text: "
+    )
     assert character_lore._query_embedding_input("독립글 소재").startswith(
         "task: search result | query: "
     )
@@ -304,9 +324,9 @@ def test_retrieve_lore_for_query_tracked_records_embedding_success(monkeypatch):
 
     monkeypatch.setattr(character_lore, "_ready_chunk_count", lambda *_args: 1)
     monkeypatch.setattr(
-        character_lore,
+        lore_runtime,
         "_google_embedding_credential_for_character",
-        lambda *_args: character_lore._GoogleEmbeddingCredential(
+        lambda *_args: lore_contracts._GoogleEmbeddingCredential(
             api_key="key",
             credential_id="cred-1",
             key_fingerprint="fp-1",
@@ -314,7 +334,7 @@ def test_retrieve_lore_for_query_tracked_records_embedding_success(monkeypatch):
         ),
     )
     monkeypatch.setattr(
-        character_lore,
+        lore_runtime,
         "_embed_text",
         lambda _api_key, _text: [0.1] * character_lore.EMBEDDING_DIMENSION,
     )
@@ -329,7 +349,7 @@ def test_retrieve_lore_for_query_tracked_records_embedding_success(monkeypatch):
         lambda _rows: character_lore.LoreRetrievalResult(
             mode="pgvector",
             chunks=(
-                character_lore.RetrievedLoreChunk(
+                lore_contracts.RetrievedLoreChunk(
                     id="lore-chunk-1",
                     source_id="lore-source-1",
                     source_filename="memo.md",
@@ -348,6 +368,7 @@ def test_retrieve_lore_for_query_tracked_records_embedding_success(monkeypatch):
             query="quiet memory",
             tracker=tracker,
             agent_run_id="run-1",
+            workflows=lore_runtime.build_lore_workflows(),
         )
     )
 
@@ -371,16 +392,16 @@ def test_retrieve_lore_for_query_tracked_records_embedding_failure(monkeypatch):
 
     monkeypatch.setattr(character_lore, "_ready_chunk_count", lambda *_args: 1)
     monkeypatch.setattr(
-        character_lore,
+        lore_runtime,
         "_google_embedding_credential_for_character",
-        lambda *_args: character_lore._GoogleEmbeddingCredential(
+        lambda *_args: lore_contracts._GoogleEmbeddingCredential(
             api_key="key",
             credential_id="cred-1",
             key_fingerprint="fp-1",
             provider="google",
         ),
     )
-    monkeypatch.setattr(character_lore, "_embed_text", fail_embed)
+    monkeypatch.setattr(lore_runtime, "_embed_text", fail_embed)
 
     result = asyncio.run(
         character_lore.retrieve_lore_for_query_tracked(
@@ -389,6 +410,7 @@ def test_retrieve_lore_for_query_tracked_records_embedding_failure(monkeypatch):
             query="quiet memory",
             tracker=tracker,
             agent_run_id="run-1",
+            workflows=lore_runtime.build_lore_workflows(),
         )
     )
 
@@ -403,7 +425,7 @@ def test_retrieve_lore_for_query_tracked_records_embedding_failure(monkeypatch):
 
 def test_self_update_query_excludes_feed_scan_context(monkeypatch):
     monkeypatch.setattr(
-        character_lore.community_service,
+        lore_runtime.community_service,
         "format_recent_own_root_topic_history_for_prompt",
         lambda *args, **kwargs: "최근 자기 root topic",
     )
@@ -425,6 +447,7 @@ def test_self_update_query_excludes_feed_scan_context(monkeypatch):
             topic_preferences="관찰, 물건, 습관",
         ),
         now=datetime(2026, 6, 4, 3, 0, tzinfo=UTC),
+        workflows=lore_runtime.build_lore_workflows(),
     )
 
     assert "독립 root 글" in query

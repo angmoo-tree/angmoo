@@ -34,7 +34,7 @@
     },
     "DELETE /api/v1/agents/{character_id}/lore-sources/{source_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.character_lore",
+      "module": "app.domains.character_lore.router",
       "endpoint": "delete_lore_source"
     },
     "DELETE /api/v1/agents/{character_id}/media-candidates/{candidate_id}": {
@@ -159,12 +159,12 @@
     },
     "GET /api/v1/agents/{character_id}/lore-sources": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.character_lore",
+      "module": "app.domains.character_lore.router",
       "endpoint": "list_lore_sources"
     },
     "GET /api/v1/agents/{character_id}/lore-status": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.character_lore",
+      "module": "app.domains.character_lore.router",
       "endpoint": "get_lore_status"
     },
     "GET /api/v1/agents/{character_id}/media-candidates/{candidate_id}/content": {
@@ -664,12 +664,12 @@
     },
     "POST /api/v1/agents/{character_id}/lore-sources": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.character_lore",
+      "module": "app.domains.character_lore.router",
       "endpoint": "upload_lore_source"
     },
     "POST /api/v1/agents/{character_id}/lore-sources/{source_id}/rebuild": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.character_lore",
+      "module": "app.domains.character_lore.router",
       "endpoint": "rebuild_lore_source"
     },
     "POST /api/v1/agents/{character_id}/media": {

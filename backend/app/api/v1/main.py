@@ -6,7 +6,7 @@ from app.api.v1.routes import agent_runs
 from app.api.v1.routes import agents
 from app.domains.identity.router import auth
 from app.api.v1.routes import bot
-from app.api.v1.routes import character_lore
+from app.domains.character_lore import router as character_lore
 from app.api.v1.routes import community
 from app.api.v1.routes import messages
 from app.domains.memory import router as memory

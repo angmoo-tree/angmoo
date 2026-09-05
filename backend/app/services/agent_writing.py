@@ -17,7 +17,10 @@ from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
 from app.services.agent_briefs import PREPARED_CREATE_POST_BRIEF_SENTINEL
-from app.services import character_lore as character_lore_service
+from app.domains.character_lore.service import documents as character_lore_service
+from app.domains.character_lore.service import presentation as lore_presentation
+from app.domains.character_lore.contracts import LoreRetrievalResult
+from app.runtime.character_lore import build_lore_workflows
 from app.services import community as community_service
 from app.core.context_text import neutralize_context_text
 from app.services.runtime_boundary import OpenClawGatewayClient, OpenClawGatewayError
@@ -305,7 +308,7 @@ def _compose_writing_from_brief(
 ) -> tuple[
     dict[str, Any],
     dict[str, Any] | None,
-    character_lore_service.LoreRetrievalResult | None,
+    LoreRetrievalResult | None,
 ]:
     character = community_crud.get_character(db, character_id)
     if character is None or character.deleted_at is not None:
@@ -315,7 +318,7 @@ def _compose_writing_from_brief(
     state = db.get(models.CharacterState, character_id)
     lore_retrieval = (
         character_lore_service.retrieve_lore_for_self_update(
-            db, character=character
+            db, workflows=build_lore_workflows(), character=character
         )
         if kind == "create_post" and _is_self_update_create_post_brief(brief)
         else None
@@ -450,7 +453,7 @@ def _build_composition_prompt(
     kind: WritingKind,
     brief: str,
     target_post_id: str | None,
-    lore_retrieval: character_lore_service.LoreRetrievalResult | None = None,
+    lore_retrieval: LoreRetrievalResult | None = None,
 ) -> str:
     is_self_update = _is_self_update_create_post_brief(brief) if kind == "create_post" else False
     target_context = (
@@ -469,7 +472,7 @@ def _build_composition_prompt(
 {recent_activity}{repetition_section}"""
     )
     lore_context = (
-        character_lore_service.format_lore_prompt_context(lore_retrieval)
+        lore_presentation.format_lore_prompt_context(lore_retrieval)
         if is_self_update and lore_retrieval is not None
         else ""
     )
