@@ -26,7 +26,8 @@ from app.domains.memory.models.items import (
     MemoryMaintenanceJob,
     MemoryScopeSettingModel,
 )
-from app.runtime.memory.batch_runtime import MemoryBatchRuntime, reconcile_sources, schedule_batches
+from app.runtime.memory.batch_runtime import MemoryBatchRuntime, reconcile_sources
+from memory.preparation_support import schedule_batches
 from memory.preparation_support import deliver_candidates
 from app.runtime.memory.shutdown import MemoryShutdownCoordinator
 from app.runtime.memory.source_delivery import (

@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 from app.domains.memory.contracts.source_evidence import MemorySourceEvidenceReaderPort
 
 if TYPE_CHECKING:
+    from app.domains.memory.models.batch import MemoryBatchSetting
     from app.domains.memory.repository.items import SqlAlchemyMemoryRepository
     from app.domains.memory.repository.batch import SqlAlchemyMemoryBatchRepository
     from app.domains.memory.repository.consolidation import SqlAlchemyMemoryConsolidationRepository
@@ -19,3 +20,4 @@ class MemoryPreparationDependencies:
     batch_repository: Callable[[Session], SqlAlchemyMemoryBatchRepository]
     consolidation_repository: Callable[[Session], SqlAlchemyMemoryConsolidationRepository]
     source_reader: Callable[[Session], MemorySourceEvidenceReaderPort]
+    read_due_configs: Callable[..., list[MemoryBatchSetting]]

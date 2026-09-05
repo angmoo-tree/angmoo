@@ -1,7 +1,7 @@
 {
-  "edge_count": 2142,
-  "external_import_count": 2107,
-  "module_count": 654,
+  "edge_count": 2155,
+  "external_import_count": 2109,
+  "module_count": 655,
   "modules": [
     {
       "external_imports": [],
@@ -2434,6 +2434,7 @@
       ],
       "imports": [
         "app.domains.memory.contracts.source_evidence",
+        "app.domains.memory.models.batch",
         "app.domains.memory.repository.batch",
         "app.domains.memory.repository.consolidation",
         "app.domains.memory.repository.items"
@@ -3087,6 +3088,25 @@
       ],
       "module": "app.domains.memory.service.batch_preparation",
       "path": "backend/app/domains/memory/service/batch_preparation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.memory.contracts.batch_preparation",
+        "app.domains.memory.contracts.items",
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.exceptions",
+        "app.domains.memory.models.batch",
+        "app.domains.memory.models.items",
+        "app.domains.memory.policies.batch",
+        "app.domains.memory.service.batch_preparation"
+      ],
+      "module": "app.domains.memory.service.batch_scheduling",
+      "path": "backend/app/domains/memory/service/batch_scheduling.py",
       "wildcard_imports": []
     },
     {
@@ -7481,6 +7501,7 @@
       "imports": [
         "app.domains.memory.contracts.batch_preparation",
         "app.runtime.memory.composition",
+        "app.runtime.memory.scope_queries",
         "app.runtime.memory.sqlalchemy_source_reader"
       ],
       "module": "app.runtime.memory.batch_preparation",
@@ -7508,6 +7529,7 @@
         "app.domains.memory.policies.consolidation",
         "app.domains.memory.repository.delivery",
         "app.domains.memory.service.batch_preparation",
+        "app.domains.memory.service.batch_scheduling",
         "app.domains.memory.service.batch_selection",
         "app.domains.memory.service.items",
         "app.runtime.memory.batch_preparation",
@@ -7559,7 +7581,9 @@
       ],
       "imports": [
         "app.core.db",
-        "app.domains.memory.contracts.scope"
+        "app.domains.memory.contracts.scope",
+        "app.domains.memory.models.batch",
+        "app.domains.memory.models.items"
       ],
       "module": "app.runtime.memory.scope_queries",
       "path": "backend/app/runtime/memory/scope_queries.py",
