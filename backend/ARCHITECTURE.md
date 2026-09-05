@@ -537,3 +537,9 @@ World 대화 생성의 tuple/quota lock, preference 생성의 flush-only 경로,
 `repository/response_lifecycle.py`는 응답 요청의 lease·상태 전이·sequence·최종 답변의 원자적 저장을 담당합니다. `accept`와 `finalize`는 원래 `create_request`와 `finalize_response`의 동일 함수 이름이며 추가 저장 정책이 아닙니다. 실행 경로는 이 저장소를 직접 사용하므로 단순 전달만 하던 `GenerationLifecycleService` 인스턴스를 생성하지 않습니다. 오래된 fence의 거부, 완료 응답 재실행 시 중복 방지, 부분 delta 비저장, 성공 이후 Memory 후보 생성 순서는 유지합니다.
 
 이전 생성 클래스는 기존 공개 계약과 승인 테스트를 보존하기 위해 `compatibility/chat_generation_lifecycle.py` 한 곳에 남습니다. 새 기능의 진입점으로 사용하지 않으며 B8에서 원래 테스트와 실제 저장소 회귀의 대응을 확인한 뒤 제거합니다. `runtime/chat/world_generation.py`의 HTTP 요청 조립과 여러 업무를 함께 읽는 실제 코드는 다음 B6 전환 범위이며, 이 단계만으로 Chat 전체 전환이 완료된 것은 아닙니다.
+
+### World Chat 요청의 실제 서비스
+
+`service/generation.py`의 `GenerationService`가 접수·같은 요청 재실행·실패 응답 재시도·상태 읽기·기한 만료 복구·시작 전 실패 기록을 구현합니다. HTTP의 접수·재시도·요청 조회 네 동작은 이 실제 인스턴스를 호출합니다. ThreadService의 소유권·잠금·World 재검증과 모델 snapshot을 같은 Session으로 사용하고, 사용자 메시지 flush 이후 요청 생성·commit·refresh 순서를 유지합니다. 요청이 이미 존재하면 원래 내용과 키를 확인해 기존 요청을 반환하며 새 메시지를 만들지 않습니다.
+
+`repository/response_requests.py`는 같은 thread의 진행 중·최신 요청을 원래 조건과 순서로 조회합니다. 조회는 commit하지 않습니다. 기한 만료 복구의 commit, 실패 stream의 accepted/failed 이벤트 sequence와 fence 확인은 GenerationService가 소유합니다. `runtime/chat/world_generation.py`의 남은 stream/provider·근거 inspector는 이 서비스의 동일 메서드를 연결하며, 다음 단계에서 실제 외부 협력 조립과 정책을 더 분리합니다.

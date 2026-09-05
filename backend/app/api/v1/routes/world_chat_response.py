@@ -14,6 +14,7 @@ from app.config import settings
 from app.domains.chat import public as chat
 from app.domains.identity.public import User
 from app.runtime.chat import world_generation as chat_service
+from app.runtime.chat.message_composition import generation_service
 
 
 router = APIRouter(prefix="/worlds/{world_id}/chat", tags=["world-chat"])
@@ -33,7 +34,7 @@ def accept_world_message(
 ) -> chat.WorldChatMessageAcceptRead:
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
-        return chat_service.accept_world_message(db, user, world_id, thread_id, data)
+        return generation_service.accept_world_message(db, user, world_id, thread_id, data)
     except chat.MessageNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except chat.MessageForbiddenError as exc:
@@ -61,7 +62,7 @@ def retry_world_response(
 ) -> chat.WorldChatMessageAcceptRead:
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
-        return chat_service.retry_world_response(db, user, world_id, thread_id, data)
+        return generation_service.retry_world_response(db, user, world_id, thread_id, data)
     except chat.MessageNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
     except chat.MessageForbiddenError as exc:
@@ -83,7 +84,7 @@ def get_latest_world_response_request(
 ) -> chat.WorldChatLatestRequestRead:
     browser_session.require_local_frontend_request(request, mutation=False)
     try:
-        return chat_service.get_latest_world_response_request(
+        return generation_service.get_latest_world_response_request(
             db, user, world_id, thread_id
         )
     except chat.MessageNotFoundError as exc:
@@ -106,7 +107,7 @@ def get_world_response_request(
 ) -> chat.WorldChatGenerationRequestRead:
     browser_session.require_local_frontend_request(request, mutation=False)
     try:
-        return chat_service.get_world_response_request(
+        return generation_service.get_world_response_request(
             db, user, world_id, thread_id, request_id
         )
     except chat.MessageNotFoundError as exc:
@@ -149,7 +150,7 @@ def stream_world_response_events(
 ) -> StreamingResponse:
     browser_session.require_local_frontend_request(request, mutation=False)
     try:
-        read = chat_service.get_world_response_request(
+        read = generation_service.get_world_response_request(
             db, user, world_id, thread_id, request_id
         )
     except chat.MessageNotFoundError as exc:

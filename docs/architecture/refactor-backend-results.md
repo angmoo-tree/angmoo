@@ -566,3 +566,15 @@ A2 `57528d22072f7541e7f1f1b982071afd5c1d537c` 뒤 실제 검색 계획·근거 �
 전체 `--contracts --nodes` 검사에서 source 목적지·분리 symbol/소비자·assertion·억제 표시·API·ORM·기존 node 오류는 0이었다. 보호 계보 **2,129 / 현재 2,168**이며 선행 Media/WC 및 A1/A2의 아직 캡처되지 않은 committed source 36개·node 37개 때문에 명령 전체는 exit 1이다. 이번 source의 신규 2 nodes와 실제 소유 파일의 첫 도입 SHA는 root가 선형 통합에서 캡처한다. Frozen 원본·checkpoint·승인 node는 바꾸지 않았다.
 
 Live architecture **641 modules / 2,094 edges / exact legacy 265 PASS**, ER0 **79/87/24/44/7 PASS**, L4 parity **97**, Memory batch current, 공개 route inventory **196**이다. 후속 B6-B2/C에서 runtime의 generation admission·evidence 읽기·provider/다중 업무 조립과 HTTP 진입점을 이어서 정리한다. B5 합류·전체 Chat 완료·Hosted CI·설치 Gate 완료를 의미하지 않는다.
+
+## AR-B6-B2A — 생성 접수·재시도·상태와 실패 기록의 실제 서비스
+
+B1 `408a29e0306aa9b95b08e3ed383032eebf4c6f8c` 뒤 runtime의 실제 업무 12개를 `GenerationService`로, 같은 thread의 active/latest SQL 2개를 `repository/response_requests.py`로 이전했다. HTTP 네 동작은 실제 서비스 인스턴스를 직접 호출한다. 기존 stream/evidence의 동일 인스턴스 메서드 alias는 남은 실제 호출을 위해서만 유지하며, API·runtime·repository·새 service를 원래 source의 완전한 symbol 분리 지도로 연결했다.
+
+12개 메서드는 명시적 self·ThreadService·repository binding을 원래 이름으로 되돌리면 **모두 AST 동일**하고 SQL 2개도 동일하다. user message flush→request 생성→commit→refresh, 같은 idempotency 키·내용 재확인, 최신 실패 요청과 같은 user message/response slot 재시도, 모델 PATCH와 같은 tuple 잠금·scope 재검증, 만료 복구 commit, accepted/failed sequence·lease fence 및 terminal 오류 저장 순서를 유지했다.
+
+첫 집중 검사 **46 passed / 3 failed**에서 모델 snapshot 함수를 SettingsService로 잘못 연결한 부분을 찾아 실제 ThreadService 소유로 수정했다. 기존 Hotfix 잠금 회귀는 monkeypatch 대상만 실제 owning instance로 옮기고 assertion은 그대로 유지했다. 수정 뒤 **56 passed / 기존 4 warnings / 14.10초**, 고정 tree 확장 묶음은 **194 passed / 기존 4 warnings / 24.95초**였다. 신규 node는 추가하지 않았으며 B1의 실제 accept/replay·fence 회귀와 기존 전송·재시도·재연결·모델 Hotfix 검증을 사용했다.
+
+전체 보존 검사에서 source/split/assertion/억제 표시/API/ORM/기존 node 오류 0, 보호 **2,129 / 현재 2,168**을 확인했다. 선행 source 37개·node 39개의 append-only capture가 root 순차 통합에 남아 있어 명령 전체는 exit 1이다. 이번 실제 service/repository 2개 파일의 첫 도입 SHA도 그 순서로 캡처한다. Live architecture **643 modules / 2,109 edges / exact legacy 265 PASS**, ER0 **79/87/24/44/7 PASS**, L4 **97**, Memory batch current, public **196**이다.
+
+근거 inspector의 현재 원본·revision/공개 상태 재검증과 provider/Memory/graph/Today 실행 조립은 후속 B2B/C 범위다. 전체 Chat·B5 순차 통합·CI·설치 완료로 표시하지 않는다.

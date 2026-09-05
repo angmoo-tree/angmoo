@@ -1,7 +1,7 @@
 {
-  "edge_count": 2094,
-  "external_import_count": 2097,
-  "module_count": 641,
+  "edge_count": 2109,
+  "external_import_count": 2106,
+  "module_count": 643,
   "modules": [
     {
       "external_imports": [],
@@ -377,6 +377,7 @@
         "app.domains.identity.browser_session",
         "app.domains.identity.dependencies",
         "app.domains.identity.public",
+        "app.runtime.chat.message_composition",
         "app.runtime.chat.world_generation"
       ],
       "module": "app.api.v1.routes.world_chat_response",
@@ -1701,6 +1702,20 @@
     {
       "external_imports": [
         "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.chat.contracts.generation_lifecycle",
+        "app.domains.chat.models"
+      ],
+      "module": "app.domains.chat.repository.response_requests",
+      "path": "backend/app/domains/chat/repository/response_requests.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "hashlib",
         "sqlalchemy",
         "sqlalchemy.orm"
@@ -1843,6 +1858,29 @@
       ],
       "module": "app.domains.chat.service.evidence_assembly",
       "path": "backend/app/domains/chat/service/evidence_assembly.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.chat.contracts",
+        "app.domains.chat.contracts.context",
+        "app.domains.chat.exceptions",
+        "app.domains.chat.models",
+        "app.domains.chat.repository.response_lifecycle",
+        "app.domains.chat.repository.response_requests",
+        "app.domains.chat.schemas",
+        "app.domains.chat.service.threads"
+      ],
+      "module": "app.domains.chat.service.generation",
+      "path": "backend/app/domains/chat/service/generation.py",
       "wildcard_imports": []
     },
     {
@@ -7039,6 +7077,7 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.chat.service.generation",
         "app.domains.chat.service.messages",
         "app.domains.chat.service.settings",
         "app.domains.chat.service.threads",
@@ -7147,8 +7186,10 @@
         "app.domains.chat.contracts",
         "app.domains.chat.exceptions",
         "app.domains.chat.repository",
+        "app.domains.chat.repository.response_requests",
         "app.domains.chat.schemas",
         "app.domains.chat.service",
+        "app.domains.chat.service.generation",
         "app.domains.identity.public",
         "app.domains.memory.infrastructure",
         "app.domains.memory.public",
@@ -7156,6 +7197,7 @@
         "app.domains.relationships.public",
         "app.integrations.llm",
         "app.runtime.chat.memory_producer",
+        "app.runtime.chat.message_composition",
         "app.runtime.chat.model_bindings",
         "app.runtime.chat.retrieval_policy",
         "app.runtime.chat.sqlalchemy_service",

@@ -103,7 +103,7 @@ def test_generation_acceptance_locks_thread_before_model_snapshot(
     observed: dict[str, object] = {}
 
     monkeypatch.setattr(
-        world_generation.sqlalchemy_service,
+        world_generation.generation_service.thread_service,
         "_require_world_chat_owner_scope",
         lambda *_args, **_kwargs: None,
     )
@@ -120,12 +120,12 @@ def test_generation_acceptance_locks_thread_before_model_snapshot(
         return thread
 
     monkeypatch.setattr(
-        world_generation.sqlalchemy_service,
+        world_generation.generation_service.thread_service,
         "_get_owned_world_thread",
         get_owned_thread,
     )
     monkeypatch.setattr(
-        world_generation.sqlalchemy_service,
+        world_generation.generation_service.thread_service,
         "_world_thread_read",
         lambda *_args, **_kwargs: None,
     )

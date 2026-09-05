@@ -270,7 +270,8 @@
     "backend/app/domains/chat/ports/today_sns_activity.py": "backend/app/domains/chat/contracts/today_sns_activity.py",
     "backend/app/domains/chat/ports/__init__.py": "backend/app/domains/chat/contracts/__init__.py",
     "backend/app/domains/chat/infrastructure/response_lifecycle_repository.py": "backend/app/domains/chat/repository/response_lifecycle.py",
-    "backend/app/domains/chat/infrastructure/__init__.py": "backend/app/domains/chat/repository/__init__.py"
+    "backend/app/domains/chat/infrastructure/__init__.py": "backend/app/domains/chat/repository/__init__.py",
+    "backend/app/runtime/chat/world_generation.py": "backend/app/domains/chat/service/generation.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -17972,7 +17973,7 @@
           "backend/app/domains/chat/service/messages.py",
           "backend/app/domains/chat/service/settings.py",
           "backend/app/domains/chat/service/threads.py",
-          "backend/app/runtime/chat/world_generation.py"
+          "backend/app/domains/chat/service/generation.py"
         ]
       },
       "split_symbols": [
@@ -18015,15 +18016,17 @@
         },
         {
           "old": "backend/app/runtime/chat/sqlalchemy_adapter.py::SqlAlchemyChatRuntime",
-          "new": "backend/app/runtime/chat/world_generation.py::accept_world_message",
+          "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
             "backend/app/api/v1/routes/world_chat_response.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_j_response_generation_lifecycle.py::test_fenced_finalize_is_atomic_idempotent_and_stores_no_partial_delta",
             "tests/chat/test_service_ownership.py::test_routes_call_actual_owner_services_without_runtime_port_chain"
           ],
-          "reason": "Generation HTTP now calls the established concrete workflow directly; generation-role migration is the next B6 slice."
+          "reason": "Generation HTTP now calls the established concrete workflow directly; generation-role migration is the next B6 slice.",
+          "new_member": "accept_world_message"
         }
       ],
       "preserved_body_comparison": {
@@ -18111,6 +18114,381 @@
         "workflow_constructor_annotation_changes": 1,
         "classes_with_same_method_aliases": 2,
         "runtime_functions_identical_after_unwrapping_original_constructor": 5
+      }
+    },
+    "AR-B6-B2A": {
+      "status": "Actual generation admission/replay/retry/status/terminal failure workflow moved to GenerationService. Provider streaming and live evidence remain exact B6-B2B/C runtime-owned remainder.",
+      "split_files": {
+        "backend/app/runtime/chat/world_generation.py": [
+          "backend/app/domains/chat/service/generation.py",
+          "backend/app/domains/chat/repository/response_requests.py",
+          "backend/app/runtime/chat/world_generation.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::RESPONSE_REQUEST_DEADLINE_SECONDS",
+          "new": "backend/app/domains/chat/service/generation.py::RESPONSE_REQUEST_DEADLINE_SECONDS",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::RESPONSE_CONTEXT_MESSAGE_LIMIT",
+          "new": "backend/app/runtime/chat/world_generation.py::RESPONSE_CONTEXT_MESSAGE_LIMIT",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::RESPONSE_CONTEXT_CHAR_LIMIT",
+          "new": "backend/app/runtime/chat/world_generation.py::RESPONSE_CONTEXT_CHAR_LIMIT",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::logger",
+          "new": "backend/app/runtime/chat/world_generation.py::logger",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::SqlAlchemyResponseWorkflowUnitOfWork",
+          "new": "backend/app/runtime/chat/world_generation.py::SqlAlchemyResponseWorkflowUnitOfWork",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::accept_world_message",
+          "new": "backend/app/domains/chat/service/generation.py::GenerationService",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ],
+          "new_member": "accept_world_message"
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::retry_world_response",
+          "new": "backend/app/domains/chat/service/generation.py::GenerationService",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ],
+          "new_member": "retry_world_response"
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::get_world_response_request",
+          "new": "backend/app/domains/chat/service/generation.py::GenerationService",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ],
+          "new_member": "get_world_response_request"
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::get_latest_world_response_request",
+          "new": "backend/app/domains/chat/service/generation.py::GenerationService",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ],
+          "new_member": "get_latest_world_response_request"
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::get_world_response_evidence",
+          "new": "backend/app/runtime/chat/world_generation.py::get_world_response_evidence",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::stream_world_response",
+          "new": "backend/app/runtime/chat/world_generation.py::stream_world_response",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_mutation_thread",
+          "new": "backend/app/domains/chat/service/generation.py::GenerationService",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ],
+          "new_member": "_mutation_thread"
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_active_request",
+          "new": "backend/app/domains/chat/repository/response_requests.py::_active_request",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_latest_request_row",
+          "new": "backend/app/domains/chat/repository/response_requests.py::_latest_request_row",
+          "direct_consumers": [
+            "backend/app/domains/chat/service/generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_recover_if_expired",
+          "new": "backend/app/domains/chat/service/generation.py::GenerationService",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ],
+          "new_member": "_recover_if_expired"
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_request_read",
+          "new": "backend/app/domains/chat/service/generation.py::GenerationService",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ],
+          "new_member": "_request_read"
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_record_read",
+          "new": "backend/app/domains/chat/service/generation.py::GenerationService",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ],
+          "new_member": "_record_read"
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_chat_evidence_item",
+          "new": "backend/app/runtime/chat/world_generation.py::_chat_evidence_item",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_optional_datetime",
+          "new": "backend/app/runtime/chat/world_generation.py::_optional_datetime",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_related_direction",
+          "new": "backend/app/runtime/chat/world_generation.py::_related_direction",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_world_character_name",
+          "new": "backend/app/runtime/chat/world_generation.py::_world_character_name",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_chat_source_label",
+          "new": "backend/app/runtime/chat/world_generation.py::_chat_source_label",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_recent_context",
+          "new": "backend/app/runtime/chat/world_generation.py::_recent_context",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_profile",
+          "new": "backend/app/runtime/chat/world_generation.py::_profile",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_character_labels",
+          "new": "backend/app/runtime/chat/world_generation.py::_character_labels",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_fail_before_workflow",
+          "new": "backend/app/domains/chat/service/generation.py::GenerationService",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ],
+          "new_member": "_fail_before_workflow"
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_terminal_event",
+          "new": "backend/app/domains/chat/service/generation.py::GenerationService",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ],
+          "new_member": "_terminal_event"
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_fence",
+          "new": "backend/app/domains/chat/service/generation.py::GenerationService",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ],
+          "new_member": "_fence"
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::_event",
+          "new": "backend/app/domains/chat/service/generation.py::GenerationService",
+          "direct_consumers": [
+            "backend/app/runtime/chat/message_composition.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ],
+          "new_member": "_event"
+        },
+        {
+          "old": "backend/app/runtime/chat/world_generation.py::__all__",
+          "new": "backend/app/runtime/chat/world_generation.py::__all__",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
+            "tests/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
+          ]
+        }
+      ],
+      "preserved_body_comparison": {
+        "same_owner_binding_normalized_methods": 12,
+        "unchanged_sql_functions": 2
+      },
+      "consumer_contract": "Four HTTP operations call the GenerationService instance directly. Existing runtime generation helpers temporarily alias the same instance for remaining streaming/evidence and historical tests.",
+      "remaining_owners": {
+        "backend/app/runtime/chat/world_generation.py": "B6-B2B/C streaming provider/Memory/graph/Today composition and evidence visibility revalidation; keep their same-Session/commit and live-source checks."
       }
     }
   }
