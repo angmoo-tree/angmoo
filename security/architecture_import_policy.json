@@ -161,10 +161,6 @@
           "importer": "app.models"
         },
         {
-          "imported": "app.models.character_lore",
-          "importer": "app.models"
-        },
-        {
           "imported": "app.models.local_bot_quotas",
           "importer": "app.models"
         },
@@ -302,10 +298,6 @@
         },
         {
           "imported": "app.schemas.agents",
-          "importer": "app.schemas"
-        },
-        {
-          "imported": "app.schemas.character_lore",
           "importer": "app.schemas"
         },
         {
@@ -469,10 +461,6 @@
           "importer": "app.services.character_lore"
         },
         {
-          "imported": "app.services.lore_parser_quota",
-          "importer": "app.services.character_lore"
-        },
-        {
           "imported": "app.cruds.agent_runs",
           "importer": "app.services.community"
         },
@@ -619,10 +607,6 @@
         {
           "imported": "app.services.agent_activity_policy",
           "importer": "app.services.local_bot_quota"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.lore_parser_quota"
         },
         {
           "imported": "app.models",
@@ -969,6 +953,12 @@
       "app.pagination"
     ],
     "modules": [
+      "app.domains.character_lore.constants",
+      "app.domains.character_lore.contracts",
+      "app.domains.character_lore.exceptions",
+      "app.domains.character_lore.models",
+      "app.domains.character_lore.schemas",
+      "app.domains.character_lore.service.parser_quota",
       "app.domains.characters.contracts",
       "app.domains.characters.dependencies",
       "app.domains.characters.exceptions",
@@ -1239,6 +1229,9 @@
       "app.domains.worlds.storage"
     ],
     "entries": [
+      "app.domains.character_lore.contracts",
+      "app.domains.character_lore.schemas",
+      "app.domains.character_lore.service.parser_quota",
       "app.domains.characters.contracts",
       "app.domains.characters.schemas",
       "app.domains.characters.service.access",
@@ -2870,6 +2863,54 @@
         "owner_stage": "AR-B8-A / AR-G5",
         "removal_condition": "Replace global aggregate model/schema imports and explicit registration in G5; no new Tree business implementation in the legacy path.",
         "reason": "Existing aggregate exposes the same actual Tree class/schema objects during registration and consumer transition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.character_lore.models",
+        "owner_stage": "AR-B8-A / AR-G5",
+        "removal_condition": "Move remaining lore document/parser/retrieval/HTTP consumers to actual roles; retire aggregate model/schema registration in G5.",
+        "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.character_lore.schemas",
+        "owner_stage": "AR-B8-A / AR-G5",
+        "removal_condition": "Move remaining lore document/parser/retrieval/HTTP consumers to actual roles; retire aggregate model/schema registration in G5.",
+        "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.character_lore",
+        "target": "app.domains.character_lore.constants",
+        "owner_stage": "AR-B8-A / AR-G5",
+        "removal_condition": "Move remaining lore document/parser/retrieval/HTTP consumers to actual roles; retire aggregate model/schema registration in G5.",
+        "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.character_lore",
+        "target": "app.domains.character_lore.exceptions",
+        "owner_stage": "AR-B8-A / AR-G5",
+        "removal_condition": "Move remaining lore document/parser/retrieval/HTTP consumers to actual roles; retire aggregate model/schema registration in G5.",
+        "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.character_lore",
+        "target": "app.domains.character_lore.contracts",
+        "owner_stage": "AR-B8-A / AR-G5",
+        "removal_condition": "Move remaining lore document/parser/retrieval/HTTP consumers to actual roles; retire aggregate model/schema registration in G5.",
+        "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.character_lore",
+        "target": "app.domains.character_lore.service.parser_quota",
+        "owner_stage": "AR-B8-A / AR-G5",
+        "removal_condition": "Move remaining lore document/parser/retrieval/HTTP consumers to actual roles; retire aggregate model/schema registration in G5.",
+        "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
         "review_date": "2026-09-06"
       }
     ]

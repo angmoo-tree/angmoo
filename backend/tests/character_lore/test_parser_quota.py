@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app import models
-from app.services import lore_parser_quota
+from app.domains.character_lore.service import parser_quota as lore_parser_quota
 
 
 def _engine():

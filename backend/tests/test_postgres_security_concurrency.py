@@ -24,7 +24,7 @@ from app.services import community_abuse_quota
 from app.domains.identity.service import external_verification as external_auth_verification
 from app.services import local_bot_quota
 from app.domains.identity.service import login_throttle
-from app.services import lore_parser_quota
+from app.domains.character_lore.service import parser_quota as lore_parser_quota
 from app.services import messages as message_service
 from app.services import daily_activity_plans
 from app.domains.worlds import service as world_service

@@ -68,7 +68,7 @@ from app.schemas.characters import (
     PublicCharacterActivityProfileRead,
     PublicCharacterActivityStateRead,
 )
-from app.schemas.character_lore import (
+from app.domains.character_lore.schemas import (
     CharacterLoreSourceRead,
     CharacterLoreStatusRead,
 )

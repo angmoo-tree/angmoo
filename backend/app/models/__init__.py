@@ -10,7 +10,7 @@ from app.domains.identity.models import User
 from app.domains.identity.models import LlmCredential
 from app.domains.runtime.infrastructure import RuntimeSchedulerLease
 from app.domains.characters.models import Character, CharacterState
-from app.models.character_lore import CharacterLoreChunk, CharacterLoreSource, LoreParserLease
+from app.domains.character_lore.models import CharacterLoreChunk, CharacterLoreSource, LoreParserLease
 from app.models.agent_settings import AgentImageGenerationSetting
 from app.domains.routines.models import AgentActivitySetting
 from app.models.agent_local_keys import AgentLocalKey

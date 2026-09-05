@@ -1,7 +1,7 @@
 {
-  "edge_count": 2431,
-  "external_import_count": 2259,
-  "module_count": 729,
+  "edge_count": 2438,
+  "external_import_count": 2261,
+  "module_count": 734,
   "modules": [
     {
       "external_imports": [],
@@ -788,6 +788,102 @@
       "imports": [],
       "module": "app.domains",
       "path": "backend/app/domains/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.character_lore",
+      "path": "backend/app/domains/character_lore/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "os",
+        "zoneinfo"
+      ],
+      "imports": [],
+      "module": "app.domains.character_lore.constants",
+      "path": "backend/app/domains/character_lore/constants.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses"
+      ],
+      "imports": [
+        "app.domains.character_lore.constants"
+      ],
+      "module": "app.domains.character_lore.contracts",
+      "path": "backend/app/domains/character_lore/contracts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "dataclasses"
+      ],
+      "imports": [
+        "app.domains.character_lore.constants"
+      ],
+      "module": "app.domains.character_lore.exceptions",
+      "path": "backend/app/domains/character_lore/exceptions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "json",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "sqlalchemy.types",
+        "typing"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.character_lore.models",
+      "path": "backend/app/domains/character_lore/models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "pydantic"
+      ],
+      "imports": [],
+      "module": "app.domains.character_lore.schemas",
+      "path": "backend/app/domains/character_lore/schemas.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.character_lore.service",
+      "path": "backend/app/domains/character_lore/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "contextlib",
+        "datetime",
+        "hashlib",
+        "hmac",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "threading",
+        "typing",
+        "uuid"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.character_lore.constants",
+        "app.domains.character_lore.exceptions",
+        "app.domains.character_lore.models"
+      ],
+      "module": "app.domains.character_lore.service.parser_quota",
+      "path": "backend/app/domains/character_lore/service/parser_quota.py",
       "wildcard_imports": []
     },
     {
@@ -7512,6 +7608,7 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.character_lore.models",
         "app.domains.characters.models",
         "app.domains.chat.infrastructure.sqlalchemy_models",
         "app.domains.identity.models",
@@ -7532,7 +7629,6 @@
         "app.models.agent_local_keys",
         "app.models.agent_runs",
         "app.models.agent_settings",
-        "app.models.character_lore",
         "app.models.local_bot_quotas",
         "app.models.world_activity_runtime",
         "app.models.world_character_setup",
@@ -7615,22 +7711,6 @@
       ],
       "module": "app.models.auth",
       "path": "backend/app/models/auth.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "datetime",
-        "json",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "sqlalchemy.types",
-        "typing"
-      ],
-      "imports": [
-        "app.core.db"
-      ],
-      "module": "app.models.character_lore",
-      "path": "backend/app/models/character_lore.py",
       "wildcard_imports": []
     },
     {
@@ -10006,6 +10086,7 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.character_lore.schemas",
         "app.domains.chat.api.schemas",
         "app.domains.identity.schemas",
         "app.domains.relationships.graph_read.schemas",
@@ -10015,7 +10096,6 @@
         "app.domains.social.schemas.feed",
         "app.domains.tree.schemas",
         "app.schemas.agents",
-        "app.schemas.character_lore",
         "app.schemas.characters",
         "app.schemas.maintenance",
         "app.schemas.social_memory",
@@ -10055,16 +10135,6 @@
       ],
       "module": "app.schemas.auth",
       "path": "backend/app/schemas/auth.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "datetime",
-        "pydantic"
-      ],
-      "imports": [],
-      "module": "app.schemas.character_lore",
-      "path": "backend/app/schemas/character_lore.py",
       "wildcard_imports": []
     },
     {
@@ -10302,7 +10372,6 @@
         "__future__",
         "asyncio",
         "ctypes",
-        "dataclasses",
         "datetime",
         "docx",
         "hashlib",
@@ -10321,21 +10390,23 @@
         "time",
         "typing",
         "uuid",
-        "zipfile",
-        "zoneinfo"
+        "zipfile"
       ],
       "imports": [
         "app.core.context_text",
         "app.credentials",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.character_lore.constants",
+        "app.domains.character_lore.contracts",
+        "app.domains.character_lore.exceptions",
+        "app.domains.character_lore.service.parser_quota",
         "app.models",
         "app.providers.contracts",
         "app.providers.registry",
         "app.schemas",
         "app.services.community",
-        "app.services.direct_llm",
-        "app.services.lore_parser_quota"
+        "app.services.direct_llm"
       ],
       "module": "app.services.character_lore",
       "path": "backend/app/services/character_lore.py",
@@ -10576,28 +10647,6 @@
       ],
       "module": "app.services.local_bot_quota",
       "path": "backend/app/services/local_bot_quota.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "contextlib",
-        "dataclasses",
-        "datetime",
-        "hashlib",
-        "hmac",
-        "sqlalchemy",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm",
-        "threading",
-        "typing",
-        "uuid"
-      ],
-      "imports": [
-        "app.config",
-        "app.models"
-      ],
-      "module": "app.services.lore_parser_quota",
-      "path": "backend/app/services/lore_parser_quota.py",
       "wildcard_imports": []
     },
     {

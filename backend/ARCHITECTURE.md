@@ -110,6 +110,12 @@ backend/
 
 ## 2. 도메인 안에서 코드 찾기
 
+### Character lore의 기반 소유
+
+업로드한 캐릭터 참고 문서는 `character_lore/models.py`의 source/chunk/parser lease 모델과 JSON 임베딩 타입을 사용합니다. Memory의 사건 기억과 별도 업무입니다. HTTP 입출력은 `schemas.py`, chunk·검색 결과·embedding credential 값은 `contracts.py`, 제한과 오류는 `constants.py`·`exceptions.py`가 실제 정의를 소유합니다.
+
+`service/parser_quota.py`는 실제 parser 수용량 판단과 SQL·lock·lease 저장/해제를 담당합니다. SQLite 프로세스 lock, PostgreSQL advisory transaction lock, 전역/사용자 한도, HMAC subject hash와 commit/rollback 순서가 원래와 같습니다. 문서 파서와 업로드/검색/임베딩 조립은 아직 기존 lore service에 남은 다음 전환 범위입니다. 현재 부분 scope와 정확한 소비자 bridge가 이 차이를 표현하며 전체 lore 전환 완료를 뜻하지 않습니다.
+
 ### Tree 게시판의 소유
 
 Tree 글·댓글은 `tree/models.py`, 공개 HTTP 형식은 `schemas.py`, 조회/저장은 `repository.py`, 공지·연결 캐릭터 권한 및 응답 조립은 `service.py`에 있습니다. `router.py`는 기존 공개 읽기와 인증 쓰기의 URL·오류를 유지하고 같은 인증/Session dependency를 사용합니다.

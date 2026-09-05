@@ -1098,3 +1098,15 @@ Tree 확대 검증은 **133 passed / 기존 warning 1 / 88.92s**다. stock 전�
 최종 Tree 재검사 **8 passed / 기존 warning 1 / 12.32s**, 정확 split 증거 진단 **0 errors**, 경계 **729 modules / 2,431 edges / legacy212**, L4 현재 inventory **729/14/97**, 공개 route inventory **196 operations**를 확인했다. 최종 source는 이 독립 준비 범위이며 root가 선형 원장·후속 source 합류·Hosted CI를 수행한다.
 
 별도 역사적 `scripts/verify_m4_contracts.py` 실행은 M4 당시 expected148 operations/120 paths/182 schemas와 현재196/160/266의 차이로 FAIL이다. 해당 파일과 상수는 수정하지 않았고 현재 workflow가 호출하지 않음을 확인했다. 이번 전환의 frozen API/ORM 비교는 손실 0이며, 역사적 verifier의 현재 지원 여부는 B8 종료 정리에서 별도로 판정한다.
+
+
+## AR-B8 Lore A1 실제 모델·계약·파서 수용량 준비 — 2026-09-06
+
+Tree `f52dbdb` 다음 source에서 `character_lore/models.py`로 실제 ORM3개와 EmbeddingJsonText를, schemas/contracts/constants/exceptions로 실제 정의를 이전했다. `service/parser_quota.py`는 기존 lock·HMAC subject·SQL·전역/사용자 한도·commit/rollback·yield 후 lease 해제 본문을 소유한다. errors의 retry 상수는 동일 값의 canonical 상수를 직접 참조한다. 기존 parser/doc upload/retrieval/HTTP와 provider 조립은 다음 slice로 명시하고, 기존 lore service는 정확히 필요한 동일 정의를 사용한다.
+
+모델/schema 및 원래 서비스의 정의 **113개 AST 동일**, 기존 lore3파일 **34 test nodes 일대일 이동**, Lore/Tree/M3삭제/LangGraph resident **245 passed / 기존 warning1 / 21.20s**다. 경계 **734 modules/2,438 edges/legacy208**, 현재 L4 **734/14/97**, deferred22를 확인했다. 원장을 수정하지 않은 signed869bae55 경로 supplement 진단에서 protected2,201/current2,251, source/assertion/suppression/APIORM/node 손실0이다. 첫 split 검사에서 남아 있는 원래 Windows parser job handle의 AnnAssign 한 줄을 지도에서 빠뜨린 것을 확인하고, 실제 남은 기존 파일/동일 symbol/기존 isolated parser 회귀로 정확히 추가하여 재검사한다. 제품 로직과 검사 규칙은 바꾸지 않는다.
+
+이 단계에 새 test node는 없다. 실제 모델/정의 최초 도입 source와 source capture는 구분하며, G5 전역 등록 및 aggregate 제거·G06/B8-B·Hosted CI/설치는 아직 별도 단계다.
+
+
+Lore A1의 정확 split symbol 재검사는 **0 errors**로 종료했다. 정의/행동 보존과 부분 scope 근거를 고정하며, pending 원장을 재생성하거나 검사 대상에서 제외하지 않았다.
