@@ -45,8 +45,8 @@ PARITY_WORKLOADS = (
         "phase": "P1",
         "contract": "World create/update/readiness/publish/archive with provider calls and public writes both zero",
         "tests": [
-            "backend/tests/test_world_creator_routes.py",
-            "backend/tests/test_world_definition_contract.py",
+            "backend/tests/worlds/test_creator_routes.py",
+            "backend/tests/worlds/test_definition_contract.py",
             "backend/tests/test_world_foundation.py",
         ],
     },

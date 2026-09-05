@@ -388,7 +388,7 @@
     },
     {
       "path": "scripts/ci/build_windows_installer_supported_upgrade_fixture.py",
-      "sha256": "a93ed45d13ddbba76041978109268960ae61ab216fb4042e28940d928eca0bad"
+      "sha256": "9b949db3b400a9e7f87473aa2fe28d1c631ac0efc68f974cd2a231791ea98a61"
     },
     {
       "path": "scripts/ci/check_windows_installer_supported_upgrade_matrix.py",

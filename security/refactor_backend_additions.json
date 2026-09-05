@@ -1329,6 +1329,92 @@
         "tests/characters/test_character_state_http.py": {},
         "tests/characters/test_creator_http_errors.py": {}
       }
+    },
+    {
+      "commit": "38c26102a7d1f576d4eb9686f4cb9fb3585f75f2",
+      "feature_id": "AR-B2",
+      "reason": "Worlds Creator, definitions, banners, scheduling and preserved role-service behavior after Character source evidence",
+      "tracked_files": {
+        "backend/app/domains/worlds/exceptions.py": "2c3af086e22ebdd56d756ac41ce9510cda1c3936",
+        "backend/app/domains/worlds/router.py": "320bd5fa7592031c2a2eff1b22115761ac7bdf7c",
+        "backend/app/domains/worlds/service/__init__.py": "eaac96cc8e2480468cee2fedf6f8c9b644cf0c5b",
+        "backend/app/domains/worlds/service/scheduling.py": "6a085f98134244c59a68030bf6b14294425a843f",
+        "backend/tests/worlds/test_transition_contracts.py": "520c49192b136b1d8862def7214d1e7d730418c3"
+      },
+      "test_nodes": [
+        "tests/worlds/test_transition_contracts.py::test_banner_commit_failure_removes_new_file_and_preserves_previous_banner",
+        "tests/worlds/test_transition_contracts.py::test_frozen_migration_imports_resolve_to_identical_models_and_functions",
+        "tests/worlds/test_transition_contracts.py::test_resident_leave_still_translates_errors_from_the_world_service",
+        "tests/worlds/test_transition_contracts.py::test_seed_flushes_without_owning_the_callers_commit",
+        "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
+        "tests/worlds/test_transition_contracts.py::test_timezone_update_and_rescheduling_share_one_transaction[False]",
+        "tests/worlds/test_transition_contracts.py::test_timezone_update_and_rescheduling_share_one_transaction[True]"
+      ],
+      "test_assertions": {
+        "tests/worlds/test_transition_contracts.py": {
+          "world_session": [],
+          "test_frozen_migration_imports_resolve_to_identical_models_and_functions": [
+            "assert old_models.World is models.World is registered_models.World",
+            "assert old_models.WorldMembership is models.WorldMembership",
+            "assert old_models.WorldRole is models.WorldRole",
+            "assert old_models.World.metadata is Base.metadata",
+            "assert Base.metadata.tables['worlds'] is models.World.__table__",
+            "assert old_definition.refresh_world_contract is definition.refresh_world_contract",
+            "assert old_roles.ensure_no_specific_role is reserved_roles.ensure_no_specific_role",
+            "assert old_roles.ReservedWorldRoleConflictError is service.ReservedWorldRoleConflictError",
+            "assert old_contracts.is_canonical_no_specific_role is contracts.is_canonical_no_specific_role",
+            "assert not hasattr(service, 'World')",
+            "assert not hasattr(service, 'WorldMembership')"
+          ],
+          "test_banner_commit_failure_removes_new_file_and_preserves_previous_banner": [
+            "pytest.raises(RuntimeError, match='injected database commit failure')",
+            "assert list(previous_file.parent.iterdir()) == [previous_file]",
+            "assert previous_file.read_bytes() == b'previous verified image'",
+            "assert world.banner_media_id == previous_url",
+            "assert world.banner_alt_text == 'previous banner'",
+            "assert world.row_version == original_version"
+          ],
+          "test_timezone_update_and_rescheduling_share_one_transaction": [
+            "assert callbacks == [(db, world_id, 'America/New_York')]",
+            "assert session is db",
+            "assert session.in_transaction()",
+            "assert session.get(models.World, world_id).timezone == 'America/New_York'",
+            "pytest.raises(RuntimeError, match='injected schedule failure')",
+            "assert commits == []",
+            "assert world.timezone == original_timezone",
+            "assert world.row_version == original_version",
+            "assert world.banner_alt_text == ''",
+            "assert commits == [db]",
+            "assert updated.world.timezone == 'America/New_York'",
+            "assert world.row_version == original_version + 1",
+            "assert db.get(models.World, world_id).banner_alt_text == 'schedule applied'"
+          ],
+          "test_seed_flushes_without_owning_the_callers_commit": [
+            "assert commits == []",
+            "assert seeded.membership.world_id == identifier",
+            "assert db.get(models.World, identifier) is seeded.world",
+            "assert db.get(models.World, identifier) is None",
+            "assert db.scalar(select(models.WorldMembership).where(models.WorldMembership.world_id == identifier)) is None"
+          ],
+          "test_split_router_preserves_all_fourteen_world_and_resident_endpoints": [
+            "assert len(resident) == 4",
+            "assert len(creator_routes) == 10",
+            "assert resident.isdisjoint(creator_routes)",
+            "assert routers.count(resident_router) == 1",
+            "assert routers.count(creator_router) == 1",
+            "assert routers.index(creator_router) == routers.index(resident_router) + 1"
+          ],
+          "test_resident_leave_still_translates_errors_from_the_world_service": [
+            "assert response.status_code == 404",
+            "assert response.json() == {'detail': 'world_not_found'}",
+            "assert invoked[0]['world_id'] == world_id",
+            "assert invoked[0]['current_user_id'] == owner_id"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/worlds/test_transition_contracts.py": {}
+      }
     }
   ]
 }

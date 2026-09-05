@@ -142,8 +142,8 @@ jobs:
         run: |
           uv run python -m pytest -q \
             tests/test_world_foundation.py \
-            tests/test_world_definition_contract.py \
-            tests/test_world_creator_routes.py \
+            tests/worlds/test_definition_contract.py \
+            tests/worlds/test_creator_routes.py \
             tests/test_world_character_setup_service.py \
             tests/test_daily_activity_runtime.py \
             tests/test_routine_post_runtime.py \

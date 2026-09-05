@@ -997,10 +997,6 @@
           "importer": "app.services.world_foundation"
         },
         {
-          "imported": "app.services.world_definitions",
-          "importer": "app.services.world_foundation"
-        },
-        {
           "imported": "app.models",
           "importer": "app.services.worlds"
         }
@@ -1280,7 +1276,19 @@
       "app.domains.media.contracts",
       "app.domains.media.schemas",
       "app.domains.runtime.contracts",
-      "app.domains.runtime.schemas"
+      "app.domains.runtime.schemas",
+      "app.domains.worlds.contracts",
+      "app.domains.worlds.exceptions",
+      "app.domains.worlds.models",
+      "app.domains.worlds.router",
+      "app.domains.worlds.schemas",
+      "app.domains.worlds.service",
+      "app.domains.worlds.service.creator",
+      "app.domains.worlds.service.definition",
+      "app.domains.worlds.service.generation_context",
+      "app.domains.worlds.service.reserved_roles",
+      "app.domains.worlds.service.scheduling",
+      "app.domains.worlds.storage"
     ],
     "entries": [
       "app.domains.characters.contracts",
@@ -1309,7 +1317,11 @@
       "app.domains.media.contracts",
       "app.domains.media.schemas",
       "app.domains.runtime.contracts",
-      "app.domains.runtime.schemas"
+      "app.domains.runtime.schemas",
+      "app.domains.worlds.contracts",
+      "app.domains.worlds.schemas",
+      "app.domains.worlds.service",
+      "app.domains.worlds.service.definition"
     ],
     "bridges": [
       {
@@ -1742,6 +1754,118 @@
         "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
         "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
         "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.domain.reserved_roles",
+        "target": "app.domains.worlds.contracts",
+        "owner_stage": "AR-B8-A",
+        "reason": "The immutable SQLite v2->v3 migration imports this exact path; only identical object exports remain.",
+        "removal_condition": "Keep until supported historical migration import loading has a verified compatibility resolver; no duplicate implementation or model registration is permitted.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.infrastructure.definition_repository",
+        "target": "app.domains.worlds.service.definition",
+        "owner_stage": "AR-B8-A",
+        "reason": "The immutable SQLite v2->v3 migration imports this exact path; only identical object exports remain.",
+        "removal_condition": "Keep until supported historical migration import loading has a verified compatibility resolver; no duplicate implementation or model registration is permitted.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.infrastructure.sqlalchemy_models",
+        "target": "app.domains.worlds.models",
+        "owner_stage": "AR-B8-A",
+        "reason": "The immutable SQLite v2->v3 migration imports this exact path; only identical object exports remain.",
+        "removal_condition": "Keep until supported historical migration import loading has a verified compatibility resolver; no duplicate implementation or model registration is permitted.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.infrastructure.sqlalchemy_reserved_roles",
+        "target": "app.domains.worlds.service.reserved_roles",
+        "owner_stage": "AR-B8-A",
+        "reason": "The immutable SQLite v2->v3 migration imports this exact path; only identical object exports remain.",
+        "removal_condition": "Keep until supported historical migration import loading has a verified compatibility resolver; no duplicate implementation or model registration is permitted.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.public",
+        "target": "app.domains.worlds.contracts",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.public",
+        "target": "app.domains.worlds.models",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.public",
+        "target": "app.domains.worlds.schemas",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.public",
+        "target": "app.domains.worlds.service.creator",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.public",
+        "target": "app.domains.worlds.service.definition",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.public",
+        "target": "app.domains.worlds.service.generation_context",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.worlds.public",
+        "target": "app.domains.worlds.service.reserved_roles",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models.worlds",
+        "target": "app.domains.worlds.models",
+        "owner_stage": "AR-G5",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.worlds",
+        "target": "app.domains.worlds.schemas",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.world_foundation",
+        "target": "app.domains.worlds.service.definition",
+        "owner_stage": "AR-B8-A",
+        "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
+        "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
         "review_date": "2026-09-05"
       }
     ]
