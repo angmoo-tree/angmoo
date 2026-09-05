@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -9,9 +10,10 @@ from app.domains.routines.policies import activity_state
 from app.domains.routines.exceptions import ActivityRuntimeConflictError, ActivityRuntimeNotFoundError, ActivityRuntimeValidationError
 from app.domains.routines.contracts.lifecycle import DaypartTransitionCounts, RecoveryCounts, WorldInterruptionCounts
 from app.domains.routines.service.scheduling import aware_utc
-from app.domains.routines import models as models
-from app.domains.world_characters.public import WorldCharacter
-from app.domains.worlds.public import WorldMembership
+from app.domains.routines import models
+from app.domains.routines.contracts.lifecycle import LifecycleReferences
+from app.domains.routines.contracts.clock import Clock
+from app.domains.routines.utils.clock import resolve_clock
 
 
 TERMINAL_ITEM_STATUSES = frozenset(
@@ -19,8 +21,8 @@ TERMINAL_ITEM_STATUSES = frozenset(
 )
 
 
-def _require_autonomous(db: Session, world_character_id: str) -> WorldCharacter:
-    world_character = db.get(WorldCharacter, world_character_id)
+def _require_autonomous(references: LifecycleReferences, world_character_id: str) -> Any:
+    world_character = references.get_world_character(world_character_id)
     if world_character is None:
         raise ActivityRuntimeNotFoundError(world_character_id)
     if world_character.control_mode != "autonomous":
@@ -29,8 +31,13 @@ def _require_autonomous(db: Session, world_character_id: str) -> WorldCharacter:
 
 
 def recover_expired_claims(
-    db: Session, *, now: datetime
+    db: Session,
+    *,
+    now: datetime | None = None,
+    clock: Clock | None = None,
+    references: LifecycleReferences,
 ) -> RecoveryCounts:
+    now = resolve_clock(now=now, clock=clock).now_utc()
     current = aware_utc(now)
     beats = list(
         db.scalars(
@@ -43,7 +50,7 @@ def recover_expired_claims(
         )
     )
     for beat in beats:
-        _require_autonomous(db, beat.world_character_id)
+        _require_autonomous(references, beat.world_character_id)
         beat.status = "pending"
         beat.claim_run_id = None
         beat.claim_expires_at = None
@@ -60,7 +67,7 @@ def recover_expired_claims(
         )
     )
     for row in consumptions:
-        _require_autonomous(db, row.consumer_world_character_id)
+        _require_autonomous(references, row.consumer_world_character_id)
         row.status = "released"
         row.claim_run_id = None
         row.claim_expires_at = None
@@ -107,11 +114,17 @@ def _close_open_beat_claims(
 
 
 def close_elapsed_dayparts(
-    db: Session, *, world_character_id: str, now: datetime
+    db: Session,
+    *,
+    world_character_id: str,
+    now: datetime | None = None,
+    clock: Clock | None = None,
+    references: LifecycleReferences,
 ) -> DaypartTransitionCounts:
     """Close elapsed items without creating catch-up provider or SNS work."""
 
-    _require_autonomous(db, world_character_id)
+    now = resolve_clock(now=now, clock=clock).now_utc()
+    _require_autonomous(references, world_character_id)
     current = aware_utc(now)
     items = list(
         db.scalars(
@@ -209,33 +222,24 @@ def close_elapsed_dayparts(
 
 
 def reconcile_all_elapsed_routines(
-    db: Session, *, now: datetime
+    db: Session,
+    *,
+    now: datetime | None = None,
+    clock: Clock | None = None,
+    references: LifecycleReferences,
 ) -> DaypartTransitionCounts:
     """Reconcile eligible autonomous plans once; owner-controlled rows stay invisible."""
 
+    now = resolve_clock(now=now, clock=clock).now_utc()
     current = aware_utc(now)
-    world_character_ids = list(
-        db.scalars(
-            select(models.DailyActivityPlanItem.world_character_id)
-            .join(
-                WorldCharacter,
-                WorldCharacter.id
-                == models.DailyActivityPlanItem.world_character_id,
-            )
-            .where(
-                models.DailyActivityPlanItem.scheduled_end_at <= current,
-                models.DailyActivityPlanItem.status.in_({"planned", "active"}),
-                WorldCharacter.control_mode == "autonomous",
-            )
-            .distinct()
-        )
-    )
+    world_character_ids = references.elapsed_autonomous_world_character_ids(now=current)
     completed = 0
     skipped = 0
     for world_character_id in world_character_ids:
         transition = close_elapsed_dayparts(
             db,
             world_character_id=world_character_id,
+            references=references,
             now=current,
         )
         completed += transition.completed
@@ -244,11 +248,17 @@ def reconcile_all_elapsed_routines(
 
 
 def interrupt_inactive_world_character(
-    db: Session, *, world_character_id: str, now: datetime
+    db: Session,
+    *,
+    world_character_id: str,
+    now: datetime | None = None,
+    clock: Clock | None = None,
+    references: LifecycleReferences,
 ) -> WorldInterruptionCounts:
+    now = resolve_clock(now=now, clock=clock).now_utc()
     current = aware_utc(now)
-    world_character = _require_autonomous(db, world_character_id)
-    membership = db.get(WorldMembership, world_character.membership_id)
+    world_character = _require_autonomous(references, world_character_id)
+    membership = references.get_membership(world_character.membership_id)
     if membership is None or membership.world_id != world_character.world_id:
         raise ActivityRuntimeValidationError("cross_world_reference")
     if membership.status == "active" and world_character.status == "active":
@@ -309,23 +319,3 @@ def interrupt_inactive_world_character(
         plan.version += 1
     db.commit()
     return WorldInterruptionCounts(interrupted=interrupted, cancelled=cancelled)
-
-
-class SqlAlchemyLifecycleRepository:
-    def __init__(self, db: Session) -> None:
-        self._db = db
-
-    def reconcile_elapsed(self, *, now: datetime) -> DaypartTransitionCounts:
-        return reconcile_all_elapsed_routines(self._db, now=now)
-
-    def recover_expired_claims(self, *, now: datetime) -> RecoveryCounts:
-        return recover_expired_claims(self._db, now=now)
-
-
-__all__ = [
-    "SqlAlchemyLifecycleRepository",
-    "close_elapsed_dayparts",
-    "interrupt_inactive_world_character",
-    "reconcile_all_elapsed_routines",
-    "recover_expired_claims",
-]

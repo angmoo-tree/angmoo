@@ -1297,6 +1297,7 @@
       "app.domains.routines.schemas",
       "app.domains.routines.service",
       "app.domains.routines.service.joint_reservations",
+      "app.domains.routines.service.lifecycle",
       "app.domains.routines.service.plans",
       "app.domains.routines.service.scheduling",
       "app.domains.routines.utils",
@@ -1382,6 +1383,7 @@
       "app.domains.routines.schemas",
       "app.domains.routines.service",
       "app.domains.routines.service.joint_reservations",
+      "app.domains.routines.service.lifecycle",
       "app.domains.routines.service.plans",
       "app.domains.routines.service.scheduling",
       "app.domains.runtime.contracts",
@@ -1549,70 +1551,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.routines.application.reconcile_lifecycle",
-        "target": "app.domains.routines.contracts.clock",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.application.reconcile_lifecycle",
-        "target": "app.domains.routines.contracts.lifecycle",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.infrastructure.sqlalchemy_lifecycle",
-        "target": "app.domains.routines.contracts.lifecycle",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.infrastructure.sqlalchemy_lifecycle",
-        "target": "app.domains.routines.exceptions",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.infrastructure.sqlalchemy_lifecycle",
-        "target": "app.domains.routines.models",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.infrastructure.sqlalchemy_lifecycle",
-        "target": "app.domains.routines.policies.activity_state",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.infrastructure.sqlalchemy_lifecycle",
-        "target": "app.domains.routines.service.scheduling",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.routines.ports.lifecycle_repository",
-        "target": "app.domains.routines.contracts.lifecycle",
-        "owner_stage": "AR-B4-A2 / AR-B4-A3",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.domains.routines.public",
         "target": "app.domains.routines.constants",
         "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",
@@ -1658,6 +1596,14 @@
         "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",
         "removal_condition": "Retire this exact legacy lifecycle or aggregate consumer after its actual owner service and caller move; retain same-object plan aliases only until remaining B4 consumers use canonical roles.",
         "reason": "Actual plan service owns all decisions and commits. This existing lifecycle/public or horizontal consumer imports the same object while its own remaining workflow is still tracked separately.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.service.lifecycle",
+        "owner_stage": "AR-B4-A3b / AR-B4-B / AR-B4-C / AR-G5",
+        "removal_condition": "Move this exact legacy claim, joint, provider, scheduler or aggregate consumer to its actual owner; remove the same-object alias after the last tracked caller moves.",
+        "reason": "Actual guarded lifecycle is now service-owned; these existing callers or public aliases preserve the original invocation and no-catch-up/per-character commit contracts while their remaining roles transition.",
         "review_date": "2026-09-05"
       },
       {
@@ -2242,6 +2188,14 @@
         "owner_stage": "AR-B4-B / AR-B4-C",
         "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
         "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.lifecycle",
+        "owner_stage": "AR-B4-A3b / AR-B4-B / AR-B4-C / AR-G5",
+        "removal_condition": "Move this exact legacy claim, joint, provider, scheduler or aggregate consumer to its actual owner; remove the same-object alias after the last tracked caller moves.",
+        "reason": "Actual guarded lifecycle is now service-owned; these existing callers or public aliases preserve the original invocation and no-catch-up/per-character commit contracts while their remaining roles transition.",
         "review_date": "2026-09-05"
       },
       {

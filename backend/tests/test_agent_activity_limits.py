@@ -959,7 +959,7 @@ def test_file_backed_sqlite_tick_claims_two_naive_due_slots(
     monkeypatch.setattr(
         resident_tick_scheduler.agent_runs,
         "reconcile_all_elapsed_routines",
-        lambda _db: SimpleNamespace(completed=0, skipped=0),
+        lambda _db, *, references: SimpleNamespace(completed=0, skipped=0),
     )
     monkeypatch.setattr(
         agent_run_service,
@@ -1164,7 +1164,7 @@ def test_resident_scheduler_tick_runner_uses_configured_global_tick(
     monkeypatch.setattr(
         resident_tick_scheduler.agent_runs,
         "reconcile_all_elapsed_routines",
-        lambda _db: SimpleNamespace(completed=0, skipped=0),
+        lambda _db, *, references: SimpleNamespace(completed=0, skipped=0),
     )
     monkeypatch.setattr(resident_tick_scheduler.agent_runs, "tick_resident_slots", _tick)
     monkeypatch.setattr(settings, "RESIDENT_TICK_POST_ID", "post-scheduler")

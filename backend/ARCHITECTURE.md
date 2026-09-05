@@ -456,13 +456,15 @@ Portable ref/profile 변환은 `service/export_projection.py`, 로컬 export 근
 
 AR-B4-A1에서 일일 활동의 입출력은 `domains/routines/schemas.py`, 아홉 ORM은 `models.py`가 소유합니다. 모델은 기존과 같은 Base·table·column·index·FK를 사용합니다. `policies/activity_state.py`는 mood/energy 등의 상태 범위와 delta를 검증하고, `service/scheduling.py`는 이미 지난 tick을 무더기로 재실행하지 않고 가장 최근 due tick과 건너뛴 횟수를 계산합니다. 안정적인 오류는 `exceptions.py`, immutable 결과와 clock 계약은 `contracts/`, 실제 SystemClock/FrozenClock은 `utils/clock.py`에 있습니다.
 
-계획 생성·권한 scope·공동 예약의 실제 서비스는 아래 A2 역할을 사용하며, claim 회복·종료의 나머지 전환은 AR-B4-A3 범위입니다. 현재 domain lifecycle과 전역 activity runtime의 같은 이름 함수는 manual 제외·선택적 now·오류/commit 의미가 달라 단순 별칭으로 통합하지 않습니다. provider/result 실행은 AR-B4-B, resident·lease·worker는 AR-B4-C에서 이어갑니다. 이 부분 전환의 정확한 기존 소비자와 제거 시점은 경계 검사 policy와 보존 지도에 기록합니다.
+계획 생성·권한 scope·공동 예약의 실제 서비스는 아래 A2 역할을 사용합니다. A3a의 `service/lifecycle.py`는 autonomous 소유권을 검사하는 claim 회복·기간 종료·비활성 World 중단을 소유합니다. 전역 activity runtime의 같은 이름 함수는 manual 제외·선택적 now·오류/commit 의미가 달라 단순 별칭으로 통합하지 않습니다. 그 claim 실행은 A3 후속, provider/result 실행은 AR-B4-B, resident·lease·worker는 AR-B4-C에서 이어갑니다. 이 부분 전환의 정확한 기존 소비자와 제거 시점은 경계 검사 policy와 보존 지도에 기록합니다.
 
 AR-B4-A2에서는 version/daypart/history 상수를 `constants.py`, 실제 DST boundary·후보 선택·snapshot 규칙을 `policies/planning.py`에 두고, routines ORM만 다루는 공동 예약 query와 materialization을 `service/joint_reservations.py`로 옮겼습니다. `service/plans.py`는 소유권·scope·40개 repertoire 후보·readiness·계획 생성/조회·모드 변경과 commit/rollback을 소유합니다. 과거 선택 이력 조회는 `repository/plans.py`, 응답은 `schemas.py`, HTTP 상태 변환은 `router.py`에 있습니다.
 
 계획 요청에서 다른 업무를 읽는 SQL은 `runtime/routines/plan_references.py`가 기존 Session으로 수행합니다. 앱 생성 시 `runtime/routines/composition.py`가 factory를 등록하고 `dependencies.py`가 요청의 `get_db`와 같은 Session을 전달합니다. `contracts/plans.py`의 `PlanReferences`는 그 실제 협력 경계이며 서비스마다 반복해서 추가하는 계층이 아닙니다. WorldCharacter 모드·version 변경은 WC 소유 함수에 요청하고, 최종 commit은 기존 계획 서비스가 수행합니다. 이 조립에는 새 Session·worker 실행·별도 commit이 없습니다.
 
-기존 `public.py`의 계획 함수는 실제 서비스와 같은 객체를 제공하는 임시 별칭입니다. 단순 전달만 하던 daily-plan usecase·repository 클래스와 외부 ORM 집계 파일은 제거했습니다. Clock/FrozenClock 지원과 `now`·`clock` 동시 입력 거부는 `utils/clock.py`에 유지합니다. 같은 public 파일의 lifecycle 실행과 옛 `services/daily_activity_plans.py` 소비자는 A3/B4-C에서 차례대로 정리합니다. 전체 routines 전환 완료를 뜻하지 않습니다.
+기존 `public.py`의 계획·guarded lifecycle 함수는 실제 서비스와 같은 객체를 제공하는 임시 별칭입니다. 단순 전달만 하던 daily-plan/lifecycle usecase·repository 클래스와 외부 ORM 집계 파일은 제거했습니다. Clock/FrozenClock 지원과 `now`·`clock` 동시 입력 거부는 `utils/clock.py`에 유지합니다. 옛 `services/daily_activity_plans.py`와 public 소비자는 A3 후속/B4-C에서 차례대로 정리합니다. 전체 routines 전환 완료를 뜻하지 않습니다.
+
+`runtime/routines/lifecycle_references.py`는 같은 Session에서 WorldCharacter·membership을 읽고, 만료 계획과 autonomous WorldCharacter를 연결하던 기존 join을 수행합니다. Lifecycle 서비스가 현재 업무의 상태 전이와 commit을 담당하고, scheduler가 이 조회 협력 객체를 전달합니다. 모든 캐릭터의 기간 종료를 한 번에 원자 처리하도록 변경하지 않습니다. 기존처럼 한 캐릭터의 종료 commit 후 다음 캐릭터를 처리하며, 뒤의 scope가 실패해도 앞서 완료한 commit은 유지됩니다. 조회 협력 객체는 별도 Session이나 commit을 만들지 않습니다.
 ### Character/Creator 전환의 현재 위치
 
 Character 입력과 상태·Creator 모델은 `characters/models.py`, `schemas.py`, `contracts.py`에서 찾는다. 생성·표시 프로필·페르소나·동의의 실제 변경은 `service/mutations.py`가 담당하고, `access.py`·`persona.py`·`promotion.py`가 해당 판단을 공유한다. Caller-owned World seed는 `service/seed.py`의 flush-only 계약을 따르며 일반 생성의 기존 commit을 합치지 않는다.

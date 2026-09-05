@@ -13,6 +13,7 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
+from app.runtime.routines.lifecycle_references import SqlAlchemyLifecycleReferences
 from app import models, schemas
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.domains.identity import dependencies as api_deps
@@ -405,7 +406,7 @@ def test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan() -> N
             )
 
         transition = routines.reconcile_all_elapsed_routines(
-            db, clock=routines.FrozenClock(now + timedelta(days=1))
+            db, references=SqlAlchemyLifecycleReferences(db), clock=routines.FrozenClock(now + timedelta(days=1))
         )
         assert transition == routines.DaypartTransitionCounts(0, 0)
         assert db.scalar(select(func.count(models.DailyActivityPlan.id))) == 0
@@ -836,7 +837,7 @@ def test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work() -> No
 
         transition = routine_post_runtime.reconcile_all_elapsed_routines(
             db,
-            now=reconcile_at,
+            references=SqlAlchemyLifecycleReferences(db), now=reconcile_at,
         )
 
         assert transition == activity_runtime.DaypartTransitionCounts(
@@ -877,7 +878,7 @@ def test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work() -> No
 
         replay = routine_post_runtime.reconcile_all_elapsed_routines(
             db,
-            now=reconcile_at,
+            references=SqlAlchemyLifecycleReferences(db), now=reconcile_at,
         )
         assert replay == activity_runtime.DaypartTransitionCounts(0, 0)
 

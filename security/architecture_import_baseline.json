@@ -1,7 +1,7 @@
 {
-  "edge_count": 2041,
-  "external_import_count": 2070,
-  "module_count": 639,
+  "edge_count": 2040,
+  "external_import_count": 2068,
+  "module_count": 633,
   "modules": [
     {
       "external_imports": [],
@@ -3484,34 +3484,6 @@
     {
       "external_imports": [],
       "imports": [],
-      "module": "app.domains.routines.api",
-      "path": "backend/app/domains/routines/api/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.domains.routines.application",
-      "path": "backend/app/domains/routines/application/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses"
-      ],
-      "imports": [
-        "app.domains.routines.contracts.clock",
-        "app.domains.routines.contracts.lifecycle",
-        "app.domains.routines.ports.lifecycle_repository"
-      ],
-      "module": "app.domains.routines.application.reconcile_lifecycle",
-      "path": "backend/app/domains/routines/application/reconcile_lifecycle.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [],
       "module": "app.domains.routines.constants",
       "path": "backend/app/domains/routines/constants.py",
       "wildcard_imports": []
@@ -3538,7 +3510,8 @@
       "external_imports": [
         "__future__",
         "dataclasses",
-        "datetime"
+        "datetime",
+        "typing"
       ],
       "imports": [],
       "module": "app.domains.routines.contracts.lifecycle",
@@ -3571,46 +3544,12 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.domains.routines.domain",
-      "path": "backend/app/domains/routines/domain/__init__.py",
-      "wildcard_imports": []
-    },
-    {
       "external_imports": [
         "__future__"
       ],
       "imports": [],
       "module": "app.domains.routines.exceptions",
       "path": "backend/app/domains/routines/exceptions.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.domains.routines.infrastructure",
-      "path": "backend/app/domains/routines/infrastructure/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.domains.routines.contracts.lifecycle",
-        "app.domains.routines.exceptions",
-        "app.domains.routines.models",
-        "app.domains.routines.policies.activity_state",
-        "app.domains.routines.service.scheduling",
-        "app.domains.world_characters.public",
-        "app.domains.worlds.public"
-      ],
-      "module": "app.domains.routines.infrastructure.sqlalchemy_lifecycle",
-      "path": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py",
       "wildcard_imports": []
     },
     {
@@ -3666,40 +3605,17 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.domains.routines.ports",
-      "path": "backend/app/domains/routines/ports/__init__.py",
-      "wildcard_imports": []
-    },
-    {
       "external_imports": [
-        "__future__",
-        "datetime",
-        "typing"
+        "__future__"
       ],
       "imports": [
-        "app.domains.routines.contracts.lifecycle"
-      ],
-      "module": "app.domains.routines.ports.lifecycle_repository",
-      "path": "backend/app/domains/routines/ports/lifecycle_repository.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.routines.application.reconcile_lifecycle",
         "app.domains.routines.constants",
         "app.domains.routines.contracts.clock",
         "app.domains.routines.contracts.lifecycle",
         "app.domains.routines.contracts.plans",
         "app.domains.routines.exceptions",
-        "app.domains.routines.infrastructure.sqlalchemy_lifecycle",
         "app.domains.routines.policies.planning",
+        "app.domains.routines.service.lifecycle",
         "app.domains.routines.service.plans",
         "app.domains.routines.service.scheduling",
         "app.domains.routines.utils.clock"
@@ -3780,6 +3696,27 @@
       ],
       "module": "app.domains.routines.service.joint_reservations",
       "path": "backend/app/domains/routines/service/joint_reservations.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.clock",
+        "app.domains.routines.contracts.lifecycle",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.policies.activity_state",
+        "app.domains.routines.service.scheduling",
+        "app.domains.routines.utils.clock"
+      ],
+      "module": "app.domains.routines.service.lifecycle",
+      "path": "backend/app/domains/routines/service/lifecycle.py",
       "wildcard_imports": []
     },
     {
@@ -7833,7 +7770,7 @@
         "app.core.unit_of_work",
         "app.domains.routine_posts.infrastructure.direct_llm_provider",
         "app.domains.routine_posts.infrastructure.sqlalchemy_context",
-        "app.domains.routines.public",
+        "app.domains.routines.service.lifecycle",
         "app.domains.social.domain.subjective_context",
         "app.domains.social.public",
         "app.integrations.direct_llm",
@@ -7861,6 +7798,21 @@
       ],
       "module": "app.runtime.routines.composition",
       "path": "backend/app/runtime/routines/composition.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.models",
+        "app.domains.world_characters.models",
+        "app.domains.worlds.models"
+      ],
+      "module": "app.runtime.routines.lifecycle_references",
+      "path": "backend/app/runtime/routines/lifecycle_references.py",
       "wildcard_imports": []
     },
     {
@@ -8664,7 +8616,7 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
-        "app.domains.routines.public",
+        "app.domains.routines.service.lifecycle",
         "app.domains.runtime.contracts",
         "app.domains.social.public",
         "app.domains.world_characters.public",
@@ -9289,6 +9241,7 @@
         "app.config",
         "app.core.db",
         "app.domains.runtime.public",
+        "app.runtime.routines.lifecycle_references",
         "app.schemas",
         "app.services.agent_runs"
       ],

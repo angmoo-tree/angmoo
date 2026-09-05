@@ -4,6 +4,7 @@ import pytest
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 
+from app.runtime.routines.lifecycle_references import SqlAlchemyLifecycleReferences
 from app import models
 from app.core.db import Base
 from app.domains.routines import public as routines
@@ -73,7 +74,7 @@ def test_guarded_recovery_uses_consumption_owner_and_preserves_admission(
     with Session(engine, expire_on_commit=False) as restarted:
         def recover():
             return routines.recover_expired_claims(
-                restarted, clock=routines.FrozenClock(now + timedelta(minutes=6))
+                restarted, references=SqlAlchemyLifecycleReferences(restarted), clock=routines.FrozenClock(now + timedelta(minutes=6))
             )
 
         if owner_controlled:

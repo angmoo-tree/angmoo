@@ -15,7 +15,7 @@
 | AR-G4 | LOCAL VERIFIED · PR PENDING | Alembic 물리 경로·역사 본문 보존; G5 최종 모델 등록 연결 대기 |
 | AR-B2 | IDENTITY PR #270 · CHARACTER FOUNDATION INTEGRATION | Identity full backend PASS; Character 기반·Creator 정책 통합 후 HTTP/Worlds/WC 후속 |
 | AR-B3 | NOT STARTED | World Package→media |
-| AR-B4 | NOT STARTED | routines→routine_posts→활동 조립 |
+| AR-B4 | ROUTINES A1/A2/A3a LOCAL VERIFIED · INTEGRATION/PR PENDING | 실제 계획·guarded lifecycle 이전; legacy claim·routine_posts·resident 후속 |
 | AR-B5 | NOT STARTED | social→relationships→projection |
 | AR-B6 | NOT STARTED | Chat transport→generation→retrieval/response |
 | AR-B7 | NOT STARTED | Memory read/write→owner→batch→runtime |
@@ -501,3 +501,17 @@ Setup slice의 최종 현재 API·ORM 및 전체 split evidence 검사도 PASS�
 제품 변경은 해당 참조 **한 줄**이며 기존 `_require_autonomous`와 commit 순서·오류 의미를 유지한다. 만료 consumption과 아직 유효한 beat를 분리한 실제 SQLite 재시작 검증에서, 자율 캐릭터의 consumption은 한 번만 released·version 증가되고 claim 필드가 정리된다. 사용자 조종 캐릭터는 기존 validation 오류로 거부되며 caller rollback 후 원래 claim이 남는다. 두 경우 모두 아직 유효한 beat, Post/AgentRun/SocialEvent 개수를 보존한다. 기존 guarded와 legacy lifecycle을 하나로 합치거나 guarded 경로에 legacy의 약한 admission을 적용하지 않았다.
 
 Hotfix·계획·공동 활동·게시 실행·scheduler/활동 한도 집중 결과는 **121 passed / 1 기존 PostgreSQL skip / 2 기존 SQLite datetime warnings / 29.57초**다. 수정 전 두 실패는 `guarded-recovery-before.log`에 남겼으며, 원본 assertion·frozen checkpoint·API·ORM은 수정하지 않았다. 현재 ER0 source hash만 한 줄 변경에 맞췄다. 이 신규 회귀의 최초 도입 capture는 source 고정 이후 root가 수행한다. 이후 A3 구조 이전은 이 정상 scope 동작을 보존한다.
+
+### AR-B4-A3a — guarded lifecycle의 실제 서비스와 동일 Session 조회
+
+별도 hotfix source `2c0a8a8` 이후, guarded 회복·기간 종료·비활성 World 중단·전체 만료 조정의 실제 구현을 `domains/routines/service/lifecycle.py`로 옮겼다. WorldCharacter/membership 조회와 기존 만료 계획의 autonomous join은 `runtime/routines/lifecycle_references.py`가 caller Session에서 수행한다. 서비스는 `contracts/lifecycle.py`의 실제 조회 계약을 받으며, 자체 ORM의 잠금·상태 전이·flush·commit을 소유한다. 기존 public의 clock 처리는 서비스 입구로 옮겨 `now`·`clock` 동시 거부와 검사 순서를 유지했다.
+
+두 단계 전달만 하던 lifecycle usecase/repository와 빈 이전 layer package를 제거했다. public은 같은 서비스 객체를 제공하며, scheduler는 기존 Session을 새 조회 객체에 명시적으로 전달한다. legacy `services/activity_runtime.py`의 동명 함수는 owner admission과 오류·commit 계약이 달라 이번에 통합하지 않았다. 특히 guarded consumption 회복은 선행 hotfix의 `consumer_world_character_id`를 사용하고 owner-controlled 거부를 유지한다.
+
+- 신규 실제 SQLite 검증 2개는 기존 join이 pending owner 변경을 같은 Session에서 읽고 commit하지 않는 점, 첫 캐릭터의 종료 commit 이후 두 번째 scope 오류가 발생해도 첫 commit이 남는 점을 검증한다. 전체 캐릭터를 새 원자 트랜잭션으로 묶지 않는다.
+- 계획·guarded/legacy lifecycle·claim·proposal·게시 runtime·활동 한도·domain map·L4·ER7 집중 검증 **150 passed / 1 기존 PostgreSQL skip / 3 기존 warnings / 75.42초**. 기존 행동 assertion은 유지하고 새 의존성의 전달 및 실제 경로 확인만 연결했다.
+- 현재 경계 **633 modules / 2,040 edges / legacy exact 281 PASS**, routines의 실제 **22개 module**만 부분 scope다. L4 parity **97**, ER0 **76 PostgreSQL 파일 / 87 migrations / 24 Neo4j / 44 Next routes / 7 workloads**를 확인했다. frozen checkpoint·원본 test·historical migration은 변경하지 않는다.
+
+A3a는 K05 전체 완료가 아니다. legacy claim/공동 실행, routine_posts provider·결과 처리, resident·lease·worker, 선형 통합 후 backend 전체·Hosted·installer 검증은 후속 범위다. 신규 source/test 도입 증거는 source commit을 고정한 뒤 root가 선형 계보에 append한다.
+
+전체 보존 검사는 PR258 **1,867** / PR263 **1,907** / 보호 계보 **2,129** / 현재 **2,173** node를 대조했다. API·ORM·원본 assertion/exception·suppression·split·기존 node 손실은 없으며, exit 1의 항목은 이 준비 branch에 아직 합류하지 않은 선행 source/test 도입 metadata다. 원본 소스나 frozen 기준을 수정하지 않았고, 상세 결과는 작업 산출물 `routines-a3a-preservation.log`에 보존했다.

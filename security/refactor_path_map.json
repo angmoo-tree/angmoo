@@ -291,7 +291,16 @@
     "backend/app/domains/routines/application/daily_plan.py": "backend/app/domains/routines/service/plans.py",
     "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_repository.py": "backend/app/domains/routines/service/plans.py",
     "backend/app/domains/routines/ports/daily_plan_repository.py": "backend/app/domains/routines/contracts/plans.py",
-    "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_models.py": "backend/app/runtime/routines/plan_references.py"
+    "backend/app/domains/routines/infrastructure/sqlalchemy_daily_plan_models.py": "backend/app/runtime/routines/plan_references.py",
+    "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py": "backend/app/domains/routines/service/lifecycle.py",
+    "backend/app/domains/routines/application/reconcile_lifecycle.py": "backend/app/domains/routines/service/lifecycle.py",
+    "backend/app/domains/routines/ports/lifecycle_repository.py": "backend/app/domains/routines/contracts/lifecycle.py",
+    "backend/app/domains/routines/public.py": "backend/app/domains/routines/service/lifecycle.py",
+    "backend/app/domains/routines/api/__init__.py": "backend/app/domains/routines/__init__.py",
+    "backend/app/domains/routines/application/__init__.py": "backend/app/domains/routines/__init__.py",
+    "backend/app/domains/routines/domain/__init__.py": "backend/app/domains/routines/__init__.py",
+    "backend/app/domains/routines/infrastructure/__init__.py": "backend/app/domains/routines/__init__.py",
+    "backend/app/domains/routines/ports/__init__.py": "backend/app/domains/routines/__init__.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -762,8 +771,8 @@
           "backend/app/pagination.py"
         ],
         "backend/app/runtime/social/sqlalchemy_profile_repository.py": [
-          "backend/app/runtime/social/sqlalchemy_profile_repository.py",
-          "backend/app/pagination.py"
+          "backend/app/pagination.py",
+          "backend/app/runtime/social/sqlalchemy_profile_repository.py"
         ]
       },
       "split_symbols": [
@@ -3778,13 +3787,13 @@
       "compatibility_retirement": "The four frozen v2->v3 imports are exact aliases, not copied logic. G5/B8 must retain supported historical migration loading until a verified resolver replaces those imports. worlds.public temporarily serves WC/Package/Routines ORM readers; new service never exports ORM classes.",
       "split_files": {
         "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py": [
-          "backend/app/domains/worlds/service/creator.py",
           "backend/app/domains/worlds/exceptions.py",
+          "backend/app/domains/worlds/service/creator.py",
           "backend/app/domains/worlds/service/scheduling.py"
         ],
         "backend/app/domains/worlds/infrastructure/sqlalchemy_reserved_roles.py": [
-          "backend/app/domains/worlds/service/reserved_roles.py",
-          "backend/app/domains/worlds/exceptions.py"
+          "backend/app/domains/worlds/exceptions.py",
+          "backend/app/domains/worlds/service/reserved_roles.py"
         ],
         "backend/app/api/v1/routes/worlds.py": [
           "backend/app/api/v1/routes/worlds.py",
@@ -4484,9 +4493,9 @@
           "backend/app/domains/world_characters/exceptions.py"
         ],
         "backend/app/domains/world_characters/infrastructure/autonomous_setup_contracts.py": [
-          "backend/app/domains/world_characters/service/setup_validation.py",
           "backend/app/domains/world_characters/contracts/setup.py",
-          "backend/app/domains/world_characters/exceptions.py"
+          "backend/app/domains/world_characters/exceptions.py",
+          "backend/app/domains/world_characters/service/setup_validation.py"
         ],
         "backend/app/domains/world_characters/infrastructure/direct_llm_setup_provider.py": [
           "backend/app/domains/world_characters/client.py",
@@ -10001,9 +10010,9 @@
       "status": "IMPLEMENTED; owner/UoW/Package/Social focused24 PASS; current API/ORM same; precise split evidence verified after remapping Character merged consumer",
       "split_files": {
         "backend/app/domains/world_characters/infrastructure/sqlalchemy_owner_controlled_identity.py": [
-          "backend/app/domains/world_characters/service/owner_identity.py",
           "backend/app/domains/characters/service/owner_controlled.py",
-          "backend/app/domains/identity/service/owner_context.py"
+          "backend/app/domains/identity/service/owner_context.py",
+          "backend/app/domains/world_characters/service/owner_identity.py"
         ]
       },
       "split_symbols": [
@@ -15912,9 +15921,9 @@
           "backend/app/runtime/world_characters/queries.py"
         ],
         "backend/app/domains/world_characters/infrastructure/sqlalchemy_studio_lifecycle.py": [
+          "backend/app/domains/characters/service/world_lifecycle.py",
           "backend/app/domains/world_characters/service/lifecycle.py",
-          "backend/app/runtime/world_characters/queries.py",
-          "backend/app/domains/characters/service/world_lifecycle.py"
+          "backend/app/runtime/world_characters/queries.py"
         ]
       },
       "split_symbols": [
@@ -16067,16 +16076,16 @@
       "status": "IMPLEMENTED; setup/runtime/capacity/Package101 PASS; 36/42 original function bodies identical; current API/ORM and complete split evidence PASS",
       "split_files": {
         "backend/app/domains/world_characters/infrastructure/sqlalchemy_autonomous_setup.py": [
-          "backend/app/domains/world_characters/service/autonomous_setup.py",
-          "backend/app/domains/world_characters/exceptions.py",
-          "backend/app/domains/worlds/service/character_entry.py",
           "backend/app/domains/identity/service/world_character_credentials.py",
+          "backend/app/domains/world_characters/exceptions.py",
+          "backend/app/domains/world_characters/service/autonomous_setup.py",
+          "backend/app/domains/worlds/service/character_entry.py",
           "backend/app/runtime/world_characters/queries.py"
         ],
         "backend/app/domains/world_characters/infrastructure/sqlalchemy_runtime_modes.py": [
+          "backend/app/domains/world_characters/contracts/runtime_modes.py",
           "backend/app/domains/world_characters/service/runtime_modes.py",
-          "backend/app/runtime/world_characters/recovery.py",
-          "backend/app/domains/world_characters/contracts/runtime_modes.py"
+          "backend/app/runtime/world_characters/recovery.py"
         ]
       },
       "split_symbols": [
@@ -16771,8 +16780,8 @@
       },
       "split_files": {
         "backend/app/domains/world_packages/infrastructure/sqlalchemy_registry.py": [
-          "backend/app/domains/world_packages/service/registry.py",
-          "backend/app/domains/world_packages/repository/registry.py"
+          "backend/app/domains/world_packages/repository/registry.py",
+          "backend/app/domains/world_packages/service/registry.py"
         ]
       },
       "split_symbols": [
@@ -16831,12 +16840,12 @@
       "status": "SOURCE IMPLEMENTED — final Package role tree; focused 190 passed, integration/Hosted and introduction metadata pending",
       "split_files": {
         "backend/app/domains/world_packages/infrastructure/sqlalchemy_source_snapshot.py": [
-          "backend/app/runtime/world_packages/export_source.py",
-          "backend/app/domains/world_packages/service/export_projection.py"
+          "backend/app/domains/world_packages/service/export_projection.py",
+          "backend/app/runtime/world_packages/export_source.py"
         ],
         "backend/app/domains/world_packages/infrastructure/sqlalchemy_preview_probe.py": [
-          "backend/app/runtime/world_packages/preview_probe.py",
-          "backend/app/domains/world_packages/service/preview.py"
+          "backend/app/domains/world_packages/service/preview.py",
+          "backend/app/runtime/world_packages/preview_probe.py"
         ]
       },
       "split_symbols": [
@@ -16953,8 +16962,8 @@
       "status": "SOURCE IMPLEMENTED — final Package role tree; focused 190 passed, integration/Hosted and introduction metadata pending",
       "split_files": {
         "backend/app/domains/world_packages/api/routes.py": [
-          "backend/app/domains/world_packages/router.py",
           "backend/app/domains/world_packages/dependencies.py",
+          "backend/app/domains/world_packages/router.py",
           "backend/app/domains/world_packages/service/delivery.py"
         ]
       },
@@ -17272,8 +17281,8 @@
       "status": "SOURCE IMPLEMENTED — foundation only; focused 50 passed, 1 existing PostgreSQL skip; metadata/integration pending",
       "split_files": {
         "backend/app/domains/routines/domain/lifecycle.py": [
-          "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/contracts/lifecycle.py",
+          "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/service/scheduling.py"
         ]
       },
@@ -17850,6 +17859,7 @@
       "split_files": {
         "backend/app/domains/routines/public.py": [
           "backend/app/domains/routines/public.py",
+          "backend/app/domains/routines/service/lifecycle.py",
           "backend/app/domains/routines/service/plans.py",
           "backend/app/domains/routines/utils/clock.py"
         ],
@@ -17913,7 +17923,7 @@
         },
         {
           "old": "backend/app/domains/routines/public.py::reconcile_all_elapsed_routines",
-          "new": "backend/app/domains/routines/public.py::reconcile_all_elapsed_routines",
+          "new": "backend/app/domains/routines/service/lifecycle.py::reconcile_all_elapsed_routines",
           "direct_consumers": [
             "backend/app/domains/routines/public.py"
           ],
@@ -17926,7 +17936,7 @@
         },
         {
           "old": "backend/app/domains/routines/public.py::recover_expired_claims",
-          "new": "backend/app/domains/routines/public.py::recover_expired_claims",
+          "new": "backend/app/domains/routines/service/lifecycle.py::recover_expired_claims",
           "direct_consumers": [
             "backend/app/domains/routines/public.py"
           ],
@@ -17939,7 +17949,7 @@
         },
         {
           "old": "backend/app/domains/routines/public.py::close_elapsed_dayparts",
-          "new": "backend/app/domains/routines/public.py::close_elapsed_dayparts",
+          "new": "backend/app/domains/routines/service/lifecycle.py::close_elapsed_dayparts",
           "direct_consumers": [
             "backend/app/domains/routines/public.py"
           ],
@@ -17952,7 +17962,7 @@
         },
         {
           "old": "backend/app/domains/routines/public.py::interrupt_inactive_world_character",
-          "new": "backend/app/domains/routines/public.py::interrupt_inactive_world_character",
+          "new": "backend/app/domains/routines/service/lifecycle.py::interrupt_inactive_world_character",
           "direct_consumers": [
             "backend/app/domains/routines/public.py"
           ],
@@ -18139,7 +18149,178 @@
         "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission[autonomous]",
         "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission[owner-controlled]"
       ],
-      "evidence": "Existing restart fixture on isolated SQLite reproduced AttributeError through guarded public. Both new nodes failed before the one-line fix, then passed with scheduler/claim/public-action checks; unexpired beat remains claimed."
+      "evidence": "Existing restart fixture on isolated SQLite reproduced AttributeError through guarded public. Both new nodes failed before the one-line fix, then passed with scheduler/claim/public-action checks; unexpired beat remains claimed.",
+      "current_source": "backend/app/domains/routines/service/lifecycle.py::recover_expired_claims"
+    },
+    "AR-B4-A3a-guarded-lifecycle": {
+      "status": "IMPLEMENTED — focused validation pending final tree",
+      "split_files": {
+        "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py": [
+          "backend/app/domains/routines/service/lifecycle.py",
+          "backend/app/runtime/routines/lifecycle_references.py",
+          "backend/app/domains/routines/public.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py::TERMINAL_ITEM_STATUSES",
+          "new": "backend/app/domains/routines/service/lifecycle.py::TERMINAL_ITEM_STATUSES",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py",
+            "backend/app/services/resident_tick_scheduler.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan",
+            "tests/routines/test_daily_activity_runtime.py::test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work",
+            "tests/routines/test_lifecycle_composition.py::test_elapsed_owner_join_observes_pending_state_without_committing",
+            "tests/routines/test_lifecycle_composition.py::test_reconcile_preserves_each_character_commit_when_later_scope_fails"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py::_require_autonomous",
+          "new": "backend/app/domains/routines/service/lifecycle.py::_require_autonomous",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py",
+            "backend/app/services/resident_tick_scheduler.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan",
+            "tests/routines/test_daily_activity_runtime.py::test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work",
+            "tests/routines/test_lifecycle_composition.py::test_elapsed_owner_join_observes_pending_state_without_committing",
+            "tests/routines/test_lifecycle_composition.py::test_reconcile_preserves_each_character_commit_when_later_scope_fails"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py::recover_expired_claims",
+          "new": "backend/app/domains/routines/service/lifecycle.py::recover_expired_claims",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py",
+            "backend/app/services/resident_tick_scheduler.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan",
+            "tests/routines/test_daily_activity_runtime.py::test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work",
+            "tests/routines/test_lifecycle_composition.py::test_elapsed_owner_join_observes_pending_state_without_committing",
+            "tests/routines/test_lifecycle_composition.py::test_reconcile_preserves_each_character_commit_when_later_scope_fails"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py::_close_open_beat_claims",
+          "new": "backend/app/domains/routines/service/lifecycle.py::_close_open_beat_claims",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py",
+            "backend/app/services/resident_tick_scheduler.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan",
+            "tests/routines/test_daily_activity_runtime.py::test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work",
+            "tests/routines/test_lifecycle_composition.py::test_elapsed_owner_join_observes_pending_state_without_committing",
+            "tests/routines/test_lifecycle_composition.py::test_reconcile_preserves_each_character_commit_when_later_scope_fails"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py::close_elapsed_dayparts",
+          "new": "backend/app/domains/routines/service/lifecycle.py::close_elapsed_dayparts",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py",
+            "backend/app/services/resident_tick_scheduler.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan",
+            "tests/routines/test_daily_activity_runtime.py::test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work",
+            "tests/routines/test_lifecycle_composition.py::test_elapsed_owner_join_observes_pending_state_without_committing",
+            "tests/routines/test_lifecycle_composition.py::test_reconcile_preserves_each_character_commit_when_later_scope_fails"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py::reconcile_all_elapsed_routines",
+          "new": "backend/app/domains/routines/service/lifecycle.py::reconcile_all_elapsed_routines",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py",
+            "backend/app/services/resident_tick_scheduler.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan",
+            "tests/routines/test_daily_activity_runtime.py::test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work",
+            "tests/routines/test_lifecycle_composition.py::test_elapsed_owner_join_observes_pending_state_without_committing",
+            "tests/routines/test_lifecycle_composition.py::test_reconcile_preserves_each_character_commit_when_later_scope_fails"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py::interrupt_inactive_world_character",
+          "new": "backend/app/domains/routines/service/lifecycle.py::interrupt_inactive_world_character",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py",
+            "backend/app/services/resident_tick_scheduler.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan",
+            "tests/routines/test_daily_activity_runtime.py::test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work",
+            "tests/routines/test_lifecycle_composition.py::test_elapsed_owner_join_observes_pending_state_without_committing",
+            "tests/routines/test_lifecycle_composition.py::test_reconcile_preserves_each_character_commit_when_later_scope_fails"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py::SqlAlchemyLifecycleRepository",
+          "new": "backend/app/domains/routines/service/lifecycle.py::reconcile_all_elapsed_routines",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py",
+            "backend/app/services/resident_tick_scheduler.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan",
+            "tests/routines/test_daily_activity_runtime.py::test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work",
+            "tests/routines/test_lifecycle_composition.py::test_elapsed_owner_join_observes_pending_state_without_committing",
+            "tests/routines/test_lifecycle_composition.py::test_reconcile_preserves_each_character_commit_when_later_scope_fails"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py::__all__",
+          "new": "backend/app/domains/routines/public.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py",
+            "backend/app/services/resident_tick_scheduler.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan",
+            "tests/routines/test_daily_activity_runtime.py::test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work",
+            "tests/routines/test_lifecycle_composition.py::test_elapsed_owner_join_observes_pending_state_without_committing",
+            "tests/routines/test_lifecycle_composition.py::test_reconcile_preserves_each_character_commit_when_later_scope_fails"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py::reconcile_all_elapsed_routines",
+          "new": "backend/app/runtime/routines/lifecycle_references.py::SqlAlchemyLifecycleReferences",
+          "direct_consumers": [
+            "backend/app/services/resident_tick_scheduler.py",
+            "backend/app/domains/routines/service/lifecycle.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan",
+            "tests/routines/test_daily_activity_runtime.py::test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work",
+            "tests/routines/test_lifecycle_composition.py::test_elapsed_owner_join_observes_pending_state_without_committing",
+            "tests/routines/test_lifecycle_composition.py::test_reconcile_preserves_each_character_commit_when_later_scope_fails"
+          ]
+        }
+      ],
+      "retired_forwarders": [
+        "backend/app/domains/routines/application/reconcile_lifecycle.py",
+        "backend/app/domains/routines/ports/lifecycle_repository.py",
+        "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py::SqlAlchemyLifecycleRepository"
+      ],
+      "ownership": "Service retains guarded claim recovery, owner admission, elapsed closure, interruption, skip_locked and per-character commits. Runtime supplies the original autonomous-WC join and nullable owner references on the same Session. Exact scheduler and test consumers explicitly provide those references.",
+      "clock": "All public lifecycle names point to the actual service. resolve_clock runs before owner queries, preserving the original public now/clock rejection and single custom clock call.",
+      "remaining": "Legacy services/activity_runtime.py and joint/provider/resident workflows still preserve their different active caller contracts. They are next B4-A3b/B4-B/B4-C; public remains a same-object alias until consumers move."
     }
   }
 }

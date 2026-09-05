@@ -23,7 +23,7 @@ from app.domains.routine_posts.infrastructure.sqlalchemy_context import (
     RoutineInteractionSource,
     assemble_routine_post_context,
 )
-from app.domains.routines.public import reconcile_all_elapsed_routines
+from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routines
 from app.runtime.social.sqlalchemy_inbox import (
     ManualInboxRuntimeError,
     claimed_observation_post_id,
