@@ -578,23 +578,11 @@
         },
         {
           "importer": "app.services.langgraph_resident",
-          "imported": "app.services.langgraph_social_apply"
-        },
-        {
-          "importer": "app.services.langgraph_resident",
           "imported": "app.services.prompt_safety"
         },
         {
           "importer": "app.services.langgraph_resident",
           "imported": "app.services.world_feed_runtime"
-        },
-        {
-          "importer": "app.services.langgraph_social_apply",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.services.langgraph_social_apply",
-          "imported": "app.runtime.activity_proposals.composition"
         },
         {
           "importer": "app.services.local_bot",
@@ -701,10 +689,6 @@
           "imported": "app.services.world_feed_search"
         },
         {
-          "importer": "app.services.world_feed_runtime",
-          "imported": "app.services.world_feed_social_apply"
-        },
-        {
           "importer": "app.services.world_feed_search",
           "imported": "app.models"
         },
@@ -715,22 +699,6 @@
         {
           "importer": "app.services.world_feed_search",
           "imported": "app.services.world_character_contracts"
-        },
-        {
-          "importer": "app.services.world_feed_social_apply",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.services.world_feed_social_apply",
-          "imported": "app.runtime.activity_proposals.composition"
-        },
-        {
-          "importer": "app.services.world_feed_social_apply",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.world_feed_social_apply",
-          "imported": "app.services.world_feed_search"
         },
         {
           "importer": "app.services.world_foundation",
@@ -960,6 +928,7 @@
       "app.domains.media.schemas",
       "app.domains.relationships.constants",
       "app.domains.relationships.contracts",
+      "app.domains.relationships.contracts.action_response",
       "app.domains.relationships.contracts.diagnostics",
       "app.domains.relationships.contracts.events",
       "app.domains.relationships.contracts.graph_execution",
@@ -1003,6 +972,7 @@
       "app.domains.relationships.router",
       "app.domains.relationships.schemas",
       "app.domains.relationships.service",
+      "app.domains.relationships.service.action_response",
       "app.domains.relationships.service.diagnostics",
       "app.domains.relationships.service.events",
       "app.domains.relationships.service.evidence",
@@ -1086,6 +1056,7 @@
       "app.domains.runtime.contracts",
       "app.domains.social.constants",
       "app.domains.social.contracts",
+      "app.domains.social.contracts.action_scope",
       "app.domains.social.contracts.activity",
       "app.domains.social.contracts.actors",
       "app.domains.social.contracts.discovery",
@@ -1137,6 +1108,9 @@
       "app.domains.social.schemas.image_generation",
       "app.domains.social.schemas.manual",
       "app.domains.social.service",
+      "app.domains.social.service.action_event_types",
+      "app.domains.social.service.action_notifications",
+      "app.domains.social.service.action_sources",
       "app.domains.social.service.activity_results",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
@@ -1196,6 +1170,7 @@
       "app.domains.world_characters.schemas.identity",
       "app.domains.world_characters.schemas.setup",
       "app.domains.world_characters.service",
+      "app.domains.world_characters.service.action_scope",
       "app.domains.world_characters.service.autonomous_setup",
       "app.domains.world_characters.service.event_scope",
       "app.domains.world_characters.service.lifecycle",
@@ -1259,6 +1234,7 @@
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
+      "app.domains.relationships.contracts.action_response",
       "app.domains.relationships.contracts.diagnostics",
       "app.domains.relationships.contracts.events",
       "app.domains.relationships.contracts.graph_execution",
@@ -1277,6 +1253,7 @@
       "app.domains.relationships.contracts.replay",
       "app.domains.relationships.contracts.source_posts",
       "app.domains.relationships.schemas",
+      "app.domains.relationships.service.action_response",
       "app.domains.relationships.service.diagnostics",
       "app.domains.relationships.service.events",
       "app.domains.relationships.service.graph_planning",
@@ -1334,6 +1311,7 @@
       "app.domains.routines.service.tick_schedule",
       "app.domains.runtime.contracts",
       "app.domains.social.contracts",
+      "app.domains.social.contracts.action_scope",
       "app.domains.social.contracts.activity",
       "app.domains.social.contracts.actors",
       "app.domains.social.contracts.discovery",
@@ -1361,6 +1339,9 @@
       "app.domains.social.schemas.feed",
       "app.domains.social.schemas.image_generation",
       "app.domains.social.schemas.manual",
+      "app.domains.social.service.action_event_types",
+      "app.domains.social.service.action_notifications",
+      "app.domains.social.service.action_sources",
       "app.domains.social.service.activity_results",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
@@ -1407,6 +1388,7 @@
       "app.domains.world_characters.schemas.identity",
       "app.domains.world_characters.schemas.setup",
       "app.domains.world_characters.service",
+      "app.domains.world_characters.service.action_scope",
       "app.domains.world_characters.service.autonomous_setup",
       "app.domains.world_characters.service.event_scope",
       "app.domains.world_characters.service.lifecycle",

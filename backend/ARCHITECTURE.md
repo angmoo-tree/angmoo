@@ -730,3 +730,6 @@ Today SNS의 활동 종류, 실행 성공 일치, source/chain 변경 감지값,
 
 
 Today SNS의 범위·권한·차단·조상 게시물·성공 근거·명시적 자기 설명 검증과 category/count/coverage/watermark 조립은 `social/service/today_activity.py::TodaySocialActivityService`가 소유한다. `repository/today_activity.py`는 기존 bound/batch 실행과 Social post/block/declaration SQL, `runtime/social/today_activity_queries.py`는 같은 Session의 World/WC/membership/Relationship/Routines 사실을 조회한다. 구체 fact 조회는 Social의 동일 bounded query 실행을 사용해 populate_existing·정렬·상한·batch 순서를 유지한다. `runtime/social/today_activity.py::today_social_activity_reader`는 실제 서비스를 구성만 하고, 옛 SqlAlchemyTodaySocialActivityReader 파일은 제거했다.
+
+
+성공한 자율 행동을 기록할 때 `social/service/action_sources.py`가 원본 글·반응 확인과 World 연결을, `action_notifications.py`가 생성/입력 알림 연결과 명시적 NO_ACTION 처리 판단을 소유한다. `world_characters/service/action_scope.py`는 원래 활성 WorldCharacter 조회·확인, `relationships/service/action_response.py`는 제안 응답의 허용 판단을 수행한다. 실행 레코드 필드는 `routines/service/public_action_executions.py`가 실제 대입하며 flush/commit을 추가하지 않는다. `runtime/social/{langgraph_actions,world_feed_actions}.py`는 같은 Session에서 소유 서비스를 호출하고 성공 event/evidence·proposal 저장을 원래 순서로 연결한다. 오류 생성자는 이 협력에서 원래 오류 클래스를 전달하여 scope 오류의 class와 reason을 유지하고, 이를 위해 다른 업무를 역참조하지 않는다. 옛 services의 두 social_apply 파일은 제거했다.

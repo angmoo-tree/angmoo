@@ -393,7 +393,9 @@
     "backend/app/api/v1/routes/manual_social.py": "backend/app/domains/social/router.py",
     "backend/app/domains/social/ports/write_unit_of_work.py": "backend/app/domains/social/contracts/write_execution.py",
     "backend/app/runtime/social/subjective_context.py": "backend/app/runtime/social/subjective_composition.py",
-    "backend/app/runtime/social/sqlalchemy_today_activity.py": "backend/app/runtime/social/today_activity.py"
+    "backend/app/runtime/social/sqlalchemy_today_activity.py": "backend/app/runtime/social/today_activity.py",
+    "backend/app/services/langgraph_social_apply.py": "backend/app/runtime/social/langgraph_actions.py",
+    "backend/app/services/world_feed_social_apply.py": "backend/app/runtime/social/world_feed_actions.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -41742,6 +41744,556 @@
       ],
       "same_session_evidence": "Expanded read/scope/subjective policies3, query execution/block3 and active-query1 AST match the original. Original and new executed SQL/bound values/order are identical:13 statements; complete records/counts/coverage/watermarks value is equal. New SQLite regression verifies sameSession construction/range error SQL0, refresh of an already-cached Post after observer hides it, descendant exclusion, and no own commit.",
       "remaining": "The Today reader is now owned by actual services/queries. Other B5 legacy agent WorldFeed/tool workflows, compatibility and G07 ownership still require completion; source capture and Hosted integration remain root-owned."
+    },
+    "AR-B5-C15": {
+      "status": "IMPLEMENTED source; actual action source/notification/scope/proposal owners; capture pending",
+      "scope": "Social owns original post/reaction evidence, root/target validation, scope attachment, notification dedupe/link/no-action rules and event-name mappings. WC owns original active/current/target reads and checks, Relationships owns accept/reject/counter and response scope admission, Routines owns execution scope/intent/event assignments. Runtime preserves original same-Session coordination, successful event/evidence/idempotency and proposal callbacks, flush ordering and attached results. Old services files removed.",
+      "split_files": {
+        "backend/app/services/langgraph_social_apply.py": [
+          "backend/app/domains/relationships/contracts/action_response.py",
+          "backend/app/domains/relationships/service/action_response.py",
+          "backend/app/domains/routines/service/public_action_executions.py",
+          "backend/app/domains/social/contracts/action_scope.py",
+          "backend/app/domains/social/exceptions.py",
+          "backend/app/domains/social/service/action_event_types.py",
+          "backend/app/domains/social/service/action_notifications.py",
+          "backend/app/domains/social/service/action_sources.py",
+          "backend/app/domains/world_characters/service/action_scope.py",
+          "backend/app/runtime/social/action_scope.py",
+          "backend/app/runtime/social/langgraph_actions.py"
+        ],
+        "backend/app/services/world_feed_social_apply.py": [
+          "backend/app/domains/social/contracts/action_scope.py",
+          "backend/app/domains/social/exceptions.py",
+          "backend/app/domains/social/service/action_event_types.py",
+          "backend/app/domains/social/service/action_notifications.py",
+          "backend/app/domains/social/service/action_sources.py",
+          "backend/app/runtime/social/world_feed_actions.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::LangGraphSocialApplyError",
+          "new": "backend/app/domains/social/exceptions.py::LangGraphSocialApplyError",
+          "direct_consumers": [
+            "backend/app/domains/social/service/action_sources.py",
+            "backend/app/domains/social/service/action_notifications.py",
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py",
+            "backend/app/runtime/social/action_scope.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::ProposalResponseInput",
+          "new": "backend/app/domains/relationships/contracts/action_response.py::ProposalResponseInput",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/domains/relationships/service/action_response.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::PreparedProposalResponse",
+          "new": "backend/app/domains/relationships/contracts/action_response.py::PreparedProposalResponse",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/domains/relationships/service/action_response.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::LangGraphSocialApplyResult",
+          "new": "backend/app/runtime/social/langgraph_actions.py::LangGraphSocialApplyResult",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::apply_successful_root_post",
+          "new": "backend/app/runtime/social/langgraph_actions.py::apply_successful_root_post",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::active_world_character",
+          "new": "backend/app/domains/world_characters/service/action_scope.py::active_world_character",
+          "direct_consumers": [
+            "backend/app/runtime/social/action_scope.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::_world_character_for_character",
+          "new": "backend/app/domains/world_characters/service/action_scope.py::world_character_for_character",
+          "direct_consumers": [
+            "backend/app/runtime/social/action_scope.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::_root_post_id",
+          "new": "backend/app/domains/social/service/action_sources.py::_root_post_id",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py",
+            "backend/app/domains/social/service/action_notifications.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::proposal_for_notification",
+          "new": "backend/app/runtime/social/langgraph_actions.py::proposal_for_notification",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::prepare_proposal_response",
+          "new": "backend/app/domains/relationships/service/action_response.py::prepare_proposal_response",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::_target_scope",
+          "new": "backend/app/domains/social/service/action_sources.py::_target_scope",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py",
+            "backend/app/domains/social/service/action_notifications.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::_source_evidence",
+          "new": "backend/app/domains/social/service/action_sources.py::_source_evidence",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py",
+            "backend/app/domains/social/service/action_notifications.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::_event_type",
+          "new": "backend/app/domains/social/service/action_event_types.py::_event_type",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::_link_notifications",
+          "new": "backend/app/domains/social/service/action_notifications.py::_link_notifications",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::apply_successful_public_action",
+          "new": "backend/app/runtime/social/langgraph_actions.py::apply_successful_public_action",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::mark_notification_handled_without_public_action",
+          "new": "backend/app/domains/social/service/action_notifications.py::mark_notification_handled_without_public_action",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_social_apply.py::WorldFeedSocialApplyError",
+          "new": "backend/app/domains/social/exceptions.py::WorldFeedSocialApplyError",
+          "direct_consumers": [
+            "backend/app/domains/social/service/action_sources.py",
+            "backend/app/domains/social/service/action_notifications.py",
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py",
+            "backend/app/runtime/social/action_scope.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_social_apply.py::WorldFeedSocialApplyResult",
+          "new": "backend/app/runtime/social/world_feed_actions.py::WorldFeedSocialApplyResult",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_social_apply.py::_source_row",
+          "new": "backend/app/domains/social/service/action_sources.py::_source_row",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py",
+            "backend/app/domains/social/service/action_notifications.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_social_apply.py::apply_successful_world_feed_action",
+          "new": "backend/app/runtime/social/world_feed_actions.py::apply_successful_world_feed_action",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::_target_scope",
+          "new": "backend/app/domains/world_characters/service/action_scope.py::get_world_character",
+          "direct_consumers": [
+            "backend/app/runtime/social/action_scope.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::_target_scope",
+          "new": "backend/app/domains/social/contracts/action_scope.py::ActionScopeReferences",
+          "direct_consumers": [
+            "backend/app/domains/social/service/action_sources.py",
+            "backend/app/domains/social/service/action_notifications.py",
+            "backend/app/runtime/social/action_scope.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::active_world_character",
+          "new": "backend/app/runtime/social/action_scope.py::RuntimeActionScopeReferences",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::apply_successful_root_post",
+          "new": "backend/app/domains/social/service/action_sources.py::prepare_root_post",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py",
+            "backend/app/domains/social/service/action_notifications.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::proposal_for_notification",
+          "new": "backend/app/domains/social/service/action_sources.py::proposal_notification_source",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py",
+            "backend/app/domains/social/service/action_notifications.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::apply_successful_public_action",
+          "new": "backend/app/domains/relationships/service/action_response.py::validate_public_response_scope",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::prepare_proposal_response",
+          "new": "backend/app/domains/relationships/contracts/action_response.py::ProposalResponseActor",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/domains/relationships/service/action_response.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::apply_successful_public_action",
+          "new": "backend/app/domains/routines/service/public_action_executions.py::set_social_scope",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py",
+            "backend/app/runtime/social/action_scope.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::apply_successful_public_action",
+          "new": "backend/app/domains/routines/service/public_action_executions.py::set_interaction_intent",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py",
+            "backend/app/runtime/social/action_scope.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_social_apply.py::apply_successful_world_feed_action",
+          "new": "backend/app/domains/social/service/action_sources.py::attach_world_feed_source",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py",
+            "backend/app/domains/social/service/action_notifications.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_social_apply.py::apply_successful_world_feed_action",
+          "new": "backend/app/domains/social/service/action_sources.py::require_proposal_comment",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py",
+            "backend/app/domains/social/service/action_notifications.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_social_apply.py::apply_successful_world_feed_action",
+          "new": "backend/app/domains/social/service/action_notifications.py::link_world_feed_notification",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_social_apply.py::apply_successful_world_feed_action",
+          "new": "backend/app/domains/social/service/action_event_types.py::world_feed_event_type",
+          "direct_consumers": [
+            "backend/app/runtime/social/langgraph_actions.py",
+            "backend/app/runtime/social/world_feed_actions.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing",
+            "tests/test_social_event_runtime.py::test_inbox_reply_apply_marks_notification_and_updates_only_actor_direction",
+            "tests/test_social_event_runtime.py::test_inbox_llm_no_action_marks_notification_without_event_or_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_social_apply.py::apply_successful_world_feed_action",
+          "new": "backend/app/domains/social/contracts/action_scope.py::ActionIdentity",
+          "direct_consumers": [
+            "backend/app/domains/social/contracts/action_scope.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_social_apply.py::apply_successful_world_feed_action",
+          "new": "backend/app/domains/social/contracts/action_scope.py::WorldFeedActionProfile",
+          "direct_consumers": [
+            "backend/app/runtime/social/world_feed_actions.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::_event_type",
+          "new": "backend/app/domains/social/contracts/action_scope.py::ActionResponseDecision",
+          "direct_consumers": [
+            "backend/app/domains/social/contracts/action_scope.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing"
+          ]
+        },
+        {
+          "old": "backend/app/services/langgraph_social_apply.py::_event_type",
+          "new": "backend/app/domains/social/contracts/action_scope.py::PublicActionProposalResponse",
+          "direct_consumers": [
+            "backend/app/domains/social/service/action_event_types.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+            "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing"
+          ]
+        }
+      ],
+      "new_tests": [
+        "tests/social/test_action_apply_ownership.py::test_no_action_keeps_original_scope_checks_and_caller_rollback",
+        "tests/social/test_action_apply_ownership.py::test_action_sources_preserve_pending_reaction_scope_without_committing"
+      ],
+      "retired_compatibility_files": [
+        "backend/app/services/langgraph_social_apply.py",
+        "backend/app/services/world_feed_social_apply.py"
+      ],
+      "same_session_evidence": "19 original policy/query/error/complete transaction bodies match after exact owner-call expansion. New SQLite2 prove fail-first invalid no-action SQL0, sameSession construction and attached result, no implicit commit/event/relationship, caller rollback, and reaction mutation without implicit flush. Existing reply/proposal/WorldFeed/LangGraph/RoutinePost behavior remains under focused regressions.",
+      "remaining": "Community and WorldFeed runtime execution, parent-owned Search, remaining compatibility consumers and G07 test ownership are not complete. Capture, Hosted CI and integration are parent-owned."
     }
   }
 }

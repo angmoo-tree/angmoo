@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2390,
-      "internal_edge_count": 2763,
+      "external_import_count": 2406,
+      "internal_edge_count": 2810,
       "legacy_import_exception_count": 0,
-      "module_count": 799,
+      "module_count": 807,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -22,6 +22,14 @@
             "imports": [],
             "module": "app.domains.relationships.contracts",
             "path": "backend/app/domains/relationships/contracts/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.proposals",
+              "app.domains.relationships.models"
+            ],
+            "module": "app.domains.relationships.contracts.action_response",
+            "path": "backend/app/domains/relationships/contracts/action_response.py"
           },
           {
             "imports": [
@@ -358,6 +366,16 @@
           },
           {
             "imports": [
+              "app.domains.relationships.contracts.action_response",
+              "app.domains.relationships.contracts.proposals",
+              "app.domains.relationships.models",
+              "app.domains.relationships.service.proposals"
+            ],
+            "module": "app.domains.relationships.service.action_response",
+            "path": "backend/app/domains/relationships/service/action_response.py"
+          },
+          {
+            "imports": [
               "app.config",
               "app.domains.relationships.contracts.diagnostics",
               "app.domains.relationships.contracts.graph_read",
@@ -624,6 +642,14 @@
             ],
             "module": "app.domains.social.contracts",
             "path": "backend/app/domains/social/contracts/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.source_writes",
+              "app.domains.social.contracts.subjective_persistence"
+            ],
+            "module": "app.domains.social.contracts.action_scope",
+            "path": "backend/app/domains/social/contracts/action_scope.py"
           },
           {
             "imports": [
@@ -1045,6 +1071,36 @@
             "imports": [],
             "module": "app.domains.social.service",
             "path": "backend/app/domains/social/service/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.action_scope"
+            ],
+            "module": "app.domains.social.service.action_event_types",
+            "path": "backend/app/domains/social/service/action_event_types.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.action_scope",
+              "app.domains.social.contracts.source_writes",
+              "app.domains.social.contracts.subjective_persistence",
+              "app.domains.social.exceptions",
+              "app.domains.social.models.posts",
+              "app.domains.social.service.action_sources"
+            ],
+            "module": "app.domains.social.service.action_notifications",
+            "path": "backend/app/domains/social/service/action_notifications.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.action_scope",
+              "app.domains.social.contracts.source_writes",
+              "app.domains.social.contracts.subjective_persistence",
+              "app.domains.social.exceptions",
+              "app.domains.social.models.posts"
+            ],
+            "module": "app.domains.social.service.action_sources",
+            "path": "backend/app/domains/social/service/action_sources.py"
           },
           {
             "imports": [
@@ -1640,6 +1696,18 @@
           },
           {
             "imports": [
+              "app.domains.routines.service.public_action_executions",
+              "app.domains.social.contracts.action_scope",
+              "app.domains.social.contracts.source_writes",
+              "app.domains.social.contracts.subjective_persistence",
+              "app.domains.social.exceptions",
+              "app.domains.world_characters.service.action_scope"
+            ],
+            "module": "app.runtime.social.action_scope",
+            "path": "backend/app/runtime/social/action_scope.py"
+          },
+          {
+            "imports": [
               "app.runtime.social.discovery",
               "app.runtime.social.inbox",
               "app.runtime.social.manual_feed_references",
@@ -1712,6 +1780,27 @@
             ],
             "module": "app.runtime.social.inbox",
             "path": "backend/app/runtime/social/inbox.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.action_response",
+              "app.domains.relationships.models",
+              "app.domains.relationships.service.action_response",
+              "app.domains.routines.models",
+              "app.domains.routines.service.public_action_executions",
+              "app.domains.social.exceptions",
+              "app.domains.social.models.posts",
+              "app.domains.social.service.action_event_types",
+              "app.domains.social.service.action_notifications",
+              "app.domains.social.service.action_sources",
+              "app.domains.world_characters.models",
+              "app.runtime.activity_proposals.composition",
+              "app.runtime.activity_proposals.references",
+              "app.runtime.relationships.sqlalchemy_social_event",
+              "app.runtime.social.action_scope"
+            ],
+            "module": "app.runtime.social.langgraph_actions",
+            "path": "backend/app/runtime/social/langgraph_actions.py"
           },
           {
             "imports": [
@@ -1870,6 +1959,24 @@
             ],
             "module": "app.runtime.social.today_activity_queries",
             "path": "backend/app/runtime/social/today_activity_queries.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.models",
+              "app.domains.routines.models",
+              "app.domains.routines.service.public_action_executions",
+              "app.domains.social.contracts.action_scope",
+              "app.domains.social.exceptions",
+              "app.domains.social.models.posts",
+              "app.domains.social.schemas.feed",
+              "app.domains.social.service.action_event_types",
+              "app.domains.social.service.action_notifications",
+              "app.domains.social.service.action_sources",
+              "app.runtime.activity_proposals.composition",
+              "app.runtime.relationships.sqlalchemy_social_event"
+            ],
+            "module": "app.runtime.social.world_feed_actions",
+            "path": "backend/app/runtime/social/world_feed_actions.py"
           }
         ],
         "legacy_horizontal": [
@@ -2369,7 +2476,7 @@
       },
       {
         "path": "backend/tests/test_social_event_runtime.py",
-        "sha256": "2c28c1bbadafcf759687a94a15064e16c11a9dd37899d99eba6bde6ca25029e0"
+        "sha256": "6e233f9b4c902e33207a9f7ed876a96c271bb64137740b46e4383086fa1c537b"
       },
       {
         "path": "backend/tests/test_t2_architecture_inventory.py",

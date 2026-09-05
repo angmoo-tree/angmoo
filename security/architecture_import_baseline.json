@@ -1,7 +1,7 @@
 {
-  "edge_count": 2763,
-  "external_import_count": 2390,
-  "module_count": 799,
+  "edge_count": 2810,
+  "external_import_count": 2406,
+  "module_count": 807,
   "modules": [
     {
       "external_imports": [],
@@ -3125,6 +3125,20 @@
     },
     {
       "external_imports": [
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.contracts.proposals",
+        "app.domains.relationships.models"
+      ],
+      "module": "app.domains.relationships.contracts.action_response",
+      "path": "backend/app/domains/relationships/contracts/action_response.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime",
         "typing"
@@ -3694,6 +3708,22 @@
       "imports": [],
       "module": "app.domains.relationships.service",
       "path": "backend/app/domains/relationships/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections.abc",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.relationships.contracts.action_response",
+        "app.domains.relationships.contracts.proposals",
+        "app.domains.relationships.models",
+        "app.domains.relationships.service.proposals"
+      ],
+      "module": "app.domains.relationships.service.action_response",
+      "path": "backend/app/domains/relationships/service/action_response.py",
       "wildcard_imports": []
     },
     {
@@ -5260,6 +5290,18 @@
     },
     {
       "external_imports": [
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.source_writes",
+        "app.domains.social.contracts.subjective_persistence"
+      ],
+      "module": "app.domains.social.contracts.action_scope",
+      "path": "backend/app/domains/social/contracts/action_scope.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "datetime",
         "sqlalchemy.orm",
         "typing"
@@ -5979,6 +6021,51 @@
       "imports": [],
       "module": "app.domains.social.service",
       "path": "backend/app/domains/social/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.social.contracts.action_scope"
+      ],
+      "module": "app.domains.social.service.action_event_types",
+      "path": "backend/app/domains/social/service/action_event_types.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.contracts.action_scope",
+        "app.domains.social.contracts.source_writes",
+        "app.domains.social.contracts.subjective_persistence",
+        "app.domains.social.exceptions",
+        "app.domains.social.models.posts",
+        "app.domains.social.service.action_sources"
+      ],
+      "module": "app.domains.social.service.action_notifications",
+      "path": "backend/app/domains/social/service/action_notifications.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.contracts.action_scope",
+        "app.domains.social.contracts.source_writes",
+        "app.domains.social.contracts.subjective_persistence",
+        "app.domains.social.exceptions",
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.domains.social.service.action_sources",
+      "path": "backend/app/domains/social/service/action_sources.py",
       "wildcard_imports": []
     },
     {
@@ -6921,6 +7008,20 @@
       "imports": [],
       "module": "app.domains.world_characters.service",
       "path": "backend/app/domains/world_characters/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "collections.abc",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.world_characters.exceptions",
+        "app.domains.world_characters.models"
+      ],
+      "module": "app.domains.world_characters.service.action_scope",
+      "path": "backend/app/domains/world_characters/service/action_scope.py",
       "wildcard_imports": []
     },
     {
@@ -10584,6 +10685,22 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.service.public_action_executions",
+        "app.domains.social.contracts.action_scope",
+        "app.domains.social.contracts.source_writes",
+        "app.domains.social.contracts.subjective_persistence",
+        "app.domains.social.exceptions",
+        "app.domains.world_characters.service.action_scope"
+      ],
+      "module": "app.runtime.social.action_scope",
+      "path": "backend/app/runtime/social/action_scope.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "fastapi"
       ],
       "imports": [
@@ -10689,6 +10806,35 @@
       ],
       "module": "app.runtime.social.inbox",
       "path": "backend/app/runtime/social/inbox.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.relationships.contracts.action_response",
+        "app.domains.relationships.models",
+        "app.domains.relationships.service.action_response",
+        "app.domains.routines.models",
+        "app.domains.routines.service.public_action_executions",
+        "app.domains.social.exceptions",
+        "app.domains.social.models.posts",
+        "app.domains.social.service.action_event_types",
+        "app.domains.social.service.action_notifications",
+        "app.domains.social.service.action_sources",
+        "app.domains.world_characters.models",
+        "app.runtime.activity_proposals.composition",
+        "app.runtime.activity_proposals.references",
+        "app.runtime.relationships.sqlalchemy_social_event",
+        "app.runtime.social.action_scope"
+      ],
+      "module": "app.runtime.social.langgraph_actions",
+      "path": "backend/app/runtime/social/langgraph_actions.py",
       "wildcard_imports": []
     },
     {
@@ -10920,6 +11066,32 @@
       ],
       "module": "app.runtime.social.today_activity_queries",
       "path": "backend/app/runtime/social/today_activity_queries.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.relationships.models",
+        "app.domains.routines.models",
+        "app.domains.routines.service.public_action_executions",
+        "app.domains.social.contracts.action_scope",
+        "app.domains.social.exceptions",
+        "app.domains.social.models.posts",
+        "app.domains.social.schemas.feed",
+        "app.domains.social.service.action_event_types",
+        "app.domains.social.service.action_notifications",
+        "app.domains.social.service.action_sources",
+        "app.runtime.activity_proposals.composition",
+        "app.runtime.relationships.sqlalchemy_social_event"
+      ],
+      "module": "app.runtime.social.world_feed_actions",
+      "path": "backend/app/runtime/social/world_feed_actions.py",
       "wildcard_imports": []
     },
     {
@@ -11634,6 +11806,7 @@
         "app.runtime.resident.context",
         "app.runtime.routine_posts.sqlalchemy_runtime",
         "app.runtime.social.image_generation",
+        "app.runtime.social.langgraph_actions",
         "app.runtime.social.observations",
         "app.runtime.social.subjective_composition",
         "app.schemas",
@@ -11641,30 +11814,11 @@
         "app.services.character_lore",
         "app.services.community",
         "app.services.direct_llm",
-        "app.services.langgraph_social_apply",
         "app.services.prompt_safety",
         "app.services.world_feed_runtime"
       ],
       "module": "app.services.langgraph_resident",
       "path": "backend/app/services/langgraph_resident.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "hashlib",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.models",
-        "app.runtime.activity_proposals.composition",
-        "app.runtime.relationships.sqlalchemy_social_event"
-      ],
-      "module": "app.services.langgraph_social_apply",
-      "path": "backend/app/services/langgraph_social_apply.py",
       "wildcard_imports": []
     },
     {
@@ -11904,12 +12058,12 @@
         "app.runtime.resident.context",
         "app.runtime.social.observations",
         "app.runtime.social.subjective_composition",
+        "app.runtime.social.world_feed_actions",
         "app.schemas",
         "app.services.community",
         "app.services.direct_llm",
         "app.services.feed_reaction_planner",
-        "app.services.world_feed_search",
-        "app.services.world_feed_social_apply"
+        "app.services.world_feed_search"
       ],
       "module": "app.services.world_feed_runtime",
       "path": "backend/app/services/world_feed_runtime.py",
@@ -11939,26 +12093,6 @@
       ],
       "module": "app.services.world_feed_search",
       "path": "backend/app/services/world_feed_search.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "hashlib",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.models",
-        "app.runtime.activity_proposals.composition",
-        "app.runtime.relationships.sqlalchemy_social_event",
-        "app.schemas",
-        "app.services.world_feed_search"
-      ],
-      "module": "app.services.world_feed_social_apply",
-      "path": "backend/app/services/world_feed_social_apply.py",
       "wildcard_imports": []
     },
     {

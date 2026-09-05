@@ -1231,3 +1231,12 @@ Today·기존 응답 streaming·명시적 저장 focused37 PASS/14.38초. API·s
 확장 read/scope/subjective policy3과 query execution/block3·active query1 AST가 원문과 동일하다. 원래 reader와 새 서비스의 **실행 SQL13개·bound parameters·순서 및 전체 records/count/coverage/watermark 값이 동일**하다. 신규 SQLite1node는 factory/range reject SQL0·sameSession, 다른 Session에서 숨긴 원본을 기존 캐시 대신 다시 확인하여 원본/자손 제외, commit0을 검증했다. 기존 Today·응답 streaming·declared context와 함께 **38 PASS / 12.41초**다. 전체 B5·원본 최초도입 capture·Hosted/installer·G07 최종 종료는 후속 단계다.
 
 고정 후보의 전체 Social 역할 회귀와 Today/streaming/수동 게시·프로필을 함께 실행해 **95 PASS / 33.62초 / 기존 Starlette 경고1**를 확인했다. API·schema·ORM, 보호된2개 원래 테스트 파일 assertion, 전체 split evidence, 경계799 modules/2763 edges/legacy197 및 L4/ER0 현재 inventory PASS.
+
+
+## AR-B5-C15 — 성공 행동의 원본·알림·범위·제안 응답 소유 전환
+
+Social의 source/notification 정책과 자기 ORM query/mutation, WC의 활성/current/target scope 확인, Relationships의 제안 응답 허용, Routines의 실행 scope/intent 실제 대입을 소유 서비스로 분리했다. 같은 Session의 event/evidence/idempotency·proposal·attached result와 flush 순서는 runtime 조립이 연결하며 기존 services 두 파일을 제거했다. 전환은 정책을 통째 runtime으로 이름만 옮기는 방식이 아니다.
+
+원문 정책·조회·오류·전체 트랜잭션 **19개 AST 확장 비교가 동일**하다. 기존 event/WorldFeed/LangGraph/RoutinePost와 새 SQLite2 회귀가 **239 PASS / 기존 PostgreSQL 전용 1 SKIP / 27.85초**다. 신규 검증은 잘못된 NO_ACTION 입력의 SQL0·sameSession·관계/event0·rollback 및 attached 반응의 caller flush/rollback을 확인한다. 최초 실행의 새 reaction fixture가 필수 user_id를 빠뜨려 **238 PASS / 신규 fixture 1 FAIL / 1 SKIP**였고, fixture에 원래 owner_id만 채운 뒤 위 결과를 얻었다. 제품 DDL·nullable·기존 assertion을 바꾸지 않았다. 전체 B5·G07·원본 도입 capture·Hosted/installer 종료는 후속 범위다.
+
+최종 C15 소유 계약과 canonical ORM import 기준 확대 검증은 **255 PASS / 기존 PostgreSQL 전용 1 SKIP / 26.74초**다. PR #258/#263 API·schema·ORM 계약 동일, 변경된 보호 테스트 1개 파일 assertion과 전체 split evidence 검사가 통과했다. 경계 검사는 **807 module / 2810 edge / legacy exact edge 189**로 통과했고 L4/ER0 현재 inventory도 통과했다. Event 이름 판단은 읽기 전용 응답 값 계약을 소비하여 Social↔Relationships package cycle을 만들지 않는다. 검색 profile 역시 실제 attached 객체의 읽는 속성만 계약으로 표현하므로 옛 Search module 예외를 추가하지 않았다.
