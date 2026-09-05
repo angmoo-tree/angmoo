@@ -635,3 +635,8 @@ FeedCue 입력의 identity 계약은 user/character의 id만 읽으며 호출자
 `routines/service/slot_pool.py`는 빈 슬롯 확보, `slot_recovery.py`는 만료된 실행 복구, `slot_assignments.py`는 임시·상시 배정 반납, `slot_leases.py`는 실행 연결·연장·완료를 소유합니다. `slot_state.py`의 한정된 clear는 같은 attached Slot의 배정 필드만 지웁니다. 조회는 `repository/slots.py`에서 찾습니다. 임시 수동 실행의 종료를 상시 자율활동 배정으로 바꾸거나, 자율활동이 받아들인 배정을 임시 슬롯처럼 지우지 않습니다.
 
 Character row lock과 owner-controlled WorldCharacter 제외를 사용하는 배정/선점 판단도 `slot_assignments.py`와 `slot_claims.py`가 소유합니다. `contracts/slots.py`의 협력은 caller와 같은 Session에서 원래 Character 잠금·조회와 WC correlated predicate만 제공합니다. `runtime/resident/slot_references.py`가 실제 조회를, `runtime/resident/slots.py`가 원래 호출 signature와 조립을 담당합니다. Predicate를 미리 조회한 ID 목록으로 바꾸거나, commit/rollback을 adapter로 옮기지 않습니다. 현재 테스트의 혼합 `agent_crud.get_assigned_slot` 이름은 실제 repository 함수의 동일 객체 export만 사용하며, 기존 assertion을 그대로 보존하는 정확한 임시 소비자입니다. 이를 전체 전환 완료로 간주하지 않으며 B8-A 이전에 정리합니다.
+
+
+### 실행 실패 후 대기 정책
+
+`routines/service/run_backoff.py`는 사용량 제한·과부하·응답 시간 초과를 구분해 원래 재시도 시각과 표시 메시지를 결정합니다. 최근 실행 이력은 자기 `repository/run_backoff.py`에서 같은 Session으로 읽고, 결과 값은 immutable `contracts/backoff.py`에 둡니다. Provider 요청이나 sleep은 이 정책의 책임이 아닙니다. Character 또는 credential의 최근 실패를 읽는 OR 조건, 시각 범위와 30행 제한을 유지하며, 정책을 조회하기 위해 별도 Session이나 commit을 만들지 않습니다.

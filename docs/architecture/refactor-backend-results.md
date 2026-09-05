@@ -975,3 +975,12 @@ C4b1 최종 후보 검증은 **415 passed / 기존 19 skip / 기존 warnings 3 /
 C4b2 최종 확대 검증은 **424 passed / 기존 19 skip / 기존 warnings 3 / 166.39초**다. 경계 **717 modules / 2,406 edges / exact legacy 209 / cycle 0**, L4 parity 97·ER0 85/87/24/44/7·Memory batch 현재 inventory는 통과했다. 읽기 전용 원래 보존 함수의 source/assertion/suppression/API·ORM/node는 **각각 오류 0**, 보호 **2,139 / 현재 2,245 nodes**다. Split 검사는 옛 RunConflictError export 제거 뒤 실제 소비자를 누락한 세 지도 항목을 잡았고, 실제 `routines/service/runs.py`와 `services/agent_runs.py` 소비자를 정확 기록한 뒤 원래 split 검사를 다시 실행해 **오류 0**을 확인했다. 제품·테스트·검사 구현·frozen 자료는 이 보완에서 변경하지 않았다.
 
 Signed 선행 두 경로를 메모리로만 보충하는 동일 지역 진단이며 source introduction metadata는 부모가 선형 append한다. Stock 전체 보존·PostgreSQL CI·installer 및 전체 B4 완료는 별도 조건으로 남겨 둔다.
+
+
+## AR-B4-C5a — Run 과부하 이력·재시도 시각 정책
+
+실패 문자열/저장 결과의 분류와 재시도 시각은 Routines `service/run_backoff.py`, 자기 Run의 실제 이력 SQL은 `repository/run_backoff.py`, frozen 결정 값은 `contracts/backoff.py`로 이전했다. 실제 정의 9개와 SQL은 한정된 repository 호출을 복원하면 AST 차이 0이다. Character/credential OR, 2시간 구간의 경계, created/id 정렬·limit30·lazy scalar/autoflush 및 rate limit45/overload10·30/timeout10분 의미를 유지했다.
+
+기존 langgraph 검증의 과부하 7 nodes와 helper를 `tests/routines/test_run_backoff.py`로 이전했고 원래 테스트 본문 AST 8개가 모두 동일하다. 새 file SQLite 회귀는 caller의 미커밋 Run 실패 결과 조회·observer 격리·rollback 후 원래 판단 복원을 검증한다. 전체 214개 원래 AgentRun 정의를 검사하는 기존 AR-B2-B5의 완전 source map에 실제 목적지와 추출된 query member를 갱신했으며 중복 전체 지도를 새 단계마다 복사하지 않는다. Frozen/checkpoint/additions와 검사 구현은 유지한다.
+
+C5a 기존 영향 범위와 신규 회귀는 **293 passed / 기존 PG 1 skip / 기존 warnings 2 / 25.08초**, 현재 목록·OSS 경계·실행 조립 추가 검증은 **35 passed / 기존 warning 1 / 44.15초**다. 경계 **720 modules / 2,412 edges / exact legacy 209 / cycle 0**, L4 parity97·ER0 85/87/24/44/7·Memory batch 현재 inventory도 통과했다. 읽기 전용 원래 보존 진단의 **source/split/assertion/suppression/API·ORM/node 모두 오류 0**, 기존 보호 **2,139 / 현재 2,246 nodes**다. 선행 signed 두 경로만 메모리에 보충했으며 tracked frozen/checkpoint/additions·검사 구현을 수정하지 않았다. 부모 선형 introduction append 후 stock 전체·CI·installer는 별도 완료 조건이다.

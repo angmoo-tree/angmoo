@@ -118,3 +118,8 @@ ORPHANED_RESIDENT_RUN_ERROR = "resident_run_orphaned_after_expired_lease"
 TEMPORARY_MANUAL_SLOT_RELEASED_ERROR = (
     "temporary_manual_slot_released_after_interruption"
 )
+
+
+MODEL_OVERLOADED_RETRY_MINUTES = 10
+MODEL_OVERLOADED_REPEATED_RETRY_MINUTES = 30
+MODEL_OVERLOADED_REPEAT_WINDOW = timedelta(hours=2)

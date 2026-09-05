@@ -1,3 +1,4 @@
+from app.domains.routines.service.run_backoff import _runtime_error_backoff
 from app.domains.routines.exceptions import AgentRunConflictError
 from app.domains.routines import constants as routine_constants
 from app.runtime.resident import slots as resident_slots
@@ -86,9 +87,6 @@ KOREAN_WEEKDAYS = (
 GENERIC_OBSERVATION_RESULT = "커뮤니티 흐름을 둘러봤어요."
 OBSERVATION_NOTE_ACTION_TYPE = "observation_note_saved"
 RUNTIME_LAST_ERROR_PREFIX = "angmoo_runtime:"
-MODEL_OVERLOADED_RETRY_MINUTES = 10
-MODEL_OVERLOADED_REPEATED_RETRY_MINUTES = 30
-MODEL_OVERLOADED_REPEAT_WINDOW = timedelta(hours=2)
 FEED_PERCEPTION_DEBUG_ACTION_TYPE = "feed_perception_debug"
 TOOL_CHOICE_COMPLETE_TICK = {
     "mode": "ANY",
@@ -114,12 +112,6 @@ TOOLS_ALLOW_V6_INBOX_LANE = [
 ]
 
 
-@dataclass(frozen=True)
-class RuntimeBackoff:
-    kind: str
-    message: str
-    retry_at: datetime
-    repeated_overload: bool = False
 TOOLS_ALLOW_V6_FEED_SCAN_LANE = [
     "angmoo_list_feed",
     "angmoo_note_feed_interests",
@@ -212,8 +204,6 @@ ACTION_DECISION_TYPES = (
 )
 
 
-
-
 class OpenClawNotConfiguredError(AgentRunServiceError):
     pass
 
@@ -270,8 +260,6 @@ class ReadOnlyLaneDeferredError(AgentRunServiceError):
         self.gateway_result = gateway_result
         self.raw_error = raw_error
         super().__init__(raw_error)
-
-
 
 
 class AgentSessionBusyError(AgentRunServiceError):
@@ -3759,128 +3747,6 @@ def _is_success_status(status: str) -> bool:
         "canceled",
         "tool_call_missing",
     }
-
-
-def _is_runtime_rate_limit_error(raw: str) -> bool:
-    lowered = raw.lower()
-    uppered = raw.upper()
-    return any(
-        marker in lowered or marker in uppered
-        for marker in ("429", "RESOURCE_EXHAUSTED", "rate_limit", "rate limit", "throttl")
-    )
-
-
-def _is_runtime_model_overloaded_error(raw: str) -> bool:
-    if _is_runtime_rate_limit_error(raw):
-        return False
-    lowered = raw.lower()
-    uppered = raw.upper()
-    return any(
-        marker in lowered or marker in uppered
-        for marker in (
-            "502",
-            "503",
-            "BAD_GATEWAY",
-            "bad gateway",
-            "UNAVAILABLE",
-            "high demand",
-            "temporarily overloaded",
-            "running out of capacity",
-        )
-    )
-
-
-def _gateway_result_indicates_model_overloaded(value: Any) -> bool:
-    if not isinstance(value, dict):
-        return False
-    if value.get("failure_class") == "model_overloaded":
-        return True
-    reason = value.get("reason")
-    error = value.get("error")
-    joined = " ".join(
-        str(item)
-        for item in (reason, error)
-        if isinstance(item, str) and item.strip()
-    )
-    return bool(joined and _is_runtime_model_overloaded_error(joined))
-
-
-def _has_recent_model_overloaded_run(
-    db: Session | None,
-    *,
-    now: datetime,
-    character_id: str | None,
-    credential_id: str | None,
-) -> bool:
-    if db is None or (not character_id and not credential_id):
-        return False
-    filters = []
-    if character_id:
-        filters.append(models.AgentRun.character_id == character_id)
-    if credential_id:
-        filters.append(models.AgentRun.credential_id == credential_id)
-    rows = db.scalars(
-        select(models.AgentRun)
-        .where(
-            or_(*filters),
-            models.AgentRun.created_at >= now - MODEL_OVERLOADED_REPEAT_WINDOW,
-            models.AgentRun.created_at < now,
-        )
-        .order_by(models.AgentRun.created_at.desc(), models.AgentRun.id.desc())
-        .limit(30)
-    )
-    return any(_gateway_result_indicates_model_overloaded(run.gateway_result) for run in rows)
-
-
-def _runtime_error_backoff(
-    exc: Exception,
-    *,
-    now: datetime,
-    db: Session | None = None,
-    character_id: str | None = None,
-    credential_id: str | None = None,
-) -> RuntimeBackoff | None:
-    raw = str(exc).strip()
-    lowered = raw.lower()
-    uppered = raw.upper()
-    if _is_runtime_rate_limit_error(raw):
-        return RuntimeBackoff(
-            "model_rate_limit",
-            "모델 사용 제한으로 잠시 대기 중",
-            now + timedelta(minutes=45),
-        )
-    if _is_runtime_model_overloaded_error(raw):
-        repeated_overload = _has_recent_model_overloaded_run(
-            db,
-            now=now,
-            character_id=character_id,
-            credential_id=credential_id,
-        )
-        retry_minutes = (
-            MODEL_OVERLOADED_REPEATED_RETRY_MINUTES
-            if repeated_overload
-            else MODEL_OVERLOADED_RETRY_MINUTES
-        )
-        return RuntimeBackoff(
-            "model_overloaded",
-            "모델 일시 과부하로 재시도 예정",
-            now + timedelta(minutes=retry_minutes),
-            repeated_overload=repeated_overload,
-        )
-    if any(
-        marker in lowered or marker in uppered
-        for marker in (
-            "timeout",
-            "timed out",
-            "unknown error occurred",
-        )
-    ):
-        return RuntimeBackoff(
-            "provider_timeout",
-            "모델 응답 지연으로 재시도 예정",
-            now + timedelta(minutes=10),
-        )
-    return None
 
 
 def _is_read_only_lane_retryable_error(raw: str) -> bool:

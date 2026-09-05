@@ -1025,6 +1025,7 @@
       "app.domains.routines.contracts.activity",
       "app.domains.routines.contracts.activity_policy",
       "app.domains.routines.contracts.activity_scope",
+      "app.domains.routines.contracts.backoff",
       "app.domains.routines.contracts.clock",
       "app.domains.routines.contracts.feed_cues",
       "app.domains.routines.contracts.joint_activity",
@@ -1045,6 +1046,7 @@
       "app.domains.routines.repository.feed_cues",
       "app.domains.routines.repository.plans",
       "app.domains.routines.repository.public_action_executions",
+      "app.domains.routines.repository.run_backoff",
       "app.domains.routines.repository.runs",
       "app.domains.routines.repository.slots",
       "app.domains.routines.router",
@@ -1071,6 +1073,7 @@
       "app.domains.routines.service.lifecycle",
       "app.domains.routines.service.plans",
       "app.domains.routines.service.public_action_executions",
+      "app.domains.routines.service.run_backoff",
       "app.domains.routines.service.runs",
       "app.domains.routines.service.scheduling",
       "app.domains.routines.service.slot_assignments",
@@ -1247,6 +1250,7 @@
       "app.domains.routines.service.lifecycle",
       "app.domains.routines.service.plans",
       "app.domains.routines.service.public_action_executions",
+      "app.domains.routines.service.run_backoff",
       "app.domains.routines.service.runs",
       "app.domains.routines.service.scheduling",
       "app.domains.routines.service.slot_assignments",
@@ -2763,6 +2767,14 @@
         "owner_stage": "AR-B4-C",
         "reason": "Remaining real AgentRun orchestration catches the same actual Routines conflict class and consumes canonical lifecycle constants after the old CRUD exports are removed.",
         "removal_condition": "Move remaining AgentRun real execution to runtime/owner services in B4-C, removing this exact legacy consumer by B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.run_backoff",
+        "owner_stage": "AR-B4-C",
+        "reason": "Remaining real AgentRun execution consumes the same backoff decision after its actual policy/query move; no duplicate classifier or forwarding function.",
+        "removal_condition": "Move remaining actual execution orchestration to runtime/owner services in B4-C and remove this exact legacy consumer before B8-A.",
         "review_date": "2026-09-06"
       }
     ]

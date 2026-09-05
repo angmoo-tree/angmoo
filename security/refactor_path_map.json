@@ -802,7 +802,14 @@
     "tests/test_l2_scheduler_singleton.py::test_shutdown_during_tick_drains_then_releases_without_second_tick": "tests/routines/test_scheduler_singleton.py::test_shutdown_during_tick_drains_then_releases_without_second_tick",
     "tests/test_l2_scheduler_singleton.py::test_sleep_wake_gap_does_not_replay_missed_intervals": "tests/routines/test_scheduler_singleton.py::test_sleep_wake_gap_does_not_replay_missed_intervals",
     "tests/test_l2_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates": "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
-    "tests/test_l2_scheduler_singleton.py::test_wait_between_ticks_keeps_lease_alive": "tests/routines/test_scheduler_singleton.py::test_wait_between_ticks_keeps_lease_alive"
+    "tests/test_l2_scheduler_singleton.py::test_wait_between_ticks_keeps_lease_alive": "tests/routines/test_scheduler_singleton.py::test_wait_between_ticks_keeps_lease_alive",
+    "tests/test_langgraph_resident_engine.py::test_gateway_result_indicates_model_overloaded": "tests/routines/test_run_backoff.py::test_gateway_result_indicates_model_overloaded",
+    "tests/test_langgraph_resident_engine.py::test_recent_model_overload_detects_same_character_or_credential": "tests/routines/test_run_backoff.py::test_recent_model_overload_detects_same_character_or_credential",
+    "tests/test_langgraph_resident_engine.py::test_recent_model_overload_ignores_old_or_non_overload_runs": "tests/routines/test_run_backoff.py::test_recent_model_overload_ignores_old_or_non_overload_runs",
+    "tests/test_langgraph_resident_engine.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate": "tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
+    "tests/test_langgraph_resident_engine.py::test_runtime_backoff_model_overloaded_bad_gateway": "tests/routines/test_run_backoff.py::test_runtime_backoff_model_overloaded_bad_gateway",
+    "tests/test_langgraph_resident_engine.py::test_runtime_backoff_model_overloaded_first_occurrence": "tests/routines/test_run_backoff.py::test_runtime_backoff_model_overloaded_first_occurrence",
+    "tests/test_langgraph_resident_engine.py::test_runtime_backoff_model_overloaded_repeated_occurrence": "tests/routines/test_run_backoff.py::test_runtime_backoff_model_overloaded_repeated_occurrence"
   },
   "details": {
     "AR-B1": {
@@ -10859,6 +10866,10 @@
           "backend/app/services/runtime_boundary.py"
         ],
         "backend/app/services/agent_runs.py": [
+          "backend/app/domains/routines/constants.py",
+          "backend/app/domains/routines/contracts/backoff.py",
+          "backend/app/domains/routines/repository/run_backoff.py",
+          "backend/app/domains/routines/service/run_backoff.py",
           "backend/app/domains/runtime/contracts.py",
           "backend/app/services/agent_runs.py"
         ],
@@ -11084,32 +11095,38 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::MODEL_OVERLOADED_RETRY_MINUTES",
-          "new": "backend/app/services/agent_runs.py::MODEL_OVERLOADED_RETRY_MINUTES",
+          "new": "backend/app/domains/routines/constants.py::MODEL_OVERLOADED_RETRY_MINUTES",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/run_backoff.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
+            "tests/routines/test_run_backoff.py::test_recent_model_overload_detects_same_character_or_credential",
+            "tests/routines/test_run_backoff.py::test_overload_query_reads_pending_caller_result_without_committing"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::MODEL_OVERLOADED_REPEATED_RETRY_MINUTES",
-          "new": "backend/app/services/agent_runs.py::MODEL_OVERLOADED_REPEATED_RETRY_MINUTES",
+          "new": "backend/app/domains/routines/constants.py::MODEL_OVERLOADED_REPEATED_RETRY_MINUTES",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/run_backoff.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
+            "tests/routines/test_run_backoff.py::test_recent_model_overload_detects_same_character_or_credential",
+            "tests/routines/test_run_backoff.py::test_overload_query_reads_pending_caller_result_without_committing"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::MODEL_OVERLOADED_REPEAT_WINDOW",
-          "new": "backend/app/services/agent_runs.py::MODEL_OVERLOADED_REPEAT_WINDOW",
+          "new": "backend/app/domains/routines/constants.py::MODEL_OVERLOADED_REPEAT_WINDOW",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/run_backoff.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
+            "tests/routines/test_run_backoff.py::test_recent_model_overload_detects_same_character_or_credential",
+            "tests/routines/test_run_backoff.py::test_overload_query_reads_pending_caller_result_without_committing"
           ]
         },
         {
@@ -11204,12 +11221,14 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::RuntimeBackoff",
-          "new": "backend/app/services/agent_runs.py::RuntimeBackoff",
+          "new": "backend/app/domains/routines/contracts/backoff.py::RuntimeBackoff",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/run_backoff.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
+            "tests/routines/test_run_backoff.py::test_recent_model_overload_detects_same_character_or_credential",
+            "tests/routines/test_run_backoff.py::test_overload_query_reads_pending_caller_result_without_committing"
           ]
         },
         {
@@ -12534,52 +12553,62 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_is_runtime_rate_limit_error",
-          "new": "backend/app/services/agent_runs.py::_is_runtime_rate_limit_error",
+          "new": "backend/app/domains/routines/service/run_backoff.py::_is_runtime_rate_limit_error",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/run_backoff.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
+            "tests/routines/test_run_backoff.py::test_recent_model_overload_detects_same_character_or_credential",
+            "tests/routines/test_run_backoff.py::test_overload_query_reads_pending_caller_result_without_committing"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_is_runtime_model_overloaded_error",
-          "new": "backend/app/services/agent_runs.py::_is_runtime_model_overloaded_error",
+          "new": "backend/app/domains/routines/service/run_backoff.py::_is_runtime_model_overloaded_error",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/run_backoff.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
+            "tests/routines/test_run_backoff.py::test_recent_model_overload_detects_same_character_or_credential",
+            "tests/routines/test_run_backoff.py::test_overload_query_reads_pending_caller_result_without_committing"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_gateway_result_indicates_model_overloaded",
-          "new": "backend/app/services/agent_runs.py::_gateway_result_indicates_model_overloaded",
+          "new": "backend/app/domains/routines/service/run_backoff.py::_gateway_result_indicates_model_overloaded",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/run_backoff.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
+            "tests/routines/test_run_backoff.py::test_recent_model_overload_detects_same_character_or_credential",
+            "tests/routines/test_run_backoff.py::test_overload_query_reads_pending_caller_result_without_committing"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_has_recent_model_overloaded_run",
-          "new": "backend/app/services/agent_runs.py::_has_recent_model_overloaded_run",
+          "new": "backend/app/domains/routines/service/run_backoff.py::_has_recent_model_overloaded_run",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/run_backoff.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
+            "tests/routines/test_run_backoff.py::test_recent_model_overload_detects_same_character_or_credential",
+            "tests/routines/test_run_backoff.py::test_overload_query_reads_pending_caller_result_without_committing"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_runtime_error_backoff",
-          "new": "backend/app/services/agent_runs.py::_runtime_error_backoff",
+          "new": "backend/app/domains/routines/service/run_backoff.py::_runtime_error_backoff",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
+            "tests/routines/test_run_backoff.py::test_recent_model_overload_detects_same_character_or_credential",
+            "tests/routines/test_run_backoff.py::test_overload_query_reads_pending_caller_result_without_committing"
           ]
         },
         {
@@ -13675,6 +13704,19 @@
           ],
           "test_nodes": [
             "tests/media/test_media_storage_boundaries.py::test_compatibility_exports_use_owner_implementations_and_same_error_classes"
+          ]
+        },
+        {
+          "old": "backend/app/services/agent_runs.py::_has_recent_model_overloaded_run",
+          "new": "backend/app/domains/routines/repository/run_backoff.py::recent_runs_for_model_overload",
+          "source_member": "Original filter list, optional character/credential OR clauses and db.scalars select/order/limit30 only. Guard and overload classification stay in actual service. Scalar iterator/autoflush remain on caller Session; no commit/rollback.",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/run_backoff.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
+            "tests/routines/test_run_backoff.py::test_recent_model_overload_detects_same_character_or_credential",
+            "tests/routines/test_run_backoff.py::test_overload_query_reads_pending_caller_result_without_committing"
           ]
         }
       ]
@@ -31206,6 +31248,37 @@
       "ownership": "Assignment/temporary claim and assigned/due claim real decisions now live in Routines services. Runtime constructs exact same-Session Character lock/read and WC correlated predicate collaboration; five original query occurrences mapped with no foreign ORM in owner services.",
       "preservation": "Four complete workflow ASTs match after exact reference substitution and removal of one required collaboration parameter. All three SQL ASTs match same classes/Session/argument binding. Candidate order/limit/max_count, allowed empty guard, single-flight, owner-controlled exclusion, nested transaction recovery, token/error/commit/rollback/refresh are unchanged. New3 SQLite nodes prove observer visibility and rollback for explicit commit modes plus constructor/empty guards with zero statements.",
       "remaining": "Old Slot constants/error exports were removed after exact production imports and four test-only constant imports switched, preserving local names/assertions. The separate cruds.agents.get_assigned_slot mixed test-only same-function bridge remains C4b1/B8-A. AgentRun/LangGraph orchestration, credentials, other-owner candidates, historical source introductions and full B4 closure remain pending."
+    },
+    "AR-B4-C5a-run-backoff": {
+      "status": "IMPLEMENTED —293 behavioral passed/existing PG1skip plus35 inventory/boundary passed;9definitions+SQL and8original test/helper AST same; readonly6 checks0; parent linear stock gate pending",
+      "checked_source_map": "AR-B2-B5 split_files/split_symbols for backend/app/services/agent_runs.py retains complete source coverage with exact canonical destinations and the new SQL member; no duplicate full-map copy.",
+      "actual_paths": [
+        "backend/app/domains/routines/service/run_backoff.py",
+        "backend/app/domains/routines/repository/run_backoff.py",
+        "backend/app/domains/routines/contracts/backoff.py",
+        "backend/app/domains/routines/constants.py"
+      ],
+      "test_nodes": [
+        "tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
+        "tests/routines/test_run_backoff.py::test_recent_model_overload_detects_same_character_or_credential",
+        "tests/routines/test_run_backoff.py::test_overload_query_reads_pending_caller_result_without_committing"
+      ],
+      "test_moves": {
+        "backend/tests/test_langgraph_resident_engine.py::test_runtime_backoff_model_overloaded_first_occurrence": "backend/tests/routines/test_run_backoff.py::test_runtime_backoff_model_overloaded_first_occurrence",
+        "backend/tests/test_langgraph_resident_engine.py::test_runtime_backoff_model_overloaded_bad_gateway": "backend/tests/routines/test_run_backoff.py::test_runtime_backoff_model_overloaded_bad_gateway",
+        "backend/tests/test_langgraph_resident_engine.py::test_runtime_backoff_model_overloaded_repeated_occurrence": "backend/tests/routines/test_run_backoff.py::test_runtime_backoff_model_overloaded_repeated_occurrence",
+        "backend/tests/test_langgraph_resident_engine.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate": "backend/tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
+        "backend/tests/test_langgraph_resident_engine.py::test_gateway_result_indicates_model_overloaded": "backend/tests/routines/test_run_backoff.py::test_gateway_result_indicates_model_overloaded",
+        "backend/tests/test_langgraph_resident_engine.py::test_recent_model_overload_detects_same_character_or_credential": "backend/tests/routines/test_run_backoff.py::test_recent_model_overload_detects_same_character_or_credential",
+        "backend/tests/test_langgraph_resident_engine.py::test_recent_model_overload_ignores_old_or_non_overload_runs": "backend/tests/routines/test_run_backoff.py::test_recent_model_overload_ignores_old_or_non_overload_runs",
+        "backend/tests/test_langgraph_resident_engine.py::_agent_run_for_overload_test": "backend/tests/routines/test_run_backoff.py::_agent_run_for_overload_test"
+      },
+      "ownership": "Actual failure classification and backoff decision service consumes its own Run repository; frozen retry decision is a contract. Three original overload constants remain single definitions. Original seven tests and helper move unchanged to Routines tests.",
+      "preservation": "Nine actual definitions plus extracted SQL match original AST after exact repository substitution. Every original test/helper body AST matches. OR identity filter, 2h inclusive-lower/exclusive-now window, created/id descending and limit30 are unchanged; same lazy scalar iterator and Session autoflush. Rate limit45 before overload10/30 before timeout10 stays unchanged.",
+      "remaining": "Read-only lane retry/provider diagnostics, actual AgentRun/LangGraph orchestration, shared credential/other owner final integration and exact test-only Slot bridge remain later B4-C/B8-A work."
     }
+  },
+  "test_symbols": {
+    "backend/tests/test_langgraph_resident_engine.py::_agent_run_for_overload_test": "backend/tests/routines/test_run_backoff.py::_agent_run_for_overload_test"
   }
 }

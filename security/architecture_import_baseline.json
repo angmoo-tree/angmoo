@@ -1,7 +1,7 @@
 {
-  "edge_count": 2406,
-  "external_import_count": 2251,
-  "module_count": 717,
+  "edge_count": 2412,
+  "external_import_count": 2262,
+  "module_count": 720,
   "modules": [
     {
       "external_imports": [],
@@ -3691,6 +3691,17 @@
     {
       "external_imports": [
         "__future__",
+        "dataclasses",
+        "datetime"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.contracts.backoff",
+      "path": "backend/app/domains/routines/contracts/backoff.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "datetime",
         "typing"
       ],
@@ -3949,6 +3960,21 @@
       ],
       "module": "app.domains.routines.repository.public_action_executions",
       "path": "backend/app/domains/routines/repository/public_action_executions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.repository.run_backoff",
+      "path": "backend/app/domains/routines/repository/run_backoff.py",
       "wildcard_imports": []
     },
     {
@@ -4376,6 +4402,22 @@
       ],
       "module": "app.domains.routines.service.public_action_executions",
       "path": "backend/app/domains/routines/service/public_action_executions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.backoff",
+        "app.domains.routines.repository.run_backoff"
+      ],
+      "module": "app.domains.routines.service.run_backoff",
+      "path": "backend/app/domains/routines/service/run_backoff.py",
       "wildcard_imports": []
     },
     {
@@ -10090,6 +10132,7 @@
         "app.domains.routines.repository.feed_cues",
         "app.domains.routines.repository.slots",
         "app.domains.routines.service.lifecycle",
+        "app.domains.routines.service.run_backoff",
         "app.domains.routines.service.runs",
         "app.domains.routines.service.slot_assignments",
         "app.domains.routines.service.slot_leases",
