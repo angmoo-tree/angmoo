@@ -8,7 +8,10 @@ from sqlalchemy.pool import StaticPool
 
 from app import models
 from app import schemas
-from app.services import local_bot
+from tests.local_bot.support import bound_bot_actions
+from app.domains.local_bot.service import actions
+from app.runtime.local_bot import composition as bot_composition
+local_bot = bound_bot_actions()
 from app.domains.local_bot.service import quota as local_bot_quota
 
 
@@ -250,9 +253,9 @@ def test_failed_domain_write_rolls_back_without_consuming_quota(
 ) -> None:
     db = _FakeTransactionDb()
     quota = _FakeQuota()
-    monkeypatch.setattr(local_bot, "_ensure_post_rate_limit", lambda *_args: quota)
+    monkeypatch.setattr(actions.rate_limits, "_ensure_post_rate_limit", lambda *_args, **_kwargs: quota)
     monkeypatch.setattr(
-        local_bot.community_service,
+        bot_composition.community,
         "create_post",
         lambda *_args, **_kwargs: SimpleNamespace(
             id="post-quota",
@@ -264,7 +267,7 @@ def test_failed_domain_write_rolls_back_without_consuming_quota(
     def fail_activity(*_args, **_kwargs):
         raise RuntimeError("activity write failed")
 
-    monkeypatch.setattr(local_bot.agent_crud, "log_activity", fail_activity)
+    monkeypatch.setattr(bot_composition.activity_logs, "log_activity", fail_activity)
 
     with pytest.raises(RuntimeError, match="activity write failed"):
         local_bot.create_post(
@@ -285,17 +288,17 @@ def test_noop_like_commits_without_consuming_quota(
     quota = _FakeQuota()
     marker = object()
     monkeypatch.setattr(
-        local_bot,
+        actions.rate_limits,
         "_ensure_reaction_rate_limit",
         lambda *_args, **_kwargs: quota,
     )
-    monkeypatch.setattr(local_bot, "_post_like_exists", lambda *_args: True)
+    monkeypatch.setattr(bot_composition.queries, "_post_like_exists", lambda *_args: True)
     monkeypatch.setattr(
-        local_bot.community_service,
+        bot_composition.community,
         "like_post",
         lambda *_args, **_kwargs: marker,
     )
-    monkeypatch.setattr(local_bot, "_bot_post_detail", lambda value: value)
+    monkeypatch.setattr(actions, "_bot_post_detail", lambda value: value)
 
     assert local_bot.like_post(db, _context(), "post-quota") is marker
     assert quota.consumed == []

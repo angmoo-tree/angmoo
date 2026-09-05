@@ -425,7 +425,9 @@
     "backend/app/models/local_bot_quotas.py": "backend/app/domains/local_bot/models.py",
     "backend/app/services/local_bot_quota.py": "backend/app/domains/local_bot/service/quota.py",
     "backend/app/services/image_prompt_safety.py": "backend/app/core/image_prompt_safety.py",
-    "backend/app/services/service_image_key.py": "backend/app/credentials/service_images.py"
+    "backend/app/services/service_image_key.py": "backend/app/credentials/service_images.py",
+    "backend/app/services/local_bot.py": "backend/app/domains/local_bot/service/actions.py",
+    "backend/app/api/v1/routes/bot.py": "backend/app/domains/local_bot/router/bot.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -1683,8 +1685,9 @@
           "backend/app/domains/identity/exceptions.py"
         ],
         "backend/app/api/v1/deps.py": [
-          "backend/app/api/v1/deps.py",
-          "backend/app/domains/identity/dependencies.py"
+          "backend/app/api/authorization.py",
+          "backend/app/domains/identity/dependencies.py",
+          "backend/app/domains/local_bot/dependencies.py"
         ]
       },
       "split_symbols": [
@@ -3862,14 +3865,13 @@
         },
         {
           "old": "backend/app/api/v1/deps.py::AuthorizationHeader",
-          "new": "backend/app/domains/identity/dependencies.py::AuthorizationHeader",
+          "new": "backend/app/api/authorization.py::AuthorizationHeader",
           "direct_consumers": [
-            "backend/app/domains/identity/dependencies.py"
+            "backend/app/domains/identity/dependencies.py",
+            "backend/app/domains/local_bot/dependencies.py"
           ],
           "test_nodes": [
-            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
-            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
-            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_auth_errors_precede_quota_and_preserve_status_details"
           ]
         },
         {
@@ -3886,14 +3888,13 @@
         },
         {
           "old": "backend/app/api/v1/deps.py::_bearer_token",
-          "new": "backend/app/domains/identity/dependencies.py::_bearer_token",
+          "new": "backend/app/api/authorization.py::_bearer_token",
           "direct_consumers": [
-            "backend/app/domains/identity/dependencies.py"
+            "backend/app/domains/identity/dependencies.py",
+            "backend/app/domains/local_bot/dependencies.py"
           ],
           "test_nodes": [
-            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
-            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
-            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_auth_errors_precede_quota_and_preserve_status_details"
           ]
         },
         {
@@ -4018,14 +4019,13 @@
         },
         {
           "old": "backend/app/api/v1/deps.py::get_current_local_bot",
-          "new": "backend/app/api/v1/deps.py::get_current_local_bot",
+          "new": "backend/app/domains/local_bot/dependencies.py::get_current_local_bot",
           "direct_consumers": [
-            "backend/app/api/v1/deps.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/identity/test_browser_session_security.py::test_browser_auth_schemas_do_not_serialize_tokens",
-            "tests/identity/test_browser_session_security.py::test_password_login_sets_http_only_cookie_without_token_json",
-            "tests/identity/test_browser_session_security.py::test_login_requires_exact_origin_before_service_call"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/local_bot/test_http_workflows.py::test_bot_http_auth_errors_precede_quota_and_preserve_status_details"
           ]
         }
       ],
@@ -37156,11 +37156,11 @@
           "backend/app/domains/local_bot/contracts/authentication.py",
           "backend/app/domains/local_bot/exceptions.py",
           "backend/app/domains/local_bot/policies/rate_limit_clock.py",
+          "backend/app/domains/local_bot/service/actions.py",
           "backend/app/domains/local_bot/service/authentication.py",
           "backend/app/domains/local_bot/service/presentation.py",
           "backend/app/domains/local_bot/service/rate_limits.py",
-          "backend/app/runtime/local_bot/queries.py",
-          "backend/app/services/local_bot.py"
+          "backend/app/runtime/local_bot/queries.py"
         ],
         "backend/app/schemas/agents.py": [
           "backend/app/schemas/agents.py",
@@ -37184,7 +37184,8 @@
           "old": "backend/app/services/local_bot.py::POST_COOLDOWN",
           "new": "backend/app/domains/local_bot/constants.py::POST_COOLDOWN",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py",
+            "backend/app/runtime/local_bot/queries.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37195,7 +37196,7 @@
           "old": "backend/app/services/local_bot.py::MAX_POSTS_PER_DAY",
           "new": "backend/app/domains/local_bot/constants.py::MAX_POSTS_PER_DAY",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
             "backend/app/domains/routines/schemas/resident.py"
           ],
           "test_nodes": [
@@ -37207,7 +37208,8 @@
           "old": "backend/app/services/local_bot.py::REPLY_COOLDOWN",
           "new": "backend/app/domains/local_bot/constants.py::REPLY_COOLDOWN",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37218,7 +37220,8 @@
           "old": "backend/app/services/local_bot.py::MAX_REPLIES_PER_DAY",
           "new": "backend/app/domains/local_bot/constants.py::MAX_REPLIES_PER_DAY",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37229,7 +37232,7 @@
           "old": "backend/app/services/local_bot.py::REACTION_COOLDOWN",
           "new": "backend/app/domains/local_bot/constants.py::REACTION_COOLDOWN",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37240,7 +37243,7 @@
           "old": "backend/app/services/local_bot.py::MAX_REACTIONS_PER_DAY",
           "new": "backend/app/domains/local_bot/constants.py::MAX_REACTIONS_PER_DAY",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37251,7 +37254,8 @@
           "old": "backend/app/services/local_bot.py::STATE_COOLDOWN",
           "new": "backend/app/domains/local_bot/constants.py::STATE_COOLDOWN",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37262,7 +37266,7 @@
           "old": "backend/app/services/local_bot.py::READ_WINDOW",
           "new": "backend/app/domains/local_bot/constants.py::READ_WINDOW",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37273,7 +37277,7 @@
           "old": "backend/app/services/local_bot.py::MAX_READS_PER_WINDOW",
           "new": "backend/app/domains/local_bot/constants.py::MAX_READS_PER_WINDOW",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37284,7 +37288,8 @@
           "old": "backend/app/services/local_bot.py::REACTION_ACTION_TYPES",
           "new": "backend/app/domains/local_bot/constants.py::REACTION_ACTION_TYPES",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py",
+            "backend/app/runtime/local_bot/queries.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37295,7 +37300,8 @@
           "old": "backend/app/services/local_bot.py::STATE_ACTION_TYPES",
           "new": "backend/app/domains/local_bot/constants.py::STATE_ACTION_TYPES",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37306,7 +37312,7 @@
           "old": "backend/app/services/local_bot.py::REACTION_COOLDOWN_ACTION_TYPES",
           "new": "backend/app/domains/local_bot/constants.py::REACTION_COOLDOWN_ACTION_TYPES",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37317,7 +37323,7 @@
           "old": "backend/app/services/local_bot.py::RATE_LIMIT_LOG_DEDUPE_WINDOW",
           "new": "backend/app/domains/local_bot/constants.py::RATE_LIMIT_LOG_DEDUPE_WINDOW",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/runtime/local_bot/queries.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37339,8 +37345,7 @@
           "old": "backend/app/services/local_bot.py::LocalBotError",
           "new": "backend/app/domains/local_bot/exceptions.py::LocalBotError",
           "direct_consumers": [
-            "backend/app/domains/local_bot/exceptions.py",
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/exceptions.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37351,7 +37356,8 @@
           "old": "backend/app/services/local_bot.py::LocalBotAuthError",
           "new": "backend/app/domains/local_bot/exceptions.py::LocalBotAuthError",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/dependencies.py",
+            "backend/app/domains/local_bot/service/authentication.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37362,7 +37368,8 @@
           "old": "backend/app/services/local_bot.py::LocalBotForbiddenError",
           "new": "backend/app/domains/local_bot/exceptions.py::LocalBotForbiddenError",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/dependencies.py",
+            "backend/app/domains/local_bot/service/authentication.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37373,7 +37380,8 @@
           "old": "backend/app/services/local_bot.py::LocalBotModeError",
           "new": "backend/app/domains/local_bot/exceptions.py::LocalBotModeError",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/dependencies.py",
+            "backend/app/domains/local_bot/service/authentication.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37384,7 +37392,8 @@
           "old": "backend/app/services/local_bot.py::LocalBotRateLimitError",
           "new": "backend/app/domains/local_bot/exceptions.py::LocalBotRateLimitError",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37395,8 +37404,14 @@
           "old": "backend/app/services/local_bot.py::LocalBotContext",
           "new": "backend/app/domains/local_bot/contracts/authentication.py::LocalBotContext",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
-            "backend/app/domains/local_bot/service/authentication.py"
+            "backend/app/domains/local_bot/dependencies.py",
+            "backend/app/domains/local_bot/contracts/actions.py",
+            "backend/app/domains/local_bot/contracts/rate_limits.py",
+            "backend/app/domains/local_bot/router/bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
+            "backend/app/domains/local_bot/service/authentication.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
+            "backend/app/runtime/local_bot/queries.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_response_contract.py::test_bot_me_hides_owner_and_token_management_fields",
@@ -37407,7 +37422,7 @@
           "old": "backend/app/services/local_bot.py::authenticate_local_bot",
           "new": "backend/app/domains/local_bot/service/authentication.py::authenticate_local_bot",
           "direct_consumers": [
-            "backend/app/api/v1/deps.py",
+            "backend/app/domains/local_bot/dependencies.py",
             "backend/tests/local_bot/test_key_management.py",
             "backend/tests/identity/test_demo_account_lock.py"
           ],
@@ -37418,210 +37433,206 @@
         },
         {
           "old": "backend/app/services/local_bot.py::get_me",
-          "new": "backend/app/services/local_bot.py::get_me",
+          "new": "backend/app/domains/local_bot/service/actions.py::get_me",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::get_state",
-          "new": "backend/app/services/local_bot.py::get_state",
+          "new": "backend/app/domains/local_bot/service/actions.py::get_state",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::save_state",
-          "new": "backend/app/services/local_bot.py::save_state",
+          "new": "backend/app/domains/local_bot/service/actions.py::save_state",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::list_feed",
-          "new": "backend/app/services/local_bot.py::list_feed",
+          "new": "backend/app/domains/local_bot/service/actions.py::list_feed",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::list_following_feed",
-          "new": "backend/app/services/local_bot.py::list_following_feed",
+          "new": "backend/app/domains/local_bot/service/actions.py::list_following_feed",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::get_post_thread",
-          "new": "backend/app/services/local_bot.py::get_post_thread",
+          "new": "backend/app/domains/local_bot/service/actions.py::get_post_thread",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::list_notifications",
-          "new": "backend/app/services/local_bot.py::list_notifications",
+          "new": "backend/app/domains/local_bot/service/actions.py::list_notifications",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::get_character_profile",
-          "new": "backend/app/services/local_bot.py::get_character_profile",
+          "new": "backend/app/domains/local_bot/service/actions.py::get_character_profile",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::get_activity",
-          "new": "backend/app/services/local_bot.py::get_activity",
+          "new": "backend/app/domains/local_bot/service/actions.py::get_activity",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::mark_notification_read",
-          "new": "backend/app/services/local_bot.py::mark_notification_read",
+          "new": "backend/app/domains/local_bot/service/actions.py::mark_notification_read",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::create_post",
-          "new": "backend/app/services/local_bot.py::create_post",
+          "new": "backend/app/domains/local_bot/service/actions.py::create_post",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
-            "backend/tests/test_local_bot_atomic_quota.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::create_reply",
-          "new": "backend/app/services/local_bot.py::create_reply",
+          "new": "backend/app/domains/local_bot/service/actions.py::create_reply",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::like_post",
-          "new": "backend/app/services/local_bot.py::like_post",
+          "new": "backend/app/domains/local_bot/service/actions.py::like_post",
           "direct_consumers": [
-            "backend/tests/test_postgres_security_concurrency.py",
-            "backend/app/services/local_bot.py",
-            "backend/tests/test_local_bot_atomic_quota.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::unlike_post",
-          "new": "backend/app/services/local_bot.py::unlike_post",
+          "new": "backend/app/domains/local_bot/service/actions.py::unlike_post",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::repost_post",
-          "new": "backend/app/services/local_bot.py::repost_post",
+          "new": "backend/app/domains/local_bot/service/actions.py::repost_post",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::unrepost_post",
-          "new": "backend/app/services/local_bot.py::unrepost_post",
+          "new": "backend/app/domains/local_bot/service/actions.py::unrepost_post",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::follow_profile",
-          "new": "backend/app/services/local_bot.py::follow_profile",
+          "new": "backend/app/domains/local_bot/service/actions.py::follow_profile",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::unfollow_profile",
-          "new": "backend/app/services/local_bot.py::unfollow_profile",
+          "new": "backend/app/domains/local_bot/service/actions.py::unfollow_profile",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
-            "tests/test_local_bot_atomic_quota.py::test_reaction_daily_bucket_and_action_cooldown_are_independent"
+            "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+            "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown"
           ]
         },
         {
           "old": "backend/app/services/local_bot.py::_bot_post_reference",
           "new": "backend/app/domains/local_bot/service/presentation.py::_bot_post_reference",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
             "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
@@ -37633,7 +37644,6 @@
           "old": "backend/app/services/local_bot.py::_bot_post_summary",
           "new": "backend/app/domains/local_bot/service/presentation.py::_bot_post_summary",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
             "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
@@ -37645,7 +37655,7 @@
           "old": "backend/app/services/local_bot.py::_bot_post_detail",
           "new": "backend/app/domains/local_bot/service/presentation.py::_bot_post_detail",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
@@ -37657,7 +37667,7 @@
           "old": "backend/app/services/local_bot.py::_bot_feed_page",
           "new": "backend/app/domains/local_bot/service/presentation.py::_bot_feed_page",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
@@ -37669,7 +37679,7 @@
           "old": "backend/app/services/local_bot.py::_bot_post_thread",
           "new": "backend/app/domains/local_bot/service/presentation.py::_bot_post_thread",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
@@ -37681,7 +37691,7 @@
           "old": "backend/app/services/local_bot.py::_bot_notification_read",
           "new": "backend/app/domains/local_bot/service/presentation.py::_bot_notification_read",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
@@ -37693,7 +37703,7 @@
           "old": "backend/app/services/local_bot.py::_bot_notification_page",
           "new": "backend/app/domains/local_bot/service/presentation.py::_bot_notification_page",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
@@ -37705,7 +37715,6 @@
           "old": "backend/app/services/local_bot.py::_bot_profile_ref",
           "new": "backend/app/domains/local_bot/service/presentation.py::_bot_profile_ref",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
             "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
@@ -37717,7 +37726,7 @@
           "old": "backend/app/services/local_bot.py::_bot_follow_read",
           "new": "backend/app/domains/local_bot/service/presentation.py::_bot_follow_read",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
@@ -37729,7 +37738,7 @@
           "old": "backend/app/services/local_bot.py::_bot_profile_read",
           "new": "backend/app/domains/local_bot/service/presentation.py::_bot_profile_read",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/service/presentation.py"
           ],
           "test_nodes": [
@@ -37741,7 +37750,7 @@
           "old": "backend/app/services/local_bot.py::_ensure_post_rate_limit",
           "new": "backend/app/domains/local_bot/service/rate_limits.py::_ensure_post_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
@@ -37754,7 +37763,7 @@
           "old": "backend/app/services/local_bot.py::_bot_activity_limits",
           "new": "backend/app/domains/local_bot/service/rate_limits.py::_bot_activity_limits",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
@@ -37767,7 +37776,6 @@
           "old": "backend/app/services/local_bot.py::_post_limit_status",
           "new": "backend/app/domains/local_bot/service/rate_limits.py::_post_limit_status",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
             "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
@@ -37780,7 +37788,6 @@
           "old": "backend/app/services/local_bot.py::_activity_limit_status",
           "new": "backend/app/domains/local_bot/service/rate_limits.py::_activity_limit_status",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
             "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
@@ -37793,7 +37800,8 @@
           "old": "backend/app/services/local_bot.py::_latest_activity_at",
           "new": "backend/app/runtime/local_bot/queries.py::_latest_activity_at",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/contracts/rate_limits.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37804,7 +37812,8 @@
           "old": "backend/app/services/local_bot.py::_count_activities_today",
           "new": "backend/app/runtime/local_bot/queries.py::_count_activities_today",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/contracts/rate_limits.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37815,7 +37824,8 @@
           "old": "backend/app/services/local_bot.py::_remaining_seconds",
           "new": "backend/app/domains/local_bot/policies/rate_limit_clock.py::_remaining_seconds",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/schemas.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
             "backend/app/domains/local_bot/policies/rate_limit_clock.py"
           ],
           "test_nodes": [
@@ -37827,7 +37837,7 @@
           "old": "backend/app/services/local_bot.py::_ensure_reaction_rate_limit",
           "new": "backend/app/domains/local_bot/service/rate_limits.py::_ensure_reaction_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
@@ -37840,7 +37850,6 @@
           "old": "backend/app/services/local_bot.py::_ensure_reaction_daily_limit",
           "new": "backend/app/domains/local_bot/service/rate_limits.py::_ensure_reaction_daily_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
             "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
@@ -37853,7 +37862,7 @@
           "old": "backend/app/services/local_bot.py::_ensure_activity_rate_limit",
           "new": "backend/app/domains/local_bot/service/rate_limits.py::_ensure_activity_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
@@ -37866,7 +37875,7 @@
           "old": "backend/app/services/local_bot.py::_ensure_read_rate_limit",
           "new": "backend/app/domains/local_bot/service/rate_limits.py::_ensure_read_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
@@ -37879,7 +37888,7 @@
           "old": "backend/app/services/local_bot.py::_complete_action_quota",
           "new": "backend/app/domains/local_bot/service/rate_limits.py::_complete_action_quota",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
@@ -37892,7 +37901,7 @@
           "old": "backend/app/services/local_bot.py::_rollback_action_quota",
           "new": "backend/app/domains/local_bot/service/rate_limits.py::_rollback_action_quota",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
@@ -37905,7 +37914,8 @@
           "old": "backend/app/services/local_bot.py::_post_like_exists",
           "new": "backend/app/runtime/local_bot/queries.py::_post_like_exists",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/contracts/actions.py",
+            "backend/app/domains/local_bot/service/actions.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37916,7 +37926,8 @@
           "old": "backend/app/services/local_bot.py::_post_repost_exists",
           "new": "backend/app/runtime/local_bot/queries.py::_post_repost_exists",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/contracts/actions.py",
+            "backend/app/domains/local_bot/service/actions.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37927,7 +37938,8 @@
           "old": "backend/app/services/local_bot.py::_profile_follow_exists",
           "new": "backend/app/runtime/local_bot/queries.py::_profile_follow_exists",
           "direct_consumers": [
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/contracts/actions.py",
+            "backend/app/domains/local_bot/service/actions.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -37938,7 +37950,8 @@
           "old": "backend/app/services/local_bot.py::_local_day_start_utc",
           "new": "backend/app/domains/local_bot/policies/rate_limit_clock.py::_local_day_start_utc",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/quota.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
             "backend/app/domains/local_bot/policies/rate_limit_clock.py"
           ],
           "test_nodes": [
@@ -37950,7 +37963,8 @@
           "old": "backend/app/services/local_bot.py::_next_local_day_start_utc",
           "new": "backend/app/domains/local_bot/policies/rate_limit_clock.py::_next_local_day_start_utc",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/quota.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
             "backend/app/domains/local_bot/policies/rate_limit_clock.py"
           ],
           "test_nodes": [
@@ -37962,7 +37976,8 @@
           "old": "backend/app/services/local_bot.py::_seconds_until",
           "new": "backend/app/domains/local_bot/policies/rate_limit_clock.py::_seconds_until",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/quota.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
             "backend/app/domains/local_bot/policies/rate_limit_clock.py"
           ],
           "test_nodes": [
@@ -37974,7 +37989,6 @@
           "old": "backend/app/services/local_bot.py::_raise_rate_limit",
           "new": "backend/app/domains/local_bot/service/rate_limits.py::_raise_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
             "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
@@ -37987,7 +38001,6 @@
           "old": "backend/app/services/local_bot.py::_log_rate_limit",
           "new": "backend/app/domains/local_bot/service/rate_limits.py::_log_rate_limit",
           "direct_consumers": [
-            "backend/app/services/local_bot.py",
             "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
@@ -38128,7 +38141,7 @@
           "direct_consumers": [
             "backend/app/schemas/agents.py",
             "backend/app/schemas/__init__.py",
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/actions.py",
             "backend/app/domains/local_bot/schemas.py"
           ],
           "test_nodes": [
@@ -38142,7 +38155,8 @@
           "direct_consumers": [
             "backend/app/schemas/agents.py",
             "backend/app/schemas/__init__.py",
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/router/bot.py",
+            "backend/app/domains/local_bot/service/actions.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -38166,7 +38180,7 @@
           "direct_consumers": [
             "backend/tests/test_postgres_security_concurrency.py",
             "backend/app/domains/local_bot/service/quota.py",
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
             "backend/tests/test_local_bot_atomic_quota.py"
           ],
           "test_nodes": [
@@ -38179,7 +38193,9 @@
           "new": "backend/app/domains/local_bot/service/quota.py::ActionQuota",
           "direct_consumers": [
             "backend/app/domains/local_bot/service/quota.py",
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/models.py",
+            "backend/app/domains/local_bot/repository/quota.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -38191,7 +38207,7 @@
           "new": "backend/app/domains/local_bot/service/quota.py::lock_action_quota",
           "direct_consumers": [
             "backend/tests/test_postgres_security_concurrency.py",
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
             "backend/tests/test_local_bot_atomic_quota.py"
           ],
           "test_nodes": [
@@ -38204,7 +38220,7 @@
           "new": "backend/app/domains/local_bot/service/quota.py::consume_read",
           "direct_consumers": [
             "backend/tests/test_postgres_security_concurrency.py",
-            "backend/app/services/local_bot.py",
+            "backend/app/domains/local_bot/service/rate_limits.py",
             "backend/tests/test_local_bot_atomic_quota.py"
           ],
           "test_nodes": [
@@ -38239,7 +38255,8 @@
           "new": "backend/app/domains/local_bot/service/quota.py::_next_local_day_start_utc",
           "direct_consumers": [
             "backend/app/domains/local_bot/service/quota.py",
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/policies/rate_limit_clock.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -38262,7 +38279,8 @@
           "new": "backend/app/domains/local_bot/service/quota.py::_seconds_until",
           "direct_consumers": [
             "backend/app/domains/local_bot/service/quota.py",
-            "backend/app/services/local_bot.py"
+            "backend/app/domains/local_bot/policies/rate_limit_clock.py",
+            "backend/app/domains/local_bot/service/rate_limits.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -47217,6 +47235,35 @@
         "_raise_rate_limit"
       ],
       "remaining": "Exact partial bindings in the existing service connect its unconverted actual Bot actions; they retire with Bot action/service and HTTP slice, not as permanent parallel entrypoints. Original frozen/test assertions/suppression and no extra provider or owner mutation remain protected."
+    },
+    "AR-B8-LOCAL-BOT-A5": {
+      "status": "IMPLEMENTED SOURCE; 287 focused/Identity/G07/boundary tests PASS; original six preservation diagnostics 0 errors; root linear source introductions and hosted integration pending",
+      "actual_paths": [
+        "backend/app/domains/local_bot/service/actions.py",
+        "backend/app/domains/local_bot/contracts/actions.py",
+        "backend/app/runtime/local_bot/composition.py",
+        "backend/app/api/authorization.py",
+        "backend/app/domains/local_bot/router/bot.py",
+        "backend/app/domains/local_bot/dependencies.py"
+      ],
+      "original_action_source": "480426256302628c445b4ead07db4bdfd60c5e25:backend/app/services/local_bot.py",
+      "preservation": "18 actual Bot reads/actions with same-Session typed Social/read/log/image collaborations, original quota reservation/deferred commit/failure rollback and aftercommit image request. 18 HTTP operations and Retry-After helper keep original URL/order/status/operation names and public DTOs. Shared Authorization syntax is one actual common HTTP definition; Identity and Bot share its same object. Request app.state builders connect authentication/actions in both factories. Original dedicated assertions use test-only workflow binding; product code has no forwarding wrapper.",
+      "removed_paths": [
+        "backend/app/services/local_bot.py",
+        "backend/app/api/v1/routes/bot.py",
+        "backend/app/api/v1/deps.py"
+      ],
+      "remaining": "Root B5 final integration replaces exactly the community and post_image_generation callable bindings in runtime.local_bot.composition; current actual owners and their error wrappers remain unchanged. Root G5 handles the global same-model/schema export and historical migration registration. G06 keeps both factory registrations during final single-factory integration. Parent alone captures signed source introductions and performs hosted/merged gates.",
+      "verification": {
+        "pytest": "287 passed, 15 warnings in 16.77s",
+        "ast": "18 original complete action bodies and signatures after workflow binding normalization; 18 router functions plus error helper; shared Authorization 2 definitions; original Bot assertions and suppressions unchanged",
+        "typed_collaboration": "16 Social Protocol method annotations resolved",
+        "boundaries": "782 modules / 2605 edges / 168 exact legacy edges",
+        "g07": "Full original security harness PASS; 26 module-only inventory changes, same operation/endpoint/access; public inventory 196",
+        "preservation": "Sources/split/assertions/suppression/APIORM/missing_nodes each 0 errors; protected 2201/current 2269; immutable original snapshots and additions unchanged; exact signed 869bae55 source 2-file supplement in memory only",
+        "l4_er0": "L4 current inventory 782 modules / 97 parity nodes; deferred runtime 22 files",
+        "new_test_nodes": "4 actual HTTP tests + 3 explicit error-entry architecture regressions; source introduction SHA is this source commit"
+      }
     }
   }
 }

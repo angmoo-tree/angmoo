@@ -679,8 +679,12 @@ Runtime은 기존 서비스 키 가용성과 Social quota 조회를 같은 Sessi
 
 `local_bot/service/presentation.py`는 Social 응답을 Bot의 공개 필드로 변환합니다. Bot의 입력·공개 응답 형식은 `local_bot/schemas.py`가 소유하고, Social 이미지 작업 결과인 `BotImageRequestRead`와 공유 글 미디어·댓글은 원래 Social 형식을 사용합니다. 비공개 Character 상태·개인 credential을 공개 projection에 추가하지 않습니다. `policies/rate_limit_clock.py`는 원래의 지역 날짜 경계와 양수 Retry-After 계산을 유지합니다.
 
-현재 실제 Bot 행동·rate-limit 읽기와 HTTP 라우터는 후속 LocalBot 전환 범위입니다. 임시 기존 소비자는 소유 서비스를 직접 연결하며, 이 단계의 인증·응답 분리를 모든 LocalBot 전환의 완료로 해석하지 않습니다.
+Bot의 실제 읽기·행동은 `local_bot/service/actions.py`, 18개 HTTP 경로는 `router/bot.py`에서 찾습니다. `dependencies.py`는 요청의 같은 DB Session, Bot 인증과 app.state에 등록된 협력 구성을 연결합니다. `runtime/local_bot/composition.py`는 Social 업무, 활동 로그, 이미지 요청과 필요한 복합 조회를 구성하며 서비스는 runtime을 직접 import하지 않습니다. 옛 `services/local_bot.py`와 Bot의 옛 HTTP 파일은 제거했습니다. 다른 업무의 최종 소비자 연결과 모델 등록은 B5/G5 통합에서 검증합니다.
 
 LocalBot의 Social 게시물·반응·follow, Routines 활동 이력, Character 상태 읽기는 `runtime/local_bot/queries.py`가 현재 Session에서 연결합니다. 각 조회의 다른 작성자·삭제·시간·개수·정렬 조건과 non-Session fallback을 유지하며 해당 조회에서 commit/flush를 추가하지 않습니다. 할당량·행동 판단은 이 SQL 조립과 구분합니다.
 
 `local_bot/service/rate_limits.py`는 게시·답글·반응·상태·읽기의 실제 제한을 판단하고 사용량 응답과 Retry-After를 만듭니다. `contracts/rate_limits.py`의 필요한 조회·활동기록만 runtime에서 연결합니다. 실제 Session의 quota lock과 원래 synthetic fallback을 구분하며, 읽기 횟수는 원래 자체 commit, 행동은 원래 완료 후 commit·실패 rollback을 유지합니다. rate-limit 로그의 중복 방지 조회와 저장도 같은 Session 및 원래 호출 순서입니다.
+
+공통 HTTP Authorization 문법은 `app/api/authorization.py`에서 해석합니다. Identity와 LocalBot의 권한 정책은 각자의 서비스에 남아 있습니다. 다른 업무의 실제 오류 클래스를 처리할 때는 검사 정책에 정확한 `exceptions` 모듈을 공개 entry로 등록할 수 있습니다. 이것은 하위 모듈·router·models·repository 접근을 허용하지 않으며, 오류 모듈의 DB·프레임워크 의존도 계속 금지합니다.
+
+Bot 쓰기에서 할당량 잠금, 지연 commit 구간, 성공 기록과 실패 rollback의 순서는 업무 계약입니다. 이미지 생성 요청은 원래 게시 성공 후 위치를 유지합니다. 상태 저장은 일일 사용량을 늘리지 않고 마지막 성공 시각으로 재호출 간격을 제한합니다. 반환 DTO는 소유자 id·토큰·private persona를 포함하지 않습니다.

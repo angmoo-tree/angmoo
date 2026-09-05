@@ -1208,3 +1208,14 @@ LocalBot A2 최종: 원래18정의와 Bot19전체 class AST/JSONschema 동일. �
 12개 실제 판단/사용량/Retry-After/log/commit/rollback 함수를 LocalBot service로 옮겼다. 명시 workflow의 같은 조회·Routines 기록 함수를 복원하면 원래 남은30함수의 전체AST와 같다. 기존 rate-limit 테스트는 실제 소유 서비스와 workflow 준비만 바꾸고 모든 assertion/suppression은 유지했다. 옛 action 구현의 임시partial10개는 뒤따르는 실제 action/HTTP 이전에서 제거한다.
 
 집중 **54 passed / 기존warning1 /7.24초**, 원래6진단 모든항목0(protected2201/current2262), 경계780/2589/173legacy·L4 780/14/97·deferred22 PASS. 실제 신규3파일(service/rate_limits.py,contracts/rate_limits.py,runtime/local_bot/rate_limits.py), 새노드0이다. 원본 frozen·append-only 원장은 그대로이고 source도입 캡처는 부모의 순차 통합에서 수행한다.
+
+
+### AR-B8 LocalBot A5 — 실제 행동·HTTP·G07 연결
+
+`service/actions.py`가 원래 Bot 읽기·행동 18함수를 소유하고 `router/bot.py`가 HTTP 18개와 Retry-After helper를 소유한다. 인증은 요청의 같은 Session과 두 factory의 app.state builder를 사용한다. Authorization Header/parser 2개는 공통 HTTP에 원문 그대로 옮겨 Identity와 Bot이 같은 객체를 사용한다. 옛 전역 LocalBot service, Bot router와 마지막 api/v1/deps는 제거했다. 기존 dedicated test의 assertion/param/suppression은 그대로이며 test-only workflow binding이 새 실제 서비스에 같은 runtime 협력을 넣는다.
+
+원본 18action 전체 AST와 18route+오류helper AST는 명시적 workflow/DTO 경로를 역정규화한 뒤 동일하다. G07의 현재 module 26개만 변경했고 URL·endpoint·access 분류는 불변이다. shared errors는 정확한 exceptions entry만 허용하며, 미등록 sibling/하위/HTTP/storage 접근과 errors IO는 기존처럼 실패한다. 신규 HTTP 4개와 경계 3개 회귀 및 최종 보존 검증은 아래 확정 결과로 기록한다.
+
+남은 root 통합: B5의 실제 Social/image callable을 runtime composition에 연결하고, G5 모델 등록과 G06 단일 factory에 두 Bot builder를 유지한다. source 최초 도입 capture·Hosted CI·PR/merge 상태는 이 소스 준비와 별개다.
+
+확정 검증: Identity 전체·Bot 기존/새 HTTP·G07 전체·기존 partial/architecture/legacy 및 explicit error-entry 검사는 **287 PASS / 15 warnings / 16.77초**다. 원래6보존 진단은 source/split/assertion/suppression/APIORM/node 모두0오류이며 protected2201/current2269다. 진단의 exact signed869bae55 두 파일만 메모리에서 보충했고 frozen/additions는 변경하지 않았다. 전체 stock/source introduction gate를 통과했다고 표시하지 않는다. 현재 경계782modules/2605edges/168exactlegacy, Public route196, L4 current782modules/97parity, deferred runtime22files도 PASS다. 신규 테스트는 HTTP4+경계3이며 source 첫 도입은 이 signed source commit으로 root가 기록한다.

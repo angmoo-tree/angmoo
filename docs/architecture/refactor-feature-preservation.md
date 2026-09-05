@@ -128,3 +128,6 @@ Worlds 부분 전환은 K03 전체 또는 WC·Package·활동·frontend 완료�
 
 
 AR-B2 WorldCharacter 기반 slice는 6개 ORM과 두 schema 묶음, 입력 계약·오류, 생성기 client, 응답 검증 및 flush-only seed를 새 역할 경로로 옮긴다. 기존 setup contract 테스트는 `tests/world_characters/test_setup_contracts.py`로 이동하며 test node·symbol map이 원본 assertion을 계속 보호한다. provider monkeypatch 호환은 같은 module 객체로 유지하고, frozen v2→v3의 옛 ORM import 두 개도 새 class와 동일한 객체다. 원본 5파일의 66개 symbol 분리를 기록했으며 setup·entry·owner·Studio workflow는 아직 후속 slice다.
+
+
+AR-B8 LocalBot A5는 실제 18행동/읽기와 18HTTP를 own service/router로 닫는다. 이전 LocalBot 72정의 split의 실제 목적지·소비자와 Identity deps 원본의 Authorization 2/Bot 인증 1 분할을 갱신했다. 기존 원본 snapshot/assertion은 불변이며 typed 협력은 같은 Session·nullable 조회·오류객체·deferred commit·quota/rollback·aftercommit image 요청을 보존한다. G07 route inventory는 module 필드 26개만 현재 owner로 전환했다. B5/G5/G06 최종 합류와 원본 source introduction은 root 순차 통합 범위다.

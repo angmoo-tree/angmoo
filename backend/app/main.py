@@ -216,7 +216,11 @@ def create_app(
     from app.runtime.characters.management import build_image_settings_workflows
     runtime_app.state.image_settings_workflows = build_image_settings_workflows
     from app.runtime.local_bot.keys import build_local_key_workflows
+    from app.runtime.local_bot.authentication import build_authentication_workflows
+    from app.runtime.local_bot.composition import build_bot_workflows
     runtime_app.state.local_key_workflows = build_local_key_workflows
+    runtime_app.state.local_bot_authentication_workflows = build_authentication_workflows
+    runtime_app.state.local_bot_workflows = build_bot_workflows
     runtime_app.add_middleware(RequestBodyLimitMiddleware)
     runtime_app.include_router(
         create_public_api_router(extension.routers if extension else ()),
