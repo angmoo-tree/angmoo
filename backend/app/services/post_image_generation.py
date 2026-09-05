@@ -1,5 +1,22 @@
 from __future__ import annotations
 
+from app.domains.social.service.image_attachment import (
+    attach_prepared_post_image,
+    release_prepared_post_image_quota,
+)
+from app.domains.social.service.image_reference_policy import (
+    _pollinations_reference_url,
+    _reference_image_url,
+    _accepts_pollinations_reference,
+    _requires_pollinations_reference,
+    _requires_reference,
+    _allows_reference_fallback,
+)
+from app.domains.social.service.image_attempts import (
+    _pollinations_failed,
+    _replicate_failed,
+)
+
 from app.domains.social.contracts.image_generation import (
     PreparedPostImage,
 )
@@ -604,76 +621,6 @@ async def prepare_local_api_post_image(
     )
 
 
-def attach_prepared_post_image(
-    *,
-    db: Session,
-    post_id: str,
-    prepared: PreparedPostImage,
-) -> dict[str, Any]:
-    if not prepared.ready:
-        return prepared.attempt
-    assert prepared.content is not None
-    assert prepared.content_type is not None
-    assert prepared.alt_text is not None
-    assert prepared.prompt_hash is not None
-    assert prepared.model is not None
-    try:
-        saved = profile_media.save_generated_post_image_bytes(
-            post_id=post_id,
-            content_type=prepared.content_type,
-            content=prepared.content,
-            target_size=POST_IMAGE_TARGET_SIZE,
-            max_bytes=POST_IMAGE_TARGET_MAX_BYTES,
-            quality_steps=POST_IMAGE_WEBP_QUALITY_STEPS,
-        )
-        media = community_crud.create_post_media(
-            db,
-            post_id=post_id,
-            url=str(saved["url"]),
-            alt_text=prepared.alt_text,
-            model=prepared.model,
-            prompt_hash=prepared.prompt_hash,
-            byte_size=int(saved["byte_size"]),
-            width=int(saved["width"]),
-            height=int(saved["height"]),
-            key_source=prepared.key_source if prepared.key_source != "none" else "user",
-        )
-    except Exception as exc:
-        reservation = community_crud.get_post_image_quota_reservation(
-            db, prepared.quota_reservation_id
-        )
-        _finalize_service_image_quota(db, reservation, status="failed", post_id=post_id)
-        return {
-            **prepared.attempt,
-            "status": "failed",
-            "failure_class": type(exc).__name__,
-        }
-    reservation = community_crud.get_post_image_quota_reservation(
-        db, prepared.quota_reservation_id
-    )
-    _finalize_service_image_quota(db, reservation, status="attached", post_id=post_id)
-    return {
-        **prepared.attempt,
-        "status": "attached",
-        "media_url": media.url,
-        "byte_size": media.byte_size,
-    }
-
-
-def release_prepared_post_image_quota(
-    *,
-    db: Session,
-    prepared: PreparedPostImage | None,
-    status: str = "released",
-) -> None:
-    if prepared is None or prepared.quota_reservation_id is None:
-        return
-    reservation = community_crud.get_post_image_quota_reservation(
-        db, prepared.quota_reservation_id
-    )
-    _finalize_service_image_quota(db, reservation, status=status)
-
-
 async def _ensure_visual_identity(
     *,
     db: Session,
@@ -843,48 +790,6 @@ async def _refine_image_prompt(
         "prompt": refined["prompt"].strip(),
         "alt_text": refined["alt_text"].strip(),
     }
-
-
-def _pollinations_reference_url(
-    model: str,
-    reference: _ReferenceImage | None,
-) -> str | None:
-    if not _accepts_pollinations_reference(model) or reference is None:
-        return None
-    return reference.public_url
-
-
-def _reference_image_url(
-    model: str,
-    reference: _ReferenceImage | None,
-) -> str | None:
-    if reference is None:
-        return None
-    if model == REPLICATE_IMAGE_MODEL_PRUNA_EDIT:
-        return reference.public_url
-    return _pollinations_reference_url(model, reference)
-
-
-def _accepts_pollinations_reference(model: str) -> bool:
-    return model in {
-        POLLINATIONS_IMAGE_MODEL_FLUX_KLEIN,
-        POLLINATIONS_IMAGE_MODEL_PRUNA_EDIT,
-    }
-
-
-def _requires_pollinations_reference(model: str) -> bool:
-    return model == POLLINATIONS_IMAGE_MODEL_PRUNA_EDIT
-
-
-def _requires_reference(model: str) -> bool:
-    return model in {
-        POLLINATIONS_IMAGE_MODEL_PRUNA_EDIT,
-        REPLICATE_IMAGE_MODEL_PRUNA_EDIT,
-    }
-
-
-def _allows_reference_fallback(model: str) -> bool:
-    return model == POLLINATIONS_IMAGE_MODEL_FLUX_KLEIN
 
 
 def _select_reference_image(
@@ -1083,61 +988,4 @@ def _log_local_api_image_rejected(
         target_post_id=post_id,
         reason="unsafe_prompt",
         result=f"skip_reason=unsafe_prompt; token_prefix={local_key_prefix}",
-    )
-
-
-def _pollinations_failed(
-    exc: pollinations_image.PollinationsImageError,
-    *,
-    key_source: str,
-    reference_source: str | None,
-    reference_sent: bool,
-    prompt_hash: str,
-    prompt_length: int,
-    quota_reservation_id: int | None,
-    **extra: Any,
-) -> PreparedPostImage:
-    return _failed(
-        _service_failure_class(exc.failure_class, key_source=key_source),
-        reference_source=reference_source,
-        reference_sent=(
-            exc.reference_sent if exc.reference_sent is not None else reference_sent
-        ),
-        key_source=key_source,
-        prompt_hash=prompt_hash,
-        prompt_length=exc.prompt_length if exc.prompt_length is not None else prompt_length,
-        pollinations_status_code=exc.status_code,
-        pollinations_response_body_preview=exc.response_body_preview,
-        pollinations_content_type=exc.response_content_type,
-        pollinations_url_length=exc.request_url_length,
-        safe_filter=exc.safe_filter,
-        diagnostic_hint=exc.diagnostic_hint,
-        relay_elapsed_ms=exc.relay_elapsed_ms,
-        quota_reservation_id=quota_reservation_id,
-        **extra,
-    )
-
-
-def _replicate_failed(
-    exc: replicate_image.ReplicateImageError,
-    *,
-    key_source: str,
-    reference_source: str | None,
-    prompt_hash: str,
-    prompt_length: int,
-    quota_reservation_id: int | None,
-    **extra: Any,
-) -> PreparedPostImage:
-    return _failed(
-        _service_failure_class(exc.failure_class, key_source=key_source),
-        reference_source=reference_source,
-        reference_sent=False,
-        key_source=key_source,
-        prompt_hash=prompt_hash,
-        prompt_length=prompt_length,
-        provider_status_code=exc.status_code,
-        provider_response_body_preview=exc.response_body_preview,
-        provider_prediction_id=exc.prediction_id,
-        quota_reservation_id=quota_reservation_id,
-        **extra,
     )

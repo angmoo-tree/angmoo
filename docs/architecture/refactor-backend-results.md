@@ -1147,3 +1147,10 @@ C10-A 최종 확인: 원래 57개 모든 함수/class 본문 동일, API/schema/
 claim/stale/완료 3개 원래 상태 정책을 Social service로 이동하고 기존 PostgreSQL skip_locked·정렬·limit 및 stale cutoff query는 repository로 나누었다. 워커의 실제 Character/Post 검사→prepare→attach→finish 정책도 같은 service에 두며 원래 Session 생성/시각 계산/취소/실패 로그/대기 loop는 worker에 유지한다. Character는 같은 Session의 nullable 실제 소유 조회를 callback으로 연결하며 Social은 외부 ORM에 의존하지 않는다.
 
 원래 query를 확장한 상태3·처리1 AST 동일. 신규4 node는 실제 worker를 통해 claim commit 이후 attached Character/Session/처리 시각, 제거된 Character/Post에서 provider0, 최종 commit·실패, stale cutoff의 strict < 및 조건부 commit을 검증한다. 기존 이미지/quota/provider/Local Bot 포함 **77 PASS/9.23초**. 기존 assertion 변경 없음. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
+
+
+## AR-B5-C10-C — 이미지 첨부·reference·실패 결과 책임
+
+실제 첨부2/reference6/provider 실패 결과2 정의 본문을 그대로 Social 서비스에 이전했다. 저장 기술은 기존 Social media storage가 처리하고, 수락된 결과를 PostMedia와 quota에 어떤 순서로 기록하는가는 attachment service가 판단한다. 미디어 참조 판단은 공개 URL만 읽는 구조적 계약을 사용하며 외부 ORM을 import하지 않는다.
+
+최종 집중 **79 PASS/22.03초**. 신규2 parameter node는 실제 DB에서 저장 성공 시 media commit→quota attached commit, 저장 실패 시 media 없음·quota failed commit과 원래 변환 크기/품질 전달을 확인한다. 기존 assertion과10개 원래 함수 본문 동일. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.

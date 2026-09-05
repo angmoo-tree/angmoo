@@ -700,3 +700,6 @@ Social 임시 `_SocialPersistenceModels`/`social_persistence_models` export는 �
 
 
 이미지 작업의 queued→processing claim, stale 실패, 완료·quota 종료 및 Character/Post 존재 확인 순서는 `social/service/image_jobs.py`가 소유한다. `social/repository/image_jobs.py`는 기존 대기 작업 선택과 stale 목록 query만 수행한다. 워커는 Session·설정 시각·루프와 구체 callback을 연결한다. Claim commit/refresh가 완료된 후 같은 Session에서 Character를 조회하고, 삭제된 Character나 Post이면 provider를 호출하지 않고 기존 실패를 저장한다. Provider·attachment는 명시적인 typed callback이며 service가 실행 runtime을 import하지 않는다.
+
+
+생성 결과 첨부·quota 종료는 `social/service/image_attachment.py`에 있다. 미준비 결과는 그대로 반환하고, 준비된 결과는 기존 크기·품질 값으로 저장한 뒤 PostMedia commit/refresh와 quota 종료 commit을 수행한다. 저장 실패의 quota 실패 처리도 같은 순서다. 모델별 reference 필요·fallback 판단은 `image_reference_policy.py`, provider 진단값을 안정적인 업무 실패 결과로 만드는 정책은 `image_attempts.py`가 소유한다.

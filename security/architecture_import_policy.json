@@ -1144,10 +1144,12 @@
       "app.domains.social.service.activity_results",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
+      "app.domains.social.service.image_attachment",
       "app.domains.social.service.image_attempts",
       "app.domains.social.service.image_jobs",
       "app.domains.social.service.image_prompts",
       "app.domains.social.service.image_quota",
+      "app.domains.social.service.image_reference_policy",
       "app.domains.social.service.inbox",
       "app.domains.social.service.joint_posts",
       "app.domains.social.service.manual_feed",
@@ -1354,10 +1356,12 @@
       "app.domains.social.service.activity_results",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
+      "app.domains.social.service.image_attachment",
       "app.domains.social.service.image_attempts",
       "app.domains.social.service.image_jobs",
       "app.domains.social.service.image_prompts",
       "app.domains.social.service.image_quota",
+      "app.domains.social.service.image_reference_policy",
       "app.domains.social.service.inbox",
       "app.domains.social.service.joint_posts",
       "app.domains.social.service.manual_feed",
@@ -3107,6 +3111,22 @@
         "owner_stage": "AR-B5",
         "reason": "The old worker/CRUD surface binds the actual Social job policy and nullable Character lookup during the bounded image workflow transition.",
         "removal_condition": "Retire the exact old worker/CRUD consumer after provider/Character bindings and image source workflow use canonical runtime composition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.social.service.image_reference_policy",
+        "owner_stage": "AR-B5",
+        "reason": "Legacy generation orchestration imports the identical actual Social attachment/reference decision function during migration.",
+        "removal_condition": "Remove the old image generation consumer after its remaining provider and Character callback wiring moves to canonical runtime.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.social.service.image_attachment",
+        "owner_stage": "AR-B5",
+        "reason": "Legacy generation orchestration imports the identical actual Social attachment/reference decision function during migration.",
+        "removal_condition": "Remove the old image generation consumer after its remaining provider and Character callback wiring moves to canonical runtime.",
         "review_date": "2026-09-06"
       }
     ]

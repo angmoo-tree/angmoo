@@ -1,7 +1,7 @@
 {
-  "edge_count": 2699,
-  "external_import_count": 2352,
-  "module_count": 783,
+  "edge_count": 2710,
+  "external_import_count": 2356,
+  "module_count": 785,
   "modules": [
     {
       "external_imports": [],
@@ -5973,10 +5973,29 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "sqlalchemy.orm",
         "typing"
       ],
       "imports": [
-        "app.domains.social.contracts.image_generation"
+        "app.core.image_generation",
+        "app.domains.social.contracts.image_generation",
+        "app.domains.social.repository.media",
+        "app.domains.social.service.image_quota",
+        "app.domains.social.service.media_storage"
+      ],
+      "module": "app.domains.social.service.image_attachment",
+      "path": "backend/app/domains/social/service/image_attachment.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.image_generation",
+        "app.integrations.pollinations_image",
+        "app.integrations.replicate_image"
       ],
       "module": "app.domains.social.service.image_attempts",
       "path": "backend/app/domains/social/service/image_attempts.py",
@@ -6031,6 +6050,18 @@
       ],
       "module": "app.domains.social.service.image_quota",
       "path": "backend/app/domains/social/service/image_quota.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.core.image_generation",
+        "app.domains.social.contracts.image_generation"
+      ],
+      "module": "app.domains.social.service.image_reference_policy",
+      "path": "backend/app/domains/social/service/image_reference_policy.py",
       "wildcard_imports": []
     },
     {
@@ -11487,9 +11518,11 @@
         "app.domains.social.contracts.image_generation",
         "app.domains.social.exceptions",
         "app.domains.social.schemas.image_generation",
+        "app.domains.social.service.image_attachment",
         "app.domains.social.service.image_attempts",
         "app.domains.social.service.image_prompts",
         "app.domains.social.service.image_quota",
+        "app.domains.social.service.image_reference_policy",
         "app.domains.social.service.media_storage",
         "app.integrations.image_provider",
         "app.integrations.media.files",

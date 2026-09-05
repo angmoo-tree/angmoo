@@ -44,3 +44,8 @@ class PreparedPostImage:
             and self.prompt_hash is not None
             and self.model is not None
         )
+
+
+class ImageReferenceLocation(Protocol):
+    @property
+    def public_url(self) -> str | None: ...
