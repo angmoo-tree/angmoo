@@ -28600,6 +28600,283 @@
         "tests/relationships/test_event_owner_collaboration.py::test_replay_checks_current_membership_before_skipping_source_reads",
         "tests/relationships/test_event_owner_collaboration.py::test_actor_validation_locks_before_target_or_evidence_queries"
       ]
+    },
+    "AR-B5-C4-A": {
+      "status": "IMPLEMENTED; focused19 PASS; 17 actual definitions AST preserved except explicit attached-result type protocol; introduction pending",
+      "scope": "Proposal values/error/counts/evidence query/text rule; actual workflows remain for next C4B slice.",
+      "split_files": {
+        "backend/app/services/activity_proposal_runtime.py": [
+          "backend/app/domains/relationships/constants.py",
+          "backend/app/domains/relationships/contracts/proposals.py",
+          "backend/app/domains/relationships/exceptions.py",
+          "backend/app/domains/relationships/policies/events.py",
+          "backend/app/domains/relationships/policies/proposals.py",
+          "backend/app/domains/relationships/repository/proposals.py",
+          "backend/app/services/activity_proposal_runtime.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::OPEN_PROPOSAL_LIMIT_PER_PAIR",
+          "new": "backend/app/domains/relationships/constants.py::OPEN_PROPOSAL_LIMIT_PER_PAIR",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::OPEN_PROPOSAL_LIMIT_PER_CHARACTER",
+          "new": "backend/app/domains/relationships/constants.py::OPEN_PROPOSAL_LIMIT_PER_CHARACTER",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::ACTIVE_COMMITMENT_LIMIT",
+          "new": "backend/app/domains/relationships/constants.py::ACTIVE_COMMITMENT_LIMIT",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::COUNTER_LIMIT",
+          "new": "backend/app/domains/relationships/constants.py::COUNTER_LIMIT",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::PAIR_COOLDOWN",
+          "new": "backend/app/domains/relationships/constants.py::PAIR_COOLDOWN",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::SEARCH_DAYS",
+          "new": "backend/app/domains/relationships/constants.py::SEARCH_DAYS",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::PROPOSAL_TTL",
+          "new": "backend/app/domains/relationships/constants.py::PROPOSAL_TTL",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::ActivityProposalRuntimeError",
+          "new": "backend/app/domains/relationships/exceptions.py::ActivityProposalRuntimeError",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::ProposalEligibility",
+          "new": "backend/app/domains/relationships/contracts/proposals.py::ProposalEligibility",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::ResolvedSchedule",
+          "new": "backend/app/domains/relationships/contracts/proposals.py::ResolvedSchedule",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::ProposalResponseResult",
+          "new": "backend/app/domains/relationships/contracts/proposals.py::ProposalResponseResult",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::_aware_utc",
+          "new": "backend/app/domains/relationships/policies/events.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::_open_pair_count",
+          "new": "backend/app/domains/relationships/repository/proposals.py::_open_pair_count",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::_open_character_count",
+          "new": "backend/app/domains/relationships/repository/proposals.py::_open_character_count",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::_cooldown_active",
+          "new": "backend/app/services/activity_proposal_runtime.py::_cooldown_active",
+          "direct_consumers": [
+            "backend/app/services/world_feed_social_apply.py",
+            "backend/app/services/langgraph_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::proposal_eligibility",
+          "new": "backend/app/services/activity_proposal_runtime.py::proposal_eligibility",
+          "direct_consumers": [
+            "backend/app/services/world_feed_social_apply.py",
+            "backend/app/services/langgraph_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::_DAYPART_MARKERS",
+          "new": "backend/app/domains/relationships/policies/proposals.py::_DAYPART_MARKERS",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::_text_daypart_consistent",
+          "new": "backend/app/domains/relationships/policies/proposals.py::_text_daypart_consistent",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::validate_preview",
+          "new": "backend/app/services/activity_proposal_runtime.py::validate_preview",
+          "direct_consumers": [
+            "backend/app/services/world_feed_social_apply.py",
+            "backend/app/services/langgraph_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::create_published_proposal",
+          "new": "backend/app/services/activity_proposal_runtime.py::create_published_proposal",
+          "direct_consumers": [
+            "backend/app/services/world_feed_social_apply.py",
+            "backend/app/services/langgraph_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::find_open_proposal_for_source_post",
+          "new": "backend/app/domains/relationships/repository/proposals.py::find_open_proposal_for_source_post",
+          "direct_consumers": [
+            "backend/app/services/activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::resolve_acceptance_schedule",
+          "new": "backend/app/services/activity_proposal_runtime.py::resolve_acceptance_schedule",
+          "direct_consumers": [
+            "backend/app/services/world_feed_social_apply.py",
+            "backend/app/services/langgraph_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        },
+        {
+          "old": "backend/app/services/activity_proposal_runtime.py::apply_response",
+          "new": "backend/app/services/activity_proposal_runtime.py::apply_response",
+          "direct_consumers": [
+            "backend/app/services/world_feed_social_apply.py",
+            "backend/app/services/langgraph_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship"
+          ]
+        }
+      ],
+      "new_tests": []
     }
   }
 }

@@ -1,5 +1,12 @@
 from __future__ import annotations
 
+from app.domains.relationships.constants import (OPEN_PROPOSAL_LIMIT_PER_PAIR, OPEN_PROPOSAL_LIMIT_PER_CHARACTER, ACTIVE_COMMITMENT_LIMIT, COUNTER_LIMIT, PAIR_COOLDOWN, SEARCH_DAYS, PROPOSAL_TTL)
+from app.domains.relationships.exceptions import (ActivityProposalRuntimeError)
+from app.domains.relationships.contracts.proposals import (ProposalEligibility, ResolvedSchedule, ProposalResponseResult)
+from app.domains.relationships.repository.proposals import (_open_pair_count, _open_character_count, find_open_proposal_for_source_post)
+from app.domains.relationships.policies.proposals import (_DAYPART_MARKERS, _text_daypart_consistent)
+from app.domains.relationships.policies.events import (_aware_utc)
+
 from app.runtime.routines.joint_references import SqlAlchemyJointReferences
 
 from dataclasses import dataclass
@@ -15,80 +22,20 @@ from app.services import daily_activity_plans
 from app.domains.routines.service import joint_activity as joint_activity_runtime
 
 
-OPEN_PROPOSAL_LIMIT_PER_PAIR = 1
-OPEN_PROPOSAL_LIMIT_PER_CHARACTER = 3
-ACTIVE_COMMITMENT_LIMIT = 2
-COUNTER_LIMIT = 2
-PAIR_COOLDOWN = timedelta(hours=24)
-SEARCH_DAYS = 7
-PROPOSAL_TTL = timedelta(days=7)
 
 
-class ActivityProposalRuntimeError(Exception):
-    def __init__(self, reason_code: str) -> None:
-        super().__init__(reason_code)
-        self.reason_code = reason_code
 
 
-@dataclass(frozen=True)
-class ProposalEligibility:
-    eligible: bool
-    reason_code: str | None
-    target_world_character_id: str | None
 
 
-@dataclass(frozen=True)
-class ResolvedSchedule:
-    local_date: date
-    daypart: str
-    scheduled_start_at: datetime
-    scheduled_end_at: datetime
-    timezone_name: str
 
 
-@dataclass(frozen=True)
-class ProposalResponseResult:
-    proposal: models.ActivityProposal
-    child_proposal: models.ActivityProposal | None
-    joint_activity: models.JointActivity | None
 
 
-def _aware_utc(value: datetime) -> datetime:
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)
 
 
-def _open_pair_count(
-    db: Session, *, actor_id: str, target_id: str
-) -> int:
-    return int(
-        db.scalar(
-            select(func.count(models.ActivityProposal.id)).where(
-                models.ActivityProposal.proposer_world_character_id == actor_id,
-                models.ActivityProposal.target_world_character_id == target_id,
-                models.ActivityProposal.status == "proposed",
-            )
-        )
-        or 0
-    )
 
 
-def _open_character_count(db: Session, *, world_character_id: str) -> int:
-    return int(
-        db.scalar(
-            select(func.count(models.ActivityProposal.id)).where(
-                models.ActivityProposal.status == "proposed",
-                or_(
-                    models.ActivityProposal.proposer_world_character_id
-                    == world_character_id,
-                    models.ActivityProposal.target_world_character_id
-                    == world_character_id,
-                ),
-            )
-        )
-        or 0
-    )
 
 
 def _cooldown_active(
@@ -165,22 +112,8 @@ def proposal_eligibility(
     return ProposalEligibility(True, None, target_id)
 
 
-_DAYPART_MARKERS = {
-    "dawn": ("새벽", "dawn"),
-    "morning": ("아침", "오전", "morning"),
-    "afternoon": ("낮", "오후", "afternoon"),
-    "evening": ("저녁", "밤", "evening", "tonight"),
-}
 
 
-def _text_daypart_consistent(text: str, target_daypart: str) -> bool:
-    normalized = text.casefold()
-    explicit = {
-        daypart
-        for daypart, markers in _DAYPART_MARKERS.items()
-        if any(marker in normalized for marker in markers)
-    }
-    return not explicit or explicit == {target_daypart}
 
 
 def validate_preview(
@@ -311,37 +244,6 @@ def create_published_proposal(
     return proposal
 
 
-def find_open_proposal_for_source_post(
-    db: Session,
-    *,
-    world_id: str,
-    target_world_character_id: str,
-    source_post_id: str,
-) -> models.ActivityProposal | None:
-    """Resolve a proposal only through its successful published reply evidence."""
-
-    return db.scalar(
-        select(models.ActivityProposal)
-        .join(
-            models.SocialEvent,
-            models.SocialEvent.id
-            == models.ActivityProposal.source_proposal_event_id,
-        )
-        .join(
-            models.SocialEventEvidence,
-            models.SocialEventEvidence.social_event_id == models.SocialEvent.id,
-        )
-        .where(
-            models.ActivityProposal.world_id == world_id,
-            models.ActivityProposal.target_world_character_id
-            == target_world_character_id,
-            models.ActivityProposal.status == "proposed",
-            models.SocialEvent.event_type == "joint_proposed",
-            models.SocialEventEvidence.source_post_id == source_post_id,
-        )
-        .order_by(models.ActivityProposal.created_at.desc())
-        .limit(1)
-    )
 
 
 def resolve_acceptance_schedule(

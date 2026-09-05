@@ -1,7 +1,7 @@
 {
-  "edge_count": 2500,
-  "external_import_count": 2259,
-  "module_count": 734,
+  "edge_count": 2508,
+  "external_import_count": 2266,
+  "module_count": 737,
   "modules": [
     {
       "external_imports": [],
@@ -3140,7 +3140,9 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
+      "external_imports": [
+        "datetime"
+      ],
       "imports": [],
       "module": "app.domains.relationships.constants",
       "path": "backend/app/domains/relationships/constants.py",
@@ -3296,6 +3298,20 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.models"
+      ],
+      "module": "app.domains.relationships.contracts.proposals",
+      "path": "backend/app/domains/relationships/contracts/proposals.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.relationships.contracts.graph_query"
@@ -3432,6 +3448,13 @@
     },
     {
       "external_imports": [],
+      "imports": [],
+      "module": "app.domains.relationships.policies.proposals",
+      "path": "backend/app/domains/relationships/policies/proposals.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
       "imports": [
         "app.domains.relationships.contracts.graph_execution",
         "app.domains.relationships.contracts.graph_plan",
@@ -3488,6 +3511,18 @@
       ],
       "module": "app.domains.relationships.repository.points",
       "path": "backend/app/domains/relationships/repository/points.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.relationships.models"
+      ],
+      "module": "app.domains.relationships.repository.proposals",
+      "path": "backend/app/domains/relationships/repository/proposals.py",
       "wildcard_imports": []
     },
     {
@@ -10271,6 +10306,12 @@
       ],
       "imports": [
         "app.core.ids",
+        "app.domains.relationships.constants",
+        "app.domains.relationships.contracts.proposals",
+        "app.domains.relationships.exceptions",
+        "app.domains.relationships.policies.events",
+        "app.domains.relationships.policies.proposals",
+        "app.domains.relationships.repository.proposals",
         "app.domains.routines.service.joint_activity",
         "app.models",
         "app.runtime.routines.joint_references",

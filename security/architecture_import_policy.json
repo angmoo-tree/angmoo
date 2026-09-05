@@ -1051,6 +1051,7 @@
       "app.domains.relationships.contracts.outbox",
       "app.domains.relationships.contracts.projection",
       "app.domains.relationships.contracts.projection_commands",
+      "app.domains.relationships.contracts.proposals",
       "app.domains.relationships.contracts.query",
       "app.domains.relationships.contracts.replay",
       "app.domains.relationships.exceptions",
@@ -1062,9 +1063,11 @@
       "app.domains.relationships.policies.events",
       "app.domains.relationships.policies.graph_plan_schema",
       "app.domains.relationships.policies.graph_recall",
+      "app.domains.relationships.policies.proposals",
       "app.domains.relationships.repository",
       "app.domains.relationships.repository.events",
       "app.domains.relationships.repository.points",
+      "app.domains.relationships.repository.proposals",
       "app.domains.relationships.repository.state",
       "app.domains.relationships.schemas",
       "app.domains.relationships.service",
@@ -1290,6 +1293,7 @@
       "app.domains.relationships.contracts.outbox",
       "app.domains.relationships.contracts.projection",
       "app.domains.relationships.contracts.projection_commands",
+      "app.domains.relationships.contracts.proposals",
       "app.domains.relationships.contracts.query",
       "app.domains.relationships.contracts.replay",
       "app.domains.relationships.schemas",
@@ -3018,6 +3022,54 @@
         "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
         "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
         "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.activity_proposal_runtime",
+        "target": "app.domains.relationships.constants",
+        "owner_stage": "AR-B5-C4-B",
+        "removal_condition": "Move the remaining actual Proposal workflows to their owner and same-Session runtime composition in C4B, then delete this old services path.",
+        "reason": "Original Proposal source now consumes the same moved value/error/query/policy implementation; the remaining workflow is a bounded transitional consumer.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.activity_proposal_runtime",
+        "target": "app.domains.relationships.exceptions",
+        "owner_stage": "AR-B5-C4-B",
+        "removal_condition": "Move the remaining actual Proposal workflows to their owner and same-Session runtime composition in C4B, then delete this old services path.",
+        "reason": "Original Proposal source now consumes the same moved value/error/query/policy implementation; the remaining workflow is a bounded transitional consumer.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.activity_proposal_runtime",
+        "target": "app.domains.relationships.contracts.proposals",
+        "owner_stage": "AR-B5-C4-B",
+        "removal_condition": "Move the remaining actual Proposal workflows to their owner and same-Session runtime composition in C4B, then delete this old services path.",
+        "reason": "Original Proposal source now consumes the same moved value/error/query/policy implementation; the remaining workflow is a bounded transitional consumer.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.activity_proposal_runtime",
+        "target": "app.domains.relationships.repository.proposals",
+        "owner_stage": "AR-B5-C4-B",
+        "removal_condition": "Move the remaining actual Proposal workflows to their owner and same-Session runtime composition in C4B, then delete this old services path.",
+        "reason": "Original Proposal source now consumes the same moved value/error/query/policy implementation; the remaining workflow is a bounded transitional consumer.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.activity_proposal_runtime",
+        "target": "app.domains.relationships.policies.proposals",
+        "owner_stage": "AR-B5-C4-B",
+        "removal_condition": "Move the remaining actual Proposal workflows to their owner and same-Session runtime composition in C4B, then delete this old services path.",
+        "reason": "Original Proposal source now consumes the same moved value/error/query/policy implementation; the remaining workflow is a bounded transitional consumer.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.activity_proposal_runtime",
+        "target": "app.domains.relationships.policies.events",
+        "owner_stage": "AR-B5-C4-B",
+        "removal_condition": "Move the remaining actual Proposal workflows to their owner and same-Session runtime composition in C4B, then delete this old services path.",
+        "reason": "Original Proposal source now consumes the same moved value/error/query/policy implementation; the remaining workflow is a bounded transitional consumer.",
         "review_date": "2026-09-06"
       }
     ]

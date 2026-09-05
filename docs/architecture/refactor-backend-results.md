@@ -1020,3 +1020,10 @@ Signed Social `2761e35`에 Routines `6beec5d`를 합쳤다. 활동 로그·기�
 API·응답 스키마·ORM는 PR258/263과 동일하고 기존 보호 테스트의 assertion은 변경하지 않았다. 실제 composition wrapper를 유지한 두 이전 split 기록의 목적지를 보완했다. Root가 별도로 발견한 Memory fixture의 Post+관찰 동시 add 문제도 production constructor를 감사했다. 현재 유일한 `claim_feed_observations`는 기존 관찰 SELECT 다음 `begin_nested()`의 선행 flush 뒤 observation을 add/flush하며, Post+observation 동시 add_all을 하지 않는다. 모델/FK/transaction 의미를 변경하지 않고 fixture가 이 선행 조건을 표현하도록 root에서 검증한다. Source capture·Hosted CI·전체 B5 종료는 후속 통합에서 수행한다.
 
 C3-B 최종 구조 검사는 **734 modules / 2,500 edges / exact legacy 217**, 변경된 event split 기록 3개와 L4·ER0 current inventory가 통과했다. 다른 full split 기록은 직전 검사에서 오류가 없었고 이번 정정은 이 3개 기록에 한정된다.
+
+
+## AR-B5-C4-A — 활동 제안 값·오류·자체 조회·문구 규칙
+
+원래 activity_proposal_runtime의 상수 7개·오류·결과 dataclass 3개·자체 조회 3개·daypart marker/문구 판단과 기존 동일 UTC 함수를 실제 Relationships 역할 경로로 연결했다. **17개 정의 AST 동일**이며 외부 Joint ORM 반환 타입만 attached 값의 read-only 구조 계약으로 표현한다(객체를 변환하거나 복사하지 않는다). 나머지 제안 생성·응답·일정 workflow는 C4B에서 소유 이전하며, 원래 서비스의 6개 정확한 임시 import만 다음 단계 제거 조건과 함께 기록했다.
+
+집중 검증 **19 passed / 14.61초**. 기존 Proposal·SocialEvent·공동 실행의 assertion은 변경하지 않았고 신규 node는 없다. Source capture/Hosted CI와 전체 B5 종료는 후속 단계다.

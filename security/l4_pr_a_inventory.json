@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2259,
-      "internal_edge_count": 2500,
+      "external_import_count": 2266,
+      "internal_edge_count": 2508,
       "legacy_import_exception_count": 0,
-      "module_count": 734,
+      "module_count": 737,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -97,6 +97,13 @@
           },
           {
             "imports": [
+              "app.domains.relationships.models"
+            ],
+            "module": "app.domains.relationships.contracts.proposals",
+            "path": "backend/app/domains/relationships/contracts/proposals.py"
+          },
+          {
+            "imports": [
               "app.domains.relationships.contracts.graph_query"
             ],
             "module": "app.domains.relationships.contracts.query",
@@ -176,6 +183,11 @@
             "path": "backend/app/domains/relationships/policies/graph_recall.py"
           },
           {
+            "imports": [],
+            "module": "app.domains.relationships.policies.proposals",
+            "path": "backend/app/domains/relationships/policies/proposals.py"
+          },
+          {
             "imports": [
               "app.domains.relationships.contracts.graph_execution",
               "app.domains.relationships.contracts.graph_plan",
@@ -218,6 +230,13 @@
             ],
             "module": "app.domains.relationships.repository.points",
             "path": "backend/app/domains/relationships/repository/points.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.models"
+            ],
+            "module": "app.domains.relationships.repository.proposals",
+            "path": "backend/app/domains/relationships/repository/proposals.py"
           },
           {
             "imports": [

@@ -56,3 +56,26 @@ SOCIAL_EVENT_TYPES = (
     "joint_declined",
     "joint_cancelled",
 )
+
+
+from datetime import timedelta
+
+OPEN_PROPOSAL_LIMIT_PER_PAIR = 1
+
+
+OPEN_PROPOSAL_LIMIT_PER_CHARACTER = 3
+
+
+ACTIVE_COMMITMENT_LIMIT = 2
+
+
+COUNTER_LIMIT = 2
+
+
+PAIR_COOLDOWN = timedelta(hours=24)
+
+
+SEARCH_DAYS = 7
+
+
+PROPOSAL_TTL = timedelta(days=7)

@@ -1110,13 +1110,13 @@
     {
       "markers": {
         "row_lock": [
-          421
+          323
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/activity_proposal_runtime.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "2b97838fdb31b2d3ea0a56906114878f02edb2942116e94a667c2d2a89fe458a",
+      "source_sha256": "68e86ae8ed58b27ff2b1605ca7924b0a60b763d136c72bb0840af822990a1be8",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
