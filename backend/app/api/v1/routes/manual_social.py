@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.domains.identity.dependencies import get_current_user
 from app.domains.identity import browser_session
 from app.core.db import get_db
-from app.domains.social.api.schemas import (
+from app.domains.social.schemas.manual import (
     ManualSocialFeedRead,
     ManualSocialWriteRead,
     OwnerManualPostWrite,

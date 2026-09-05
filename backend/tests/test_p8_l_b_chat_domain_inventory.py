@@ -77,7 +77,7 @@ def test_p8_l_b_compatibility_facades_preserve_object_identity() -> None:
     )
     legacy_schemas = importlib.import_module("app.schemas.messages")
     canonical_schemas = importlib.import_module("app.domains.chat.api.schemas")
-    community_schemas = importlib.import_module("app.schemas.community")
+    community_schemas = importlib.import_module("app.domains.social.schemas.community")
     core_profile_ref = importlib.import_module("app.core.profile_ref")
     policy = _json("security/p8_l_b_chat_domain_policy.json")
 

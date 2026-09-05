@@ -15,7 +15,7 @@ from app.domains.social.application import (
     register_social_search,
     unregister_social_search,
 )
-from app.domains.social.domain import (
+from app.domains.social.contracts import (
     ACTION_SUBJECTIVE_CONTEXT_VERSION,
     ActionEmotionLabel,
     ActionMotivationKind,
@@ -54,7 +54,7 @@ from app.domains.social.domain import (
     WorldCharacterSocialProfileTab,
     WorldCharacterSocialProfileValidationError,
 )
-from app.domains.social.domain.inbox import ManualInboxInteractionCandidate
+from app.domains.social.contracts.inbox import ManualInboxInteractionCandidate
 from app.domains.social.ports import (
     SocialObservationUnitOfWorkPort,
     SocialSearchIndexPort,

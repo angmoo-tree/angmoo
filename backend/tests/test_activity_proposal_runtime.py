@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+from app.runtime.routines.joint_references import SqlAlchemyJointReferences
+
 from datetime import date, datetime, timedelta
+from functools import partial
 from types import SimpleNamespace
 
 import pytest
@@ -11,11 +14,22 @@ from app import models, schemas
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )
+from app.domains.routines.service import joint_activity as joint_activity_runtime
 from app.services import (
     activity_proposal_runtime,
-    joint_activity_runtime,
 )
-from test_daily_activity_runtime import _engine, _prepare, _seed, _utc
+from routines.test_daily_activity_runtime import _engine, _prepare, _seed, _utc
+
+
+def _joint_runtime_for_session(db: Session) -> SimpleNamespace:
+    """Supply the transaction dependency before the unchanged behavioral assertion."""
+    return SimpleNamespace(**{
+        **vars(joint_activity_runtime),
+        "apply_joint_post": partial(
+            joint_activity_runtime.apply_joint_post,
+            references=SqlAlchemyJointReferences(db),
+        ),
+    })
 
 
 def _post(
@@ -208,6 +222,7 @@ def test_proposal_acceptance_enters_both_plans_and_both_characters_continue_join
     engine = _engine()
     now = _utc(datetime(2026, 8, 9, 0, 30))
     with Session(engine, expire_on_commit=False) as db:
+        joint_activity_runtime = _joint_runtime_for_session(db)
         world, proposer, acceptor = _seed(db, two_characters=True)
         assert acceptor is not None
         proposer_plan = _prepare(db, proposer, now=now, key="p6-plan-proposer")
@@ -331,7 +346,7 @@ def test_proposal_acceptance_enters_both_plans_and_both_characters_continue_join
 
         opening_time = schedule.scheduled_start_at + timedelta(minutes=5)
         opening_claim = joint_activity_runtime.claim_opening(
-            db,
+            db, references=SqlAlchemyJointReferences(db),
             joint_activity_id=joint.id,
             claimant_world_character_id=proposer.world_character.id,
             now=opening_time,
@@ -356,7 +371,7 @@ def test_proposal_acceptance_enters_both_plans_and_both_characters_continue_join
             idempotency_key="p6-joint-opening-post",
         )
         started_event = joint_activity_runtime.apply_joint_post(
-            db,
+            db, references=SqlAlchemyJointReferences(db),
             joint_activity_id=joint.id,
             author_world_character_id=proposer.world_character.id,
             post=opening_post,
@@ -416,7 +431,7 @@ def test_proposal_acceptance_enters_both_plans_and_both_characters_continue_join
         assert followup_post.opening_post_id == opening_post.id
         assert opening_post.id != followup_post.id
         completed, expired = joint_activity_runtime.complete_due_joint_activities(
-            db,
+            db, references=SqlAlchemyJointReferences(db),
             world_id=world.id,
             now=schedule.scheduled_end_at + timedelta(minutes=1),
         )
@@ -640,7 +655,7 @@ def test_zero_joint_posts_expire_without_completion_event_or_relationship_delta(
         )
 
         completed, expired = joint_activity_runtime.complete_due_joint_activities(
-            db,
+            db, references=SqlAlchemyJointReferences(db),
             world_id=fixture.world.id,
             now=fixture.schedule.scheduled_end_at + timedelta(minutes=1),
         )
@@ -723,7 +738,7 @@ def test_opening_and_followup_failures_preserve_joint_and_both_participant_plans
         )
         first_attempt_at = fixture.schedule.scheduled_start_at + timedelta(minutes=5)
         failed_claim = joint_activity_runtime.claim_opening(
-            db,
+            db, references=SqlAlchemyJointReferences(db),
             joint_activity_id=fixture.joint.id,
             claimant_world_character_id=fixture.proposer.world_character.id,
             now=first_attempt_at,
@@ -780,7 +795,7 @@ def test_opening_and_followup_failures_preserve_joint_and_both_participant_plans
 
         opening_at = first_attempt_at + timedelta(minutes=5)
         opening_claim = joint_activity_runtime.claim_opening(
-            db,
+            db, references=SqlAlchemyJointReferences(db),
             joint_activity_id=fixture.joint.id,
             claimant_world_character_id=fixture.proposer.world_character.id,
             now=opening_at,
@@ -805,7 +820,7 @@ def test_opening_and_followup_failures_preserve_joint_and_both_participant_plans
             idempotency_key="p6-joint-write-failures-opening-post",
         )
         joint_activity_runtime.apply_joint_post(
-            db,
+            db, references=SqlAlchemyJointReferences(db),
             joint_activity_id=fixture.joint.id,
             author_world_character_id=fixture.proposer.world_character.id,
             post=opening_post,
@@ -837,7 +852,7 @@ def test_opening_and_followup_failures_preserve_joint_and_both_participant_plans
         )
         followup_event_id = followup_event.id
         joint_activity_runtime.apply_joint_post(
-            db,
+            db, references=SqlAlchemyJointReferences(db),
             joint_activity_id=fixture.joint.id,
             author_world_character_id=fixture.acceptor.world_character.id,
             post=followup_post,

@@ -25,7 +25,7 @@ from app.services import (
 )
 from app.services.direct_llm import DirectLlmError, RunLlmTracker
 from app.services.feed_reaction_planner import validate_reaction_decision
-from app.services.resident_contracts import LangGraphResidentContext
+from app.runtime.resident.context import LangGraphResidentContext
 from app.services.world_feed_runtime import run_world_keyword_feed
 
 

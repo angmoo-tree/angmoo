@@ -35,7 +35,7 @@ from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_FEED_RUNTIME_MODE,
     LEGACY_FEED_RUNTIME_MODE,
 )
-from app.domains.social.domain.subjective_context import (
+from app.domains.social.contracts.subjective_context import (
     ActionEmotionLabel,
     ActionMotivationKind,
     ActionSubjectiveContextV1,
@@ -59,11 +59,9 @@ from app.services.direct_llm import (
     RunLlmTracker,
     generate_json,
 )
-from app.services.llm_context import neutralize_context_text
-from app.services.resident_contracts import (
-    LangGraphResidentContext,
-    ResidentGraphState as _ResidentGraphState,
-)
+from app.core.context_text import neutralize_context_text
+from app.runtime.resident.context import LangGraphResidentContext
+from app.domains.routines.contracts.resident import ResidentGraphState as _ResidentGraphState
 from app.services.world_feed_runtime import run_world_keyword_feed
 
 

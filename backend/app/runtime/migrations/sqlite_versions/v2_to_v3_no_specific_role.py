@@ -9,7 +9,7 @@ from typing import Any
 from sqlalchemy import Connection, select, update
 from sqlalchemy.orm import Session
 
-from app.domains.routines.infrastructure.sqlalchemy_models import DailyActivityPlan
+from app.domains.routines.models import DailyActivityPlan
 from app.domains.world_characters.infrastructure.sqlalchemy_models import WorldCharacter
 from app.domains.world_characters.infrastructure.sqlalchemy_setup_models import (
     WorldActivityRepertoire,

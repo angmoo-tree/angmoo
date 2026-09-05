@@ -10,7 +10,7 @@ from app.domains.identity.dependencies import get_current_user
 from app.core.db import get_db
 from app.config import settings
 from app.domains.relationships import public as relationships
-from app.domains.routines import public as routines
+from app.domains.routines import router as routine_routes
 from app.runtime.graph_projection import social_memory_read
 from app.runtime.graph_projection.relationship_graph_read import (
     SqlAlchemyRelationshipGraphReadGateway,
@@ -18,18 +18,8 @@ from app.runtime.graph_projection.relationship_graph_read import (
 
 
 router = APIRouter(prefix="/characters", tags=["world-activity-runtime"])
+router.include_router(routine_routes.router)
 
-
-def _raise_plan_error(exc: routines.DailyActivityPlanError) -> None:
-    if isinstance(exc, routines.DailyActivityPlanNotFoundError):
-        status_code = status.HTTP_404_NOT_FOUND
-    elif isinstance(exc, routines.DailyActivityPlanForbiddenError):
-        status_code = status.HTTP_403_FORBIDDEN
-    elif isinstance(exc, routines.DailyActivityPlanConflictError):
-        status_code = status.HTTP_409_CONFLICT
-    else:
-        status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
-    raise HTTPException(status_code=status_code, detail=exc.reason_code) from exc
 
 def _raise_social_memory_error(exc: social_memory_read.SocialMemoryReadError) -> None:
     if isinstance(exc, social_memory_read.SocialMemoryNotFoundError):
@@ -39,7 +29,6 @@ def _raise_social_memory_error(exc: social_memory_read.SocialMemoryReadError) ->
     else:
         status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
     raise HTTPException(status_code=status_code, detail=exc.reason_code) from exc
-
 
 
 def _raise_relationship_graph_error(
@@ -52,73 +41,6 @@ def _raise_relationship_graph_error(
     else:
         status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
     raise HTTPException(status_code=status_code, detail=exc.reason_code) from exc
-
-
-@router.get(
-    "/{character_id}/worlds/{world_id}/activity-plan",
-    response_model=schemas.DailyActivityPlanRead,
-)
-def get_daily_activity_plan(
-    character_id: str,
-    world_id: str,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.DailyActivityPlanRead:
-    try:
-        return routines.get_activity_plan(
-            db,
-            character_id=character_id,
-            world_id=world_id,
-            user=user,
-        )
-    except routines.DailyActivityPlanError as exc:
-        _raise_plan_error(exc)
-
-
-@router.post(
-    "/{character_id}/worlds/{world_id}/activity-plan/prepare",
-    response_model=schemas.DailyActivityPlanRead,
-)
-def prepare_daily_activity_plan(
-    character_id: str,
-    world_id: str,
-    data: schemas.DailyActivityPlanPrepareCreate,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.DailyActivityPlanRead:
-    try:
-        return routines.prepare_activity_plan(
-            db,
-            character_id=character_id,
-            world_id=world_id,
-            user=user,
-            data=data,
-        )
-    except routines.DailyActivityPlanError as exc:
-        _raise_plan_error(exc)
-
-
-@router.patch(
-    "/{character_id}/worlds/{world_id}/activity-runtime-mode",
-    response_model=schemas.WorldCharacterRuntimeModeRead,
-)
-def update_world_character_activity_runtime_mode(
-    character_id: str,
-    world_id: str,
-    data: schemas.WorldCharacterRuntimeModeUpdate,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.WorldCharacterRuntimeModeRead:
-    try:
-        return routines.update_activity_runtime_mode(
-            db,
-            character_id=character_id,
-            world_id=world_id,
-            user=user,
-            data=data,
-        )
-    except routines.DailyActivityPlanError as exc:
-        _raise_plan_error(exc)
 
 
 @router.get(

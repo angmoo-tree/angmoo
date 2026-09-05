@@ -25,7 +25,7 @@ from app.domains.chat.ports.character_response_generator import (
     CharacterResponseGeneratorRequest,
     CharacterResponseProfile,
 )
-from app.domains.social.domain.subjective_context import (
+from app.domains.social.contracts.subjective_context import (
     ActionEmotionLabel,
     ActionMotivationKind,
     ActionSubjectiveContextV1,

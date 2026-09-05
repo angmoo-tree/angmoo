@@ -1,6 +1,6 @@
 from typing import Any
 
-from app.services.llm_context import neutralize_context_text
+from app.core.context_text import neutralize_context_text
 
 
 PREPARED_CREATE_POST_BRIEF_SENTINEL = "__ANGMOO_USE_PREPARED_FEED_SCAN_BRIEF__"

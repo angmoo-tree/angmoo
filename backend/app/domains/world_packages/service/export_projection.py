@@ -46,4 +46,3 @@ def _portable_local_profile(value: object) -> dict[str, object]:
         if isinstance(access_scope, list)
         else [],
     }
-

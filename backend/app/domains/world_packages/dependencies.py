@@ -124,4 +124,3 @@ def _import_committer(
             existing.recover_media()
             request.app.state.world_package_import_committer = existing
     return existing
-

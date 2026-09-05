@@ -8,10 +8,10 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.domains.social.domain.inbox import (
+from app.domains.social.contracts.inbox import (
     ManualInboxInteractionCandidate,
 )
-from app.domains.social.infrastructure.sqlalchemy_models import (
+from app.domains.social.models.manual_writes import (
     OwnerManualInboxCandidate,
 )
 

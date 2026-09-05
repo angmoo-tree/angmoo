@@ -1,4 +1,4 @@
-from app.schemas.agent_runs import (
+from app.domains.routines.schemas.runs import (
     AgentActivityLogRead,
     AgentSlotPublicRead,
     AgentSlotRead,
@@ -72,7 +72,7 @@ from app.schemas.character_lore import (
     CharacterLoreSourceRead,
     CharacterLoreStatusRead,
 )
-from app.schemas.community import (
+from app.domains.social.schemas.community import (
     AgentCompleteTickAction,
     AgentCompleteTickCreate,
     AgentCompleteTickRead,
@@ -249,7 +249,7 @@ from app.schemas.world_activity_runtime import (
     WorldCharacterRuntimeModeRead,
     WorldCharacterRuntimeModeUpdate,
 )
-from app.schemas.world_feed import (
+from app.domains.social.schemas.feed import (
     FeedAction,
     FeedCommentDraft,
     FeedCommentPurpose,
@@ -261,7 +261,7 @@ from app.schemas.world_feed import (
     WorldFeedCycleStatusRead,
     WorldFeedObservationRead,
 )
-from app.schemas.routine_post import (
+from app.domains.routine_posts.schemas import (
     RoutineBeatPlan,
     RoutinePostDraft,
     RoutineSourceEventEffect,

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.domains.social.domain.profile_activity import (
+from app.domains.social.contracts.profile_activity import (
     WorldCharacterSocialProfilePage,
     WorldCharacterSocialProfileQuery,
     WorldCharacterSocialProfileValidationError,

@@ -295,14 +295,24 @@ legacy setup, schema, model, provider, contract, and direct-LLM modules are
 compatibility aliases only; privacy cleanup remains in the legacy service
 until its P3-P6 rows have migrated to their owning domains.
 
-L3 PR E makes `app.domains.routines.public` the canonical P3 entry for daily
-plan preparation, read, runtime-mode updates and elapsed lifecycle recovery.
-Application use cases depend on explicit Clock, daily-plan repository and
-lifecycle repository ports; SQLAlchemy is confined to infrastructure adapters.
-Legacy `app.models`, `app.schemas`, `app.services.daily_activity_plans` and
-activity-state paths remain thin compatibility facades. API and scheduler
-consumers no longer import the legacy daily-plan service, and restart recovery
-closes elapsed state without creating catch-up public actions.
+L3 PR E originally introduced the `app.domains.routines.public` entry for daily
+planning and lifecycle. AR-B4-A now places actual planning decisions and commit
+boundaries in `service/plans.py`, historical selection SQL in `repository/plans.py`,
+and HTTP handling in `router.py`. The same request Session reaches the multi-owner
+reference queries through `runtime/routines/plan_references.py`; WorldCharacter
+owns the mode/version mutation, while routines retains the original transaction.
+Clock/FrozenClock remains useful without the former forwarding daily-plan usecases.
+Legacy model/schema/state and daily-plan aliases retain identical objects until
+their consumers move. Guarded elapsed/restart lifecycle now lives in
+`service/lifecycle.py`; `runtime/routines/lifecycle_references.py` supplies the
+original owner records and autonomous elapsed-plan join on the caller's Session.
+The service preserves per-character commits and owner-controlled rejection.
+The differently admitted runner claim/lifecycle functions now live under
+`service/execution/claims.py` and `service/execution/lifecycle.py`, preserving
+episode-before-beat locks and the original flush/commit decisions. Publication
+evidence reads use the caller's Session through `runtime/routines/activity_references.py`.
+Joint scheduling and resident execution remain following B4 slices, with no
+catch-up public actions added.
 
 L3 PR F introduced `app.domains.routine_posts.public` for autonomous routine
 selection, evidence-bounded continuation, two-call writing, and atomic

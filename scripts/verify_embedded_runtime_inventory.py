@@ -63,15 +63,15 @@ PARITY_WORKLOADS = (
         "phase": "P3",
         "contract": "Daily plan selects four deterministic items with zero provider calls and no missed-slot catch-up",
         "tests": [
-            "backend/tests/test_daily_activity_runtime.py",
-            "backend/tests/test_agent_activity_limits.py",
+            "backend/tests/routines/test_daily_activity_runtime.py",
+            "backend/tests/routines/test_activity_limits.py",
         ],
     },
     {
         "phase": "P4",
         "contract": "Routine continuation publishes atomically with normal two-call and repair-bounded three-call behavior",
         "tests": [
-            "backend/tests/test_routine_post_runtime.py",
+            "backend/tests/routine_posts/test_runtime.py",
             "backend/tests/test_l3_owner_manual_social_inbox.py",
         ],
     },
@@ -461,7 +461,7 @@ def _runtime_coupling() -> list[dict[str, Any]]:
         ("compose.yml", "shared", ["two-service topology", "embedded data volume", "backend health dependency"]),
         ("compose.dev.yml", "shared", ["frontend HMR", "backend reload", "contributor logs"]),
         ("backend/app/runtime/single_backend_components.py", "shared", ["in-process scheduler/projector ownership", "bounded drain"]),
-        ("backend/app/services/resident_tick_scheduler.py", "scheduler", ["singleton process lock", "database lease", "heartbeat", "bounded drain"]),
+        ("backend/app/runtime/resident/scheduler.py", "scheduler", ["singleton process lock", "database lease", "heartbeat", "bounded drain"]),
         ("backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py", "scheduler", ["lease repository", "fencing epoch"]),
         ("backend/app/runtime/graph_projection/worker.py", "projector", ["outbox claim", "thread pool", "bounded drain", "degraded state"]),
         ("backend/app/runtime/graph_projection/process_client.py", "projector", ["graph client construction"]),
@@ -480,7 +480,7 @@ def _behavior_file_hashes() -> list[dict[str, str]]:
         "Dockerfile.frontend",
         "frontend/next.config.ts",
         "backend/app/main.py",
-        "backend/app/services/resident_tick_scheduler.py",
+        "backend/app/runtime/resident/scheduler.py",
         "backend/app/runtime/graph_projection/worker.py",
     )
     return [

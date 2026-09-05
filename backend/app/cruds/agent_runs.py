@@ -7,7 +7,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import models
-from app.core import agent_activity_schedule, unit_of_work
+from app.domains.routines.service import tick_schedule as agent_activity_schedule
+from app.core import unit_of_work
 
 
 ACTIVE_RUN_STATUSES = {"running"}

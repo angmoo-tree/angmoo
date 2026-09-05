@@ -18,7 +18,7 @@ from sqlalchemy import delete, or_, select
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.core import agent_activity_schedule
+from app.domains.routines.service import tick_schedule as agent_activity_schedule
 from app.config import settings
 from app.core.redaction import redact_secret_text, redact_secrets
 from app.core.db import SessionLocal
@@ -31,7 +31,7 @@ from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
 from app.runtime.routine_posts import routine_world_character_for_character
-from app.domains.routines.public import reconcile_all_elapsed_routines
+from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routines
 from app.domains.social.public import current_social_search
 from app.domains.world_characters.public import (
     is_owner_controlled_character,
@@ -46,7 +46,7 @@ from app.services.agent_briefs import (
     is_feed_scan_community_theme_brief,
 )
 from app.services import community as community_service
-from app.services.llm_context import neutralize_context_text
+from app.core.context_text import neutralize_context_text
 from app.services import maintenance as maintenance_service
 from app.services.direct_llm import DirectLlmDeferred
 from app.services.langgraph_resident import (
