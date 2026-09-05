@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2095,
-      "internal_edge_count": 2105,
+      "external_import_count": 2100,
+      "internal_edge_count": 2129,
       "legacy_import_exception_count": 0,
-      "module_count": 652,
+      "module_count": 658,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -264,6 +264,11 @@
             "path": "backend/app/domains/social/application/writes.py"
           },
           {
+            "imports": [],
+            "module": "app.domains.social.constants",
+            "path": "backend/app/domains/social/constants.py"
+          },
+          {
             "imports": [
               "app.domains.social.contracts.observations",
               "app.domains.social.contracts.profile_activity",
@@ -309,6 +314,11 @@
             "imports": [],
             "module": "app.domains.social.contracts.writes",
             "path": "backend/app/domains/social/contracts/writes.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.social.exceptions",
+            "path": "backend/app/domains/social/exceptions.py"
           },
           {
             "imports": [
@@ -484,6 +494,41 @@
             ],
             "module": "app.domains.social.service.notifications",
             "path": "backend/app/domains/social/service/notifications.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.exceptions",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.posts",
+              "app.domains.social.schemas.community",
+              "app.domains.social.service.presentation",
+              "app.domains.social.service.visibility"
+            ],
+            "module": "app.domains.social.service.posts",
+            "path": "backend/app/domains/social/service/posts.py"
+          },
+          {
+            "imports": [
+              "app.domains.characters.service.profile",
+              "app.domains.identity.service.profile",
+              "app.domains.social.constants",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.media",
+              "app.domains.social.repository.posts",
+              "app.domains.social.schemas.community",
+              "app.domains.social.service.visibility"
+            ],
+            "module": "app.domains.social.service.presentation",
+            "path": "backend/app/domains/social/service/presentation.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.posts",
+              "app.domains.social.schemas.community"
+            ],
+            "module": "app.domains.social.service.visibility",
+            "path": "backend/app/domains/social/service/visibility.py"
           },
           {
             "imports": [],
@@ -744,6 +789,7 @@
               "app.domains.characters.exceptions",
               "app.domains.characters.service.profile",
               "app.domains.characters.service.state",
+              "app.domains.identity.service.profile",
               "app.domains.social.repository.inbox",
               "app.domains.social.repository.media",
               "app.domains.social.repository.posts",

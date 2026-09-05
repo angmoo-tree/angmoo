@@ -616,3 +616,16 @@ M1 뒤 남아 있던 기존 credential privacy 테스트의 monkeypatch 위치 �
 공개 media mount는 기존 characters/posts/world-package-imports만 유지한다. World/draft/candidate를 anonymous 정적 경로에 추가하지 않았다. 관련 권한/비공개 검증의 통과를 실제 Installer/real-provider 검증으로 확대하지 않는다. 현재 Media M1~M6의 새 nodes는 26개이며 source introduction·통합 Actions·순차 merge는 root가 관리한다.
 
 M6 고정 후보에서 `--contracts --nodes`는 현재 **2,151 nodes**를 수집했다. 보호 계보 2,125개 대비 API/ORM·기존 assertion/suppression·누락 node·source split 오류는 없었다. 실패 목록은 M1~M5의 root 선형 capture를 기다리는 source 12개·test 21개뿐이며 M6 새 5개는 이 검사 당시 미커밋 도입이었다. source 고정 후 root가 M1~M6의 각 첫 도입 SHA에서 append-only 증거를 추가한다.
+
+
+## AR-B5-B2 — Social 공개 판단·읽기·응답 조립과 소유 조회
+
+기존 Community 오류 13개와 상수 4개를 Social의 `exceptions.py`와 `constants.py`로 옮겼다. 게시물과 thread 읽기, 공개 판단, 응답 조립 함수의 실제 본문은 `service/{posts,visibility,presentation}.py`가 소유한다. 삭제·신고·인용·reply 조상 체인 판단 순서와 숨김 응답은 같으며 기존 service의 남은 기능은 같은 함수 객체를 연결한다.
+
+응답 조립의 User 조회는 Identity `service/profile.py::get_user`, Character 조회와 멘션 SQL은 Character `service/profile.py`가 소유한다. User 조회의 nullable `db.get`와 attached identity, 멘션의 기존 한 번의 SQL/active·not-deleted 조건은 같다. 응답에서 멘션 순서와 중복 제거를 유지하고 새로운 flush·commit·refresh를 추가하지 않았다. 서로 다른 도메인의 ORM을 Social에서 직접 조회하지 않는다.
+
+신규 **2 nodes**는 `tests/social/test_identity_read_collaboration.py`에 있다. 실제 SQLite에서 멘션의 한 번의 조회·입력 순서·삭제/정지 필터·빈 입력 0쿼리, User의 같은 attached 객체·미저장 변경·없는 대상 None·flush/commit 0을 검증한다. 기존 게시물 테스트는 monkeypatch를 실제 새 소유 함수에 연결했고 assertion/raises/warns는 동일하다. 초기 2개 실패는 아직 이전하지 않은 mention notification의 patch 위치를 너무 넓게 바꾼 fixture 문제였으며 실제 남은 caller 위치로 좁혀 수정했다.
+
+최종 집중 검증은 **107 passed / 1 existing warning / 21.68s**다. #258/#263 API·schema·ORM 차이 0, 변경 기존 테스트 1개 파일의 assertion 계약 PASS, 전체 split evidence PASS다. Media/Package 통합 후 기존 B2 split evidence 27개의 Package 테스트 경로만 이미 승인된 exact node map의 현재 목적지로 연결했다. 보호 원본 node, 기준선, 검사 규칙은 변경하지 않았다. Architecture는 **658 modules / 2,129 edges / 247 exact legacy edges**, L4 inventory는 **658 modules / parity 97**, ER0는 **Postgres 78 files / historical migration subset 87 / Neo4j 24 / Next 44 / parity 7**로 통과했다.
+
+Social 쓰기·프로필·Inbox·agent 도구·미디어 job, Relationships 및 projection은 B5 잔여 구현이다. 이번 source 고정과 새 nodes 도입은 root가 선형 capture·통합 Actions·PR/merge로 이어가며 이 기록은 전체 B5 완료를 주장하지 않는다.

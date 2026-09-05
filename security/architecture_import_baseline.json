@@ -1,7 +1,7 @@
 {
-  "edge_count": 2105,
-  "external_import_count": 2095,
-  "module_count": 652,
+  "edge_count": 2129,
+  "external_import_count": 2100,
+  "module_count": 658,
   "modules": [
     {
       "external_imports": [],
@@ -820,6 +820,7 @@
         "app.domains.characters.exceptions",
         "app.domains.characters.service.profile",
         "app.domains.characters.service.state",
+        "app.domains.identity.service.profile",
         "app.domains.social.repository.inbox",
         "app.domains.social.repository.media",
         "app.domains.social.repository.posts",
@@ -2383,6 +2384,17 @@
       ],
       "module": "app.domains.identity.service.owner_context",
       "path": "backend/app/domains/identity/service/owner_context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.identity.models"
+      ],
+      "module": "app.domains.identity.service.profile",
+      "path": "backend/app/domains/identity/service/profile.py",
       "wildcard_imports": []
     },
     {
@@ -4204,6 +4216,15 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "re"
+      ],
+      "imports": [],
+      "module": "app.domains.social.constants",
+      "path": "backend/app/domains/social/constants.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.social.contracts.observations",
@@ -4295,6 +4316,13 @@
       "imports": [],
       "module": "app.domains.social.contracts.writes",
       "path": "backend/app/domains/social/contracts/writes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.social.exceptions",
+      "path": "backend/app/domains/social/exceptions.py",
       "wildcard_imports": []
     },
     {
@@ -4591,6 +4619,53 @@
       ],
       "module": "app.domains.social.service.notifications",
       "path": "backend/app/domains/social/service/notifications.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.exceptions",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.posts",
+        "app.domains.social.schemas.community",
+        "app.domains.social.service.presentation",
+        "app.domains.social.service.visibility"
+      ],
+      "module": "app.domains.social.service.posts",
+      "path": "backend/app/domains/social/service/posts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.service.profile",
+        "app.domains.identity.service.profile",
+        "app.domains.social.constants",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.media",
+        "app.domains.social.repository.posts",
+        "app.domains.social.schemas.community",
+        "app.domains.social.service.visibility"
+      ],
+      "module": "app.domains.social.service.presentation",
+      "path": "backend/app/domains/social/service/presentation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.posts",
+        "app.domains.social.schemas.community"
+      ],
+      "module": "app.domains.social.service.visibility",
+      "path": "backend/app/domains/social/service/visibility.py",
       "wildcard_imports": []
     },
     {
@@ -9093,6 +9168,11 @@
         "app.cruds.community",
         "app.domains.characters.exceptions",
         "app.domains.characters.service.state",
+        "app.domains.social.constants",
+        "app.domains.social.exceptions",
+        "app.domains.social.service.posts",
+        "app.domains.social.service.presentation",
+        "app.domains.social.service.visibility",
         "app.models",
         "app.runtime.relationships.sqlalchemy_social_event",
         "app.schemas",

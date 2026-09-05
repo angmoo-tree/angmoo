@@ -1,3 +1,4 @@
+from app.domains.identity.service.profile import get_user
 from app.domains.social.service.notifications import create_notification
 from app.domains.social.repository.inbox import (
     get_notification_for_agent,
@@ -616,8 +617,6 @@ def delete_timeline_reposts(
 
 
 
-def get_user(db: Session, user_id: str) -> models.User | None:
-    return db.get(models.User, user_id)
 
 
 def create_follow(

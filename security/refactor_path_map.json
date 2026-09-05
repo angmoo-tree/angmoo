@@ -5251,7 +5251,8 @@
           "backend/app/domains/social/repository/profiles.py",
           "backend/app/domains/social/service/notifications.py",
           "backend/app/domains/social/utils/cursors.py",
-          "backend/app/domains/social/utils/text.py"
+          "backend/app/domains/social/utils/text.py",
+          "backend/app/domains/identity/service/profile.py"
         ],
         "backend/app/schemas/characters.py": [
           "backend/app/domains/characters/schemas.py",
@@ -6081,12 +6082,13 @@
         },
         {
           "old": "backend/app/cruds/community.py::get_user",
-          "new": "backend/app/cruds/community.py::get_user",
+          "new": "backend/app/domains/identity/service/profile.py::get_user",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/domains/social/service/presentation.py",
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_identity_read_collaboration.py::test_user_lookup_preserves_nullable_same_session_unflushed_identity"
           ]
         },
         {
@@ -6695,7 +6697,7 @@
           ],
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -6798,7 +6800,7 @@
           ],
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -7172,7 +7174,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -7255,7 +7257,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -7288,7 +7290,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -7382,7 +7384,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -7584,7 +7586,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_keeps_non_json_errors"
           ]
@@ -7608,7 +7610,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
@@ -7669,7 +7671,7 @@
           ],
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
         },
@@ -7681,7 +7683,7 @@
           ],
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
         },
@@ -7770,7 +7772,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -7782,7 +7784,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -7848,7 +7850,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -7872,7 +7874,7 @@
           ],
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
         },
@@ -8058,7 +8060,7 @@
           ],
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
         },
@@ -8071,7 +8073,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -8083,7 +8085,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -8105,7 +8107,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -8269,7 +8271,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -8335,7 +8337,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
@@ -8347,7 +8349,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -8358,7 +8360,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -8369,7 +8371,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
             "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics"
           ]
@@ -8447,7 +8449,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
           ]
         },
@@ -8459,7 +8461,7 @@
           ],
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_langgraph_resident_engine.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria"
           ]
         },
@@ -8472,7 +8474,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -8849,7 +8851,7 @@
           "test_nodes": [
             "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
-            "tests/test_l3_5_world_package_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
         {
@@ -13510,7 +13512,13 @@
       "status": "Character state admission/HTTP complete; Social tool-run auth/log/deduplication and public activity remain with their real B4/B5 owners",
       "split_files": {
         "backend/app/services/community.py": [
+          "backend/app/domains/characters/service/profile.py",
           "backend/app/domains/characters/service/state.py",
+          "backend/app/domains/social/constants.py",
+          "backend/app/domains/social/exceptions.py",
+          "backend/app/domains/social/service/posts.py",
+          "backend/app/domains/social/service/presentation.py",
+          "backend/app/domains/social/service/visibility.py",
           "backend/app/services/community.py"
         ],
         "backend/app/api/v1/routes/community.py": [
@@ -13531,12 +13539,13 @@
         },
         {
           "old": "backend/app/services/community.py::DELETED_CHARACTER_NAME",
-          "new": "backend/app/services/community.py::DELETED_CHARACTER_NAME",
+          "new": "backend/app/domains/social/constants.py::DELETED_CHARACTER_NAME",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
@@ -13691,12 +13700,13 @@
         },
         {
           "old": "backend/app/services/community.py::MENTION_HANDLE_RE",
-          "new": "backend/app/services/community.py::MENTION_HANDLE_RE",
+          "new": "backend/app/domains/social/constants.py::MENTION_HANDLE_RE",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
@@ -13741,22 +13751,24 @@
         },
         {
           "old": "backend/app/services/community.py::REPORT_HIDDEN_TITLE",
-          "new": "backend/app/services/community.py::REPORT_HIDDEN_TITLE",
+          "new": "backend/app/domains/social/constants.py::REPORT_HIDDEN_TITLE",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::REPORT_HIDDEN_MESSAGE",
-          "new": "backend/app/services/community.py::REPORT_HIDDEN_MESSAGE",
+          "new": "backend/app/domains/social/constants.py::REPORT_HIDDEN_MESSAGE",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
@@ -13771,52 +13783,57 @@
         },
         {
           "old": "backend/app/services/community.py::CommunityServiceError",
-          "new": "backend/app/services/community.py::CommunityServiceError",
+          "new": "backend/app/domains/social/exceptions.py::CommunityServiceError",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::PostNotFoundError",
-          "new": "backend/app/services/community.py::PostNotFoundError",
+          "new": "backend/app/domains/social/exceptions.py::PostNotFoundError",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::CharacterNotFoundError",
-          "new": "backend/app/services/community.py::CharacterNotFoundError",
+          "new": "backend/app/domains/social/exceptions.py::CharacterNotFoundError",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::AgentRunAuthorizationError",
-          "new": "backend/app/services/community.py::AgentRunAuthorizationError",
+          "new": "backend/app/domains/social/exceptions.py::AgentRunAuthorizationError",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::PostWorldScopeError",
-          "new": "backend/app/services/community.py::PostWorldScopeError",
+          "new": "backend/app/domains/social/exceptions.py::PostWorldScopeError",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
@@ -14321,82 +14338,90 @@
         },
         {
           "old": "backend/app/services/community.py::CharacterOwnershipError",
-          "new": "backend/app/services/community.py::CharacterOwnershipError",
+          "new": "backend/app/domains/social/exceptions.py::CharacterOwnershipError",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::CharacterSuspendedError",
-          "new": "backend/app/services/community.py::CharacterSuspendedError",
+          "new": "backend/app/domains/social/exceptions.py::CharacterSuspendedError",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::ProfileNotFoundError",
-          "new": "backend/app/services/community.py::ProfileNotFoundError",
+          "new": "backend/app/domains/social/exceptions.py::ProfileNotFoundError",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::FollowSelfError",
-          "new": "backend/app/services/community.py::FollowSelfError",
+          "new": "backend/app/domains/social/exceptions.py::FollowSelfError",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::NotificationNotFoundError",
-          "new": "backend/app/services/community.py::NotificationNotFoundError",
+          "new": "backend/app/domains/social/exceptions.py::NotificationNotFoundError",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::LegacyCommentsDisabledError",
-          "new": "backend/app/services/community.py::LegacyCommentsDisabledError",
+          "new": "backend/app/domains/social/exceptions.py::LegacyCommentsDisabledError",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::PostReportNotAllowedError",
-          "new": "backend/app/services/community.py::PostReportNotAllowedError",
+          "new": "backend/app/domains/social/exceptions.py::PostReportNotAllowedError",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::CommunityRateLimitedError",
-          "new": "backend/app/services/community.py::CommunityRateLimitedError",
+          "new": "backend/app/domains/social/exceptions.py::CommunityRateLimitedError",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
@@ -14551,22 +14576,24 @@
         },
         {
           "old": "backend/app/services/community.py::get_post",
-          "new": "backend/app/services/community.py::get_post",
+          "new": "backend/app/domains/social/service/posts.py::get_post",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::get_post_thread",
-          "new": "backend/app/services/community.py::get_post_thread",
+          "new": "backend/app/domains/social/service/posts.py::get_post_thread",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
@@ -15601,12 +15628,13 @@
         },
         {
           "old": "backend/app/services/community.py::_notification_read",
-          "new": "backend/app/services/community.py::_notification_read",
+          "new": "backend/app/domains/social/service/presentation.py::_notification_read",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
@@ -15621,32 +15649,35 @@
         },
         {
           "old": "backend/app/services/community.py::_notification_actor_identity",
-          "new": "backend/app/services/community.py::_notification_actor_identity",
+          "new": "backend/app/domains/social/service/presentation.py::_notification_actor_identity",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::_notification_recipient_identity",
-          "new": "backend/app/services/community.py::_notification_recipient_identity",
+          "new": "backend/app/domains/social/service/presentation.py::_notification_recipient_identity",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::_notification_post_preview",
-          "new": "backend/app/services/community.py::_notification_post_preview",
+          "new": "backend/app/domains/social/service/presentation.py::_notification_post_preview",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
@@ -15701,92 +15732,100 @@
         },
         {
           "old": "backend/app/services/community.py::_post_summary",
-          "new": "backend/app/services/community.py::_post_summary",
+          "new": "backend/app/domains/social/service/presentation.py::_post_summary",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::_post_detail",
-          "new": "backend/app/services/community.py::_post_detail",
+          "new": "backend/app/domains/social/service/presentation.py::_post_detail",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::_hidden_post_detail",
-          "new": "backend/app/services/community.py::_hidden_post_detail",
+          "new": "backend/app/domains/social/service/presentation.py::_hidden_post_detail",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::is_post_public_context_visible",
-          "new": "backend/app/services/community.py::is_post_public_context_visible",
+          "new": "backend/app/domains/social/service/visibility.py::is_post_public_context_visible",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::_is_post_public_context_visible",
-          "new": "backend/app/services/community.py::_is_post_public_context_visible",
+          "new": "backend/app/domains/social/service/visibility.py::_is_post_public_context_visible",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::_post_reference",
-          "new": "backend/app/services/community.py::_post_reference",
+          "new": "backend/app/domains/social/service/presentation.py::_post_reference",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::_post_media_reads",
-          "new": "backend/app/services/community.py::_post_media_reads",
+          "new": "backend/app/domains/social/service/presentation.py::_post_media_reads",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::_post_author_identity",
-          "new": "backend/app/services/community.py::_post_author_identity",
+          "new": "backend/app/domains/social/service/presentation.py::_post_author_identity",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_post_reference_includes_mention_metadata",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets"
           ]
         },
         {
           "old": "backend/app/services/community.py::_mentioned_characters_for_texts",
-          "new": "backend/app/services/community.py::_mentioned_characters_for_texts",
+          "new": "backend/app/domains/social/service/presentation.py::_mentioned_characters_for_texts",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_identity_read_collaboration.py::test_mentions_use_one_owned_query_and_keep_input_order_and_visibility"
           ]
         },
         {
@@ -16127,6 +16166,17 @@
           ],
           "test_nodes": [
             "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+          ]
+        },
+        {
+          "old": "backend/app/services/community.py::_mentioned_characters_for_texts",
+          "new": "backend/app/domains/characters/service/profile.py::list_mentionable_characters",
+          "source_member": "Original characters = list(db.scalars(select(Character).where(handle IN, deleted IS NULL, moderation active))) query, same Session/one SQL/no ordering or writes.",
+          "direct_consumers": [
+            "backend/app/domains/social/service/presentation.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_identity_read_collaboration.py::test_mentions_use_one_owned_query_and_keep_input_order_and_visibility"
           ]
         }
       ]
@@ -17954,6 +18004,22 @@
       ],
       "runtime_ownership": "World/Character read projection, destination seed, commit and recovery run under app/runtime/world_packages. App factories inject constructor callbacks into Package dependencies; domain modules never import runtime. Existing Session/sessionmaker and row-lock/commit/rollback/media journal order are preserved.",
       "remaining_compatibility": "No Package public/api/application/domain/ports/infrastructure implementation or same-domain bridge remains. app.models aggregate registration is the sole Package incoming bridge and retires in AR-G5. Upstream B2 worlds/characters public consumers in runtime migrate when those source branches join."
+    },
+    "AR-B5-B2": {
+      "status": "IMPLEMENTED; focused 107 PASS; API/schema/ORM and changed assertions unchanged; full split evidence PASS; source introduction and integration gates pending",
+      "scope": "Actual post/thread read services, canonical ancestry visibility, response assembly, original Social errors and response constants. Character owns the original mention query; Identity owns the original nullable user lookup.",
+      "source_split_owners": [
+        "AR-B2-B6 retains all 228 original services/community symbols",
+        "AR-B2-B1 retains all 103 original cruds/community symbols"
+      ],
+      "tests": [
+        "tests/social/test_identity_read_collaboration.py",
+        "tests/test_community_posts_route.py",
+        "tests/test_community_abuse_boundaries.py",
+        "tests/test_l3_owner_manual_social_inbox.py",
+        "tests/test_l4_social_write_uow.py"
+      ],
+      "remaining": "Post mutations, profile/follow/inbox read workflows, agent/resident coordination, Relationship and projection transitions."
     }
   }
 }
