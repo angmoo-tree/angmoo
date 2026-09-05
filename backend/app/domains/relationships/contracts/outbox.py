@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Literal, Protocol, runtime_checkable
 
-from app.domains.relationships.projection.commands import ProjectionCommand
+from app.domains.relationships.contracts.projection_commands import (ProjectionCommand)
 
 
 OutboxFinalizeStatus = Literal[

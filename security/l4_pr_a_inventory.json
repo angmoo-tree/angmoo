@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2169,
-      "internal_edge_count": 2292,
+      "external_import_count": 2180,
+      "internal_edge_count": 2304,
       "legacy_import_exception_count": 0,
-      "module_count": 694,
+      "module_count": 693,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -14,104 +14,98 @@
             "path": "backend/app/domains/relationships/__init__.py"
           },
           {
-            "imports": [
-              "app.domains.relationships.application.graph_planning"
-            ],
-            "module": "app.domains.relationships.application",
-            "path": "backend/app/domains/relationships/application/__init__.py"
-          },
-          {
-            "imports": [
-              "app.domains.relationships.domain.graph_retrieval_plan",
-              "app.domains.relationships.domain.graph_retrieval_planner",
-              "app.domains.relationships.graph_recall.contracts",
-              "app.domains.relationships.graph_recall.service"
-            ],
-            "module": "app.domains.relationships.application.graph_planning",
-            "path": "backend/app/domains/relationships/application/graph_planning.py"
-          },
-          {
             "imports": [],
             "module": "app.domains.relationships.constants",
             "path": "backend/app/domains/relationships/constants.py"
           },
           {
-            "imports": [
-              "app.domains.relationships.domain.graph_retrieval_plan",
-              "app.domains.relationships.domain.graph_retrieval_planner"
-            ],
-            "module": "app.domains.relationships.domain",
-            "path": "backend/app/domains/relationships/domain/__init__.py"
-          },
-          {
             "imports": [],
-            "module": "app.domains.relationships.domain.graph_retrieval_plan",
-            "path": "backend/app/domains/relationships/domain/graph_retrieval_plan.py"
+            "module": "app.domains.relationships.contracts",
+            "path": "backend/app/domains/relationships/contracts/__init__.py"
           },
           {
             "imports": [
-              "app.domains.relationships.domain.graph_retrieval_plan",
-              "app.domains.relationships.graph_recall.contracts"
+              "app.domains.relationships.contracts.graph_plan",
+              "app.domains.relationships.contracts.graph_recall"
             ],
-            "module": "app.domains.relationships.domain.graph_retrieval_planner",
-            "path": "backend/app/domains/relationships/domain/graph_retrieval_planner.py"
+            "module": "app.domains.relationships.contracts.graph_execution",
+            "path": "backend/app/domains/relationships/contracts/graph_execution.py"
           },
           {
             "imports": [],
-            "module": "app.domains.relationships.graph_read",
-            "path": "backend/app/domains/relationships/graph_read/__init__.py"
-          },
-          {
-            "imports": [],
-            "module": "app.domains.relationships.graph_read.errors",
-            "path": "backend/app/domains/relationships/graph_read/errors.py"
-          },
-          {
-            "imports": [],
-            "module": "app.domains.relationships.graph_read.repository",
-            "path": "backend/app/domains/relationships/graph_read/repository.py"
-          },
-          {
-            "imports": [],
-            "module": "app.domains.relationships.graph_read.schemas",
-            "path": "backend/app/domains/relationships/graph_read/schemas.py"
+            "module": "app.domains.relationships.contracts.graph_plan",
+            "path": "backend/app/domains/relationships/contracts/graph_plan.py"
           },
           {
             "imports": [
-              "app.domains.relationships.graph_read.errors",
-              "app.domains.relationships.graph_read.repository",
-              "app.domains.relationships.graph_read.schemas"
+              "app.domains.relationships.contracts.graph_plan"
             ],
-            "module": "app.domains.relationships.graph_read.use_case",
-            "path": "backend/app/domains/relationships/graph_read/use_case.py"
-          },
-          {
-            "imports": [
-              "app.domains.relationships.graph_recall.contracts",
-              "app.domains.relationships.graph_recall.service"
-            ],
-            "module": "app.domains.relationships.graph_recall",
-            "path": "backend/app/domains/relationships/graph_recall/__init__.py"
+            "module": "app.domains.relationships.contracts.graph_planner",
+            "path": "backend/app/domains/relationships/contracts/graph_planner.py"
           },
           {
             "imports": [],
-            "module": "app.domains.relationships.graph_recall.contracts",
-            "path": "backend/app/domains/relationships/graph_recall/contracts.py"
+            "module": "app.domains.relationships.contracts.graph_query",
+            "path": "backend/app/domains/relationships/contracts/graph_query.py"
           },
           {
             "imports": [
-              "app.domains.relationships.graph_read.errors",
-              "app.domains.relationships.graph_read.repository",
-              "app.domains.relationships.graph_read.use_case",
-              "app.domains.relationships.graph_recall.contracts"
+              "app.domains.relationships.contracts.graph_query"
             ],
-            "module": "app.domains.relationships.graph_recall.service",
-            "path": "backend/app/domains/relationships/graph_recall/service.py"
+            "module": "app.domains.relationships.contracts.graph_read",
+            "path": "backend/app/domains/relationships/contracts/graph_read.py"
           },
           {
             "imports": [],
-            "module": "app.domains.relationships.infrastructure",
-            "path": "backend/app/domains/relationships/infrastructure/__init__.py"
+            "module": "app.domains.relationships.contracts.graph_recall",
+            "path": "backend/app/domains/relationships/contracts/graph_recall.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.graph_query",
+              "app.domains.relationships.contracts.graph_read",
+              "app.domains.relationships.contracts.graph_recall"
+            ],
+            "module": "app.domains.relationships.contracts.graph_recall_gateway",
+            "path": "backend/app/domains/relationships/contracts/graph_recall_gateway.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.projection_commands"
+            ],
+            "module": "app.domains.relationships.contracts.outbox",
+            "path": "backend/app/domains/relationships/contracts/outbox.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.projection_commands"
+            ],
+            "module": "app.domains.relationships.contracts.projection",
+            "path": "backend/app/domains/relationships/contracts/projection.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.relationships.contracts.projection_commands",
+            "path": "backend/app/domains/relationships/contracts/projection_commands.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.graph_query"
+            ],
+            "module": "app.domains.relationships.contracts.query",
+            "path": "backend/app/domains/relationships/contracts/query.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.projection_commands"
+            ],
+            "module": "app.domains.relationships.contracts.replay",
+            "path": "backend/app/domains/relationships/contracts/replay.py"
+          },
+          {
+            "imports": [],
+            "module": "app.domains.relationships.exceptions",
+            "path": "backend/app/domains/relationships/exceptions.py"
           },
           {
             "imports": [
@@ -144,81 +138,47 @@
             "path": "backend/app/domains/relationships/models/social.py"
           },
           {
-            "imports": [
-              "app.domains.relationships.ports.graph_planner_provider",
-              "app.domains.relationships.ports.outbox",
-              "app.domains.relationships.ports.projection",
-              "app.domains.relationships.ports.query",
-              "app.domains.relationships.ports.replay"
-            ],
-            "module": "app.domains.relationships.ports",
-            "path": "backend/app/domains/relationships/ports/__init__.py"
-          },
-          {
-            "imports": [
-              "app.domains.relationships.domain.graph_retrieval_plan"
-            ],
-            "module": "app.domains.relationships.ports.graph_planner_provider",
-            "path": "backend/app/domains/relationships/ports/graph_planner_provider.py"
-          },
-          {
-            "imports": [
-              "app.domains.relationships.projection.commands"
-            ],
-            "module": "app.domains.relationships.ports.outbox",
-            "path": "backend/app/domains/relationships/ports/outbox.py"
-          },
-          {
-            "imports": [
-              "app.domains.relationships.projection.commands"
-            ],
-            "module": "app.domains.relationships.ports.projection",
-            "path": "backend/app/domains/relationships/ports/projection.py"
-          },
-          {
-            "imports": [
-              "app.domains.relationships.graph_read.repository"
-            ],
-            "module": "app.domains.relationships.ports.query",
-            "path": "backend/app/domains/relationships/ports/query.py"
-          },
-          {
-            "imports": [
-              "app.domains.relationships.projection.commands"
-            ],
-            "module": "app.domains.relationships.ports.replay",
-            "path": "backend/app/domains/relationships/ports/replay.py"
-          },
-          {
-            "imports": [
-              "app.domains.relationships.projection.commands",
-              "app.domains.relationships.projection.digest"
-            ],
-            "module": "app.domains.relationships.projection",
-            "path": "backend/app/domains/relationships/projection/__init__.py"
-          },
-          {
             "imports": [],
-            "module": "app.domains.relationships.projection.commands",
-            "path": "backend/app/domains/relationships/projection/commands.py"
+            "module": "app.domains.relationships.policies",
+            "path": "backend/app/domains/relationships/policies/__init__.py"
           },
           {
             "imports": [
-              "app.domains.relationships.projection.commands"
+              "app.domains.relationships.contracts.graph_plan",
+              "app.domains.relationships.contracts.graph_recall"
             ],
-            "module": "app.domains.relationships.projection.digest",
-            "path": "backend/app/domains/relationships/projection/digest.py"
+            "module": "app.domains.relationships.policies.graph_plan_schema",
+            "path": "backend/app/domains/relationships/policies/graph_plan_schema.py"
           },
           {
             "imports": [
-              "app.domains.relationships.application",
-              "app.domains.relationships.domain",
-              "app.domains.relationships.graph_read.errors",
-              "app.domains.relationships.graph_read.schemas",
-              "app.domains.relationships.graph_read.use_case",
-              "app.domains.relationships.graph_recall",
-              "app.domains.relationships.ports",
-              "app.domains.relationships.projection"
+              "app.domains.relationships.contracts.graph_query",
+              "app.domains.relationships.contracts.graph_recall",
+              "app.domains.relationships.exceptions"
+            ],
+            "module": "app.domains.relationships.policies.graph_recall",
+            "path": "backend/app/domains/relationships/policies/graph_recall.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.graph_execution",
+              "app.domains.relationships.contracts.graph_plan",
+              "app.domains.relationships.contracts.graph_planner",
+              "app.domains.relationships.contracts.graph_read",
+              "app.domains.relationships.contracts.graph_recall",
+              "app.domains.relationships.contracts.graph_recall_gateway",
+              "app.domains.relationships.contracts.outbox",
+              "app.domains.relationships.contracts.projection",
+              "app.domains.relationships.contracts.projection_commands",
+              "app.domains.relationships.contracts.query",
+              "app.domains.relationships.contracts.replay",
+              "app.domains.relationships.exceptions",
+              "app.domains.relationships.policies.graph_plan_schema",
+              "app.domains.relationships.schemas",
+              "app.domains.relationships.service.graph_planning",
+              "app.domains.relationships.service.graph_read",
+              "app.domains.relationships.service.graph_recall",
+              "app.domains.relationships.utils.projection_digest"
             ],
             "module": "app.domains.relationships.public",
             "path": "backend/app/domains/relationships/public.py"
@@ -238,8 +198,47 @@
           },
           {
             "imports": [],
+            "module": "app.domains.relationships.schemas",
+            "path": "backend/app/domains/relationships/schemas.py"
+          },
+          {
+            "imports": [],
             "module": "app.domains.relationships.service",
             "path": "backend/app/domains/relationships/service/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.graph_execution",
+              "app.domains.relationships.contracts.graph_plan",
+              "app.domains.relationships.contracts.graph_recall",
+              "app.domains.relationships.contracts.graph_recall_gateway",
+              "app.domains.relationships.policies.graph_plan_schema",
+              "app.domains.relationships.service.graph_recall"
+            ],
+            "module": "app.domains.relationships.service.graph_planning",
+            "path": "backend/app/domains/relationships/service/graph_planning.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.graph_query",
+              "app.domains.relationships.contracts.graph_read",
+              "app.domains.relationships.exceptions",
+              "app.domains.relationships.schemas"
+            ],
+            "module": "app.domains.relationships.service.graph_read",
+            "path": "backend/app/domains/relationships/service/graph_read.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.graph_query",
+              "app.domains.relationships.contracts.graph_read",
+              "app.domains.relationships.contracts.graph_recall",
+              "app.domains.relationships.contracts.graph_recall_gateway",
+              "app.domains.relationships.exceptions",
+              "app.domains.relationships.policies.graph_recall"
+            ],
+            "module": "app.domains.relationships.service.graph_recall",
+            "path": "backend/app/domains/relationships/service/graph_recall.py"
           },
           {
             "imports": [
@@ -260,6 +259,13 @@
             "imports": [],
             "module": "app.domains.relationships.utils.points",
             "path": "backend/app/domains/relationships/utils/points.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.projection_commands"
+            ],
+            "module": "app.domains.relationships.utils.projection_digest",
+            "path": "backend/app/domains/relationships/utils/projection_digest.py"
           },
           {
             "imports": [],
@@ -821,16 +827,16 @@
           },
           {
             "imports": [
-              "app.domains.relationships.graph_read.repository",
-              "app.domains.relationships.ports.projection",
-              "app.domains.relationships.projection.commands"
+              "app.domains.relationships.contracts.graph_query",
+              "app.domains.relationships.contracts.projection",
+              "app.domains.relationships.contracts.projection_commands"
             ],
             "module": "app.integrations.ladybug_projection",
             "path": "backend/app/integrations/ladybug_projection.py"
           },
           {
             "imports": [
-              "app.domains.relationships.graph_read.repository"
+              "app.domains.relationships.contracts.graph_query"
             ],
             "module": "app.integrations.relationship_graph_read",
             "path": "backend/app/integrations/relationship_graph_read.py"
@@ -850,7 +856,7 @@
           {
             "imports": [
               "app.config",
-              "app.domains.relationships.ports.projection",
+              "app.domains.relationships.contracts.projection",
               "app.integrations.ladybug_projection"
             ],
             "module": "app.runtime.graph_projection.process_client",
@@ -859,12 +865,12 @@
           {
             "imports": [
               "app.config",
-              "app.domains.relationships.graph_read.errors",
-              "app.domains.relationships.graph_read.repository",
-              "app.domains.relationships.graph_read.schemas",
-              "app.domains.relationships.graph_read.use_case",
-              "app.domains.relationships.ports.projection",
+              "app.domains.relationships.contracts.graph_query",
+              "app.domains.relationships.contracts.graph_read",
+              "app.domains.relationships.contracts.projection",
+              "app.domains.relationships.exceptions",
               "app.domains.relationships.public",
+              "app.domains.relationships.schemas",
               "app.integrations.ladybug_projection",
               "app.integrations.relationship_graph_read",
               "app.models",
@@ -878,7 +884,7 @@
           {
             "imports": [
               "app.core.ids",
-              "app.domains.relationships.projection.digest",
+              "app.domains.relationships.utils.projection_digest",
               "app.models",
               "app.runtime.graph_projection.metrics",
               "app.runtime.graph_projection.sqlalchemy_commands",
@@ -902,7 +908,7 @@
           },
           {
             "imports": [
-              "app.domains.relationships.projection.commands",
+              "app.domains.relationships.contracts.projection_commands",
               "app.models"
             ],
             "module": "app.runtime.graph_projection.sqlalchemy_commands",
@@ -911,8 +917,8 @@
           {
             "imports": [
               "app.core.sqlite_concurrency",
-              "app.domains.relationships.ports.outbox",
-              "app.domains.relationships.projection.commands",
+              "app.domains.relationships.contracts.outbox",
+              "app.domains.relationships.contracts.projection_commands",
               "app.models",
               "app.runtime.graph_projection.sqlalchemy_commands",
               "app.runtime.graph_projection.sqlalchemy_state"
@@ -929,9 +935,9 @@
           },
           {
             "imports": [
-              "app.domains.relationships.ports.outbox",
-              "app.domains.relationships.ports.projection",
-              "app.domains.relationships.projection.commands",
+              "app.domains.relationships.contracts.outbox",
+              "app.domains.relationships.contracts.projection",
+              "app.domains.relationships.contracts.projection_commands",
               "app.runtime.graph_projection.metrics",
               "app.runtime.graph_projection.sqlalchemy_outbox"
             ],
@@ -1568,7 +1574,7 @@
       },
       {
         "path": "backend/tests/test_graph_projection_worker.py",
-        "sha256": "9ff41ffff689b6b060236e08844b2dc42e33dce16abc15eb4cd66d1862f82a2d"
+        "sha256": "1b569fec873e22b9d41fadc1bf6a509e31c3c0c9bd7ead1f491b472f5e3ab7da"
       },
       {
         "path": "backend/tests/test_l2_5_frontend_architecture_boundaries.py",
@@ -1580,7 +1586,7 @@
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
-        "sha256": "f13a15f0b61096ea3de801d0575d356f6317f3b57b15beafb114afca34066f9e"
+        "sha256": "0c727169947658b98cc202fb009038161601ff593e8bad0d53489ee8d1082ccf"
       },
       {
         "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
@@ -1596,7 +1602,7 @@
       },
       {
         "path": "backend/tests/test_relationship_graph_repository.py",
-        "sha256": "dada8caf7becaed5d16bff6193e67ebbd5d24e4f7c7a4c79366a5400acdbe946"
+        "sha256": "74b67ae8c011a26a3d69f07d234f123222f5d7e99d657139915a92745087de38"
       },
       {
         "path": "backend/tests/test_social_event_runtime.py",

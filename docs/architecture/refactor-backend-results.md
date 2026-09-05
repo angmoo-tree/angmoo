@@ -725,3 +725,14 @@ Feed 목록·following의 실제 함수 4개, Inbox 업무 함수 4개를 Social
 신규 `tests/relationships/test_point_write_boundaries.py` **2 nodes**는 잘못된 입력의 SQL0, 기존 duplicate SELECT1/commit0/선택 상태 보존, 첫 조회 뒤 외부 Session이 저장한 경쟁 winner를 실제 UNIQUE 실패→rollback→재조회로 복구하는 흐름을 검증한다. 기존 Resident 전체·SocialEvent·projection commands/replay·삭제와 함께 **230 passed / 13.83s**다. #258/#263 API/schema/ORM 차이0, 보호 구조 테스트1파일의 경로 전환 assertion PASS, 전체 split PASS다. 경계는 **694 modules / 2,292 edges / 241 exact legacy edges**, L4 694/parity97, ER0 Postgres78/migration subset87/Neo4j24/Next44/parity7이다.
 
 B4-C의 실제 residual 소비자 연결과 G5 공통 model 등록에서 정확 legacy alias를 종료한다. Graph service/계약, event/proposal/projection의 나머지 실제 정책과 Social agent/media/World Feed 작업은 이어지는 B5 범위다. 이 source의 capture/통합 Actions/PR/merge는 root가 별도로 진행한다.
+
+
+## AR-B5-C2 — Graph 계약·규칙과 실제 읽기·회상·계획 실행
+
+기존 Graph read/recall/plan의 실제 실행 본문을 `relationships/service/graph_read.py`, `graph_recall.py`, `graph_planning.py`로 이전했다. 응답 schema와 오류는 `schemas.py`·`exceptions.py`, immutable 값/조회 callback/실행 결과는 `contracts/`가 소유한다. GraphRecall의 방향·근거·공개·bounded 결과 함수와 provider-plan strict 파서는 IO 없는 `policies/`로 분리했다. 서비스마다 전달 전용 중간 클래스를 추가하지 않았으며 graph storage/provider와의 실제 typed callback 계약은 유지한다.
+
+원래 정의 **144개**의 AST 본문·상수·class 메서드가 같음을 확인했다. 기존 공통 schema와 public 소비자는 같은 클래스/함수 객체를 사용하고, `application/domain/graph_read/graph_recall/ports/projection/infrastructure`의 사용하지 않는 old package 모듈7개는 import 소비자0과 기존 공개 이름의 보존을 확인한 뒤 제거했다. `public.py`는 기존 Chat/Memory/runtime/test의 정확한 호환 표면으로만 남으며 각 import별 bridge에 최종 전환·종료 조건을 명시했다.
+
+Graph 읽기·six primitives recall·strict planner·commands/replay/worker/metrics 검증은 **58 passed / 12.29s**, 기존 inventory/port/architecture 회귀는 **24 passed / 3.28s**다. 새로운 test node는 없으며 기존 permission/World/방향/누락 근거/관찰 여부/차단/삭제/실패 fallback/provider 한도 assertion을 유지한다. #258/#263 API/schema/ORM 차이0, 변경 보호 테스트7파일 assertion PASS, 전체 split evidence PASS다. 최초 한 차례 root cwd의 collection은 app import를 찾지 못했으며 이후 모든 실제 검증은 backend cwd에서 수행했다.
+
+Architecture **693 modules / 2,304 edges / 241 exact legacy edges**, L4 693/parity97, ER0 Postgres78/migration subset87/Neo4j24/Next44/parity7이다. 역사 frozen JSON은 수정하지 않았다. 관계 event 생성·proposal과 projection runtime의 SQL/상태 변경 소유, Social agent·World Feed·media jobs는 B5 잔여로 남는다. Source 도입 capture·통합 Actions·PR/merge는 root가 진행한다.

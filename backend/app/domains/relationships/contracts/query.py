@@ -1,8 +1,6 @@
 """Stable name for the storage-neutral relationship query boundary."""
 
-from app.domains.relationships.graph_read.repository import (
-    RelationshipGraphQueryPort,
-)
+from app.domains.relationships.contracts.graph_query import (RelationshipGraphQueryPort)
 
 
 RelationshipQueryPort = RelationshipGraphQueryPort

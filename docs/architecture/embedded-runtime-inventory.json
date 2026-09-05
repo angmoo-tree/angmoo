@@ -35,7 +35,7 @@
     },
     {
       "path": "backend/app/runtime/graph_projection/worker.py",
-      "sha256": "cdc807b1a80cff2ed41384498321b776a22c2a9153852c81459424275b70d9da"
+      "sha256": "1a8f3c2b6e25d8b27cd75ecd27d1a663571fffa2abe01bc27f5079fb64538a38"
     }
   ],
   "dependencies": {
@@ -263,7 +263,7 @@
       "owner": "ER4",
       "path": "backend/app/runtime/graph_projection/worker.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "cdc807b1a80cff2ed41384498321b776a22c2a9153852c81459424275b70d9da",
+      "source_sha256": "1a8f3c2b6e25d8b27cd75ecd27d1a663571fffa2abe01bc27f5079fb64538a38",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -274,7 +274,7 @@
       "owner": "ER4",
       "path": "backend/app/runtime/graph_projection/process_client.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "35b1eeda4b5722a29d5b25d1dabe617212ee32fd6d27c6bdd34d2da031e70035",
+      "source_sha256": "8b0fdcbee1a37ddb485d198e8dd38d51112bcd3e719d5ca39dd53f0b40fffe0a",
       "transition_pr": "ER4 PR J"
     },
     {

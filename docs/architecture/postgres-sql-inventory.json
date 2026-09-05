@@ -852,7 +852,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/graph_projection/replay.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "1b9b9dfc91b88c3cda6e8a1f9b5cace23d502c3296ba08d6e6c35ff965c28615",
+      "source_sha256": "4f73837f854a9ba7e81dce07f77410968b8ef167e84952f0bdac84e6e7227f35",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

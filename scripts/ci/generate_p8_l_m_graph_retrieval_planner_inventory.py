@@ -43,10 +43,10 @@ class InventoryError(RuntimeError):
 
 
 REQUIRED_FILES = (
-    "backend/app/domains/relationships/domain/graph_retrieval_plan.py",
-    "backend/app/domains/relationships/domain/graph_retrieval_planner.py",
-    "backend/app/domains/relationships/ports/graph_planner_provider.py",
-    "backend/app/domains/relationships/application/graph_planning.py",
+    "backend/app/domains/relationships/contracts/graph_plan.py",
+    "backend/app/domains/relationships/policies/graph_plan_schema.py",
+    "backend/app/domains/relationships/contracts/graph_planner.py",
+    "backend/app/domains/relationships/service/graph_planning.py",
     "backend/app/domains/chat/application/graph_retrieval.py",
     "backend/app/domains/chat/domain/call_tracker.py",
     "backend/app/integrations/llm/graph_retrieval_planner.py",
@@ -115,7 +115,7 @@ def _corpus_contract() -> dict[str, Any]:
 
 def _boundary_contract() -> dict[str, Any]:
     _require_text(
-        "backend/app/domains/relationships/domain/graph_retrieval_planner.py",
+        "backend/app/domains/relationships/policies/graph_plan_schema.py",
         (
             "parse_graph_retrieval_plan_payload",
             "graph_retrieval_plan_response_schema",
@@ -125,7 +125,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/relationships/application/graph_planning.py",
+        "backend/app/domains/relationships/service/graph_planning.py",
         (
             "GraphRetrievalPlanValidator",
             "GraphRetrievalPlanExecutor",

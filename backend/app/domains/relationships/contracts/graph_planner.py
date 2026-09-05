@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from app.domains.relationships.domain.graph_retrieval_plan import (
+from app.domains.relationships.contracts.graph_plan import (
     GraphPlanContractError,
     GraphRetrievalPlan,
 )

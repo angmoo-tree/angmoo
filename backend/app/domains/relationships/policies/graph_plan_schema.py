@@ -6,14 +6,14 @@ import re
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from app.domains.relationships.domain.graph_retrieval_plan import (
+from app.domains.relationships.contracts.graph_plan import (
     GRAPH_PLAN_VERSION,
     MAX_GRAPH_PLAN_STEPS,
     GraphPlanContractError,
     GraphPlanStep,
     GraphRetrievalPlan,
 )
-from app.domains.relationships.graph_recall.contracts import (
+from app.domains.relationships.contracts.graph_recall import (
     GraphRecallDirection,
     GraphRecallOperation,
     GraphRecallRanking,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from app.domains.relationships.projection.commands import ProjectionCommand
+from app.domains.relationships.contracts.projection_commands import (ProjectionCommand)
 
 
 class ProjectionReplaySource(Protocol):

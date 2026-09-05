@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.config import settings
-from app.domains.relationships.projection.commands import (
+from app.domains.relationships.contracts.projection_commands import (
     RelationshipStateProjectionCommand,
     SocialEventProjectionCommand,
     SourceExclusionProjectionCommand,

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from app.domains.relationships.projection.commands import (
+from app.domains.relationships.contracts.projection_commands import (
     NoGraphMutationCommand,
     ProjectionCommand,
     RelationshipStateProjectionCommand,

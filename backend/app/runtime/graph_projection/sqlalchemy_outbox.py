@@ -11,11 +11,8 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.runtime.graph_projection import sqlalchemy_state as graph_projection_crud
-from app.domains.relationships.ports.outbox import (
-    OutboxFinalizeStatus,
-    ProjectionWorkItem,
-)
-from app.domains.relationships.projection.commands import ProjectionCommand
+from app.domains.relationships.contracts.outbox import (OutboxFinalizeStatus, ProjectionWorkItem)
+from app.domains.relationships.contracts.projection_commands import (ProjectionCommand)
 from app.core.sqlite_concurrency import (
     SqliteRetryPolicy,
     run_sqlite_immediate,

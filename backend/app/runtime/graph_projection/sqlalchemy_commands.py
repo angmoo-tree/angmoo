@@ -11,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.domains.relationships.projection.commands import (
+from app.domains.relationships.contracts.projection_commands import (
     NoGraphMutationCommand,
     ProjectionCommand,
     ProjectionCommandError,

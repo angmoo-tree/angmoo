@@ -4,7 +4,7 @@ import threading
 from typing import Any, Protocol
 
 from app.config import Settings, settings
-from app.domains.relationships.ports.projection import (
+from app.domains.relationships.contracts.projection import (
     RelationshipProjectionBackendError,
     RelationshipProjectionPort,
 )

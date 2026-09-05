@@ -3,7 +3,10 @@ from datetime import datetime
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 from app.domains.relationships import models
-from app.domains.relationships.constants import RELATIONSHIP_POINT_ACTIVE_STATUSES, RELATIONSHIP_POINT_PENDING
+from app.domains.relationships.constants import (
+    RELATIONSHIP_POINT_ACTIVE_STATUSES,
+    RELATIONSHIP_POINT_PENDING,
+)
 
 
 def find_by_signature(db: Session, *, source_signature: str) -> models.AgentRelationshipPoint | None:

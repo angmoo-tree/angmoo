@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from app.domains.relationships.graph_read.repository import GraphQueryTemplate
+from app.domains.relationships.contracts.graph_query import (GraphQueryTemplate)
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
 
 

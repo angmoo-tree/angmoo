@@ -307,7 +307,30 @@
     "backend/tests/test_l3_5_world_package_ui_contract.py": "backend/tests/world_packages/test_ui_contract.py",
     "backend/app/services/llm_context.py": "backend/app/core/context_text.py",
     "backend/app/domains/relationships/infrastructure/sqlalchemy_social_models.py": "backend/app/domains/relationships/models/social.py",
-    "backend/app/domains/relationships/infrastructure/sqlalchemy_models.py": "backend/app/domains/relationships/models/projection.py"
+    "backend/app/domains/relationships/infrastructure/sqlalchemy_models.py": "backend/app/domains/relationships/models/projection.py",
+    "backend/app/domains/relationships/graph_read/errors.py": "backend/app/domains/relationships/exceptions.py",
+    "backend/app/domains/relationships/graph_read/schemas.py": "backend/app/domains/relationships/schemas.py",
+    "backend/app/domains/relationships/graph_read/repository.py": "backend/app/domains/relationships/contracts/graph_query.py",
+    "backend/app/domains/relationships/domain/graph_retrieval_plan.py": "backend/app/domains/relationships/contracts/graph_plan.py",
+    "backend/app/domains/relationships/domain/graph_retrieval_planner.py": "backend/app/domains/relationships/policies/graph_plan_schema.py",
+    "backend/app/domains/relationships/graph_recall/contracts.py": "backend/app/domains/relationships/contracts/graph_recall.py",
+    "backend/app/domains/relationships/ports/graph_planner_provider.py": "backend/app/domains/relationships/contracts/graph_planner.py",
+    "backend/app/domains/relationships/ports/outbox.py": "backend/app/domains/relationships/contracts/outbox.py",
+    "backend/app/domains/relationships/ports/projection.py": "backend/app/domains/relationships/contracts/projection.py",
+    "backend/app/domains/relationships/ports/query.py": "backend/app/domains/relationships/contracts/query.py",
+    "backend/app/domains/relationships/ports/replay.py": "backend/app/domains/relationships/contracts/replay.py",
+    "backend/app/domains/relationships/projection/commands.py": "backend/app/domains/relationships/contracts/projection_commands.py",
+    "backend/app/domains/relationships/projection/digest.py": "backend/app/domains/relationships/utils/projection_digest.py",
+    "backend/app/domains/relationships/application/__init__.py": "backend/app/domains/relationships/public.py",
+    "backend/app/domains/relationships/domain/__init__.py": "backend/app/domains/relationships/public.py",
+    "backend/app/domains/relationships/graph_recall/__init__.py": "backend/app/domains/relationships/public.py",
+    "backend/app/domains/relationships/ports/__init__.py": "backend/app/domains/relationships/public.py",
+    "backend/app/domains/relationships/projection/__init__.py": "backend/app/domains/relationships/public.py",
+    "backend/app/domains/relationships/graph_read/__init__.py": "backend/app/domains/relationships/__init__.py",
+    "backend/app/domains/relationships/infrastructure/__init__.py": "backend/app/domains/relationships/__init__.py",
+    "backend/app/domains/relationships/graph_read/use_case.py": "backend/app/domains/relationships/service/graph_read.py",
+    "backend/app/domains/relationships/application/graph_planning.py": "backend/app/domains/relationships/service/graph_planning.py",
+    "backend/app/domains/relationships/graph_recall/service.py": "backend/app/domains/relationships/service/graph_recall.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -19780,6 +19803,732 @@
         "tests/relationships/test_point_write_boundaries.py::test_point_admission_and_existing_duplicate_do_not_write_or_reset_state",
         "tests/relationships/test_point_write_boundaries.py::test_point_unique_collision_rolls_back_then_reads_the_committed_winner"
       ]
+    },
+    "AR-B5-C2": {
+      "status": "IMPLEMENTED; focused58 plus structure/inventory24 PASS; 144 original definition AST checks PASS; source introduction and integration pending",
+      "scope": "Graph read/recall/planning actual service execution, pure policy, typed callbacks/results and response schemas; unused old package modules removed.",
+      "split_files": {
+        "backend/app/domains/relationships/graph_read/use_case.py": [
+          "backend/app/domains/relationships/contracts/graph_read.py",
+          "backend/app/domains/relationships/service/graph_read.py"
+        ],
+        "backend/app/domains/relationships/application/graph_planning.py": [
+          "backend/app/domains/relationships/contracts/graph_execution.py",
+          "backend/app/domains/relationships/service/graph_planning.py"
+        ],
+        "backend/app/domains/relationships/graph_recall/service.py": [
+          "backend/app/domains/relationships/contracts/graph_recall_gateway.py",
+          "backend/app/domains/relationships/policies/graph_recall.py",
+          "backend/app/domains/relationships/service/graph_recall.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/relationships/graph_read/use_case.py::GraphView",
+          "new": "backend/app/domains/relationships/contracts/graph_read.py::GraphView",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_relationship_graph_api.py::test_owner_read_falls_back_to_directional_canonical_when_graph_disabled",
+            "tests/test_relationship_graph_api.py::test_other_owner_cannot_read_character_graph",
+            "tests/test_relationship_graph_api.py::test_failed_world_rebuild_falls_back_to_canonical_as_unavailable",
+            "tests/test_relationship_graph_api.py::test_ladybug_reads_projection_and_recovers_from_lock",
+            "tests/test_relationship_graph_api.py::test_in_process_projector_connection_is_shared_with_graph_and_p6_reads",
+            "tests/test_relationship_graph_api.py::test_obsolete_preview_flag_cannot_disable_canonical_ladybug_provider"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_read/use_case.py::GraphProvider",
+          "new": "backend/app/domains/relationships/contracts/graph_read.py::GraphProvider",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_relationship_graph_api.py::test_owner_read_falls_back_to_directional_canonical_when_graph_disabled",
+            "tests/test_relationship_graph_api.py::test_other_owner_cannot_read_character_graph",
+            "tests/test_relationship_graph_api.py::test_failed_world_rebuild_falls_back_to_canonical_as_unavailable",
+            "tests/test_relationship_graph_api.py::test_ladybug_reads_projection_and_recovers_from_lock",
+            "tests/test_relationship_graph_api.py::test_in_process_projector_connection_is_shared_with_graph_and_p6_reads",
+            "tests/test_relationship_graph_api.py::test_obsolete_preview_flag_cannot_disable_canonical_ladybug_provider"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_read/use_case.py::GraphProjectionCounts",
+          "new": "backend/app/domains/relationships/contracts/graph_read.py::GraphProjectionCounts",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_relationship_graph_api.py::test_owner_read_falls_back_to_directional_canonical_when_graph_disabled",
+            "tests/test_relationship_graph_api.py::test_other_owner_cannot_read_character_graph",
+            "tests/test_relationship_graph_api.py::test_failed_world_rebuild_falls_back_to_canonical_as_unavailable",
+            "tests/test_relationship_graph_api.py::test_ladybug_reads_projection_and_recovers_from_lock",
+            "tests/test_relationship_graph_api.py::test_in_process_projector_connection_is_shared_with_graph_and_p6_reads",
+            "tests/test_relationship_graph_api.py::test_obsolete_preview_flag_cannot_disable_canonical_ladybug_provider"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_read/use_case.py::RelationshipGraphReadGateway",
+          "new": "backend/app/domains/relationships/contracts/graph_read.py::RelationshipGraphReadGateway",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_relationship_graph_api.py::test_owner_read_falls_back_to_directional_canonical_when_graph_disabled",
+            "tests/test_relationship_graph_api.py::test_other_owner_cannot_read_character_graph",
+            "tests/test_relationship_graph_api.py::test_failed_world_rebuild_falls_back_to_canonical_as_unavailable",
+            "tests/test_relationship_graph_api.py::test_ladybug_reads_projection_and_recovers_from_lock",
+            "tests/test_relationship_graph_api.py::test_in_process_projector_connection_is_shared_with_graph_and_p6_reads",
+            "tests/test_relationship_graph_api.py::test_obsolete_preview_flag_cannot_disable_canonical_ladybug_provider"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_read/use_case.py::_owner_world_character",
+          "new": "backend/app/domains/relationships/service/graph_read.py::_owner_world_character",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_relationship_graph_api.py::test_owner_read_falls_back_to_directional_canonical_when_graph_disabled",
+            "tests/test_relationship_graph_api.py::test_other_owner_cannot_read_character_graph",
+            "tests/test_relationship_graph_api.py::test_failed_world_rebuild_falls_back_to_canonical_as_unavailable",
+            "tests/test_relationship_graph_api.py::test_ladybug_reads_projection_and_recovers_from_lock",
+            "tests/test_relationship_graph_api.py::test_in_process_projector_connection_is_shared_with_graph_and_p6_reads",
+            "tests/test_relationship_graph_api.py::test_obsolete_preview_flag_cannot_disable_canonical_ladybug_provider"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_read/use_case.py::_revalidate_relationships",
+          "new": "backend/app/domains/relationships/service/graph_read.py::_revalidate_relationships",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_relationship_graph_api.py::test_owner_read_falls_back_to_directional_canonical_when_graph_disabled",
+            "tests/test_relationship_graph_api.py::test_other_owner_cannot_read_character_graph",
+            "tests/test_relationship_graph_api.py::test_failed_world_rebuild_falls_back_to_canonical_as_unavailable",
+            "tests/test_relationship_graph_api.py::test_ladybug_reads_projection_and_recovers_from_lock",
+            "tests/test_relationship_graph_api.py::test_in_process_projector_connection_is_shared_with_graph_and_p6_reads",
+            "tests/test_relationship_graph_api.py::test_obsolete_preview_flag_cannot_disable_canonical_ladybug_provider"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_read/use_case.py::_evidence_reads",
+          "new": "backend/app/domains/relationships/service/graph_read.py::_evidence_reads",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_relationship_graph_api.py::test_owner_read_falls_back_to_directional_canonical_when_graph_disabled",
+            "tests/test_relationship_graph_api.py::test_other_owner_cannot_read_character_graph",
+            "tests/test_relationship_graph_api.py::test_failed_world_rebuild_falls_back_to_canonical_as_unavailable",
+            "tests/test_relationship_graph_api.py::test_ladybug_reads_projection_and_recovers_from_lock",
+            "tests/test_relationship_graph_api.py::test_in_process_projector_connection_is_shared_with_graph_and_p6_reads",
+            "tests/test_relationship_graph_api.py::test_obsolete_preview_flag_cannot_disable_canonical_ladybug_provider"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_read/use_case.py::_node_reads",
+          "new": "backend/app/domains/relationships/service/graph_read.py::_node_reads",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_read.py"
+          ],
+          "test_nodes": [
+            "tests/test_relationship_graph_api.py::test_owner_read_falls_back_to_directional_canonical_when_graph_disabled",
+            "tests/test_relationship_graph_api.py::test_other_owner_cannot_read_character_graph",
+            "tests/test_relationship_graph_api.py::test_failed_world_rebuild_falls_back_to_canonical_as_unavailable",
+            "tests/test_relationship_graph_api.py::test_ladybug_reads_projection_and_recovers_from_lock",
+            "tests/test_relationship_graph_api.py::test_in_process_projector_connection_is_shared_with_graph_and_p6_reads",
+            "tests/test_relationship_graph_api.py::test_obsolete_preview_flag_cannot_disable_canonical_ladybug_provider"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_read/use_case.py::get_owner_relationship_graph",
+          "new": "backend/app/domains/relationships/service/graph_read.py::get_owner_relationship_graph",
+          "direct_consumers": [
+            "backend/app/domains/relationships/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_relationship_graph_api.py::test_owner_read_falls_back_to_directional_canonical_when_graph_disabled",
+            "tests/test_relationship_graph_api.py::test_other_owner_cannot_read_character_graph",
+            "tests/test_relationship_graph_api.py::test_failed_world_rebuild_falls_back_to_canonical_as_unavailable",
+            "tests/test_relationship_graph_api.py::test_ladybug_reads_projection_and_recovers_from_lock",
+            "tests/test_relationship_graph_api.py::test_in_process_projector_connection_is_shared_with_graph_and_p6_reads",
+            "tests/test_relationship_graph_api.py::test_obsolete_preview_flag_cannot_disable_canonical_ladybug_provider"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/application/graph_planning.py::GraphPlanExecutionContext",
+          "new": "backend/app/domains/relationships/contracts/graph_execution.py::GraphPlanExecutionContext",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_planning.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/application/graph_planning.py::GraphPlanValidationResult",
+          "new": "backend/app/domains/relationships/contracts/graph_execution.py::GraphPlanValidationResult",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_planning.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/application/graph_planning.py::GraphPlanStepExecution",
+          "new": "backend/app/domains/relationships/contracts/graph_execution.py::GraphPlanStepExecution",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_planning.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/application/graph_planning.py::GraphPlanExecutionResult",
+          "new": "backend/app/domains/relationships/contracts/graph_execution.py::GraphPlanExecutionResult",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_planning.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/application/graph_planning.py::GraphRetrievalPlanValidator",
+          "new": "backend/app/domains/relationships/service/graph_planning.py::GraphRetrievalPlanValidator",
+          "direct_consumers": [
+            "backend/app/domains/relationships/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/application/graph_planning.py::GraphRetrievalPlanExecutor",
+          "new": "backend/app/domains/relationships/service/graph_planning.py::GraphRetrievalPlanExecutor",
+          "direct_consumers": [
+            "backend/app/domains/relationships/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/application/graph_planning.py::_world_character_refs",
+          "new": "backend/app/domains/relationships/service/graph_planning.py::_world_character_refs",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_planning.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/application/graph_planning.py::__all__",
+          "new": "backend/app/domains/relationships/service/graph_planning.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_planning.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_parser_rejects_cross_catalog_ids_queries_and_bad_dependencies",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_validator_clamps_code_caps_and_executor_injects_actual_scope",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_empty_dependency_short_circuits_without_invalid_graph_query",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_route_calls_one_specialist_and_preserves_three_call_cap",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_graph_planner_uses_only_remaining_request_wide_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_router_repair_prevents_second_request_wide_graph_repair",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_unobservable_graph_scope_short_circuits_but_memory_off_does_not",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_binding_direction_and_unresolved_reference_fail_closed",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_direct_adapter_has_no_hidden_retry_cypher_or_actual_ids",
+            "tests/test_p8_l_m_graph_retrieval_planner.py::test_held_out_korean_corpus_covers_all_six_operations_and_executes"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::FallbackMode",
+          "new": "backend/app/domains/relationships/contracts/graph_recall_gateway.py::FallbackMode",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::GraphRecallPrimitiveSpec",
+          "new": "backend/app/domains/relationships/contracts/graph_recall_gateway.py::GraphRecallPrimitiveSpec",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::GRAPH_RECALL_PRIMITIVE_REGISTRY",
+          "new": "backend/app/domains/relationships/contracts/graph_recall_gateway.py::GRAPH_RECALL_PRIMITIVE_REGISTRY",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::GraphRecallGateway",
+          "new": "backend/app/domains/relationships/contracts/graph_recall_gateway.py::GraphRecallGateway",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::GraphRecallValidator",
+          "new": "backend/app/domains/relationships/service/graph_recall.py::GraphRecallValidator",
+          "direct_consumers": [
+            "backend/app/domains/relationships/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::GraphRecallService",
+          "new": "backend/app/domains/relationships/service/graph_recall.py::GraphRecallService",
+          "direct_consumers": [
+            "backend/app/domains/relationships/public.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_validate_reference",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_validate_reference",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_result",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_result",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_direct_orientation",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_direct_orientation",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_matches_direction",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_matches_direction",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_ids_match_direction",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_ids_match_direction",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_filter_direction",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_filter_direction",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_evidence_matches_direction",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_evidence_matches_direction",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_relationship_facts_valid",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_relationship_facts_valid",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_relationship_record",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_relationship_record",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_node_valid",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_node_valid",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_evidence_candidate_valid",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_evidence_candidate_valid",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_neighbor_ids",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_neighbor_ids",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_path_edges_match_nodes",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_path_edges_match_nodes",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_bounded_neighborhood",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_bounded_neighborhood",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_rank_key",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_rank_key",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_optional_datetime",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_optional_datetime",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::_as_utc",
+          "new": "backend/app/domains/relationships/policies/graph_recall.py::_as_utc",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        },
+        {
+          "old": "backend/app/domains/relationships/graph_recall/service.py::__all__",
+          "new": "backend/app/domains/relationships/service/graph_recall.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/graph_recall.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
+            "tests/test_p8_l_i_graph_recall.py::test_direct_and_evidence_replace_stale_projection_and_filter_unobserved",
+            "tests/test_p8_l_i_graph_recall.py::test_shared_path_rank_and_neighborhood_are_canonically_revalidated",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_has_bounded_fallback_without_raising",
+            "tests/test_p8_l_i_graph_recall.py::test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts",
+            "tests/test_p8_l_i_graph_recall.py::test_scope_validation_rejects_blocked_counterpart_before_graph_query",
+            "tests/test_p8_l_i_graph_recall.py::test_provider_results_cannot_escape_pair_direction_or_path_shape",
+            "tests/test_p8_l_i_graph_recall.py::test_runtime_facade_preserves_direction_evidence_and_owner_scope"
+          ]
+        }
+      ],
+      "new_tests": [],
+      "removed_package_exports": "All original __all__ names remain the same objects in the pre-existing public compatibility surface; no source imports the 7 deleted packages."
     }
   }
 }

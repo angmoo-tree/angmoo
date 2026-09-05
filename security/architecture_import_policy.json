@@ -1153,16 +1153,38 @@
       "app.domains.media.contracts",
       "app.domains.media.schemas",
       "app.domains.relationships.constants",
+      "app.domains.relationships.contracts",
+      "app.domains.relationships.contracts.graph_execution",
+      "app.domains.relationships.contracts.graph_plan",
+      "app.domains.relationships.contracts.graph_planner",
+      "app.domains.relationships.contracts.graph_query",
+      "app.domains.relationships.contracts.graph_read",
+      "app.domains.relationships.contracts.graph_recall",
+      "app.domains.relationships.contracts.graph_recall_gateway",
+      "app.domains.relationships.contracts.outbox",
+      "app.domains.relationships.contracts.projection",
+      "app.domains.relationships.contracts.projection_commands",
+      "app.domains.relationships.contracts.query",
+      "app.domains.relationships.contracts.replay",
+      "app.domains.relationships.exceptions",
       "app.domains.relationships.models",
       "app.domains.relationships.models.points",
       "app.domains.relationships.models.projection",
       "app.domains.relationships.models.social",
+      "app.domains.relationships.policies",
+      "app.domains.relationships.policies.graph_plan_schema",
+      "app.domains.relationships.policies.graph_recall",
       "app.domains.relationships.repository",
       "app.domains.relationships.repository.points",
+      "app.domains.relationships.schemas",
       "app.domains.relationships.service",
+      "app.domains.relationships.service.graph_planning",
+      "app.domains.relationships.service.graph_read",
+      "app.domains.relationships.service.graph_recall",
       "app.domains.relationships.service.points",
       "app.domains.relationships.utils",
       "app.domains.relationships.utils.points",
+      "app.domains.relationships.utils.projection_digest",
       "app.domains.runtime.contracts",
       "app.domains.runtime.schemas",
       "app.domains.social.constants",
@@ -1301,6 +1323,22 @@
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
+      "app.domains.relationships.contracts.graph_execution",
+      "app.domains.relationships.contracts.graph_plan",
+      "app.domains.relationships.contracts.graph_planner",
+      "app.domains.relationships.contracts.graph_query",
+      "app.domains.relationships.contracts.graph_read",
+      "app.domains.relationships.contracts.graph_recall",
+      "app.domains.relationships.contracts.graph_recall_gateway",
+      "app.domains.relationships.contracts.outbox",
+      "app.domains.relationships.contracts.projection",
+      "app.domains.relationships.contracts.projection_commands",
+      "app.domains.relationships.contracts.query",
+      "app.domains.relationships.contracts.replay",
+      "app.domains.relationships.schemas",
+      "app.domains.relationships.service.graph_planning",
+      "app.domains.relationships.service.graph_read",
+      "app.domains.relationships.service.graph_recall",
       "app.domains.relationships.service.points",
       "app.domains.runtime.contracts",
       "app.domains.runtime.schemas",
@@ -2596,6 +2634,158 @@
         "owner_stage": "AR-B5 / AR-B4-C / AR-G5",
         "reason": "Exact legacy registration/candidate export preserves existing same-class or same-function consumers during role transition.",
         "removal_condition": "Move B4 resident consumers and complete G5 model registration; remove the named old import when unused.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.relationships.schemas",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "Exact legacy common schema export retains the original graph response class identities.",
+        "removal_condition": "Move remaining schema aggregate consumers and remove the exact import.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.graph_plan",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.policies.graph_plan_schema",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.graph_execution",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.service.graph_planning",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.exceptions",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.schemas",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.graph_read",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.service.graph_read",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.graph_recall",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.graph_recall_gateway",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.service.graph_recall",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.graph_planner",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.outbox",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.replay",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.projection",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.query",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.contracts.projection_commands",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.relationships.public",
+        "target": "app.domains.relationships.utils.projection_digest",
+        "owner_stage": "AR-B5 / AR-B6 / AR-B7 / AR-B8-A",
+        "reason": "Exact pre-existing public contract export is the same class/function from its actual role owner.",
+        "removal_condition": "Move remaining Chat/Memory/runtime and compatibility-test consumers to named services/contracts and retire the old public export.",
         "review_date": "2026-09-06"
       }
     ]
