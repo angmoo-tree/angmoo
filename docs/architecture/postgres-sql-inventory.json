@@ -1047,13 +1047,13 @@
     {
       "markers": {
         "row_lock": [
-          67
+          68
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/relationships/sqlalchemy_social_event.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "440dd79c8253c00c5e4ef707e627d5858ad1a5305c2de1d190a325810933a780",
+      "source_sha256": "c7d576fe6d647b1fb0c08aa3b730f6254265d6c95c5d250ae94caf36b9f53e0c",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

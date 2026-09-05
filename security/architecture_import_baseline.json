@@ -1,7 +1,7 @@
 {
-  "edge_count": 2472,
-  "external_import_count": 2250,
-  "module_count": 727,
+  "edge_count": 2474,
+  "external_import_count": 2251,
+  "module_count": 728,
   "modules": [
     {
       "external_imports": [],
@@ -4440,6 +4440,17 @@
       ],
       "module": "app.domains.routines.service.plans",
       "path": "backend/app/domains/routines/service/plans.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.service.public_action_executions",
+      "path": "backend/app/domains/routines/service/public_action_executions.py",
       "wildcard_imports": []
     },
     {
@@ -9210,6 +9221,7 @@
         "app.domains.relationships.service.events",
         "app.domains.relationships.service.projection_events",
         "app.domains.relationships.service.state",
+        "app.domains.routines.service.public_action_executions",
         "app.models"
       ],
       "module": "app.runtime.relationships.sqlalchemy_social_event",

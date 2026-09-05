@@ -1002,3 +1002,10 @@ C3a 최초 집중 검증은 **200 passed / 기존 PG 1 skip / 기존 warnings 5 
 Signed Social `2761e35`에 Routines `6beec5d`를 합쳤다. 활동 로그·기록 모델과 tick timezone의 실제 Routines 소유를 Social의 검색·프로필 활동·Feed에서 소비하도록 연결하고, joint runtime의 RelationshipState를 실제 Relationships 모델로 연결했다. 같은 Session의 호출 순서와 factory의 각 configure 호출 1회를 유지한다. 원본 `agent_runs.py`의 Daypart 모델 본문은 그대로 두고 Point는 Relationships의 동일 class를, 나머지 실행 모델은 Routines의 동일 class를 등록한다.
 
 집중 검증 **232 passed / 기존 warning 1 / 106.03초**. 첫 collection은 새 joint adapter의 옛 모델 경로 1건을 발견했으며 실제 소유 import만 수정한 뒤 같은 검증을 통과했다. API·응답 스키마·ORM는 PR258/263과 동일하며 변경된 보호 테스트 14개 파일의 assertion과 전체 기존 split evidence가 모두 통과했다. 구조 검사는 **727 modules / 2,472 edges / exact legacy 218**로 통과했다. 현재 L4(727/97)·ER0(Postgres83/migration87/Neo4j24/Next44/parity7) inventory를 재생성했으며 frozen baseline/checkpoint/additions는 변경하지 않았다. Source capture·Hosted CI·installer 및 전체 B5 완료는 부모의 후속 선형 통합에서 검증한다.
+
+
+## AR-B5-C3-A1 — 활동 실행의 동일 Session 연결 협력
+
+`routines/service/public_action_executions.py`가 기존 nullable `Session.get`와 `social_event_id` 한 필드 대입을 실제 소유한다. Relationships runtime은 기존 오류 판정과 마지막 flush를 계속 담당한다. 추가 검증·commit·flush·값 복사 없이 원래 attached 객체를 전달하며 이후 이벤트 workflow 이전에서 이 계약을 재사용한다. 기존 signature/create/finish는 B4-C4 소유로 별도 전환한다.
+
+집중 검증 **14 passed / 13.15초**. 신규 2개 parameter node는 실제 SQLite와 두 Session으로 정상/조회 실패 주입을 검사한다. 기존 성공 실행 ID를 FK evidence로 유지하고 reader가 없는 레코드를 읽도록 제한적으로 주입하여 원래 `execution_evidence_invalid` 분기를 검증한다. 대입 함수는 SQL을 추가하지 않고, 외부 Session에서는 미커밋 event/link를 볼 수 없으며 caller rollback 뒤 event/evidence/outbox/link가 전부 되돌아간다. 기존 12개 SocialEvent 회귀의 assertion은 변경하지 않았다. Source 도입 capture는 부모의 선형 통합 단계에서 진행한다.

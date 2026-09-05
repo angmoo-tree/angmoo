@@ -13,6 +13,7 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app import models
+from app.domains.routines.service import public_action_executions
 from app.core.ids import uuid7_string
 from app.domains.relationships.models.social import (
     SOCIAL_EVENT_TYPES,
@@ -339,12 +340,9 @@ def record_successful_social_event(
         db.add(change)
     _enqueue_outbox(db, event=event, relationship_state=state)
     if evidence.public_action_execution_id is not None:
-        execution = db.get(
-            models.AgentPublicActionExecution,
-            evidence.public_action_execution_id,
-        )
+        execution = public_action_executions.get_execution(db, evidence.public_action_execution_id)
         if execution is None:
             raise SocialEventRuntimeError("execution_evidence_invalid")
-        execution.social_event_id = event.id
+        public_action_executions.set_social_event_id(execution, social_event_id=event.id)
     db.flush()
     return EventApplyResult(event, state, change, False)
