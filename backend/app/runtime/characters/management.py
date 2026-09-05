@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.domains.routines import constants as routine_constants
 from app.domains.routines.repository import slots as slot_queries
 from app.domains.routines.service import slot_assignments as slot_assignments
 from app.domains.routines.service import slot_pool as slot_pool
@@ -88,7 +89,6 @@ from app.credentials import (
     CredentialResolutionError,
     CredentialResolver,
 )
-from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
 from app.policies import name_policy
@@ -1138,7 +1138,7 @@ def update_credential(
     current_assigned_slot = slot_queries.get_assigned_slot(db, character.id)
     if (
         current_assigned_slot is not None
-        and current_assigned_slot.status == agent_run_crud.SLOT_STATUS_RUNNING
+        and current_assigned_slot.status == routine_constants.SLOT_STATUS_RUNNING
     ):
         raise ActiveSlotBusyError(
             "앵무가 지금 활동 중이라 API key 또는 모델을 바꿀 수 없습니다. 활동이 끝난 뒤 다시 시도해주세요."
@@ -1248,7 +1248,7 @@ def delete_credential(
     assigned_slot = slot_queries.get_assigned_slot(db, character.id)
     if (
         assigned_slot is not None
-        and assigned_slot.status == agent_run_crud.SLOT_STATUS_RUNNING
+        and assigned_slot.status == routine_constants.SLOT_STATUS_RUNNING
     ):
         raise ActiveSlotBusyError(
             "앵무가 지금 활동 중이라 API key를 삭제할 수 없습니다. 활동이 끝난 뒤 다시 시도해주세요."
@@ -1373,7 +1373,7 @@ def update_settings(
         if (
             setting.auto_enabled
             and schedule_changed
-            and slot.status == agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE
+            and slot.status == routine_constants.SLOT_STATUS_ASSIGNED_IDLE
         ):
             policy = agent_activity_policy.build_activity_policy(
                 db,
@@ -1797,7 +1797,7 @@ def deactivate_agent(
         return _build_agent_detail(db, character)
     if (
         assigned_slot is not None
-        and assigned_slot.status == agent_run_crud.SLOT_STATUS_RUNNING
+        and assigned_slot.status == routine_constants.SLOT_STATUS_RUNNING
     ):
         raise ActiveSlotBusyError(
             f"agent {character.id}가 지금 실행 중이라 끌 수 없습니다. 잠시 뒤 다시 시도해주세요."
@@ -2369,7 +2369,7 @@ def _slot_has_live_lease(slot: models.AgentSlot, now: datetime) -> bool:
 
 def _slot_is_live_running(slot: models.AgentSlot, now: datetime) -> bool:
     return (
-        slot.status == agent_run_crud.SLOT_STATUS_RUNNING
+        slot.status == routine_constants.SLOT_STATUS_RUNNING
         and _slot_has_live_lease(slot, now)
     )
 
@@ -2631,7 +2631,7 @@ def _ensure_agent_deletion_not_busy(
         .where(
             models.AgentRun.user_id == user_id,
             models.AgentRun.character_id == character_id,
-            models.AgentRun.status.in_(agent_run_crud.ACTIVE_RUN_STATUSES),
+            models.AgentRun.status.in_(routine_constants.ACTIVE_RUN_STATUSES),
         )
         .limit(1)
     )
@@ -2646,7 +2646,7 @@ def _ensure_agent_deletion_not_busy(
             _agent_deletion_slot_condition(
                 db, user_id=user_id, character_id=character_id
             ),
-            models.AgentSlot.status == agent_run_crud.SLOT_STATUS_RUNNING,
+            models.AgentSlot.status == routine_constants.SLOT_STATUS_RUNNING,
         )
         .limit(1)
     )
@@ -2672,7 +2672,7 @@ def _release_openclaw_profile_for_agent(
     )
     released = False
     for slot in slots:
-        if slot.status == agent_run_crud.SLOT_STATUS_RUNNING:
+        if slot.status == routine_constants.SLOT_STATUS_RUNNING:
             raise ActiveSlotBusyError(
                 "앵무가 지금 활동 중이라 삭제할 수 없습니다. 잠시 뒤 다시 시도해주세요."
             )
@@ -2713,11 +2713,11 @@ def _clear_resident_slots_for_agent(
         )
     )
     for slot in slots:
-        if slot.status == agent_run_crud.SLOT_STATUS_RUNNING:
+        if slot.status == routine_constants.SLOT_STATUS_RUNNING:
             raise ActiveSlotBusyError(
                 "앵무가 지금 활동 중이라 삭제할 수 없습니다. 잠시 뒤 다시 시도해주세요."
             )
-        slot.status = agent_run_crud.SLOT_STATUS_EMPTY
+        slot.status = routine_constants.SLOT_STATUS_EMPTY
         slot.assigned_user_id = None
         slot.assigned_character_id = None
         slot.assigned_credential_id = None

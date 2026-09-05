@@ -1,3 +1,4 @@
+from app.domains.routines import constants as routine_constants
 from uuid import uuid4
 
 
@@ -8,7 +9,6 @@ from app import models
 
 from app.config import settings
 from app.core.redaction import redact_secret_text
-from app.cruds import agent_runs as agent_run_crud
 
 
 from app.integrations.media import files as profile_media
@@ -92,7 +92,7 @@ def _ensure_account_deletion_not_busy(
         select(models.AgentRun.id)
         .where(
             _owned_agent_run_condition(user_id, character_ids),
-            models.AgentRun.status.in_(agent_run_crud.ACTIVE_RUN_STATUSES),
+            models.AgentRun.status.in_(routine_constants.ACTIVE_RUN_STATUSES),
         )
         .limit(1)
     )
@@ -103,7 +103,7 @@ def _ensure_account_deletion_not_busy(
         select(models.AgentSlot.agent_id)
         .where(
             _owned_agent_slot_condition(user_id, character_ids),
-            models.AgentSlot.status == agent_run_crud.SLOT_STATUS_RUNNING,
+            models.AgentSlot.status == routine_constants.SLOT_STATUS_RUNNING,
         )
         .limit(1)
     )
@@ -125,7 +125,7 @@ def _release_openclaw_profiles_for_account(
         )
     )
     for slot in slots:
-        if slot.status == agent_run_crud.SLOT_STATUS_RUNNING:
+        if slot.status == routine_constants.SLOT_STATUS_RUNNING:
             raise AccountDeletionBusyError("Resident slot is running")
         if (
             slot.assigned_user_id is None
@@ -177,9 +177,9 @@ def _clear_resident_slots_for_account(
         )
     )
     for slot in slots:
-        if slot.status == agent_run_crud.SLOT_STATUS_RUNNING:
+        if slot.status == routine_constants.SLOT_STATUS_RUNNING:
             raise AccountDeletionBusyError("Resident slot is running")
-        slot.status = agent_run_crud.SLOT_STATUS_EMPTY
+        slot.status = routine_constants.SLOT_STATUS_EMPTY
         slot.assigned_user_id = None
         slot.assigned_character_id = None
         slot.assigned_credential_id = None

@@ -1,3 +1,6 @@
+from app.domains.routines.exceptions import AgentRunConflictError
+from app.domains.routines import constants as routine_constants
+from app.runtime.resident import slots as resident_slots
 from app.domains.routines.repository import slots as slot_queries
 from app.domains.routines.service import slot_assignments as slot_assignments
 from app.domains.routines.service import slot_leases as slot_leases
@@ -5527,7 +5530,7 @@ def assign_resident_slot(
             db, character_id=character_id
         ),
     ).next_tick_at
-    slot = agent_run_crud.assign_resident_slot(
+    slot = resident_slots.assign_resident_slot(
         db,
         agent_ids=candidate_agent_ids,
         user_id=user_id,
@@ -5561,7 +5564,7 @@ def claim_temporary_resident_slot(
         character_id=character_id,
         credential_id=credential_id,
     )
-    slot = agent_run_crud.claim_temporary_resident_slot_assignment(
+    slot = resident_slots.claim_temporary_resident_slot_assignment(
         db,
         agent_ids=settings.openclaw_agent_ids,
         user_id=user_id,
@@ -6044,7 +6047,7 @@ async def run_community_once(
                 ),
             )
         gateway_result["feed_perception"] = feed_perception_result
-    except agent_run_crud.AgentRunConflictError as exc:
+    except AgentRunConflictError as exc:
         slot_pool.release_agent_slot(
             db,
             agent_id=agent_id,
@@ -7464,7 +7467,7 @@ async def _run_resident_slot_once(
                 run_id,
             )
         raise
-    except agent_run_crud.AgentRunConflictError as exc:
+    except AgentRunConflictError as exc:
         slot_leases.complete_resident_slot_run(
             db,
             agent_id=slot.agent_id,
@@ -8003,7 +8006,7 @@ async def run_assigned_resident_slot_once(
     if character.moderation_status == "suspended":
         raise community_service.CharacterSuspendedError("character_suspended")
     timeout = timeout_seconds or settings.openclaw_timeout_seconds
-    slot = agent_run_crud.claim_resident_slot_assignment(
+    slot = resident_slots.claim_resident_slot_assignment(
         db,
         user_id=user_id,
         character_id=character_id,
@@ -8042,7 +8045,7 @@ async def run_claimed_temporary_resident_slot_once(
     slot = db.get(models.AgentSlot, agent_id)
     if (
         slot is None
-        or slot.status != agent_run_crud.SLOT_STATUS_RUNNING
+        or slot.status != routine_constants.SLOT_STATUS_RUNNING
         or slot.assigned_user_id != user_id
         or slot.assigned_character_id != character_id
         or slot.assigned_credential_id != credential_id
@@ -8102,7 +8105,7 @@ async def tick_resident_slots(
                 slot
                 for slot in slot_queries.list_agent_slots(db)
                 if _resident_slot_is_due(slot, now=now)
-                and slot.status in agent_run_crud.DUE_SLOT_STATUSES
+                and slot.status in routine_constants.DUE_SLOT_STATUSES
             ]
             return schemas.ResidentSlotTickRead(
                 due_count=len(due_before),
@@ -8122,14 +8125,14 @@ async def tick_resident_slots(
         slot
         for slot in slot_queries.list_agent_slots(db)
         if _resident_slot_is_due(slot, now=now)
-        and slot.status in agent_run_crud.DUE_SLOT_STATUSES
+        and slot.status in routine_constants.DUE_SLOT_STATUSES
         and slot.assigned_character_id not in owner_controlled_ids
         and (
             allowed_character_ids is None
             or slot.assigned_character_id in allowed_character_ids
         )
     ]
-    claimed_slots = agent_run_crud.claim_due_resident_slots(
+    claimed_slots = resident_slots.claim_due_resident_slots(
         db,
         now=now,
         max_count=data.max_runs,

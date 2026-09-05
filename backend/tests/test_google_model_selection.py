@@ -5,7 +5,7 @@ import pytest
 from pydantic import ValidationError
 
 from app import schemas
-from app.cruds import agent_runs as agent_run_crud
+from app.domains.routines import constants as agent_run_crud
 from app.runtime.characters import management as agent_service
 
 

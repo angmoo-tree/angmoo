@@ -19,7 +19,7 @@ from app import models, schemas
 from app.core import active_hours
 from app.domains.routines.service import tick_schedule as agent_activity_schedule
 from app.config import settings
-from app.cruds import agent_runs as agent_run_crud
+from app.domains.routines import constants as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.domains.worlds import public as world_service
 from app.runtime.resident import activity_policy as agent_activity_policy
@@ -1121,7 +1121,7 @@ def test_tick_resident_slots_staggers_claimed_runs(
             gateway_result={},
         )
 
-    monkeypatch.setattr(agent_run_service.agent_run_crud, "claim_due_resident_slots", _claim)
+    monkeypatch.setattr(agent_run_service.resident_slots, "claim_due_resident_slots", _claim)
     monkeypatch.setattr(agent_run_service, "_run_claimed_resident_slot_once", _fake_run)
     monkeypatch.setattr(agent_run_service, "list_resident_slots", lambda db: [])
 

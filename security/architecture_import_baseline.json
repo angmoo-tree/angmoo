@@ -1,7 +1,7 @@
 {
-  "edge_count": 2395,
-  "external_import_count": 2234,
-  "module_count": 713,
+  "edge_count": 2406,
+  "external_import_count": 2251,
+  "module_count": 717,
   "modules": [
     {
       "external_imports": [],
@@ -756,11 +756,6 @@
       ],
       "imports": [
         "app.core.unit_of_work",
-        "app.domains.routines.constants",
-        "app.domains.routines.exceptions",
-        "app.domains.routines.repository.slots",
-        "app.domains.routines.service.slot_pool",
-        "app.domains.routines.service.slot_state",
         "app.models"
       ],
       "module": "app.cruds.agent_runs",
@@ -3763,6 +3758,18 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.sql.elements",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.contracts.slots",
+      "path": "backend/app/domains/routines/contracts/slots.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "fastapi",
         "sqlalchemy.orm"
       ],
@@ -4404,16 +4411,37 @@
       "external_imports": [
         "__future__",
         "datetime",
+        "hashlib",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.slots",
+        "app.domains.routines.models",
+        "app.domains.routines.service.slot_pool",
+        "app.domains.routines.service.slot_state"
+      ],
+      "module": "app.domains.routines.service.slot_assignments",
+      "path": "backend/app/domains/routines/service/slot_assignments.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
       "imports": [
         "app.domains.routines.constants",
+        "app.domains.routines.contracts.slots",
         "app.domains.routines.models",
-        "app.domains.routines.service.slot_state"
+        "app.domains.routines.repository.slots"
       ],
-      "module": "app.domains.routines.service.slot_assignments",
-      "path": "backend/app/domains/routines/service/slot_assignments.py",
+      "module": "app.domains.routines.service.slot_claims",
+      "path": "backend/app/domains/routines/service/slot_claims.py",
       "wildcard_imports": []
     },
     {
@@ -7731,10 +7759,10 @@
       "imports": [
         "app.config",
         "app.core.redaction",
-        "app.cruds.agent_runs",
         "app.domains.identity.constants",
         "app.domains.identity.exceptions",
         "app.domains.identity.service.auth",
+        "app.domains.routines.constants",
         "app.integrations.media.files",
         "app.models",
         "app.runtime.memory_privacy",
@@ -7834,7 +7862,6 @@
         "app.core.sqlite_concurrency",
         "app.core.unit_of_work",
         "app.credentials",
-        "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
         "app.domains.characters.contracts",
@@ -7850,6 +7877,7 @@
         "app.domains.characters.service.profile",
         "app.domains.characters.service.promotion",
         "app.domains.identity.service.demo_access",
+        "app.domains.routines.constants",
         "app.domains.routines.repository.feed_cues",
         "app.domains.routines.repository.runs",
         "app.domains.routines.repository.slots",
@@ -9145,6 +9173,38 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "sqlalchemy.sql.elements"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.routines.models",
+        "app.domains.world_characters.models"
+      ],
+      "module": "app.runtime.resident.slot_references",
+      "path": "backend/app/runtime/resident/slot_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.models",
+        "app.domains.routines.service.slot_assignments",
+        "app.domains.routines.service.slot_claims",
+        "app.runtime.resident.slot_references"
+      ],
+      "module": "app.runtime.resident.slots",
+      "path": "backend/app/runtime/resident/slots.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.runtime.routine_posts.sqlalchemy_runtime"
@@ -10025,6 +10085,8 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.routines.constants",
+        "app.domains.routines.exceptions",
         "app.domains.routines.repository.feed_cues",
         "app.domains.routines.repository.slots",
         "app.domains.routines.service.lifecycle",
@@ -10040,6 +10102,7 @@
         "app.domains.world_characters.service.readiness",
         "app.models",
         "app.runtime.resident.activity_policy",
+        "app.runtime.resident.slots",
         "app.runtime.routine_posts",
         "app.schemas",
         "app.services.agent_briefs",

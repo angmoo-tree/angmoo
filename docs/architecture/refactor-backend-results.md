@@ -962,3 +962,16 @@ C4a 최종 후보는 **481 passed / 기존 PG 1 skip / 기존 warnings 5 / 151.5
 C4b1 최종 후보 검증은 **415 passed / 기존 19 skip / 기존 warnings 3 / 144.61초**다. Skip은 PostgreSQL 전용 18개와 기존 RoutinePost PostgreSQL 1개이며 실제 PG 동시성 결과를 대신하지 않는다. 경계 **713 modules / 2,395 edges / exact legacy 211 / cycle 0**, L4 parity 97·ER0 84/87/24/44/7·Memory batch 현재 inventory도 통과했다. 실제 SQL이 역할별 파일로 이동하면서 현재 PostgreSQL inventory 파일 수만 81에서 84로 바뀌었고 frozen 원문은 변경하지 않았다.
 
 읽기 전용 보존 진단은 **source/split/assertion/suppression/API·ORM/node 각각 오류 0**, 기존 보호 **2,139 / 현재 2,242 nodes**다. 선행 signed 최초 도입 두 경로만 메모리에 보충했으며 tracked additions/checkpoint/frozen 자료와 검사 구현은 수정하지 않았다. 부모 선형 도입 append 후 stock 전체 검사·Actions·installer 및 C4b2 이후 실행 전환은 남아 있다.
+
+
+## AR-B4-C4b2 — Slot 배정·선점 실제 정책과 같은 세션 조회
+
+배정/임시 claim과 assigned/due claim 실제 네 함수는 Routines 서비스, 원래 Character 잠금·nullable get 및 correlated WC owner-controlled predicate는 같은 Session의 runtime 협력으로 분리했다. 네 실제 함수 AST는 한정된 조회 다섯 위치를 복원하면 동일하며 세 SQL AST도 같은 class/Session/인자 연결을 적용하면 차이 0이다. Empty allowed set → single-flight → own/owner-control 조건 → ordered/limited/skip-locked 후보 → Character 상태·중복·count 제한 → 상태 변경 → commit/refresh 순서를 유지한다. 임시 hash token, persistent nested transaction replay 및 실패 rollback은 합치지 않았다.
+
+원래 signature의 runtime 표면은 조회 협력을 구성하며 constructor에서 IO를 수행하지 않는다. 기존 직접 소비자는 이 실제 경로로 전환했고 Slot 상수만 사용하던 네 테스트의 local import 이름은 canonical constants에 연결하여 assertion AST를 그대로 유지했다. 옛 CRUD의 Slot 상수와 Run conflict error export는 실제 소비자를 모두 옮긴 뒤 제거했다. 다른 Identity/Relationships 업무의 원문과 기존 get_assigned_slot 테스트용 한정 bridge는 남은 소유 전환으로 명시한다.
+
+신규 실제 SQLite 3 nodes는 slot pool write 뒤 같은 caller Session의 Character lock, explicit commit 유무에 따른 observer 가시성과 rollback, 빈 대상에서 query/transaction이 시작되지 않는 조건을 검증한다. 기존 집중 묶음과 함께 **108 passed / 기존 PostgreSQL 18 skip / 기존 warnings 3 / 42.88초**다. 최종 경계/보존 검증과 부모 선형 도입 append 후 stock·Actions·installer 검증은 별도로 이어간다.
+
+C4b2 최종 확대 검증은 **424 passed / 기존 19 skip / 기존 warnings 3 / 166.39초**다. 경계 **717 modules / 2,406 edges / exact legacy 209 / cycle 0**, L4 parity 97·ER0 85/87/24/44/7·Memory batch 현재 inventory는 통과했다. 읽기 전용 원래 보존 함수의 source/assertion/suppression/API·ORM/node는 **각각 오류 0**, 보호 **2,139 / 현재 2,245 nodes**다. Split 검사는 옛 RunConflictError export 제거 뒤 실제 소비자를 누락한 세 지도 항목을 잡았고, 실제 `routines/service/runs.py`와 `services/agent_runs.py` 소비자를 정확 기록한 뒤 원래 split 검사를 다시 실행해 **오류 0**을 확인했다. 제품·테스트·검사 구현·frozen 자료는 이 보완에서 변경하지 않았다.
+
+Signed 선행 두 경로를 메모리로만 보충하는 동일 지역 진단이며 source introduction metadata는 부모가 선형 append한다. Stock 전체 보존·PostgreSQL CI·installer 및 전체 B4 완료는 별도 조건으로 남겨 둔다.

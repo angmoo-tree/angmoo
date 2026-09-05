@@ -1,3 +1,4 @@
+from app.runtime.resident import slots as resident_slots
 from app.domains.routines.service import slot_assignments as slot_assignments
 from app.domains.routines.service import slot_pool as slot_pool
 import asyncio
@@ -18,7 +19,7 @@ from app import models, schemas
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.domains.chat.api import schemas as chat_schemas
 from app.config import settings
-from app.cruds import agent_runs as agent_run_crud
+from app.domains.routines import constants as agent_run_crud
 from app.cruds import community as community_crud
 from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
@@ -601,7 +602,7 @@ def test_resident_character_assignment_is_unique_across_postgres_sessions() -> N
     def attempt() -> str:
         with Session(engine) as db:
             barrier.wait()
-            slot = agent_run_crud.assign_resident_slot(
+            slot = resident_slots.assign_resident_slot(
                 db,
                 agent_ids=agent_ids,
                 user_id=user_id,
@@ -701,7 +702,7 @@ def test_temporary_manual_slot_claim_is_single_flight_across_postgres_sessions()
     def attempt() -> str | None:
         with Session(engine) as db:
             barrier.wait()
-            slot = agent_run_crud.claim_temporary_resident_slot_assignment(
+            slot = resident_slots.claim_temporary_resident_slot_assignment(
                 db,
                 agent_ids=agent_ids,
                 user_id=user_id,
