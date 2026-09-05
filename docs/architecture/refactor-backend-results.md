@@ -696,3 +696,12 @@ Feed 목록·following의 실제 함수 4개, Inbox 업무 함수 4개를 Social
 집중 검증 **33 passed / 5.35s**, #258/#263 API/schema/ORM 차이 0, 기존 보호 테스트 변경 0, 전체 split evidence PASS다. 경계는 **677 modules / 2,239 edges / 243 exact legacy edges**다. 두 legacy edge 증가는 기존 활동 로그/hidden-action 읽기가 명명된 runtime으로 이동한 사실만 기록하며 AR-B4-C가 소유 이전 후 종료한다. B4 담당자가 timezone은 아직 core.agent_activity_schedule의 같은 객체임을 확인했다.
 
 전역 Today 순위와 World 범위 Chat Today SNS snapshot은 구분한다. 후자의 source/관찰/World/coverage와 Relationships/projection, agent/resident, media job·HTTP 전환은 여전히 B5 잔여다. Source introduction capture·통합 Actions·PR/merge는 root가 진행하며 이 source의 집중 PASS를 전체 B5 완료로 확대하지 않는다.
+
+
+## AR-B5-B9 — 공개 활동 projection과 비공개 필드 경계
+
+공개 활동 schema 정의 5개, action/요약/숨김 상수 4개, admission·응답·event 변환의 실제 함수 3개와 댓글/활동 조회를 해당 역할로 이전했다. 원본 schema/constants·함수 본문·추출 SQL의 AST **14 checks PASS**이며 원래 댓글 → state → 활동 조회 순서와 limit/dedupe를 그대로 사용한다. `app/schemas/characters.py`는 관련 정의가 없는 동일 객체 alias이며 full split의 실제 목적지에서는 제거하고 호환 소비자로만 추적한다.
+
+신규 `tests/social/test_profile_activity_workflows.py` **2 nodes**는 실제 SQLite의 댓글20개·동점순서, lazy state를 포함한 쿼리 순서, hidden activity 제외·state_saved 중복 제거, private field와 로그 원문 마스킹, 없는/삭제 대상의 활동 조회 전 차단을 검증한다. 신규 fixture의 Comment 필드 이름과 identity-map 조건을 수정한 뒤 **25 passed / 4.49s**다. 제품 로직 수정 없이 fixture만 실제 모델·lazy read 조건에 맞췄다.
+
+#258/#263 API·schema·ORM 차이 0, 기존 보호 테스트 변경 0, full split PASS, architecture **682 modules / 2,257 edges / 244 exact legacy edges**다. 원래 로그 읽기 두 의존이 runtime으로 옮겨지고 사용하지 않는 이전 CRUD→agent import 하나를 제거했으며 AR-B4-C의 정확한 후속 소비자를 공유했다. 일반 HTTP·agent/resident·World Feed·media job 및 Relationships/projection 전환은 아직 남아 있고 source capture·Actions·PR/merge는 root가 진행한다.

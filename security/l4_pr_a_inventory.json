@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2142,
-      "internal_edge_count": 2239,
+      "external_import_count": 2153,
+      "internal_edge_count": 2257,
       "legacy_import_exception_count": 0,
-      "module_count": 677,
+      "module_count": 682,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -281,6 +281,13 @@
             "path": "backend/app/domains/social/contracts/__init__.py"
           },
           {
+            "imports": [
+              "app.domains.social.contracts.actors"
+            ],
+            "module": "app.domains.social.contracts.activity",
+            "path": "backend/app/domains/social/contracts/activity.py"
+          },
+          {
             "imports": [],
             "module": "app.domains.social.contracts.actors",
             "path": "backend/app/domains/social/contracts/actors.py"
@@ -441,6 +448,13 @@
           },
           {
             "imports": [
+              "app.domains.social.models.posts"
+            ],
+            "module": "app.domains.social.repository.activity",
+            "path": "backend/app/domains/social/repository/activity.py"
+          },
+          {
+            "imports": [
               "app.domains.social.models.posts",
               "app.domains.social.utils.cursors"
             ],
@@ -489,6 +503,13 @@
             "imports": [],
             "module": "app.domains.social.schemas",
             "path": "backend/app/domains/social/schemas/__init__.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.schemas.community"
+            ],
+            "module": "app.domains.social.schemas.activity",
+            "path": "backend/app/domains/social/schemas/activity.py"
           },
           {
             "imports": [
@@ -617,6 +638,18 @@
             ],
             "module": "app.domains.social.service.presentation",
             "path": "backend/app/domains/social/service/presentation.py"
+          },
+          {
+            "imports": [
+              "app.domains.characters.service.profile",
+              "app.domains.social.constants",
+              "app.domains.social.contracts.activity",
+              "app.domains.social.exceptions",
+              "app.domains.social.repository.activity",
+              "app.domains.social.schemas.activity"
+            ],
+            "module": "app.domains.social.service.profile_activity",
+            "path": "backend/app/domains/social/service/profile_activity.py"
           },
           {
             "imports": [
@@ -880,6 +913,17 @@
           },
           {
             "imports": [
+              "app.cruds.agents",
+              "app.domains.social.constants",
+              "app.domains.social.contracts.activity",
+              "app.domains.social.service.profile_activity",
+              "app.models.agent_runs"
+            ],
+            "module": "app.runtime.social.profile_activity",
+            "path": "backend/app/runtime/social/profile_activity.py"
+          },
+          {
+            "imports": [
               "app.domains.social.contracts.inbox",
               "app.domains.social.models.manual_writes",
               "app.models"
@@ -972,24 +1016,26 @@
               "app.core.search_text",
               "app.core.security",
               "app.core.unit_of_work",
-              "app.cruds.agents",
               "app.domains.characters.exceptions",
               "app.domains.characters.service.profile",
               "app.domains.characters.service.search",
               "app.domains.characters.service.state",
               "app.domains.identity.service.profile",
+              "app.domains.social.constants",
               "app.domains.social.repository.inbox",
               "app.domains.social.repository.media",
               "app.domains.social.repository.posts",
               "app.domains.social.repository.profiles",
               "app.domains.social.repository.reactions",
               "app.domains.social.service.notifications",
+              "app.domains.social.service.profile_activity",
               "app.domains.social.service.source_posts",
               "app.domains.social.utils.cursors",
               "app.domains.social.utils.text",
               "app.models",
               "app.runtime.social.discovery",
               "app.runtime.social.inbox",
+              "app.runtime.social.profile_activity",
               "app.schemas"
             ],
             "module": "app.cruds.community",

@@ -568,3 +568,12 @@ Inbox의 없는 알림 오류와 응답·읽음 흐름은 `social/service/inbox.
 Today 인기 root Post의 SQL은 Social repository에 있고 공개 응답·반응 점수는 Feed service가 결정한다. 활동 순위의 KST 자정·포스트/대꾸/좋아요 가중치·이름에 따른 동점 순서를 유지한다. 이 전역 Today 순위는 Chat 근거용의 World 범위 Today SNS snapshot과 서로 다른 기존 기능이므로 합치지 않는다.
 
 현재 AgentActivityLog와 hidden-action 상수는 AR-B4-C 이전 대상이다. 그 두 원래 조회 의존은 runtime의 정확한 임시 소비자로 기록하고 Social 도메인이 옛 model/CRUD를 다시 import하지 않는다. 이 조회는 provider 호출이나 commit을 만들지 않는다.
+
+
+### 공개 캐릭터 활동 응답
+
+공개 캐릭터 활동의 대상 존재/삭제 판단과 응답 구성은 `social/service/profile_activity.py`가 소유한다. `schemas/activity.py`는 공개되는 Character·state·event 필드를 명시한다. 활동의 원문 reason/result나 Character private 설정, state memory_note를 그대로 직렬화하지 않고 기존 action alias와 고정 요약을 사용한다.
+
+댓글 조회는 Social repository, 활동 로그 조회/기존 visible filter는 `runtime/social/profile_activity.py`의 같은 Session 협력이다. 원래 댓글 20개 조회 → 공개 Character/state 구성 → 활동 로그 80개 조회와 visible/dedupe 20개 적용 순서를 유지한다. 이미 로드한 state의 ORM identity-map 사용이나 필요한 lazy read도 보존한다.
+
+기존 schema aggregate는 같은 class를 내보내는 임시 호환 경로이며 구현이 중복되지 않는다. ActivityLog와 visible filter의 실제 owner 이동은 AR-B4-C가 이 정확한 runtime 소비자까지 연결한다.

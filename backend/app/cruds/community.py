@@ -1,3 +1,7 @@
+from app.domains.social.constants import HIDDEN_AGENT_ACTIVITY_ACTION_TYPES, PUBLIC_ACTIVITY_ACTION_ALIASES, PUBLIC_ACTIVITY_ACTION_TYPES, PUBLIC_ACTIVITY_SUMMARIES
+from app.domains.social.service.profile_activity import _public_activity_event
+from app.runtime.social.profile_activity import profile_activity_service
+get_character_activity = profile_activity_service.build_character_activity
 from app.domains.characters.service.search import search_characters
 from app.runtime.social.discovery import discovery_reads
 search_posts = discovery_reads.search_posts
@@ -117,7 +121,6 @@ from app.config import settings
 from app.core import security
 from app.core.search_text import build_post_search_document
 from app.core import unit_of_work
-from app.cruds import agents as agent_crud
 
 from app.domains.characters.exceptions import CharacterHandleConflictError, InvalidCharacterHandleError
 from app.domains.characters.service.profile import (
@@ -138,68 +141,6 @@ from app.domains.characters.service.profile import (
 from app.domains.characters.service.state import upsert_character_state
 
 
-HIDDEN_AGENT_ACTIVITY_ACTION_TYPES = (
-    "state_save_suppressed",
-    "feed_perception_debug",
-    "complete_tick_rejected",
-    "local_key_issued",
-    "local_key_revoked",
-    "local_bot_rate_limited",
-)
-PUBLIC_ACTIVITY_ACTION_ALIASES = {
-    "comment": "replied",
-    "commented": "replied",
-    "follow": "followed",
-    "like": "liked",
-    "observe": "observed",
-    "post": "post_created",
-    "quote": "quoted",
-    "reply": "replied",
-    "repost": "reposted",
-    "unfollow": "unfollowed",
-}
-PUBLIC_ACTIVITY_ACTION_TYPES = {
-    "activated",
-    "created",
-    "deactivated",
-    "followed",
-    "liked",
-    "memory_note_refine_failed",
-    "observed",
-    "persona_updated",
-    "post_created",
-    "profile_updated",
-    "quoted",
-    "replied",
-    "reposted",
-    "skipped",
-    "state_saved",
-    "tendency_analyzed",
-    "thread_viewed",
-    "tick_completed",
-    "unfollowed",
-}
-PUBLIC_ACTIVITY_SUMMARIES = {
-    "activated": "자율 활동이 켜졌어요.",
-    "created": "프로필과 활동 준비가 저장됐어요.",
-    "deactivated": "자율 활동이 꺼졌어요.",
-    "followed": "새 프로필을 팔로우했어요.",
-    "liked": "좋아요가 반영됐어요.",
-    "memory_note_refine_failed": "처음 저장한 기억 문구를 그대로 유지했어요.",
-    "observed": "커뮤니티 흐름을 살펴봤어요.",
-    "persona_updated": "성격과 말투 설정을 업데이트했어요.",
-    "post_created": "지저귐이 타임라인에 추가됐어요.",
-    "profile_updated": "프로필 정보를 업데이트했어요.",
-    "quoted": "인용 기록이 반영됐어요.",
-    "replied": "대꾸가 타임라인에 추가됐어요.",
-    "reposted": "리포스트가 반영됐어요.",
-    "skipped": "이번 활동은 쉬어갔어요.",
-    "state_saved": "기분과 기억을 업데이트했어요.",
-    "tendency_analyzed": "커뮤니티 활동 성향을 다시 정리했어요.",
-    "thread_viewed": "대화 흐름을 확인했어요.",
-    "tick_completed": "활동 결과를 정리했어요.",
-    "unfollowed": "프로필 팔로우를 해제했어요.",
-}
 
 
 
@@ -360,69 +301,8 @@ PUBLIC_ACTIVITY_SUMMARIES = {
 
 
 
-def get_character_activity(
-    db: Session, character: models.Character
-) -> schemas.CharacterActivityRead:
-    recent_comments = list(
-        db.scalars(
-            select(models.Comment)
-            .where(models.Comment.author_character_id == character.id)
-            .order_by(models.Comment.created_at.desc(), models.Comment.id.desc())
-            .limit(20)
-        )
-    )
 
-    return schemas.CharacterActivityRead(
-        character=schemas.PublicCharacterActivityProfileRead.model_validate(character),
-        state=(
-            schemas.PublicCharacterActivityStateRead.model_validate(character.state)
-            if character.state
-            else None
-        ),
-        recent_comments=[
-            schemas.CommentRead.model_validate(comment) for comment in recent_comments
-        ],
-        recent_agent_activity=[
-            _public_activity_event(log)
-            for log in agent_crud.filter_visible_activity_logs(
-                list(
-                    db.scalars(
-                        select(models.AgentActivityLog)
-                        .where(models.AgentActivityLog.character_id == character.id)
-                        .where(
-                            models.AgentActivityLog.action_type.not_in(
-                                HIDDEN_AGENT_ACTIVITY_ACTION_TYPES
-                            )
-                        )
-                        .order_by(
-                            models.AgentActivityLog.created_at.desc(),
-                            models.AgentActivityLog.id.desc(),
-                        )
-                        .limit(80)
-                    )
-                ),
-                limit=20,
-            )
-        ],
-    )
 
-
-def _public_activity_event(
-    log: models.AgentActivityLog,
-) -> schemas.PublicCharacterActivityEventRead:
-    action_type = PUBLIC_ACTIVITY_ACTION_ALIASES.get(log.action_type, log.action_type)
-    if action_type not in PUBLIC_ACTIVITY_ACTION_TYPES:
-        action_type = "activity_updated"
-    return schemas.PublicCharacterActivityEventRead(
-        id=log.id,
-        action_type=action_type,
-        target_post_id=log.target_post_id,
-        summary=PUBLIC_ACTIVITY_SUMMARIES.get(
-            action_type,
-            "활동 기록이 업데이트됐어요.",
-        ),
-        created_at=log.created_at,
-    )
 
 
 def seed_demo_data(db: Session) -> None:

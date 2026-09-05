@@ -1,3 +1,5 @@
+from app.runtime.social.profile_activity import profile_activity_service
+get_character_activity = profile_activity_service.get_character_activity
 from app.domains.social.service.feed import list_today_popular_posts, _today_start_utc, _post_reaction_score
 from app.runtime.social.discovery import discovery_service
 list_today_activity = discovery_service.list_today_activity
@@ -3968,14 +3970,6 @@ def save_agent_tool_character_state(
     return state
 
 
-def get_character_activity(
-    db: Session, character_id: str
-) -> schemas.CharacterActivityRead:
-    character = community_crud.get_character(db, character_id)
-    if character is None or character.deleted_at is not None:
-        raise CharacterNotFoundError(character_id)
-
-    return community_crud.get_character_activity(db, character)
 
 
 def _get_agent_tool_run(

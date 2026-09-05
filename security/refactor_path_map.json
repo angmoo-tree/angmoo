@@ -5249,21 +5249,25 @@
           "backend/app/domains/characters/service/search.py",
           "backend/app/domains/characters/service/state.py",
           "backend/app/domains/identity/service/profile.py",
+          "backend/app/domains/social/constants.py",
+          "backend/app/domains/social/repository/activity.py",
           "backend/app/domains/social/repository/inbox.py",
           "backend/app/domains/social/repository/media.py",
           "backend/app/domains/social/repository/posts.py",
           "backend/app/domains/social/repository/profiles.py",
           "backend/app/domains/social/repository/reactions.py",
           "backend/app/domains/social/service/notifications.py",
+          "backend/app/domains/social/service/profile_activity.py",
           "backend/app/domains/social/service/source_posts.py",
           "backend/app/domains/social/utils/cursors.py",
           "backend/app/domains/social/utils/text.py",
           "backend/app/runtime/social/discovery.py",
-          "backend/app/runtime/social/inbox.py"
+          "backend/app/runtime/social/inbox.py",
+          "backend/app/runtime/social/profile_activity.py"
         ],
         "backend/app/schemas/characters.py": [
           "backend/app/domains/characters/schemas.py",
-          "backend/app/schemas/characters.py"
+          "backend/app/domains/social/schemas/activity.py"
         ],
         "backend/app/schemas/agents.py": [
           "backend/app/domains/characters/schemas.py",
@@ -5275,45 +5279,54 @@
       "split_symbols": [
         {
           "old": "backend/app/cruds/community.py::HIDDEN_AGENT_ACTIVITY_ACTION_TYPES",
-          "new": "backend/app/cruds/community.py::HIDDEN_AGENT_ACTIVITY_ACTION_TYPES",
+          "new": "backend/app/domains/social/constants.py::HIDDEN_AGENT_ACTIVITY_ACTION_TYPES",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/runtime/social/profile_activity.py",
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe",
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_rejects_missing_or_deleted_before_activity_queries"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::PUBLIC_ACTIVITY_ACTION_ALIASES",
-          "new": "backend/app/cruds/community.py::PUBLIC_ACTIVITY_ACTION_ALIASES",
+          "new": "backend/app/domains/social/constants.py::PUBLIC_ACTIVITY_ACTION_ALIASES",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/runtime/social/profile_activity.py",
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/test_public_activity_security.py::test_public_activity_event_normalizes_unknown_actions_without_raw_fallback",
-            "tests/test_public_activity_security.py::test_public_activity_event_replaces_raw_reason_and_result_with_safe_summary"
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe",
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_rejects_missing_or_deleted_before_activity_queries"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::PUBLIC_ACTIVITY_ACTION_TYPES",
-          "new": "backend/app/cruds/community.py::PUBLIC_ACTIVITY_ACTION_TYPES",
+          "new": "backend/app/domains/social/constants.py::PUBLIC_ACTIVITY_ACTION_TYPES",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/runtime/social/profile_activity.py",
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/test_public_activity_security.py::test_public_activity_event_normalizes_unknown_actions_without_raw_fallback",
-            "tests/test_public_activity_security.py::test_public_activity_event_replaces_raw_reason_and_result_with_safe_summary"
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe",
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_rejects_missing_or_deleted_before_activity_queries"
           ]
         },
         {
           "old": "backend/app/cruds/community.py::PUBLIC_ACTIVITY_SUMMARIES",
-          "new": "backend/app/cruds/community.py::PUBLIC_ACTIVITY_SUMMARIES",
+          "new": "backend/app/domains/social/constants.py::PUBLIC_ACTIVITY_SUMMARIES",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/runtime/social/profile_activity.py",
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/test_public_activity_security.py::test_public_activity_event_normalizes_unknown_actions_without_raw_fallback",
-            "tests/test_public_activity_security.py::test_public_activity_event_replaces_raw_reason_and_result_with_safe_summary"
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe",
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_rejects_missing_or_deleted_before_activity_queries"
           ]
         },
         {
@@ -6324,23 +6337,27 @@
         },
         {
           "old": "backend/app/cruds/community.py::get_character_activity",
-          "new": "backend/app/cruds/community.py::get_character_activity",
+          "new": "backend/app/domains/social/service/profile_activity.py::ProfileActivityService",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/services/community.py",
+            "backend/app/cruds/community.py",
+            "backend/app/runtime/social/profile_activity.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe",
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_rejects_missing_or_deleted_before_activity_queries"
+          ],
+          "destination_member": "ProfileActivityService.build_character_activity"
         },
         {
           "old": "backend/app/cruds/community.py::_public_activity_event",
-          "new": "backend/app/cruds/community.py::_public_activity_event",
+          "new": "backend/app/domains/social/service/profile_activity.py::_public_activity_event",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py"
           ],
           "test_nodes": [
-            "tests/test_public_activity_security.py::test_public_activity_event_normalizes_unknown_actions_without_raw_fallback",
-            "tests/test_public_activity_security.py::test_public_activity_event_replaces_raw_reason_and_result_with_safe_summary"
+            "tests/test_public_activity_security.py::test_public_activity_event_replaces_raw_reason_and_result_with_safe_summary",
+            "tests/test_public_activity_security.py::test_public_activity_event_normalizes_unknown_actions_without_raw_fallback"
           ]
         },
         {
@@ -6396,52 +6413,62 @@
         },
         {
           "old": "backend/app/schemas/characters.py::PublicCharacterActivityAction",
-          "new": "backend/app/schemas/characters.py::PublicCharacterActivityAction",
+          "new": "backend/app/domains/social/schemas/activity.py::PublicCharacterActivityAction",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/schemas/characters.py",
+            "backend/app/domains/social/service/profile_activity.py"
           ],
           "test_nodes": [
-            "tests/test_public_activity_security.py::test_public_character_activity_schema_excludes_private_character_and_state_fields"
+            "tests/test_public_activity_security.py::test_public_character_activity_schema_excludes_private_character_and_state_fields",
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe"
           ]
         },
         {
           "old": "backend/app/schemas/characters.py::PublicCharacterActivityProfileRead",
-          "new": "backend/app/schemas/characters.py::PublicCharacterActivityProfileRead",
+          "new": "backend/app/domains/social/schemas/activity.py::PublicCharacterActivityProfileRead",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/schemas/characters.py",
+            "backend/app/domains/social/service/profile_activity.py"
           ],
           "test_nodes": [
-            "tests/test_public_activity_security.py::test_public_character_activity_schema_excludes_private_character_and_state_fields"
+            "tests/test_public_activity_security.py::test_public_character_activity_schema_excludes_private_character_and_state_fields",
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe"
           ]
         },
         {
           "old": "backend/app/schemas/characters.py::PublicCharacterActivityStateRead",
-          "new": "backend/app/schemas/characters.py::PublicCharacterActivityStateRead",
+          "new": "backend/app/domains/social/schemas/activity.py::PublicCharacterActivityStateRead",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/schemas/characters.py",
+            "backend/app/domains/social/service/profile_activity.py"
           ],
           "test_nodes": [
-            "tests/test_public_activity_security.py::test_public_character_activity_schema_excludes_private_character_and_state_fields"
+            "tests/test_public_activity_security.py::test_public_character_activity_schema_excludes_private_character_and_state_fields",
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe"
           ]
         },
         {
           "old": "backend/app/schemas/characters.py::PublicCharacterActivityEventRead",
-          "new": "backend/app/schemas/characters.py::PublicCharacterActivityEventRead",
+          "new": "backend/app/domains/social/schemas/activity.py::PublicCharacterActivityEventRead",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/schemas/characters.py",
+            "backend/app/domains/social/service/profile_activity.py"
           ],
           "test_nodes": [
-            "tests/test_public_activity_security.py::test_public_character_activity_schema_excludes_private_character_and_state_fields"
+            "tests/test_public_activity_security.py::test_public_character_activity_schema_excludes_private_character_and_state_fields",
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe"
           ]
         },
         {
           "old": "backend/app/schemas/characters.py::CharacterActivityRead",
-          "new": "backend/app/schemas/characters.py::CharacterActivityRead",
+          "new": "backend/app/domains/social/schemas/activity.py::CharacterActivityRead",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/schemas/characters.py",
+            "backend/app/domains/social/service/profile_activity.py"
           ],
           "test_nodes": [
-            "tests/test_public_activity_security.py::test_public_character_activity_schema_excludes_private_character_and_state_fields"
+            "tests/test_public_activity_security.py::test_public_character_activity_schema_excludes_private_character_and_state_fields",
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe"
           ]
         },
         {
@@ -6960,6 +6987,29 @@
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::get_character_activity",
+          "new": "backend/app/domains/social/repository/activity.py::recent_character_comments",
+          "source_member": "Original recent_comments SQL: same Character ID, created/id descending, limit20, same Session and position before state projection.",
+          "direct_consumers": [
+            "backend/app/domains/social/service/profile_activity.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/community.py::get_character_activity",
+          "new": "backend/app/runtime/social/profile_activity.py::SqlAlchemyProfileActivityReads",
+          "destination_member": "SqlAlchemyProfileActivityReads.recent_activity_logs",
+          "source_member": "Original filter_visible_activity_logs(list(db.scalars(AgentActivityLog query, hidden exclusion, created/id DESC, limit80)),limit20); original dedupe and lazy-state-before-log ordering.",
+          "direct_consumers": [
+            "backend/app/domains/social/service/profile_activity.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe"
           ]
         }
       ],
@@ -13544,6 +13594,7 @@
           "backend/app/domains/social/service/notifications.py",
           "backend/app/domains/social/service/posts.py",
           "backend/app/domains/social/service/presentation.py",
+          "backend/app/domains/social/service/profile_activity.py",
           "backend/app/domains/social/service/profiles.py",
           "backend/app/domains/social/service/timeline.py",
           "backend/app/domains/social/service/visibility.py",
@@ -15595,13 +15646,16 @@
         },
         {
           "old": "backend/app/services/community.py::get_character_activity",
-          "new": "backend/app/services/community.py::get_character_activity",
+          "new": "backend/app/domains/social/service/profile_activity.py::ProfileActivityService",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/services/community.py",
+            "backend/app/runtime/social/profile_activity.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
-          ]
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe",
+            "tests/social/test_profile_activity_workflows.py::test_profile_activity_rejects_missing_or_deleted_before_activity_queries"
+          ],
+          "destination_member": "ProfileActivityService.get_character_activity"
         },
         {
           "old": "backend/app/services/community.py::_get_agent_tool_run",
@@ -18795,6 +18849,21 @@
       ],
       "pending_activity_owner": "AR-B4-C will migrate AgentActivityLog and hidden-action constants; exact pre-existing runtime dependencies are scoped until then.",
       "remaining": "Agent/resident workflows, media jobs, World Feed search and manual/observed UoWs, Relationships/projection, HTTP and legacy cleanup."
+    },
+    "AR-B5-B9": {
+      "status": "IMPLEMENTED; focused25 PASS; original14 schema/constants/body/query AST checks PASS; API/ORM/assertions/full split PASS; source introduction and integration pending",
+      "scope": "Public activity admission, explicit private-field projection, original action aliases/summaries, comments read, same-Session ordered log query/filter.",
+      "new_tests": [
+        "backend/tests/social/test_profile_activity_workflows.py"
+      ],
+      "test_nodes": [
+        "tests/social/test_profile_activity_workflows.py::test_profile_activity_keeps_read_order_safe_projection_and_log_dedupe",
+        "tests/social/test_profile_activity_workflows.py::test_profile_activity_rejects_missing_or_deleted_before_activity_queries"
+      ],
+      "source_split_owners": [
+        "AR-B2-B1 original CRUD/Character schema maps; AR-B2-B6 original service map"
+      ],
+      "remaining": "Actual agent/resident workflows, World Feed UoWs/search, media jobs, Relationships/projection, HTTP/legacy cleanup."
     }
   }
 }

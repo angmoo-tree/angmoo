@@ -1,7 +1,7 @@
 {
-  "edge_count": 2239,
-  "external_import_count": 2142,
-  "module_count": 677,
+  "edge_count": 2257,
+  "external_import_count": 2153,
+  "module_count": 682,
   "modules": [
     {
       "external_imports": [],
@@ -825,24 +825,26 @@
         "app.core.search_text",
         "app.core.security",
         "app.core.unit_of_work",
-        "app.cruds.agents",
         "app.domains.characters.exceptions",
         "app.domains.characters.service.profile",
         "app.domains.characters.service.search",
         "app.domains.characters.service.state",
         "app.domains.identity.service.profile",
+        "app.domains.social.constants",
         "app.domains.social.repository.inbox",
         "app.domains.social.repository.media",
         "app.domains.social.repository.posts",
         "app.domains.social.repository.profiles",
         "app.domains.social.repository.reactions",
         "app.domains.social.service.notifications",
+        "app.domains.social.service.profile_activity",
         "app.domains.social.service.source_posts",
         "app.domains.social.utils.cursors",
         "app.domains.social.utils.text",
         "app.models",
         "app.runtime.social.discovery",
         "app.runtime.social.inbox",
+        "app.runtime.social.profile_activity",
         "app.schemas"
       ],
       "module": "app.cruds.community",
@@ -4268,6 +4270,19 @@
     {
       "external_imports": [
         "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.actors"
+      ],
+      "module": "app.domains.social.contracts.activity",
+      "path": "backend/app/domains/social/contracts/activity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
         "typing"
       ],
       "imports": [],
@@ -4564,6 +4579,18 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.domains.social.repository.activity",
+      "path": "backend/app/domains/social/repository/activity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
         "app.domains.social.models.posts",
         "app.domains.social.utils.cursors"
       ],
@@ -4639,6 +4666,19 @@
       "imports": [],
       "module": "app.domains.social.schemas",
       "path": "backend/app/domains/social/schemas/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.schemas.community"
+      ],
+      "module": "app.domains.social.schemas.activity",
+      "path": "backend/app/domains/social/schemas/activity.py",
       "wildcard_imports": []
     },
     {
@@ -4831,6 +4871,22 @@
       ],
       "module": "app.domains.social.service.presentation",
       "path": "backend/app/domains/social/service/presentation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.service.profile",
+        "app.domains.social.constants",
+        "app.domains.social.contracts.activity",
+        "app.domains.social.exceptions",
+        "app.domains.social.repository.activity",
+        "app.domains.social.schemas.activity"
+      ],
+      "module": "app.domains.social.service.profile_activity",
+      "path": "backend/app/domains/social/service/profile_activity.py",
       "wildcard_imports": []
     },
     {
@@ -8704,6 +8760,22 @@
     },
     {
       "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.cruds.agents",
+        "app.domains.social.constants",
+        "app.domains.social.contracts.activity",
+        "app.domains.social.service.profile_activity",
+        "app.models.agent_runs"
+      ],
+      "module": "app.runtime.social.profile_activity",
+      "path": "backend/app/runtime/social/profile_activity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime",
         "sqlalchemy",
@@ -9163,6 +9235,7 @@
       ],
       "imports": [
         "app.domains.characters.schemas",
+        "app.domains.social.schemas.activity",
         "app.domains.social.schemas.community"
       ],
       "module": "app.schemas.characters",
@@ -9500,6 +9573,7 @@
         "app.models",
         "app.runtime.social.discovery",
         "app.runtime.social.inbox",
+        "app.runtime.social.profile_activity",
         "app.runtime.social.timeline",
         "app.schemas",
         "app.services.agent_activity_policy",
