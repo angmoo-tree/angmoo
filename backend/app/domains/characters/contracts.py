@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Callable, Protocol, TYPE_CHECKING
+from typing import Awaitable, Callable, Protocol, TYPE_CHECKING
 from sqlalchemy.orm import Session
 
 if TYPE_CHECKING:
@@ -33,7 +33,12 @@ class AutonomousCharacterSeedData:
     banner_url: str | None = None
 
 
-__all__ = ["AutonomousCharacterSeedData", "CharacterOwner", "CharacterManagementWorkflows"]
+__all__ = [
+    "AutonomousCharacterSeedData",
+    "CharacterOwner",
+    "CharacterManagementWorkflows",
+    "CreatorWorkflows",
+]
 
 
 @dataclass(frozen=True)
@@ -57,3 +62,31 @@ class CharacterManagementWorkflows:
     after_persona: Callable[
         [Session, CharacterOwner, models.Character], schemas.AgentDetailRead
     ]
+
+
+class DraftLlmCall(Protocol):
+    def __call__(
+        self, *, db: Session, user: CharacterOwner, draft_id: str, provider: str,
+        model: str, api_key: str, message: str, extra_system_prompt: str,
+    ) -> Awaitable[str]: ...
+
+
+class DraftMediaPromotion(Protocol):
+    def __call__(
+        self, *, character_id: str, media_type: str, draft_media_url: str,
+    ) -> str: ...
+
+
+@dataclass(frozen=True)
+class CreatorWorkflows:
+    """External work used by the draft lifecycle in its caller-owned Session."""
+
+    run_llm: DraftLlmCall
+    decrypt_api_key: Callable[[models.AgentCreationDraft], str]
+    delete_candidate_media: Callable[[str, str], None]
+    delete_draft_media: Callable[[str], None]
+    promote_media: DraftMediaPromotion
+    create_character: Callable[
+        [Session, CharacterOwner, schemas.AgentCreate], schemas.AgentDetailRead
+    ]
+    read_character: Callable[[Session, CharacterOwner, str], schemas.AgentDetailRead]

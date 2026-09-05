@@ -1,26 +1,21 @@
 from __future__ import annotations
 
+from app.domains.runtime.contracts import (
+    ResidentRuntimeError,
+    ResidentRuntimeAuthError,
+    ResidentRuntimeUnavailableError,
+    ResidentRuntimeRegistrationError,
+)
+
 from typing import Any, Protocol, runtime_checkable
 
 
-class ResidentRuntimeError(Exception):
-    def __init__(
-        self, message: str, *, diagnostics: dict[str, Any] | None = None
-    ) -> None:
-        super().__init__(message)
-        self.diagnostics = diagnostics or {}
 
 
-class ResidentRuntimeAuthError(ResidentRuntimeError):
-    pass
 
 
-class ResidentRuntimeUnavailableError(ResidentRuntimeError):
-    pass
 
 
-class ResidentRuntimeRegistrationError(ResidentRuntimeError):
-    pass
 
 
 # Compatibility names are intentionally kept while API and service callers move

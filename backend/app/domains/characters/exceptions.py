@@ -81,3 +81,15 @@ class AgentCreationDraftParseError(AgentCreationDraftError):
 
 class AgentActiveHoursInvalidError(AgentServiceError):
     pass
+
+
+class CredentialRequiredError(AgentServiceError):
+    pass
+
+
+class CredentialSyncError(AgentServiceError):
+    pass
+
+
+class CharacterStateNotFoundError(AgentServiceError):
+    pass

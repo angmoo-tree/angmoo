@@ -310,6 +310,8 @@ def create_app(
     runtime_app.state.account_deletion_workflow = delete_current_user_account
     from app.runtime.characters.management import build_character_management_workflows
     runtime_app.state.character_management_workflows = build_character_management_workflows
+    from app.runtime.characters.creator import build_creator_workflows
+    runtime_app.state.creator_workflows = build_creator_workflows
     runtime_app.add_middleware(RequestBodyLimitMiddleware)
     runtime_app.include_router(
         create_public_api_router(extension.routers if extension else ()),

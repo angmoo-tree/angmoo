@@ -1,7 +1,7 @@
 {
-  "edge_count": 1943,
-  "external_import_count": 2038,
-  "module_count": 610,
+  "edge_count": 1971,
+  "external_import_count": 2044,
+  "module_count": 613,
   "modules": [
     {
       "external_imports": [],
@@ -187,6 +187,7 @@
       ],
       "imports": [
         "app.core.db",
+        "app.domains.characters.router",
         "app.domains.identity.dependencies",
         "app.models",
         "app.schemas",
@@ -924,8 +925,13 @@
         "app.domains.characters.dependencies",
         "app.domains.characters.exceptions",
         "app.domains.characters.schemas",
+        "app.domains.characters.service.creator",
+        "app.domains.characters.service.drafts",
         "app.domains.characters.service.management",
-        "app.domains.identity.service.demo_access"
+        "app.domains.characters.service.state",
+        "app.domains.identity.service.demo_access",
+        "app.domains.media.contracts",
+        "app.domains.runtime.contracts"
       ],
       "module": "app.domains.characters.router",
       "path": "backend/app/domains/characters/router.py",
@@ -985,6 +991,29 @@
       ],
       "module": "app.domains.characters.service.creator",
       "path": "backend/app/domains/characters/service/creator.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "logging",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.core.security",
+        "app.domains.characters.contracts",
+        "app.domains.characters.exceptions",
+        "app.domains.characters.models",
+        "app.domains.characters.schemas",
+        "app.domains.characters.service.creator",
+        "app.domains.characters.service.persona",
+        "app.domains.characters.service.profile",
+        "app.policies.name_policy"
+      ],
+      "module": "app.domains.characters.service.drafts",
+      "path": "backend/app/domains/characters/service/drafts.py",
       "wildcard_imports": []
     },
     {
@@ -1105,8 +1134,11 @@
       ],
       "imports": [
         "app.core.unit_of_work",
+        "app.domains.characters.contracts",
+        "app.domains.characters.exceptions",
         "app.domains.characters.models",
-        "app.domains.characters.schemas"
+        "app.domains.characters.schemas",
+        "app.domains.characters.service.profile"
       ],
       "module": "app.domains.characters.service.state",
       "path": "backend/app/domains/characters/service/state.py",
@@ -2242,6 +2274,13 @@
       "imports": [],
       "module": "app.domains.media",
       "path": "backend/app/domains/media/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.media.contracts",
+      "path": "backend/app/domains/media/contracts.py",
       "wildcard_imports": []
     },
     {
@@ -3719,6 +3758,15 @@
       ],
       "module": "app.domains.runtime.application.single_backend_components",
       "path": "backend/app/domains/runtime/application/single_backend_components.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.runtime.contracts",
+      "path": "backend/app/domains/runtime/contracts.py",
       "wildcard_imports": []
     },
     {
@@ -5922,6 +5970,7 @@
         "app.core.request_limits",
         "app.cruds.community",
         "app.runtime.account_deletion",
+        "app.runtime.characters.creator",
         "app.runtime.characters.management",
         "app.runtime.logging_config",
         "app.runtime.single_backend_components",
@@ -6312,6 +6361,7 @@
         "app.domains.world_packages.infrastructure.filesystem_import_media",
         "app.domains.world_packages.infrastructure.sqlalchemy_import_commit",
         "app.runtime.account_deletion",
+        "app.runtime.characters.creator",
         "app.runtime.characters.management",
         "app.runtime.component_workers",
         "app.runtime.configuration",
@@ -6397,9 +6447,11 @@
         "app.credentials",
         "app.cruds.agent_runs",
         "app.cruds.agents",
+        "app.domains.characters.contracts",
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
         "app.domains.characters.service.creator",
+        "app.domains.characters.service.drafts",
         "app.domains.characters.service.image_quota",
         "app.domains.characters.service.profile",
         "app.domains.identity.service.demo_access",
@@ -6454,6 +6506,7 @@
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
         "app.domains.characters.service.access",
+        "app.domains.characters.service.creator",
         "app.domains.characters.service.management",
         "app.domains.characters.service.mutations",
         "app.domains.characters.service.persona",
@@ -8293,6 +8346,7 @@
         "app.cruds.agents",
         "app.cruds.community",
         "app.domains.routines.public",
+        "app.domains.runtime.contracts",
         "app.domains.social.public",
         "app.domains.world_characters.public",
         "app.models",
@@ -8405,6 +8459,8 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.characters.exceptions",
+        "app.domains.characters.service.state",
         "app.models",
         "app.runtime.relationships.sqlalchemy_social_event",
         "app.schemas",
@@ -8820,7 +8876,8 @@
         "warnings"
       ],
       "imports": [
-        "app.config"
+        "app.config",
+        "app.domains.media.contracts"
       ],
       "module": "app.services.profile_media",
       "path": "backend/app/services/profile_media.py",
@@ -8961,7 +9018,9 @@
         "__future__",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.domains.runtime.contracts"
+      ],
       "module": "app.services.runtime_boundary",
       "path": "backend/app/services/runtime_boundary.py",
       "wildcard_imports": []

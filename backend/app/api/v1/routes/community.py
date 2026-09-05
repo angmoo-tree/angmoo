@@ -1,3 +1,4 @@
+from app.domains.characters.router import save_character_state, state_router
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -506,23 +507,7 @@ def mark_notification_read(
         )
 
 
-@router.post(
-    "/characters/{character_id}/state", response_model=schemas.CharacterStateRead
-)
-def save_character_state(
-    character_id: str,
-    data: schemas.CharacterStateWrite,
-    db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
-) -> schemas.CharacterStateRead:
-    try:
-        return community_service.save_character_state_for_user(
-            db, user, character_id, data
-        )
-    except community_service.CharacterNotFoundError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Character not found"
-        )
+router.routes.extend(state_router.routes)
 
 
 @router.get(

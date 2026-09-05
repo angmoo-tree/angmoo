@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from app.domains.characters.contracts import CreatorWorkflows
+from app.domains.characters.service import drafts as draft_lifecycle
+
 from app.domains.characters.service.creator import (
     DRAFT_TTL,
     DRAFT_COOLDOWN,
@@ -127,59 +130,13 @@ class _DraftCredential:
 async def create_draft(
     db: Session, user: models.User, data: schemas.AgentCreationDraftCreate
 ) -> schemas.AgentCreationDraftRead:
-    _cleanup_expired_drafts(db)
-    draft_id = f"draft-{uuid4().hex[:12]}"
-    await _run_draft_llm(
-        db=db,
-        user=user,
-        draft_id=draft_id,
-        provider=data.provider,
-        model=data.model,
-        api_key=data.api_key,
-        message='Return exactly this JSON: {"ok": true}',
-        extra_system_prompt=(
-            "You are verifying an Angmoo user-provided LLM credential. "
-            'Return only {"ok": true}. Do not call tools.'
-        ),
-    )
-    draft = character_models.AgentCreationDraft(
-        id=draft_id,
-        user_id=user.id,
-        provider=data.provider,
-        model=data.model,
-        encrypted_api_key=security.encrypt_secret(
-            data.api_key,
-            scope=security.SecretScope(
-                owner_id=user.id,
-                character_id="",
-                provider=data.provider,
-                purpose="creation_draft",
-            ),
-        ),
-        key_fingerprint=security.fingerprint_secret(data.api_key),
-        name="",
-        handle=None,
-        one_liner="",
-        personality="",
-        speech_style="",
-        worldview="",
-        topic_preferences="",
-        safety_rules="",
-        image_style="기본",
-        appearance_prompt="",
-        expires_at=datetime.now(UTC) + DRAFT_TTL,
-    )
-    db.add(draft)
-    db.commit()
-    db.refresh(draft)
-    return _draft_read(draft)
+    return await draft_lifecycle.create_draft(db, user, data, workflows=build_creator_workflows())
 
 
 def get_draft(
     db: Session, user: models.User, draft_id: str
 ) -> schemas.AgentCreationDraftRead:
-    draft = _get_owned_draft(db, user, draft_id)
-    return _draft_read(draft)
+    return draft_lifecycle.get_draft(db, user, draft_id, workflows=build_creator_workflows())
 
 
 def get_draft_media_content(
@@ -265,70 +222,13 @@ def update_draft(
     draft_id: str,
     data: schemas.AgentCreationDraftUpdate,
 ) -> schemas.AgentCreationDraftRead:
-    draft = _get_owned_draft(db, user, draft_id)
-    for field, value in data.model_dump(exclude_unset=True).items():
-        if field == "handle":
-            if value is None or not str(value).strip():
-                draft.handle = None
-                continue
-            if name_policy.is_blocked_name(str(value)):
-                raise AgentCreationDraftValidationError("사용할 수 없는 핸들입니다.")
-            try:
-                draft.handle = character_profile.validate_character_handle_for_create(
-                    db, str(value)
-                )
-            except character_profile.CharacterHandleConflictError as exc:
-                raise AgentCreationDraftHandleConflictError(str(exc)) from exc
-            except character_profile.InvalidCharacterHandleError as exc:
-                raise AgentCreationDraftValidationError(str(exc)) from exc
-        elif value is None and field in {"avatar_temp_url", "banner_temp_url"}:
-            setattr(draft, field, None)
-        elif value is not None:
-            cleaned = _clean_text(value)
-            if field in agent_service.PERSONA_PROMPT_SAFETY_FIELDS:
-                _ensure_draft_prompt_safety(cleaned, field_name=field)
-            setattr(draft, field, cleaned)
-    db.commit()
-    db.refresh(draft)
-    return _draft_read(draft)
+    return draft_lifecycle.update_draft(db, user, draft_id, data, workflows=build_creator_workflows())
 
 
 async def enhance_persona(
     db: Session, user: models.User, draft_id: str
 ) -> schemas.AgentCreationDraftRead:
-    draft = _get_owned_draft(db, user, draft_id)
-    _ensure_not_in_cooldown(draft.persona_enhance_available_at)
-    api_key = _decrypt_draft_api_key(draft)
-    raw_text = await _run_draft_llm(
-        db=db,
-        user=user,
-        draft_id=draft.id,
-        provider=draft.provider,
-        model=draft.model,
-        api_key=api_key,
-        message="보강할 앵무 페르소나를 JSON으로 정리해 주세요.",
-        extra_system_prompt=_build_persona_enhance_prompt(draft),
-    )
-    payload = _parse_json_object(raw_text)
-    persona_values = {
-        "personality": _safe_payload_text(payload.get("personality"), 2000),
-        "speech_style": _safe_payload_text(payload.get("speech_style"), 1200),
-        "worldview": _safe_payload_text(payload.get("worldview"), 2000),
-        "topic_preferences": _safe_payload_text(
-            payload.get("topic_preferences"), 1200
-        ),
-        "safety_rules": _safe_payload_text(payload.get("safety_rules"), 1200),
-    }
-    _ensure_draft_persona_prompt_safety(persona_values)
-    draft.personality = persona_values["personality"]
-    draft.speech_style = persona_values["speech_style"]
-    draft.worldview = persona_values["worldview"]
-    draft.topic_preferences = persona_values["topic_preferences"]
-    draft.safety_rules = persona_values["safety_rules"]
-    draft.persona_enhance_available_at = datetime.now(UTC) + DRAFT_COOLDOWN
-    db.commit()
-    db.refresh(draft)
-    return _draft_read(draft)
+    return await draft_lifecycle.enhance_persona(db, user, draft_id, workflows=build_creator_workflows())
 
 
 def upload_draft_media(
@@ -735,127 +635,23 @@ def complete_draft(
     draft_id: str,
     data: schemas.AgentCreationDraftComplete | None = None,
 ) -> schemas.AgentDetailRead:
-    data = data or schemas.AgentCreationDraftComplete()
-    draft = _get_owned_draft(db, user, draft_id)
-    name = draft.name.strip()
-    handle = draft.handle.strip() if draft.handle else None
-    if not name:
-        raise AgentCreationDraftValidationError("이름을 입력해주세요.")
-    if name_policy.is_blocked_name(name):
-        raise AgentCreationDraftValidationError("사용할 수 없는 닉네임입니다.")
-    if handle and name_policy.is_blocked_name(handle):
-        raise AgentCreationDraftValidationError("사용할 수 없는 핸들입니다.")
-    if not draft.personality.strip():
-        raise AgentCreationDraftValidationError("성격을 입력해주세요.")
-    _ensure_draft_persona_prompt_safety(
-        {
-            "personality": draft.personality,
-            "speech_style": draft.speech_style,
-            "worldview": draft.worldview,
-            "topic_preferences": draft.topic_preferences,
-            "safety_rules": draft.safety_rules,
-        }
-    )
-    api_key = _decrypt_draft_api_key(draft)
-    create_data = schemas.AgentCreate(
-        name=name,
-        handle=handle,
-        one_liner=draft.one_liner.strip(),
-        personality=draft.personality.strip(),
-        speech_style=draft.speech_style.strip(),
-        worldview=draft.worldview.strip(),
-        topic_preferences=draft.topic_preferences.strip(),
-        safety_rules=draft.safety_rules.strip(),
-        provider=draft.provider,
-        model=draft.model,  # type: ignore[arg-type]
-        api_key=api_key,
-        activity_interval_minutes=data.activity_interval_minutes,
-        active_hours_start=data.active_hours_start,
-        active_hours_end=data.active_hours_end,
-        promotion_usage_allowed=data.promotion_usage_allowed,
-    )
-    detail = agent_service.create_agent(db, user, create_data)
-    character = db.get(character_models.Character, detail.character.id)
-    if character is not None:
-        if draft.avatar_temp_url:
-            character.avatar_url = profile_media.promote_draft_profile_media(
-                character_id=character.id,
-                media_type="avatar",
-                draft_media_url=draft.avatar_temp_url,
-            )
-        if draft.banner_temp_url:
-            character.banner_url = profile_media.promote_draft_profile_media(
-                character_id=character.id,
-                media_type="banner",
-                draft_media_url=draft.banner_temp_url,
-            )
-        db.commit()
-    _delete_profile_image_candidates_for_draft(db, draft)
-    profile_media.delete_draft_media(draft.id)
-    db.delete(draft)
-    db.commit()
-    return agent_service.get_agent(db, user, detail.character.id)
+    return draft_lifecycle.complete_draft(db, user, draft_id, data, workflows=build_creator_workflows())
 
 
 def _get_owned_draft(
     db: Session, user: models.User, draft_id: str
 ) -> character_models.AgentCreationDraft:
-    _cleanup_expired_drafts(db)
-    draft = db.get(character_models.AgentCreationDraft, draft_id)
-    if draft is None or draft.user_id != user.id:
-        raise AgentCreationDraftNotFoundError(draft_id)
-    expires_at = draft.expires_at
-    if expires_at.tzinfo is None:
-        expires_at = expires_at.replace(tzinfo=UTC)
-    if expires_at <= datetime.now(UTC):
-        _delete_profile_image_candidates_for_draft(db, draft)
-        profile_media.delete_draft_media(draft.id)
-        db.delete(draft)
-        db.commit()
-        raise AgentCreationDraftExpiredError(draft_id)
-    return draft
+    return draft_lifecycle._get_owned_draft(db, user, draft_id, workflows=build_creator_workflows())
 
 
 def _cleanup_expired_drafts(db: Session) -> None:
-    now = datetime.now(UTC)
-    expired = list(
-        db.scalars(
-            select(character_models.AgentCreationDraft)
-            .where(character_models.AgentCreationDraft.expires_at <= now)
-            .limit(20)
-        )
-    )
-    if not expired:
-        return
-    for draft in expired:
-        try:
-            _delete_profile_image_candidates_for_draft(db, draft)
-            profile_media.delete_draft_media(draft.id)
-            db.delete(draft)
-            db.commit()
-        except Exception:
-            db.rollback()
-            logger.exception(
-                "expired agent creation draft cleanup failed: draft_id=%s",
-                draft.id,
-            )
+    return draft_lifecycle._cleanup_expired_drafts(db, workflows=build_creator_workflows())
 
 
 def _delete_profile_image_candidates_for_draft(
     db: Session, draft: character_models.AgentCreationDraft
 ) -> None:
-    candidates = list(
-        db.scalars(
-            select(character_models.ProfileImageCandidate).where(
-                character_models.ProfileImageCandidate.draft_id == draft.id
-            )
-        )
-    )
-    for candidate in candidates:
-        profile_media.delete_profile_image_candidate(candidate.id, candidate.user_id)
-        db.delete(candidate)
-    if candidates:
-        db.flush()
+    return draft_lifecycle._delete_profile_image_candidates_for_draft(db, draft, workflows=build_creator_workflows())
 
 
 async def _run_draft_llm(
@@ -1514,3 +1310,16 @@ def _generate_draft_media_file(
 
 def _draft_media_seed(draft_id: str, media_type: str) -> int:
     return int(security.hash_token(f"{draft_id}:{media_type}")[:8], 16) & POLLINATIONS_MAX_SEED
+
+
+def build_creator_workflows() -> CreatorWorkflows:
+    """Bind external work; lifecycle decisions and draft ORM stay in Characters."""
+    return CreatorWorkflows(
+        run_llm=_run_draft_llm,
+        decrypt_api_key=_decrypt_draft_api_key,
+        delete_candidate_media=profile_media.delete_profile_image_candidate,
+        delete_draft_media=profile_media.delete_draft_media,
+        promote_media=profile_media.promote_draft_profile_media,
+        create_character=agent_service.create_agent,
+        read_character=agent_service.get_agent,
+    )

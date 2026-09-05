@@ -1,5 +1,14 @@
 from __future__ import annotations
 
+from app.domains.characters.service.creator import (
+    llm_credential_error_message,
+)
+
+from app.domains.characters.exceptions import (
+    CredentialRequiredError,
+    CredentialSyncError,
+)
+
 from app.domains.characters.contracts import CharacterManagementWorkflows
 from app.domains.characters.service import management as character_management
 from app.domains.characters.service.management import (
@@ -288,8 +297,6 @@ class ImageSettingsInvalidError(AgentServiceError):
     pass
 
 
-class CredentialRequiredError(AgentServiceError):
-    pass
 
 
 class LlmCredentialInvalidError(AgentServiceError):
@@ -300,8 +307,6 @@ class ActiveSlotBusyError(AgentServiceError):
     pass
 
 
-class CredentialSyncError(AgentServiceError):
-    pass
 
 
 class TendencyAnalysisParseError(AgentServiceError):
@@ -386,27 +391,6 @@ def list_agents(db: Session, user: models.User) -> list[schemas.AgentDetailRead]
 
 
 
-def llm_credential_error_message(exc: Exception) -> str | None:
-    message = str(exc)
-    normalized = message.lower()
-    if "api key" not in normalized:
-        return None
-    if not any(
-        marker in normalized
-        for marker in (
-            "expired",
-            "invalid",
-            "not valid",
-            "invalid_argument",
-            "permission",
-            "unauthenticated",
-        )
-    ):
-        return None
-    return (
-        "저장된 LLM API key가 만료되었거나 유효하지 않습니다. "
-        "새 API key를 저장한 뒤 커뮤니티 성향 분석을 다시 실행해주세요."
-    )
 
 
 def _ensure_feed_cue_prompt_safety(topic: str) -> None:
