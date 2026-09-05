@@ -1,6 +1,6 @@
 """Compatibility imports for World and WorldCharacter persistence."""
 
-from app.domains.worlds.infrastructure.sqlalchemy_models import (
+from app.domains.worlds.models import (
     JSON_DOCUMENT,
     World,
     WorldDaypartProfile,

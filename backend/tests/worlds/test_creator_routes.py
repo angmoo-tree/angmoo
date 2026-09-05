@@ -15,10 +15,10 @@ from sqlalchemy.pool import StaticPool
 
 from app import models
 from app.domains.identity import dependencies as api_deps
-from app.api.v1.routes import worlds as world_routes
+from app.domains.worlds import router as world_routes
 from app.config import settings
 from app.core.db import Base
-from app.domains.worlds.infrastructure.sqlalchemy_reserved_roles import (
+from app.domains.worlds.service.reserved_roles import (
     ensure_no_specific_role,
 )
 
@@ -297,7 +297,7 @@ def test_api_rejects_unknown_fields_and_frontend_uses_new_creator_routes() -> No
     )
     assert invalid.status_code == 422
 
-    frontend_root = Path(__file__).parents[2] / "frontend" / "src"
+    frontend_root = Path(__file__).parents[3] / "frontend" / "src"
     client = (frontend_root / "components" / "world-creator-client.tsx").read_text(
         encoding="utf-8"
     )

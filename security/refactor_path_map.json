@@ -175,6 +175,19 @@
     "backend/app/core/config.py": "backend/app/config.py",
     "backend/tests/test_startup_security.py": "backend/tests/config/test_startup_security.py",
     "backend/tests/test_request_body_limits.py": "backend/tests/common/test_request_body_limits.py",
+    "backend/app/domains/worlds/api/schemas.py": "backend/app/domains/worlds/schemas.py",
+    "backend/app/domains/worlds/domain/reserved_roles.py": "backend/app/domains/worlds/contracts.py",
+    "backend/app/domains/worlds/infrastructure/sqlalchemy_models.py": "backend/app/domains/worlds/models.py",
+    "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py": "backend/app/domains/worlds/service/creator.py",
+    "backend/app/domains/worlds/infrastructure/definition_repository.py": "backend/app/domains/worlds/service/definition.py",
+    "backend/app/domains/worlds/infrastructure/generation_context.py": "backend/app/domains/worlds/service/generation_context.py",
+    "backend/app/domains/worlds/infrastructure/sqlalchemy_reserved_roles.py": "backend/app/domains/worlds/service/reserved_roles.py",
+    "backend/app/domains/worlds/infrastructure/world_banner_storage.py": "backend/app/domains/worlds/storage.py",
+    "backend/tests/test_world_creator_routes.py": "backend/tests/worlds/test_creator_routes.py",
+    "backend/tests/test_world_definition_contract.py": "backend/tests/worlds/test_definition_contract.py",
+    "backend/app/services/world_definitions.py": "backend/app/domains/worlds/service/definition.py",
+    "backend/app/services/world_generation_context.py": "backend/app/domains/worlds/service/generation_context.py",
+    "backend/app/domains/worlds/api/__init__.py": "backend/app/domains/worlds/__init__.py",
     "backend/app/services/replicate_image.py": "backend/app/integrations/replicate_image.py",
     "backend/app/services/image_provider.py": "backend/app/integrations/image_provider.py",
     "backend/app/services/provider_http.py": "backend/app/integrations/provider_http.py",
@@ -352,6 +365,17 @@
     "tests/test_l1_local_owner_session.py::test_bootstrap_closes_after_claim_and_replayed_challenge_loses_race": "tests/identity/test_l1_local_owner_session.py::test_bootstrap_closes_after_claim_and_replayed_challenge_loses_race",
     "tests/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods[HEAD]": "tests/identity/test_demo_account_lock.py::test_demo_principal_allows_safe_http_methods[HEAD]",
     "tests/test_turnstile.py::test_siteverify_timeout_is_unavailable": "tests/identity/test_turnstile.py::test_siteverify_timeout_is_unavailable",
+    "tests/test_world_creator_routes.py::test_api_rejects_unknown_fields_and_frontend_uses_new_creator_routes": "tests/worlds/test_creator_routes.py::test_api_rejects_unknown_fields_and_frontend_uses_new_creator_routes",
+    "tests/test_world_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict": "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict",
+    "tests/test_world_creator_routes.py::test_private_world_is_hidden_and_member_cannot_mutate": "tests/worlds/test_creator_routes.py::test_private_world_is_hidden_and_member_cannot_mutate",
+    "tests/test_world_creator_routes.py::test_reserved_no_role_is_system_owned_and_survives_user_definition_sync": "tests/worlds/test_creator_routes.py::test_reserved_no_role_is_system_owned_and_survives_user_definition_sync",
+    "tests/test_world_creator_routes.py::test_world_banner_round_trip_stays_inside_worlds_domain_storage": "tests/worlds/test_creator_routes.py::test_world_banner_round_trip_stays_inside_worlds_domain_storage",
+    "tests/test_world_definition_contract.py::test_canonical_definition_treats_prompt_like_text_as_data": "tests/worlds/test_definition_contract.py::test_canonical_definition_treats_prompt_like_text_as_data",
+    "tests/test_world_definition_contract.py::test_complete_world_is_canonical_and_provider_free": "tests/worlds/test_definition_contract.py::test_complete_world_is_canonical_and_provider_free",
+    "tests/test_world_definition_contract.py::test_generation_context_excludes_owner_media_and_workflow_fields": "tests/worlds/test_definition_contract.py::test_generation_context_excludes_owner_media_and_workflow_fields",
+    "tests/test_world_definition_contract.py::test_name_only_draft_is_saved_but_not_publish_ready": "tests/worlds/test_definition_contract.py::test_name_only_draft_is_saved_but_not_publish_ready",
+    "tests/test_world_definition_contract.py::test_optional_catalog_is_versioned_archived_and_hash_stable_by_order": "tests/worlds/test_definition_contract.py::test_optional_catalog_is_versioned_archived_and_hash_stable_by_order",
+    "tests/test_world_definition_contract.py::test_semantic_change_updates_hash_but_banner_and_visibility_do_not": "tests/worlds/test_definition_contract.py::test_semantic_change_updates_hash_but_banner_and_visibility_do_not",
     "tests/test_replicate_image.py::test_p_image_edit_posts_reference_payload_and_downloads_output": "tests/media/test_replicate_image.py::test_p_image_edit_posts_reference_payload_and_downloads_output",
     "tests/test_replicate_image.py::test_p_image_edit_requires_reference_in_provider": "tests/media/test_replicate_image.py::test_p_image_edit_requires_reference_in_provider",
     "tests/test_replicate_url_security.py::test_output_download_never_adds_the_provider_bearer": "tests/media/test_replicate_url_security.py::test_output_download_never_adds_the_provider_bearer",
@@ -14307,6 +14331,713 @@
           ]
         }
       ]
+    },
+    "AR-B2-worlds": {
+      "status": "IMPLEMENTED; focused guards/World contracts 134 PASS; consumer suite 77 PASS; source capture/PR/merge pending",
+      "scope": "PARTIAL Worlds models/schemas/contracts/exceptions/router/storage/service. Four WorldCharacter endpoints and its actual setup/lifecycle implementation are pending in the next B2 PR.",
+      "transactions": "seed_world remains flush-only on the supplied Session. Creator mutations keep their commit, row_version, published replay and banner cleanup order. World timezone changes call the existing slot reschedule query in that same transaction without a service-to-runtime dependency.",
+      "scheduling_collaboration": {
+        "current_owner": "World timezone-change service cooperation query",
+        "path": "backend/app/domains/worlds/service/scheduling.py",
+        "follow_up": "AR-B4 activity/scheduler ownership; preserve enabled active autonomous residents, idle slots, World timezone, UTC, dialect row locks, and caller-owned Session without committing."
+      },
+      "frozen_migration_aliases": [
+        "backend/app/domains/worlds/domain/reserved_roles.py",
+        "backend/app/domains/worlds/infrastructure/sqlalchemy_models.py",
+        "backend/app/domains/worlds/infrastructure/definition_repository.py",
+        "backend/app/domains/worlds/infrastructure/sqlalchemy_reserved_roles.py"
+      ],
+      "compatibility_retirement": "The four frozen v2->v3 imports are exact aliases, not copied logic. G5/B8 must retain supported historical migration loading until a verified resolver replaces those imports. worlds.public temporarily serves WC/Package/Routines ORM readers; new service never exports ORM classes.",
+      "split_files": {
+        "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py": [
+          "backend/app/domains/worlds/service/creator.py",
+          "backend/app/domains/worlds/exceptions.py",
+          "backend/app/domains/worlds/service/scheduling.py"
+        ],
+        "backend/app/domains/worlds/infrastructure/sqlalchemy_reserved_roles.py": [
+          "backend/app/domains/worlds/service/reserved_roles.py",
+          "backend/app/domains/worlds/exceptions.py"
+        ],
+        "backend/app/api/v1/routes/worlds.py": [
+          "backend/app/api/v1/routes/worlds.py",
+          "backend/app/domains/worlds/router.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::CREATOR_ROLES",
+          "new": "backend/app/domains/worlds/service/creator.py::CREATOR_ROLES",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::UserIdentity",
+          "new": "backend/app/domains/worlds/service/creator.py::UserIdentity",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldArchivedError",
+          "new": "backend/app/domains/worlds/exceptions.py::WorldArchivedError",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py",
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldBannerValidationError",
+          "new": "backend/app/domains/worlds/exceptions.py::WorldBannerValidationError",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py",
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_world_banner_round_trip_stays_inside_worlds_domain_storage",
+            "tests/worlds/test_transition_contracts.py::test_banner_commit_failure_removes_new_file_and_preserves_previous_banner"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldCreatorRoleRequiredError",
+          "new": "backend/app/domains/worlds/exceptions.py::WorldCreatorRoleRequiredError",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py",
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldDefinitionIncompleteError",
+          "new": "backend/app/domains/worlds/exceptions.py::WorldDefinitionIncompleteError",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py",
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldDefinitionValidationError",
+          "new": "backend/app/domains/worlds/exceptions.py::WorldDefinitionValidationError",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py",
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldMembershipRequiredError",
+          "new": "backend/app/domains/worlds/exceptions.py::WorldMembershipRequiredError",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py",
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldNotFoundError",
+          "new": "backend/app/domains/worlds/exceptions.py::WorldNotFoundError",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py",
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldOwnerRoleRequiredError",
+          "new": "backend/app/domains/worlds/exceptions.py::WorldOwnerRoleRequiredError",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py",
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldRowVersionConflictError",
+          "new": "backend/app/domains/worlds/exceptions.py::WorldRowVersionConflictError",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py",
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldSeedOutcome",
+          "new": "backend/app/domains/worlds/service/creator.py::WorldSeedOutcome",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_transition_contracts.py::test_seed_flushes_without_owning_the_callers_commit"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::WorldServiceError",
+          "new": "backend/app/domains/worlds/exceptions.py::WorldServiceError",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py",
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::_SLUG_SEPARATORS",
+          "new": "backend/app/domains/worlds/service/creator.py::_SLUG_SEPARATORS",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::_T",
+          "new": "backend/app/domains/worlds/service/creator.py::_T",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::_WorldAutonomyScheduleSetting",
+          "new": "backend/app/domains/worlds/service/scheduling.py::_WorldAutonomyScheduleSetting",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/scheduling.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_world_timezone_change_reschedules_enabled_idle_slots"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::_assert_unique",
+          "new": "backend/app/domains/worlds/service/creator.py::_assert_unique",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::_available_slug",
+          "new": "backend/app/domains/worlds/service/creator.py::_available_slug",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::_creator_context",
+          "new": "backend/app/domains/worlds/service/creator.py::_creator_context",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::_semantic_value_equal",
+          "new": "backend/app/domains/worlds/service/creator.py::_semantic_value_equal",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::_slug_base",
+          "new": "backend/app/domains/worlds/service/creator.py::_slug_base",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::_sync_optional_definition",
+          "new": "backend/app/domains/worlds/service/creator.py::_sync_optional_definition",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::_sync_rows",
+          "new": "backend/app/domains/worlds/service/creator.py::_sync_rows",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::archive_world",
+          "new": "backend/app/domains/worlds/service/creator.py::archive_world",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::create_world",
+          "new": "backend/app/domains/worlds/service/creator.py::create_world",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::get_active_membership",
+          "new": "backend/app/domains/worlds/service/creator.py::get_active_membership",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::get_creator_context",
+          "new": "backend/app/domains/worlds/service/creator.py::get_creator_context",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::get_generation_context",
+          "new": "backend/app/domains/worlds/service/creator.py::get_generation_context",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::get_world",
+          "new": "backend/app/domains/worlds/service/creator.py::get_world",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::get_world_read",
+          "new": "backend/app/domains/worlds/service/creator.py::get_world_read",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::is_enabled_world_role",
+          "new": "backend/app/domains/worlds/service/creator.py::is_enabled_world_role",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::publish_world",
+          "new": "backend/app/domains/worlds/service/creator.py::publish_world",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::remove_world_banner",
+          "new": "backend/app/domains/worlds/service/creator.py::remove_world_banner",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::require_creator_access",
+          "new": "backend/app/domains/worlds/service/creator.py::require_creator_access",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::require_owner_access",
+          "new": "backend/app/domains/worlds/service/creator.py::require_owner_access",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::require_world_read_access",
+          "new": "backend/app/domains/worlds/service/creator.py::require_world_read_access",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::reschedule_world_autonomy_slots",
+          "new": "backend/app/domains/worlds/service/scheduling.py::reschedule_world_autonomy_slots",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/creator.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_world_timezone_change_reschedules_enabled_idle_slots"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::seed_world",
+          "new": "backend/app/domains/worlds/service/creator.py::seed_world",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_transition_contracts.py::test_seed_flushes_without_owning_the_callers_commit"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::update_world",
+          "new": "backend/app/domains/worlds/service/creator.py::update_world",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::upload_world_banner",
+          "new": "backend/app/domains/worlds/service/creator.py::upload_world_banner",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_world_banner_round_trip_stays_inside_worlds_domain_storage",
+            "tests/worlds/test_transition_contracts.py::test_banner_commit_failure_removes_new_file_and_preserves_previous_banner"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_world_creator.py::validate_world_definition",
+          "new": "backend/app/domains/worlds/service/creator.py::validate_world_definition",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_reserved_roles.py::ReservedWorldRoleConflictError",
+          "new": "backend/app/domains/worlds/exceptions.py::ReservedWorldRoleConflictError",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/reserved_roles.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_reserved_roles.py::__all__",
+          "new": "backend/app/domains/worlds/service/reserved_roles.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/reserved_roles.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/domains/worlds/infrastructure/sqlalchemy_reserved_roles.py::ensure_no_specific_role",
+          "new": "backend/app/domains/worlds/service/reserved_roles.py::ensure_no_specific_role",
+          "direct_consumers": [
+            "backend/app/domains/worlds/service/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::_WorldCharacterLeaveRuntimeGuard",
+          "new": "backend/app/api/v1/routes/worlds.py::_WorldCharacterLeaveRuntimeGuard",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/worlds.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
+            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::_raise_world_character_error",
+          "new": "backend/app/api/v1/routes/worlds.py::_raise_world_character_error",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/worlds.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
+            "tests/test_world_character_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::_raise_world_character_lifecycle_error",
+          "new": "backend/app/api/v1/routes/worlds.py::_raise_world_character_lifecycle_error",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/worlds.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
+            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::_raise_world_error",
+          "new": "backend/app/domains/worlds/router.py::_raise_world_error",
+          "direct_consumers": [
+            "backend/app/domains/worlds/router.py",
+            "backend/app/api/v1/routes/worlds.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict",
+            "tests/worlds/test_transition_contracts.py::test_resident_leave_still_translates_errors_from_the_world_service"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::archive_world",
+          "new": "backend/app/domains/worlds/router.py::archive_world",
+          "direct_consumers": [
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::create_world",
+          "new": "backend/app/domains/worlds/router.py::create_world",
+          "direct_consumers": [
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::enter_world_with_character",
+          "new": "backend/app/api/v1/routes/worlds.py::enter_world_with_character",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/worlds.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
+            "tests/test_world_character_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::get_world",
+          "new": "backend/app/domains/worlds/router.py::get_world",
+          "direct_consumers": [
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::get_world_character_entry",
+          "new": "backend/app/api/v1/routes/worlds.py::get_world_character_entry",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/worlds.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
+            "tests/test_world_character_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::get_world_creator_context",
+          "new": "backend/app/domains/worlds/router.py::get_world_creator_context",
+          "direct_consumers": [
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::get_world_generation_context",
+          "new": "backend/app/domains/worlds/router.py::get_world_generation_context",
+          "direct_consumers": [
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::leave_world_with_character",
+          "new": "backend/app/api/v1/routes/worlds.py::leave_world_with_character",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/worlds.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
+            "tests/test_l4_pr_g_character_fixture_lifecycle.py::test_leave_is_world_local_idempotent_and_preserves_setup_history"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::publish_world",
+          "new": "backend/app/domains/worlds/router.py::publish_world",
+          "direct_consumers": [
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::remove_world_banner",
+          "new": "backend/app/domains/worlds/router.py::remove_world_banner",
+          "direct_consumers": [
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::router",
+          "new": "backend/app/api/v1/routes/worlds.py::router",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
+            "tests/test_world_character_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::update_world",
+          "new": "backend/app/domains/worlds/router.py::update_world",
+          "direct_consumers": [
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::update_world_character_role",
+          "new": "backend/app/api/v1/routes/worlds.py::update_world_character_role",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/worlds.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_transition_contracts.py::test_split_router_preserves_all_fourteen_world_and_resident_endpoints",
+            "tests/test_world_character_setup_service.py::test_world_entry_creates_pending_world_character_without_provider_or_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::upload_world_banner",
+          "new": "backend/app/domains/worlds/router.py::upload_world_banner",
+          "direct_consumers": [
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_world_banner_round_trip_stays_inside_worlds_domain_storage",
+            "tests/worlds/test_transition_contracts.py::test_banner_commit_failure_removes_new_file_and_preserves_previous_banner"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/worlds.py::validate_world_definition",
+          "new": "backend/app/domains/worlds/router.py::validate_world_definition",
+          "direct_consumers": [
+            "backend/app/domains/worlds/router.py"
+          ],
+          "test_nodes": [
+            "tests/worlds/test_creator_routes.py::test_creator_route_lifecycle_and_stable_conflict"
+          ]
+        }
+      ],
+      "retired_legacy_edges": [
+        {
+          "imported": "app.services.world_definitions",
+          "importer": "app.services.world_foundation"
+        }
+      ],
+      "test_ownership": {
+        "backend/tests/test_world_creator_routes.py": "backend/tests/worlds/test_creator_routes.py",
+        "backend/tests/test_world_definition_contract.py": "backend/tests/worlds/test_definition_contract.py"
+      },
+      "retained_world_character_routes": 4,
+      "moved_world_routes": 10,
+      "validation": {
+        "focused": "134 passed / 4 warnings / 33.83 seconds",
+        "consumers": "77 passed / 3 warnings / 113.22 seconds",
+        "public_nodes": "approved 604 / current 2092 PASS",
+        "contracts": "API/ORM/assertions/split unchanged; overall checker exit 1 solely pending identity introduction evidence: 9 sources, 5 nodes",
+        "new_transition_nodes": 7
+      }
     },
     "AR-B3-M1": {
       "status": "Shared bounded codec/path/quarantine and Character/Social file placement now have actual role owners. Character candidate workflows and World legacy helper continue in the next media slice; Social job/quota/public attachment closes in AR-B5.",

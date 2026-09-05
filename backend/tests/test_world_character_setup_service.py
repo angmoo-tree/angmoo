@@ -13,10 +13,11 @@ from sqlalchemy.pool import StaticPool
 from app import models, schemas
 from app.domains.identity import dependencies as api_deps
 from app.api.v1.routes import worlds as world_routes
+from app.domains.worlds import router as world_creator_routes
 from app.api.v1.routes import world_character_setup as setup_routes
 from app.core import security
 from app.core.db import Base
-from app.domains.worlds.domain.reserved_roles import (
+from app.domains.worlds.contracts import (
     NO_SPECIFIC_ROLE_DESCRIPTION,
     NO_SPECIFIC_ROLE_KEY,
     NO_SPECIFIC_ROLE_NAME,
@@ -90,6 +91,7 @@ def _request(app: FastAPI, method: str, path: str, **kwargs) -> httpx.Response:
 def _app(engine, principal: dict[str, models.User | None]) -> FastAPI:
     app = FastAPI()
     app.include_router(world_routes.router, prefix="/api/v1")
+    app.include_router(world_creator_routes.router, prefix="/api/v1")
     app.include_router(setup_routes.router, prefix="/api/v1")
 
     def get_db():

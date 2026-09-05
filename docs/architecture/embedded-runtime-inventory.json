@@ -121,8 +121,8 @@
         "missing_tests": [],
         "phase": "P1",
         "tests": [
-          "backend/tests/test_world_creator_routes.py",
-          "backend/tests/test_world_definition_contract.py",
+          "backend/tests/worlds/test_creator_routes.py",
+          "backend/tests/worlds/test_definition_contract.py",
           "backend/tests/test_world_foundation.py"
         ]
       },

@@ -15,7 +15,7 @@ from app.domains.identity.public import (
 from app.domains.identity.models import LlmCredential
 from app.domains.identity.models import User
 from app.domains.world_characters.infrastructure.sqlalchemy_models import WorldCharacter
-from app.domains.worlds.infrastructure.sqlalchemy_models import World, WorldMembership
+from app.domains.worlds.models import World, WorldMembership
 
 __all__ = [
     "Character",

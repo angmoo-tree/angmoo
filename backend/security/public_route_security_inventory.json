@@ -94,7 +94,7 @@
     },
     "DELETE /api/v1/worlds/{world_id}/banner": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "remove_world_banner"
     },
     "DELETE /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}": {
@@ -184,12 +184,12 @@
     },
     "GET /api/v1/auth/local/bootstrap": {
       "access": "public",
-      "module": "app.domains.identity.api.local_routes",
+      "module": "app.domains.identity.router.local",
       "endpoint": "get_local_bootstrap_status"
     },
     "GET /api/v1/auth/me": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.auth",
+      "module": "app.domains.identity.router.auth",
       "endpoint": "me"
     },
     "GET /api/v1/bot/activity": {
@@ -404,7 +404,7 @@
     },
     "GET /api/v1/worlds/{world_id}": {
       "access": "public",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "get_world"
     },
     "GET /api/v1/worlds/{world_id}/character-candidates": {
@@ -454,12 +454,12 @@
     },
     "GET /api/v1/worlds/{world_id}/creator-context": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "get_world_creator_context"
     },
     "GET /api/v1/worlds/{world_id}/generation-context": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "get_world_generation_context"
     },
     "GET /api/v1/worlds/{world_id}/manual-social/feed": {
@@ -529,12 +529,12 @@
     },
     "PATCH /api/v1/auth/me": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.auth",
+      "module": "app.domains.identity.router.auth",
       "endpoint": "update_me"
     },
     "PATCH /api/v1/auth/me/preferences": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.auth",
+      "module": "app.domains.identity.router.auth",
       "endpoint": "update_me_preferences"
     },
     "PATCH /api/v1/bot/notifications/{notification_id}/read": {
@@ -574,7 +574,7 @@
     },
     "PATCH /api/v1/worlds/{world_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "update_world"
     },
     "PATCH /api/v1/worlds/{world_id}/characters/{character_id}/role": {
@@ -694,22 +694,22 @@
     },
     "POST /api/v1/auth/local/bootstrap/challenge": {
       "access": "public",
-      "module": "app.domains.identity.api.local_routes",
+      "module": "app.domains.identity.router.local",
       "endpoint": "create_local_bootstrap_challenge"
     },
     "POST /api/v1/auth/local/bootstrap/claim": {
       "access": "public",
-      "module": "app.domains.identity.api.local_routes",
+      "module": "app.domains.identity.router.local",
       "endpoint": "claim_local_owner"
     },
     "POST /api/v1/auth/local/session": {
       "access": "public",
-      "module": "app.domains.identity.api.local_routes",
+      "module": "app.domains.identity.router.local",
       "endpoint": "issue_local_session"
     },
     "POST /api/v1/auth/logout": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.auth",
+      "module": "app.domains.identity.router.auth",
       "endpoint": "logout"
     },
     "POST /api/v1/bot/posts": {
@@ -854,17 +854,17 @@
     },
     "POST /api/v1/worlds": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "create_world"
     },
     "POST /api/v1/worlds/{world_id}/archive": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "archive_world"
     },
     "POST /api/v1/worlds/{world_id}/banner": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "upload_world_banner"
     },
     "POST /api/v1/worlds/{world_id}/characters": {
@@ -919,12 +919,12 @@
     },
     "POST /api/v1/worlds/{world_id}/publish": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "publish_world"
     },
     "POST /api/v1/worlds/{world_id}/validate": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.worlds",
+      "module": "app.domains.worlds.router",
       "endpoint": "validate_world_definition"
     },
     "POST /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}/corrections": {

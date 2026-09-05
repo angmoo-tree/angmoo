@@ -14,6 +14,7 @@ from app.api.v1.routes.manual_social import router as manual_social_router
 from app.api.v1.routes import runtime_status
 from app.api.v1.routes import tree
 from app.api.v1.routes import worlds
+from app.domains.worlds import router as world_creator
 from app.api.v1.routes import world_character_setup
 from app.api.v1.routes import world_activity_runtime
 from app.api.v1.routes import world_chat
@@ -48,6 +49,7 @@ PUBLIC_ROUTERS = (
     runtime_status.router,
     tree.router,
     worlds.router,
+    world_creator.router,
     world_character_setup.router,
     world_activity_runtime.router,
 )

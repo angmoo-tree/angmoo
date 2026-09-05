@@ -38,7 +38,7 @@ from app.domains.memory.infrastructure.sqlalchemy_models import (
 from app.domains.social.infrastructure.sqlalchemy_subjective_context_models import (
     drop_subjective_context_schema,
 )
-from app.domains.worlds.domain.reserved_roles import (
+from app.domains.worlds.contracts import (
     NO_SPECIFIC_ROLE_DESCRIPTION,
     NO_SPECIFIC_ROLE_KEY,
     NO_SPECIFIC_ROLE_NAME,

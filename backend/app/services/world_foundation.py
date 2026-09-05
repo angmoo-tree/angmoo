@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.services import world_definitions
+from app.domains.worlds.service import definition as world_definitions
 
 
 ANGMOO_GLOBAL_WORLD_ID = "019fd7cd-8c00-721a-85f5-6b6cce3bed99"

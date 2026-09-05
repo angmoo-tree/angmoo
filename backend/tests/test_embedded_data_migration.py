@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.runtime.social.observations import observe_source
-from app.domains.worlds.domain.reserved_roles import (
+from app.domains.worlds.contracts import (
     NO_SPECIFIC_ROLE_DESCRIPTION,
     NO_SPECIFIC_ROLE_NAME,
 )

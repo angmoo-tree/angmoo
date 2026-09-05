@@ -29,24 +29,6 @@
     },
     {
       "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "backend/app/integrations/pollinations_image.py"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "backend/app/integrations/pollinations_image.py"
-    },
-    {
-      "markers": [
         "privacy-contact",
         "product-host"
       ],
@@ -64,42 +46,6 @@
         "L0-L4 product URL, privacy UX, provider referer"
       ],
       "path": "backend/tests/config/test_startup_security.py"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "backend/tests/config/test_startup_security.py"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "backend/tests/config/test_startup_security.py"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "backend/tests/identity/test_browser_session_security.py"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "backend/tests/identity/test_browser_session_security.py"
     },
     {
       "markers": [
@@ -155,7 +101,7 @@
       "owner_phases": [
         "L0-L4 product URL, privacy UX, provider referer"
       ],
-      "path": "backend/tests/media/test_replicate_image.py"
+      "path": "backend/tests/test_replicate_image.py"
     },
     {
       "markers": [
@@ -250,24 +196,6 @@
         "L0-L4 product URL, privacy UX, provider referer"
       ],
       "path": "security/refactor_backend_checkpoint.json"
-    },
-    {
-      "markers": [
-        "hosted-extension-type"
-      ],
-      "owner_phases": [
-        "L0-L4 hosted extension compatibility audit"
-      ],
-      "path": "security/refactor_feature_inventory.json"
-    },
-    {
-      "markers": [
-        "hosted-extension-type"
-      ],
-      "owner_phases": [
-        "L0-L4 hosted extension compatibility audit"
-      ],
-      "path": "security/refactor_feature_inventory.json"
     },
     {
       "markers": [
