@@ -11,7 +11,7 @@ from fastapi.routing import _iter_routes_with_context
 from fastapi.testclient import TestClient
 
 from app.api.identity_dependencies import get_current_user
-from app.core.db import get_db
+from app.database import get_db
 from app.domains.chat import dependencies
 from app.domains.chat.router import messages, world_chat, world_chat_response
 from app.runtime.chat import message_composition

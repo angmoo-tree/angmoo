@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.domains.identity.service.profile import get_user
 from app.domains.social.service.presentation import _mentioned_characters_for_texts
 

@@ -22,7 +22,19 @@ BACKEND_ROOT = REPOSITORY_ROOT / "backend"
 if str(BACKEND_ROOT) not in sys.path:
     sys.path.insert(0, str(BACKEND_ROOT))
 
-from app import models
+from app.domains.characters.models import Character as _model_Character
+from app.domains.identity.models import InstallationIdentity as _model_InstallationIdentity
+from app.domains.identity.models import LlmCredential as _model_LlmCredential
+from app.domains.chat.models import MessageMessage as _model_MessageMessage
+from app.domains.chat.models import MessageThread as _model_MessageThread
+from app.domains.identity.models import User as _model_User
+from app.domains.chat.models import UserMessagePreference as _model_UserMessagePreference
+from app.domains.worlds.models import World as _model_World
+from app.domains.world_characters.models import WorldCharacter as _model_WorldCharacter
+from app.domains.worlds.models import WorldMembership as _model_WorldMembership
+from app.domains.worlds.models import WorldRole as _model_WorldRole
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.domains.chat.infrastructure.world_scope_migration import (
     rebuild_message_threads_v3,
 )
@@ -167,14 +179,14 @@ def _seed_supported_predecessor(
     database.open()
     old_world_hash = "b" * 64
     with database.session() as session:
-        owner = models.User(
+        owner = _model_User(
             id="owner-supported-v2",
             email="supported-v2@example.test",
             display_name="Supported Owner",
             display_name_normalized="supported owner",
             profile_setup_completed=True,
         )
-        world = models.World(
+        world = _model_World(
             id="world-supported-v2",
             slug="supported-upgrade-world",
             owner_user_id=owner.id,
@@ -194,7 +206,7 @@ def _seed_supported_predecessor(
             readiness_status="publish_ready",
             create_idempotency_key="supported-upgrade-world",
         )
-        membership = models.WorldMembership(
+        membership = _model_WorldMembership(
             id="membership-supported-v2",
             world_id=world.id,
             user_id=owner.id,
@@ -203,7 +215,7 @@ def _seed_supported_predecessor(
             joined_at=datetime.now(UTC),
         )
         characters = [
-            models.Character(
+            _model_Character(
                 id=f"character-supported-v2-{index}",
                 owner_id=owner.id,
                 name=f"Fixture Character {index}",
@@ -222,14 +234,14 @@ def _seed_supported_predecessor(
         session.add(owner)
         session.flush()
         session.add(
-            models.UserMessagePreference(
+            _model_UserMessagePreference(
                 user_id=owner.id,
                 credential_source="message_key",
                 default_model="gemini-3.1-flash-lite",
             )
         )
         session.add(
-            models.InstallationIdentity(
+            _model_InstallationIdentity(
                 singleton_key="local-installation",
                 installation_id="supported-upgrade-fixture-installation",
                 owner_user_id=owner.id,
@@ -241,7 +253,7 @@ def _seed_supported_predecessor(
         session.add_all([world, *characters])
         session.flush()
         session.add(
-            models.WorldRole(
+            _model_WorldRole(
                 id="custom-role-supported-v2",
                 world_id=world.id,
                 role_key="harbor_guide",
@@ -255,7 +267,7 @@ def _seed_supported_predecessor(
         )
         if conflict:
             session.add(
-                models.WorldRole(
+                _model_WorldRole(
                     id="conflicting-reserved-role-supported-v2",
                     world_id=world.id,
                     role_key="no_specific_role",
@@ -271,7 +283,7 @@ def _seed_supported_predecessor(
         session.flush()
         session.add_all(
             [
-                models.WorldCharacter(
+                _model_WorldCharacter(
                     id="autonomous-supported-v2-a",
                     world_id=world.id,
                     character_id=characters[0].id,
@@ -283,7 +295,7 @@ def _seed_supported_predecessor(
                     world_contract_hash=old_world_hash,
                     version=4,
                 ),
-                models.WorldCharacter(
+                _model_WorldCharacter(
                     id="autonomous-supported-v2-b",
                     world_id=world.id,
                     character_id=characters[1].id,
@@ -295,7 +307,7 @@ def _seed_supported_predecessor(
                     world_contract_hash=old_world_hash,
                     version=7,
                 ),
-                models.WorldCharacter(
+                _model_WorldCharacter(
                     id="owner-controlled-supported-v2",
                     world_id=world.id,
                     character_id=characters[2].id,
@@ -308,7 +320,7 @@ def _seed_supported_predecessor(
                     world_contract_hash=old_world_hash,
                     version=2,
                 ),
-                models.LlmCredential(
+                _model_LlmCredential(
                     id="credential-supported-v2",
                     owner_id=owner.id,
                     character_id=characters[0].id,
@@ -328,7 +340,7 @@ def _seed_supported_predecessor(
         # predecessor database used by the real NSIS update job.  This proves
         # that the installer does not merely handle the one-world roleless
         # example while unit tests cover the rest.
-        second_world = models.World(
+        second_world = _model_World(
             id="world-supported-v2-second",
             slug="supported-upgrade-world-second",
             owner_user_id=owner.id,
@@ -348,7 +360,7 @@ def _seed_supported_predecessor(
             readiness_status="publish_ready",
             create_idempotency_key="supported-upgrade-world-second",
         )
-        noop_world = models.World(
+        noop_world = _model_World(
             id="world-supported-v2-noop",
             slug="supported-upgrade-world-noop",
             owner_user_id=owner.id,
@@ -368,7 +380,7 @@ def _seed_supported_predecessor(
             readiness_status="publish_ready",
             create_idempotency_key="supported-upgrade-world-noop",
         )
-        existing_role_world = models.World(
+        existing_role_world = _model_World(
             id="world-supported-v2-existing-role",
             slug="supported-upgrade-world-existing-role",
             owner_user_id=owner.id,
@@ -391,7 +403,7 @@ def _seed_supported_predecessor(
         session.add_all([second_world, noop_world, existing_role_world])
         session.flush()
         memberships = [
-            models.WorldMembership(
+            _model_WorldMembership(
                 id="membership-supported-v2-second",
                 world_id=second_world.id,
                 user_id=owner.id,
@@ -399,7 +411,7 @@ def _seed_supported_predecessor(
                 status="active",
                 joined_at=datetime.now(UTC),
             ),
-            models.WorldMembership(
+            _model_WorldMembership(
                 id="membership-supported-v2-noop",
                 world_id=noop_world.id,
                 user_id=owner.id,
@@ -407,7 +419,7 @@ def _seed_supported_predecessor(
                 status="active",
                 joined_at=datetime.now(UTC),
             ),
-            models.WorldMembership(
+            _model_WorldMembership(
                 id="membership-supported-v2-existing-role",
                 world_id=existing_role_world.id,
                 user_id=owner.id,
@@ -420,7 +432,7 @@ def _seed_supported_predecessor(
         session.flush()
         session.add_all(
             [
-                models.WorldRole(
+                _model_WorldRole(
                     id="noop-custom-role-supported-v2",
                     world_id=noop_world.id,
                     role_key="archivist",
@@ -431,7 +443,7 @@ def _seed_supported_predecessor(
                     autonomous_allowed=True,
                     status="enabled",
                 ),
-                models.WorldRole(
+                _model_WorldRole(
                     id="existing-reserved-role-supported-v2",
                     world_id=existing_role_world.id,
                     role_key=NO_SPECIFIC_ROLE_KEY,
@@ -443,7 +455,7 @@ def _seed_supported_predecessor(
                     status="disabled",
                     version=3,
                 ),
-                models.WorldCharacter(
+                _model_WorldCharacter(
                     id="autonomous-supported-v2-second-world",
                     world_id=second_world.id,
                     character_id=characters[3].id,
@@ -455,7 +467,7 @@ def _seed_supported_predecessor(
                     world_contract_hash="c" * 64,
                     version=9,
                 ),
-                models.WorldCharacter(
+                _model_WorldCharacter(
                     id="autonomous-supported-v2-noop",
                     world_id=noop_world.id,
                     character_id=characters[4].id,
@@ -467,7 +479,7 @@ def _seed_supported_predecessor(
                     world_contract_hash="d" * 64,
                     version=6,
                 ),
-                models.WorldCharacter(
+                _model_WorldCharacter(
                     id="autonomous-supported-v2-existing-role",
                     world_id=existing_role_world.id,
                     character_id=characters[5].id,
@@ -482,7 +494,7 @@ def _seed_supported_predecessor(
             ]
         )
         session.flush()
-        resolved_thread = models.MessageThread(
+        resolved_thread = _model_MessageThread(
             id="thread-supported-world-resolved",
             requester_id=owner.id,
             character_id=characters[0].id,
@@ -498,7 +510,7 @@ def _seed_supported_predecessor(
             created_at=datetime(2026, 8, 31, 1, 0, tzinfo=UTC),
             updated_at=datetime(2026, 8, 31, 1, 2, tzinfo=UTC),
         )
-        ambiguous_thread = models.MessageThread(
+        ambiguous_thread = _model_MessageThread(
             id="thread-supported-world-ambiguous",
             requester_id=owner.id,
             character_id=characters[3].id,
@@ -516,14 +528,14 @@ def _seed_supported_predecessor(
         session.flush()
         session.add_all(
             [
-                models.MessageMessage(
+                _model_MessageMessage(
                     thread_id=resolved_thread.id,
                     role="user",
                     content="resolved predecessor message must survive",
                     status="ok",
                     created_at=datetime(2026, 8, 31, 1, 1, tzinfo=UTC),
                 ),
-                models.MessageMessage(
+                _model_MessageMessage(
                     thread_id=ambiguous_thread.id,
                     role="assistant",
                     content="ambiguous predecessor message must survive",
@@ -603,7 +615,7 @@ def _seed_supported_predecessor(
                 from app.domains.memory.models.batch import (
                     MEMORY_BATCH_TABLES,
                 )
-                from app.core.db import Base
+                from app.models import Base
 
                 for name in reversed(MEMORY_BATCH_TABLES):
                     Base.metadata.tables[name].drop(sql_connection, checkfirst=True)

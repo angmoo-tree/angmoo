@@ -8,7 +8,13 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app import models
+from app.domains.characters.models import Character as _model_Character
+from app.domains.identity.models import User as _model_User
+from app.domains.worlds.models import World as _model_World
+from app.domains.world_characters.models import WorldCharacter as _model_WorldCharacter
+from app.domains.worlds.models import WorldMembership as _model_WorldMembership
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.domains.worlds.service import definition as world_definitions
 
 
@@ -61,35 +67,35 @@ def stable_backfill_uuid7(scope: str, value: str) -> str:
 
 def choose_global_owner_user_id(db: Session) -> str | None:
     user_id = db.scalar(
-        select(models.User.id)
-        .where(models.User.deleted_at.is_(None), models.User.is_admin.is_(True))
-        .order_by(models.User.created_at, models.User.id)
+        select(_model_User.id)
+        .where(_model_User.deleted_at.is_(None), _model_User.is_admin.is_(True))
+        .order_by(_model_User.created_at, _model_User.id)
         .limit(1)
     )
     if user_id is not None:
         return user_id
     user_id = db.scalar(
-        select(models.Character.owner_id)
-        .join(models.User, models.User.id == models.Character.owner_id)
+        select(_model_Character.owner_id)
+        .join(_model_User, _model_User.id == _model_Character.owner_id)
         .where(
-            models.Character.deleted_at.is_(None),
-            models.User.deleted_at.is_(None),
+            _model_Character.deleted_at.is_(None),
+            _model_User.deleted_at.is_(None),
         )
-        .order_by(models.Character.created_at, models.Character.owner_id)
+        .order_by(_model_Character.created_at, _model_Character.owner_id)
         .limit(1)
     )
     if user_id is not None:
         return user_id
     return db.scalar(
-        select(models.User.id)
-        .where(models.User.deleted_at.is_(None))
-        .order_by(models.User.created_at, models.User.id)
+        select(_model_User.id)
+        .where(_model_User.deleted_at.is_(None))
+        .order_by(_model_User.created_at, _model_User.id)
         .limit(1)
     )
 
 
-def _new_global_world(owner_user_id: str) -> models.World:
-    return models.World(
+def _new_global_world(owner_user_id: str) -> _model_World:
+    return _model_World(
         id=ANGMOO_GLOBAL_WORLD_ID,
         slug=ANGMOO_GLOBAL_WORLD_SLUG,
         owner_user_id=owner_user_id,
@@ -122,7 +128,7 @@ def ensure_angmoo_global_foundation(db: Session) -> GlobalFoundationReport:
         return GlobalFoundationReport(False, None, None, 0, 0)
 
     world = db.scalar(
-        select(models.World).where(models.World.slug == ANGMOO_GLOBAL_WORLD_SLUG)
+        select(_model_World).where(_model_World.slug == ANGMOO_GLOBAL_WORLD_SLUG)
     )
     if world is None:
         world = _new_global_world(owner_user_id)
@@ -135,29 +141,29 @@ def ensure_angmoo_global_foundation(db: Session) -> GlobalFoundationReport:
     now = datetime.now(timezone.utc)
     owner_ids = list(
         db.scalars(
-            select(models.Character.owner_id)
-            .join(models.User, models.User.id == models.Character.owner_id)
+            select(_model_Character.owner_id)
+            .join(_model_User, _model_User.id == _model_Character.owner_id)
             .where(
-                models.Character.deleted_at.is_(None),
-                models.User.deleted_at.is_(None),
+                _model_Character.deleted_at.is_(None),
+                _model_User.deleted_at.is_(None),
             )
             .distinct()
-            .order_by(models.Character.owner_id)
+            .order_by(_model_Character.owner_id)
         )
     )
     if owner_user_id not in owner_ids:
         owner_ids.insert(0, owner_user_id)
 
-    membership_by_user: dict[str, models.WorldMembership] = {}
+    membership_by_user: dict[str, _model_WorldMembership] = {}
     for user_id in owner_ids:
         membership = db.scalar(
-            select(models.WorldMembership).where(
-                models.WorldMembership.world_id == world.id,
-                models.WorldMembership.user_id == user_id,
+            select(_model_WorldMembership).where(
+                _model_WorldMembership.world_id == world.id,
+                _model_WorldMembership.user_id == user_id,
             )
         )
         if membership is None:
-            membership = models.WorldMembership(
+            membership = _model_WorldMembership(
                 id=stable_backfill_uuid7("angmoo-global-membership", user_id),
                 world_id=world.id,
                 user_id=user_id,
@@ -174,21 +180,21 @@ def ensure_angmoo_global_foundation(db: Session) -> GlobalFoundationReport:
 
     characters = list(
         db.scalars(
-            select(models.Character)
-            .where(models.Character.deleted_at.is_(None))
-            .order_by(models.Character.id)
+            select(_model_Character)
+            .where(_model_Character.deleted_at.is_(None))
+            .order_by(_model_Character.id)
         )
     )
     for character in characters:
         existing = db.scalar(
-            select(models.WorldCharacter.id).where(
-                models.WorldCharacter.world_id == world.id,
-                models.WorldCharacter.character_id == character.id,
+            select(_model_WorldCharacter.id).where(
+                _model_WorldCharacter.world_id == world.id,
+                _model_WorldCharacter.character_id == character.id,
             )
         )
         if existing is None:
             db.add(
-                models.WorldCharacter(
+                _model_WorldCharacter(
                     id=stable_backfill_uuid7(
                         "angmoo-global-world-character", character.id
                     ),
@@ -203,9 +209,9 @@ def ensure_angmoo_global_foundation(db: Session) -> GlobalFoundationReport:
                 )
             )
     db.flush()
-    membership_count = db.query(models.WorldMembership).filter_by(world_id=world.id).count()
+    membership_count = db.query(_model_WorldMembership).filter_by(world_id=world.id).count()
     world_character_count = (
-        db.query(models.WorldCharacter).filter_by(world_id=world.id).count()
+        db.query(_model_WorldCharacter).filter_by(world_id=world.id).count()
     )
     return GlobalFoundationReport(
         True,

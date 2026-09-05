@@ -7,8 +7,8 @@ import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
-from app import models as registered_models
-from app.core.db import Base
+from model_fixture_support import models as registered_models
+from app.models import Base
 from app.core.response_schemas import UtcInstantResponseModel
 from app.domains.characters import exceptions, models, schemas
 from app.domains.characters.service import access, creator, image_quota, mutations

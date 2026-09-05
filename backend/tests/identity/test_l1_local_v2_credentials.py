@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.core import security
 from app.config import Settings
 from app.domains.identity.exceptions import CredentialMigrationError

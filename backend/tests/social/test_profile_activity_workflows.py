@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
-from app import models  # Complete ORM registration before partial fixture DDL.
+from model_fixture_support import models  # Complete ORM registration before partial fixture DDL.
 from app.domains.social.exceptions import CharacterNotFoundError
 from app.runtime.social.profile_activity import profile_activity_service
 

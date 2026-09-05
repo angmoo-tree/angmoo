@@ -112,7 +112,14 @@ from sqlalchemy import and_, func, or_, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, aliased, selectinload
 
-from app import models
+from app.domains.routines.models.resident import AgentActivitySetting as _model_AgentActivitySetting
+from app.domains.characters.models import Character as _model_Character
+from app.domains.characters.models import CharacterState as _model_CharacterState
+from app.domains.identity.models import LlmCredential as _model_LlmCredential
+from app.domains.social.models.posts import Post as _model_Post
+from app.domains.identity.models import User as _model_User
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app import schemas
 from app.domains.routines.constants import (
     DEFAULT_MAX_COMMENTS_PER_DAY,
@@ -309,7 +316,7 @@ from app.domains.characters.service.state import upsert_character_state
 
 def seed_demo_data(db: Session) -> None:
     demo_password = settings.demo_user_password
-    existing_user = db.get(models.User, "user-demo")
+    existing_user = db.get(_model_User, "user-demo")
     if existing_user is not None:
         changed = False
         if existing_user.email is None:
@@ -326,9 +333,9 @@ def seed_demo_data(db: Session) -> None:
             changed = True
         if changed:
             db.commit()
-        if db.get(models.LlmCredential, "cred-demo-google") is None:
+        if db.get(_model_LlmCredential, "cred-demo-google") is None:
             db.add(
-                models.LlmCredential(
+                _model_LlmCredential(
                     id="cred-demo-google",
                     owner_id="user-demo",
                     character_id="char-mango",
@@ -338,9 +345,9 @@ def seed_demo_data(db: Session) -> None:
                 )
             )
             db.commit()
-        if db.get(models.AgentActivitySetting, "char-mango") is None:
+        if db.get(_model_AgentActivitySetting, "char-mango") is None:
             db.add(
-                models.AgentActivitySetting(
+                _model_AgentActivitySetting(
                     character_id="char-mango",
                     auto_enabled=False,
                     activity_level="normal",
@@ -361,7 +368,7 @@ def seed_demo_data(db: Session) -> None:
             db.commit()
         return
 
-    user = models.User(
+    user = _model_User(
         id="user-demo",
         email="demo@angmoo.local",
         password_hash=(
@@ -371,7 +378,7 @@ def seed_demo_data(db: Session) -> None:
         display_name_normalized="demo user",
         profile_setup_completed=True,
     )
-    character = models.Character(
+    character = _model_Character(
         id="char-mango",
         owner_id=user.id,
         name="망고",
@@ -391,26 +398,26 @@ def seed_demo_data(db: Session) -> None:
         ),
     )
     posts = [
-        models.Post(
+        _model_Post(
             id="post-001",
             author_name="운영자",
             title="오늘의 둥지 주제",
             body="새로 들어온 앵무들이 서로를 알아갈 수 있게 짧은 인사를 남겨주세요.",
         ),
-        models.Post(
+        _model_Post(
             id="post-002",
             author_name="리나",
             title="비 오는 날 집중하는 법",
             body="빗소리가 들리면 집중이 잘 되는 편인가요, 아니면 산만해지나요?",
         ),
     ]
-    state = models.CharacterState(
+    state = _model_CharacterState(
         character_id=character.id,
         mood="curious",
         summary="아직 커뮤니티를 관찰하며 분위기를 파악하는 중이다.",
         memory_note="처음 보는 사용자에게는 가볍게 인사한다.",
     )
-    credential = models.LlmCredential(
+    credential = _model_LlmCredential(
         id="cred-demo-google",
         owner_id=user.id,
         character_id=character.id,
@@ -418,7 +425,7 @@ def seed_demo_data(db: Session) -> None:
         auth_profile_id="google:default",
         label="Demo Google profile",
     )
-    setting = models.AgentActivitySetting(
+    setting = _model_AgentActivitySetting(
         character_id=character.id,
         auto_enabled=False,
         activity_level="normal",

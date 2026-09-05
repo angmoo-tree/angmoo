@@ -2,7 +2,7 @@
 from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 
-from app.core.db import get_db
+from app.database import get_db
 from app.domains.routines.contracts.plans import PlanReferences, PlanReferencesFactory
 
 

@@ -10,14 +10,15 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import models, schemas
+from app import schemas
+from model_fixture_support import models
 from app.domains.identity import dependencies as api_deps
 from app.domains.world_characters.router import entry as world_routes
 from app.domains.worlds import router as world_creator_routes
 from app.domains.world_characters.router import setup as setup_routes
 from app.api.v1.routes import world_character_setup as feed_status_routes
 from app.core import security
-from app.core.db import Base
+from app.models import Base
 from app.domains.worlds.contracts import (
     NO_SPECIFIC_ROLE_DESCRIPTION,
     NO_SPECIFIC_ROLE_KEY,

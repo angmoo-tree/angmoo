@@ -8,7 +8,7 @@ import pytest
 from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import Session, sessionmaker
 
-from app import models
+from model_fixture_support import models
 from app.domains.runtime.exceptions import SchedulerLeaseHeldError
 from app.runtime.persistence.scheduler_lease import SqlAlchemySchedulerLeaseRepository
 

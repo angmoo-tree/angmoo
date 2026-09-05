@@ -34,9 +34,12 @@ from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from app.domains.identity.models import User as _model_User
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.domains.identity.dependencies import get_current_user
-from app.core.db import get_db
+from app.database import get_db
 from app.runtime.characters import creator as draft_service
 from app.runtime.characters import management as agent_service
 from app.services import agent_runs as agent_run_service
@@ -108,7 +111,7 @@ def delete_agent(
     character_id: str,
     data: schemas.AgentDeleteCreate,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: _model_User = Depends(get_current_user),
 ) -> Response:
     try:
         agent_service.delete_agent(db, user, character_id, data)
@@ -152,7 +155,7 @@ router.routes.append(_local_key_routes["revoke_local_key"])
 def get_feed_cue(
     character_id: str,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: _model_User = Depends(get_current_user),
 ) -> schemas.AgentFeedCueRead | None:
     try:
         return agent_service.get_feed_cue(db, user, character_id)
@@ -171,7 +174,7 @@ def give_feed_cue(
     character_id: str,
     data: schemas.AgentFeedCueCreate,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: _model_User = Depends(get_current_user),
 ) -> schemas.AgentFeedCueRead:
     try:
         return agent_service.give_feed_cue(db, user, character_id, data)
@@ -240,7 +243,7 @@ def update_credential(
     character_id: str,
     data: schemas.CredentialUpsert,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: _model_User = Depends(get_current_user),
 ) -> schemas.CredentialRead:
     try:
         return agent_service.update_credential(db, user, character_id, data)
@@ -266,7 +269,7 @@ def get_credential_metadata(
     character_id: str,
     world_id: str | None = None,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: _model_User = Depends(get_current_user),
 ) -> schemas.CredentialRead | None:
     try:
         return agent_service.get_credential_metadata(
@@ -289,7 +292,7 @@ def delete_credential(
     character_id: str,
     world_id: str | None = None,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: _model_User = Depends(get_current_user),
 ) -> Response:
     try:
         agent_service.delete_credential(
@@ -313,7 +316,7 @@ def delete_credential(
 def get_settings(
     character_id: str,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: _model_User = Depends(get_current_user),
 ) -> schemas.AgentActivitySettingRead:
     try:
         return agent_service.get_settings(db, user, character_id)
@@ -326,7 +329,7 @@ def update_settings(
     character_id: str,
     data: schemas.AgentActivitySettingUpdate,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: _model_User = Depends(get_current_user),
 ) -> schemas.AgentActivitySettingRead:
     try:
         return agent_service.update_settings(db, user, character_id, data)
@@ -351,7 +354,7 @@ def update_settings(
 async def analyze_tendency(
     character_id: str,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: _model_User = Depends(get_current_user),
 ) -> schemas.AgentDetailRead:
     try:
         return await agent_service.analyze_tendency(db, user, character_id)
@@ -406,7 +409,7 @@ async def analyze_tendency(
 def activate_agent(
     character_id: str,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: _model_User = Depends(get_current_user),
 ) -> schemas.AgentDetailRead:
     try:
         return agent_service.activate_agent(db, user, character_id)
@@ -452,7 +455,7 @@ def activate_agent(
 def deactivate_agent(
     character_id: str,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: _model_User = Depends(get_current_user),
 ) -> schemas.AgentDetailRead:
     try:
         return agent_service.deactivate_agent(db, user, character_id)
@@ -468,7 +471,7 @@ def deactivate_agent(
 async def run_now(
     character_id: str,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: _model_User = Depends(get_current_user),
 ) -> schemas.OpenClawAgentRunRead:
     try:
         return await agent_service.run_agent_now(db, user, character_id)
@@ -537,7 +540,7 @@ async def first_greeting(
     character_id: str,
     data: schemas.AgentFirstGreetingCreate,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: _model_User = Depends(get_current_user),
 ) -> schemas.AgentFirstGreetingRead:
     try:
         return await agent_service.run_first_greeting(db, user, character_id, data)

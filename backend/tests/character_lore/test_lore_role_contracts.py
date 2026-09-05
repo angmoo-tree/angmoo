@@ -7,8 +7,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import models as registered_models  # noqa: F401 - explicit registry is G5
-from app.core.db import Base
+from model_fixture_support import models as registered_models  # noqa: F401 - explicit registry is G5
+from app.models import Base
 from app.domains.characters.models import Character
 from app.domains.identity.models import User
 from app.domains.character_lore import models

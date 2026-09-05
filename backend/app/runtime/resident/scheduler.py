@@ -13,7 +13,7 @@ from app.domains.routines import schemas
 from app.runtime.routines.lifecycle_references import SqlAlchemyLifecycleReferences
 
 from app.config import Settings, settings
-from app.core.db import SessionLocal
+from app.database import SessionLocal
 from app.domains.runtime.service.lease_coordinator import SchedulerLeaseCoordinator
 from app.domains.runtime.exceptions import SchedulerLeaseHeldError
 from app.domains.runtime.exceptions import SchedulerLeaseLostError

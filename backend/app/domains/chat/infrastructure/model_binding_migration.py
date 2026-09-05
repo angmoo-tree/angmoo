@@ -8,7 +8,7 @@ from typing import Any
 from sqlalchemy import MetaData, text
 from sqlalchemy.schema import CreateIndex, CreateTable
 
-from app.core.db import Base
+from app.models import Base
 from app.domains.chat.contracts.model_binding import MessageModelBindingMode
 from app.domains.chat.policies import MESSAGE_MODELS
 from app.domains.chat.infrastructure.world_scope_migration import (

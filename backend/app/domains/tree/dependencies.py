@@ -2,7 +2,7 @@
 
 from fastapi import Request
 from app.api.identity_dependencies import get_current_user
-from app.core.db import get_db
+from app.database import get_db
 from app.domains.tree.contracts import TreeReferences
 
 

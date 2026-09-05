@@ -39,8 +39,9 @@ def current_contracts(asgi_moves: dict[str, str] | None = None) -> dict:
     sys.path.insert(0, str(ROOT / "backend"))
     from app.main import app as full_app
     from app.main import public_app
-    import app.models  # noqa: F401 - canonical model registration
-    from app.core.db import Base
+    from app.runtime.persistence.model_registration import register_models
+    register_models()
+    from app.models import Base
 
     contracts = {}
     applications = [("full", full_app), ("public", public_app)]
@@ -460,9 +461,150 @@ def normalized_assertion(fragment: str, literals: list[tuple[str, str]], asgi_mo
     return ast.dump(Paths().visit(ast.parse(fragment)), include_attributes=False)
 
 
+def validated_model_facade_retirements(moves: dict[str, str], files: dict[str, str],
+                                      snapshots: list[dict], root: Path = ROOT) -> dict[str, str]:
+    """Validate removal of pure ORM aliases before changing their existence test.
+
+    The original alias must be frozen, its actual classes must still match their
+    frozen definitions, and registration must load that owner on the sole Base.
+    This does not authorize removing behavior assertions or arbitrary modules.
+    """
+    if not isinstance(moves, dict):
+        raise ValueError("model facade retirements must be an exact module mapping")
+    if not moves:
+        return {}
+
+    def module_path(name):
+        if not isinstance(name, str) or not re.fullmatch(r"app(?:\.[a-z_][a-z0-9_]*)+", name):
+            raise ValueError("invalid model facade module")
+        return "backend/" + name.replace(".", "/") + ".py"
+
+    def frozen(path):
+        records = [s["tracked_files"][path] for s in snapshots if path in s.get("tracked_files", {})]
+        if not records:
+            raise ValueError("model facade source is not protected: " + path)
+        blob = records[-1]
+        return ast.parse(git_bytes("cat-file", "blob", blob["git_blob"] if isinstance(blob, dict) else blob, root=root).decode("utf-8-sig"))
+
+    def plain(tree):
+        return [n for n in tree.body if not (isinstance(n, ast.Expr) and isinstance(n.value, ast.Constant) and isinstance(n.value.value, str))]
+
+    def mapped(path):
+        seen = set()
+        while path in files and files[path] != path:
+            if path in seen:
+                raise ValueError("cyclic model facade mapping")
+            seen.add(path)
+            path = files[path]
+        return path
+
+    app_sources = {p: ast.parse(p.read_text(encoding="utf-8-sig")) for p in (root / "backend/app").rglob("*.py") if "__pycache__" not in p.parts}
+    base_path = root / "backend/app/models.py"
+    expected_base = next(n for n in frozen("backend/app/core/db.py").body if isinstance(n, ast.ClassDef) and n.name == "Base")
+    actual_base = [n for p, tree in app_sources.items() for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "Base"]
+    if len(actual_base) != 1 or base_path not in app_sources or ast.dump(actual_base[0]) != ast.dump(expected_base):
+        raise ValueError("model retirement requires the unchanged sole ORM Base")
+    base_body = plain(app_sources[base_path])
+    if len(base_body) != 2 or ast.dump(base_body[0]) != ast.dump(ast.parse("from sqlalchemy.orm import DeclarativeBase").body[0]) or base_body[1] is not actual_base[0]:
+        raise ValueError("global models must contain only the shared ORM Base")
+    registration = root / "backend/app/runtime/persistence/model_registration.py"
+    if registration not in app_sources:
+        raise ValueError("explicit model registration is missing")
+    registration_tree = app_sources[registration]
+    if _scope_binding_counts(registration_tree.body)["Base"] != 1:
+        raise ValueError("model registration cannot replace the shared Base")
+    if not any(isinstance(n, ast.ImportFrom) and n.module == "app.models" and [(a.name, a.asname) for a in n.names] == [("Base", None)] for n in registration_tree.body):
+        raise ValueError("model registration must use the shared Base")
+    functions = [n for n in registration_tree.body if isinstance(n, ast.FunctionDef) and n.name == "register_models"]
+    if len(functions) != 1 or _scope_binding_counts(registration_tree.body)["register_models"] != 1:
+        raise ValueError("explicit model registration function is missing")
+    registration_function = functions[0]
+    if registration_function.decorator_list or ast.dump(registration_function.args) != ast.dump(ast.parse("def register_models(): pass").body[0].args):
+        raise ValueError("model registration must remain an undecorated no-argument function")
+    body = plain(functions[0])
+    if not body or ast.dump(body[-1]) != ast.dump(ast.parse("return Base.metadata").body[0]) or any(not isinstance(n, ast.Import) for n in body[:-1]):
+        raise ValueError("registration must directly import owners and return the shared metadata")
+    registered = {a.name for n in body[:-1] for a in n.names if a.asname is None}
+
+    for old, target in moves.items():
+        old_path, target_path = module_path(old), module_path(target)
+        if not old.startswith("app.models.") or not re.fullmatch(r"app\.domains\.[a-z_]+\.models(?:\.[a-z_]+)*", target):
+            raise ValueError("retirement is limited to legacy model aliases and actual domain model owners")
+        if (root / old_path).exists() or (root / old_path.removesuffix(".py") / "__init__.py").exists() or mapped(old_path) != target_path:
+            raise ValueError("retired model facade remains or lacks its exact owner mapping")
+        current = app_sources.get(root / target_path)
+        if current is None or target not in registered:
+            raise ValueError("retired model owner is missing from explicit registration")
+        imports = [n for n in current.body if isinstance(n, ast.ImportFrom) and n.module == "app.models"]
+        if len(imports) != 1 or [(a.name, a.asname) for a in imports[0].names] != [("Base", None)] or _scope_binding_counts(current.body)["Base"] != 1:
+            raise ValueError("canonical model owner must use the sole Base")
+        owned = {n.name: n for n in current.body if isinstance(n, ast.ClassDef)}
+        original = plain(frozen(old_path))
+        exports, imported, classes = [], {}, 0
+        for node in original:
+            if isinstance(node, ast.ImportFrom) and node.level == 0 and node.module and node.module.startswith("app.domains."):
+                source_path = module_path(node.module)
+                if mapped(source_path) != target_path or any(a.asname or a.name == "*" for a in node.names):
+                    raise ValueError("frozen facade does not point only to its canonical owner")
+                source_tree = frozen(source_path)
+                source_classes = {n.name: n for n in source_tree.body if isinstance(n, ast.ClassDef)}
+                source_values = {t.id: n for n in source_tree.body if isinstance(n, (ast.Assign, ast.AnnAssign)) for t in (n.targets if isinstance(n, ast.Assign) else [n.target]) if isinstance(t, ast.Name)}
+                current_values = {t.id: n for n in current.body if isinstance(n, (ast.Assign, ast.AnnAssign)) for t in (n.targets if isinstance(n, ast.Assign) else [n.target]) if isinstance(t, ast.Name)}
+                for alias in node.names:
+                    if alias.name in imported:
+                        raise ValueError("duplicate frozen facade export")
+                    imported[alias.name] = source_path
+                    if _scope_binding_counts(current.body)[alias.name] != 1:
+                        raise ValueError("canonical model export cannot be rebound: " + alias.name)
+                    if alias.name in source_classes:
+                        classes += 1
+                        if alias.name not in owned or ast.dump(owned[alias.name]) != ast.dump(source_classes[alias.name]):
+                            raise ValueError("canonical model class changed or disappeared: " + alias.name)
+                    elif alias.name not in source_values or alias.name not in current_values or ast.dump(source_values[alias.name]) != ast.dump(current_values[alias.name]):
+                        raise ValueError("unsupported frozen model facade export")
+            elif isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name) and node.targets[0].id == "__all__" and not exports:
+                exports = ast.literal_eval(node.value)
+            else:
+                raise ValueError("frozen facade contains implementation or unsupported syntax")
+        if not classes or not isinstance(exports, list) or len(exports) != len(set(exports)) or set(exports) != set(imported):
+            raise ValueError("frozen model facade exports are incomplete")
+        for path, tree in app_sources.items():
+            module = path.relative_to(root / "backend").with_suffix("").as_posix().replace("/", ".")
+            package = module.removesuffix(".__init__") if path.name == "__init__.py" else module.rpartition(".")[0]
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    names = [a.name for a in node.names]
+                elif isinstance(node, ast.ImportFrom):
+                    prefix = package.split(".")[:len(package.split(".")) - node.level + 1] if node.level else []
+                    base = ".".join(prefix + ([node.module] if node.module else []))
+                    names = [base, *(base + "." + a.name for a in node.names)]
+                else:
+                    continue
+                if any(name == old or name.startswith(old + ".") for name in names):
+                    raise ValueError("retired model facade still has an actual import: " + module)
+    return dict(moves)
+
+
+def retired_model_assertion(fragment: str, retirements: dict[str, str], literals: list[tuple[str, str]] | None = None) -> str:
+    """Only an exact positive import-map equality becomes its absence check."""
+    tree = ast.parse(fragment)
+    if len(tree.body) != 1 or not isinstance(tree.body[0], ast.Assert) or tree.body[0].msg is not None:
+        return fragment
+    node = tree.body[0].test
+    for old, target in retirements.items():
+        expected = ast.parse(f"assert imports[{old!r}] == {{{target!r}}}").body[0].test
+        if (isinstance(node, ast.Compare) and ast.dump(node.left) == ast.dump(expected.left)
+                and len(node.ops) == 1 and isinstance(node.ops[0], ast.Eq) and len(node.comparators) == 1
+                and normalized_assertion(ast.unparse(node.comparators[0]), literals or [])
+                == normalized_assertion(ast.unparse(expected.comparators[0]), literals or [])):
+            return f"assert {old!r} not in imports"
+    return fragment
+
+
 def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict[str, str], root: Path = ROOT,
                      symbols: dict[str, str] | None = None,
-                     asgi_moves: dict[str, str] | None = None) -> list[str]:
+                     asgi_moves: dict[str, str] | None = None,
+                     model_retirements: dict[str, str] | None = None) -> list[str]:
     errors, cache, checked = [], {}, set()
     root_cache, frozen_root_cache = {}, {}
     literals = path_literals(files)
@@ -512,7 +654,7 @@ def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict
                 frozen_root_cache[(old_path, blob)] = literal_path_roots(text, "backend/" + old_path)
             old_roots = frozen_root_cache.get((old_path, blob), {}).get(old_function, {})
             new_roots = root_cache.get(new_path, {}).get(new_function, {})
-            required = Counter(normalized_assertion(value, literals, asgi_moves, roots=old_roots) for value in expected)
+            required = Counter(normalized_assertion(retired_model_assertion(value, model_retirements or {}, literals), literals, asgi_moves, roots=old_roots) for value in expected)
             # An unchanged synthetic legacy-path fixture and a migrated real
             # path assertion are equivalent under the same exact move map.
             # Normalize both sides; behavior predicates remain mandatory.
@@ -791,8 +933,11 @@ def main() -> int:
                             for snapshot in snapshots]
         symbols = mapped_targets(sorted(set().union(*(set(nodes) for nodes in symbol_snapshots))),
                                  moves.get("test_symbols", {}), nodes=True, node_snapshots=symbol_snapshots)
+        model_retirements = validated_model_facade_retirements(
+            moves.get("retired_model_facades", {}), file_targets, [baseline, *snapshots])
         errors.extend(check_assertions(snapshots, targets, file_targets,
-                                      symbols={old: new for old, new in symbols.items() if old != new}, asgi_moves=asgi_moves))
+                                      symbols={old: new for old, new in symbols.items() if old != new}, asgi_moves=asgi_moves,
+                                      model_retirements=model_retirements))
         errors.extend(check_suppressions(snapshots, file_targets))
     except (KeyError, TypeError, ValueError) as exc:
         errors.append(str(exc))

@@ -6,8 +6,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app import models
-from app.core.db import Base
+from model_fixture_support import models
+from app.models import Base
 from app.domains.social.public import SocialSearchState, current_social_search
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 from app.runtime.search import EmbeddedSocialSearchProjection, SqliteFts5SearchIndex

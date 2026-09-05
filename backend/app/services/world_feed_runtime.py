@@ -10,7 +10,11 @@ from typing import Any
 
 from pydantic import ValidationError
 
-from app import models, schemas
+from app import schemas
+from app.domains.world_characters.models import CharacterActiveWorld as _model_CharacterActiveWorld
+from app.domains.social.models.feed import WorldCharacterFeedObservation as _model_WorldCharacterFeedObservation
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.runtime.social.observations import observe_source
 from app.core import unit_of_work
 from app.cruds import agent_runs as agent_run_crud
@@ -257,7 +261,7 @@ async def run_world_keyword_feed(
     provider: FeedReactionProvider | None = None,
 ) -> dict[str, Any]:
     tracker = RunLlmTracker(max_calls=3)
-    active_world = ctx.db.get(models.CharacterActiveWorld, ctx.character.id)
+    active_world = ctx.db.get(_model_CharacterActiveWorld, ctx.character.id)
     if active_world is None:
         return _safe_result(
             outcome="world_character_not_ready",
@@ -875,7 +879,7 @@ async def run_world_keyword_feed(
                 for observation in claims.observations
                 if (
                     row := ctx.db.get(
-                        models.WorldCharacterFeedObservation, observation.id
+                        _model_WorldCharacterFeedObservation, observation.id
                     )
                 )
                 is not None

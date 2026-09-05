@@ -34,7 +34,16 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from app.domains.routines.models.resident import AgentPublicActionExecution as _model_AgentPublicActionExecution
+from app.domains.relationships.models.points import AgentRelationshipPoint as _model_AgentRelationshipPoint
+from app.domains.characters.models import Character as _model_Character
+from app.domains.characters.models import CharacterState as _model_CharacterState
+from app.domains.identity.models import LlmCredential as _model_LlmCredential
+from app.domains.social.models.posts import Post as _model_Post
+from app.domains.social.models.posts import ProfileFollow as _model_ProfileFollow
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.runtime.social.observations import observe_source
 from app.core import unit_of_work
 from app.config import settings
@@ -961,7 +970,7 @@ def _action_name_for_policy(action_type: str) -> str:
     return "post" if action_type == "create_post" else action_type
 
 
-def _decrypt_api_key(credential: models.LlmCredential) -> str:
+def _decrypt_api_key(credential: _model_LlmCredential) -> str:
     try:
         return CredentialResolver.resolve_llm_credential(
             credential,
@@ -1042,7 +1051,7 @@ def _topic_arc_last_post_created_at(
     if not callable(db_get):
         return None
     try:
-        post = db_get(models.Post, last_post_id)
+        post = db_get(_model_Post, last_post_id)
     except Exception:
         logger.debug(
             "Failed to load topic arc last post for continuity context",
@@ -1100,7 +1109,7 @@ def _topic_arc_continuity_context(
     }
 
 
-def _persona_context(character: models.Character, state: models.CharacterState | None) -> str:
+def _persona_context(character: _model_Character, state: _model_CharacterState | None) -> str:
     return "\n".join(
         [
             f"name: {character.name}",
@@ -1174,10 +1183,10 @@ def _target_character_following(
         return False
     return (
         ctx.db.scalar(
-            select(models.ProfileFollow.id)
+            select(_model_ProfileFollow.id)
             .where(
-                models.ProfileFollow.follower_character_id == ctx.character.id,
-                models.ProfileFollow.target_character_id == target_id,
+                _model_ProfileFollow.follower_character_id == ctx.character.id,
+                _model_ProfileFollow.target_character_id == target_id,
             )
             .limit(1)
         )
@@ -1414,15 +1423,15 @@ def _recent_independent_topic_keys(
     try:
         executions = list(
             db_scalars(
-                select(models.AgentPublicActionExecution)
+                select(_model_AgentPublicActionExecution)
                 .where(
-                    models.AgentPublicActionExecution.character_id == ctx.character.id
+                    _model_AgentPublicActionExecution.character_id == ctx.character.id
                 )
-                .where(models.AgentPublicActionExecution.action_type == "post")
-                .where(models.AgentPublicActionExecution.status == "succeeded")
+                .where(_model_AgentPublicActionExecution.action_type == "post")
+                .where(_model_AgentPublicActionExecution.status == "succeeded")
                 .order_by(
-                    models.AgentPublicActionExecution.created_at.desc(),
-                    models.AgentPublicActionExecution.id.desc(),
+                    _model_AgentPublicActionExecution.created_at.desc(),
+                    _model_AgentPublicActionExecution.id.desc(),
                 )
                 .limit(40)
             )
@@ -1465,17 +1474,17 @@ def _today_independent_topic_keys(ctx: LangGraphResidentContext) -> set[str]:
     try:
         executions = list(
             db_scalars(
-                select(models.AgentPublicActionExecution)
+                select(_model_AgentPublicActionExecution)
                 .where(
-                    models.AgentPublicActionExecution.character_id == ctx.character.id
+                    _model_AgentPublicActionExecution.character_id == ctx.character.id
                 )
-                .where(models.AgentPublicActionExecution.action_type == "post")
-                .where(models.AgentPublicActionExecution.status == "succeeded")
-                .where(models.AgentPublicActionExecution.created_at >= start_utc)
-                .where(models.AgentPublicActionExecution.created_at <= end_utc)
+                .where(_model_AgentPublicActionExecution.action_type == "post")
+                .where(_model_AgentPublicActionExecution.status == "succeeded")
+                .where(_model_AgentPublicActionExecution.created_at >= start_utc)
+                .where(_model_AgentPublicActionExecution.created_at <= end_utc)
                 .order_by(
-                    models.AgentPublicActionExecution.created_at.desc(),
-                    models.AgentPublicActionExecution.id.desc(),
+                    _model_AgentPublicActionExecution.created_at.desc(),
+                    _model_AgentPublicActionExecution.id.desc(),
                 )
                 .limit(120)
             )
@@ -1553,16 +1562,16 @@ def _today_own_root_posts_for_coverage(
     try:
         posts = list(
             db_scalars(
-                select(models.Post)
-                .where(models.Post.author_character_id == ctx.character.id)
-                .where(models.Post.created_at >= start_utc)
-                .where(models.Post.created_at <= end_utc)
-                .where(models.Post.reply_to_post_id.is_(None))
-                .where(models.Post.repost_of_post_id.is_(None))
-                .where(models.Post.post_type == "post")
-                .where(models.Post.deleted_at.is_(None))
-                .where(models.Post.report_hidden_at.is_(None))
-                .order_by(models.Post.created_at.desc(), models.Post.id.desc())
+                select(_model_Post)
+                .where(_model_Post.author_character_id == ctx.character.id)
+                .where(_model_Post.created_at >= start_utc)
+                .where(_model_Post.created_at <= end_utc)
+                .where(_model_Post.reply_to_post_id.is_(None))
+                .where(_model_Post.repost_of_post_id.is_(None))
+                .where(_model_Post.post_type == "post")
+                .where(_model_Post.deleted_at.is_(None))
+                .where(_model_Post.report_hidden_at.is_(None))
+                .order_by(_model_Post.created_at.desc(), _model_Post.id.desc())
                 .limit(20)
             )
         )
@@ -1602,16 +1611,16 @@ def _today_root_writing_memory_for_prompt(
     try:
         posts = list(
             db_scalars(
-                select(models.Post)
-                .where(models.Post.author_character_id == ctx.character.id)
-                .where(models.Post.created_at >= start_utc)
-                .where(models.Post.created_at <= end_utc)
-                .where(models.Post.reply_to_post_id.is_(None))
-                .where(models.Post.repost_of_post_id.is_(None))
-                .where(models.Post.post_type == "post")
-                .where(models.Post.deleted_at.is_(None))
-                .where(models.Post.report_hidden_at.is_(None))
-                .order_by(models.Post.created_at.desc(), models.Post.id.desc())
+                select(_model_Post)
+                .where(_model_Post.author_character_id == ctx.character.id)
+                .where(_model_Post.created_at >= start_utc)
+                .where(_model_Post.created_at <= end_utc)
+                .where(_model_Post.reply_to_post_id.is_(None))
+                .where(_model_Post.repost_of_post_id.is_(None))
+                .where(_model_Post.post_type == "post")
+                .where(_model_Post.deleted_at.is_(None))
+                .where(_model_Post.report_hidden_at.is_(None))
+                .order_by(_model_Post.created_at.desc(), _model_Post.id.desc())
                 .limit(12)
             )
         )
@@ -1899,13 +1908,13 @@ def _build_independent_post_roll(
 def _recent_own_root_posts(ctx: LangGraphResidentContext) -> list[dict[str, Any]]:
     posts = list(
         ctx.db.scalars(
-            select(models.Post)
-            .where(models.Post.author_character_id == ctx.character.id)
-            .where(models.Post.reply_to_post_id.is_(None))
-            .where(models.Post.repost_of_post_id.is_(None))
-            .where(models.Post.post_type == "post")
-            .where(models.Post.deleted_at.is_(None))
-            .order_by(models.Post.created_at.desc(), models.Post.id.desc())
+            select(_model_Post)
+            .where(_model_Post.author_character_id == ctx.character.id)
+            .where(_model_Post.reply_to_post_id.is_(None))
+            .where(_model_Post.repost_of_post_id.is_(None))
+            .where(_model_Post.post_type == "post")
+            .where(_model_Post.deleted_at.is_(None))
+            .order_by(_model_Post.created_at.desc(), _model_Post.id.desc())
             .limit(8)
         )
     )
@@ -1922,7 +1931,7 @@ def _recent_own_root_posts(ctx: LangGraphResidentContext) -> list[dict[str, Any]
 
 
 def _conversation_turn_for_prompt(
-    post: models.Post,
+    post: _model_Post,
     *,
     current_character_id: str,
     actor_character_id: str | None,
@@ -1939,23 +1948,23 @@ def _conversation_turn_for_prompt(
     }
 
 
-def _conversation_context_post(db: Session, post_id: str | None) -> models.Post | None:
+def _conversation_context_post(db: Session, post_id: str | None) -> _model_Post | None:
     if not post_id:
         return None
     return db.scalar(
-        select(models.Post)
+        select(_model_Post)
         .where(
-            models.Post.id == post_id,
-            models.Post.deleted_at.is_(None),
-            models.Post.report_hidden_at.is_(None),
+            _model_Post.id == post_id,
+            _model_Post.deleted_at.is_(None),
+            _model_Post.report_hidden_at.is_(None),
         )
         .limit(1)
     )
 
 
 def _thread_root_post_for_conversation_context(
-    db: Session, source_post: models.Post
-) -> models.Post:
+    db: Session, source_post: _model_Post
+) -> _model_Post:
     post = source_post
     seen = {post.id}
     while post.reply_to_post_id is not None:
@@ -2170,16 +2179,16 @@ def _character_handle_by_id(ctx: LangGraphResidentContext, character_id: str | N
     return _clip(getattr(character, "handle", ""), 80) or None
 
 
-def _character_for_handle(ctx: LangGraphResidentContext, handle: str | None) -> models.Character | None:
+def _character_for_handle(ctx: LangGraphResidentContext, handle: str | None) -> _model_Character | None:
     normalized = str(handle or "").strip().removeprefix("@").lower()
     if not normalized:
         return None
     return ctx.db.scalar(
-        select(models.Character)
+        select(_model_Character)
         .where(
-            models.Character.handle == normalized,
-            models.Character.deleted_at.is_(None),
-            models.Character.moderation_status != "suspended",
+            _model_Character.handle == normalized,
+            _model_Character.deleted_at.is_(None),
+            _model_Character.moderation_status != "suspended",
         )
         .limit(1)
     )
@@ -2187,16 +2196,16 @@ def _character_for_handle(ctx: LangGraphResidentContext, handle: str | None) -> 
 
 def _relationship_source_post_available(
     ctx: LangGraphResidentContext, source_post_id: str | None
-) -> models.Post | None:
+) -> _model_Post | None:
     if not source_post_id:
         return None
     return ctx.db.scalar(
-        select(models.Post)
+        select(_model_Post)
         .where(
-            models.Post.id == source_post_id,
-            models.Post.deleted_at.is_(None),
-            models.Post.report_hidden_at.is_(None),
-            models.Post.visibility == "public",
+            _model_Post.id == source_post_id,
+            _model_Post.deleted_at.is_(None),
+            _model_Post.report_hidden_at.is_(None),
+            _model_Post.visibility == "public",
         )
         .limit(1)
     )
@@ -2204,7 +2213,7 @@ def _relationship_source_post_available(
 
 def _relationship_point_to_state(
     ctx: LangGraphResidentContext,
-    point: models.AgentRelationshipPoint,
+    point: _model_AgentRelationshipPoint,
 ) -> dict[str, Any] | None:
     source_post = _relationship_source_post_available(ctx, point.source_post_id)
     if source_post is None:
@@ -4746,13 +4755,13 @@ def _character_already_replied_to_target(
     if not post_id:
         return False
     existing_reply_id = db.scalar(
-        select(models.Post.id)
+        select(_model_Post.id)
         .where(
-            models.Post.author_character_id == character_id,
-            models.Post.reply_to_post_id == post_id,
-            models.Post.post_type == "reply",
-            models.Post.deleted_at.is_(None),
-            models.Post.report_hidden_at.is_(None),
+            _model_Post.author_character_id == character_id,
+            _model_Post.reply_to_post_id == post_id,
+            _model_Post.post_type == "reply",
+            _model_Post.deleted_at.is_(None),
+            _model_Post.report_hidden_at.is_(None),
         )
         .limit(1)
     )
@@ -7070,7 +7079,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
         if isinstance(selected_relationship_point, dict):
             try:
                 db_point = ctx.db.get(
-                    models.AgentRelationshipPoint,
+                    _model_AgentRelationshipPoint,
                     int(selected_relationship_point["id"]),
                 )
                 if (
@@ -7664,7 +7673,7 @@ def _reserve_public_action(
     target_profile_type: str | None = None,
     target_profile_id: str | None = None,
     brief_hash: str | None = None,
-) -> tuple[models.AgentPublicActionExecution | None, dict[str, Any] | None]:
+) -> tuple[_model_AgentPublicActionExecution | None, dict[str, Any] | None]:
     target_id = target_post_id or (
         f"{target_profile_type}:{target_profile_id}" if target_profile_id else None
     )
@@ -7721,7 +7730,7 @@ def _reserve_public_action(
 
 def _finish_execution(
     ctx: LangGraphResidentContext,
-    execution: models.AgentPublicActionExecution,
+    execution: _model_AgentPublicActionExecution,
     *,
     status: str,
     result: dict[str, Any] | None = None,
@@ -8570,7 +8579,7 @@ def _record_relationship_points_after_publish(
     if root_post_id:
         point_id = writing_plan.get("relationship_point_id")
         if point_id:
-            point = ctx.db.get(models.AgentRelationshipPoint, int(point_id))
+            point = ctx.db.get(_model_AgentRelationshipPoint, int(point_id))
             if point is not None and point.status in {
                 agent_run_crud.RELATIONSHIP_POINT_PENDING,
                 agent_run_crud.RELATIONSHIP_POINT_SELECTED,
@@ -8602,7 +8611,7 @@ def _record_relationship_points_after_publish(
     elif writing_plan.get("relationship_point_id"):
         point_id = writing_plan.get("relationship_point_id")
         try:
-            point = ctx.db.get(models.AgentRelationshipPoint, int(point_id))
+            point = ctx.db.get(_model_AgentRelationshipPoint, int(point_id))
             if (
                 point is not None
                 and point.status == agent_run_crud.RELATIONSHIP_POINT_SELECTED

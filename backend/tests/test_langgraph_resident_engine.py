@@ -8,7 +8,7 @@ from google.genai import errors as google_errors
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.domains.character_lore import contracts as character_lore
 from app.services import (
     agent_runs,

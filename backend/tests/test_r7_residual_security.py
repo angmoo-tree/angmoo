@@ -8,7 +8,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.main import app as private_app
 from app.main import public_app
 from app.services import agent_runs as agent_run_service

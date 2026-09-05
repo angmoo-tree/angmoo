@@ -28,8 +28,9 @@ E_INVENTORY_SHA256 = (
     "8f40f852077d32f77f1a417c9726e08d02041aa0d0fb6223ade13049e3777a79"
 )
 
-from app import models as _models  # noqa: E402,F401 - register canonical metadata
-from app.core.db import Base  # noqa: E402
+from app.runtime.persistence.model_registration import register_models
+register_models()  # noqa: E402,F401 - register canonical metadata
+from app.models import Base  # noqa: E402
 from app.domains.memory.contracts.provenance import MemoryKindV1  # noqa: E402
 from app.domains.memory.models.items import (  # noqa: E402
     MEMORY_SCHEMA_V1_TABLES,

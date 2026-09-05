@@ -14,11 +14,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app.runtime.routines.lifecycle_references import SqlAlchemyLifecycleReferences
-from app import models, schemas
+from app import schemas
+from model_fixture_support import models
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.domains.identity import dependencies as api_deps
 from app.api.v1.routes import world_activity_runtime as runtime_routes
-from app.core.db import Base
+from app.models import Base
 from app.domains.routines import public as routines
 from app.domains.routines.service import execution as activity_runtime
 from app.runtime.routines.activity_references import SqlAlchemyActivityReferences

@@ -1,7 +1,11 @@
 """Runtime composition of scheduler state and the WC leave guard contract."""
 from sqlalchemy import select
 from sqlalchemy.orm import Session
-from app import models
+from app.domains.routines.models.resident import AgentActivitySetting as _model_AgentActivitySetting
+from app.domains.routines.models.resident import AgentRun as _model_AgentRun
+from app.domains.routines.models.resident import AgentSlot as _model_AgentSlot
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.domains.world_characters import models as wc_models
 from app.domains.world_characters import exceptions as world_character_setup
 
@@ -37,11 +41,11 @@ class WorldCharacterLeaveRuntimeGuard:
             return
 
         active_run = self.db.scalar(
-            select(models.AgentRun.id)
+            select(_model_AgentRun.id)
             .where(
-                models.AgentRun.user_id == owner_user_id,
-                models.AgentRun.character_id == character_id,
-                models.AgentRun.status == "running",
+                _model_AgentRun.user_id == owner_user_id,
+                _model_AgentRun.character_id == character_id,
+                _model_AgentRun.status == "running",
             )
             .limit(1)
         )
@@ -50,10 +54,10 @@ class WorldCharacterLeaveRuntimeGuard:
                 "world_character_run_in_progress"
             )
         assigned_slot = self.db.scalar(
-            select(models.AgentSlot.agent_id)
+            select(_model_AgentSlot.agent_id)
             .where(
-                models.AgentSlot.assigned_user_id == owner_user_id,
-                models.AgentSlot.assigned_character_id == character_id,
+                _model_AgentSlot.assigned_user_id == owner_user_id,
+                _model_AgentSlot.assigned_character_id == character_id,
             )
             .limit(1)
         )
@@ -61,7 +65,7 @@ class WorldCharacterLeaveRuntimeGuard:
             raise world_character_setup.StudioWorldCharacterBusyError(
                 "scheduler_assignment_active"
             )
-        setting = self.db.get(models.AgentActivitySetting, character_id)
+        setting = self.db.get(_model_AgentActivitySetting, character_id)
         if setting is not None and setting.auto_enabled:
             raise world_character_setup.StudioWorldCharacterConflictError(
                 "world_character_autonomy_enabled"

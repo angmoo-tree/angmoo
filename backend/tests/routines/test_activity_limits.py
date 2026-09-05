@@ -12,7 +12,8 @@ from pydantic import SecretStr, ValidationError
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from app import models, schemas
+from app import schemas
+from model_fixture_support import models
 from app.core import active_hours
 from app.domains.routines.service import tick_schedule as agent_activity_schedule
 from app.config import settings

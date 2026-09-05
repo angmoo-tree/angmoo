@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import models
+from model_fixture_support import models
 from app.config import settings
 from app.core.public_media import mount_public_media
 from app.runtime.characters import creator as agent_creation_drafts

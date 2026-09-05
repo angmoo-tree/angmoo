@@ -7,7 +7,14 @@ from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app import models
+from app.domains.routines.models.resident import AgentActivitySetting as _model_AgentActivitySetting
+from app.domains.routines.models.resident import AgentPublicActionExecution as _model_AgentPublicActionExecution
+from app.domains.routines.models.resident import AgentRun as _model_AgentRun
+from app.domains.routines.models.resident import AgentSlot as _model_AgentSlot
+from app.domains.characters.models import Character as _model_Character
+from app.domains.world_characters.models import WorldCharacter as _model_WorldCharacter
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.domains.routines.service import tick_schedule as agent_activity_schedule
 from app.core import unit_of_work
 from app.domains.relationships.constants import (RELATIONSHIP_POINT_KINDS, RELATIONSHIP_POINT_PENDING, RELATIONSHIP_POINT_SELECTED, RELATIONSHIP_POINT_CONSUMED, RELATIONSHIP_POINT_EXPIRED, RELATIONSHIP_POINT_FAILED, RELATIONSHIP_POINT_ACTIVE_STATUSES)
@@ -52,8 +59,8 @@ def create_agent_run(
     agent_id: str,
     session_key: str,
     tool_auth_key: str | None = None,
-) -> models.AgentRun:
-    run = models.AgentRun(
+) -> _model_AgentRun:
+    run = _model_AgentRun(
         id=run_id,
         user_id=user_id,
         character_id=character_id,
@@ -80,7 +87,7 @@ def mark_agent_run_finished(
     status: str,
     gateway_result: dict[str, Any] | None = None,
 ) -> None:
-    run = db.get(models.AgentRun, run_id)
+    run = db.get(_model_AgentRun, run_id)
     if run is None:
         return
     run.status = status
@@ -91,7 +98,7 @@ def mark_agent_run_finished(
 
 
 def set_agent_run_post_id(db: Session, run_id: str, post_id: str | None) -> None:
-    run = db.get(models.AgentRun, run_id)
+    run = db.get(_model_AgentRun, run_id)
     if run is None:
         return
     run.post_id = post_id
@@ -100,10 +107,10 @@ def set_agent_run_post_id(db: Session, run_id: str, post_id: str | None) -> None
 
 def get_public_action_execution_by_signature(
     db: Session, signature: str
-) -> models.AgentPublicActionExecution | None:
+) -> _model_AgentPublicActionExecution | None:
     return db.scalar(
-        select(models.AgentPublicActionExecution).where(
-            models.AgentPublicActionExecution.signature == signature
+        select(_model_AgentPublicActionExecution).where(
+            _model_AgentPublicActionExecution.signature == signature
         )
     )
 
@@ -125,8 +132,8 @@ def create_public_action_execution(
     feed_observation_id: str | None = None,
     interaction_intent: str | None = None,
     comment_purpose: str | None = None,
-) -> models.AgentPublicActionExecution:
-    execution = models.AgentPublicActionExecution(
+) -> _model_AgentPublicActionExecution:
+    execution = _model_AgentPublicActionExecution(
         run_id=run_id,
         character_id=character_id,
         signature=signature,
@@ -150,12 +157,12 @@ def create_public_action_execution(
 
 def mark_public_action_execution_finished(
     db: Session,
-    execution: models.AgentPublicActionExecution,
+    execution: _model_AgentPublicActionExecution,
     *,
     status: str,
     result: dict[str, Any] | None = None,
     failure_class: str | None = None,
-) -> models.AgentPublicActionExecution:
+) -> _model_AgentPublicActionExecution:
     execution.status = status
     execution.result = result
     execution.failure_class = failure_class
@@ -166,73 +173,73 @@ def mark_public_action_execution_finished(
 
 def get_active_run_for_session(
     db: Session, session_key: str
-) -> models.AgentRun | None:
+) -> _model_AgentRun | None:
     return db.scalar(
-        select(models.AgentRun)
+        select(_model_AgentRun)
         .where(
-            models.AgentRun.session_key == session_key,
-            models.AgentRun.status.in_(ACTIVE_RUN_STATUSES),
+            _model_AgentRun.session_key == session_key,
+            _model_AgentRun.status.in_(ACTIVE_RUN_STATUSES),
         )
-        .order_by(models.AgentRun.created_at.desc(), models.AgentRun.id.desc())
+        .order_by(_model_AgentRun.created_at.desc(), _model_AgentRun.id.desc())
     )
 
 
 def get_active_run_for_tool_auth_key(
     db: Session, tool_auth_key: str
-) -> models.AgentRun | None:
+) -> _model_AgentRun | None:
     return db.scalar(
-        select(models.AgentRun)
+        select(_model_AgentRun)
         .where(
-            models.AgentRun.tool_auth_key == tool_auth_key,
-            models.AgentRun.status.in_(ACTIVE_RUN_STATUSES),
+            _model_AgentRun.tool_auth_key == tool_auth_key,
+            _model_AgentRun.status.in_(ACTIVE_RUN_STATUSES),
         )
-        .order_by(models.AgentRun.created_at.desc(), models.AgentRun.id.desc())
+        .order_by(_model_AgentRun.created_at.desc(), _model_AgentRun.id.desc())
     )
 
 
 def get_latest_run_for_session(
     db: Session, session_key: str
-) -> models.AgentRun | None:
+) -> _model_AgentRun | None:
     return db.scalar(
-        select(models.AgentRun)
-        .where(models.AgentRun.session_key == session_key)
-        .order_by(models.AgentRun.created_at.desc(), models.AgentRun.id.desc())
+        select(_model_AgentRun)
+        .where(_model_AgentRun.session_key == session_key)
+        .order_by(_model_AgentRun.created_at.desc(), _model_AgentRun.id.desc())
     )
 
 
 def get_latest_run_for_tool_auth_key(
     db: Session, tool_auth_key: str
-) -> models.AgentRun | None:
+) -> _model_AgentRun | None:
     return db.scalar(
-        select(models.AgentRun)
-        .where(models.AgentRun.tool_auth_key == tool_auth_key)
-        .order_by(models.AgentRun.created_at.desc(), models.AgentRun.id.desc())
+        select(_model_AgentRun)
+        .where(_model_AgentRun.tool_auth_key == tool_auth_key)
+        .order_by(_model_AgentRun.created_at.desc(), _model_AgentRun.id.desc())
     )
 
 
 def get_latest_manual_run_for_user(
     db: Session, user_id: str
-) -> models.AgentRun | None:
+) -> _model_AgentRun | None:
     return db.scalar(
-        select(models.AgentRun)
+        select(_model_AgentRun)
         .where(
-            models.AgentRun.user_id == user_id,
-            models.AgentRun.session_key.contains(":resident-manual:"),
+            _model_AgentRun.user_id == user_id,
+            _model_AgentRun.session_key.contains(":resident-manual:"),
         )
-        .order_by(models.AgentRun.created_at.desc(), models.AgentRun.id.desc())
+        .order_by(_model_AgentRun.created_at.desc(), _model_AgentRun.id.desc())
     )
 
 
 def get_latest_first_greeting_run_for_user(
     db: Session, user_id: str
-) -> models.AgentRun | None:
+) -> _model_AgentRun | None:
     return db.scalar(
-        select(models.AgentRun)
+        select(_model_AgentRun)
         .where(
-            models.AgentRun.user_id == user_id,
-            models.AgentRun.session_key.contains(":first-greeting:"),
+            _model_AgentRun.user_id == user_id,
+            _model_AgentRun.session_key.contains(":first-greeting:"),
         )
-        .order_by(models.AgentRun.created_at.desc(), models.AgentRun.id.desc())
+        .order_by(_model_AgentRun.created_at.desc(), _model_AgentRun.id.desc())
     )
 
 
@@ -250,13 +257,13 @@ def ensure_agent_slots(
 
     existing = set(
         db.scalars(
-            select(models.AgentSlot.agent_id).where(
-                models.AgentSlot.agent_id.in_(unique_agent_ids)
+            select(_model_AgentSlot.agent_id).where(
+                _model_AgentSlot.agent_id.in_(unique_agent_ids)
             )
         )
     )
     missing = [
-        models.AgentSlot(agent_id=agent_id, status=SLOT_STATUS_EMPTY)
+        _model_AgentSlot(agent_id=agent_id, status=SLOT_STATUS_EMPTY)
         for agent_id in unique_agent_ids
         if agent_id not in existing
     ]
@@ -275,7 +282,7 @@ def ensure_agent_slots(
 
 def claim_agent_slot(
     db: Session, *, run_id: str, agent_ids: list[str], lease_seconds: int
-) -> models.AgentSlot | None:
+) -> _model_AgentSlot | None:
     unique_agent_ids = list(
         dict.fromkeys(agent_id for agent_id in agent_ids if agent_id)
     )
@@ -286,15 +293,15 @@ def claim_agent_slot(
 
     now = datetime.now(UTC)
     slot = db.scalar(
-        select(models.AgentSlot)
+        select(_model_AgentSlot)
         .where(
-            models.AgentSlot.agent_id.in_(unique_agent_ids),
+            _model_AgentSlot.agent_id.in_(unique_agent_ids),
             or_(
-                models.AgentSlot.status.in_(FREE_SLOT_STATUSES),
-                models.AgentSlot.lease_expires_at <= now,
+                _model_AgentSlot.status.in_(FREE_SLOT_STATUSES),
+                _model_AgentSlot.lease_expires_at <= now,
             ),
         )
-        .order_by(models.AgentSlot.updated_at.asc(), models.AgentSlot.agent_id.asc())
+        .order_by(_model_AgentSlot.updated_at.asc(), _model_AgentSlot.agent_id.asc())
         .with_for_update(skip_locked=True)
     )
     if slot is None:
@@ -317,7 +324,7 @@ def release_agent_slot(
     run_id: str,
     last_error: str | None = None,
 ) -> None:
-    slot = db.get(models.AgentSlot, agent_id)
+    slot = db.get(_model_AgentSlot, agent_id)
     if slot is None or slot.locked_by_run_id != run_id:
         return
 
@@ -328,9 +335,9 @@ def release_agent_slot(
     db.commit()
 
 
-def list_agent_slots(db: Session) -> list[models.AgentSlot]:
+def list_agent_slots(db: Session) -> list[_model_AgentSlot]:
     return list(
-        db.scalars(select(models.AgentSlot).order_by(models.AgentSlot.agent_id.asc()))
+        db.scalars(select(_model_AgentSlot).order_by(_model_AgentSlot.agent_id.asc()))
     )
 
 
@@ -338,24 +345,24 @@ def recover_expired_resident_slot_runs(
     db: Session,
     *,
     now: datetime,
-    next_tick_at_factory: Callable[[models.AgentSlot, datetime], datetime] | None = None,
+    next_tick_at_factory: Callable[[_model_AgentSlot, datetime], datetime] | None = None,
 ) -> int:
     now = agent_activity_schedule.aware_utc(now)
     slots = list(
         db.scalars(
-            select(models.AgentSlot)
+            select(_model_AgentSlot)
             .where(
-                models.AgentSlot.status == SLOT_STATUS_RUNNING,
-                models.AgentSlot.assigned_user_id.is_not(None),
-                models.AgentSlot.assigned_character_id.is_not(None),
-                models.AgentSlot.assigned_credential_id.is_not(None),
-                models.AgentSlot.locked_by_run_id.is_not(None),
-                models.AgentSlot.lease_expires_at.is_not(None),
-                models.AgentSlot.lease_expires_at <= now,
+                _model_AgentSlot.status == SLOT_STATUS_RUNNING,
+                _model_AgentSlot.assigned_user_id.is_not(None),
+                _model_AgentSlot.assigned_character_id.is_not(None),
+                _model_AgentSlot.assigned_credential_id.is_not(None),
+                _model_AgentSlot.locked_by_run_id.is_not(None),
+                _model_AgentSlot.lease_expires_at.is_not(None),
+                _model_AgentSlot.lease_expires_at <= now,
             )
             .order_by(
-                models.AgentSlot.lease_expires_at.asc(),
-                models.AgentSlot.agent_id.asc(),
+                _model_AgentSlot.lease_expires_at.asc(),
+                _model_AgentSlot.agent_id.asc(),
             )
             .with_for_update(skip_locked=True)
         )
@@ -365,7 +372,7 @@ def recover_expired_resident_slot_runs(
         locked_run_id = slot.locked_by_run_id or ""
         lease_expires_at = slot.lease_expires_at
         if locked_run_id and not locked_run_id.startswith("pending:"):
-            run = db.get(models.AgentRun, locked_run_id)
+            run = db.get(_model_AgentRun, locked_run_id)
             if run is not None and run.status in ACTIVE_RUN_STATUSES:
                 run.status = "failed"
                 run.completed_at = now
@@ -379,7 +386,7 @@ def recover_expired_resident_slot_runs(
                         else None,
                     }
         setting = (
-            db.get(models.AgentActivitySetting, slot.assigned_character_id)
+            db.get(_model_AgentActivitySetting, slot.assigned_character_id)
             if slot.assigned_character_id is not None
             else None
         )
@@ -411,7 +418,7 @@ def recover_expired_resident_slot_runs(
     return recovered_count
 
 
-def _clear_resident_slot(slot: models.AgentSlot) -> None:
+def _clear_resident_slot(slot: _model_AgentSlot) -> None:
     slot.status = SLOT_STATUS_EMPTY
     slot.assigned_user_id = None
     slot.assigned_character_id = None
@@ -434,7 +441,7 @@ def assign_resident_slot(
     heartbeat_interval_seconds: int,
     next_tick_at: datetime,
     commit: bool = True,
-) -> models.AgentSlot | None:
+) -> _model_AgentSlot | None:
     unique_agent_ids = list(
         dict.fromkeys(agent_id for agent_id in agent_ids if agent_id)
     )
@@ -444,8 +451,8 @@ def assign_resident_slot(
     ensure_agent_slots(db, unique_agent_ids, commit=commit)
 
     locked_character_id = db.scalar(
-        select(models.Character.id)
-        .where(models.Character.id == character_id)
+        select(_model_Character.id)
+        .where(_model_Character.id == character_id)
         .with_for_update()
     )
     if locked_character_id is None:
@@ -453,16 +460,16 @@ def assign_resident_slot(
         return None
 
     existing_slot = db.scalar(
-        select(models.AgentSlot)
+        select(_model_AgentSlot)
         .where(
-            models.AgentSlot.assigned_user_id == user_id,
-            models.AgentSlot.assigned_character_id == character_id,
+            _model_AgentSlot.assigned_user_id == user_id,
+            _model_AgentSlot.assigned_character_id == character_id,
         )
         .order_by(
-            (models.AgentSlot.status == SLOT_STATUS_RUNNING).desc(),
-            models.AgentSlot.last_run_at.desc().nullslast(),
-            models.AgentSlot.updated_at.desc(),
-            models.AgentSlot.agent_id.asc(),
+            (_model_AgentSlot.status == SLOT_STATUS_RUNNING).desc(),
+            _model_AgentSlot.last_run_at.desc().nullslast(),
+            _model_AgentSlot.updated_at.desc(),
+            _model_AgentSlot.agent_id.asc(),
         )
         .with_for_update()
     )
@@ -471,12 +478,12 @@ def assign_resident_slot(
         return None
 
     slot = existing_slot or db.scalar(
-        select(models.AgentSlot)
+        select(_model_AgentSlot)
         .where(
-            models.AgentSlot.agent_id.in_(unique_agent_ids),
-            models.AgentSlot.status.in_(FREE_SLOT_STATUSES),
+            _model_AgentSlot.agent_id.in_(unique_agent_ids),
+            _model_AgentSlot.status.in_(FREE_SLOT_STATUSES),
         )
-        .order_by(models.AgentSlot.updated_at.asc(), models.AgentSlot.agent_id.asc())
+        .order_by(_model_AgentSlot.updated_at.asc(), _model_AgentSlot.agent_id.asc())
         .with_for_update(skip_locked=True)
     )
     if slot is None:
@@ -487,12 +494,12 @@ def assign_resident_slot(
         with db.begin_nested():
             duplicate_slots = list(
                 db.scalars(
-                    select(models.AgentSlot)
+                    select(_model_AgentSlot)
                     .where(
-                        models.AgentSlot.assigned_user_id == user_id,
-                        models.AgentSlot.assigned_character_id == character_id,
-                        models.AgentSlot.agent_id != slot.agent_id,
-                        models.AgentSlot.status != SLOT_STATUS_RUNNING,
+                        _model_AgentSlot.assigned_user_id == user_id,
+                        _model_AgentSlot.assigned_character_id == character_id,
+                        _model_AgentSlot.agent_id != slot.agent_id,
+                        _model_AgentSlot.status != SLOT_STATUS_RUNNING,
                     )
                     .with_for_update()
                 )
@@ -512,8 +519,8 @@ def assign_resident_slot(
             db.flush()
     except IntegrityError:
         slot = db.scalar(
-            select(models.AgentSlot).where(
-                models.AgentSlot.assigned_character_id == character_id
+            select(_model_AgentSlot).where(
+                _model_AgentSlot.assigned_character_id == character_id
             )
         )
         if slot is None:
@@ -534,7 +541,7 @@ def claim_temporary_resident_slot_assignment(
     credential_id: str,
     heartbeat_interval_seconds: int,
     lease_seconds: int,
-) -> models.AgentSlot | None:
+) -> _model_AgentSlot | None:
     """Atomically claim an unassigned slot for one explicit manual run."""
 
     unique_agent_ids = list(
@@ -546,8 +553,8 @@ def claim_temporary_resident_slot_assignment(
     ensure_agent_slots(db, unique_agent_ids)
     now = datetime.now(UTC)
     locked_character_id = db.scalar(
-        select(models.Character.id)
-        .where(models.Character.id == character_id)
+        select(_model_Character.id)
+        .where(_model_Character.id == character_id)
         .with_for_update()
     )
     if locked_character_id is None:
@@ -555,8 +562,8 @@ def claim_temporary_resident_slot_assignment(
         return None
 
     existing_slot = db.scalar(
-        select(models.AgentSlot)
-        .where(models.AgentSlot.assigned_character_id == character_id)
+        select(_model_AgentSlot)
+        .where(_model_AgentSlot.assigned_character_id == character_id)
         .with_for_update()
     )
     if existing_slot is not None:
@@ -564,15 +571,15 @@ def claim_temporary_resident_slot_assignment(
         return None
 
     slot = db.scalar(
-        select(models.AgentSlot)
+        select(_model_AgentSlot)
         .where(
-            models.AgentSlot.agent_id.in_(unique_agent_ids),
-            models.AgentSlot.status.in_(FREE_SLOT_STATUSES),
-            models.AgentSlot.assigned_user_id.is_(None),
-            models.AgentSlot.assigned_character_id.is_(None),
-            models.AgentSlot.assigned_credential_id.is_(None),
+            _model_AgentSlot.agent_id.in_(unique_agent_ids),
+            _model_AgentSlot.status.in_(FREE_SLOT_STATUSES),
+            _model_AgentSlot.assigned_user_id.is_(None),
+            _model_AgentSlot.assigned_character_id.is_(None),
+            _model_AgentSlot.assigned_credential_id.is_(None),
         )
-        .order_by(models.AgentSlot.updated_at.asc(), models.AgentSlot.agent_id.asc())
+        .order_by(_model_AgentSlot.updated_at.asc(), _model_AgentSlot.agent_id.asc())
         .with_for_update(skip_locked=True)
     )
     if slot is None:
@@ -613,12 +620,12 @@ def release_temporary_resident_slot_assignment(
     user_id: str,
     character_id: str,
     credential_id: str,
-) -> models.AgentSlot | None:
+) -> _model_AgentSlot | None:
     """Return an exact manual lease to the pool without disabling autonomy."""
 
     slot = db.scalar(
-        select(models.AgentSlot)
-        .where(models.AgentSlot.agent_id == agent_id)
+        select(_model_AgentSlot)
+        .where(_model_AgentSlot.agent_id == agent_id)
         .with_for_update()
     )
     if (
@@ -630,7 +637,7 @@ def release_temporary_resident_slot_assignment(
         db.rollback()
         return None
 
-    setting = db.get(models.AgentActivitySetting, character_id)
+    setting = db.get(_model_AgentActivitySetting, character_id)
     if setting is not None and setting.auto_enabled:
         # A concurrent explicit activation adopted this assignment. It is no
         # longer temporary and must remain scheduled.
@@ -640,7 +647,7 @@ def release_temporary_resident_slot_assignment(
     locked_run_id = slot.locked_by_run_id or ""
     if slot.status == SLOT_STATUS_RUNNING and locked_run_id:
         if not locked_run_id.startswith("pending:temporary:"):
-            run = db.get(models.AgentRun, locked_run_id)
+            run = db.get(_model_AgentRun, locked_run_id)
             if run is not None and run.status in ACTIVE_RUN_STATUSES:
                 now = datetime.now(UTC)
                 run.status = "failed"
@@ -659,19 +666,19 @@ def release_temporary_resident_slot_assignment(
 
 def release_resident_slot_assignment(
     db: Session, *, user_id: str, character_id: str, commit: bool = True
-) -> models.AgentSlot | None:
+) -> _model_AgentSlot | None:
     slots = list(
         db.scalars(
-            select(models.AgentSlot)
+            select(_model_AgentSlot)
             .where(
-                models.AgentSlot.assigned_user_id == user_id,
-                models.AgentSlot.assigned_character_id == character_id,
+                _model_AgentSlot.assigned_user_id == user_id,
+                _model_AgentSlot.assigned_character_id == character_id,
             )
             .order_by(
-                (models.AgentSlot.status == SLOT_STATUS_RUNNING).desc(),
-                models.AgentSlot.last_run_at.desc().nullslast(),
-                models.AgentSlot.updated_at.desc(),
-                models.AgentSlot.agent_id.asc(),
+                (_model_AgentSlot.status == SLOT_STATUS_RUNNING).desc(),
+                _model_AgentSlot.last_run_at.desc().nullslast(),
+                _model_AgentSlot.updated_at.desc(),
+                _model_AgentSlot.agent_id.asc(),
             )
             .with_for_update(skip_locked=True)
         )
@@ -700,25 +707,25 @@ def claim_resident_slot_assignment(
     user_id: str,
     character_id: str,
     lease_seconds: int,
-) -> models.AgentSlot | None:
+) -> _model_AgentSlot | None:
     now = datetime.now(UTC)
-    owner_controlled = select(models.WorldCharacter.id).where(
-        models.WorldCharacter.character_id == models.AgentSlot.assigned_character_id,
-        models.WorldCharacter.control_mode == "owner_controlled",
-        models.WorldCharacter.status == "active",
+    owner_controlled = select(_model_WorldCharacter.id).where(
+        _model_WorldCharacter.character_id == _model_AgentSlot.assigned_character_id,
+        _model_WorldCharacter.control_mode == "owner_controlled",
+        _model_WorldCharacter.status == "active",
     ).exists()
     slot = db.scalar(
-        select(models.AgentSlot)
+        select(_model_AgentSlot)
         .where(
-            models.AgentSlot.assigned_user_id == user_id,
-            models.AgentSlot.assigned_character_id == character_id,
+            _model_AgentSlot.assigned_user_id == user_id,
+            _model_AgentSlot.assigned_character_id == character_id,
             or_(
-                models.AgentSlot.status.in_(DUE_SLOT_STATUSES),
-                models.AgentSlot.lease_expires_at <= now,
+                _model_AgentSlot.status.in_(DUE_SLOT_STATUSES),
+                _model_AgentSlot.lease_expires_at <= now,
             ),
             ~owner_controlled,
         )
-        .order_by(models.AgentSlot.updated_at.asc(), models.AgentSlot.agent_id.asc())
+        .order_by(_model_AgentSlot.updated_at.asc(), _model_AgentSlot.agent_id.asc())
         .with_for_update(skip_locked=True)
     )
     if slot is None:
@@ -742,44 +749,44 @@ def claim_due_resident_slots(
     lease_seconds: int,
     allowed_character_ids: set[str] | None = None,
     single_flight: bool = False,
-) -> list[models.AgentSlot]:
+) -> list[_model_AgentSlot]:
     if allowed_character_ids is not None and not allowed_character_ids:
         return []
     if single_flight and has_active_resident_slot_run(db, now=now):
         return []
 
     conditions = [
-        models.AgentSlot.status.in_(DUE_SLOT_STATUSES),
-        models.AgentSlot.assigned_user_id.is_not(None),
-        models.AgentSlot.assigned_character_id.is_not(None),
-        models.AgentSlot.assigned_credential_id.is_not(None),
-        models.AgentSlot.next_tick_at <= now,
+        _model_AgentSlot.status.in_(DUE_SLOT_STATUSES),
+        _model_AgentSlot.assigned_user_id.is_not(None),
+        _model_AgentSlot.assigned_character_id.is_not(None),
+        _model_AgentSlot.assigned_credential_id.is_not(None),
+        _model_AgentSlot.next_tick_at <= now,
     ]
-    owner_controlled = select(models.WorldCharacter.id).where(
-        models.WorldCharacter.character_id == models.AgentSlot.assigned_character_id,
-        models.WorldCharacter.control_mode == "owner_controlled",
-        models.WorldCharacter.status == "active",
+    owner_controlled = select(_model_WorldCharacter.id).where(
+        _model_WorldCharacter.character_id == _model_AgentSlot.assigned_character_id,
+        _model_WorldCharacter.control_mode == "owner_controlled",
+        _model_WorldCharacter.status == "active",
     ).exists()
     conditions.append(~owner_controlled)
     if allowed_character_ids is not None:
         conditions.append(
-            models.AgentSlot.assigned_character_id.in_(allowed_character_ids)
+            _model_AgentSlot.assigned_character_id.in_(allowed_character_ids)
         )
 
     candidate_slots = list(
         db.scalars(
-            select(models.AgentSlot)
+            select(_model_AgentSlot)
             .where(*conditions)
-            .order_by(models.AgentSlot.next_tick_at.asc(), models.AgentSlot.agent_id.asc())
+            .order_by(_model_AgentSlot.next_tick_at.asc(), _model_AgentSlot.agent_id.asc())
             .limit(max(max_count * 3, max_count))
             .with_for_update(skip_locked=True)
         )
     )
-    slots: list[models.AgentSlot] = []
+    slots: list[_model_AgentSlot] = []
     seen_assignments: set[tuple[str | None, str | None]] = set()
     for slot in candidate_slots:
         character = (
-            db.get(models.Character, slot.assigned_character_id)
+            db.get(_model_Character, slot.assigned_character_id)
             if slot.assigned_character_id
             else None
         )
@@ -810,12 +817,12 @@ def claim_due_resident_slots(
 def has_active_resident_slot_run(db: Session, *, now: datetime) -> bool:
     return (
         db.scalar(
-            select(models.AgentSlot.agent_id)
+            select(_model_AgentSlot.agent_id)
             .where(
-                models.AgentSlot.status == SLOT_STATUS_RUNNING,
-                models.AgentSlot.assigned_user_id.is_not(None),
-                models.AgentSlot.assigned_character_id.is_not(None),
-                models.AgentSlot.lease_expires_at > now,
+                _model_AgentSlot.status == SLOT_STATUS_RUNNING,
+                _model_AgentSlot.assigned_user_id.is_not(None),
+                _model_AgentSlot.assigned_character_id.is_not(None),
+                _model_AgentSlot.lease_expires_at > now,
             )
             .limit(1)
         )
@@ -825,8 +832,8 @@ def has_active_resident_slot_run(db: Session, *, now: datetime) -> bool:
 
 def set_resident_slot_run_id(
     db: Session, *, agent_id: str, run_id: str, lease_seconds: int
-) -> models.AgentSlot | None:
-    slot = db.get(models.AgentSlot, agent_id)
+) -> _model_AgentSlot | None:
+    slot = db.get(_model_AgentSlot, agent_id)
     if slot is None or slot.status != SLOT_STATUS_RUNNING:
         return None
     slot.locked_by_run_id = run_id
@@ -838,8 +845,8 @@ def set_resident_slot_run_id(
 
 def extend_resident_slot_lease(
     db: Session, *, agent_id: str, run_id: str, lease_seconds: int
-) -> models.AgentSlot | None:
-    slot = db.get(models.AgentSlot, agent_id)
+) -> _model_AgentSlot | None:
+    slot = db.get(_model_AgentSlot, agent_id)
     if slot is None or slot.locked_by_run_id != run_id:
         return None
     slot.lease_expires_at = datetime.now(UTC) + timedelta(seconds=lease_seconds)
@@ -857,7 +864,7 @@ def complete_resident_slot_run(
     next_tick_at: datetime | None = None,
     last_error: str | None = None,
 ) -> None:
-    slot = db.get(models.AgentSlot, agent_id)
+    slot = db.get(_model_AgentSlot, agent_id)
     if slot is None or slot.locked_by_run_id != run_id:
         return
     now = datetime.now(UTC)

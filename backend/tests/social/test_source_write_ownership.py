@@ -1,7 +1,7 @@
 from sqlalchemy import event, func, select
 from sqlalchemy.orm import object_session
 
-from app import models
+from model_fixture_support import models
 from app.runtime.social import source_references
 from app.runtime.social.sqlalchemy_unit_of_work import SqlAlchemySocialWriteUnitOfWork
 from test_l4_social_write_uow import _owner_post, _session_factory

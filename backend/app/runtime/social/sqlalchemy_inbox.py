@@ -7,7 +7,12 @@ from datetime import UTC, datetime
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from app import models
+from app.domains.social.models.posts import Post as _model_Post
+from app.domains.world_characters.models import WorldCharacter as _model_WorldCharacter
+from app.domains.social.models.feed import WorldCharacterBlock as _model_WorldCharacterBlock
+from app.domains.worlds.models import WorldMembership as _model_WorldMembership
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.domains.social.contracts.inbox import (
     ManualInboxInteractionCandidate,
 )
@@ -47,24 +52,24 @@ def _aware_utc(value: datetime) -> datetime:
 def _blocked(db: Session, *, row: OwnerManualInboxCandidate) -> bool:
     return (
         db.scalar(
-            select(models.WorldCharacterBlock.id)
+            select(_model_WorldCharacterBlock.id)
             .where(
-                models.WorldCharacterBlock.world_id == row.world_id,
+                _model_WorldCharacterBlock.world_id == row.world_id,
                 or_(
                     (
-                        models.WorldCharacterBlock.blocker_world_character_id
+                        _model_WorldCharacterBlock.blocker_world_character_id
                         == row.actor_world_character_id
                     )
                     & (
-                        models.WorldCharacterBlock.blocked_world_character_id
+                        _model_WorldCharacterBlock.blocked_world_character_id
                         == row.target_world_character_id
                     ),
                     (
-                        models.WorldCharacterBlock.blocker_world_character_id
+                        _model_WorldCharacterBlock.blocker_world_character_id
                         == row.target_world_character_id
                     )
                     & (
-                        models.WorldCharacterBlock.blocked_world_character_id
+                        _model_WorldCharacterBlock.blocked_world_character_id
                         == row.actor_world_character_id
                     ),
                 ),
@@ -79,11 +84,11 @@ def _valid_candidate(
     db: Session,
     *,
     row: OwnerManualInboxCandidate,
-) -> tuple[models.Post, models.Post] | None:
-    reply = db.get(models.Post, row.source_reply_post_id)
-    target_post = db.get(models.Post, row.target_post_id)
-    actor = db.get(models.WorldCharacter, row.actor_world_character_id)
-    target = db.get(models.WorldCharacter, row.target_world_character_id)
+) -> tuple[_model_Post, _model_Post] | None:
+    reply = db.get(_model_Post, row.source_reply_post_id)
+    target_post = db.get(_model_Post, row.target_post_id)
+    actor = db.get(_model_WorldCharacter, row.actor_world_character_id)
+    target = db.get(_model_WorldCharacter, row.target_world_character_id)
     if (
         reply is None
         or target_post is None
@@ -108,8 +113,8 @@ def _valid_candidate(
         or _blocked(db, row=row)
     ):
         return None
-    actor_membership = db.get(models.WorldMembership, actor.membership_id)
-    target_membership = db.get(models.WorldMembership, target.membership_id)
+    actor_membership = db.get(_model_WorldMembership, actor.membership_id)
+    target_membership = db.get(_model_WorldMembership, target.membership_id)
     if (
         actor_membership is None
         or target_membership is None

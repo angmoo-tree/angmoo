@@ -12,7 +12,8 @@ from sqlalchemy import create_engine, delete, func, inspect, select, text
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import NullPool
 
-from app import models, schemas
+from app import schemas
+from model_fixture_support import models
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.domains.chat import schemas as chat_schemas
 from app.config import settings

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.api.identity_dependencies import get_current_user
 from app.api.identity_dependencies import browser_session
-from app.core.db import get_db
+from app.database import get_db
 from app.domains.device_home import service as device_home_service
 from app.domains.device_home.contracts import WorldSurface
 from app.domains.device_home.exceptions import (

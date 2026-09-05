@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import hashlib
 from pathlib import Path
 
-from app.core.db import create_database_engine, create_session_factory
+from app.database import create_database_engine, create_session_factory
 from app.domains.runtime.contracts.data_paths import RuntimeDataPathPort
 from app.integrations.ladybug_projection import (
     LADYBUG_PROJECTION_SCHEMA_VERSION,

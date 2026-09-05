@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
-from app import models  # Complete registration precedes the fixture's partial DDL.
+from model_fixture_support import models  # Complete registration precedes the fixture's partial DDL.
 from app.domains.characters.service import search as character_search
 from app.domains.social.repository import posts as post_repository
 from app.domains.social.service import feed

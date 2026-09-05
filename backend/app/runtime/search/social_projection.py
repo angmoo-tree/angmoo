@@ -8,7 +8,9 @@ import logging
 from sqlalchemy import event, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from app import models
+from app.domains.social.models.posts import Post as _model_Post
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.core.search_text import build_post_search_document
 from app.domains.runtime.contracts.search import SearchIndexDocument
 from app.domains.social.public import (
@@ -27,7 +29,7 @@ logger = logging.getLogger(__name__)
 _PENDING_POST_IDS = "angmoo_social_search_pending_post_ids"
 
 
-def _post_search_document(post: models.Post) -> SearchIndexDocument | None:
+def _post_search_document(post: _model_Post) -> SearchIndexDocument | None:
     searchable = (
         post.world_id is not None
         and post.author_world_character_id is not None
@@ -68,7 +70,7 @@ class _SqlAlchemySocialSearchDocumentSource:
 
     def all_documents(self) -> tuple[SearchIndexDocument, ...]:
         with self._factory() as db:
-            posts = db.scalars(select(models.Post).order_by(models.Post.id)).all()
+            posts = db.scalars(select(_model_Post).order_by(_model_Post.id)).all()
             return tuple(
                 document
                 for post in posts
@@ -84,7 +86,7 @@ class _SqlAlchemySocialSearchDocumentSource:
             return {}
         with self._factory() as db:
             posts = db.scalars(
-                select(models.Post).where(models.Post.id.in_(ids))
+                select(_model_Post).where(_model_Post.id.in_(ids))
             ).all()
             documents: dict[str, SearchIndexDocument] = {}
             for post in posts:
@@ -179,7 +181,7 @@ class EmbeddedSocialSearchProjection:
     def _after_flush(self, session: Session, _flush_context: object) -> None:
         pending = session.info.setdefault(_PENDING_POST_IDS, set())
         for entity in session.new | session.dirty | session.deleted:
-            if isinstance(entity, models.Post):
+            if isinstance(entity, _model_Post):
                 pending.add(entity.id)
 
     def _after_commit(self, session: Session) -> None:

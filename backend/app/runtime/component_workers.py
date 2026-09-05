@@ -7,7 +7,7 @@ import threading
 from typing import Any, Protocol
 
 from app.config import Settings, settings
-from app.core.db import SessionLocal
+from app.database import SessionLocal
 from app.domains.relationships.contracts.projection import (RelationshipProjectionBackendError)
 from app.runtime.graph_projection.process_client import (
     borrow_process_graph_client,

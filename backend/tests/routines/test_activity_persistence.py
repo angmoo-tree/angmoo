@@ -6,9 +6,9 @@ import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
-from app import models as registered_models
+from model_fixture_support import models as registered_models
 from app.core import unit_of_work
-from app.core.db import Base
+from app.models import Base
 from app.domains.routines import models, schemas
 from app.domains.routines.service import activity_logs, activity_settings
 from app.domains.routines.contracts.plans import PlanScope

@@ -3,7 +3,7 @@
 from fastapi import Depends, Request
 from sqlalchemy.orm import Session
 from app.api.identity_dependencies import get_current_user, get_optional_current_user
-from app.core.db import get_db
+from app.database import get_db
 from app.domains.social.contracts.manual_feed import ManualFeedReferences
 from app.domains.social.contracts.write_execution import SocialWriteUnitOfWorkPort
 from app.domains.social.service.world_profile import WorldSocialProfileService

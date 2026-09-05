@@ -8,7 +8,7 @@ from app.domains.identity import (
     models,
     browser_session,
 )
-from app.core.db import get_db
+from app.database import get_db
 from app.core.desktop_loopback import is_authenticated_desktop_webview_request
 from app.domains.identity.contracts import AccountDeletionWorkflow
 from app.domains.identity.service import (

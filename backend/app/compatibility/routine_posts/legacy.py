@@ -8,7 +8,8 @@ imported by the domain itself.
 
 from __future__ import annotations
 
-from app import models
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.compatibility.routine_posts.canonical_interactions import (
     CanonicalRoutineInteractionSource,
 )
@@ -40,7 +41,6 @@ __all__ = [
     "agent_run_crud",
     "canonical_interaction_source",
     "community_service",
-    "models",
     "neutralize_context_text",
     "social_event_runtime",
 ]
