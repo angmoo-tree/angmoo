@@ -914,3 +914,14 @@ C2 최종 후보는 **196 passed / 기존 PG 1 skip / 기존 warnings 3 / 125.17
 C3a 최초 집중 검증은 **200 passed / 기존 PG 1 skip / 기존 warnings 5 / 41.77초**, inventory 갱신 후 최종 후보의 광역 검증은 **268 passed / 기존 PG 1 skip / 기존 warnings 5 / 121.75초**다. 원래 정책의 33개 정의와 Run DTO 5개 정의는 AST 차이 0이며, 런타임 Context의 **21개 resolved type이 전부 같은 실제 객체**다. 경계는 **694 modules / 2,318 edges / exact legacy 222 / cycle 0**, L4·ER0·Memory batch 현재 inventory는 통과했다.
 
 선행 signed 두 경로 blob만 메모리에 보충한 원래 검사 함수의 읽기 전용 진단도 **source/split/assertion/suppression/API·ORM/node 각각 오류 0**, 기존 보호 **2,139 / 현재 2,233 nodes**다. Source introduction metadata는 부모가 선형 append하며 stock 전체 보존·Actions·installer·최종 B4 완료는 별도로 남아 있다. 기존 테스트의 assertion/parametrize/skip 및 frozen 자료를 수정하지 않았다.
+
+
+## AR-B4-C3b — 활동 허용 흐름·횟수 SQL 실제 이전
+
+build/assert/count의 실제 허용·차단·제한·cooldown 흐름은 `routines/service/activity_policy.py`, 자기 ActivityLog의 세 실제 SQL 함수는 `repository/activity_counts.py`, log action-type 정규화는 `utils/activity_actions.py`로 이전했다. 기존 World timezone을 읽는 함수는 명시적 lazy collaboration으로 전달하며 ensure_setting → now → timezone의 순서를 유지했다. 호출 표면의 세 임시 함수는 이 연결만 수행하고 정책 본문을 복제하지 않는다. World/Package scope의 기존 네 함수는 C3c에서 실제 역할 분리 후 제거하기 위해 원문을 남겼다.
+
+기존 집중 묶음은 **182 passed / 기존 PG 1 skip / 기존 warnings 5 / 34.92초**다. 새 file SQLite 검증은 처음 설정 생성의 commit 이후 scope 읽기, 기존 설정의 uncommitted 변경/observer 격리/rollback, unsupported action·non-policy 세션의 scope 조회 이전 guard를 검증한다. API/ORM/frozen/test assertions는 그대로 보존한다.
+
+C3b 최종 후보 검증은 **467 passed / 기존 PG 1 skip / 기존 warnings 5 / 156.24초**다. 신규 실제 SQLite 3 nodes와 영향 범위 검증은 **99 passed / 기존 PG 1 skip / 기존 warnings 2 / 22.71초**였으며 설정 commit/동일 Session/격리/rollback과 조회 이전 guard를 확인했다. 원래 실제 함수 10개의 AST는 명시한 timezone reader 전달만 원래 호출로 복원했을 때 차이 0이다. 경계는 **697 modules / 2,332 edges / exact legacy 221 / cycle 0**, L4 parity 97·ER0 81/87/24/44/7·Memory batch 현재 inventory도 통과했다.
+
+읽기 전용 원래 보존 함수 진단은 **source/split/assertion/suppression/API·ORM/node 각각 오류 0**, 기존 보호 **2,139 / 현재 2,236 nodes**다. 앞 단계와 동일하게 signed 최초 도입 두 blob만 메모리에 보충했으며 tracked frozen/checkpoint/additions와 검사 구현은 수정하지 않았다. 부모의 선형 도입 append 후 stock 전체 보존 검사와 통합 Actions/installer 검증은 남아 있다.

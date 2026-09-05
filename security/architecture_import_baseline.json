@@ -1,7 +1,7 @@
 {
-  "edge_count": 2318,
-  "external_import_count": 2175,
-  "module_count": 694,
+  "edge_count": 2332,
+  "external_import_count": 2184,
+  "module_count": 697,
   "modules": [
     {
       "external_imports": [],
@@ -3667,7 +3667,9 @@
     {
       "external_imports": [
         "dataclasses",
-        "datetime"
+        "datetime",
+        "typing",
+        "zoneinfo"
       ],
       "imports": [
         "app.domains.routines.constants"
@@ -3866,6 +3868,22 @@
       "external_imports": [
         "datetime",
         "sqlalchemy",
+        "sqlalchemy.orm",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.domains.routines.models",
+        "app.domains.routines.service.tick_schedule",
+        "app.domains.routines.utils.activity_actions"
+      ],
+      "module": "app.domains.routines.repository.activity_counts",
+      "path": "backend/app/domains/routines/repository/activity_counts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -3967,6 +3985,26 @@
       ],
       "module": "app.domains.routines.service.activity_logs",
       "path": "backend/app/domains/routines/service/activity_logs.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy.orm",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.repository.activity_counts",
+        "app.domains.routines.service.activity_sessions",
+        "app.domains.routines.service.activity_settings",
+        "app.domains.routines.service.tick_schedule"
+      ],
+      "module": "app.domains.routines.service.activity_policy",
+      "path": "backend/app/domains/routines/service/activity_policy.py",
       "wildcard_imports": []
     },
     {
@@ -4247,6 +4285,15 @@
       "imports": [],
       "module": "app.domains.routines.utils",
       "path": "backend/app/domains/routines/utils/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.routines.constants"
+      ],
+      "module": "app.domains.routines.utils.activity_actions",
+      "path": "backend/app/domains/routines/utils/activity_actions.py",
       "wildcard_imports": []
     },
     {
@@ -9687,12 +9734,14 @@
         "zoneinfo"
       ],
       "imports": [
-        "app.cruds.agents",
         "app.domains.routines.constants",
         "app.domains.routines.contracts.activity_policy",
         "app.domains.routines.exceptions",
+        "app.domains.routines.repository.activity_counts",
+        "app.domains.routines.service.activity_policy",
         "app.domains.routines.service.activity_sessions",
         "app.domains.routines.service.tick_schedule",
+        "app.domains.routines.utils.activity_actions",
         "app.models"
       ],
       "module": "app.services.agent_activity_policy",

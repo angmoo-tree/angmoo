@@ -6,12 +6,11 @@ from app.domains.routines.service.activity_sessions import is_policy_enforced_se
 from datetime import UTC, datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import func, inspect, select
+from sqlalchemy import inspect, select
 from sqlalchemy.orm import Session
 
 from app import models
 from app.domains.routines.service import tick_schedule as agent_activity_schedule
-from app.cruds import agents as agent_crud
 
 
 APP_TIMEZONE = agent_activity_schedule.APP_TIMEZONE
@@ -137,6 +136,32 @@ def is_imported_world_runtime_locked_for_character(
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from app.domains.routines.service import activity_policy as canonical_activity_policy
+from app.domains.routines.repository.activity_counts import count_public_actions_since, _count_action_today, _latest_action_at
+from app.domains.routines.utils.activity_actions import _normalize_action_types, _public_action_log_types
+from app.domains.routines.service.activity_policy import _evaluate_counted_actions, _block_actions
+
+
 def build_activity_policy(
     db: Session,
     *,
@@ -144,253 +169,22 @@ def build_activity_policy(
     now: datetime | None = None,
     ignore_active_hours: bool = False,
 ) -> ActivityPolicy:
-    setting = agent_crud.ensure_setting(db, character_id)
-    current = _aware_utc(now or datetime.now(UTC))
-    timezone = activity_timezone(db, character_id=character_id)
-    actual_within_active_hours = _is_within_active_hours(
-        setting, current, timezone=timezone
-    )
-    within_active_hours = True if ignore_active_hours else actual_within_active_hours
-    schedule = next_tick_schedule(
-        setting,
-        character_id=character_id,
-        now=current,
-        within_active_hours=actual_within_active_hours,
-        timezone=timezone,
-    )
-    blocked: dict[str, str] = {}
-
-    if not within_active_hours:
-        reason = (
-            f"outside active hours {setting.active_hours_start}-{setting.active_hours_end}"
-        )
-        return ActivityPolicy(
-            within_active_hours=False,
-            allowed_actions=(),
-            blocked_reasons={action: reason for action in POLICY_ACTION_NAMES},
-            next_tick_at=schedule.next_tick_at,
-            summary=reason,
-            target_interval_seconds=schedule.target_interval_seconds,
-            schedule_spread_seconds=schedule.schedule_spread_seconds,
-            schedule_spread_reason=schedule.schedule_spread_reason,
-            tendency_summary=setting.tendency_summary,
-            tendency_action_ranges=setting.tendency_action_ranges,
-            planner_tendency_profile=setting.planner_tendency_profile,
-        )
-
-    allowed: list[str] = []
-    if setting.allow_reply:
-        _evaluate_counted_actions(
-            db,
-            character_id=character_id,
-            actions=("reply",),
-            action_types=PUBLIC_ACTION_TYPES["reply"],
-            max_per_day=setting.max_comments_per_day,
-            cooldown=timedelta(0),
-            now=current,
-            allowed=allowed,
-            blocked=blocked,
-            timezone=timezone,
-        )
-    else:
-        blocked["reply"] = "reply writing is disabled"
-
-    if setting.allow_post:
-        _evaluate_counted_actions(
-            db,
-            character_id=character_id,
-            actions=("post",),
-            action_types=PUBLIC_ACTION_TYPES["post"],
-            max_per_day=setting.max_posts_per_day,
-            cooldown=timedelta(0),
-            now=current,
-            allowed=allowed,
-            blocked=blocked,
-            timezone=timezone,
-        )
-    else:
-        blocked["post"] = "new post writing is disabled"
-    blocked["quote"] = "quote is disabled for agent activity"
-
-    if not setting.allow_like:
-        blocked["like"] = "like is disabled"
-    else:
-        allowed.append("like")
-    if setting.allow_repost:
-        allowed.append("repost")
-    else:
-        blocked["repost"] = "repost is disabled"
-
-    if setting.allow_follow:
-        allowed.append("follow")
-    else:
-        blocked["follow"] = "follow is disabled"
-
-    if setting.allow_unfollow:
-        allowed.append("unfollow")
-    else:
-        blocked["unfollow"] = "unfollow is disabled"
-
-    allowed.append("observe")
-
-    summary = f"allowed={','.join(allowed)}"
-    return ActivityPolicy(
-        within_active_hours=True,
-        allowed_actions=tuple(allowed),
-        blocked_reasons=blocked,
-        next_tick_at=schedule.next_tick_at,
-        summary=summary,
-        target_interval_seconds=schedule.target_interval_seconds,
-        schedule_spread_seconds=schedule.schedule_spread_seconds,
-        schedule_spread_reason=schedule.schedule_spread_reason,
-        tendency_summary=setting.tendency_summary,
-        tendency_action_ranges=setting.tendency_action_ranges,
-        planner_tendency_profile=setting.planner_tendency_profile,
+    return canonical_activity_policy.build_activity_policy(
+        db, character_id=character_id, now=now,
+        ignore_active_hours=ignore_active_hours, timezone_reader=activity_timezone,
     )
 
 
 def assert_action_allowed(db: Session, *, run: models.AgentRun, action: str) -> None:
-    if not is_policy_enforced_session(run.session_key):
-        return
-    policy = build_activity_policy(
-        db,
-        character_id=run.character_id,
-        ignore_active_hours=is_manual_policy_session(run.session_key),
-    )
-    if action in policy.allowed_actions:
-        return
-    reason = policy.blocked_reasons.get(action, "action is not allowed for this tick")
-    raise ActivityPolicyDeniedError(reason)
-
-
-def count_public_actions_since(
-    db: Session, *, character_id: str, since: datetime
-) -> int:
-    return (
-        db.scalar(
-            select(func.count(models.AgentActivityLog.id)).where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type.in_(_public_action_log_types()),
-                models.AgentActivityLog.created_at >= since,
-            )
-        )
-        or 0
+    return canonical_activity_policy.assert_action_allowed(
+        db, run=run, action=action, timezone_reader=activity_timezone,
     )
 
 
 def count_action_today(
-    db: Session,
-    *,
-    character_id: str,
-    action: str,
-    now: datetime | None = None,
+    db: Session, *, character_id: str, action: str, now: datetime | None = None,
 ) -> int:
-    action_type = PUBLIC_ACTION_TYPES[action]
-    return _count_action_today(
-        db,
-        character_id,
-        action_type,
-        _aware_utc(now or datetime.now(UTC)),
-        timezone=activity_timezone(db, character_id=character_id),
-    )
-
-
-def _evaluate_counted_actions(
-    db: Session,
-    *,
-    character_id: str,
-    actions: tuple[str, ...],
-    action_types: tuple[str, ...],
-    max_per_day: int,
-    cooldown: timedelta,
-    now: datetime,
-    allowed: list[str],
-    blocked: dict[str, str],
-    timezone: ZoneInfo,
-) -> None:
-    action_label = "/".join(actions)
-    if max_per_day <= 0:
-        _block_actions(blocked, actions, "daily limit is 0")
-        return
-    today_count = _count_action_today(
-        db, character_id, action_types, now, timezone=timezone
-    )
-    if today_count >= max_per_day:
-        _block_actions(
-            blocked,
-            actions,
-            f"daily limit reached ({today_count}/{max_per_day})",
-        )
-        return
-    latest = _latest_action_at(db, character_id, action_types)
-    if latest is not None:
-        ready_at = _aware_utc(latest) + cooldown
-        if ready_at > now:
-            _block_actions(
-                blocked,
-                actions,
-                f"{action_label} cooldown until {ready_at.isoformat()}",
-            )
-            return
-    allowed.extend(actions)
-
-
-def _count_action_today(
-    db: Session,
-    character_id: str,
-    action_types: str | tuple[str, ...],
-    now: datetime,
-    *,
-    timezone: ZoneInfo = APP_TIMEZONE,
-) -> int:
-    local_now = now.astimezone(timezone)
-    day_start = datetime.combine(local_now.date(), time.min, tzinfo=timezone)
-    action_type_values = _normalize_action_types(action_types)
-    return (
-        db.scalar(
-            select(func.count(models.AgentActivityLog.id)).where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type.in_(action_type_values),
-                models.AgentActivityLog.created_at >= day_start.astimezone(UTC),
-            )
-        )
-        or 0
-    )
-
-
-def _latest_action_at(
-    db: Session, character_id: str, action_types: str | tuple[str, ...]
-) -> datetime | None:
-    action_type_values = _normalize_action_types(action_types)
-    return db.scalar(
-        select(models.AgentActivityLog.created_at)
-        .where(
-            models.AgentActivityLog.character_id == character_id,
-            models.AgentActivityLog.action_type.in_(action_type_values),
-        )
-        .order_by(models.AgentActivityLog.created_at.desc(), models.AgentActivityLog.id.desc())
-        .limit(1)
-    )
-
-
-def _block_actions(
-    blocked: dict[str, str], actions: tuple[str, ...], reason: str
-) -> None:
-    for action in actions:
-        blocked[action] = reason
-
-
-def _normalize_action_types(action_types: str | tuple[str, ...]) -> tuple[str, ...]:
-    if isinstance(action_types, str):
-        return (action_types,)
-    return action_types
-
-
-def _public_action_log_types() -> tuple[str, ...]:
-    return tuple(
-        dict.fromkeys(
-            action_type
-            for action_types in PUBLIC_ACTION_TYPES.values()
-            for action_type in action_types
-        )
+    return canonical_activity_policy.count_action_today(
+        db, character_id=character_id, action=action, now=now,
+        timezone_reader=activity_timezone,
     )

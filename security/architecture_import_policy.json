@@ -377,10 +377,6 @@
           "importer": "app.services.activity_proposal_runtime"
         },
         {
-          "imported": "app.cruds.agents",
-          "importer": "app.services.agent_activity_policy"
-        },
-        {
           "imported": "app.models",
           "importer": "app.services.agent_activity_policy"
         },
@@ -1090,6 +1086,7 @@
       "app.domains.routines.policies.activity_state",
       "app.domains.routines.policies.planning",
       "app.domains.routines.repository",
+      "app.domains.routines.repository.activity_counts",
       "app.domains.routines.repository.plans",
       "app.domains.routines.router",
       "app.domains.routines.schemas",
@@ -1098,6 +1095,7 @@
       "app.domains.routines.schemas.runs",
       "app.domains.routines.service",
       "app.domains.routines.service.activity_logs",
+      "app.domains.routines.service.activity_policy",
       "app.domains.routines.service.activity_sessions",
       "app.domains.routines.service.activity_settings",
       "app.domains.routines.service.execution",
@@ -1114,6 +1112,7 @@
       "app.domains.routines.service.scheduling",
       "app.domains.routines.service.tick_schedule",
       "app.domains.routines.utils",
+      "app.domains.routines.utils.activity_actions",
       "app.domains.routines.utils.clock",
       "app.domains.runtime.contracts",
       "app.domains.social.constants",
@@ -1262,6 +1261,7 @@
       "app.domains.routines.schemas.runs",
       "app.domains.routines.service",
       "app.domains.routines.service.activity_logs",
+      "app.domains.routines.service.activity_policy",
       "app.domains.routines.service.activity_sessions",
       "app.domains.routines.service.activity_settings",
       "app.domains.routines.service.execution",
@@ -2673,6 +2673,30 @@
         "owner_stage": "AR-B4-C",
         "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
         "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_activity_policy",
+        "target": "app.domains.routines.repository.activity_counts",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing activity policy surface connects the original lazy same-Session timezone read and same actual count function; no new legacy policy body.",
+        "removal_condition": "C3c moves the remaining World/import scope collaboration and closes this precise legacy activity-policy surface before B4 completion.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_activity_policy",
+        "target": "app.domains.routines.service.activity_policy",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing activity policy surface connects the original lazy same-Session timezone read and same actual count function; no new legacy policy body.",
+        "removal_condition": "C3c moves the remaining World/import scope collaboration and closes this precise legacy activity-policy surface before B4 completion.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_activity_policy",
+        "target": "app.domains.routines.utils.activity_actions",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing activity policy surface connects the original lazy same-Session timezone read and same actual count function; no new legacy policy body.",
+        "removal_condition": "C3c moves the remaining World/import scope collaboration and closes this precise legacy activity-policy surface before B4 completion.",
         "review_date": "2026-09-06"
       }
     ]
