@@ -600,3 +600,10 @@ AR-B4-C1의 적용은 이 실제 모델/입력/저장 범위입니다. AgentRela
 
 
 일일 계획이 필요로 하는 Character contract hash는 이미 존재하는 `PlanReferences`가 WC 소유 함수를 연결합니다. World/WC 준비 확인 뒤, repertoire 조회 직전의 원래 위치에서 같은 attached Character를 전달합니다. Character 상세 응답이 Routines의 실제 DTO를 사용해도 Routines 업무 코드가 WC 구현을 직접 역참조하지 않아 패키지 순환이 생기지 않습니다.
+
+
+### 활동 시각과 resident 실행 수명
+
+Routines의 `service/tick_schedule.py`는 active hours·다음 실행·재시도·재개 시각과 deterministic jitter를 계산합니다. World timezone과 Character image quota도 이 같은 시간 값을 사용합니다. `runtime/resident/scheduler.py`는 파일 잠금·DB lease·fencing epoch·heartbeat·취소와 종료 대기를 담당하고 앱의 기존 component worker가 한 번 연결합니다. 별도 scheduler 실행 프로세스를 만들지 않습니다.
+
+그래프 단계가 전달하는 순수 값은 `routines/contracts/resident.py::ResidentGraphState`, 실행 중 같은 Session과 attached 객체를 묶는 context는 `runtime/resident/context.py::LangGraphResidentContext`입니다. Context는 저장소·트랜잭션을 새로 열지 않으며 원래 생성자가 전달한 객체와 callback을 유지합니다. C2는 이 역할만 이전했으며 실제 agent-run 흐름·활동 정책·provider/graph·활동 HTTP와 남은 호환은 후속 C 단계입니다.

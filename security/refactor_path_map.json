@@ -347,7 +347,12 @@
     "backend/app/domains/routines/schemas.py": "backend/app/domains/routines/schemas/plans.py",
     "backend/app/models/agent_slots.py": "backend/app/domains/routines/models/resident.py",
     "backend/app/core/agent_activity_limits.py": "backend/app/domains/routines/constants.py",
-    "backend/app/domains/runtime/schemas.py": "backend/app/domains/routines/schemas/resident.py"
+    "backend/app/domains/runtime/schemas.py": "backend/app/domains/routines/schemas/resident.py",
+    "backend/app/core/agent_activity_schedule.py": "backend/app/domains/routines/service/tick_schedule.py",
+    "backend/app/services/resident_tick_scheduler.py": "backend/app/runtime/resident/scheduler.py",
+    "backend/app/services/resident_contracts.py": "backend/app/runtime/resident/context.py",
+    "backend/tests/test_agent_activity_limits.py": "backend/tests/routines/test_activity_limits.py",
+    "backend/tests/test_l2_scheduler_singleton.py": "backend/tests/routines/test_scheduler_singleton.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -710,7 +715,92 @@
     "tests/test_routine_post_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service": "tests/routine_posts/test_runtime.py::test_scoped_post_pair_and_identity_are_validated_by_service",
     "tests/test_routine_post_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post": "tests/routine_posts/test_runtime.py::test_transient_provider_failure_retries_same_beat_without_duplicate_post",
     "tests/test_routine_post_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire": "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
-    "tests/test_routine_post_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate": "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate"
+    "tests/test_routine_post_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate": "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+    "tests/test_agent_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity": "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+    "tests/test_agent_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full": "tests/routines/test_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
+    "tests/test_agent_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character": "tests/routines/test_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
+    "tests/test_agent_activity_limits.py::test_activation_uses_canonical_initial_schedule": "tests/routines/test_activity_limits.py::test_activation_uses_canonical_initial_schedule",
+    "tests/test_agent_activity_limits.py::test_active_hours_validation_allows_presets_and_custom_under_cap": "tests/routines/test_activity_limits.py::test_active_hours_validation_allows_presets_and_custom_under_cap",
+    "tests/test_agent_activity_limits.py::test_active_hours_validation_rejects_all_day_over_cap_and_bad_start": "tests/routines/test_activity_limits.py::test_active_hours_validation_rejects_all_day_over_cap_and_bad_start",
+    "tests/test_agent_activity_limits.py::test_active_start_spread_stays_inside_next_30_minute_boundary": "tests/routines/test_activity_limits.py::test_active_start_spread_stays_inside_next_30_minute_boundary",
+    "tests/test_agent_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours": "tests/routines/test_activity_limits.py::test_activity_policy_handles_cross_midnight_active_hours",
+    "tests/test_agent_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled": "tests/routines/test_activity_limits.py::test_activity_policy_keeps_observe_internal_when_setting_disabled",
+    "tests/test_agent_activity_limits.py::test_activity_timezone_comes_from_selected_world": "tests/routines/test_activity_limits.py::test_activity_timezone_comes_from_selected_world",
+    "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds": "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+    "tests/test_agent_activity_limits.py::test_agent_creation_draft_complete_rejects_prompt_injection": "tests/routines/test_activity_limits.py::test_agent_creation_draft_complete_rejects_prompt_injection",
+    "tests/test_agent_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving": "tests/routines/test_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving",
+    "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle": "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+    "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving": "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+    "tests/test_agent_activity_limits.py::test_api_agent_instants_normalize_sqlite_naive_values_to_utc": "tests/routines/test_activity_limits.py::test_api_agent_instants_normalize_sqlite_naive_values_to_utc",
+    "tests/test_agent_activity_limits.py::test_combined_runtime_audit_post_prefers_actual_inbox_target": "tests/routines/test_activity_limits.py::test_combined_runtime_audit_post_prefers_actual_inbox_target",
+    "tests/test_agent_activity_limits.py::test_combined_runtime_audit_post_uses_root_or_none": "tests/routines/test_activity_limits.py::test_combined_runtime_audit_post_uses_root_or_none",
+    "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings": "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+    "tests/test_agent_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert": "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert",
+    "tests/test_agent_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert": "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+    "tests/test_agent_activity_limits.py::test_default_slot_bootstrap_preserves_first_thirty_and_adds_thirty_one_to_fifty": "tests/routines/test_activity_limits.py::test_default_slot_bootstrap_preserves_first_thirty_and_adds_thirty_one_to_fifty",
+    "tests/test_agent_activity_limits.py::test_effective_server_llm_autonomy_count_includes_auto_or_slot_unique": "tests/routines/test_activity_limits.py::test_effective_server_llm_autonomy_count_includes_auto_or_slot_unique",
+    "tests/test_agent_activity_limits.py::test_enabled_idle_slot_reschedules_immediately_after_activity_window_change": "tests/routines/test_activity_limits.py::test_enabled_idle_slot_reschedules_immediately_after_activity_window_change",
+    "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits": "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+    "tests/test_agent_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick": "tests/routines/test_activity_limits.py::test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick",
+    "tests/test_agent_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy": "tests/routines/test_activity_limits.py::test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy",
+    "tests/test_agent_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots": "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+    "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call": "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+    "tests/test_agent_activity_limits.py::test_first_greeting_cooldown_is_separate_from_run_now_cooldown": "tests/routines/test_activity_limits.py::test_first_greeting_cooldown_is_separate_from_run_now_cooldown",
+    "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident": "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+    "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue": "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+    "tests/test_agent_activity_limits.py::test_global_autonomy_capacity_rejects_one_hundred_first_without_side_effects": "tests/routines/test_activity_limits.py::test_global_autonomy_capacity_rejects_one_hundred_first_without_side_effects",
+    "tests/test_agent_activity_limits.py::test_initial_retry_and_recovery_schedules_spread_without_running_early": "tests/routines/test_activity_limits.py::test_initial_retry_and_recovery_schedules_spread_without_running_early",
+    "tests/test_agent_activity_limits.py::test_initial_schedule_uses_world_timezone_across_dst_boundary": "tests/routines/test_activity_limits.py::test_initial_schedule_uses_world_timezone_across_dst_boundary",
+    "tests/test_agent_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot": "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot",
+    "tests/test_agent_activity_limits.py::test_next_tick_schedule_adds_interval_jitter_without_running_early": "tests/routines/test_activity_limits.py::test_next_tick_schedule_adds_interval_jitter_without_running_early",
+    "tests/test_agent_activity_limits.py::test_next_tick_schedule_moves_end_of_window_to_next_active_start": "tests/routines/test_activity_limits.py::test_next_tick_schedule_moves_end_of_window_to_next_active_start",
+    "tests/test_agent_activity_limits.py::test_non_scoped_runtime_keeps_legacy_post_fallback": "tests/routines/test_activity_limits.py::test_non_scoped_runtime_keeps_legacy_post_fallback",
+    "tests/test_agent_activity_limits.py::test_physical_slot_capacity_does_not_disable_existing_agents": "tests/routines/test_activity_limits.py::test_physical_slot_capacity_does_not_disable_existing_agents",
+    "tests/test_agent_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick": "tests/routines/test_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick",
+    "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot": "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[None-False]": "tests/routines/test_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[None-False]",
+    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at1-True]": "tests/routines/test_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at1-True]",
+    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at2-True]": "tests/routines/test_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at2-True]",
+    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at3-False]": "tests/routines/test_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at3-False]",
+    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at4-True]": "tests/routines/test_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at4-True]",
+    "tests/test_agent_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at5-False]": "tests/routines/test_activity_limits.py::test_resident_slot_due_comparison_normalizes_utc_instants[next_tick_at5-False]",
+    "tests/test_agent_activity_limits.py::test_routine_runtime_does_not_invent_global_selected_post": "tests/routines/test_activity_limits.py::test_routine_runtime_does_not_invent_global_selected_post",
+    "tests/test_agent_activity_limits.py::test_run_now_allows_other_imminent_slot": "tests/routines/test_activity_limits.py::test_run_now_allows_other_imminent_slot",
+    "tests/test_agent_activity_limits.py::test_run_now_allows_target_due_slot": "tests/routines/test_activity_limits.py::test_run_now_allows_target_due_slot",
+    "tests/test_agent_activity_limits.py::test_run_now_allows_two_other_live_running_slots": "tests/routines/test_activity_limits.py::test_run_now_allows_two_other_live_running_slots",
+    "tests/test_agent_activity_limits.py::test_run_now_ignores_expired_running_lease_for_capacity": "tests/routines/test_activity_limits.py::test_run_now_ignores_expired_running_lease_for_capacity",
+    "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists": "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+    "tests/test_agent_activity_limits.py::test_run_now_manual_slot_does_not_preserve_previous_next_tick": "tests/routines/test_activity_limits.py::test_run_now_manual_slot_does_not_preserve_previous_next_tick",
+    "tests/test_agent_activity_limits.py::test_run_now_rejects_character_owned_by_another_user": "tests/routines/test_activity_limits.py::test_run_now_rejects_character_owned_by_another_user",
+    "tests/test_agent_activity_limits.py::test_run_now_rejects_target_running_slot": "tests/routines/test_activity_limits.py::test_run_now_rejects_target_running_slot",
+    "tests/test_agent_activity_limits.py::test_run_now_rejects_target_soon_scheduled_slot": "tests/routines/test_activity_limits.py::test_run_now_rejects_target_soon_scheduled_slot",
+    "tests/test_agent_activity_limits.py::test_run_now_rejects_when_capacity_has_three_live_running_slots": "tests/routines/test_activity_limits.py::test_run_now_rejects_when_capacity_has_three_live_running_slots",
+    "tests/test_agent_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback": "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback",
+    "tests/test_agent_activity_limits.py::test_run_now_releases_temporary_slot_after_runner_failure": "tests/routines/test_activity_limits.py::test_run_now_releases_temporary_slot_after_runner_failure",
+    "tests/test_agent_activity_limits.py::test_run_now_single_flight_rejects_one_live_running_slot": "tests/routines/test_activity_limits.py::test_run_now_single_flight_rejects_one_live_running_slot",
+    "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy": "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+    "tests/test_agent_activity_limits.py::test_running_slot_keeps_current_schedule_until_run_completion": "tests/routines/test_activity_limits.py::test_running_slot_keeps_current_schedule_until_run_completion",
+    "tests/test_agent_activity_limits.py::test_sqlite_busy_exhaustion_is_exposed_as_retryable_activation_error": "tests/routines/test_activity_limits.py::test_sqlite_busy_exhaustion_is_exposed_as_retryable_activation_error",
+    "tests/test_agent_activity_limits.py::test_sqlite_concurrent_world_activation_serializes_capacity_at_one": "tests/routines/test_activity_limits.py::test_sqlite_concurrent_world_activation_serializes_capacity_at_one",
+    "tests/test_agent_activity_limits.py::test_tick_resident_slots_staggers_claimed_runs": "tests/routines/test_activity_limits.py::test_tick_resident_slots_staggers_claimed_runs",
+    "tests/test_agent_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving": "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
+    "tests/test_agent_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled": "tests/routines/test_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
+    "tests/test_agent_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change": "tests/routines/test_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change",
+    "tests/test_agent_activity_limits.py::test_update_settings_rejects_invalid_active_hours": "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
+    "tests/test_agent_activity_limits.py::test_visible_activity_actions_hide_observe": "tests/routines/test_activity_limits.py::test_visible_activity_actions_hide_observe",
+    "tests/test_agent_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically": "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically",
+    "tests/test_agent_activity_limits.py::test_world_autonomy_capacity_excludes_owner_controlled_left_and_inactive_rows": "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_excludes_owner_controlled_left_and_inactive_rows",
+    "tests/test_agent_activity_limits.py::test_world_timezone_change_reschedules_enabled_idle_slots": "tests/routines/test_activity_limits.py::test_world_timezone_change_reschedules_enabled_idle_slots",
+    "tests/test_l2_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick": "tests/routines/test_scheduler_singleton.py::test_scheduler_heartbeat_preserves_failure_until_next_tick",
+    "tests/test_l2_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner": "tests/routines/test_scheduler_singleton.py::test_scheduler_lease_rejects_duplicate_and_fences_stale_owner",
+    "tests/test_l2_scheduler_singleton.py::test_scheduler_process_lock_rejects_second_local_loop": "tests/routines/test_scheduler_singleton.py::test_scheduler_process_lock_rejects_second_local_loop",
+    "tests/test_l2_scheduler_singleton.py::test_scheduler_readiness_exists_only_while_lease_is_held": "tests/routines/test_scheduler_singleton.py::test_scheduler_readiness_exists_only_while_lease_is_held",
+    "tests/test_l2_scheduler_singleton.py::test_shutdown_before_first_tick_releases_lease_without_claiming_work": "tests/routines/test_scheduler_singleton.py::test_shutdown_before_first_tick_releases_lease_without_claiming_work",
+    "tests/test_l2_scheduler_singleton.py::test_shutdown_drain_timeout_cancels_tick_and_releases_lease": "tests/routines/test_scheduler_singleton.py::test_shutdown_drain_timeout_cancels_tick_and_releases_lease",
+    "tests/test_l2_scheduler_singleton.py::test_shutdown_during_tick_drains_then_releases_without_second_tick": "tests/routines/test_scheduler_singleton.py::test_shutdown_during_tick_drains_then_releases_without_second_tick",
+    "tests/test_l2_scheduler_singleton.py::test_sleep_wake_gap_does_not_replay_missed_intervals": "tests/routines/test_scheduler_singleton.py::test_sleep_wake_gap_does_not_replay_missed_intervals",
+    "tests/test_l2_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates": "tests/routines/test_scheduler_singleton.py::test_tick_window_skips_forward_catchup_and_backward_duplicates",
+    "tests/test_l2_scheduler_singleton.py::test_wait_between_ticks_keeps_lease_alive": "tests/routines/test_scheduler_singleton.py::test_wait_between_ticks_keeps_lease_alive"
   },
   "details": {
     "AR-B1": {
@@ -4057,7 +4147,7 @@
             "backend/app/domains/worlds/service/scheduling.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_world_timezone_change_reschedules_enabled_idle_slots"
+            "tests/routines/test_activity_limits.py::test_world_timezone_change_reschedules_enabled_idle_slots"
           ]
         },
         {
@@ -4267,7 +4357,7 @@
             "backend/app/domains/worlds/service/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_world_timezone_change_reschedules_enabled_idle_slots"
+            "tests/routines/test_activity_limits.py::test_world_timezone_change_reschedules_enabled_idle_slots"
           ]
         },
         {
@@ -6512,7 +6602,7 @@
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
             "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings"
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings"
           ]
         },
         {
@@ -6556,9 +6646,9 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_enabled_idle_slot_reschedules_immediately_after_activity_window_change",
-            "tests/test_agent_activity_limits.py::test_running_slot_keeps_current_schedule_until_run_completion"
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_enabled_idle_slot_reschedules_immediately_after_activity_window_change",
+            "tests/routines/test_activity_limits.py::test_running_slot_keeps_current_schedule_until_run_completion"
           ]
         },
         {
@@ -6570,7 +6660,7 @@
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
             "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings"
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings"
           ]
         },
         {
@@ -6582,7 +6672,7 @@
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
             "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings"
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings"
           ]
         },
         {
@@ -6602,8 +6692,8 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
             "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate"
           ]
         },
@@ -6660,8 +6750,8 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
             "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
           ]
         },
@@ -6775,7 +6865,7 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
@@ -6866,9 +6956,9 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_enabled_idle_slot_reschedules_immediately_after_activity_window_change",
-            "tests/test_agent_activity_limits.py::test_running_slot_keeps_current_schedule_until_run_completion"
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_enabled_idle_slot_reschedules_immediately_after_activity_window_change",
+            "tests/routines/test_activity_limits.py::test_running_slot_keeps_current_schedule_until_run_completion"
           ]
         },
         {
@@ -6878,7 +6968,7 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
@@ -6932,7 +7022,7 @@
             "backend/app/schemas/agents.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
             "tests/test_m3_authorization_deletion.py::test_sensitive_update_schemas_ignore_ownership_and_secret_mass_assignment"
           ]
         },
@@ -6985,7 +7075,7 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_api_agent_instants_normalize_sqlite_naive_values_to_utc"
+            "tests/routines/test_activity_limits.py::test_api_agent_instants_normalize_sqlite_naive_values_to_utc"
           ]
         },
         {
@@ -7095,8 +7185,8 @@
             "backend/app/schemas/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_api_agent_instants_normalize_sqlite_naive_values_to_utc",
-            "tests/test_agent_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick"
+            "tests/routines/test_activity_limits.py::test_api_agent_instants_normalize_sqlite_naive_values_to_utc",
+            "tests/routines/test_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick"
           ]
         },
         {
@@ -7126,9 +7216,9 @@
             "backend/app/schemas/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
-            "tests/test_agent_activity_limits.py::test_tick_resident_slots_staggers_claimed_runs",
-            "tests/test_agent_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick"
+            "tests/routines/test_activity_limits.py::test_file_backed_sqlite_tick_claims_two_naive_due_slots",
+            "tests/routines/test_activity_limits.py::test_tick_resident_slots_staggers_claimed_runs",
+            "tests/routines/test_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick"
           ]
         },
         {
@@ -7138,8 +7228,8 @@
             "backend/app/schemas/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_api_agent_instants_normalize_sqlite_naive_values_to_utc",
-            "tests/test_agent_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick"
+            "tests/routines/test_activity_limits.py::test_api_agent_instants_normalize_sqlite_naive_values_to_utc",
+            "tests/routines/test_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick"
           ]
         },
         {
@@ -7159,9 +7249,9 @@
             "backend/app/schemas/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot",
-            "tests/test_agent_activity_limits.py::test_tick_resident_slots_staggers_claimed_runs",
-            "tests/test_agent_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick"
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot",
+            "tests/routines/test_activity_limits.py::test_tick_resident_slots_staggers_claimed_runs",
+            "tests/routines/test_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick"
           ]
         },
         {
@@ -7171,7 +7261,7 @@
             "backend/app/schemas/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick"
+            "tests/routines/test_activity_limits.py::test_resident_scheduler_tick_runner_uses_configured_global_tick"
           ]
         },
         {
@@ -7241,7 +7331,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_first_greeting_cooldown_is_separate_from_run_now_cooldown"
+            "tests/routines/test_activity_limits.py::test_first_greeting_cooldown_is_separate_from_run_now_cooldown"
           ]
         },
         {
@@ -7251,8 +7341,8 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
-            "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
@@ -7391,9 +7481,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
-            "tests/test_agent_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
-            "tests/test_agent_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
+            "tests/routines/test_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
           ]
         },
         {
@@ -7474,7 +7564,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident"
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident"
           ]
         },
         {
@@ -7514,9 +7604,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
-            "tests/test_agent_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
-            "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue"
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue"
           ]
         },
         {
@@ -7538,9 +7628,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
-            "tests/test_agent_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
-            "tests/test_agent_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
+            "tests/routines/test_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
           ]
         },
         {
@@ -7550,9 +7640,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
-            "tests/test_agent_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
-            "tests/test_agent_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
+            "tests/routines/test_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
           ]
         },
         {
@@ -7562,9 +7652,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
-            "tests/test_agent_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
-            "tests/test_agent_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
+            "tests/routines/test_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
           ]
         },
         {
@@ -7574,9 +7664,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings",
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
           ]
         },
         {
@@ -7586,9 +7676,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings",
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
           ]
         },
         {
@@ -7631,9 +7721,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
-            "tests/test_agent_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
-            "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue"
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue"
           ]
         },
         {
@@ -7653,9 +7743,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings",
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
           ]
         },
         {
@@ -7677,8 +7767,8 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
-            "tests/test_agent_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
             "tests/test_google_model_selection.py::test_model_only_credential_update_preserves_existing_key"
           ]
         },
@@ -7749,7 +7839,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
@@ -7761,7 +7851,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
@@ -7773,9 +7863,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
-            "tests/test_agent_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
-            "tests/test_agent_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
+            "tests/routines/test_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
           ]
         },
         {
@@ -7785,9 +7875,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert",
-            "tests/test_agent_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
-            "tests/test_agent_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled"
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert",
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
+            "tests/routines/test_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled"
           ]
         },
         {
@@ -7837,9 +7927,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
-            "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
-            "tests/test_agent_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
           ]
         },
         {
@@ -7849,8 +7939,8 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
-            "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
@@ -7861,8 +7951,8 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
-            "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
@@ -7873,9 +7963,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
-            "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
-            "tests/test_agent_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
           ]
         },
         {
@@ -7885,9 +7975,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
-            "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
-            "tests/test_agent_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
           ]
         },
         {
@@ -7897,8 +7987,8 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_run_now_rejects_when_capacity_has_three_live_running_slots",
-            "tests/test_agent_activity_limits.py::test_run_now_single_flight_rejects_one_live_running_slot"
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_when_capacity_has_three_live_running_slots",
+            "tests/routines/test_activity_limits.py::test_run_now_single_flight_rejects_one_live_running_slot"
           ]
         },
         {
@@ -7908,7 +7998,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_run_now_rejects_target_soon_scheduled_slot"
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_target_soon_scheduled_slot"
           ]
         },
         {
@@ -7940,9 +8030,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings",
-            "tests/test_agent_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving"
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving"
           ]
         },
         {
@@ -7952,7 +8042,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
@@ -7986,9 +8076,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings",
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
           ],
           "part": "Character selection/mutation and callback ordering"
         },
@@ -7999,9 +8089,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings",
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
           ]
         },
         {
@@ -8011,9 +8101,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings",
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
           ]
         },
         {
@@ -8023,9 +8113,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings",
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
           ]
         },
         {
@@ -8075,9 +8165,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
-            "tests/test_agent_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
-            "tests/test_agent_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
+            "tests/routines/test_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
           ]
         },
         {
@@ -8138,7 +8228,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
           ]
@@ -8150,8 +8240,8 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
-            "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
@@ -8162,8 +8252,8 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
-            "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
@@ -8184,8 +8274,8 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
-            "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
@@ -8220,7 +8310,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving"
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving"
           ],
           "part": "Character selection/mutation and callback ordering"
         },
@@ -8338,9 +8428,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
-            "tests/test_agent_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
-            "tests/test_agent_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
+            "tests/routines/test_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
           ]
         },
         {
@@ -8361,9 +8451,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
-            "tests/test_agent_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
-            "tests/test_agent_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
+            "tests/routines/test_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
           ]
         },
         {
@@ -8373,9 +8463,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
-            "tests/test_agent_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
-            "tests/test_agent_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
+            "tests/routines/test_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
           ]
         },
         {
@@ -8385,8 +8475,8 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
-            "tests/test_agent_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character"
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character"
           ]
         },
         {
@@ -8539,7 +8629,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
             "tests/test_langgraph_resident_engine.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria"
           ]
@@ -8551,8 +8641,8 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
-            "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
@@ -8575,9 +8665,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
-            "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
-            "tests/test_agent_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
           ]
         },
         {
@@ -8587,7 +8677,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving"
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving"
           ]
         },
         {
@@ -8597,9 +8687,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
-            "tests/test_agent_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
           ]
         },
         {
@@ -8609,9 +8699,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
-            "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
-            "tests/test_agent_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
           ]
         },
         {
@@ -8621,9 +8711,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
-            "tests/test_agent_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
           ]
         },
         {
@@ -8633,9 +8723,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
-            "tests/test_agent_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
           ]
         },
         {
@@ -8665,9 +8755,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
-            "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
-            "tests/test_agent_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
           ]
         },
         {
@@ -8717,9 +8807,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
-            "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
-            "tests/test_agent_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
           ]
         },
         {
@@ -8729,9 +8819,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
-            "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
-            "tests/test_agent_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
           ]
         },
         {
@@ -8741,9 +8831,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
-            "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists"
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists"
           ]
         },
         {
@@ -8753,9 +8843,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
-            "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
-            "tests/test_agent_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
           ]
         },
         {
@@ -8765,9 +8855,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
-            "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_agent_activity_limits.py::test_update_settings_rejects_invalid_active_hours"
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours"
           ]
         },
         {
@@ -8777,9 +8867,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
-            "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists"
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists"
           ]
         },
         {
@@ -8789,9 +8879,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
-            "tests/test_agent_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
-            "tests/test_agent_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
+            "tests/routines/test_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
           ]
         },
         {
@@ -8801,9 +8891,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
-            "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists"
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists"
           ]
         },
         {
@@ -8904,9 +8994,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
-            "tests/test_agent_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
-            "tests/test_agent_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
           ]
         },
         {
@@ -8916,9 +9006,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
-            "tests/test_agent_activity_limits.py::test_first_greeting_cooldown_is_separate_from_run_now_cooldown",
-            "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call"
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_cooldown_is_separate_from_run_now_cooldown",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call"
           ]
         },
         {
@@ -8928,8 +9018,8 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
-            "tests/test_agent_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
@@ -8940,7 +9030,7 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_visible_activity_actions_hide_observe"
+            "tests/routines/test_activity_limits.py::test_visible_activity_actions_hide_observe"
           ]
         },
         {
@@ -8950,9 +9040,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings",
-            "tests/test_agent_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving"
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving"
           ]
         },
         {
@@ -8962,9 +9052,9 @@
             "backend/app/runtime/characters/management.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings",
-            "tests/test_agent_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
           ]
         },
         {
@@ -9067,7 +9157,7 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving",
             "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
             "tests/test_agent_creation_drafts.py::test_profile_image_quota_exceeded_skips_translation_and_pollinations"
           ]
@@ -9239,9 +9329,9 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_complete_rejects_prompt_injection"
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_complete_rejects_prompt_injection"
           ]
         },
         {
@@ -9282,9 +9372,9 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving"
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving"
           ]
         },
         {
@@ -9294,8 +9384,8 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
             "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
           ]
         },
@@ -9439,8 +9529,8 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
             "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
           ]
         },
@@ -9451,7 +9541,7 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving"
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving"
           ]
         },
         {
@@ -9576,7 +9666,7 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_complete_rejects_prompt_injection",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_complete_rejects_prompt_injection",
             "tests/test_agent_promotion_usage.py::test_complete_draft_records_promotion_usage_consent",
             "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
           ]
@@ -9588,8 +9678,8 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_complete_rejects_prompt_injection",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_complete_rejects_prompt_injection",
             "tests/test_agent_promotion_usage.py::test_complete_draft_records_promotion_usage_consent"
           ]
         },
@@ -9600,8 +9690,8 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
             "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
           ]
         },
@@ -9612,9 +9702,9 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving"
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving"
           ]
         },
         {
@@ -9624,9 +9714,9 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving"
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving"
           ]
         },
         {
@@ -9647,7 +9737,7 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_complete_rejects_prompt_injection",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_complete_rejects_prompt_injection",
             "tests/test_agent_creation_drafts.py::test_cleanup_expired_drafts_removes_profile_image_candidates",
             "tests/test_agent_promotion_usage.py::test_complete_draft_records_promotion_usage_consent"
           ]
@@ -9659,7 +9749,7 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving",
             "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
           ]
         },
@@ -9680,7 +9770,7 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving"
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving"
           ]
         },
         {
@@ -9690,7 +9780,7 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving"
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving"
           ]
         },
         {
@@ -9700,7 +9790,7 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving"
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving"
           ]
         },
         {
@@ -9710,8 +9800,8 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
             "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
           ]
         },
@@ -9722,8 +9812,8 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_complete_rejects_prompt_injection",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_complete_rejects_prompt_injection",
             "tests/test_agent_promotion_usage.py::test_complete_draft_records_promotion_usage_consent"
           ]
         },
@@ -9734,7 +9824,7 @@
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_enhance_rejects_prompt_injection_without_saving",
             "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
             "tests/test_agent_creation_drafts.py::test_profile_image_quota_exceeded_skips_translation_and_pollinations"
           ]
@@ -19632,7 +19722,7 @@
           "new": "backend/app/domains/routines/constants.py::TERMINAL_ITEM_STATUSES",
           "direct_consumers": [
             "backend/app/domains/routines/public.py",
-            "backend/app/services/resident_tick_scheduler.py"
+            "backend/app/runtime/resident/scheduler.py"
           ],
           "test_nodes": [
             "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
@@ -19647,7 +19737,7 @@
           "new": "backend/app/domains/routines/service/lifecycle.py::_require_autonomous",
           "direct_consumers": [
             "backend/app/domains/routines/public.py",
-            "backend/app/services/resident_tick_scheduler.py"
+            "backend/app/runtime/resident/scheduler.py"
           ],
           "test_nodes": [
             "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
@@ -19662,7 +19752,7 @@
           "new": "backend/app/domains/routines/service/lifecycle.py::recover_expired_claims",
           "direct_consumers": [
             "backend/app/domains/routines/public.py",
-            "backend/app/services/resident_tick_scheduler.py"
+            "backend/app/runtime/resident/scheduler.py"
           ],
           "test_nodes": [
             "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
@@ -19677,7 +19767,7 @@
           "new": "backend/app/domains/routines/service/execution/claims.py::_close_open_beat_claims",
           "direct_consumers": [
             "backend/app/domains/routines/public.py",
-            "backend/app/services/resident_tick_scheduler.py"
+            "backend/app/runtime/resident/scheduler.py"
           ],
           "test_nodes": [
             "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
@@ -19692,7 +19782,7 @@
           "new": "backend/app/domains/routines/service/lifecycle.py::close_elapsed_dayparts",
           "direct_consumers": [
             "backend/app/domains/routines/public.py",
-            "backend/app/services/resident_tick_scheduler.py"
+            "backend/app/runtime/resident/scheduler.py"
           ],
           "test_nodes": [
             "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
@@ -19707,7 +19797,7 @@
           "new": "backend/app/domains/routines/service/lifecycle.py::reconcile_all_elapsed_routines",
           "direct_consumers": [
             "backend/app/domains/routines/public.py",
-            "backend/app/services/resident_tick_scheduler.py"
+            "backend/app/runtime/resident/scheduler.py"
           ],
           "test_nodes": [
             "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
@@ -19722,7 +19812,7 @@
           "new": "backend/app/domains/routines/service/lifecycle.py::interrupt_inactive_world_character",
           "direct_consumers": [
             "backend/app/domains/routines/public.py",
-            "backend/app/services/resident_tick_scheduler.py"
+            "backend/app/runtime/resident/scheduler.py"
           ],
           "test_nodes": [
             "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
@@ -19737,7 +19827,7 @@
           "new": "backend/app/domains/routines/service/lifecycle.py::reconcile_all_elapsed_routines",
           "direct_consumers": [
             "backend/app/domains/routines/public.py",
-            "backend/app/services/resident_tick_scheduler.py"
+            "backend/app/runtime/resident/scheduler.py"
           ],
           "test_nodes": [
             "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
@@ -19752,7 +19842,7 @@
           "new": "backend/app/domains/routines/public.py::__all__",
           "direct_consumers": [
             "backend/app/domains/routines/public.py",
-            "backend/app/services/resident_tick_scheduler.py"
+            "backend/app/runtime/resident/scheduler.py"
           ],
           "test_nodes": [
             "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission",
@@ -19766,7 +19856,7 @@
           "old": "backend/app/domains/routines/infrastructure/sqlalchemy_lifecycle.py::reconcile_all_elapsed_routines",
           "new": "backend/app/runtime/routines/lifecycle_references.py::SqlAlchemyLifecycleReferences",
           "direct_consumers": [
-            "backend/app/services/resident_tick_scheduler.py",
+            "backend/app/runtime/resident/scheduler.py",
             "backend/app/domains/routines/service/lifecycle.py"
           ],
           "test_nodes": [
@@ -23553,9 +23643,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -23568,9 +23658,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -23583,9 +23673,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -23598,9 +23688,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23614,9 +23704,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23630,9 +23720,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -23645,9 +23735,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -23660,9 +23750,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23676,9 +23766,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -23691,9 +23781,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -23706,9 +23796,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23722,9 +23812,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23738,9 +23828,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -23753,9 +23843,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -23768,9 +23858,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -23783,9 +23873,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23799,9 +23889,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23815,9 +23905,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23831,9 +23921,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23847,9 +23937,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23863,9 +23953,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23879,9 +23969,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23895,9 +23985,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23911,9 +24001,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23927,9 +24017,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23943,9 +24033,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23959,9 +24049,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23975,9 +24065,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -23991,9 +24081,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -24006,9 +24096,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -24021,9 +24111,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -24037,9 +24127,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -24053,9 +24143,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -24069,9 +24159,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -24084,9 +24174,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -24100,9 +24190,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -24116,9 +24206,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -24132,9 +24222,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -24148,9 +24238,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ],
           "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
@@ -24164,7 +24254,7 @@
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
             "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings"
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings"
           ]
         },
         {
@@ -24208,9 +24298,9 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_enabled_idle_slot_reschedules_immediately_after_activity_window_change",
-            "tests/test_agent_activity_limits.py::test_running_slot_keeps_current_schedule_until_run_completion"
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_enabled_idle_slot_reschedules_immediately_after_activity_window_change",
+            "tests/routines/test_activity_limits.py::test_running_slot_keeps_current_schedule_until_run_completion"
           ]
         },
         {
@@ -24222,7 +24312,7 @@
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
             "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings"
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings"
           ]
         },
         {
@@ -24234,7 +24324,7 @@
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
             "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults",
-            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings"
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings"
           ]
         },
         {
@@ -24254,8 +24344,8 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
             "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate"
           ]
         },
@@ -24312,8 +24402,8 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
-            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/routines/test_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
             "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
           ]
         },
@@ -24427,7 +24517,7 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
             "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
           ]
         },
@@ -24521,9 +24611,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -24537,9 +24627,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -24553,9 +24643,9 @@
           "test_nodes": [
             "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
             "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
-            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
-            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
-            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/routines/test_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/routines/test_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
             "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
           ]
         },
@@ -24599,7 +24689,7 @@
             "backend/app/schemas/agents.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
             "tests/test_m3_authorization_deletion.py::test_sensitive_update_schemas_ignore_ownership_and_secret_mass_assignment"
           ]
         },
@@ -24652,7 +24742,7 @@
             "backend/app/schemas/__init__.py"
           ],
           "test_nodes": [
-            "tests/test_agent_activity_limits.py::test_api_agent_instants_normalize_sqlite_naive_values_to_utc"
+            "tests/routines/test_activity_limits.py::test_api_agent_instants_normalize_sqlite_naive_values_to_utc"
           ]
         },
         {
@@ -24694,6 +24784,43 @@
       "remaining": "AgentRelationshipPoint remains real app/models/agent_runs for B5; AgentDaypartMemoryEvent same file for B7. AgentImageGenerationSetting stays real image setting owner for later media/runtime cleanup. Existing mixed CRUD keeps same-function exports only for these C1 functions; new services do not import legacy. Scheduler/lease/agent-run/LLM graphs and action policy, FeedCue workflows and mixed owner filtering are subsequent C2+ work.",
       "cross_workflow": "runtime/social/timeline now calls canonical activity_logs on the same Session; runtime/routine_posts/context_references reads the canonical same AgentActivitySetting class. B5 later discovery/profile_activity sources have exact mapped ActivityLog/filter/hidden consumers to connect at linear integration; no public-filter policy is combined with Social distinct hidden6 rule.",
       "cycle_resolution": "Moving actual activity DTO ownership exposed Character.schemas -> Routines -> WC -> Character through a single hash function import. Existing PlanReferences now connects that identical pure hash at the same original point; no global policy relocation, eager input read, query, write or boundary exception. New attached-object/readiness-order regression verifies this seam."
+    },
+    "AR-B4-C2-resident-schedule-composition": {
+      "status": "IMPLEMENTED — 196 focused passed, existing PG skip1; exact30 AST unchanged, boundary692/2309/227; readonly source/split/assertion/suppression/API/ORM/node diagnostics errors0; root linear introductions and stock integration gate pending",
+      "split_files": {
+        "backend/app/services/resident_contracts.py": [
+          "backend/app/domains/routines/contracts/resident.py",
+          "backend/app/runtime/resident/context.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/resident_contracts.py::ResidentGraphState",
+          "new": "backend/app/domains/routines/contracts/resident.py::ResidentGraphState",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/services/resident_contracts.py::LangGraphResidentContext",
+          "new": "backend/app/runtime/resident/context.py::LangGraphResidentContext",
+          "direct_consumers": [
+            "backend/app/services/langgraph_resident.py",
+            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/services/world_feed_runtime.py",
+            "backend/app/compatibility/routine_posts/legacy.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        }
+      ],
+      "ownership": "Tick schedule/active window/DST/jitter/retry policy is the actual routines/service/tick_schedule implementation. Process lock, DB lease, fencing, heartbeat, cancellation, sleep/resume and bounded shutdown are actual runtime/resident/scheduler. Pure ResidentGraphState is routines/contracts/resident; Session/model-rich frozen context is runtime/resident/context.",
+      "preservation": "Exact original function/class/constant ASTs; same config values/default args, queries, callback order, monotonic time, lock/unlock and commit behavior. Existing tests move to routines ownership with unchanged assertions/parametrize/fixture; both split contract files stay in the same SDK/subprocess import scan.",
+      "remaining": "Runtime context uses the existing ActivityPolicy value until actual policy split in C3. Scheduler still invokes existing agent-run actual runtime using the same Session and schema contract; lease repository/coordination remain runtime domain support. No whole giant service move or completion claim. Compatibility RoutinePost interaction UoW, AgentRun/graph policy and IO/HTTP are subsequent C slices."
     }
   }
 }

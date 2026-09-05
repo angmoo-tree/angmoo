@@ -13,12 +13,14 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app import models, schemas
-from app.core import active_hours, agent_activity_schedule
+from app.core import active_hours
+from app.domains.routines.service import tick_schedule as agent_activity_schedule
 from app.config import settings
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.domains.worlds import public as world_service
-from app.services import (agent_activity_policy, agent_runs as agent_run_service, resident_tick_scheduler)
+from app.services import agent_activity_policy, agent_runs as agent_run_service
+from app.runtime.resident import scheduler as resident_tick_scheduler
 from app.runtime.characters import creator as draft_service
 from app.runtime.characters import management as agent_service
 

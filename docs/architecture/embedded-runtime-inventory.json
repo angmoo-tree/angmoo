@@ -30,7 +30,7 @@
       "sha256": "00710fc779995e42795865e737ebc856d5bd587ca939cac50c97aaa05e6f9032"
     },
     {
-      "path": "backend/app/services/resident_tick_scheduler.py",
+      "path": "backend/app/runtime/resident/scheduler.py",
       "sha256": "225b489384a98df296f6f8968216c2d5850b7b9ccb34a47b4efbaeae0eea2b05"
     },
     {
@@ -142,7 +142,7 @@
         "phase": "P3",
         "tests": [
           "backend/tests/routines/test_daily_activity_runtime.py",
-          "backend/tests/test_agent_activity_limits.py"
+          "backend/tests/routines/test_activity_limits.py"
         ]
       },
       {
@@ -235,7 +235,7 @@
         "bounded drain"
       ],
       "owner": "ER4",
-      "path": "backend/app/services/resident_tick_scheduler.py",
+      "path": "backend/app/runtime/resident/scheduler.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
       "source_sha256": "225b489384a98df296f6f8968216c2d5850b7b9ccb34a47b4efbaeae0eea2b05",
       "transition_pr": "ER4 PR J"

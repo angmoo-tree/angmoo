@@ -1,7 +1,7 @@
 {
-  "edge_count": 2308,
-  "external_import_count": 2173,
-  "module_count": 690,
+  "edge_count": 2309,
+  "external_import_count": 2174,
+  "module_count": 692,
   "modules": [
     {
       "external_imports": [],
@@ -445,10 +445,10 @@
         "app.domains.social.schemas.community",
         "app.models",
         "app.runtime.relationships.sqlalchemy_social_event",
+        "app.runtime.resident.context",
         "app.services.activity_state_contracts",
         "app.services.agent_activity_policy",
-        "app.services.community",
-        "app.services.resident_contracts"
+        "app.services.community"
       ],
       "module": "app.compatibility.routine_posts.legacy",
       "path": "backend/app/compatibility/routine_posts/legacy.py",
@@ -508,23 +508,6 @@
       "imports": [],
       "module": "app.core.active_hours",
       "path": "backend/app/core/active_hours.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "hashlib",
-        "typing",
-        "zoneinfo"
-      ],
-      "imports": [
-        "app.config",
-        "app.core.active_hours"
-      ],
-      "module": "app.core.agent_activity_schedule",
-      "path": "backend/app/core/agent_activity_schedule.py",
       "wildcard_imports": []
     },
     {
@@ -772,8 +755,8 @@
         "typing"
       ],
       "imports": [
-        "app.core.agent_activity_schedule",
         "app.core.unit_of_work",
+        "app.domains.routines.service.tick_schedule",
         "app.models"
       ],
       "module": "app.cruds.agent_runs",
@@ -1068,11 +1051,11 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.agent_activity_schedule",
         "app.domains.characters.contracts",
         "app.domains.characters.exceptions",
         "app.domains.characters.models",
-        "app.domains.characters.schemas"
+        "app.domains.characters.schemas",
+        "app.domains.routines.service.tick_schedule"
       ],
       "module": "app.domains.characters.service.image_quota",
       "path": "backend/app/domains/characters/service/image_quota.py",
@@ -3732,6 +3715,16 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.contracts.resident",
+      "path": "backend/app/domains/routines/contracts/resident.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "fastapi",
         "sqlalchemy.orm"
       ],
@@ -4194,6 +4187,23 @@
       ],
       "module": "app.domains.routines.service.scheduling",
       "path": "backend/app/domains/routines/service/scheduling.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "typing",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.config",
+        "app.core.active_hours"
+      ],
+      "module": "app.domains.routines.service.tick_schedule",
+      "path": "backend/app/domains/routines/service/tick_schedule.py",
       "wildcard_imports": []
     },
     {
@@ -6646,7 +6656,7 @@
         "zoneinfo"
       ],
       "imports": [
-        "app.core.agent_activity_schedule"
+        "app.domains.routines.service.tick_schedule"
       ],
       "module": "app.domains.worlds.service.scheduling",
       "path": "backend/app/domains/worlds/service/scheduling.py",
@@ -7747,7 +7757,7 @@
         "app.domains.relationships.ports.projection",
         "app.runtime.graph_projection.process_client",
         "app.runtime.graph_projection.worker",
-        "app.services.resident_tick_scheduler"
+        "app.runtime.resident.scheduler"
       ],
       "module": "app.runtime.component_workers",
       "path": "backend/app/runtime/component_workers.py",
@@ -8740,6 +8750,56 @@
     },
     {
       "external_imports": [],
+      "imports": [],
+      "module": "app.runtime.resident",
+      "path": "backend/app/runtime/resident/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.social.public",
+        "app.models",
+        "app.services.agent_activity_policy"
+      ],
+      "module": "app.runtime.resident.context",
+      "path": "backend/app/runtime/resident/context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
+        "fcntl",
+        "logging",
+        "msvcrt",
+        "os",
+        "pathlib",
+        "time",
+        "types",
+        "typing",
+        "uuid"
+      ],
+      "imports": [
+        "app.config",
+        "app.core.db",
+        "app.domains.runtime.public",
+        "app.runtime.routines.lifecycle_references",
+        "app.schemas",
+        "app.services.agent_runs"
+      ],
+      "module": "app.runtime.resident.scheduler",
+      "path": "backend/app/runtime/resident/scheduler.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
       "imports": [
         "app.runtime.routine_posts.sqlalchemy_runtime"
       ],
@@ -9604,8 +9664,8 @@
         "zoneinfo"
       ],
       "imports": [
-        "app.core.agent_activity_schedule",
         "app.cruds.agents",
+        "app.domains.routines.service.tick_schedule",
         "app.models"
       ],
       "module": "app.services.agent_activity_policy",
@@ -9641,7 +9701,6 @@
       ],
       "imports": [
         "app.config",
-        "app.core.agent_activity_schedule",
         "app.core.context_text",
         "app.core.db",
         "app.core.redaction",
@@ -9650,6 +9709,7 @@
         "app.cruds.agents",
         "app.cruds.community",
         "app.domains.routines.service.lifecycle",
+        "app.domains.routines.service.tick_schedule",
         "app.domains.runtime.contracts",
         "app.domains.social.public",
         "app.domains.world_characters.public",
@@ -9835,9 +9895,9 @@
         "app.core.context_text",
         "app.credentials",
         "app.providers.gemini",
+        "app.runtime.resident.context",
         "app.schemas",
         "app.services.direct_llm",
-        "app.services.resident_contracts",
         "app.services.world_feed_search"
       ],
       "module": "app.services.feed_reaction_planner",
@@ -9893,9 +9953,11 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.routines.contracts.resident",
         "app.domains.social.contracts.subjective_context",
         "app.domains.world_characters.contracts.runtime_modes",
         "app.models",
+        "app.runtime.resident.context",
         "app.runtime.routine_posts.sqlalchemy_runtime",
         "app.runtime.social.observations",
         "app.runtime.social.subjective_context",
@@ -9907,7 +9969,6 @@
         "app.services.langgraph_social_apply",
         "app.services.post_image_generation",
         "app.services.prompt_safety",
-        "app.services.resident_contracts",
         "app.services.world_feed_runtime"
       ],
       "module": "app.services.langgraph_resident",
@@ -10120,50 +10181,6 @@
     {
       "external_imports": [
         "__future__",
-        "collections.abc",
-        "dataclasses",
-        "datetime",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.social.public",
-        "app.models",
-        "app.services.agent_activity_policy"
-      ],
-      "module": "app.services.resident_contracts",
-      "path": "backend/app/services/resident_contracts.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "asyncio",
-        "fcntl",
-        "logging",
-        "msvcrt",
-        "os",
-        "pathlib",
-        "time",
-        "types",
-        "typing",
-        "uuid"
-      ],
-      "imports": [
-        "app.config",
-        "app.core.db",
-        "app.domains.runtime.public",
-        "app.runtime.routines.lifecycle_references",
-        "app.schemas",
-        "app.services.agent_runs"
-      ],
-      "module": "app.services.resident_tick_scheduler",
-      "path": "backend/app/services/resident_tick_scheduler.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
         "sys"
       ],
       "imports": [
@@ -10264,6 +10281,7 @@
         "app.domains.social.contracts.subjective_context",
         "app.domains.social.public",
         "app.models",
+        "app.runtime.resident.context",
         "app.runtime.social.observations",
         "app.runtime.social.subjective_context",
         "app.schemas",
@@ -10271,7 +10289,6 @@
         "app.services.community",
         "app.services.direct_llm",
         "app.services.feed_reaction_planner",
-        "app.services.resident_contracts",
         "app.services.world_feed_search",
         "app.services.world_feed_social_apply"
       ],

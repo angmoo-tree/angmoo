@@ -549,10 +549,6 @@
           "importer": "app.services.feed_reaction_planner"
         },
         {
-          "imported": "app.services.resident_contracts",
-          "importer": "app.services.feed_reaction_planner"
-        },
-        {
           "imported": "app.services.world_feed_search",
           "importer": "app.services.feed_reaction_planner"
         },
@@ -602,10 +598,6 @@
         },
         {
           "imported": "app.services.prompt_safety",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.services.resident_contracts",
           "importer": "app.services.langgraph_resident"
         },
         {
@@ -725,22 +717,6 @@
           "importer": "app.services.post_image_job_worker"
         },
         {
-          "imported": "app.models",
-          "importer": "app.services.resident_contracts"
-        },
-        {
-          "imported": "app.services.agent_activity_policy",
-          "importer": "app.services.resident_contracts"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.resident_tick_scheduler"
-        },
-        {
-          "imported": "app.services.agent_runs",
-          "importer": "app.services.resident_tick_scheduler"
-        },
-        {
           "imported": "app.cruds.community",
           "importer": "app.services.tree"
         },
@@ -782,10 +758,6 @@
         },
         {
           "imported": "app.services.feed_reaction_planner",
-          "importer": "app.services.world_feed_runtime"
-        },
-        {
-          "imported": "app.services.resident_contracts",
           "importer": "app.services.world_feed_runtime"
         },
         {
@@ -860,10 +832,6 @@
         {
           "imported": "app.services.community",
           "importer": "app.compatibility.routine_posts.legacy"
-        },
-        {
-          "imported": "app.services.resident_contracts",
-          "importer": "app.compatibility.routine_posts.legacy"
         }
       ],
       "id": "l3-routine-post-legacy-persistence-bridge",
@@ -909,19 +877,6 @@
       "reason": "L4 keeps one runtime-owned FTS5 projection adapter over the frozen pre-domain Post ORM while the social domain owns the search port and query contract.",
       "removal_condition": "Remove this exact edge when L6 moves canonical Post persistence behind a repository port shared by social writes and search projection.",
       "review_date": "2026-11-27"
-    },
-    {
-      "edges": [
-        {
-          "imported": "app.services.resident_tick_scheduler",
-          "importer": "app.runtime.component_workers"
-        }
-      ],
-      "id": "er4-single-backend-existing-worker-bridge",
-      "owner_stage": "L6",
-      "reason": "The canonical in-process component manager owns the reviewed scheduler and projector behavior through one runtime bridge while their internal services remain pre-L6 modules.",
-      "removal_condition": "Move the scheduler tick runner and graph projector implementation behind L6 canonical runtime ports, then remove all three exact edges.",
-      "review_date": "2026-11-20"
     },
     {
       "edges": [
@@ -999,6 +954,31 @@
         {
           "importer": "app.runtime.social.timeline",
           "imported": "app.services.community_abuse_quota"
+        }
+      ]
+    },
+    {
+      "id": "ar-b4-c2-existing-resident-caller-moves",
+      "owner_stage": "L6",
+      "reason": "Four existing implementation edges move with their actual Session-rich Context and process scheduler; imported targets and original behavior are unchanged. AR-B4-C3+ owns removal, not new functionality.",
+      "removal_condition": "AR-B4-C3+ replaces ActivityPolicy, AgentRun and schema aggregate with actual canonical owners; G5 finishes registration. Remove each exact edge as that owner migrates, before B8-A closeout.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.resident.context",
+          "imported": "app.models"
+        },
+        {
+          "importer": "app.runtime.resident.context",
+          "imported": "app.services.agent_activity_policy"
+        },
+        {
+          "importer": "app.runtime.resident.scheduler",
+          "imported": "app.schemas"
+        },
+        {
+          "importer": "app.runtime.resident.scheduler",
+          "imported": "app.services.agent_runs"
         }
       ]
     }
@@ -1119,6 +1099,7 @@
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.plans",
+      "app.domains.routines.contracts.resident",
       "app.domains.routines.dependencies",
       "app.domains.routines.exceptions",
       "app.domains.routines.models",
@@ -1148,6 +1129,7 @@
       "app.domains.routines.service.lifecycle",
       "app.domains.routines.service.plans",
       "app.domains.routines.service.scheduling",
+      "app.domains.routines.service.tick_schedule",
       "app.domains.routines.utils",
       "app.domains.routines.utils.clock",
       "app.domains.runtime.contracts",
@@ -1289,6 +1271,7 @@
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.plans",
+      "app.domains.routines.contracts.resident",
       "app.domains.routines.schemas",
       "app.domains.routines.schemas.plans",
       "app.domains.routines.schemas.resident",
@@ -1307,6 +1290,7 @@
       "app.domains.routines.service.lifecycle",
       "app.domains.routines.service.plans",
       "app.domains.routines.service.scheduling",
+      "app.domains.routines.service.tick_schedule",
       "app.domains.runtime.contracts",
       "app.domains.social.contracts",
       "app.domains.social.contracts.actors",
@@ -2631,6 +2615,38 @@
         "owner_stage": "AR-B4-C",
         "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
         "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.routines.service.tick_schedule",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing not-yet-migrated activity runtime/CRUD uses the identical owner clock or pure graph-state contract. All policy is in the canonical module; no new legacy body is introduced.",
+        "removal_condition": "Switch remaining agent-run/LLM graph/activity CRUD roles in later B4-C slices and remove this exact legacy consumer edge.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_activity_policy",
+        "target": "app.domains.routines.service.tick_schedule",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing not-yet-migrated activity runtime/CRUD uses the identical owner clock or pure graph-state contract. All policy is in the canonical module; no new legacy body is introduced.",
+        "removal_condition": "Switch remaining agent-run/LLM graph/activity CRUD roles in later B4-C slices and remove this exact legacy consumer edge.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.tick_schedule",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing not-yet-migrated activity runtime/CRUD uses the identical owner clock or pure graph-state contract. All policy is in the canonical module; no new legacy body is introduced.",
+        "removal_condition": "Switch remaining agent-run/LLM graph/activity CRUD roles in later B4-C slices and remove this exact legacy consumer edge.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.contracts.resident",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing not-yet-migrated activity runtime/CRUD uses the identical owner clock or pure graph-state contract. All policy is in the canonical module; no new legacy body is introduced.",
+        "removal_condition": "Switch remaining agent-run/LLM graph/activity CRUD roles in later B4-C slices and remove this exact legacy consumer edge.",
         "review_date": "2026-09-06"
       }
     ]

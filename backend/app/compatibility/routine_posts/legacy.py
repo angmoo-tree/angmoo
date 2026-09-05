@@ -23,7 +23,7 @@ from app.runtime.relationships import (
 )
 from app.services import community as community_service
 from app.core.context_text import neutralize_context_text
-from app.services.resident_contracts import LangGraphResidentContext
+from app.runtime.resident.context import LangGraphResidentContext
 
 
 def canonical_interaction_source() -> object:

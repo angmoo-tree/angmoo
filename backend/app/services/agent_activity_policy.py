@@ -6,7 +6,7 @@ from sqlalchemy import func, inspect, select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.core import agent_activity_schedule
+from app.domains.routines.service import tick_schedule as agent_activity_schedule
 from app.cruds import agents as agent_crud
 
 

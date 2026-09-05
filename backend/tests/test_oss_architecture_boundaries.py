@@ -16,7 +16,8 @@ PUBLIC_RUNTIME_FILES = (
     APP_ROOT / "domains" / "identity" / "service" / "auth.py",
     APP_ROOT / "runtime" / "account_deletion.py",
     APP_ROOT / "services" / "langgraph_resident.py",
-    APP_ROOT / "services" / "resident_contracts.py",
+    APP_ROOT / "runtime" / "resident" / "context.py",
+    APP_ROOT / "domains" / "routines" / "contracts" / "resident.py",
 )
 
 

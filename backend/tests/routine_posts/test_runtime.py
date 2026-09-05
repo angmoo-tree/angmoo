@@ -35,7 +35,7 @@ from app.runtime.characters import management as agent_service
 from app.services import community as community_service
 from app.services.agent_activity_policy import ActivityPolicy
 from app.services.direct_llm import DirectLlmCallContext, DirectLlmError
-from app.services.resident_contracts import LangGraphResidentContext
+from app.runtime.resident.context import LangGraphResidentContext
 from app.domains.routine_posts.contracts.interaction import RoutineInteractionInput
 from app.domains.routine_posts.service.context import assemble_routine_post_context
 from app.runtime.routine_posts.context_references import SqlAlchemyRoutineContextReferences

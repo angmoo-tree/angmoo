@@ -23,7 +23,7 @@ from app.domains.runtime.public import (
     decide_tick_window,
     scheduler_fence,
 )
-from app.services import resident_tick_scheduler
+from app.runtime.resident import scheduler as resident_tick_scheduler
 
 
 def _repository() -> tuple[SqlAlchemySchedulerLeaseRepository, sessionmaker[Session]]:

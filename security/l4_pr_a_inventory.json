@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2173,
-      "internal_edge_count": 2308,
+      "external_import_count": 2174,
+      "internal_edge_count": 2309,
       "legacy_import_exception_count": 0,
-      "module_count": 690,
+      "module_count": 692,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -921,9 +921,9 @@
               "app.core.context_text",
               "app.credentials",
               "app.providers.gemini",
+              "app.runtime.resident.context",
               "app.schemas",
               "app.services.direct_llm",
-              "app.services.resident_contracts",
               "app.services.world_feed_search"
             ],
             "module": "app.services.feed_reaction_planner",
@@ -1331,7 +1331,7 @@
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
-        "sha256": "d9d11f1bf12c949289619c447a3d207bc000f38c207dca3643c824bc22ffdccf"
+        "sha256": "bd1e83111413a0e8d66ac185b326bf70e8fb19e90632950cfcdf8d00149207f3"
       },
       {
         "path": "backend/tests/test_graph_projection_replay.py",
@@ -1347,7 +1347,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "1970d16c21f7b753473ab55f1a12d4f1c95b1557734c43994d390baf7ec8f145"
+        "sha256": "119af4aafa8ba1388a9868641cfb47f9542efb334acafc232b4ffe34bed32ce1"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",

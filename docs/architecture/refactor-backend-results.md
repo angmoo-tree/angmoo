@@ -892,3 +892,16 @@ C1 경계 검사에서 DTO 소유 이전에 따라 Character.schemas→Routines�
 C1 최종 고정 후보의 집중 검증은 **158 passed / 기존 PostgreSQL 1 skip / 기존 warnings 3 / 77.68초**다. 직전 실행의 유일한 실패는 B3에서 제거한 `routine_posts/public.py`를 기대하는 옛 구조 검사였다. 실제 `contracts`의 interaction/context/generation 및 package 네 파일 모두를 기존 두 assertion과 같은 금지 import 목록으로 검사하도록 연결했다. 제품 동작이나 검사 predicate를 변경하지 않았다.
 
 경계 검사는 **690 modules / 2,308 edges / exact legacy 232**, cycle 0으로 통과했다. Stock 보존 명령은 아직 append되지 않은 선행 B4 최초 도입 두 파일(`routines/models.py`, `schemas.py`)의 후속 이동에서 중단되므로 전체 PASS로 표시하지 않는다. 별도 읽기 전용 진단은 서명된 최초 도입 commit `869bae55a2e5e665fb731396a7284b53dde8a104`의 정확한 두 Git blob만 메모리 snapshot으로 보충하여 원래 검사 함수를 호출했다. **source/split symbols/assertions/suppressions/API·ORM/missing nodes 각각 오류 0**, 보호된 기존 **2,139 lineages / 현재 2,233 nodes**다. tracked baseline/checkpoint/additions·검사 코드는 변경하지 않았다. 부모의 선형 source 도입 append 후 stock 전체 검사는 여전히 필수다.
+
+
+## AR-B4-C2 — 활동 시각 정책과 resident 실행 조립
+
+`core/agent_activity_schedule.py`의 실제 active-window/timezone/DST/jitter/retry 계산은 `routines/service/tick_schedule.py`로, resident scheduler의 실제 process lock/lease/heartbeat/cancellation/drain 구현은 `runtime/resident/scheduler.py`로 이전했다. `runtime/component_workers`가 기존 in-process 실행을 연결한다. `services/resident_contracts.py`의 순수 GraphState와 Session/model-rich Context는 각각 Routines 계약과 runtime context로 분리하고 기존 클래스 본문/필드/default를 유지했다. 모든 직접 Python 소비자는 같은 bound name으로 연결했고 옛 실제 파일은 제거했다.
+
+기존 활동 제한·scheduler singleton 테스트 두 파일을 `tests/routines`로 옮기고 원래 assertion/조건/fixture를 보존했다. RoutinePost publish/ER7 종료·OSS 경계 검사와 함께 **126 passed / 기존 PG 1 skip / 기존 warnings 3 / 53.17초**다. SDK/subprocess 검사에는 분할된 실제 계약 두 파일 모두를 포함한다. Live embedded inventory의 실제 scheduler/test 경로만 갱신하고 predecessor/frozen 자료는 유지한다.
+
+ActivityPolicy 값과 agent-run 실행은 아직 후속 C3+ 소유 전환 대상이며 runtime은 기존 동일 구현을 연결한다. Source introduction/capture와 최종 stock 보존·Actions/installer는 부모의 선형 통합 후 확인하므로 이 단계 완료를 전체 B4 완료로 표시하지 않는다.
+
+C2 최종 후보는 **196 passed / 기존 PG 1 skip / 기존 warnings 3 / 125.17초**다. 실제 클래스/함수/상수 **30개 AST가 원문과 동일**하며 경계는 **692 modules / 2,309 edges / exact legacy 227 / cycle 0**으로 통과했다. L4·ER0·Memory batch 현재 inventory도 통과했다. 기존 mixed Context의 models/ActivityPolicy 및 scheduler의 schemas/AgentRun 네 import는 원래 body와 함께 실제 runtime caller로 옮긴 정확한 임시 edge이며, 새로운 대상/범위/실행 동작은 없다. C3+/G5의 실제 소유 전환 때 각 edge를 제거한다.
+
+읽기 전용 보존 진단에서 source/assertion/suppression/API·ORM/node는 각각 오류 0이었다(보호 2,139, 현재 2,233). 같은 진단의 split 검사는 current map 갱신 과정에서 AR-B1/AR-F1의 옛 파일럿 형식 7개를 잘못 다시 계산한 것을 잡았다. 두 detail을 직전 source의 원문으로 복원하고 새 split_symbols 형식만 갱신하도록 수정했다. 복원 후 원래 split 검사도 **오류 0**이다. 이 정정은 현재 경로 지도만 다루며 frozen baseline/checkpoint/additions는 변경하지 않는다. 부모의 선형 도입 append 후 stock 전체 보존 검사를 통과해야 한다.
