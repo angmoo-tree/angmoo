@@ -610,3 +610,9 @@ source `67f5178c3ce5d2dcde41700f4ddd251c01300721`에서 owner/World/subject 범�
 같은 고정 후보에서 `pytest -q tests -k 'memory or canonical_retrieval_planner or today_sns'`는 **190 passed / 2,011 deselected / 2 warnings / 67.41초**다. 이는 실제 기억 저장·회상·owner 제어·scope/CSRF·배치 consent·selection 실패·migration·Today SNS 회귀를 포함한다. 경계 **640 modules / 2,087 edges / legacy256**, ER0 **76/87/24/44/7**, L4 parity97 및 현재 Memory batch inventory를 확인했다. 원래 P8-L predecessor JSON과 migration 본문은 재생성하지 않았다. 이동하여 사라진 여덟 old consumer의 exact bridge는 제거하고 아직 전환 전인 실제 Memory consumer만 후속 B7/B8 제거 조건으로 기록했다.
 
 이 단계는 값과 정책의 실제 배치다. SQL·FTS·queue repository, 저장/회상/정리 service, HTTP와 startup/shutdown 조립, 남은 domain/public aggregate 종료는 후속 B7 범위이며 전체 전환 완료로 표시하지 않는다. 최초 도입 기록은 선행 B4~B6 source와 선형 통합 후 고정 commit 기준으로 연결한다.
+
+### AR-B7-A2 Memory 실제 업무 서비스와 사용 중인 협력 계약
+
+고정 source `a131115`에서 실제 scope CAS/replay·item lifecycle·근거 검증·canonical recall·retrieval plan·consolidation·batch selection의 실행 본문을 `service/`에 배치했다. repository/source/provider/queue/transaction의 기존 typed 협력 계약은 `contracts/`에 두며 실제 repository·provider·worker·회귀 fake가 사용하는 계약만 승계한다. 18개 role 파일의 클래스·함수·메서드 **145개 AST가 import 연결만 정규화하면 원문과 동일**하다. 새 전달 service를 추가하거나 provider/DB 호출·commit·rollback 순서를 변경하지 않았다.
+
+동일 source의 Memory·retrieval planner·Today SNS 회귀는 **190 passed / 2,011 deselected / 2 warnings / 54.73초**, 경계 **640/2087/legacy256**, L4 parity97·Memory batch·ER0 **76/87/24/44/7** PASS다. 이 단계에서 application/ports의 원래 파일을 실제 역할로 옮겼으며 공통 SQL 등록과 원래 source snapshot은 보존했다. `Port`가 붙은 기존 구조적 type 이름은 소비자/fake 호환을 위해 유지한다. SQL/FTS/queue 구현과 같은 Session의 외부 업무 조회, HTTP·runtime 조립 및 public/domain aggregate 제거는 다음 단계다.
