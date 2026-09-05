@@ -1196,3 +1196,9 @@ Identity repository/credentials.py는 원래 nullable id 조회, 소유자/활�
 기존 키 테스트와 demo 인증 테스트의 준비 대상만 실제 repository/write/nullable 협력으로 연결했다. 기존 assertions는 유지한다. 새 회귀2개는 동일 Session·같은 attached 객체·조회 순서와 삭제/실행 모드/소유자 거절 후 키 사용 기록 미수정을 검사한다. 초기 기존 quota/응답/demo/key와 새 검사 **54 passed / 기존 warning1 /9.06초**. 확장·원래 보존 최종 검증은 아래에 추가하며 frozen/checkpoint/additions를 수정하거나 source 도입 증거를 직접 캡처하지 않는다.
 
 LocalBot A2 최종: 원래18정의와 Bot19전체 class AST/JSONschema 동일. 기존 수정2테스트 모듈의 모든 assertion/suppression도 동일하다. 확장 회귀 **71 passed / 기존 warning1 /10.15초**, 남은1실패는 이 slice에서 endpoint module을 바꾸지 않은 Character의 원래 route security inventory가 아직 옛 agents 모듈을 가리키는 G07 통합 항목이다. 실제경계776/2573/175legacy·L4 776/14/97·deferred22 PASS, 원래6보존진단은 모든항목0(protected2201/current2262)이다. 새 테스트2노드는 source 첫 도입 후 부모가 순차 캡처한다. 기존 key 관리5파일 및 모델/Base·frozen/additions는 수정하지 않았다.
+
+## AR-B8 LocalBot A3 — 다른 소유 데이터의 실제 조회
+
+기존 전체 조회5함수와 실제SQL10표현식을 `runtime/local_bot/queries.py`로 이전했다. 해당 표현식을 원래 호출자에 대입하면 남은35함수의 전체 AST가 동일하고, 구체 클래스는 실제 Character/Social/Routines 소유 정의와 같은 객체다. 조회 조건·정렬·한도·NULL·synthetic non-Session 경로를 유지하며 새조회나 저장을 추가하지 않는다. 기존테스트수정0·새노드0·신규제품1파일이다.
+
+집중 **54 passed / 기존warning1 /7.34초**, 원래6진단 전부0(protected2201/current2262), 경계777/2577/173legacy·L4 777/14/97·deferred22 PASS. 실제 rate-limit/행동/HTTP의 후속 역할 전환과 source 첫 도입 캡처는 별도로 남는다.

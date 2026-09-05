@@ -1,7 +1,7 @@
 {
-  "edge_count": 2573,
-  "external_import_count": 2310,
-  "module_count": 776,
+  "edge_count": 2577,
+  "external_import_count": 2312,
+  "module_count": 777,
   "modules": [
     {
       "external_imports": [],
@@ -9216,6 +9216,23 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.local_bot.constants",
+        "app.domains.local_bot.contracts.authentication",
+        "app.domains.routines.models.resident",
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.runtime.local_bot.queries",
+      "path": "backend/app/runtime/local_bot/queries.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "configparser",
         "logging",
@@ -11198,7 +11215,6 @@
     {
       "external_imports": [
         "datetime",
-        "sqlalchemy",
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -11210,9 +11226,8 @@
         "app.domains.local_bot.policies.rate_limit_clock",
         "app.domains.local_bot.service.presentation",
         "app.domains.local_bot.service.quota",
-        "app.models",
+        "app.runtime.local_bot.queries",
         "app.schemas",
-        "app.services.agent_activity_policy",
         "app.services.community",
         "app.services.post_image_generation"
       ],

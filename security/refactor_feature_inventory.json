@@ -209,7 +209,8 @@
         "backend/app/domains/local_bot/policies/rate_limit_clock.py",
         "backend/app/domains/local_bot/service/authentication.py",
         "backend/app/domains/local_bot/service/presentation.py",
-        "backend/app/runtime/local_bot/authentication.py"
+        "backend/app/runtime/local_bot/authentication.py",
+        "backend/app/runtime/local_bot/queries.py"
       ],
       "test_paths": [
         "backend/tests/config/test_startup_security.py",
@@ -1392,7 +1393,8 @@
         "backend/app/domains/local_bot/policies/rate_limit_clock.py",
         "backend/app/domains/local_bot/service/authentication.py",
         "backend/app/domains/local_bot/service/presentation.py",
-        "backend/app/runtime/local_bot/authentication.py"
+        "backend/app/runtime/local_bot/authentication.py",
+        "backend/app/runtime/local_bot/queries.py"
       ],
       "test_paths": [
         "backend/tests/routines/test_daily_activity_runtime.py",
@@ -1769,7 +1771,8 @@
         "backend/app/domains/local_bot/policies/rate_limit_clock.py",
         "backend/app/domains/local_bot/service/authentication.py",
         "backend/app/domains/local_bot/service/presentation.py",
-        "backend/app/runtime/local_bot/authentication.py"
+        "backend/app/runtime/local_bot/authentication.py",
+        "backend/app/runtime/local_bot/queries.py"
       ],
       "test_paths": [
         "backend/tests/social/test_foundation_contracts.py",
@@ -3068,7 +3071,8 @@
         "backend/app/domains/local_bot/policies/rate_limit_clock.py",
         "backend/app/domains/local_bot/service/authentication.py",
         "backend/app/domains/local_bot/service/presentation.py",
-        "backend/app/runtime/local_bot/authentication.py"
+        "backend/app/runtime/local_bot/authentication.py",
+        "backend/app/runtime/local_bot/queries.py"
       ],
       "test_paths": [
         "backend/tests/characters/test_character_image_generation_workflows.py",
@@ -3729,7 +3733,8 @@
         "backend/app/domains/local_bot/policies/rate_limit_clock.py",
         "backend/app/domains/local_bot/service/authentication.py",
         "backend/app/domains/local_bot/service/presentation.py",
-        "backend/app/runtime/local_bot/authentication.py"
+        "backend/app/runtime/local_bot/authentication.py",
+        "backend/app/runtime/local_bot/queries.py"
       ],
       "target_paths": [
         "frontend/src/composition",
@@ -6486,7 +6491,8 @@
         "backend/app/domains/local_bot/policies/rate_limit_clock.py",
         "backend/app/domains/local_bot/service/authentication.py",
         "backend/app/domains/local_bot/service/presentation.py",
-        "backend/app/runtime/local_bot/authentication.py"
+        "backend/app/runtime/local_bot/authentication.py",
+        "backend/app/runtime/local_bot/queries.py"
       ],
       "test_paths": [
         "backend/tests/test_embedded_data_migration.py",
@@ -10701,7 +10707,8 @@
         "backend/app/domains/local_bot/policies/rate_limit_clock.py",
         "backend/app/domains/local_bot/service/authentication.py",
         "backend/app/domains/local_bot/service/presentation.py",
-        "backend/app/runtime/local_bot/authentication.py"
+        "backend/app/runtime/local_bot/authentication.py",
+        "backend/app/runtime/local_bot/queries.py"
       ],
       "preserved_contracts": [
         "Tree board API/schema/posts and existing support functions/consumers survive. Common UI primitives keep visual and interaction contracts. Compatibility sources remain until consumer-free evidence. This is not a deletion allowlist."

@@ -680,3 +680,5 @@ Runtime은 기존 서비스 키 가용성과 Social quota 조회를 같은 Sessi
 `local_bot/service/presentation.py`는 Social 응답을 Bot의 공개 필드로 변환합니다. Bot의 입력·공개 응답 형식은 `local_bot/schemas.py`가 소유하고, Social 이미지 작업 결과인 `BotImageRequestRead`와 공유 글 미디어·댓글은 원래 Social 형식을 사용합니다. 비공개 Character 상태·개인 credential을 공개 projection에 추가하지 않습니다. `policies/rate_limit_clock.py`는 원래의 지역 날짜 경계와 양수 Retry-After 계산을 유지합니다.
 
 현재 실제 Bot 행동·rate-limit 읽기와 HTTP 라우터는 후속 LocalBot 전환 범위입니다. 임시 기존 소비자는 소유 서비스를 직접 연결하며, 이 단계의 인증·응답 분리를 모든 LocalBot 전환의 완료로 해석하지 않습니다.
+
+LocalBot의 Social 게시물·반응·follow, Routines 활동 이력, Character 상태 읽기는 `runtime/local_bot/queries.py`가 현재 Session에서 연결합니다. 각 조회의 다른 작성자·삭제·시간·개수·정렬 조건과 non-Session fallback을 유지하며 해당 조회에서 commit/flush를 추가하지 않습니다. 할당량·행동 판단은 이 SQL 조립과 구분합니다.

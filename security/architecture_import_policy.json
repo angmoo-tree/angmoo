@@ -481,15 +481,7 @@
           "importer": "app.services.local_bot"
         },
         {
-          "imported": "app.models",
-          "importer": "app.services.local_bot"
-        },
-        {
           "imported": "app.schemas",
-          "importer": "app.services.local_bot"
-        },
-        {
-          "imported": "app.services.agent_activity_policy",
           "importer": "app.services.local_bot"
         },
         {

@@ -1,3 +1,5 @@
+from app.runtime.local_bot import queries as local_bot_queries
+from app.runtime.local_bot.queries import (_latest_activity_at, _count_activities_today, _post_like_exists, _post_repost_exists, _profile_follow_exists)
 from app.domains.local_bot.contracts.authentication import LocalBotContext
 from app.domains.local_bot.service.presentation import (_bot_post_reference, _bot_post_summary, _bot_post_detail, _bot_feed_page, _bot_post_thread, _bot_notification_read, _bot_notification_page, _bot_profile_ref, _bot_follow_read, _bot_profile_read)
 from app.domains.local_bot.policies.rate_limit_clock import (_remaining_seconds, _local_day_start_utc, _next_local_day_start_utc, _seconds_until)
@@ -5,14 +7,11 @@ from app.domains.local_bot.exceptions import LocalBotAuthError, LocalBotError, L
 from app.domains.local_bot.constants import MAX_POSTS_PER_DAY, MAX_REACTIONS_PER_DAY, MAX_READS_PER_WINDOW, MAX_REPLIES_PER_DAY, POST_COOLDOWN, RATE_LIMIT_LOG_DEDUPE_WINDOW, REACTION_ACTION_TYPES, REACTION_COOLDOWN, REACTION_COOLDOWN_ACTION_TYPES, READ_WINDOW, REPLY_COOLDOWN, STATE_ACTION_TYPES, STATE_COOLDOWN
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app import models
 from app import schemas
 from app.core import unit_of_work
 from app.cruds import agents as agent_crud
-from app.services import agent_activity_policy
 from app.services import community as community_service
 from app.domains.local_bot.service import quota as local_bot_quota
 from app.services import post_image_generation
@@ -27,7 +26,7 @@ def get_me(db: Session, context: LocalBotContext) -> schemas.BotMeRead:
 
 def get_state(db: Session, context: LocalBotContext) -> schemas.BotStateRead:
     _ensure_read_rate_limit(db, context, label="read")
-    state = db.get(models.CharacterState, context.character.id)
+    state = local_bot_queries.read_character_state(db, context)
     return schemas.BotStateRead(
         state=schemas.BotStateSnapshot.model_validate(state) if state is not None else None
     )
@@ -157,12 +156,7 @@ def get_activity(
     db: Session, context: LocalBotContext, *, limit: int = 20
 ) -> schemas.BotActivityRead:
     _ensure_read_rate_limit(db, context, label="read")
-    rows = db.scalars(
-        select(models.AgentActivityLog)
-        .where(models.AgentActivityLog.character_id == context.character.id)
-        .order_by(models.AgentActivityLog.created_at.desc())
-        .limit(limit)
-    ).all()
+    rows = local_bot_queries.list_activity(db, context, limit=limit)
     return schemas.BotActivityRead(
         recent_activity=[
             schemas.BotActivityLogRead(
@@ -491,15 +485,7 @@ def _ensure_post_rate_limit(
         return quota
 
     now = datetime.now(UTC)
-    recent_post = db.scalar(
-        select(models.Post.created_at)
-        .where(models.Post.author_character_id == context.character.id)
-        .where(models.Post.post_type == "post")
-        .where(models.Post.deleted_at.is_(None))
-        .where(models.Post.created_at >= now - POST_COOLDOWN)
-        .order_by(models.Post.created_at.desc())
-        .limit(1)
-    )
+    recent_post = local_bot_queries.recent_root_post_at(db, context, now=now)
     if recent_post is not None:
         _raise_rate_limit(
             db,
@@ -509,13 +495,7 @@ def _ensure_post_rate_limit(
             retry_after_seconds=_seconds_until(recent_post + POST_COOLDOWN, now),
         )
     day_start = _local_day_start_utc(now)
-    today_count = db.scalar(
-        select(func.count(models.Post.id))
-        .where(models.Post.author_character_id == context.character.id)
-        .where(models.Post.post_type == "post")
-        .where(models.Post.deleted_at.is_(None))
-        .where(models.Post.created_at >= day_start)
-    )
+    today_count = local_bot_queries.count_root_posts_since(db, context, day_start=day_start)
     if (today_count or 0) >= MAX_POSTS_PER_DAY:
         _raise_rate_limit(
             db,
@@ -588,21 +568,8 @@ def _bot_activity_limits(
 def _post_limit_status(
     db: Session, context: LocalBotContext, *, now: datetime, day_start: datetime
 ) -> schemas.BotActivityLimitRead:
-    latest = db.scalar(
-        select(models.Post.created_at)
-        .where(models.Post.author_character_id == context.character.id)
-        .where(models.Post.post_type == "post")
-        .where(models.Post.deleted_at.is_(None))
-        .order_by(models.Post.created_at.desc())
-        .limit(1)
-    )
-    used_today = db.scalar(
-        select(func.count(models.Post.id))
-        .where(models.Post.author_character_id == context.character.id)
-        .where(models.Post.post_type == "post")
-        .where(models.Post.deleted_at.is_(None))
-        .where(models.Post.created_at >= day_start)
-    ) or 0
+    latest = local_bot_queries.latest_root_post_at(db, context)
+    used_today = local_bot_queries.root_post_usage_since(db, context, day_start=day_start) or 0
     cooldown_remaining = _remaining_seconds(latest, POST_COOLDOWN, now)
     retry_after = cooldown_remaining or (
         _seconds_until(_next_local_day_start_utc(now), now)
@@ -655,34 +622,10 @@ def _activity_limit_status(
     )
 
 
-def _latest_activity_at(
-    db: Session, context: LocalBotContext, *, action_types: tuple[str, ...]
-) -> datetime | None:
-    return db.scalar(
-        select(models.AgentActivityLog.created_at)
-        .where(models.AgentActivityLog.character_id == context.character.id)
-        .where(models.AgentActivityLog.action_type.in_(action_types))
-        .order_by(models.AgentActivityLog.created_at.desc())
-        .limit(1)
-    )
 
 
-def _count_activities_today(
-    db: Session,
-    context: LocalBotContext,
-    *,
-    action_types: tuple[str, ...],
-    day_start: datetime,
-) -> int:
-    return (
-        db.scalar(
-            select(func.count(models.AgentActivityLog.id))
-            .where(models.AgentActivityLog.character_id == context.character.id)
-            .where(models.AgentActivityLog.action_type.in_(action_types))
-            .where(models.AgentActivityLog.created_at >= day_start)
-        )
-        or 0
-    )
+
+
 
 
 def _ensure_reaction_rate_limit(
@@ -733,12 +676,7 @@ def _ensure_reaction_rate_limit(
 def _ensure_reaction_daily_limit(db: Session, context: LocalBotContext) -> None:
     now = datetime.now(UTC)
     day_start = _local_day_start_utc(now)
-    today_count = db.scalar(
-        select(func.count(models.AgentActivityLog.id))
-        .where(models.AgentActivityLog.character_id == context.character.id)
-        .where(models.AgentActivityLog.action_type.in_(REACTION_ACTION_TYPES))
-        .where(models.AgentActivityLog.created_at >= day_start)
-    )
+    today_count = local_bot_queries.reaction_usage_since(db, context, day_start=day_start)
     if (today_count or 0) >= MAX_REACTIONS_PER_DAY:
         _raise_rate_limit(
             db,
@@ -783,14 +721,7 @@ def _ensure_activity_rate_limit(
         return quota
 
     now = datetime.now(UTC)
-    recent_activity = db.scalar(
-        select(models.AgentActivityLog.created_at)
-        .where(models.AgentActivityLog.character_id == context.character.id)
-        .where(models.AgentActivityLog.action_type.in_(action_types))
-        .where(models.AgentActivityLog.created_at >= now - cooldown)
-        .order_by(models.AgentActivityLog.created_at.desc())
-        .limit(1)
-    )
+    recent_activity = local_bot_queries.recent_activity_at(db, context, action_types=action_types, now=now, cooldown=cooldown)
     if recent_activity is not None:
         _raise_rate_limit(
             db,
@@ -801,12 +732,7 @@ def _ensure_activity_rate_limit(
         )
     if max_per_day is not None:
         day_start = _local_day_start_utc(now)
-        today_count = db.scalar(
-            select(func.count(models.AgentActivityLog.id))
-            .where(models.AgentActivityLog.character_id == context.character.id)
-            .where(models.AgentActivityLog.action_type.in_(action_types))
-            .where(models.AgentActivityLog.created_at >= day_start)
-        )
+        today_count = local_bot_queries.activity_usage_since(db, context, action_types=action_types, day_start=day_start)
         if (today_count or 0) >= max_per_day:
             _raise_rate_limit(
                 db,
@@ -858,54 +784,13 @@ def _rollback_action_quota(
         db.rollback()
 
 
-def _post_like_exists(
-    db: Session, context: LocalBotContext, post_id: str
-) -> bool:
-    if not isinstance(db, Session):
-        return False
-    return (
-        db.scalar(
-            select(models.PostLike.id).where(
-                models.PostLike.post_id == post_id,
-                models.PostLike.character_id == context.character.id,
-            )
-        )
-        is not None
-    )
 
 
-def _post_repost_exists(
-    db: Session, context: LocalBotContext, post_id: str
-) -> bool:
-    if not isinstance(db, Session):
-        return False
-    return (
-        db.scalar(
-            select(models.PostRepost.id).where(
-                models.PostRepost.post_id == post_id,
-                models.PostRepost.character_id == context.character.id,
-            )
-        )
-        is not None
-    )
 
 
-def _profile_follow_exists(
-    db: Session, context: LocalBotContext, target_character_id: str
-) -> bool:
-    if not isinstance(db, Session):
-        return False
-    return (
-        db.scalar(
-            select(models.ProfileFollow.id).where(
-                models.ProfileFollow.follower_user_id.is_(None),
-                models.ProfileFollow.follower_character_id == context.character.id,
-                models.ProfileFollow.target_user_id.is_(None),
-                models.ProfileFollow.target_character_id == target_character_id,
-            )
-        )
-        is not None
-    )
+
+
+
 
 
 def _raise_rate_limit(
@@ -928,15 +813,7 @@ def _log_rate_limit(
     retry_after_seconds: int,
 ) -> None:
     now = datetime.now(UTC)
-    recent_log = db.scalar(
-        select(models.AgentActivityLog.id)
-        .where(models.AgentActivityLog.character_id == context.character.id)
-        .where(models.AgentActivityLog.action_type == "local_bot_rate_limited")
-        .where(models.AgentActivityLog.created_at >= now - RATE_LIMIT_LOG_DEDUPE_WINDOW)
-        .where(models.AgentActivityLog.result.like(f"label={label};%"))
-        .order_by(models.AgentActivityLog.created_at.desc())
-        .limit(1)
-    )
+    recent_log = local_bot_queries.recent_rate_limit_log_id(db, context, now=now, label=label)
     if recent_log is not None:
         return
     agent_crud.log_activity(

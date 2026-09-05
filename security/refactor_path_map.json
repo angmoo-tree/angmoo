@@ -37158,6 +37158,7 @@
           "backend/app/domains/local_bot/policies/rate_limit_clock.py",
           "backend/app/domains/local_bot/service/authentication.py",
           "backend/app/domains/local_bot/service/presentation.py",
+          "backend/app/runtime/local_bot/queries.py",
           "backend/app/services/local_bot.py"
         ],
         "backend/app/schemas/agents.py": [
@@ -37781,7 +37782,7 @@
         },
         {
           "old": "backend/app/services/local_bot.py::_latest_activity_at",
-          "new": "backend/app/services/local_bot.py::_latest_activity_at",
+          "new": "backend/app/runtime/local_bot/queries.py::_latest_activity_at",
           "direct_consumers": [
             "backend/app/services/local_bot.py"
           ],
@@ -37792,7 +37793,7 @@
         },
         {
           "old": "backend/app/services/local_bot.py::_count_activities_today",
-          "new": "backend/app/services/local_bot.py::_count_activities_today",
+          "new": "backend/app/runtime/local_bot/queries.py::_count_activities_today",
           "direct_consumers": [
             "backend/app/services/local_bot.py"
           ],
@@ -37881,7 +37882,7 @@
         },
         {
           "old": "backend/app/services/local_bot.py::_post_like_exists",
-          "new": "backend/app/services/local_bot.py::_post_like_exists",
+          "new": "backend/app/runtime/local_bot/queries.py::_post_like_exists",
           "direct_consumers": [
             "backend/app/services/local_bot.py"
           ],
@@ -37892,7 +37893,7 @@
         },
         {
           "old": "backend/app/services/local_bot.py::_post_repost_exists",
-          "new": "backend/app/services/local_bot.py::_post_repost_exists",
+          "new": "backend/app/runtime/local_bot/queries.py::_post_repost_exists",
           "direct_consumers": [
             "backend/app/services/local_bot.py"
           ],
@@ -37903,7 +37904,7 @@
         },
         {
           "old": "backend/app/services/local_bot.py::_profile_follow_exists",
-          "new": "backend/app/services/local_bot.py::_profile_follow_exists",
+          "new": "backend/app/runtime/local_bot/queries.py::_profile_follow_exists",
           "direct_consumers": [
             "backend/app/services/local_bot.py"
           ],
@@ -47102,6 +47103,73 @@
       ],
       "preservation": "18 actual original definitions: authentication admission, unchanged last-used commit after owner/demo checks, public projections, clock and logging, plus 19 complete Bot schemas. Same attached values and caller Session supplied by actual Character/Identity nullable lookups. BotImageRequestRead remains its original Social image-result owner. No new logging/file/provider or transaction policy.",
       "remaining": "Bot19 HTTP and actual actions/read/rate-limit/SQL remain in the original services.local_bot with exact current consumers until subsequent LocalBot slices; no copied implementation or default domain-to-runtime import. Parent key files are unchanged. Aggregate Bot DTO import is temporary G5/B8 consumer. Root performs first source introductions and final owner-source integration."
+    },
+    "AR-B8-LOCAL-BOT-A3": {
+      "status": "SOURCE VERIFIED;35 original complete functions identical after exact15 query expansion;54 focused PASS/7.34s; six diagnostics0/protected2201/current2262; boundary777/2577/173legacy; source introductions pending",
+      "actual_paths": [
+        "backend/app/runtime/local_bot/queries.py"
+      ],
+      "query_expressions": [
+        {
+          "owner": "get_state",
+          "variable": "state",
+          "query": "read_character_state"
+        },
+        {
+          "owner": "get_activity",
+          "variable": "rows",
+          "query": "list_activity"
+        },
+        {
+          "owner": "_ensure_post_rate_limit",
+          "variable": "recent_post",
+          "query": "recent_root_post_at"
+        },
+        {
+          "owner": "_ensure_post_rate_limit",
+          "variable": "today_count",
+          "query": "count_root_posts_since"
+        },
+        {
+          "owner": "_post_limit_status",
+          "variable": "latest",
+          "query": "latest_root_post_at"
+        },
+        {
+          "owner": "_post_limit_status",
+          "variable": "used_today",
+          "query": "root_post_usage_since"
+        },
+        {
+          "owner": "_ensure_reaction_daily_limit",
+          "variable": "today_count",
+          "query": "reaction_usage_since"
+        },
+        {
+          "owner": "_ensure_activity_rate_limit",
+          "variable": "recent_activity",
+          "query": "recent_activity_at"
+        },
+        {
+          "owner": "_ensure_activity_rate_limit",
+          "variable": "today_count",
+          "query": "activity_usage_since"
+        },
+        {
+          "owner": "_log_rate_limit",
+          "variable": "recent_log",
+          "query": "recent_rate_limit_log_id"
+        }
+      ],
+      "whole_queries": [
+        "_latest_activity_at",
+        "_count_activities_today",
+        "_post_like_exists",
+        "_post_repost_exists",
+        "_profile_follow_exists"
+      ],
+      "preservation": "Original five complete nullable/predicate queries and ten SQL expression bodies moved into same-Session runtime queries. All remaining original35 functions match after exact query body expansion; no query order/conditions/limit/sort or non-Session fallback altered. Own quota policy remains separate and read projections add no writes.",
+      "remaining": "Rate-limit and Bot actions/HTTP remain actual old service until follow-up LocalBot ownership; parent integrates canonical B4/B5 query/model paths and shared Character state helper without duplicating it."
     }
   }
 }
