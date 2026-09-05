@@ -89,7 +89,7 @@ def _backend_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/api/v1/routes/manual_social.py",
+        "backend/app/domains/social/router.py",
         (
             '"/{world_id}/world-characters/{world_character_id}/social-profile"',
             'Literal["posts", "replies", "likes"]',

@@ -718,3 +718,6 @@ World 캐릭터 소셜 프로필의 불투명 커서는 `social/service/profile_
 
 
 World 캐릭터의 게시물·대꾸·좋아요 프로필은 `social/service/world_profile.py`가 입력 검증, 소유 프로필 오류, 차단, 탭/페이지 선택과 응답 조립을 소유한다. 같은 업무 테이블의 count·posts·likes·media SQL은 `repository/world_profile.py`, 여러 업무의 Character·World 멤버십 join은 `runtime/social/profile_references.py`에 있다. `profile_composition.py`가 같은 Session을 연결하며 구성만으로 DB를 읽지 않는다. 전체 reader 인터페이스와 별도 profile application은 실제 서비스에 통합했고 옛 runtime reader 파일을 제거했다.
+
+
+수동 World 피드·스레드·게시·답글·캐릭터 Social 프로필의 HTTP 5개는 `social/router.py::manual_router`가 소유한다. 공통 API는 원래 위치에서 그 router를 포함한다. `dependencies.py`는 요청의 같은 Session을 사용하여 프로필 서비스, 수동 피드 조회 협력, source 쓰기 실행기를 얻고, `runtime/social/composition.py`가 실제 factory를 연결한다. 구성은 DB·provider IO를 하지 않으며 프런트엔드 요청 검증 뒤에 업무가 실행된다. SQLite 즉시 트랜잭션·재시도·commit은 기존 실행기에 남고 service의 판단을 복제하지 않는다. 트랜잭션 실행 계약은 `contracts/write_execution.py`에 있다.

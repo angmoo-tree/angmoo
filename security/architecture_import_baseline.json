@@ -1,7 +1,7 @@
 {
-  "edge_count": 2733,
-  "external_import_count": 2379,
-  "module_count": 791,
+  "edge_count": 2739,
+  "external_import_count": 2376,
+  "module_count": 790,
   "modules": [
     {
       "external_imports": [],
@@ -82,7 +82,6 @@
         "app.api.v1.routes.bot",
         "app.api.v1.routes.character_lore",
         "app.api.v1.routes.community",
-        "app.api.v1.routes.manual_social",
         "app.api.v1.routes.memory",
         "app.api.v1.routes.messages",
         "app.api.v1.routes.runtime_status",
@@ -94,6 +93,7 @@
         "app.domains.device_home.router",
         "app.domains.identity.router.auth",
         "app.domains.identity.router.local",
+        "app.domains.social.router",
         "app.domains.world_characters.router.entry",
         "app.domains.world_characters.router.profile",
         "app.domains.world_characters.router.setup",
@@ -192,29 +192,6 @@
       ],
       "module": "app.api.v1.routes.community",
       "path": "backend/app/api/v1/routes/community.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "fastapi",
-        "sqlalchemy.orm",
-        "typing"
-      ],
-      "imports": [
-        "app.core.db",
-        "app.domains.identity.browser_session",
-        "app.domains.identity.dependencies",
-        "app.domains.social.public",
-        "app.domains.social.schemas.manual",
-        "app.domains.world_characters.public",
-        "app.domains.worlds.public",
-        "app.runtime.social.profile_composition",
-        "app.runtime.social.sqlalchemy_read_repository",
-        "app.runtime.social.sqlalchemy_unit_of_work"
-      ],
-      "module": "app.api.v1.routes.manual_social",
-      "path": "backend/app/api/v1/routes/manual_social.py",
       "wildcard_imports": []
     },
     {
@@ -5251,8 +5228,8 @@
         "__future__"
       ],
       "imports": [
-        "app.domains.social.contracts.writes",
-        "app.domains.social.ports.write_unit_of_work"
+        "app.domains.social.contracts.write_execution",
+        "app.domains.social.contracts.writes"
       ],
       "module": "app.domains.social.application.writes",
       "path": "backend/app/domains/social/application/writes.py",
@@ -5492,6 +5469,18 @@
     {
       "external_imports": [
         "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.writes"
+      ],
+      "module": "app.domains.social.contracts.write_execution",
+      "path": "backend/app/domains/social/contracts/write_execution.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "dataclasses",
         "datetime",
         "typing"
@@ -5503,15 +5492,19 @@
     },
     {
       "external_imports": [
-        "fastapi"
+        "fastapi",
+        "sqlalchemy.orm"
       ],
       "imports": [
         "app.api.identity_dependencies",
         "app.core.db",
+        "app.domains.social.contracts.manual_feed",
+        "app.domains.social.contracts.write_execution",
         "app.domains.social.service.discovery",
         "app.domains.social.service.inbox",
         "app.domains.social.service.profile_activity",
-        "app.domains.social.service.timeline"
+        "app.domains.social.service.timeline",
+        "app.domains.social.service.world_profile"
       ],
       "module": "app.domains.social.dependencies",
       "path": "backend/app/domains/social/dependencies.py",
@@ -5605,9 +5598,9 @@
     {
       "external_imports": [],
       "imports": [
+        "app.domains.social.contracts.write_execution",
         "app.domains.social.ports.observation_unit_of_work",
-        "app.domains.social.ports.search_index",
-        "app.domains.social.ports.write_unit_of_work"
+        "app.domains.social.ports.search_index"
       ],
       "module": "app.domains.social.ports",
       "path": "backend/app/domains/social/ports/__init__.py",
@@ -5635,18 +5628,6 @@
       ],
       "module": "app.domains.social.ports.search_index",
       "path": "backend/app/domains/social/ports/search_index.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.social.contracts.writes"
-      ],
-      "module": "app.domains.social.ports.write_unit_of_work",
-      "path": "backend/app/domains/social/ports/write_unit_of_work.py",
       "wildcard_imports": []
     },
     {
@@ -5843,18 +5824,28 @@
         "typing"
       ],
       "imports": [
+        "app.api.identity_dependencies",
         "app.domains.social.contracts.actors",
+        "app.domains.social.contracts.manual_feed",
+        "app.domains.social.contracts.profile_activity",
+        "app.domains.social.contracts.write_execution",
+        "app.domains.social.contracts.writes",
         "app.domains.social.dependencies",
         "app.domains.social.exceptions",
         "app.domains.social.schemas.activity",
         "app.domains.social.schemas.community",
+        "app.domains.social.schemas.manual",
         "app.domains.social.service.discovery",
         "app.domains.social.service.feed",
         "app.domains.social.service.inbox",
+        "app.domains.social.service.manual_feed",
         "app.domains.social.service.posts",
         "app.domains.social.service.profile_activity",
         "app.domains.social.service.profiles",
-        "app.domains.social.service.timeline"
+        "app.domains.social.service.timeline",
+        "app.domains.social.service.world_profile",
+        "app.domains.world_characters.contracts.owner_identity",
+        "app.domains.worlds.service"
       ],
       "module": "app.domains.social.router",
       "path": "backend/app/domains/social/router.py",
@@ -10490,7 +10481,10 @@
       "imports": [
         "app.runtime.social.discovery",
         "app.runtime.social.inbox",
+        "app.runtime.social.manual_feed_references",
         "app.runtime.social.profile_activity",
+        "app.runtime.social.profile_composition",
+        "app.runtime.social.sqlalchemy_unit_of_work",
         "app.runtime.social.timeline"
       ],
       "module": "app.runtime.social.composition",

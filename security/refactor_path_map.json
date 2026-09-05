@@ -389,7 +389,9 @@
     "backend/app/services/post_image_job_worker.py": "backend/app/runtime/social/image_job_worker.py",
     "backend/app/runtime/social/sqlalchemy_profile_repository.py": "backend/app/runtime/social/profile_composition.py",
     "backend/app/domains/social/application/profile_activity.py": "backend/app/domains/social/service/world_profile.py",
-    "backend/app/domains/social/ports/profile_activity.py": "backend/app/domains/social/contracts/profile_references.py"
+    "backend/app/domains/social/ports/profile_activity.py": "backend/app/domains/social/contracts/profile_references.py",
+    "backend/app/api/v1/routes/manual_social.py": "backend/app/domains/social/router.py",
+    "backend/app/domains/social/ports/write_unit_of_work.py": "backend/app/domains/social/contracts/write_execution.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -1434,7 +1436,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
           "new": "backend/app/domains/social/service/world_profile.py::WorldSocialProfileService",
           "direct_consumers": [
-            "backend/app/api/v1/routes/manual_social.py",
+            "backend/app/domains/social/router.py",
             "backend/app/runtime/social/profile_composition.py"
           ],
           "test_nodes": [
@@ -33522,7 +33524,7 @@
           "new": "backend/app/runtime/social/sqlalchemy_read_repository.py::__all__",
           "direct_consumers": [
             "backend/app/runtime/social/sqlalchemy_read_repository.py",
-            "backend/app/api/v1/routes/manual_social.py"
+            "backend/app/domains/social/router.py"
           ],
           "test_nodes": [
             "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
@@ -33943,7 +33945,7 @@
           "new": "backend/app/runtime/social/sqlalchemy_read_repository.py::__all__",
           "direct_consumers": [
             "backend/app/runtime/social/sqlalchemy_read_repository.py",
-            "backend/app/api/v1/routes/manual_social.py"
+            "backend/app/domains/social/router.py"
           ],
           "test_nodes": [
             "tests/test_l3_owner_manual_social_inbox.py::test_owner_world_post_thread_is_exactly_world_scoped"
@@ -34043,7 +34045,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::list_owner_world_feed",
           "new": "backend/app/runtime/social/sqlalchemy_read_repository.py::list_owner_world_feed",
           "direct_consumers": [
-            "backend/app/api/v1/routes/manual_social.py"
+            "backend/app/domains/social/router.py"
           ],
           "test_nodes": [
             "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
@@ -34054,7 +34056,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_read_repository.py::get_owner_world_post_thread",
           "new": "backend/app/runtime/social/sqlalchemy_read_repository.py::get_owner_world_post_thread",
           "direct_consumers": [
-            "backend/app/api/v1/routes/manual_social.py"
+            "backend/app/domains/social/router.py"
           ],
           "test_nodes": [
             "tests/social/test_manual_feed_ownership.py::test_manual_feed_reads_owner_facts_in_order_without_committing",
@@ -40671,7 +40673,7 @@
           "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
           "new": "backend/app/runtime/social/profile_composition.py::world_character_social_profile_service",
           "direct_consumers": [
-            "backend/app/api/v1/routes/manual_social.py"
+            "backend/app/runtime/social/composition.py"
           ],
           "test_nodes": [
             "tests/social/test_world_profile_ownership.py::test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit",
@@ -40810,6 +40812,230 @@
       ],
       "same_session_evidence": "Original vs current exact statements, bound parameters and order match: posts16/replies15/likes15. Exact result and deterministic existing ciphertext match in all three tabs. New SQLite regression covers pending WC profile change, input-rejection SQL0, no commit and rollback.",
       "inventory_consumer": "P8-L-E _require_text reads actual manual-feed/profile-service/query/cursor owners; returned frozen inventory bytes and assertions remain unchanged."
+    },
+    "AR-B5-C12": {
+      "status": "IMPLEMENTED; actual manual HTTP owner and request dependencies; first source capture pending",
+      "scope": "Five existing manual World profile/feed/thread/post/reply routes and their exact error mapper are Social router responsibilities. Public API assembly preserves the original router position, prefix, tags and endpoint names. Request dependencies connect the same cached caller Session to existing concrete read/service/immediate-write factories without IO. Source write validation, provider0, SQLite locking/retry/commit and replay resolution are unchanged.",
+      "split_files": {
+        "backend/app/api/v1/routes/manual_social.py": [
+          "backend/app/domains/social/dependencies.py",
+          "backend/app/domains/social/router.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/api/v1/routes/manual_social.py::router",
+          "new": "backend/app/domains/social/router.py::manual_router",
+          "direct_consumers": [
+            "backend/app/api/v1/public.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+            "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/manual_social.py::IdempotencyKey",
+          "new": "backend/app/domains/social/router.py::IdempotencyKey",
+          "direct_consumers": [
+            "backend/app/domains/social/router.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+            "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/manual_social.py::_raise_error",
+          "new": "backend/app/domains/social/router.py::_raise_error",
+          "direct_consumers": [
+            "backend/app/domains/social/router.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+            "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/manual_social.py::read_world_character_social_activity",
+          "new": "backend/app/domains/social/router.py::read_world_character_social_activity",
+          "direct_consumers": [
+            "backend/app/domains/social/router.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+            "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/manual_social.py::read_manual_social_feed",
+          "new": "backend/app/domains/social/router.py::read_manual_social_feed",
+          "direct_consumers": [
+            "backend/app/domains/social/router.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+            "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/manual_social.py::read_manual_social_post_thread",
+          "new": "backend/app/domains/social/router.py::read_manual_social_post_thread",
+          "direct_consumers": [
+            "backend/app/domains/social/router.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+            "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/manual_social.py::write_owner_post",
+          "new": "backend/app/domains/social/router.py::write_owner_post",
+          "direct_consumers": [
+            "backend/app/domains/social/router.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+            "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/manual_social.py::write_owner_reply",
+          "new": "backend/app/domains/social/router.py::write_owner_reply",
+          "direct_consumers": [
+            "backend/app/domains/social/router.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+            "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/manual_social.py::__all__",
+          "new": "backend/app/domains/social/router.py::manual_router",
+          "direct_consumers": [
+            "backend/app/domains/social/router.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+            "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/manual_social.py::read_world_character_social_activity",
+          "new": "backend/app/domains/social/dependencies.py::get_world_profile_service",
+          "direct_consumers": [
+            "backend/app/domains/social/router.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+            "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/manual_social.py::read_manual_social_feed",
+          "new": "backend/app/domains/social/dependencies.py::get_manual_feed_references",
+          "direct_consumers": [
+            "backend/app/domains/social/router.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+            "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/manual_social.py::write_owner_post",
+          "new": "backend/app/domains/social/dependencies.py::get_source_write_executor",
+          "direct_consumers": [
+            "backend/app/domains/social/router.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+            "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/domains/social/ports/write_unit_of_work.py::SocialWriteUnitOfWorkPort",
+          "new": "backend/app/domains/social/contracts/write_execution.py::SocialWriteUnitOfWorkPort",
+          "direct_consumers": [
+            "backend/app/domains/social/dependencies.py",
+            "backend/app/domains/social/router.py",
+            "backend/app/domains/social/application/writes.py",
+            "backend/app/domains/social/ports/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+            "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        },
+        {
+          "old": "backend/app/domains/social/ports/write_unit_of_work.py::__all__",
+          "new": "backend/app/domains/social/contracts/write_execution.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/social/dependencies.py",
+            "backend/app/domains/social/router.py",
+            "backend/app/domains/social/application/writes.py",
+            "backend/app/domains/social/ports/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+            "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free",
+            "tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_reply_fails_closed_for_owner_and_hidden_targets",
+            "tests/test_p8_l_e_world_profile_social_activity.py::test_world_social_profile_counts_and_tabs_are_exact_world_only"
+          ]
+        }
+      ],
+      "new_tests": [
+        "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
+        "tests/social/test_manual_http_ownership.py::test_manual_http_origin_rejection_precedes_all_business_io"
+      ],
+      "retired_compatibility_files": [
+        "backend/app/api/v1/routes/manual_social.py",
+        "backend/app/domains/social/ports/write_unit_of_work.py"
+      ],
+      "same_session_evidence": "Both application factories register all three Session factories; dependencies share the original Session and construction executes SQL0. All five invalid local-front-end requests reject before business IO. Existing idempotency/provider0/visibility/origin/error/status assertions remain unchanged.",
+      "existing_http_test_scope": "The original HTTP31 count still checks the original community tag subset after the same router module gains manual-social routes; the new test separately checks exact manual route5 names/order. Its original31 and Character route-order assertions are unchanged."
     }
   }
 }

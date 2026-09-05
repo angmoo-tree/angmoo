@@ -1,4 +1,4 @@
-"""Port for one caller-owned canonical social write transaction."""
+"""Execution contract for one caller-owned canonical social write transaction."""
 
 from __future__ import annotations
 

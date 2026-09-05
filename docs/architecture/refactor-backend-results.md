@@ -1197,3 +1197,12 @@ Social 실제 service는 원래 입력4검증·프로필/차단/탭/페이지 �
 확장 AST 전부 동일. 원문 reader와 현 실제 서비스의 실행 SQL·bound parameter·순서는 posts16/replies15/likes15 각각 동일하며 동일 snapshot/cursor를 반환했다. 신규 SQLite1node는 입력 오류 SQL0, pending WC 로컬 프로필의 즉시 반영, commit0 및 rollback을 검증한다. 기존 프로필/Chat entry/cursor/역사 inventory와 함께 **33 PASS / 9.36초**(기존 Starlette 경고1). P8-L-E 현재 source 검사만 실제 역할 경로로 연결했으며 frozen JSON은 변경하지 않았다. 전체 B5 및 source capture/Hosted/installer 종료는 후속 단계다.
 
 API/schema/ORM·기존 protected assertion·전체 split evidence PASS. 경계 **791 modules / 2733 edges / legacy 197**, L4/ER0 PASS. 새6 파일의 읽기 편의를 위해 임시 도구 환경의 Ruff 0.12.0으로 포맷했으며 저장소 의존성 파일은 바꾸지 않았다.
+
+
+## AR-B5-C12 — 수동 Social HTTP·요청 세션 연결
+
+기존 World profile/feed/thread/post/reply HTTP5 및 오류 매핑6개 본문을 Social router의 실제 책임으로 이전했다. 요청 factory3은 같은 Session으로 기존 프로필·read references·BEGIN IMMEDIATE executor를 연결하며 생성 IO0을 유지한다. 원래 API 조립 위치·URL·query/header·상태·오류·응답·멱등성 및 provider0은 그대로다. 실행 계약3method는 같은 class 본문으로 contracts에 이동했고 옛 API와 ports 파일을 제거했다.
+
+선언한 collaborator 주입만 확장하면 기존6본문/5decorator/request 인자 AST가 동일하며 기존 Social HTTP31과 transaction protocol3은 AST 그대로다. 신규 SQLite2node는 두 앱 factory의 요청 Session 동일성·constructor SQL0·manual route5 순서 및 외부 frontend 요청5의 업무 IO 전 차단을 검증했다. 최초 신규 fixture는 read가 Origin만 검사한다고 잘못 가정하여42PASS/1FAIL이었고, 원래 host 기반 읽기 규칙에 맞춰 Host도 외부 값으로 고정했다(제품 변경 없음). 최종 기존 HTTP/멱등성/provider0/프로필/Chat entry/cursor/history inventory 포함 **43 PASS / 14.49초**, 기존 Starlette 경고1. 전체 B5 및 source capture/Hosted/installer 종료는 후속 단계다.
+
+최종 Worlds 오류 계약을 기존 승인된 `worlds.service`의 같은 클래스 객체로 연결한 뒤 요청/HTTP/공통 오류 **25 PASS / 8.36초**를 확인했다. 구조 경계790 modules/2739 edges/legacy197, API·schema·ORM, 보호된4 test파일 assertion 및 전체 split evidence가 통과했고 L4/ER0 현재 inventory도 갱신했다.

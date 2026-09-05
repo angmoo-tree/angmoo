@@ -23,7 +23,7 @@ def test_both_factories_bind_social_services_and_preserve_character_state_order(
         assert dependencies.get_discovery_service(request) is discovery.discovery_service
         assert dependencies.get_profile_activity_service(request) is profile_activity.profile_activity_service
         routes = [route for route, _ in _iter_routes_with_context(app.routes)]
-        social_routes = [route for route in routes if getattr(getattr(route, "endpoint", None), "__module__", "") == "app.domains.social.router"]
+        social_routes = [route for route in routes if getattr(getattr(route, "endpoint", None), "__module__", "") == "app.domains.social.router" and "manual-social" not in getattr(route, "tags", [])]
         assert len(social_routes) == 31
         names = [getattr(route, "name", "") for route in routes]
         assert names.count("save_character_state") == 1

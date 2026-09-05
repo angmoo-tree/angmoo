@@ -8,7 +8,7 @@ from app.domains.social.contracts.writes import (
     SocialWriteResult,
     ValidatedAutonomousWriteCommand,
 )
-from app.domains.social.ports.write_unit_of_work import SocialWriteUnitOfWorkPort
+from app.domains.social.contracts.write_execution import SocialWriteUnitOfWorkPort
 
 
 def create_owner_post(

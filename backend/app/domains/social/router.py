@@ -1,19 +1,76 @@
 """Social HTTP endpoints; business decisions belong to the owning services."""
-from typing import Literal
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+from typing import Annotated, Literal
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 from app.domains.social.contracts.actors import SocialUser
-from app.domains.social.schemas import community as schemas, activity as activity_schemas
+from app.domains.social.schemas import (
+    community as schemas,
+    activity as activity_schemas,
+)
 from app.domains.social import exceptions as errors
-from app.domains.social.service import feed as feed_service, profiles as profile_service, posts as post_service
-from app.domains.social.service.timeline import create_comment as disabled_comment, SocialTimelineService
+from app.domains.social.service import (
+    feed as feed_service,
+    profiles as profile_service,
+    posts as post_service,
+)
+from app.domains.social.service.timeline import (
+    create_comment as disabled_comment,
+    SocialTimelineService,
+)
 from app.domains.social.service.inbox import SocialInboxService
 from app.domains.social.service.discovery import SocialDiscoveryService
 from app.domains.social.service.profile_activity import ProfileActivityService
 from app.domains.social.dependencies import (
-    get_db, get_current_user, get_optional_current_user,
-    get_timeline_service, get_inbox_service, get_discovery_service, get_profile_activity_service,
+    get_db,
+    get_current_user,
+    get_optional_current_user,
+    get_timeline_service,
+    get_inbox_service,
+    get_discovery_service,
+    get_profile_activity_service,
 )
+
+from app.api.identity_dependencies import browser_session
+from app.domains.social.schemas.manual import (
+    ManualSocialFeedRead,
+    ManualSocialWriteRead,
+    OwnerManualPostWrite,
+    OwnerManualReplyWrite,
+    WorldCharacterSocialProfileRead,
+)
+from app.domains.social.contracts.writes import (
+    OwnerPostCommand,
+    OwnerReplyCommand,
+    SocialWriteConflictError,
+    SocialWriteError,
+    SocialWriteForbiddenError,
+    SocialWriteNotFoundError,
+    SocialWriteRetryableError,
+)
+from app.domains.social.contracts.profile_activity import (
+    WorldCharacterSocialProfileError,
+    WorldCharacterSocialProfileForbiddenError,
+    WorldCharacterSocialProfileNotFoundError,
+    WorldCharacterSocialProfileQuery,
+    WorldCharacterSocialProfileValidationError,
+)
+from app.domains.social.contracts.manual_feed import ManualFeedReferences
+from app.domains.social.contracts.write_execution import SocialWriteUnitOfWorkPort
+from app.domains.social.service.world_profile import WorldSocialProfileService
+from app.domains.social.service.manual_feed import (
+    get_owner_world_post_thread,
+    list_owner_world_feed,
+)
+from app.domains.social.dependencies import (
+    get_world_profile_service,
+    get_manual_feed_references,
+    get_source_write_executor,
+)
+from app.domains.world_characters.contracts.owner_identity import (
+    OwnerControlledIdentityError,
+)
+from app.domains.worlds import service as world_service
 
 router = APIRouter(tags=["community"])
 
@@ -538,3 +595,188 @@ def get_character_activity(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Character not found"
         )
+
+
+manual_router = APIRouter(prefix="/worlds", tags=["manual-social"])
+IdempotencyKey = Annotated[
+    str, Header(alias="Idempotency-Key", min_length=8, max_length=128)
+]
+
+
+def _raise_error(exc: Exception) -> None:
+    reason = getattr(exc, "reason_code", "manual_social_error")
+    if isinstance(
+        exc,
+        (
+            SocialWriteNotFoundError,
+            WorldCharacterSocialProfileNotFoundError,
+            world_service.WorldNotFoundError,
+        ),
+    ):
+        code = status.HTTP_404_NOT_FOUND
+    elif isinstance(
+        exc,
+        (
+            SocialWriteForbiddenError,
+            WorldCharacterSocialProfileForbiddenError,
+            OwnerControlledIdentityError,
+            world_service.WorldMembershipRequiredError,
+            world_service.WorldCreatorRoleRequiredError,
+        ),
+    ):
+        code = status.HTTP_403_FORBIDDEN
+    elif isinstance(exc, WorldCharacterSocialProfileValidationError):
+        code = status.HTTP_422_UNPROCESSABLE_CONTENT
+    elif isinstance(exc, world_service.WorldArchivedError) or isinstance(
+        exc, SocialWriteConflictError
+    ):
+        code = status.HTTP_409_CONFLICT
+    elif isinstance(exc, SocialWriteRetryableError):
+        code = status.HTTP_503_SERVICE_UNAVAILABLE
+    else:
+        code = status.HTTP_400_BAD_REQUEST
+    raise HTTPException(status_code=code, detail=reason) from exc
+
+
+@manual_router.get(
+    "/{world_id}/world-characters/{world_character_id}/social-profile",
+    response_model=WorldCharacterSocialProfileRead,
+)
+def read_world_character_social_activity(
+    world_id: str,
+    world_character_id: str,
+    request: Request,
+    tab: Literal["posts", "replies", "likes"] = Query("posts"),
+    limit: int = Query(10, ge=1, le=20),
+    cursor: str | None = Query(None, min_length=1, max_length=2048),
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+    profile_service: WorldSocialProfileService = Depends(get_world_profile_service),
+) -> WorldCharacterSocialProfileRead:
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        page = profile_service.read(
+            WorldCharacterSocialProfileQuery(
+                world_id=world_id,
+                world_character_id=world_character_id,
+                current_user_id=str(current_user.id),
+                tab=tab,
+                limit=limit,
+                cursor=cursor,
+            ),
+        )
+    except (WorldCharacterSocialProfileError, world_service.WorldServiceError) as exc:
+        _raise_error(exc)
+        raise AssertionError("unreachable")
+    return WorldCharacterSocialProfileRead.from_snapshot(page)
+
+
+@manual_router.get(
+    "/{world_id}/manual-social/feed",
+    response_model=ManualSocialFeedRead,
+)
+def read_manual_social_feed(
+    world_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+    references: ManualFeedReferences = Depends(get_manual_feed_references),
+) -> ManualSocialFeedRead:
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        return list_owner_world_feed(
+            db,
+            world_id=world_id,
+            current_user_id=current_user.id,
+            references=references,
+        )
+    except (SocialWriteError, OwnerControlledIdentityError) as exc:
+        _raise_error(exc)
+        raise AssertionError("unreachable")
+
+
+@manual_router.get(
+    "/{world_id}/manual-social/posts/{post_id}",
+    response_model=ManualSocialFeedRead,
+)
+def read_manual_social_post_thread(
+    world_id: str,
+    post_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+    references: ManualFeedReferences = Depends(get_manual_feed_references),
+) -> ManualSocialFeedRead:
+    browser_session.require_local_frontend_request(request, mutation=False)
+    try:
+        return get_owner_world_post_thread(
+            db,
+            world_id=world_id,
+            post_id=post_id,
+            current_user_id=current_user.id,
+            references=references,
+        )
+    except (SocialWriteError, OwnerControlledIdentityError) as exc:
+        _raise_error(exc)
+        raise AssertionError("unreachable")
+
+
+@manual_router.post(
+    "/{world_id}/manual-social/posts",
+    response_model=ManualSocialWriteRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def write_owner_post(
+    world_id: str,
+    data: OwnerManualPostWrite,
+    request: Request,
+    idempotency_key: IdempotencyKey,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+    executor: SocialWriteUnitOfWorkPort = Depends(get_source_write_executor),
+) -> ManualSocialWriteRead:
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return executor.create_owner_post(
+            OwnerPostCommand(
+                world_id=world_id,
+                current_user_id=str(current_user.id),
+                idempotency_key=idempotency_key.strip(),
+                title=data.title,
+                body=data.body,
+            ),
+        )
+    except (SocialWriteError, OwnerControlledIdentityError) as exc:
+        _raise_error(exc)
+        raise AssertionError("unreachable")
+
+
+@manual_router.post(
+    "/{world_id}/manual-social/posts/{post_id}/replies",
+    response_model=ManualSocialWriteRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def write_owner_reply(
+    world_id: str,
+    post_id: str,
+    data: OwnerManualReplyWrite,
+    request: Request,
+    idempotency_key: IdempotencyKey,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+    executor: SocialWriteUnitOfWorkPort = Depends(get_source_write_executor),
+) -> ManualSocialWriteRead:
+    browser_session.require_local_frontend_request(request, mutation=True)
+    try:
+        return executor.create_owner_reply(
+            OwnerReplyCommand(
+                world_id=world_id,
+                target_post_id=post_id,
+                current_user_id=str(current_user.id),
+                idempotency_key=idempotency_key.strip(),
+                body=data.body,
+            ),
+        )
+    except (SocialWriteError, OwnerControlledIdentityError) as exc:
+        _raise_error(exc)
+        raise AssertionError("unreachable")

@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2379,
-      "internal_edge_count": 2733,
+      "external_import_count": 2376,
+      "internal_edge_count": 2739,
       "legacy_import_exception_count": 0,
-      "module_count": 791,
+      "module_count": 790,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -602,8 +602,8 @@
           },
           {
             "imports": [
-              "app.domains.social.contracts.writes",
-              "app.domains.social.ports.write_unit_of_work"
+              "app.domains.social.contracts.write_execution",
+              "app.domains.social.contracts.writes"
             ],
             "module": "app.domains.social.application.writes",
             "path": "backend/app/domains/social/application/writes.py"
@@ -734,6 +734,13 @@
             "path": "backend/app/domains/social/contracts/today_activity.py"
           },
           {
+            "imports": [
+              "app.domains.social.contracts.writes"
+            ],
+            "module": "app.domains.social.contracts.write_execution",
+            "path": "backend/app/domains/social/contracts/write_execution.py"
+          },
+          {
             "imports": [],
             "module": "app.domains.social.contracts.writes",
             "path": "backend/app/domains/social/contracts/writes.py"
@@ -742,10 +749,13 @@
             "imports": [
               "app.api.identity_dependencies",
               "app.core.db",
+              "app.domains.social.contracts.manual_feed",
+              "app.domains.social.contracts.write_execution",
               "app.domains.social.service.discovery",
               "app.domains.social.service.inbox",
               "app.domains.social.service.profile_activity",
-              "app.domains.social.service.timeline"
+              "app.domains.social.service.timeline",
+              "app.domains.social.service.world_profile"
             ],
             "module": "app.domains.social.dependencies",
             "path": "backend/app/domains/social/dependencies.py"
@@ -798,9 +808,9 @@
           },
           {
             "imports": [
+              "app.domains.social.contracts.write_execution",
               "app.domains.social.ports.observation_unit_of_work",
-              "app.domains.social.ports.search_index",
-              "app.domains.social.ports.write_unit_of_work"
+              "app.domains.social.ports.search_index"
             ],
             "module": "app.domains.social.ports",
             "path": "backend/app/domains/social/ports/__init__.py"
@@ -818,13 +828,6 @@
             ],
             "module": "app.domains.social.ports.search_index",
             "path": "backend/app/domains/social/ports/search_index.py"
-          },
-          {
-            "imports": [
-              "app.domains.social.contracts.writes"
-            ],
-            "module": "app.domains.social.ports.write_unit_of_work",
-            "path": "backend/app/domains/social/ports/write_unit_of_work.py"
           },
           {
             "imports": [
@@ -941,18 +944,28 @@
           },
           {
             "imports": [
+              "app.api.identity_dependencies",
               "app.domains.social.contracts.actors",
+              "app.domains.social.contracts.manual_feed",
+              "app.domains.social.contracts.profile_activity",
+              "app.domains.social.contracts.write_execution",
+              "app.domains.social.contracts.writes",
               "app.domains.social.dependencies",
               "app.domains.social.exceptions",
               "app.domains.social.schemas.activity",
               "app.domains.social.schemas.community",
+              "app.domains.social.schemas.manual",
               "app.domains.social.service.discovery",
               "app.domains.social.service.feed",
               "app.domains.social.service.inbox",
+              "app.domains.social.service.manual_feed",
               "app.domains.social.service.posts",
               "app.domains.social.service.profile_activity",
               "app.domains.social.service.profiles",
-              "app.domains.social.service.timeline"
+              "app.domains.social.service.timeline",
+              "app.domains.social.service.world_profile",
+              "app.domains.world_characters.contracts.owner_identity",
+              "app.domains.worlds.service"
             ],
             "module": "app.domains.social.router",
             "path": "backend/app/domains/social/router.py"
@@ -1563,7 +1576,10 @@
             "imports": [
               "app.runtime.social.discovery",
               "app.runtime.social.inbox",
+              "app.runtime.social.manual_feed_references",
               "app.runtime.social.profile_activity",
+              "app.runtime.social.profile_composition",
+              "app.runtime.social.sqlalchemy_unit_of_work",
               "app.runtime.social.timeline"
             ],
             "module": "app.runtime.social.composition",
@@ -2259,7 +2275,7 @@
       },
       {
         "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
-        "sha256": "cfda0552eb81e51c9b9c020101b46e4b8106bac0bb4460f0f41cbc530a682917"
+        "sha256": "1dc2ceffec762140b717a330a5af24b9802a476ff7c6035ec70df157547a5259"
       },
       {
         "path": "backend/tests/test_l4_social_search_projection.py",
