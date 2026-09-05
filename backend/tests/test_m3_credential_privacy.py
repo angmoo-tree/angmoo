@@ -238,7 +238,7 @@ def test_draft_pollinations_key_is_authorization_only_not_url(
         fake_urlopen,
     )
     monkeypatch.setattr(
-        agent_creation_drafts.profile_media,
+        agent_creation_drafts.media_images,
         "validate_profile_media_content",
         lambda *_args: None,
     )

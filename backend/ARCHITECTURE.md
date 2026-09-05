@@ -489,3 +489,10 @@ AR-B3-M2에서 이 네 파일의 실제 구현과 모든 Python 소비자를 이
 서비스 키를 사용할 수 없으면 quota 예약 전에 종료합니다. 일별 quota가 소진되면 번역과 이미지 provider를 부르지 않습니다. Provider 오류 또는 파일 정제 실패는 기존 오류 분류를 사용해 예약을 failed로 확정하고 commit합니다. Draft의 생성 cooldown/초기 commit·마지막 commit과 Profile 생성의 응답 순서는 서로 다른 기존 흐름을 유지합니다.
 
 이 적용으로 미디어 생성 두 HTTP도 Character router를 사용합니다. 기존 runtime에는 LLM credential/외부 번역·이전 URL-helper와 실제 잔여 호출자가 있는 forwarding이 남으며, 무기한 도메인 비즈니스 구현으로 취급하지 않습니다. 후속 shared transport/World 정리와 B4/B8의 설정·삭제 소유권 종료는 결과 문서에 별도로 기록합니다.
+
+
+### Media 소유권
+
+프로필/Draft 후보의 권한·quota·apply/discard는 Character `service/media.py`, `service/image_generation.py`, `service/image_quota.py`가 담당한다. 파일 배치는 Character·World·Social 각 소유 코드가 수행하고, 공통 이미지 정제·경로 검증·quarantine은 `integrations/media`를 사용한다. 공통 처리에서 공개 여부나 다른 업무의 quota를 결정하지 않는다. World 배너 오류와 commit 실패 보상은 World에 남는다. Post job/게시 부착과 World Package lossless codec은 각각 자신의 업무 계약을 유지한다.
+
+실제 이미지 provider/검증된 HTTP/Azure 번역은 `integrations`에 있다. Runtime은 설정/credential·Character 후처리 callback을 제공하며 provider 호출 횟수와 기존 transaction 순서를 유지한다. 과거 media export와 생산에서 호출하지 않는 URL helper는 이전 테스트의 한시적 호환 경로로 결과 문서에 소유·종료 단계를 기록하고 새 기능의 시작점으로 사용하지 않는다.

@@ -2828,7 +2828,8 @@
         "backend/app/integrations/pollinations_image.py",
         "backend/app/integrations/provider_http.py",
         "backend/app/integrations/replicate_image.py",
-        "backend/app/domains/worlds/storage.py"
+        "backend/app/domains/worlds/storage.py",
+        "backend/app/integrations/azure_translation.py"
       ],
       "target_paths": [
         "backend/app/integrations",
@@ -2917,7 +2918,8 @@
         "backend/tests/test_provider_adapters.py",
         "backend/tests/test_provider_boundary_security.py",
         "backend/tests/test_provider_response_limits.py",
-        "backend/tests/media/test_world_banner_codec.py"
+        "backend/tests/media/test_world_banner_codec.py",
+        "backend/tests/media/test_azure_translation.py"
       ],
       "test_nodes": [
         "tests/identity/test_credential_resolver.py::test_message_resolver_accepts_agent_or_message_source[agent]",

@@ -4663,6 +4663,7 @@
           "backend/app/domains/characters/service/image_generation.py",
           "backend/app/domains/characters/service/image_quota.py",
           "backend/app/domains/characters/service/media.py",
+          "backend/app/integrations/azure_translation.py",
           "backend/app/runtime/characters/creator.py"
         ]
       },
@@ -6813,12 +6814,12 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_TRANSLATION_USAGE_LOCK",
-          "new": "backend/app/runtime/characters/creator.py::_TRANSLATION_USAGE_LOCK",
+          "new": "backend/app/integrations/azure_translation.py::_TRANSLATION_USAGE_LOCK",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/media/test_azure_translation.py::test_success_cache_and_monthly_limit_keep_provider_call_count"
           ]
         },
         {
@@ -7463,12 +7464,12 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_open_translation_request",
-          "new": "backend/app/runtime/characters/creator.py::_open_translation_request",
+          "new": "backend/app/integrations/azure_translation.py::_open_translation_request",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/test_provider_boundary_security.py::test_provider_call_sites_use_validated_transport"
+            "tests/media/test_azure_translation.py::test_success_cache_and_monthly_limit_keep_provider_call_count"
           ]
         },
         {
@@ -7509,52 +7510,52 @@
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_translate_ko_to_en_with_azure",
-          "new": "backend/app/runtime/characters/creator.py::_translate_ko_to_en_with_azure",
+          "new": "backend/app/integrations/azure_translation.py::_translate_ko_to_en_with_azure",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/media/test_azure_translation.py::test_success_cache_and_monthly_limit_keep_provider_call_count"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_reserve_translation_chars",
-          "new": "backend/app/runtime/characters/creator.py::_reserve_translation_chars",
+          "new": "backend/app/integrations/azure_translation.py::_reserve_translation_chars",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/media/test_azure_translation.py::test_success_cache_and_monthly_limit_keep_provider_call_count"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_release_translation_chars",
-          "new": "backend/app/runtime/characters/creator.py::_release_translation_chars",
+          "new": "backend/app/integrations/azure_translation.py::_release_translation_chars",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/media/test_azure_translation.py::test_success_cache_and_monthly_limit_keep_provider_call_count"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_read_translation_usage",
-          "new": "backend/app/runtime/characters/creator.py::_read_translation_usage",
+          "new": "backend/app/integrations/azure_translation.py::_read_translation_usage",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/media/test_azure_translation.py::test_success_cache_and_monthly_limit_keep_provider_call_count"
           ]
         },
         {
           "old": "backend/app/services/agent_creation_drafts.py::_write_translation_usage",
-          "new": "backend/app/runtime/characters/creator.py::_write_translation_usage",
+          "new": "backend/app/integrations/azure_translation.py::_write_translation_usage",
           "direct_consumers": [
             "backend/app/runtime/characters/creator.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+            "tests/media/test_azure_translation.py::test_success_cache_and_monthly_limit_keep_provider_call_count"
           ]
         },
         {
@@ -15131,6 +15132,16 @@
         "backend/tests/media/test_world_banner_codec.py",
         "backend/tests/worlds/test_transition_contracts.py"
       ]
+    },
+    "AR-B3-M6": {
+      "status": "Azure translation transport, bounded response and provider usage file/lock have one integrations owner. Runtime retains Character prompt selection/cache and provides the callback to its generation service.",
+      "unchanged_symbols": 7,
+      "test_paths": [
+        "backend/tests/media/test_azure_translation.py",
+        "backend/tests/test_m3_credential_privacy.py",
+        "backend/tests/test_provider_boundary_security.py"
+      ],
+      "reviewed_test_patch_path": "test_m3_credential_privacy now patches creator.media_images.validate_profile_media_content, the actual shared validator since M1, preserving existing URL/header secrecy assertions."
     }
   }
 }

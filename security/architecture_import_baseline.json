@@ -1,7 +1,7 @@
 {
-  "edge_count": 2043,
-  "external_import_count": 2065,
-  "module_count": 626,
+  "edge_count": 2047,
+  "external_import_count": 2071,
+  "module_count": 627,
   "modules": [
     {
       "external_imports": [],
@@ -5936,6 +5936,25 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "json",
+        "threading",
+        "typing",
+        "urllib.error",
+        "urllib.parse",
+        "urllib.request"
+      ],
+      "imports": [
+        "app.config",
+        "app.integrations.bounded_http",
+        "app.integrations.provider_http"
+      ],
+      "module": "app.integrations.azure_translation",
+      "path": "backend/app/integrations/azure_translation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "typing"
       ],
       "imports": [],
@@ -6730,7 +6749,6 @@
         "re",
         "sqlalchemy",
         "sqlalchemy.orm",
-        "threading",
         "typing",
         "urllib.error",
         "urllib.parse",
@@ -6756,6 +6774,7 @@
         "app.domains.characters.service.media_storage",
         "app.domains.characters.service.profile",
         "app.domains.identity.service.demo_access",
+        "app.integrations.azure_translation",
         "app.integrations.bounded_http",
         "app.integrations.image_provider",
         "app.integrations.media.files",

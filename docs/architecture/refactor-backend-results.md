@@ -442,3 +442,28 @@ Worlds 통합 `1213b3063c39e32f2928d0bba9719f32106ab5ac`를 합친 뒤 canonical
 신규 8 nodes는 잘못된 World 이미지의 오류/파일 없음, 공유 정제 결과와 thumbnail/alpha, legacy 오류 동일성, root 밖 삭제 방지를 검증한다. 통합 Actions/Installer/새 source 도입 capture는 root의 별도 Gate이며 이 절에서는 그 완료를 주장하지 않는다.
 
 M5 고정 후보의 집중 검증은 **133 passed / 2 warnings / 12.30s**이며 World 배너 교체 commit 실패 복구를 포함한다. #258/#263 API/ORM 차이는 0, architecture는 **626 modules / 2,043 edges / 265 exact legacy edges**였다.
+
+
+## AR-B3-M6 — Azure 통신·제공자 사용량 분리와 media 잔여 감사
+
+Azure의 실제 통신/응답 크기 제한·monthly usage 파일·Lock을 `integrations/azure_translation.py`로 옮겼다. 기존 6개 함수와 Lock의 내용을 바꾸지 않았고 Character prompt 선택·Hangul 확인·256개 cache는 runtime 조립 callback에 남겼다. 신규 **5 nodes**는 같은 문장 cache/provider 1회, Hangul이 있는 prompt의 변환 조건, quota 초과 시 provider 0, transport/response 실패 시 예약 문자 복구, 비활성 key의 파일/요청 없음, 월 변경과 한도 경계를 검증한다.
+
+M1 뒤 남아 있던 기존 credential privacy 테스트의 monkeypatch 위치 한 곳을 실제 `creator.media_images.validate_profile_media_content`로 고쳤다. 비밀키가 URL에 없고 Authorization에만 들어간다는 원래 assertion은 그대로다. Private preview·계정 삭제·기존 provider 경계와 함께 실행한 집중 검증은 **82 passed / 1 warning / 12.68s**다. Architecture는 **627 modules / 2,047 edges / 265 exact legacy edges**로 통과했다.
+
+### Media 실제 소유권과 후속 단계
+
+| 책임 | 현재 구현 / 후속 종료 |
+|---|---|
+| 프로필·Draft 입력/권한/정제/후보 apply·discard/만료/비공개 HTTP | Character `router`, `service/media`, `service/image_generation`, `service/image_quota`, `service/media_storage`; 기존 commit·실패·provider 수 보존 |
+| World 배너 권한·row version·commit 보상과 파일 위치 | `worlds/service/creator.py`, `worlds/storage.py`; 공통 codec 예외를 기존 World 오류로 번역 |
+| 공통 MIME/EXIF/WebP/이미지 한계·containment/private paths/quarantine | `integrations/media/{images,files}.py`; 어떤 owner/공개 정책도 결정하지 않음 |
+| 실제 이미지 provider·validated HTTP / Azure | `integrations/{image_provider,pollinations_image,replicate_image,provider_http,azure_translation}.py` |
+| Post 파일 기록 / quota·job·공개 부착 | 파일은 `social/service/media_storage.py`; 기존 `services/post_image_generation.py`, `post_image_job_worker.py`의 quota/job/부착은 정확한 AR-B5 업무 소유 |
+| World Package export/import 이미지 | Package의 별도 B3 source가 소유; lossless 재인코딩·journal/보상 경로는 profile codec에 합치지 않음 |
+| 생산 호출 없는 옛 `services/profile_media.py` export | 함수 본문은 없고 frozen compatibility tests만 남음. AR-B8-A에서 source/test 계보와 함께 제거 |
+| Runtime의 옛 Pollinations model-list·URL/download helper 7개 | 기존 model-list/credential/validated-transport 테스트만 직접 호출. 새 생성 흐름에 연결하지 않으며 AR-B8-A가 정확한 테스트 호환 표면을 종료 |
+| 이미지 설정·서비스 key·Creator LLM·Local Bot·다중 owner 삭제 | 기존 runtime/credentials·AR-B8-A 실제 조립 소유. 동일 Session/credential/provider/log/cleanup 의미를 바꾸지 않음 |
+
+공개 media mount는 기존 characters/posts/world-package-imports만 유지한다. World/draft/candidate를 anonymous 정적 경로에 추가하지 않았다. 관련 권한/비공개 검증의 통과를 실제 Installer/real-provider 검증으로 확대하지 않는다. 현재 Media M1~M6의 새 nodes는 26개이며 source introduction·통합 Actions·순차 merge는 root가 관리한다.
+
+M6 고정 후보에서 `--contracts --nodes`는 현재 **2,151 nodes**를 수집했다. 보호 계보 2,125개 대비 API/ORM·기존 assertion/suppression·누락 node·source split 오류는 없었다. 실패 목록은 M1~M5의 root 선형 capture를 기다리는 source 12개·test 21개뿐이며 M6 새 5개는 이 검사 당시 미커밋 도입이었다. source 고정 후 root가 M1~M6의 각 첫 도입 SHA에서 append-only 증거를 추가한다.
