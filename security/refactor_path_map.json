@@ -273,7 +273,10 @@
     "backend/app/domains/chat/infrastructure/__init__.py": "backend/app/domains/chat/repository/__init__.py",
     "backend/app/runtime/chat/world_generation.py": "backend/app/domains/chat/service/generation.py",
     "backend/app/runtime/chat/retrieval_policy.py": "backend/app/domains/chat/service/retrieval_policy.py",
-    "backend/app/runtime/chat/today_sns_activity.py": "backend/app/domains/chat/service/today_sns_activity.py"
+    "backend/app/runtime/chat/today_sns_activity.py": "backend/app/domains/chat/service/today_sns_activity.py",
+    "backend/app/api/v1/routes/messages.py": "backend/app/domains/chat/router/messages.py",
+    "backend/app/api/v1/routes/world_chat.py": "backend/app/domains/chat/router/world_chat.py",
+    "backend/app/api/v1/routes/world_chat_response.py": "backend/app/domains/chat/router/world_chat_response.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -18750,6 +18753,362 @@
       "preserved_semantics": "Local owner -> World -> thread -> active requester/responder -> owner-controlled requester -> blocked pair -> memory setting order; exact casefold after SQL and candidate visibility/observable flags; same Today complete_through and snapshot hash errors.",
       "runtime_responsibility": "build_retrieval_policy and build_today_snapshot_validator construct collaborators, not policy. Historical constructor names alias these same functions for existing tests; canonical builder imports real build functions.",
       "remaining": "AR-B6-C HTTP ownership with Request service DI, two factories and standalone test wiring; B5/B7 integration and B8 compatibility retirement remain separate."
+    },
+    "AR-B6-C1": {
+      "status": "Actual 22 Chat HTTP handlers and five typed Request service dependencies; both application factories bind the same instances; API composition imports canonical routers.",
+      "configuration": "runtime/chat/message_composition.configure_chat_services registers existing thread/settings/message/generation/evidence instances. No new provider construction or Session lifecycle.",
+      "preserved_semantics": "Each complete handler/decorator AST is unchanged after removing the new typed Depends argument and restoring errors -> chat alias. 22 exact security-inventory module fields moved; URLs/methods/order/operation IDs/response schemas/auth callable identity/NDJSON unchanged.",
+      "legacy_retirement": "Three old route import files are same-object test-only aliases for A2 structure inspection; B8 retires them with the original node and new HTTP behavior regression correspondence. Product composition and standalone behavior tests import canonical routers.",
+      "tests": [
+        "tests/chat/test_http_ownership.py",
+        "tests/test_p8_l_d_world_chat_api.py",
+        "tests/test_p8_l_e_world_profile_chat_entry.py",
+        "tests/test_p8_l_q_memory_read_inspector.py"
+      ],
+      "remaining": "B5/B7 canonical integration and exact old public/ORM/schema/forwarder exports are B8 retirement. No full backend/CI/installer completion claim.",
+      "whole_file_moves": {
+        "backend/app/api/v1/routes/messages.py": "backend/app/domains/chat/router/messages.py",
+        "backend/app/api/v1/routes/world_chat.py": "backend/app/domains/chat/router/world_chat.py",
+        "backend/app/api/v1/routes/world_chat_response.py": "backend/app/domains/chat/router/world_chat_response.py"
+      },
+      "http_handler_evidence": [
+        {
+          "old": "backend/app/api/v1/routes/messages.py::list_threads",
+          "new": "backend/app/domains/chat/router/messages.py::list_threads",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/messages.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/messages.py::create_thread",
+          "new": "backend/app/domains/chat/router/messages.py::create_thread",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/messages.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/messages.py::get_thread",
+          "new": "backend/app/domains/chat/router/messages.py::get_thread",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/messages.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/messages.py::update_thread",
+          "new": "backend/app/domains/chat/router/messages.py::update_thread",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/messages.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/messages.py::delete_thread",
+          "new": "backend/app/domains/chat/router/messages.py::delete_thread",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/messages.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/messages.py::send_message",
+          "new": "backend/app/domains/chat/router/messages.py::send_message",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/messages.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/messages.py::retry_message",
+          "new": "backend/app/domains/chat/router/messages.py::retry_message",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/messages.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/messages.py::get_message_settings",
+          "new": "backend/app/domains/chat/router/messages.py::get_message_settings",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/messages.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/messages.py::update_message_settings",
+          "new": "backend/app/domains/chat/router/messages.py::update_message_settings",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/messages.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/messages.py::get_character_message_settings",
+          "new": "backend/app/domains/chat/router/messages.py::get_character_message_settings",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/messages.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/messages.py::update_character_message_settings",
+          "new": "backend/app/domains/chat/router/messages.py::update_character_message_settings",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/messages.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/messages.py::router",
+          "new": "backend/app/domains/chat/router/messages.py::router",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/messages.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat.py::get_world_chat_entry",
+          "new": "backend/app/domains/chat/router/world_chat.py::get_world_chat_entry",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat.py::list_world_threads",
+          "new": "backend/app/domains/chat/router/world_chat.py::list_world_threads",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat.py::create_or_get_world_thread",
+          "new": "backend/app/domains/chat/router/world_chat.py::create_or_get_world_thread",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat.py::get_world_thread",
+          "new": "backend/app/domains/chat/router/world_chat.py::get_world_thread",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat.py::update_world_thread_model",
+          "new": "backend/app/domains/chat/router/world_chat.py::update_world_thread_model",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat.py::router",
+          "new": "backend/app/domains/chat/router/world_chat.py::router",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat.py::entry_router",
+          "new": "backend/app/domains/chat/router/world_chat.py::entry_router",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat.py::__all__",
+          "new": "backend/app/domains/chat/router/world_chat.py::__all__",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat_response.py::accept_world_message",
+          "new": "backend/app/domains/chat/router/world_chat_response.py::accept_world_message",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat_response.py::retry_world_response",
+          "new": "backend/app/domains/chat/router/world_chat_response.py::retry_world_response",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat_response.py::get_latest_world_response_request",
+          "new": "backend/app/domains/chat/router/world_chat_response.py::get_latest_world_response_request",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat_response.py::get_world_response_request",
+          "new": "backend/app/domains/chat/router/world_chat_response.py::get_world_response_request",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat_response.py::get_world_response_evidence",
+          "new": "backend/app/domains/chat/router/world_chat_response.py::get_world_response_evidence",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat_response.py::stream_world_response_events",
+          "new": "backend/app/domains/chat/router/world_chat_response.py::stream_world_response_events",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat_response.py::router",
+          "new": "backend/app/domains/chat/router/world_chat_response.py::router",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/world_chat_response.py::__all__",
+          "new": "backend/app/domains/chat/router/world_chat_response.py::__all__",
+          "direct_consumers": [
+            "backend/app/api/v1/main.py",
+            "backend/app/api/v1/public.py",
+            "backend/app/api/v1/routes/world_chat_response.py"
+          ],
+          "test_nodes": [
+            "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
+          ]
+        }
+      ]
     }
   }
 }

@@ -47,8 +47,8 @@ class InventoryError(RuntimeError):
 
 REQUIRED_FILES = (
     "backend/app/alembic/versions/20260903_0087_world_chat_model_binding.py",
-    "backend/app/api/v1/routes/world_chat.py",
-    "backend/app/api/v1/routes/world_chat_response.py",
+    "backend/app/domains/chat/router/world_chat.py",
+    "backend/app/domains/chat/router/world_chat_response.py",
     "backend/app/domains/chat/api/schemas.py",
     "backend/app/domains/chat/service/character_response.py",
     "backend/app/domains/chat/service/evidence_assembly.py",

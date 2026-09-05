@@ -128,7 +128,7 @@ def _pure_layer_violations(
 
 
 def _route_operations() -> list[str]:
-    path = ROOT / "backend/app/api/v1/routes/messages.py"
+    path = ROOT / "backend/app/domains/chat/router/messages.py"
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     operations: set[str] = set()
     for node in ast.walk(tree):

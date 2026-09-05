@@ -1215,6 +1215,7 @@
       "app.domains.chat.contracts.successful_chat_memory",
       "app.domains.chat.contracts.today_sns_activity",
       "app.domains.chat.contracts.workflow_recipe",
+      "app.domains.chat.dependencies",
       "app.domains.chat.exceptions",
       "app.domains.chat.models",
       "app.domains.chat.policies",
@@ -1222,6 +1223,10 @@
       "app.domains.chat.repository.response_lifecycle",
       "app.domains.chat.repository.response_requests",
       "app.domains.chat.repository.threads",
+      "app.domains.chat.router",
+      "app.domains.chat.router.messages",
+      "app.domains.chat.router.world_chat",
+      "app.domains.chat.router.world_chat_response",
       "app.domains.chat.schemas",
       "app.domains.chat.service",
       "app.domains.chat.service.answer_request",
@@ -2278,6 +2283,30 @@
         "removal_condition": "Migrate the recorded public aggregate consumers to the actual supported service or contract, then retire the historical export. No new public aggregate consumers.",
         "reason": "Original Chat public class exports now refer to the same canonical service implementations; the compatibility-only forwarding classes remain separately named.",
         "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.api.v1.routes.messages",
+        "target": "app.domains.chat.router.messages",
+        "owner_stage": "AR-B8-A",
+        "reason": "Original A2 structural assertion imports only; actual API composition uses canonical Chat HTTP. Same function/router objects, no copied policy.",
+        "removal_condition": "Retire exact tests/chat/test_service_ownership.py historical route-module inspection after mapping it to test_http_ownership real service/transport regressions. No new product consumers.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.api.v1.routes.world_chat",
+        "target": "app.domains.chat.router.world_chat",
+        "owner_stage": "AR-B8-A",
+        "reason": "Original A2 structural assertion imports only; actual API composition uses canonical Chat HTTP. Same function/router objects, no copied policy.",
+        "removal_condition": "Retire exact tests/chat/test_service_ownership.py historical route-module inspection after mapping it to test_http_ownership real service/transport regressions. No new product consumers.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.api.v1.routes.world_chat_response",
+        "target": "app.domains.chat.router.world_chat_response",
+        "owner_stage": "AR-B8-A",
+        "reason": "Original A2 structural assertion imports only; actual API composition uses canonical Chat HTTP. Same function/router objects, no copied policy.",
+        "removal_condition": "Retire exact tests/chat/test_service_ownership.py historical route-module inspection after mapping it to test_http_ownership real service/transport regressions. No new product consumers.",
+        "review_date": "2026-09-06"
       }
     ]
   }

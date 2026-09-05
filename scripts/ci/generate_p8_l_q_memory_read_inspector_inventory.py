@@ -40,7 +40,7 @@ REQUIRED_FILES = (
     "backend/app/api/v1/main.py",
     "backend/app/api/v1/public.py",
     "backend/app/api/v1/routes/memory.py",
-    "backend/app/api/v1/routes/world_chat_response.py",
+    "backend/app/domains/chat/router/world_chat_response.py",
     "backend/app/domains/chat/api/schemas.py",
     "backend/app/domains/chat/service/evidence_assembly.py",
     "backend/app/compatibility/chat_service.py",

@@ -1,5 +1,7 @@
 """Connect concrete Chat services to their cross-owner SQL collaborator."""
 
+from fastapi import FastAPI
+
 from app.domains.chat.service.evidence import EvidenceService
 from app.domains.chat.service.generation import GenerationService
 from app.domains.chat.service.messages import MessageService
@@ -22,3 +24,12 @@ generation_service = GenerationService(
 )
 
 evidence_service = EvidenceService(thread_service, evidence_reads)
+
+
+def configure_chat_services(app: FastAPI) -> None:
+    """Bind these same service instances before serving Chat HTTP requests."""
+    app.state.chat_thread_service = thread_service
+    app.state.chat_settings_service = settings_service
+    app.state.chat_message_service = message_service
+    app.state.chat_generation_service = generation_service
+    app.state.chat_evidence_service = evidence_service

@@ -8,15 +8,15 @@ from app.domains.identity.router import auth
 from app.api.v1.routes import bot
 from app.api.v1.routes import character_lore
 from app.api.v1.routes import community
-from app.api.v1.routes import messages
+from app.domains.chat.router import messages
 from app.api.v1.routes import memory
 from app.api.v1.routes import tree
 from app.api.v1.routes import worlds
 from app.domains.worlds import router as world_creator
 from app.api.v1.routes import world_character_setup
 from app.api.v1.routes import world_activity_runtime
-from app.api.v1.routes import world_chat
-from app.api.v1.routes import world_chat_response
+from app.domains.chat.router import world_chat
+from app.domains.chat.router import world_chat_response
 from app.domains.device_home.router import router as device_home_router
 from app.domains.world_characters.router.profile import router as world_character_router
 from app.domains.world_packages.api.routes import router as world_package_router

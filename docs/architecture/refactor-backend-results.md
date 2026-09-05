@@ -613,3 +613,27 @@ Source `4d1f0f4836e913251f7fa92c091e93d8b1ce3409`에서 preflight의 실제 거�
 고정 tree 확장 검증 **212 passed / 기존 4 warnings / 22.49초**. 전체 보존은 source/split/assertion/억제 표시/API/ORM/기존 node의 실질 오류 0, 보호 **2,129 / 현재 2,178**이며 선행 source/node introduction은 root의 선형 capture 전까지 미완료다. Live architecture **651 modules / 2,155 edges / exact legacy 265 PASS**, ER0 **78/87/24/44/7**, L4 **97**, Memory batch current, public **196**이다. 신규 실제 contract/service/runtime queries와 `tests/chat/test_retrieval_policy_ownership.py`의 첫 도입 SHA는 위 source commit이다.
 
 HTTP Request 기반 service 주입·두 앱 factory와 standalone route 테스트 구성은 다음 B6-C 범위다. B5/B7 합류 시 새 Social/Memory reader·models·factory로 정확히 연결하고, 이전 constructor 이름과 구조 검사용 alias는 B8 종료 대상으로 추적한다. 전체 B6/CI/설치 완료로 승격하지 않는다.
+
+
+## AR-B6-C1 — 실제 Chat HTTP 소유와 Request 기반 서비스 주입
+
+기존 쪽지/설정 11개, World thread/진입 5개, 생성/근거/NDJSON 6개 HTTP 함수는 `chat/router/messages.py`, `world_chat.py`, `world_chat_response.py`로 이전했다. 같은 domain의 schema/error와 `dependencies.py`가 제공하는 typed 실제 service를 사용한다. 두 factory는 같은 concrete service를 등록하고 standalone 기존 API fixture 세 곳도 같은 연결을 사용한다. 요청마다 새 service/provider/Session을 만들지 않는다.
+
+22개 원래 함수의 body·decorator·기존 인자는 **새 typed Depends 인자 하나와 errors 모듈 alias를 복원하면 전체 AST 동일**하다. 실제 API 조립의 순서·prefix·URL·operation ID·schema와 기존 get_db/get_current_user 함수 identity를 보존했다. route_security_inventory의 Chat module 22필드만 실제 소유 경로로 바꿨다. 선행 WC 7필드 지연은 별도 `581b4b61440cc6dbe49dc1024f1147e3737872a9`에서 수정했으며 HTTP 업무 변경을 포함하지 않는다.
+
+새 회귀 5개는 두 factory의 동일 service/route 함수와 인증 callable, 실제 HTTP의 같은 Session/user 전달, 원래 runtime 설정·recall 협력 및 UTF-8 NDJSON bytes/no-store/nosniff, 미등록 시 암묵적 fallback을 만들지 않는 것을 검증한다. 신규 fixture의 초기 실패는 잘못 쓴 contract import와 FastAPI의 nested route 열거/기존 max_threads=5 응답을 반영해 수정했다. 최종 확장 묶음은 **253 passed / 기존 4 warnings / 47.89초**다. 이전 검사에서 드러난 P8-L-E 정책 검사 경로는 실제 ThreadService로 연결했으며 frozen JSON을 다시 쓰지 않고 --check PASS다.
+
+전체 보존 실행에서 기존 API/ORM·assertion·억제 표시·node 계약은 유지됐고 보호 **2,129 / 현재 2,183**이다. 해당 실행의 C1 mapping 형식 오류는 실제 파일 전체 이전을 여러 구현 분할로 잘못 기록한 3건이었다. 모든 22개 actual symbol은 canonical 파일 하나에 있으므로 파일 전체 이전으로 기록하고 같은 함수의 옛 import-only alias는 별도 B8 bridge로 남겼다. 수정 후 전체 split evidence 검사도 PASS다. 선행 미캡처 **48 sources / 49 nodes** 때문에 보존 명령 전체의 완료는 root의 선형 introduction capture 뒤 확인한다. 신규 `dependencies.py`, router 4파일(패키지 marker 포함), `tests/chat/test_http_ownership.py` 및 5 nodes는 이 구현 source의 최초 SHA로 캡처한다. Live architecture **656 modules / 2,171 edges / exact legacy 265**, ER0 **78/87/24/44/7**, L4 **97**, Memory batch current, public **196**이다. 독립 읽기 리뷰에서 stream·same Session·runtime 설정·두 factory DI에 추가 차단 문제를 발견하지 못했다.
+
+남은 실제 통합/호환 책임은 다음과 같다.
+
+| 경로/책임 | 실제 현재 용도와 종료 |
+| --- | --- |
+| runtime/chat/{scope_queries,retrieval_queries,evidence_reads,generation_workflows,memory_producer} | 같은 Session의 여러 업무 조회·provider 조립·성공 후 Memory propose→commit/rollback. 실제 협력이며 이름만 바꾸기 위해 삭제하지 않는다. B5/B7 canonical read/model/factory 합류는 root 순차 통합에서 연결한다. |
+| runtime/chat/sqlalchemy_service.py, services/messages.py | 동일 서비스 메서드 alias. 남은 실제 소비자는 runtime/memory_selection_provider의 credential 함수와 과거 테스트이며 B7/B8에서 canonical service와 원래 monkeypatch 계약에 대응해 종료한다. |
+| runtime/chat/world_generation.py와 api/v1/routes의 옛 Chat 3파일 | 실제 workflow/HTTP body 없음. 기존 검사 alias이며 제품 API는 canonical router를 사용한다. A2 구조 node와 새 HTTP 동작 회귀의 대응을 기록하고 B8에서 제거한다. |
+| compatibility/chat_service.py, chat_runtime_contract.py, chat_generation_lifecycle.py | 원래 forwarding 전용 구조 검사 보존. 신규 제품 호출 없음. B8에서 원래 assertion/node와 실제 서비스·repository 회귀를 일대일로 대응한 뒤 퇴역한다. |
+| chat/public.py·schemas/messages.py·models/messages.py·runtime/chat/model_bindings.py·옛 api marker | 동일 객체 집합/미사용 표면. B8/G5에서 import 및 frozen source/test 대응을 확인해 제거한다. 전체 모델 집합으로 새 소비자를 연결하지 않는다. |
+| chat/infrastructure의 model alias와 migration helpers | 과거 Alembic/embedded migration과 baseline rebuild의 실제 소비가 있다. G5/B8의 정확한 등록/역사적 helper 승계와 별개이며 파일명 정리 때문에 migration 본문/DDL을 바꾸지 않는다. |
+
+이 source는 Chat 자체의 역할 이전과 HTTP 연결을 준비한 상태다. B4/B5/B7 합류·G5·G06·B8 호환 제거·Hosted CI·신규 installer·설치 데이터 업그레이드 및 전체 백엔드 종료는 완료로 표시하지 않는다.
