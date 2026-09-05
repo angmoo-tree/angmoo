@@ -14,7 +14,8 @@ from app import models, schemas
 from app.runtime.social.observations import observe_source
 from app.core import unit_of_work
 from app.cruds import agent_runs as agent_run_crud
-from app.domains.social.public import SocialObservationError, SocialSearchUnavailable
+from app.domains.social.public import SocialObservationError
+from app.domains.social.contracts.search_state import SocialSearchUnavailable
 from app.domains.social.contracts.subjective_context import (
     ActionEmotionLabel,
     ActionSubjectiveContextV1,
@@ -34,18 +35,10 @@ from app.services.feed_reaction_planner import (
     validate_reaction_decision,
 )
 from app.runtime.resident.context import LangGraphResidentContext
-from app.services.world_feed_search import (
-    KeywordClaim,
-    ReadySearchProfile,
-    WorldFeedReadinessError,
-    claim_cycle_keywords,
-    claim_feed_observations,
-    finalize_feed_cycle,
-    load_ready_search_profile,
-    mark_claims_retryable,
-    revalidate_candidate_actions,
-    search_world_feed_candidates,
-)
+from app.domains.social.contracts.world_feed import KeywordClaim, ReadySearchProfile
+from app.domains.social.exceptions import WorldFeedReadinessError
+from app.domains.social.service.world_feed import claim_cycle_keywords, claim_feed_observations, finalize_feed_cycle, mark_claims_retryable
+from app.runtime.social.world_feed_search import load_ready_search_profile, revalidate_candidate_actions, search_world_feed_candidates
 
 
 logger = logging.getLogger(__name__)

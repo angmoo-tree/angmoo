@@ -1,7 +1,7 @@
 {
-  "edge_count": 2763,
-  "external_import_count": 2390,
-  "module_count": 799,
+  "edge_count": 2801,
+  "external_import_count": 2406,
+  "module_count": 804,
   "modules": [
     {
       "external_imports": [],
@@ -299,9 +299,10 @@
       "imports": [
         "app.core.db",
         "app.domains.identity.dependencies",
+        "app.domains.social.exceptions",
         "app.models",
-        "app.schemas",
-        "app.services.world_feed_search"
+        "app.runtime.social.world_feed_search",
+        "app.schemas"
       ],
       "module": "app.api.v1.routes.world_character_setup",
       "path": "backend/app/api/v1/routes/world_character_setup.py",
@@ -5175,26 +5176,12 @@
     {
       "external_imports": [],
       "imports": [
-        "app.domains.social.application.keyword_feed",
         "app.domains.social.application.observations",
-        "app.domains.social.application.search_runtime",
-        "app.domains.social.application.writes"
+        "app.domains.social.application.writes",
+        "app.domains.social.service.keyword_feed"
       ],
       "module": "app.domains.social.application",
       "path": "backend/app/domains/social/application/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses"
-      ],
-      "imports": [
-        "app.domains.social.contracts",
-        "app.domains.social.ports"
-      ],
-      "module": "app.domains.social.application.keyword_feed",
-      "path": "backend/app/domains/social/application/keyword_feed.py",
       "wildcard_imports": []
     },
     {
@@ -5211,20 +5198,6 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "dataclasses",
-        "threading"
-      ],
-      "imports": [
-        "app.domains.social.contracts",
-        "app.domains.social.ports"
-      ],
-      "module": "app.domains.social.application.search_runtime",
-      "path": "backend/app/domains/social/application/search_runtime.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
         "__future__"
       ],
       "imports": [
@@ -5237,6 +5210,7 @@
     },
     {
       "external_imports": [
+        "datetime",
         "re"
       ],
       "imports": [],
@@ -5410,6 +5384,16 @@
     {
       "external_imports": [
         "__future__",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.social.contracts.search_index",
+      "path": "backend/app/domains/social/contracts/search_index.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "enum"
       ],
       "imports": [],
@@ -5489,6 +5473,22 @@
       ],
       "module": "app.domains.social.contracts.today_references",
       "path": "backend/app/domains/social/contracts/today_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.models.feed",
+        "app.domains.social.models.posts",
+        "app.domains.social.schemas.feed"
+      ],
+      "module": "app.domains.social.contracts.world_feed",
+      "path": "backend/app/domains/social/contracts/world_feed.py",
       "wildcard_imports": []
     },
     {
@@ -5621,11 +5621,25 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "zoneinfo"
+      ],
+      "imports": [
+        "app.domains.social.contracts.world_feed",
+        "app.domains.social.schemas.feed"
+      ],
+      "module": "app.domains.social.policies.world_feed",
+      "path": "backend/app/domains/social/policies/world_feed.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
+        "app.domains.social.contracts.search_index",
         "app.domains.social.contracts.write_execution",
-        "app.domains.social.ports.observation_unit_of_work",
-        "app.domains.social.ports.search_index"
+        "app.domains.social.ports.observation_unit_of_work"
       ],
       "module": "app.domains.social.ports",
       "path": "backend/app/domains/social/ports/__init__.py",
@@ -5645,25 +5659,15 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.runtime.public"
-      ],
-      "module": "app.domains.social.ports.search_index",
-      "path": "backend/app/domains/social/ports/search_index.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
         "__future__"
       ],
       "imports": [
         "app.domains.social.application",
         "app.domains.social.contracts",
         "app.domains.social.contracts.inbox",
-        "app.domains.social.ports"
+        "app.domains.social.contracts.search_index",
+        "app.domains.social.ports",
+        "app.domains.social.service.keyword_feed"
       ],
       "module": "app.domains.social.public",
       "path": "backend/app/domains/social/public.py",
@@ -5850,6 +5854,22 @@
       ],
       "module": "app.domains.social.repository.today_activity",
       "path": "backend/app/domains/social/repository/today_activity.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.world_feed",
+        "app.domains.social.models.feed",
+        "app.domains.social.models.posts"
+      ],
+      "module": "app.domains.social.repository.world_feed",
+      "path": "backend/app/domains/social/repository/world_feed.py",
       "wildcard_imports": []
     },
     {
@@ -6204,6 +6224,19 @@
     {
       "external_imports": [
         "__future__",
+        "dataclasses"
+      ],
+      "imports": [
+        "app.domains.social.contracts.search_index",
+        "app.domains.social.contracts.search_state"
+      ],
+      "module": "app.domains.social.service.keyword_feed",
+      "path": "backend/app/domains/social/service/keyword_feed.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -6493,6 +6526,37 @@
       ],
       "module": "app.domains.social.service.visibility",
       "path": "backend/app/domains/social/service/visibility.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "pydantic",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm",
+        "time",
+        "typing",
+        "uuid"
+      ],
+      "imports": [
+        "app.core.search_text",
+        "app.domains.social.constants",
+        "app.domains.social.contracts.search_index",
+        "app.domains.social.contracts.search_state",
+        "app.domains.social.contracts.world_feed",
+        "app.domains.social.exceptions",
+        "app.domains.social.models.feed",
+        "app.domains.social.models.posts",
+        "app.domains.social.policies.world_feed",
+        "app.domains.social.repository.world_feed",
+        "app.domains.social.schemas.feed",
+        "app.domains.social.service.keyword_feed",
+        "app.domains.world_characters.contracts.runtime_modes",
+        "app.domains.world_characters.schemas.setup"
+      ],
+      "module": "app.domains.social.service.world_feed",
+      "path": "backend/app/domains/social/service/world_feed.py",
       "wildcard_imports": []
     },
     {
@@ -10289,7 +10353,8 @@
         "app.domains.identity.models",
         "app.domains.routines.contracts.activity_policy",
         "app.domains.routines.models",
-        "app.domains.social.public"
+        "app.domains.social.contracts.search_index",
+        "app.domains.social.contracts.search_state"
       ],
       "module": "app.runtime.resident.context",
       "path": "backend/app/runtime/resident/context.py",
@@ -10491,6 +10556,20 @@
     {
       "external_imports": [
         "__future__",
+        "dataclasses",
+        "threading"
+      ],
+      "imports": [
+        "app.domains.social.contracts",
+        "app.domains.social.contracts.search_index"
+      ],
+      "module": "app.runtime.search.binding",
+      "path": "backend/app/runtime/search/binding.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "collections.abc"
       ],
       "imports": [
@@ -10511,8 +10590,9 @@
       "imports": [
         "app.core.search_text",
         "app.domains.runtime.public",
-        "app.domains.social.public",
+        "app.domains.social.contracts.search_state",
         "app.models",
+        "app.runtime.search.binding",
         "app.runtime.search.sqlite_fts5"
       ],
       "module": "app.runtime.search.social_projection",
@@ -10920,6 +11000,46 @@
       ],
       "module": "app.runtime.social.today_activity_queries",
       "path": "backend/app/runtime/social/today_activity_queries.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.characters.models",
+        "app.domains.characters.service.profile",
+        "app.domains.social.models.feed",
+        "app.domains.social.models.posts",
+        "app.domains.world_characters.models",
+        "app.domains.world_characters.service.setup_validation",
+        "app.domains.world_packages.models",
+        "app.domains.worlds.models"
+      ],
+      "module": "app.runtime.social.world_feed_queries",
+      "path": "backend/app/runtime/social/world_feed_queries.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.search_index",
+        "app.domains.social.contracts.search_state",
+        "app.domains.social.contracts.world_feed",
+        "app.domains.social.models.posts",
+        "app.domains.social.schemas.feed",
+        "app.domains.social.service.world_feed",
+        "app.runtime.social.world_feed_queries"
+      ],
+      "module": "app.runtime.social.world_feed_search",
+      "path": "backend/app/runtime/social/world_feed_search.py",
       "wildcard_imports": []
     },
     {
@@ -11377,11 +11497,11 @@
         "app.domains.routines.service.lifecycle",
         "app.domains.routines.service.tick_schedule",
         "app.domains.runtime.contracts",
-        "app.domains.social.public",
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",
         "app.models",
         "app.runtime.routine_posts",
+        "app.runtime.search.binding",
         "app.schemas",
         "app.services.agent_activity_policy",
         "app.services.agent_briefs",
@@ -11567,11 +11687,11 @@
       "imports": [
         "app.core.context_text",
         "app.credentials",
+        "app.domains.social.contracts.world_feed",
         "app.providers.gemini",
         "app.runtime.resident.context",
         "app.schemas",
-        "app.services.direct_llm",
-        "app.services.world_feed_search"
+        "app.services.direct_llm"
       ],
       "module": "app.services.feed_reaction_planner",
       "path": "backend/app/services/feed_reaction_planner.py",
@@ -11897,48 +12017,26 @@
       "imports": [
         "app.core.unit_of_work",
         "app.cruds.agent_runs",
+        "app.domains.social.contracts.search_state",
         "app.domains.social.contracts.subjective_context",
+        "app.domains.social.contracts.world_feed",
+        "app.domains.social.exceptions",
         "app.domains.social.public",
+        "app.domains.social.service.world_feed",
         "app.models",
         "app.runtime.activity_proposals.composition",
         "app.runtime.resident.context",
         "app.runtime.social.observations",
         "app.runtime.social.subjective_composition",
+        "app.runtime.social.world_feed_search",
         "app.schemas",
         "app.services.community",
         "app.services.direct_llm",
         "app.services.feed_reaction_planner",
-        "app.services.world_feed_search",
         "app.services.world_feed_social_apply"
       ],
       "module": "app.services.world_feed_runtime",
       "path": "backend/app/services/world_feed_runtime.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "pydantic",
-        "sqlalchemy",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm",
-        "time",
-        "typing",
-        "uuid",
-        "zoneinfo"
-      ],
-      "imports": [
-        "app.core.search_text",
-        "app.domains.social.public",
-        "app.domains.world_characters.contracts.runtime_modes",
-        "app.models",
-        "app.schemas",
-        "app.services.world_character_contracts"
-      ],
-      "module": "app.services.world_feed_search",
-      "path": "backend/app/services/world_feed_search.py",
       "wildcard_imports": []
     },
     {
@@ -11951,11 +12049,11 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.domains.social.contracts.world_feed",
         "app.models",
         "app.runtime.activity_proposals.composition",
         "app.runtime.relationships.sqlalchemy_social_event",
-        "app.schemas",
-        "app.services.world_feed_search"
+        "app.schemas"
       ],
       "module": "app.services.world_feed_social_apply",
       "path": "backend/app/services/world_feed_social_apply.py",

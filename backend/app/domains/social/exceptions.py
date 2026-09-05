@@ -73,3 +73,24 @@ class SubjectiveContextPersistenceError(ValueError):
 
 class TodaySocialActivityReadError(ValueError):
     """Stable scope/read failure for Today SNS context."""
+
+
+class WorldFeedError(Exception):
+    pass
+
+
+
+class WorldFeedReadinessError(WorldFeedError):
+    def __init__(self, reason_code: str):
+        self.reason_code = reason_code
+        super().__init__(reason_code)
+
+
+
+class WorldFeedStatusNotFoundError(WorldFeedError):
+    pass
+
+
+
+class WorldFeedStatusForbiddenError(WorldFeedError):
+    pass

@@ -393,7 +393,12 @@
     "backend/app/api/v1/routes/manual_social.py": "backend/app/domains/social/router.py",
     "backend/app/domains/social/ports/write_unit_of_work.py": "backend/app/domains/social/contracts/write_execution.py",
     "backend/app/runtime/social/subjective_context.py": "backend/app/runtime/social/subjective_composition.py",
-    "backend/app/runtime/social/sqlalchemy_today_activity.py": "backend/app/runtime/social/today_activity.py"
+    "backend/app/runtime/social/sqlalchemy_today_activity.py": "backend/app/runtime/social/today_activity.py",
+    "backend/app/services/world_feed_search.py": "backend/app/domains/social/service/world_feed.py",
+    "backend/app/domains/social/application/keyword_feed.py": "backend/app/domains/social/service/keyword_feed.py",
+    "backend/app/domains/social/application/search_runtime.py": "backend/app/runtime/search/binding.py",
+    "backend/app/domains/social/ports/search_index.py": "backend/app/domains/social/contracts/search_index.py",
+    "backend/app/runtime/relationships/sqlalchemy_social_read_repository.py": "backend/app/domains/relationships/repository/diagnostics.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -41742,6 +41747,898 @@
       ],
       "same_session_evidence": "Expanded read/scope/subjective policies3, query execution/block3 and active-query1 AST match the original. Original and new executed SQL/bound values/order are identical:13 statements; complete records/counts/coverage/watermarks value is equal. New SQLite regression verifies sameSession construction/range error SQL0, refresh of an already-cached Post after observer hides it, descendant exclusion, and no own commit.",
       "remaining": "The Today reader is now owned by actual services/queries. Other B5 legacy agent WorldFeed/tool workflows, compatibility and G07 ownership still require completion; source capture and Hosted integration remain root-owned."
+    },
+    "AR-B5-WORLD-SEARCH": {
+      "status": "IMPLEMENTED; actual search responsibilities, original first source capture pending",
+      "scope": "Social readiness, canonical visibility, ranking, observation claims and cycle policy remain in service; owned cursor/observation/reaction/block SQL in repository; exact foreign reads and joins are supplied by same-Session runtime collaboration. The search binding has one actual process-local lock and state.",
+      "split_files": {
+        "backend/app/services/world_feed_search.py": [
+          "backend/app/domains/social/constants.py",
+          "backend/app/domains/social/contracts/world_feed.py",
+          "backend/app/domains/social/exceptions.py",
+          "backend/app/domains/social/policies/world_feed.py",
+          "backend/app/domains/social/repository/world_feed.py",
+          "backend/app/domains/social/service/world_feed.py",
+          "backend/app/runtime/social/world_feed_queries.py",
+          "backend/app/runtime/social/world_feed_search.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/world_feed_search.py::ReadySearchProfile",
+          "new": "backend/app/domains/social/contracts/world_feed.py::ReadySearchProfile",
+          "direct_consumers": [
+            "backend/app/domains/social/contracts/world_feed.py",
+            "backend/app/domains/social/policies/world_feed.py",
+            "backend/app/domains/social/repository/world_feed.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/world_feed_search.py",
+            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/services/world_feed_runtime.py",
+            "backend/app/services/world_feed_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::KeywordClaim",
+          "new": "backend/app/domains/social/contracts/world_feed.py::KeywordClaim",
+          "direct_consumers": [
+            "backend/app/domains/social/policies/world_feed.py",
+            "backend/app/domains/social/repository/world_feed.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/world_feed_search.py",
+            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/services/world_feed_runtime.py",
+            "backend/app/services/world_feed_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::CandidateSearchResult",
+          "new": "backend/app/domains/social/contracts/world_feed.py::CandidateSearchResult",
+          "direct_consumers": [
+            "backend/app/domains/social/policies/world_feed.py",
+            "backend/app/domains/social/repository/world_feed.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/world_feed_search.py",
+            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/services/world_feed_runtime.py",
+            "backend/app/services/world_feed_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::ObservationClaimResult",
+          "new": "backend/app/domains/social/contracts/world_feed.py::ObservationClaimResult",
+          "direct_consumers": [
+            "backend/app/domains/social/policies/world_feed.py",
+            "backend/app/domains/social/repository/world_feed.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/world_feed_search.py",
+            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/services/world_feed_runtime.py",
+            "backend/app/services/world_feed_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::load_ready_search_profile",
+          "new": "backend/app/domains/social/service/world_feed.py::load_ready_search_profile",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::claim_cycle_keywords",
+          "new": "backend/app/domains/social/service/world_feed.py::claim_cycle_keywords",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::search_world_feed_candidates",
+          "new": "backend/app/domains/social/service/world_feed.py::search_world_feed_candidates",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::claim_feed_observations",
+          "new": "backend/app/domains/social/service/world_feed.py::claim_feed_observations",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::revalidate_candidate_actions",
+          "new": "backend/app/domains/social/service/world_feed.py::revalidate_candidate_actions",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::mark_claims_retryable",
+          "new": "backend/app/domains/social/service/world_feed.py::mark_claims_retryable",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::finalize_feed_cycle",
+          "new": "backend/app/domains/social/service/world_feed.py::finalize_feed_cycle",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::world_feed_cycle_status",
+          "new": "backend/app/domains/social/service/world_feed.py::world_feed_cycle_status",
+          "direct_consumers": [
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::_feed_runtime_state",
+          "new": "backend/app/domains/social/service/world_feed.py::_feed_runtime_state",
+          "direct_consumers": [
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::_is_imported_world_runtime_locked",
+          "new": "backend/app/domains/social/service/world_feed.py::_is_imported_world_runtime_locked",
+          "direct_consumers": [
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::owner_world_feed_cycle_status",
+          "new": "backend/app/domains/social/service/world_feed.py::owner_world_feed_cycle_status",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::_aware_utc",
+          "new": "backend/app/domains/social/policies/world_feed.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/domains/social/policies/world_feed.py",
+            "backend/app/domains/social/service/world_feed.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::_action_weight",
+          "new": "backend/app/domains/social/policies/world_feed.py::_action_weight",
+          "direct_consumers": [
+            "backend/app/domains/social/policies/world_feed.py",
+            "backend/app/domains/social/service/world_feed.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::_age_bucket",
+          "new": "backend/app/domains/social/policies/world_feed.py::_age_bucket",
+          "direct_consumers": [
+            "backend/app/domains/social/service/world_feed.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::_local_datetime",
+          "new": "backend/app/domains/social/policies/world_feed.py::_local_datetime",
+          "direct_consumers": [
+            "backend/app/domains/social/service/world_feed.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::_allowed_actions",
+          "new": "backend/app/domains/social/policies/world_feed.py::_allowed_actions",
+          "direct_consumers": [
+            "backend/app/domains/social/service/world_feed.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::_existing_reactions",
+          "new": "backend/app/domains/social/repository/world_feed.py::_existing_reactions",
+          "direct_consumers": [
+            "backend/tests/test_world_feed_search.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::WorldFeedError",
+          "new": "backend/app/domains/social/exceptions.py::WorldFeedError",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_character_setup.py",
+            "backend/app/domains/social/exceptions.py",
+            "backend/app/domains/social/service/feed.py",
+            "backend/app/domains/social/service/image_generation.py",
+            "backend/app/domains/social/service/image_quota.py",
+            "backend/app/domains/social/service/inbox.py",
+            "backend/app/domains/social/service/posts.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/profiles.py",
+            "backend/app/domains/social/service/subjective_context.py",
+            "backend/app/domains/social/service/timeline.py",
+            "backend/app/domains/social/service/today_activity.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/services/community.py",
+            "backend/app/services/community_abuse_quota.py",
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::WorldFeedReadinessError",
+          "new": "backend/app/domains/social/exceptions.py::WorldFeedReadinessError",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_character_setup.py",
+            "backend/app/domains/social/service/feed.py",
+            "backend/app/domains/social/service/image_generation.py",
+            "backend/app/domains/social/service/image_quota.py",
+            "backend/app/domains/social/service/inbox.py",
+            "backend/app/domains/social/service/posts.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/profiles.py",
+            "backend/app/domains/social/service/subjective_context.py",
+            "backend/app/domains/social/service/timeline.py",
+            "backend/app/domains/social/service/today_activity.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/services/community.py",
+            "backend/app/services/community_abuse_quota.py",
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::WorldFeedStatusNotFoundError",
+          "new": "backend/app/domains/social/exceptions.py::WorldFeedStatusNotFoundError",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_character_setup.py",
+            "backend/app/domains/social/service/feed.py",
+            "backend/app/domains/social/service/image_generation.py",
+            "backend/app/domains/social/service/image_quota.py",
+            "backend/app/domains/social/service/inbox.py",
+            "backend/app/domains/social/service/posts.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/profiles.py",
+            "backend/app/domains/social/service/subjective_context.py",
+            "backend/app/domains/social/service/timeline.py",
+            "backend/app/domains/social/service/today_activity.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/services/community.py",
+            "backend/app/services/community_abuse_quota.py",
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::WorldFeedStatusForbiddenError",
+          "new": "backend/app/domains/social/exceptions.py::WorldFeedStatusForbiddenError",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/world_character_setup.py",
+            "backend/app/domains/social/service/feed.py",
+            "backend/app/domains/social/service/image_generation.py",
+            "backend/app/domains/social/service/image_quota.py",
+            "backend/app/domains/social/service/inbox.py",
+            "backend/app/domains/social/service/posts.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/profiles.py",
+            "backend/app/domains/social/service/subjective_context.py",
+            "backend/app/domains/social/service/timeline.py",
+            "backend/app/domains/social/service/today_activity.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/services/community.py",
+            "backend/app/services/community_abuse_quota.py",
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::KEYWORDS_PER_CYCLE",
+          "new": "backend/app/domains/social/constants.py::KEYWORDS_PER_CYCLE",
+          "direct_consumers": [
+            "backend/app/cruds/community.py",
+            "backend/app/domains/social/constants.py",
+            "backend/app/domains/social/repository/today_activity.py",
+            "backend/app/domains/social/service/activity_results.py",
+            "backend/app/domains/social/service/image_generation.py",
+            "backend/app/domains/social/service/image_prompts.py",
+            "backend/app/domains/social/service/presentation.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/profiles.py",
+            "backend/app/domains/social/service/today_activity.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/profile_activity.py",
+            "backend/app/runtime/social/today_activity_queries.py",
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::KEYWORD_COUNT",
+          "new": "backend/app/domains/social/constants.py::KEYWORD_COUNT",
+          "direct_consumers": [
+            "backend/app/cruds/community.py",
+            "backend/app/domains/social/constants.py",
+            "backend/app/domains/social/repository/today_activity.py",
+            "backend/app/domains/social/service/activity_results.py",
+            "backend/app/domains/social/service/image_generation.py",
+            "backend/app/domains/social/service/image_prompts.py",
+            "backend/app/domains/social/service/presentation.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/profiles.py",
+            "backend/app/domains/social/service/today_activity.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/profile_activity.py",
+            "backend/app/runtime/social/today_activity_queries.py",
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::MIN_KEYWORD_LENGTH",
+          "new": "backend/app/domains/social/constants.py::MIN_KEYWORD_LENGTH",
+          "direct_consumers": [
+            "backend/app/cruds/community.py",
+            "backend/app/domains/social/constants.py",
+            "backend/app/domains/social/repository/today_activity.py",
+            "backend/app/domains/social/service/activity_results.py",
+            "backend/app/domains/social/service/image_generation.py",
+            "backend/app/domains/social/service/image_prompts.py",
+            "backend/app/domains/social/service/presentation.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/profiles.py",
+            "backend/app/domains/social/service/today_activity.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/profile_activity.py",
+            "backend/app/runtime/social/today_activity_queries.py",
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::KEYWORD_OFFSETS",
+          "new": "backend/app/domains/social/constants.py::KEYWORD_OFFSETS",
+          "direct_consumers": [
+            "backend/app/cruds/community.py",
+            "backend/app/domains/social/constants.py",
+            "backend/app/domains/social/repository/today_activity.py",
+            "backend/app/domains/social/service/activity_results.py",
+            "backend/app/domains/social/service/image_generation.py",
+            "backend/app/domains/social/service/image_prompts.py",
+            "backend/app/domains/social/service/presentation.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/profiles.py",
+            "backend/app/domains/social/service/today_activity.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/profile_activity.py",
+            "backend/app/runtime/social/today_activity_queries.py",
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::PER_KEYWORD_FETCH_LIMIT",
+          "new": "backend/app/domains/social/constants.py::PER_KEYWORD_FETCH_LIMIT",
+          "direct_consumers": [
+            "backend/app/cruds/community.py",
+            "backend/app/domains/social/constants.py",
+            "backend/app/domains/social/repository/today_activity.py",
+            "backend/app/domains/social/service/activity_results.py",
+            "backend/app/domains/social/service/image_generation.py",
+            "backend/app/domains/social/service/image_prompts.py",
+            "backend/app/domains/social/service/presentation.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/profiles.py",
+            "backend/app/domains/social/service/today_activity.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/profile_activity.py",
+            "backend/app/runtime/social/today_activity_queries.py",
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::RAW_MERGE_LIMIT",
+          "new": "backend/app/domains/social/constants.py::RAW_MERGE_LIMIT",
+          "direct_consumers": [
+            "backend/app/cruds/community.py",
+            "backend/app/domains/social/constants.py",
+            "backend/app/domains/social/repository/today_activity.py",
+            "backend/app/domains/social/service/activity_results.py",
+            "backend/app/domains/social/service/image_generation.py",
+            "backend/app/domains/social/service/image_prompts.py",
+            "backend/app/domains/social/service/presentation.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/profiles.py",
+            "backend/app/domains/social/service/today_activity.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/profile_activity.py",
+            "backend/app/runtime/social/today_activity_queries.py",
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::PLANNER_CANDIDATE_LIMIT",
+          "new": "backend/app/domains/social/constants.py::PLANNER_CANDIDATE_LIMIT",
+          "direct_consumers": [
+            "backend/app/cruds/community.py",
+            "backend/app/domains/social/constants.py",
+            "backend/app/domains/social/repository/today_activity.py",
+            "backend/app/domains/social/service/activity_results.py",
+            "backend/app/domains/social/service/image_generation.py",
+            "backend/app/domains/social/service/image_prompts.py",
+            "backend/app/domains/social/service/presentation.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/profiles.py",
+            "backend/app/domains/social/service/today_activity.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/profile_activity.py",
+            "backend/app/runtime/social/today_activity_queries.py",
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::AUTHOR_CANDIDATE_LIMIT",
+          "new": "backend/app/domains/social/constants.py::AUTHOR_CANDIDATE_LIMIT",
+          "direct_consumers": [
+            "backend/app/cruds/community.py",
+            "backend/app/domains/social/constants.py",
+            "backend/app/domains/social/repository/today_activity.py",
+            "backend/app/domains/social/service/activity_results.py",
+            "backend/app/domains/social/service/image_generation.py",
+            "backend/app/domains/social/service/image_prompts.py",
+            "backend/app/domains/social/service/presentation.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/profiles.py",
+            "backend/app/domains/social/service/today_activity.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/profile_activity.py",
+            "backend/app/runtime/social/today_activity_queries.py",
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::OBSERVATION_LEASE",
+          "new": "backend/app/domains/social/constants.py::OBSERVATION_LEASE",
+          "direct_consumers": [
+            "backend/app/cruds/community.py",
+            "backend/app/domains/social/constants.py",
+            "backend/app/domains/social/repository/today_activity.py",
+            "backend/app/domains/social/service/activity_results.py",
+            "backend/app/domains/social/service/image_generation.py",
+            "backend/app/domains/social/service/image_prompts.py",
+            "backend/app/domains/social/service/presentation.py",
+            "backend/app/domains/social/service/profile_activity.py",
+            "backend/app/domains/social/service/profiles.py",
+            "backend/app/domains/social/service/today_activity.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/profile_activity.py",
+            "backend/app/runtime/social/today_activity_queries.py",
+            "backend/app/services/community.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::search_world_feed_candidates",
+          "new": "backend/app/runtime/social/world_feed_queries.py::WorldFeedQueries",
+          "direct_consumers": [
+            "backend/app/runtime/social/world_feed_search.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::load_ready_search_profile",
+          "new": "backend/app/domains/social/contracts/world_feed.py::WorldFeedReferences",
+          "direct_consumers": [
+            "backend/app/domains/social/policies/world_feed.py",
+            "backend/app/domains/social/repository/world_feed.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/world_feed_search.py",
+            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/services/world_feed_runtime.py",
+            "backend/app/services/world_feed_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::ReadySearchProfile",
+          "new": "backend/app/domains/social/contracts/world_feed.py::FeedWorld",
+          "direct_consumers": [
+            "backend/app/domains/social/contracts/world_feed.py",
+            "backend/app/domains/social/policies/world_feed.py",
+            "backend/app/domains/social/repository/world_feed.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/world_feed_search.py",
+            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/services/world_feed_runtime.py",
+            "backend/app/services/world_feed_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::ReadySearchProfile",
+          "new": "backend/app/domains/social/contracts/world_feed.py::FeedWorldCharacter",
+          "direct_consumers": [
+            "backend/app/domains/social/contracts/world_feed.py",
+            "backend/app/domains/social/policies/world_feed.py",
+            "backend/app/domains/social/repository/world_feed.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/world_feed_search.py",
+            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/services/world_feed_runtime.py",
+            "backend/app/services/world_feed_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::ReadySearchProfile",
+          "new": "backend/app/domains/social/contracts/world_feed.py::FeedMembership",
+          "direct_consumers": [
+            "backend/app/domains/social/contracts/world_feed.py",
+            "backend/app/domains/social/policies/world_feed.py",
+            "backend/app/domains/social/repository/world_feed.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/world_feed_search.py",
+            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/services/world_feed_runtime.py",
+            "backend/app/services/world_feed_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::ReadySearchProfile",
+          "new": "backend/app/domains/social/contracts/world_feed.py::FeedCharacter",
+          "direct_consumers": [
+            "backend/app/domains/social/contracts/world_feed.py",
+            "backend/app/domains/social/policies/world_feed.py",
+            "backend/app/domains/social/repository/world_feed.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/world_feed_search.py",
+            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/services/world_feed_runtime.py",
+            "backend/app/services/world_feed_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::ReadySearchProfile",
+          "new": "backend/app/domains/social/contracts/world_feed.py::FeedCommunityProfile",
+          "direct_consumers": [
+            "backend/app/domains/social/contracts/world_feed.py",
+            "backend/app/domains/social/policies/world_feed.py",
+            "backend/app/domains/social/repository/world_feed.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/world_feed_search.py",
+            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/services/world_feed_runtime.py",
+            "backend/app/services/world_feed_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::ReadySearchProfile",
+          "new": "backend/app/domains/social/contracts/world_feed.py::FeedOwner",
+          "direct_consumers": [
+            "backend/app/domains/social/policies/world_feed.py",
+            "backend/app/domains/social/repository/world_feed.py",
+            "backend/app/domains/social/service/world_feed.py",
+            "backend/app/runtime/social/world_feed_search.py",
+            "backend/app/services/feed_reaction_planner.py",
+            "backend/app/services/world_feed_runtime.py",
+            "backend/app/services/world_feed_social_apply.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::load_ready_search_profile",
+          "new": "backend/app/runtime/social/world_feed_search.py::load_ready_search_profile",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::search_world_feed_candidates",
+          "new": "backend/app/runtime/social/world_feed_search.py::search_world_feed_candidates",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::revalidate_candidate_actions",
+          "new": "backend/app/runtime/social/world_feed_search.py::revalidate_candidate_actions",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::world_feed_cycle_status",
+          "new": "backend/app/runtime/social/world_feed_search.py::world_feed_cycle_status",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        },
+        {
+          "old": "backend/app/services/world_feed_search.py::owner_world_feed_cycle_status",
+          "new": "backend/app/runtime/social/world_feed_search.py::owner_world_feed_cycle_status",
+          "direct_consumers": [
+            "backend/app/services/world_feed_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_world_feed_search.py::test_world_scoped_search_finds_relevant_old_post_and_filters_invalid_rows",
+            "tests/test_world_feed_search.py::test_cursor_rotates_two_keywords_and_observation_claim_is_exactly_once",
+            "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+            "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+          ]
+        }
+      ],
+      "new_tests": [
+        "tests/test_world_feed_search.py::test_search_facts_keep_attached_identity_and_caller_rollback",
+        "tests/test_world_feed_search.py::test_hidden_candidate_stops_foreign_reads_and_actions"
+      ],
+      "retired_compatibility_files": [
+        "backend/app/services/world_feed_search.py",
+        "backend/app/domains/social/application/keyword_feed.py",
+        "backend/app/domains/social/application/search_runtime.py",
+        "backend/app/domains/social/ports/search_index.py"
+      ],
+      "same_session_evidence": "25 original whole definitions, including all SQL and transaction statements, match after exact collaborator/type expansion. Existing18 and new2 focused tests pass. New facts preserve attached identities, no eager SQL, caller rollback and hidden-source fail-first behavior.",
+      "remaining": "G07 ownership moves and remaining Social Community/WorldFeed execution continue separately. Final stock preservation, Hosted and installation Gates remain pending."
     }
   }
 }

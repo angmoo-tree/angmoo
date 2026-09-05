@@ -4,8 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.domains.social.contracts import SocialSearchState, SocialSearchUnavailable
-from app.domains.social.ports import SocialSearchIndexPort
+from app.domains.social.contracts.search_state import (
+    SocialSearchState,
+    SocialSearchUnavailable,
+)
+from app.domains.social.contracts.search_index import SocialSearchIndexPort
 
 
 @dataclass(frozen=True)

@@ -101,10 +101,6 @@
           "imported": "app.schemas"
         },
         {
-          "importer": "app.api.v1.routes.world_character_setup",
-          "imported": "app.services.world_feed_search"
-        },
-        {
           "importer": "app.cruds.agent_runs",
           "imported": "app.models"
         },
@@ -533,10 +529,6 @@
           "imported": "app.services.direct_llm"
         },
         {
-          "importer": "app.services.feed_reaction_planner",
-          "imported": "app.services.world_feed_search"
-        },
-        {
           "importer": "app.services.langgraph_resident",
           "imported": "app.cruds.agent_runs"
         },
@@ -698,23 +690,7 @@
         },
         {
           "importer": "app.services.world_feed_runtime",
-          "imported": "app.services.world_feed_search"
-        },
-        {
-          "importer": "app.services.world_feed_runtime",
           "imported": "app.services.world_feed_social_apply"
-        },
-        {
-          "importer": "app.services.world_feed_search",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.services.world_feed_search",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.world_feed_search",
-          "imported": "app.services.world_character_contracts"
         },
         {
           "importer": "app.services.world_feed_social_apply",
@@ -727,10 +703,6 @@
         {
           "importer": "app.services.world_feed_social_apply",
           "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.world_feed_social_apply",
-          "imported": "app.services.world_feed_search"
         },
         {
           "importer": "app.services.world_foundation",
@@ -1098,6 +1070,7 @@
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
       "app.domains.social.contracts.profile_references",
+      "app.domains.social.contracts.search_index",
       "app.domains.social.contracts.search_state",
       "app.domains.social.contracts.source_writes",
       "app.domains.social.contracts.subjective_context",
@@ -1105,6 +1078,7 @@
       "app.domains.social.contracts.timeline",
       "app.domains.social.contracts.today_activity",
       "app.domains.social.contracts.today_references",
+      "app.domains.social.contracts.world_feed",
       "app.domains.social.contracts.write_execution",
       "app.domains.social.contracts.writes",
       "app.domains.social.dependencies",
@@ -1114,6 +1088,7 @@
       "app.domains.social.models.manual_writes",
       "app.domains.social.models.posts",
       "app.domains.social.models.subjective_context",
+      "app.domains.social.policies.world_feed",
       "app.domains.social.repository",
       "app.domains.social.repository.activity",
       "app.domains.social.repository.blocks",
@@ -1128,6 +1103,7 @@
       "app.domains.social.repository.reactions",
       "app.domains.social.repository.subjective_context",
       "app.domains.social.repository.today_activity",
+      "app.domains.social.repository.world_feed",
       "app.domains.social.repository.world_profile",
       "app.domains.social.router",
       "app.domains.social.schemas",
@@ -1150,6 +1126,7 @@
       "app.domains.social.service.image_reference_policy",
       "app.domains.social.service.inbox",
       "app.domains.social.service.joint_posts",
+      "app.domains.social.service.keyword_feed",
       "app.domains.social.service.manual_feed",
       "app.domains.social.service.manual_writes",
       "app.domains.social.service.media_storage",
@@ -1166,6 +1143,7 @@
       "app.domains.social.service.today_activity",
       "app.domains.social.service.today_activity_values",
       "app.domains.social.service.visibility",
+      "app.domains.social.service.world_feed",
       "app.domains.social.service.world_profile",
       "app.domains.social.utils",
       "app.domains.social.utils.cursors",
@@ -1346,6 +1324,7 @@
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
       "app.domains.social.contracts.profile_references",
+      "app.domains.social.contracts.search_index",
       "app.domains.social.contracts.search_state",
       "app.domains.social.contracts.source_writes",
       "app.domains.social.contracts.subjective_context",
@@ -1353,6 +1332,7 @@
       "app.domains.social.contracts.timeline",
       "app.domains.social.contracts.today_activity",
       "app.domains.social.contracts.today_references",
+      "app.domains.social.contracts.world_feed",
       "app.domains.social.contracts.write_execution",
       "app.domains.social.contracts.writes",
       "app.domains.social.schemas",
@@ -1374,6 +1354,7 @@
       "app.domains.social.service.image_reference_policy",
       "app.domains.social.service.inbox",
       "app.domains.social.service.joint_posts",
+      "app.domains.social.service.keyword_feed",
       "app.domains.social.service.manual_feed",
       "app.domains.social.service.manual_writes",
       "app.domains.social.service.media_storage",
@@ -1390,6 +1371,7 @@
       "app.domains.social.service.today_activity",
       "app.domains.social.service.today_activity_values",
       "app.domains.social.service.visibility",
+      "app.domains.social.service.world_feed",
       "app.domains.social.service.world_profile",
       "app.domains.world_characters.contracts",
       "app.domains.world_characters.contracts.lifecycle",
@@ -2025,14 +2007,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.services.world_feed_search",
-        "target": "app.domains.world_characters.contracts.runtime_modes",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.services.world_foundation",
         "target": "app.domains.worlds.service.definition",
         "owner_stage": "AR-B8-A",
@@ -2145,24 +2119,8 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.social.application.keyword_feed",
-        "target": "app.domains.social.contracts",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.domains.social.application.observations",
         "target": "app.domains.social.contracts.observations",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.social.application.search_runtime",
-        "target": "app.domains.social.contracts",
         "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
         "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
         "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
@@ -3046,6 +3004,86 @@
         "owner_stage": "AR-B5",
         "reason": "The exact still-supported source-write consumer uses the single transaction execution contract while callers move to the owning service/runtime executor.",
         "removal_condition": "Remove this exact application/ports consumer after its remaining calls and type exports use the canonical contract; no new implementation belongs in this compatibility path.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.world_feed_runtime",
+        "target": "app.domains.social.contracts.search_state",
+        "owner_stage": "AR-B5",
+        "reason": "Existing WorldFeed execution now consumes actual search contract/error owners.",
+        "removal_condition": "Move the actual remaining WorldFeed execution to runtime/social in AR-B5; retain canonical contract/error imports.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.world_feed_runtime",
+        "target": "app.domains.social.exceptions",
+        "owner_stage": "AR-B5",
+        "reason": "Existing WorldFeed execution now consumes actual search contract/error owners.",
+        "removal_condition": "Move the actual remaining WorldFeed execution to runtime/social in AR-B5; retain canonical contract/error imports.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.social.application",
+        "target": "app.domains.social.service.keyword_feed",
+        "owner_stage": "AR-B5",
+        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
+        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.social.ports",
+        "target": "app.domains.social.contracts.search_index",
+        "owner_stage": "AR-B5",
+        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
+        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.social.public",
+        "target": "app.domains.social.contracts.search_index",
+        "owner_stage": "AR-B5",
+        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
+        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.social.public",
+        "target": "app.domains.social.service.keyword_feed",
+        "owner_stage": "AR-B5",
+        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
+        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.feed_reaction_planner",
+        "target": "app.domains.social.contracts.world_feed",
+        "owner_stage": "AR-B5",
+        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
+        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.world_feed_runtime",
+        "target": "app.domains.social.contracts.world_feed",
+        "owner_stage": "AR-B5",
+        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
+        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.world_feed_runtime",
+        "target": "app.domains.social.service.world_feed",
+        "owner_stage": "AR-B5",
+        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
+        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.world_feed_social_apply",
+        "target": "app.domains.social.contracts.world_feed",
+        "owner_stage": "AR-B5",
+        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
+        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
         "review_date": "2026-09-06"
       }
     ]

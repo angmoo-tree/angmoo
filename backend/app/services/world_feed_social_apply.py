@@ -14,7 +14,7 @@ from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )
 
-from app.services.world_feed_search import ReadySearchProfile
+from app.domains.social.contracts.world_feed import ReadySearchProfile
 
 
 class WorldFeedSocialApplyError(Exception):

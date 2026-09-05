@@ -25,7 +25,7 @@ from app.domains.device_home.repository import (
     SqlAlchemyWorldSurfaceRepository,
 )
 from app.domains.runtime.public import SearchIndexHit
-from app.domains.social.public import SocialSearchState
+from app.domains.social.contracts.search_state import SocialSearchState
 from app.domains.world_packages.router import router
 from app.domains.world_packages.schemas.content import (
     AssetIndexDocument,

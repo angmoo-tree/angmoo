@@ -1,122 +1,74 @@
+"""World feed readiness, discovery, claims and owner-visible cycle status."""
+
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import datetime
 import time
 from typing import Iterable
 from uuid import uuid4
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
-
 from pydantic import ValidationError
-from sqlalchemy import and_, exists, or_, select
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, aliased
-
-from app import models, schemas
+from sqlalchemy.orm import Session
 from app.core.search_text import normalize_search_text
-from app.domains.social.public import (
-    SocialSearchIndexPort,
-    SocialSearchState,
-    find_keyword_post_ids,
+from app.domains.social.contracts.search_index import SocialSearchIndexPort
+from app.domains.social.contracts.search_state import SocialSearchState
+from app.domains.social.contracts.world_feed import (
+    ReadySearchProfile,
+    KeywordClaim,
+    CandidateSearchResult,
+    ObservationClaimResult,
+    WorldFeedReferences,
+    FeedWorldCharacter,
+    FeedOwner,
 )
+from app.domains.social.exceptions import (
+    WorldFeedError,
+    WorldFeedReadinessError,
+    WorldFeedStatusNotFoundError,
+    WorldFeedStatusForbiddenError,
+)
+from app.domains.social.constants import (
+    KEYWORDS_PER_CYCLE,
+    KEYWORD_COUNT,
+    MIN_KEYWORD_LENGTH,
+    KEYWORD_OFFSETS,
+    PER_KEYWORD_FETCH_LIMIT,
+    RAW_MERGE_LIMIT,
+    PLANNER_CANDIDATE_LIMIT,
+    AUTHOR_CANDIDATE_LIMIT,
+    OBSERVATION_LEASE,
+)
+from app.domains.social.models.feed import (
+    WorldCharacterFeedCursor,
+    WorldCharacterFeedObservation,
+)
+from app.domains.social.models.posts import Post
+from app.domains.social.policies.world_feed import (
+    _aware_utc,
+    _age_bucket,
+    _local_datetime,
+    _allowed_actions,
+)
+from app.domains.social.repository import world_feed as repository
+from app.domains.social.schemas import feed as feed_schemas
+from app.domains.social.service.keyword_feed import find_keyword_post_ids
 from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_FEED_RUNTIME_MODE,
 )
-from app.services import world_character_contracts
-
-
-KEYWORDS_PER_CYCLE = 2
-KEYWORD_COUNT = 8
-MIN_KEYWORD_LENGTH = 2
-KEYWORD_OFFSETS = (0, 2, 4, 6)
-PER_KEYWORD_FETCH_LIMIT = 24
-RAW_MERGE_LIMIT = 48
-PLANNER_CANDIDATE_LIMIT = 8
-AUTHOR_CANDIDATE_LIMIT = 2
-OBSERVATION_LEASE = timedelta(minutes=10)
-
-
-class WorldFeedError(Exception):
-    pass
-
-
-class WorldFeedReadinessError(WorldFeedError):
-    def __init__(self, reason_code: str):
-        self.reason_code = reason_code
-        super().__init__(reason_code)
-
-
-class WorldFeedStatusNotFoundError(WorldFeedError):
-    pass
-
-
-class WorldFeedStatusForbiddenError(WorldFeedError):
-    pass
-
-
-@dataclass(frozen=True)
-class ReadySearchProfile:
-    world: models.World
-    world_character: models.WorldCharacter
-    membership: models.WorldMembership
-    character: models.Character
-    profile: models.WorldCommunityProfile
-    keywords: tuple[str, ...]
-    avoid_topics: tuple[str, ...]
-    action_profile: dict[str, object]
-    imported_world_runtime_locked: bool
-
-
-@dataclass(frozen=True)
-class KeywordClaim:
-    cursor_offset: int
-    keywords: tuple[str, str]
-    duplicate_cycle: bool
-    previous_summary: dict[str, object] | None
-
-
-@dataclass(frozen=True)
-class CandidateSearchResult:
-    candidates: tuple[schemas.WorldFeedCandidateRead, ...]
-    raw_candidate_count: int
-    filtered_candidate_count: int
-    query_latency_ms: int
-
-
-@dataclass(frozen=True)
-class ObservationClaimResult:
-    candidates: tuple[schemas.WorldFeedCandidateRead, ...]
-    observations: tuple[models.WorldCharacterFeedObservation, ...]
-    claim_conflict_count: int
-
-
-def _aware_utc(value: datetime) -> datetime:
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)
-
-
-def _action_weight(action_profile: dict[str, object], action: str) -> int:
-    raw = action_profile.get(action)
-    if not isinstance(raw, dict):
-        return 0
-    try:
-        return max(0, min(100, int(raw.get("weight") or 0)))
-    except (TypeError, ValueError):
-        return 0
+from app.domains.world_characters.schemas.setup import WorldCommunityProfilePayload
 
 
 def load_ready_search_profile(
-    db: Session, *, world_character_id: str
+    db: Session, *, references: WorldFeedReferences, world_character_id: str
 ) -> ReadySearchProfile:
-    world_character = db.get(models.WorldCharacter, world_character_id)
+    world_character = references.world_character(world_character_id)
     if world_character is None or world_character.status != "active":
         raise WorldFeedReadinessError("world_character_not_ready")
     if world_character.feed_runtime_mode != AUTONOMOUS_FEED_RUNTIME_MODE:
         raise WorldFeedReadinessError("feed_runtime_mode_not_enabled")
-    character = db.get(models.Character, world_character.character_id)
-    membership = db.get(models.WorldMembership, world_character.membership_id)
-    world = db.get(models.World, world_character.world_id)
+    character = references.character(world_character.character_id)
+    membership = references.membership(world_character.membership_id)
+    world = references.world(world_character.world_id)
     if (
         character is None
         or character.deleted_at is not None
@@ -129,20 +81,10 @@ def load_ready_search_profile(
         or world.readiness_status != "publish_ready"
     ):
         raise WorldFeedReadinessError("world_scope_not_ready")
-    profile = db.scalar(
-        select(models.WorldCommunityProfile)
-        .where(
-            models.WorldCommunityProfile.world_character_id == world_character.id,
-            models.WorldCommunityProfile.status == "ready",
-        )
-        .order_by(
-            models.WorldCommunityProfile.approved_at.desc(),
-            models.WorldCommunityProfile.generated_at.desc(),
-        )
-    )
+    profile = references.ready_profile(world_character.id)
     if profile is None:
         raise WorldFeedReadinessError("world_community_profile_not_ready")
-    character_hash = world_character_contracts.character_contract_hash(character)
+    character_hash = references.character_hash(character)
     if (
         world_character.character_contract_hash != character_hash
         or world_character.world_contract_hash != world.contract_hash
@@ -151,7 +93,7 @@ def load_ready_search_profile(
     ):
         raise WorldFeedReadinessError("world_community_profile_stale")
     try:
-        validated = schemas.WorldCommunityProfilePayload(
+        validated = WorldCommunityProfilePayload(
             visible_summary=profile.visible_summary,
             core_interests=profile.core_interests,
             adjacent_interests=profile.adjacent_interests,
@@ -182,6 +124,7 @@ def load_ready_search_profile(
     )
     imported_world_runtime_locked = _is_imported_world_runtime_locked(
         db,
+        references=references,
         world_character=world_character,
     )
     return ReadySearchProfile(
@@ -204,16 +147,11 @@ def claim_cycle_keywords(
     cycle_key: str,
     run_id: str,
 ) -> KeywordClaim:
-    cursor = db.scalar(
-        select(models.WorldCharacterFeedCursor)
-        .where(
-            models.WorldCharacterFeedCursor.world_character_id
-            == profile.world_character.id
-        )
-        .with_for_update()
+    cursor = repository.cursor_for_update(
+        db, world_character_id=profile.world_character.id
     )
     if cursor is None:
-        cursor = models.WorldCharacterFeedCursor(
+        cursor = WorldCharacterFeedCursor(
             world_character_id=profile.world_character.id,
             world_id=profile.world.id,
             next_keyword_offset=0,
@@ -224,13 +162,8 @@ def claim_cycle_keywords(
             db.flush()
         except IntegrityError:
             db.rollback()
-            cursor = db.scalar(
-                select(models.WorldCharacterFeedCursor)
-                .where(
-                    models.WorldCharacterFeedCursor.world_character_id
-                    == profile.world_character.id
-                )
-                .with_for_update()
+            cursor = repository.cursor_for_update(
+                db, world_character_id=profile.world_character.id
             )
             if cursor is None:
                 raise
@@ -269,114 +202,10 @@ def claim_cycle_keywords(
     )
 
 
-def _age_bucket(age_seconds: int) -> str:
-    if age_seconds < 24 * 60 * 60:
-        return "recent"
-    if age_seconds < 7 * 24 * 60 * 60:
-        return "days_old"
-    if age_seconds < 28 * 24 * 60 * 60:
-        return "weeks_old"
-    return "older"
-
-
-def _local_datetime(value: datetime, timezone_name: str) -> str:
-    try:
-        zone = ZoneInfo(timezone_name)
-    except ZoneInfoNotFoundError:
-        zone = UTC
-    return _aware_utc(value).astimezone(zone).isoformat()
-
-
-def _existing_reactions(
-    db: Session,
-    *,
-    actor: ReadySearchProfile,
-    posts: Iterable[models.Post],
-) -> tuple[set[str], set[str], set[str], set[str]]:
-    post_list = list(posts)
-    post_ids = [post.id for post in post_list]
-    if not post_ids:
-        return set(), set(), set(), set()
-    liked = set(
-        db.scalars(
-            select(models.PostLike.post_id).where(
-                models.PostLike.post_id.in_(post_ids),
-                models.PostLike.character_id == actor.character.id,
-            )
-        )
-    )
-    commented = set(
-        db.scalars(
-            select(models.Post.reply_to_post_id).where(
-                models.Post.reply_to_post_id.in_(post_ids),
-                models.Post.author_world_character_id == actor.world_character.id,
-                models.Post.deleted_at.is_(None),
-            )
-        )
-    )
-    reposted = set(
-        db.scalars(
-            select(models.PostRepost.post_id).where(
-                models.PostRepost.post_id.in_(post_ids),
-                models.PostRepost.character_id == actor.character.id,
-            )
-        )
-    )
-    author_character_ids = {
-        post.author_character_id for post in post_list if post.author_character_id
-    }
-    followed = set(
-        db.scalars(
-            select(models.ProfileFollow.target_character_id).where(
-                models.ProfileFollow.follower_character_id == actor.character.id,
-                models.ProfileFollow.target_character_id.in_(author_character_ids),
-            )
-        )
-    )
-    return liked, commented, reposted, followed
-
-
-def _allowed_actions(
-    *,
-    actor: ReadySearchProfile,
-    post: models.Post,
-    policy_actions: set[str],
-    liked: set[str],
-    commented: set[str],
-    reposted: set[str],
-    followed: set[str],
-) -> list[schemas.FeedAction]:
-    allowed: list[schemas.FeedAction] = []
-    if (
-        "like" in policy_actions
-        and _action_weight(actor.action_profile, "like") > 0
-        and post.id not in liked
-    ):
-        allowed.append("like")
-    if (
-        ("comment" in policy_actions or "reply" in policy_actions)
-        and _action_weight(actor.action_profile, "comment") > 0
-        and post.id not in commented
-    ):
-        allowed.append("comment")
-    if (
-        "repost" in policy_actions
-        and _action_weight(actor.action_profile, "repost") > 0
-        and post.id not in reposted
-    ):
-        allowed.append("repost")
-    if (
-        "follow" in policy_actions
-        and _action_weight(actor.action_profile, "follow") > 0
-        and post.author_character_id not in followed
-    ):
-        allowed.append("follow")
-    return allowed
-
-
 def search_world_feed_candidates(
     db: Session,
     *,
+    references: WorldFeedReferences,
     profile: ReadySearchProfile,
     keywords: tuple[str, str],
     allowed_policy_actions: Iterable[str],
@@ -385,26 +214,7 @@ def search_world_feed_candidates(
     search_state: SocialSearchState,
 ) -> CandidateSearchResult:
     started = time.perf_counter()
-    author_wc = aliased(models.WorldCharacter)
-    author_membership = aliased(models.WorldMembership)
-    block_from_actor = exists(
-        select(models.WorldCharacterBlock.id).where(
-            models.WorldCharacterBlock.world_id == profile.world.id,
-            models.WorldCharacterBlock.blocker_world_character_id
-            == profile.world_character.id,
-            models.WorldCharacterBlock.blocked_world_character_id
-            == models.Post.author_world_character_id,
-        )
-    )
-    block_to_actor = exists(
-        select(models.WorldCharacterBlock.id).where(
-            models.WorldCharacterBlock.world_id == profile.world.id,
-            models.WorldCharacterBlock.blocker_world_character_id
-            == models.Post.author_world_character_id,
-            models.WorldCharacterBlock.blocked_world_character_id
-            == profile.world_character.id,
-        )
-    )
+    candidate_rows = references.candidate_rows(profile)
     lookup = find_keyword_post_ids(
         search_index,
         search_state=search_state,
@@ -413,40 +223,9 @@ def search_world_feed_candidates(
         per_keyword_limit=PER_KEYWORD_FETCH_LIMIT,
         merged_limit=RAW_MERGE_LIMIT,
     )
-    rows_by_post_id: dict[str, tuple[models.Post, models.WorldCharacter]] = {}
+    rows_by_post_id: dict[str, tuple[Post, FeedWorldCharacter]] = {}
     if lookup.post_ids:
-        query = (
-            select(models.Post, author_wc)
-            .join(author_wc, author_wc.id == models.Post.author_world_character_id)
-            .join(
-                author_membership,
-                and_(
-                    author_membership.id == author_wc.membership_id,
-                    author_membership.world_id == author_wc.world_id,
-                ),
-            )
-            .where(
-                models.Post.world_id == profile.world.id,
-                models.Post.visibility == "public",
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-                models.Post.reply_to_post_id.is_(None),
-                models.Post.post_type != "repost",
-                models.Post.repost_of_post_id.is_(None),
-                models.Post.author_world_character_id.is_not(None),
-                models.Post.author_world_character_id
-                != profile.world_character.id,
-                author_wc.status == "active",
-                author_membership.status == "active",
-                models.Post.id.in_(lookup.post_ids),
-                ~block_from_actor,
-                ~block_to_actor,
-            )
-        )
-        canonical_rows = {
-            post.id: (post, world_character)
-            for post, world_character in db.execute(query).all()
-        }
+        canonical_rows = candidate_rows(lookup.post_ids)
         rows_by_post_id = {
             post_id: canonical_rows[post_id]
             for post_id in lookup.post_ids
@@ -458,20 +237,25 @@ def search_world_feed_candidates(
     raw_count = len(rows_by_post_id)
     observations = {
         row.post_id: row
-        for row in db.scalars(
-            select(models.WorldCharacterFeedObservation).where(
-                models.WorldCharacterFeedObservation.observer_world_character_id
-                == profile.world_character.id,
-                models.WorldCharacterFeedObservation.post_id.in_(rows_by_post_id),
-            )
+        for row in repository.observations_for_posts(
+            db, observer_id=profile.world_character.id, post_ids=rows_by_post_id
         )
     }
     posts = [row[0] for row in rows_by_post_id.values()]
-    liked, commented, reposted, followed = _existing_reactions(
+    liked, commented, reposted, followed = repository._existing_reactions(
         db, actor=profile, posts=posts
     )
     policy_actions = set(allowed_policy_actions)
-    ranked: list[tuple[float, models.Post, models.WorldCharacter, list[str], list[str], list[schemas.FeedAction]]] = []
+    ranked: list[
+        tuple[
+            float,
+            Post,
+            FeedWorldCharacter,
+            list[str],
+            list[str],
+            list[feed_schemas.FeedAction],
+        ]
+    ] = []
     current = _aware_utc(now)
     for post, world_character in rows_by_post_id.values():
         existing_observation = observations.get(post.id)
@@ -544,7 +328,16 @@ def search_world_feed_candidates(
             item[1].id,
         )
     )
-    selected: list[tuple[float, models.Post, models.WorldCharacter, list[str], list[str], list[schemas.FeedAction]]] = []
+    selected: list[
+        tuple[
+            float,
+            Post,
+            FeedWorldCharacter,
+            list[str],
+            list[str],
+            list[feed_schemas.FeedAction],
+        ]
+    ] = []
     author_counts: dict[str, int] = {}
     for item in ranked:
         author_id = item[2].id
@@ -554,12 +347,19 @@ def search_world_feed_candidates(
         author_counts[author_id] = author_counts.get(author_id, 0) + 1
         if len(selected) >= PLANNER_CANDIDATE_LIMIT:
             break
-    candidates: list[schemas.WorldFeedCandidateRead] = []
-    for index, (score, post, world_character, matched_keywords, matched_fields, actions) in enumerate(selected):
+    candidates: list[feed_schemas.WorldFeedCandidateRead] = []
+    for index, (
+        score,
+        post,
+        world_character,
+        matched_keywords,
+        matched_fields,
+        actions,
+    ) in enumerate(selected):
         created_at = _aware_utc(post.created_at)
         age_seconds = max(0, int((current - created_at).total_seconds()))
         candidates.append(
-            schemas.WorldFeedCandidateRead(
+            feed_schemas.WorldFeedCandidateRead(
                 candidate_index=index,
                 post_id=post.id,
                 author_world_character_id=world_character.id,
@@ -593,24 +393,18 @@ def claim_feed_observations(
     db: Session,
     *,
     profile: ReadySearchProfile,
-    candidates: tuple[schemas.WorldFeedCandidateRead, ...],
+    candidates: tuple[feed_schemas.WorldFeedCandidateRead, ...],
     cycle_key: str,
     run_id: str,
     now: datetime,
 ) -> ObservationClaimResult:
     current = _aware_utc(now)
-    claimed_candidates: list[schemas.WorldFeedCandidateRead] = []
-    observations: list[models.WorldCharacterFeedObservation] = []
+    claimed_candidates: list[feed_schemas.WorldFeedCandidateRead] = []
+    observations: list[WorldCharacterFeedObservation] = []
     conflicts = 0
     for candidate in candidates:
-        observation = db.scalar(
-            select(models.WorldCharacterFeedObservation)
-            .where(
-                models.WorldCharacterFeedObservation.observer_world_character_id
-                == profile.world_character.id,
-                models.WorldCharacterFeedObservation.post_id == candidate.post_id,
-            )
-            .with_for_update()
+        observation = repository.observation_for_update(
+            db, observer_id=profile.world_character.id, post_id=candidate.post_id
         )
         if observation is not None and (
             observation.status == "observed"
@@ -622,7 +416,7 @@ def claim_feed_observations(
             conflicts += 1
             continue
         if observation is None:
-            observation = models.WorldCharacterFeedObservation(
+            observation = WorldCharacterFeedObservation(
                 id=f"feed-observation-{uuid4().hex}",
                 world_id=profile.world.id,
                 observer_world_character_id=profile.world_character.id,
@@ -660,9 +454,7 @@ def claim_feed_observations(
             db.add(observation)
             db.flush()
         claimed_candidates.append(
-            candidate.model_copy(
-                update={"candidate_index": len(claimed_candidates)}
-            )
+            candidate.model_copy(update={"candidate_index": len(claimed_candidates)})
         )
         observations.append(observation)
     return ObservationClaimResult(
@@ -675,11 +467,12 @@ def claim_feed_observations(
 def revalidate_candidate_actions(
     db: Session,
     *,
+    references: WorldFeedReferences,
     profile: ReadySearchProfile,
-    candidate: schemas.WorldFeedCandidateRead,
+    candidate: feed_schemas.WorldFeedCandidateRead,
     allowed_policy_actions: Iterable[str],
-) -> tuple[models.Post, list[schemas.FeedAction]] | None:
-    post = db.get(models.Post, candidate.post_id)
+) -> tuple[Post, list[feed_schemas.FeedAction]] | None:
+    post = repository.get_post(db, candidate.post_id)
     if (
         post is None
         or post.world_id != profile.world.id
@@ -693,13 +486,13 @@ def revalidate_candidate_actions(
         or post.repost_of_post_id is not None
     ):
         return None
-    actor_wc = db.get(models.WorldCharacter, profile.world_character.id)
+    actor_wc = references.world_character(profile.world_character.id)
     actor_membership = (
-        db.get(models.WorldMembership, actor_wc.membership_id) if actor_wc else None
+        references.membership(actor_wc.membership_id) if actor_wc else None
     )
-    author_wc = db.get(models.WorldCharacter, candidate.author_world_character_id)
+    author_wc = references.world_character(candidate.author_world_character_id)
     author_membership = (
-        db.get(models.WorldMembership, author_wc.membership_id) if author_wc else None
+        references.membership(author_wc.membership_id) if author_wc else None
     )
     if (
         actor_wc is None
@@ -716,28 +509,15 @@ def revalidate_candidate_actions(
         or author_membership.world_id != profile.world.id
     ):
         return None
-    blocked = db.scalar(
-        select(models.WorldCharacterBlock.id).where(
-            models.WorldCharacterBlock.world_id == profile.world.id,
-            or_(
-                and_(
-                    models.WorldCharacterBlock.blocker_world_character_id
-                    == profile.world_character.id,
-                    models.WorldCharacterBlock.blocked_world_character_id
-                    == author_wc.id,
-                ),
-                and_(
-                    models.WorldCharacterBlock.blocker_world_character_id
-                    == author_wc.id,
-                    models.WorldCharacterBlock.blocked_world_character_id
-                    == profile.world_character.id,
-                ),
-            ),
-        )
+    blocked = repository.is_blocked(
+        db,
+        world_id=profile.world.id,
+        actor_id=profile.world_character.id,
+        author_id=author_wc.id,
     )
     if blocked is not None:
         return None
-    liked, commented, reposted, followed = _existing_reactions(
+    liked, commented, reposted, followed = repository._existing_reactions(
         db, actor=profile, posts=[post]
     )
     actions = _allowed_actions(
@@ -755,7 +535,7 @@ def revalidate_candidate_actions(
 def mark_claims_retryable(
     db: Session,
     *,
-    observations: Iterable[models.WorldCharacterFeedObservation],
+    observations: Iterable[WorldCharacterFeedObservation],
     now: datetime,
 ) -> None:
     current = _aware_utc(now)
@@ -771,12 +551,12 @@ def finalize_feed_cycle(
     *,
     profile: ReadySearchProfile,
     claim: KeywordClaim,
-    observations: tuple[models.WorldCharacterFeedObservation, ...],
+    observations: tuple[WorldCharacterFeedObservation, ...],
     selected_index: int | None,
-    selected_action: schemas.FeedAction | None,
-    interaction_intent: schemas.FeedInteractionIntent | None,
-    comment_purpose: schemas.FeedCommentPurpose | None,
-    reason_code: schemas.FeedNoActionReason | None,
+    selected_action: feed_schemas.FeedAction | None,
+    interaction_intent: feed_schemas.FeedInteractionIntent | None,
+    comment_purpose: feed_schemas.FeedCommentPurpose | None,
+    reason_code: feed_schemas.FeedNoActionReason | None,
     public_action_execution_id: int | None,
     summary: dict[str, object],
     now: datetime,
@@ -797,17 +577,14 @@ def finalize_feed_cycle(
         else:
             observation.decision_outcome = "not_selected"
         db.add(observation)
-    cursor = db.scalar(
-        select(models.WorldCharacterFeedCursor)
-        .where(
-            models.WorldCharacterFeedCursor.world_character_id
-            == profile.world_character.id
-        )
-        .with_for_update()
+    cursor = repository.cursor_for_update(
+        db, world_character_id=profile.world_character.id
     )
     if cursor is None or cursor.world_id != profile.world.id:
         raise WorldFeedReadinessError("feed_cursor_invalid")
-    cursor.next_keyword_offset = (claim.cursor_offset + KEYWORDS_PER_CYCLE) % KEYWORD_COUNT
+    cursor.next_keyword_offset = (
+        claim.cursor_offset + KEYWORDS_PER_CYCLE
+    ) % KEYWORD_COUNT
     cursor.last_cycle_summary = summary
     cursor.version += 1
     db.add(cursor)
@@ -817,21 +594,12 @@ def finalize_feed_cycle(
 def world_feed_cycle_status(
     db: Session,
     *,
-    world_character: models.WorldCharacter,
+    references: WorldFeedReferences,
+    world_character: FeedWorldCharacter,
     recent_limit: int = 12,
-) -> schemas.WorldFeedCycleStatusRead:
-    cursor = db.get(models.WorldCharacterFeedCursor, world_character.id)
-    profile = db.scalar(
-        select(models.WorldCommunityProfile)
-        .where(
-            models.WorldCommunityProfile.world_character_id == world_character.id,
-            models.WorldCommunityProfile.status == "ready",
-        )
-        .order_by(
-            models.WorldCommunityProfile.approved_at.desc(),
-            models.WorldCommunityProfile.generated_at.desc(),
-        )
-    )
+) -> feed_schemas.WorldFeedCycleStatusRead:
+    cursor = repository.get_cursor(db, world_character.id)
+    profile = references.ready_profile(world_character.id)
     keywords = tuple(
         keyword
         for raw_keyword in (profile.search_keywords if profile else [])
@@ -849,41 +617,25 @@ def world_feed_cycle_status(
         else []
     )
     rows = list(
-        db.scalars(
-            select(models.WorldCharacterFeedObservation)
-            .where(
-                models.WorldCharacterFeedObservation.observer_world_character_id
-                == world_character.id
-            )
-            .order_by(
-                models.WorldCharacterFeedObservation.created_at.desc(),
-                models.WorldCharacterFeedObservation.id.desc(),
-            )
-            .limit(max(1, min(recent_limit, 50)))
+        repository.recent_observations(
+            db, observer_id=world_character.id, recent_limit=recent_limit
         )
     )
     post_ids = [row.post_id for row in rows]
     post_context: dict[str, tuple[str, str]] = {}
     if post_ids:
-        context_rows = db.execute(
-            select(models.Post.id, models.Post.title, models.Character.name)
-            .join(
-                models.WorldCharacter,
-                models.WorldCharacter.id == models.Post.author_world_character_id,
-            )
-            .join(models.Character, models.Character.id == models.Post.author_character_id)
-            .where(models.Post.id.in_(post_ids))
-        ).all()
+        context_rows = references.post_context(post_ids)
         post_context = {
             post_id: (title, author_name)
             for post_id, title, author_name in context_rows
         }
-    return schemas.WorldFeedCycleStatusRead(
+    return feed_schemas.WorldFeedCycleStatusRead(
         world_id=world_character.world_id,
         world_character_id=world_character.id,
         feed_runtime_mode=world_character.feed_runtime_mode,
         runtime_state=_feed_runtime_state(
             db,
+            references=references,
             world_character=world_character,
             cursor=cursor,
         ),
@@ -900,11 +652,15 @@ def world_feed_cycle_status(
             else None
         ),
         recent_observations=[
-            schemas.WorldFeedObservationRead(
+            feed_schemas.WorldFeedObservationRead(
                 observation_id=row.id,
                 post_id=row.post_id,
-                post_title=post_context.get(row.post_id, ("삭제된 게시글", "알 수 없음"))[0],
-                author_name=post_context.get(row.post_id, ("삭제된 게시글", "알 수 없음"))[1],
+                post_title=post_context.get(
+                    row.post_id, ("삭제된 게시글", "알 수 없음")
+                )[0],
+                author_name=post_context.get(
+                    row.post_id, ("삭제된 게시글", "알 수 없음")
+                )[1],
                 post_created_at=row.post_created_at,
                 status=row.status,
                 decision_outcome=row.decision_outcome,
@@ -925,10 +681,13 @@ def world_feed_cycle_status(
 def _feed_runtime_state(
     db: Session,
     *,
-    world_character: models.WorldCharacter,
-    cursor: models.WorldCharacterFeedCursor | None,
+    references: WorldFeedReferences,
+    world_character: FeedWorldCharacter,
+    cursor: WorldCharacterFeedCursor | None,
 ) -> str:
-    if _is_imported_world_runtime_locked(db, world_character=world_character):
+    if _is_imported_world_runtime_locked(
+        db, references=references, world_character=world_character
+    ):
         return "imported_locked"
     if world_character.feed_runtime_mode != AUTONOMOUS_FEED_RUNTIME_MODE:
         return "routine_only_legacy_feed"
@@ -949,43 +708,39 @@ def _feed_runtime_state(
 def _is_imported_world_runtime_locked(
     db: Session,
     *,
-    world_character: models.WorldCharacter,
+    references: WorldFeedReferences,
+    world_character: FeedWorldCharacter,
 ) -> bool:
     """Read package lineage without coupling this service to another service."""
 
     return bool(
         not world_character.autonomous_enabled
-        and db.scalar(
-            select(models.WorldPackageImport.import_id)
-            .where(
-                models.WorldPackageImport.imported_world_id
-                == world_character.world_id
-            )
-            .limit(1)
-        )
-        is not None
+        and references.imported_lineage(world_character.world_id) is not None
     )
 
 
 def owner_world_feed_cycle_status(
     db: Session,
     *,
+    references: WorldFeedReferences,
     world_character_id: str,
-    user: models.User,
-) -> schemas.WorldFeedCycleStatusRead:
-    world_character = db.get(models.WorldCharacter, world_character_id)
+    user: FeedOwner,
+) -> feed_schemas.WorldFeedCycleStatusRead:
+    world_character = references.world_character(world_character_id)
     if world_character is None:
         raise WorldFeedStatusNotFoundError(world_character_id)
-    character = db.get(models.Character, world_character.character_id)
+    character = references.character(world_character.character_id)
     if character is None or character.deleted_at is not None:
         raise WorldFeedStatusNotFoundError(world_character_id)
     if character.owner_id != user.id:
         raise WorldFeedStatusForbiddenError(world_character_id)
-    membership = db.get(models.WorldMembership, world_character.membership_id)
+    membership = references.membership(world_character.membership_id)
     if (
         membership is None
         or membership.world_id != world_character.world_id
         or membership.user_id != user.id
     ):
         raise WorldFeedStatusForbiddenError(world_character_id)
-    return world_feed_cycle_status(db, world_character=world_character)
+    return world_feed_cycle_status(
+        db, references=references, world_character=world_character
+    )

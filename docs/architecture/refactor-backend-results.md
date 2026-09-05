@@ -1231,3 +1231,13 @@ Today·기존 응답 streaming·명시적 저장 focused37 PASS/14.38초. API·s
 확장 read/scope/subjective policy3과 query execution/block3·active query1 AST가 원문과 동일하다. 원래 reader와 새 서비스의 **실행 SQL13개·bound parameters·순서 및 전체 records/count/coverage/watermark 값이 동일**하다. 신규 SQLite1node는 factory/range reject SQL0·sameSession, 다른 Session에서 숨긴 원본을 기존 캐시 대신 다시 확인하여 원본/자손 제외, commit0을 검증했다. 기존 Today·응답 streaming·declared context와 함께 **38 PASS / 12.41초**다. 전체 B5·원본 최초도입 capture·Hosted/installer·G07 최종 종료는 후속 단계다.
 
 고정 후보의 전체 Social 역할 회귀와 Today/streaming/수동 게시·프로필을 함께 실행해 **95 PASS / 33.62초 / 기존 Starlette 경고1**를 확인했다. API·schema·ORM, 보호된2개 원래 테스트 파일 assertion, 전체 split evidence, 경계799 modules/2763 edges/legacy197 및 L4/ER0 현재 inventory PASS.
+
+## AR-B5-WORLD-SEARCH — 키워드 검색·관찰·공개 재검증의 실제 소유
+
+`e83f320` 기반에서 WorldFeed 검색의 실제 업무 판단·자기 업무 SQL·다른 업무 조회를 나눴다. 기존 예외4·결과 dataclass4·함수17의 **25개 전체 AST**가 정확한 조회 협력과 타입 이름만 복원하면 원문과 같다. SQL, 조건 순서, FTS 이후 canonical 검증, 순위·상한·중복 방지, row lock·savepoint·flush·rollback과 트랜잭션 종료 주체를 보존했다. 검색 인덱스 capability는 실제 사용하는 hit 속성3개만 읽고 기존 Runtime hit 객체를 변환하지 않는다. 실제 단일 RLock과 process binding은 runtime/search로 이동했다.
+
+첫 집중 실행은 readiness 함수 한 개의 협력 인자가 누락되어12FAIL/6PASS였다. 실제 함수 서명을 수정한 뒤 기존 **18 PASS**를 확인했고, 추가2회귀를 포함해20PASS, World Package import의 실제 호출까지 확대하여 **30 PASS / 1 warning / 29.38초**다. 새 회귀는 생성 시 SQL0·같은 attached 객체·커서 변경의 호출자 rollback, 숨겨진 후보에서 foreign read 전에 행동 재검증 중단과 원래 값 복원을 검사한다. 기존 assertion·skip 조건은 유지했다.
+
+기존 source 보존 진단에서 선행 Relationships reader의 실제 이동 경로 누락1건을 발견해 `runtime/relationships/sqlalchemy_social_read_repository.py → domains/relationships/repository/diagnostics.py`를 명시했다. 같은 원래 source 검사 재실행은0오류다. 다른 원래 split/assertion/suppression/API·ORM/기존 node 검사는0오류, 보호 **2,139 / 현재 2,285**다. 현재 경계 **804 modules / 2,801 edges / exact legacy190 PASS**, L4 parity99, ER0 **84/87/24/44/7**을 확인했다. 원래 signed source의 append-only capture 및 전체 stock/Hosted/Installer Gate와 구분한다.
+
+옛 world_feed_search 구현·keyword_feed application·search_runtime application·search_index port 네 파일은 실제 소비자를 전환한 뒤 제거했다. 남은 Community/WorldFeed 실행·G07 전체 소유권 정리·B5 최종 종료는 계속 진행한다. 현재 aggregate/옛 실행 소비자의 제한된 연결은 제거 조건을 명시했고, 새로운 범용 우회 예외를 만들지 않았다.

@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 from app.domains.characters.models import Character, CharacterState
 from app.domains.identity.models import LlmCredential
 from app.domains.routines.models import AgentFeedCue
-from app.domains.social.public import SocialSearchIndexPort, SocialSearchState
+from app.domains.social.contracts.search_index import SocialSearchIndexPort
+from app.domains.social.contracts.search_state import SocialSearchState
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
 
 
