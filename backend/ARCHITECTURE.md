@@ -726,3 +726,61 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 `routines/service/activity_management.py`는 활동 시간 입력과 활동 설정 저장, 슬롯의 다음 실행 시각 변경을 담당합니다. Character 소유권과 Identity의 demo 변경 제한은 같은 Session에서 기존 소유 기능을 호출합니다. 최초 설정의 commit 시점과 설정 변경 후 slot 갱신 순서를 유지하며, 외부 값을 미리 읽지 않습니다.
 
 성향 분석의 provider 출력 형식은 `schemas/tendency.py`, 프롬프트·문자열 정제·범위와 주제 검증은 `service/tendency.py`, 저장된 성향의 준비 상태와 변경은 `service/tendency_settings.py`에 있습니다. provider 통신과 슬롯 해제는 runtime이 조립합니다. Character와 Routines에서 기존에 함께 사용하던 `AgentServiceError` 기반은 `app/exceptions.py`의 하나의 클래스이며, 기존 Character 이름도 같은 객체를 가리킵니다.
+
+### Resident 계획 응답의 구조와 검증
+
+`routines/schemas/resident_planning.py`는 LangGraph planner·writer의 실제 Pydantic 응답 모델을 소유합니다. 모델의 기존 private 이름은 provider JSON schema의 title에도 쓰이므로 유지합니다. Topic Arc의 단계 수와 setup/development/conclusion 순서는 `policies/topic_arc_roles.py`가 판단하며, 읽기 전용 역할 계약은 `contracts/topic_arcs.py`에 있습니다. 이 검증 경계는 DB나 provider를 호출하지 않습니다. 실제 토픽·행동 판단과 graph 실행 조립은 LG-B/LG-C에서 이어서 분리하며, 이전을 마친 Memory Daypart/공통 clipping은 최종 통합에서 기존 소유 구현을 연결합니다.
+
+계획과 Social이 함께 사용하는 동기·감정 enum 두 개의 실제 정의는 `app/contracts/action_subjective_context.py`에 있습니다. Social의 subjective DTO·출처·텍스트 검증·저장 규칙은 Social에 유지하며, 값 enum의 같은 객체를 import합니다. 따라서 enum 값·identity·provider schema를 바꾸지 않고 두 업무의 공유 값만 연결합니다.
+
+
+### Resident 계획과 결과를 판단하는 위치
+
+`routines/policies/topic_dates.py`는 상대 날짜의 기준과 이월 상태를, `handoff_coverage.py`는 이미 작성한 내용으로 전날 문맥이 충족됐는지를 판단합니다. `action_matching.py`는 관찰한 항목에 맞는 행동과 허용된 관계 행동을 고르고, `writing_contract.py`는 필수 글과 응답 형식을 결정합니다. `writer_outputs.py`는 task id로 writer 결과를 대응시키고 누락·출처 복사·잘못된 멘션을 검사하며 실제 결과를 조립합니다. 이 파일들은 받은 값만 사용하고 DB나 provider를 호출하지 않습니다. 활동 허용 입력은 기존 context의 `activity_policy` 속성만 읽는 계약이며 복제된 상태를 만들지 않습니다.
+
+
+### Topic Arc의 진행과 복구
+
+`routines/service/topic_arcs.py`가 토픽 단계 정제·시각 기준·다음 단계·진행 의도·복구 허용·시간 연속성을 판단합니다. `policies/resident_clock.py`는 원래 KST 표현과 UTC 보정만 담당합니다. 서비스에 전달되는 `TopicArcWorkflows`는 기존 텍스트 정제 함수, 마지막 게시 시각, 최근 기억 이벤트의 nullable 조회를 연결합니다. 조회는 기존 분기에서 같은 context/Session으로 호출하며, 날짜만으로 결론을 낼 수 있으면 조회하지 않습니다. 실행부의 `partial`은 실제 서비스 함수에 이 협력을 묶는 구성 코드입니다. 서비스 본문을 전달 함수로 다시 구현하거나 context·ORM 객체를 복제하지 않습니다. 공통 clipping과 Memory 이벤트 조회의 이미 구현된 소유 이전은 부모의 B7 통합에서 연결합니다.
+
+
+### 자율 글쓰기의 주제와 확률
+
+`routines/service/independent_topics.py`는 저장된 persona의 관심 기준·주제 목록·자율 글쓰기 확률을 읽어, 오늘 사용한 주제를 제외하고 같은 실행 id에 같은 선택을 만듭니다. 최근 성공 글의 주제와 오늘 성공 글의 주제를 읽는 실제 SQL은 `repository/independent_topics.py`가 소유합니다. 조회는 원래 caller의 Session으로 수행하며 Character 범위, 성공 상태, 정렬, 개수, 오늘의 시각 경계를 유지합니다. 시각 경계 계산은 `policies/resident_clock.py`, 공통 텍스트 정제는 실행 시 연결되는 같은 함수가 담당합니다.
+
+
+### 행동 계획과 실행 전 예산
+
+`routines/service/action_plans.py`는 관찰한 항목에 맞게 feed·inbox·관계 행동을 정규화하고 하나의 계획으로 묶습니다. `writing_plans.py`는 유효한 글감과 필수 독립 글의 의도를 유지하고, `action_budgets.py`는 하루 한도·답글 묶음 한도·멘션/알림 우선순위와 unfollow 충돌을 적용합니다. 이곳에 실제 판단 본문이 있으며 실행부는 서비스를 호출할 협력만 구성합니다.
+
+설정은 기존 `activity_settings.ensure_setting`을 사용하며 그 함수의 원래 저장 계약을 바꾸지 않습니다. World 시각을 사용하는 실제 사용량 계산, nullable 게시자 조회, 기억의 unfollow 관찰은 원래 Session과 호출 순서로 연결합니다. 도메인은 외부 업무 ORM을 조회하지 않고 필요한 값만 받습니다. 설정이 무제한이면 해당 count를 호출하지 않는 조건, 전체 글쓰기 제한과 답글 bucket의 우선순위를 새 구조를 이유로 통합하거나 바꾸지 않습니다.
+
+
+### 작성 결과와 상태 기록의 복구
+
+`routines/policies/writer_tasks.py`는 실행·글감에서 같은 writer task id를 만듭니다. `service/post_writer_results.py`는 필수 작성 제약과 기본 계획을 유지하며, task id와 실제 제목·본문이 일치한 결과만 적용합니다. Lore id와 조회 방식은 원래 허용된 개수와 길이로 남깁니다.
+
+`service/state_outputs.py`는 성공·재사용된 공개 행동으로 기억 근거를 만들고, 글자 수 제한만 어긴 상태 응답을 정제한 뒤 전체 Pydantic 응답 검증을 다시 수행합니다. 오류 종류에 따른 provider 예외 해석은 runtime의 같은 분기로 연결합니다. 상태 정책 안에서 provider를 다시 호출하거나 가짜 성공 근거를 만들지 않습니다. 입력은 기존 saved state와 graph state를 그대로 사용하며 ORM 복제나 새 DB 접근을 추가하지 않습니다.
+
+
+### Resident 프롬프트와 실제 writer 작업
+
+`service/resident_prompts.py`는 persona·writer·상태 기록·Lore 검색 질의의 실제 프롬프트를 만듭니다. 글감과 persona가 시스템 규칙을 덮어쓸 수 없다는 원래 문맥 경계를 유지하며 입력은 이미 읽은 값입니다. `service/writing_tasks.py`는 선택된 행동을 reply/post 작업으로 만들고, 같은 TopicArc 서비스에서 단계·날짜·이전 실행 근거를 읽습니다. 실제 읽기는 기존 협력과 같은 Session으로 필요한 분기에서만 수행합니다. `service/planner_results.py`는 관찰 입력과 각 planner의 결과를 실제 실행 진단에 맞게 표현합니다.
+
+실행 코드는 이 서비스에 기존 공통 텍스트 정제와 TopicArc 협력을 연결합니다. 도메인 내부의 task id·TopicArc·응답 조립은 실제 소유 서비스를 직접 호출하며 같은 기능을 다른 전달 서비스로 중복 구현하지 않습니다. 프롬프트 문구나 토큰 예산은 위치 변경과 함께 바꾸지 않습니다.
+
+
+### 관계·대화·기억을 활동 입력으로 고르는 기준
+
+`service/relationship_context.py`는 현재 follow 상태와 관찰한 기억을 바탕으로 허용된 관계 행동 후보를 고릅니다. 이미 답한 글의 reply 항목을 제외할 때도 원래 읽기 조건을 유지합니다. `service/conversation_context.py`는 같은 Session의 nullable 게시글 조회로 대화의 root를 찾고, 기존 여섯 turn 한도와 작성자 범위로 문맥을 만듭니다. 끊어진 부모·순환·조회 실패는 원래 규칙으로 처리합니다.
+
+`service/writing_context.py`는 현재 Daypart와 전날 이월 문맥을 선택하고 이미 게시된 글이 그 문맥을 충족했는지 표현합니다. 실제 Memory·Social 읽기는 `contracts/context_reads.py`의 필요한 협력으로 연결하며, 현재 실행이 가진 Session·값·조회 순서를 사용합니다. 자기 ActivityLog와 독립 주제는 실제 Routines 서비스가 소유합니다. Point 저장·관계 변경·Memory 이벤트 저장을 이 입력 선택 서비스에 복제하지 않습니다.
+
+
+### Graph 실행과 다른 업무의 읽기 협력
+
+`runtime/resident/langgraph.py`는 실제 graph 구성, provider 호출, 공개 행동·기억·상태 저장을 연결하는 실행 조립입니다. Routines의 실제 service/policies를 사용하고, 여러 업무의 commit·rollback·완료 후 처리 순서를 유지합니다. `runtime/resident/langgraph_queries.py`는 Social·Character를 같은 Session에서 읽어 활동에 필요한 문맥을 제공합니다. 원래 조회마다 다른 공개 범위·작성자·시간 경계·정렬·개수 제한을 하나의 느슨한 공통 조회로 합치지 않습니다.
+
+`policies/execution_results.py`는 원래 실행 식별자와 답글 결과 대응, 성공한 행동의 근거 선택을 담당합니다. 실제 provider 호출과 저장은 하지 않습니다. Graph의 규모 자체를 기준으로 전달 파일을 추가하지 않으며, 업무 판단과 실행을 연결하는 역할을 기준으로 나눕니다. 남은 Memory·Point·Lore의 원래 호출은 이미 구현된 별도 소유 source와 순차 통합하는 항목이며, 해당 구현을 다시 만들지 않습니다.
+
+실제 graph 테스트는 `tests/routines/test_resident_graph.py`에 있습니다. 과거 파일에 함께 있던 DirectLlm·AgentWriting·AgentRun 검사는 원본과 fixture를 보존하여 해당 소유 전환에서 정리합니다. 전체 API/ORM 계약과 원본 source·assertion·node 보존은 별도의 통합 검증에서 확인합니다.

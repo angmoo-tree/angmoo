@@ -151,8 +151,8 @@ from app.services.agent_runs import _filter_daypart_duplicate_inbox_candidates
 from app.services.agent_runs import _purge_expired_daypart_memory_events
 from app.services.agent_runs import _record_provided_daypart_observations
 from app.services.direct_llm import DirectLlmDeferred
-from app.services.langgraph_resident import LangGraphResidentContext
-from app.services.langgraph_resident import run_resident_langgraph
+from app.runtime.resident.context import LangGraphResidentContext
+from app.runtime.resident.langgraph import run_resident_langgraph
 from app.services.runtime_boundary import OpenClawGatewayClient
 from app.services.runtime_boundary import openclaw_auth_profiles
 from datetime import UTC

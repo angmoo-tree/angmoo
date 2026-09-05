@@ -14,7 +14,7 @@ sys.path.insert(0, str(BACKEND_ROOT))
 
 from app.main import app as private_app  # noqa: E402
 from app.public_main import app as public_app  # noqa: E402
-from app.services.langgraph_resident import _ResidentGraphState  # noqa: E402
+from app.domains.routines.contracts.resident import ResidentGraphState as _ResidentGraphState  # noqa: E402
 
 
 HTTP_METHODS = {"get", "post", "put", "patch", "delete", "options", "head", "trace"}

@@ -1210,3 +1210,99 @@ B7 Memory 7개 실제 정의와 원래 미호출/검사용 5개 정의는 아직
 최종 집중 검증은 **155 passed / 기존 경고 6개 / 12.96초**이다. 신규 실제 SQLite 검사는 같은 Session의 pending Character/Setting/Slot을 유지하며, schedule callback 시점의 다른 Session에는 이전 값이 보이고 최종 commit 뒤 새 값이 보이는 것을 확인한다. 공통 기반으로 이동한 오류는 기존 Character catch에서 같은 동작과 오류 필드를 유지한다.
 
 최종 소스 경계는 771 modules / 2636 edges / exact legacy 202 / cycle 0이다. L4 771/14/97, ER0 85/87/24/44/7과 Memory batch가 현재 코드와 일치한다. 최초 진단에서 남은 generic parametrized 테스트 경로 9개를 실제 이전 경로로 고쳤고, 최종 원래 6개 읽기 전용 검사는 모두 오류 0(보호 2139개 / 현재 2287개)이다. assertion, suppression, API/ORM 및 원래 노드는 모두 보존했다. 선행 최초 도입 원장이 합류하기 전의 진단이며 stock gate·Hosted CI와 구분한다.
+
+## AR-B4 LG-A — Resident provider 응답 스키마와 단계 규칙
+
+B4 C5e `b71c0e3`를 기준으로 LangGraph의 25개 실제 Pydantic 모델·버전 상수와 Topic Arc 단계 검증을 Routines schemas/policies로 이전했습니다. JSON schema 전체 25개가 원문과 같고, 27개 정의 AST는 validator의 역할 전용 입력 Protocol 타입명 한 곳을 복원하면 같습니다. 기존 caller는 실제 동일 class/function 객체를 사용하며 새로운 DB/provider 호출은 없습니다. LG 테스트 186개는 기존 assertion 그대로 초기 PASS입니다. 최종 source 검증 결과를 아래에 기록합니다.
+
+전체 원본 294개 정의의 위치·직접 소비자·기존 검사 대응을 명시했습니다. LG-A는 응답 계약의 실제 소유 이전이며 업무 결정·SQL·graph 조립 전체 완료가 아닙니다. LG-B/LG-C와 이미 고정된 B7 Daypart 및 B5 RelationshipPoint의 root 통합이 남습니다. 불변 checkpoint와 append-only 원본은 수정하지 않으며 신규 4파일의 최초 source 증거는 signed source 이후 root가 순차 캡처합니다.
+
+계획과 Social이 함께 사용하는 동기·감정 enum 두 개의 실제 정의는 `app/contracts/action_subjective_context.py`에 있습니다. Social의 subjective DTO·출처·텍스트 검증·저장 규칙은 Social에 유지하며, 값 enum의 같은 객체를 import합니다. 따라서 enum 값·identity·provider schema를 바꾸지 않고 두 업무의 공유 값만 연결합니다.
+
+LG-A 최종 고정 후보 검증: 관련 **372 passed / 기존 warnings2 / 111.95초**. 전체 provider JSON schema25개 동일, 원문27정의와 공유enum2정의 AST 동일(validator 입력 Protocol 타입명1곳 정규화). 경계736모듈/2463edges/206legacy, L4 736/14/97, deferred22 PASS. 원래 보존 6검사 진단은 sources/split/assertions/suppressions/API·ORM/missing-nodes 모두0이며 protected2139/current2257입니다. signed 최초869bae55의 두 Routines 파일 blob만 읽기 메모리 보충한 진단으로, stock 전체 PASS나 신규 도입 캡처를 주장하지 않습니다. 기존 테스트 수정·노드 추가0, 신규 제품 파일4개이며 root가 source 고정 후 순차 도입 증거를 합칩니다.
+
+
+## AR-B4 LG-B1 — Resident 계획·출력의 실제 순수 판단
+
+원래43함수와11상수를 날짜/이월·문맥 충족·행동 대응·필수 출력·writer 결과 역할의 Routines policies로 이전했다. 전체 본문 AST는 원문과 같고 관계 허용 함수의 입력 타입만 기존 `activity_policy`를 읽는 구조 계약으로 표현한다. 응답 필터·순서·중복 제거·문자열·source-copy 판단을 바꾸지 않았고 실제 함수의 전역 의존을 검사해 누락0을 확인했다. 정책을 호출하는 실행 조립은 아직 옛 resident 모듈에서 실제 같은 함수를 import하며 LG-C에서 runtime으로 옮긴다.
+
+보존 검사에는 부모가 이미 검증하고 고정한 `6d9e342`의 invocation 내부 동일 내용 parse cache 19줄 diff만 적용했다. 모든 경로는 원래 시점마다 다시 읽고, 같은 경로의 바뀐 내용은 다시 분석한다. 원래 frozen·assertion·error 규칙과 추가 도입 ledger는 바꾸지 않았고 부모 source의 테스트나 snapshot을 복사하지 않았다.
+
+LG-B1 최종 후보 검증: 기존 LangGraph·Today·Routines와 보존 검사 회귀 **553 passed / 기존 warnings2 / 137.22초**. 경계742/2470/206legacy, L4 742/14/97, deferred22 PASS. 원래6검사 진단 sources/split/assertions/suppressions/API·ORM/missing-nodes 모두0(protected2139/current2257)이며 stock은 부모 최초 source 도입 캡처 대기입니다. 새 도입6제품 파일, 새 테스트 노드0, 기존 테스트 본문 변경0입니다.
+
+
+## AR-B4 LG-B2 — TopicArc 실제 진행·복구와 시각 규칙
+
+TopicArc 실제14함수와 시각5함수·요일상수를 소유 service/policies로 옮겼다. 원래 본문 AST는 narrow 입력 타입·같은 APP_TIMEZONE·명시 workflow 인자/nullable callback만 복원하면 일치한다. 실행부는 기존 clip과 두 조회 함수를 `TopicArcWorkflows`로 구성하여 실제 함수에 바인딩하고, 조회를 미리 호출하거나 다른 Session을 만들지 않는다. 기존 LangGraph **186 passed / 26.18초**. 새 회귀는 DB read 순서/같은 Session/commit0과 날짜만으로 결정한 분기의 추가 조회0을 검증한다.
+
+원래 Memory 이벤트 구현/clip은 B7 고정 소스를 부모 통합에서 받아야 하므로 이 작업에 같은 helper 파일을 다시 도입하지 않는다. 현재 기존 함수의 실제 callback만 유지하며 전체 LG-B/LG-C 완료나 부모 도입 ledger 완료를 주장하지 않는다.
+
+LG-B2 최종 고정 후보: **376 passed / 기존 warnings2 / 225.61초**, 원래6보존진단 모두0(protected2139/current2261). 경계744/2482/206legacy, L4 744/14/97, deferred22 PASS. 신규 제품2파일(`service/topic_arcs.py`, `policies/resident_clock.py`)과 신규 테스트1파일, 신규 수집노드4개(동일 Session/order1 + 날짜 admission3)이다. 기존 테스트 본문/assertions/노드 변경0. 부모의 source 최초 도입 ledger 합류 전 stock 전체 완료로 표시하지 않는다.
+
+
+## AR-B4 LG-B3a — 실제 주제 선별·확률과 성공 글 조회
+
+원래 자율 주제/확률8함수·날짜 범위2함수·SQL 조회2함수와 선택 상수2개를 역할별 service/repository/clock으로 옮겼다. 전체14정의 AST는 구조 입력 타입·같은 clip·같은 ORM 객체·직접 repository 경로만 복원하면 동일하다. SQL의 Character id/성공 post 필터, created_at/id 역순, 40/120개 한도와 오늘 현재 시각까지의 포함 경계, 오류시 빈 결과를 유지한다. 조회 함수는 새 commit/flush를 하지 않는다.
+
+기존 monkeypatch 준비7곳만 실제 조회/선별 모듈로 연결하며 assertion·skip 계약과 수집 노드를 바꾸지 않는다. 실제 행위 판단을 옮긴 것이며 전체 ActionPlan/Writer/Graph 전환 완료나 부모 도입 ledger 완료를 뜻하지 않는다.
+
+LG-B3a 최종 후보 검증: **376 passed / 기존 warnings2 / 168.59초**. 원래6보존진단 모두0(protected2139/current2261), 경계746/2489/206legacy, L4 746/14/97, deferred22 PASS. 신규 파일은 실제 `service/independent_topics.py`·`repository/independent_topics.py` 두 개이며 새 수집노드0. 기존 테스트7곳은 monkeypatch 준비 대상만 실제 소유자로 바꾸고 assertion·suppression 전체 동등을 확인했다. 부모의 최초 source 도입 증거 캡처와 다른 owner source 최종 합류는 별도이다.
+
+
+## AR-B4 LG-B3b — 실제 행동 계획·쓰기 의도·예산
+
+원래25함수(1359줄)와 상수3개를 action_plans/writing_plans/action_budgets 실제 서비스로 옮겼다. 원문 AST는 좁은 context 타입과 명시 clip/read 협력 인자만 복원하면 같다. 관찰 항목 선택·필수 글 복원·관계 행동의 증거 판단·unfollow 충돌·하루 글/댓글 제한·멘션/알림 우선순위와 bucket 한도는 그대로다. 기존 LangGraph **186 passed / 6.64초**를 확인했다.
+
+설정 callback은 실제 Routines activity_settings로 연결하고 원래 테스트8개 mock 대상만 해당 모듈로 바꾼다. source/Memory 읽기는 기존 same-Session runtime 협력이며 부모 B5/B7에서 정확히 합류한다. 새 회귀2개는 같은 Session/시각/설정→count 순서, 무제한 count 생략, 추가 commit0을 검사한다. graph/provider 실행은 아직 LG-C의 남은 실제 소유 책임이다.
+
+LG-B3b 최종 고정 후보 검증: **378 passed / 기존 warnings2 / 176.55초**. 원래6보존진단 sources/split/assertions/suppressions/API·ORM/missing-nodes 모두0(protected2139/current2263), 경계750/2507/206legacy, L4 750/14/97, deferred22 PASS. 실제 서비스3개·협력 계약1개와 회귀1파일이 최초 도입되며 새 노드는2개다. 기존 assertion·suppression은 그대로이고 mock 준비 대상8곳만 실제 설정 소유자로 연결했다. 부모의 source 도입 증거 캡처와 B5/B7/runtime 최종 합류는 별도이다.
+
+
+## AR-B4 LG-B4 — 작성 결과와 상태 근거·복구 규칙
+
+원래22함수와 상수2개의 실제 본문을 writer task id, post writer plan/result, 상태 근거·복구 역할로 이전했다. 좁은 입력 타입과 같은 clip/순수 변환 함수 인자만 복원하면 원문 전체 AST가 같다. 원래186 LangGraph 검사 **186 passed / 6.07초**, 기존 테스트 수정0, 실행 전역 함수 누락0을 확인했다.
+
+DirectLlmJsonError인 경우만 자체 validation_summary를 읽는 원래 isinstance 분기는 runtime에 그대로 두며 실제 서비스가 명시적으로 연결된 변환기를 호출한다. 실제 성공·재사용 행동만 fallback 기억 근거에 쓰고, 허용된 필드의 길이 오류만 정제한 뒤 원래 StateWrite 전체 검증을 다시 통과해야 한다. provider 호출·재시도 횟수·기존 prompt payload는 변경하지 않았다. 남은 prompt 판단과 graph/provider 조립은 후속 LG 전환이다.
+
+LG-B4 최종 후보 검증: **378 passed / 기존 warnings2 / 125.78초**. 원래6보존진단 모두0(protected2139/current2263), 경계754/2519/206legacy, L4 754/14/97, deferred22 PASS. 신규 실제 제품4파일이며 새 테스트 노드0·기존 테스트 변경0이다. 원본 frozen과 append-only ledger를 변경하지 않았으며 부모의 source 첫 도입 캡처 후 stock 통합 검증을 진행한다.
+
+
+## AR-B4 LG-B5 — 실제 프롬프트·작업 구성·planner 결과
+
+원문17함수를 resident_prompts/writing_tasks/planner_results로 이전했다. 좁은 persona/state 입력과 같은 도메인의 실제 helper를 연결하는 kwargs만 복원하면 전체 AST와 문구가 같다. provider 호출은 없다. 원래 선택·task id·TopicArc 날짜/근거 조회·writer 순서·JSON 필드를 유지한다.
+
+기존 source inspection의 writer prompt 준비 대상1곳을 runtime partial에서 실제 defining service 함수로 바꿨다. 모든 기존 assertion과 suppression은 동일하며 행동 검사를 삭제하지 않았다. 현재 LG source 전체 소유 지도는 원래294정의의 실제 위치를 이어간다. Memory/Lore/Relationships의 이미 구현된 소유 코드는 복제하지 않으며 부모 합류에서 기존 읽기 협력을 교체한다.
+
+LG-B5 최종 후보 검증: **378 passed / 기존 warnings2 / 115.77초**. 원래6보존진단 모두0(protected2139/current2263), 경계758/2548/206legacy, L4 758/14/97, deferred22 PASS. 신규 제품4파일이며 새 테스트 노드0이다. 원본 frozen·append-only ledger는 유지하며 최초 source 캡처와 다른 소유 구현의 순차 합류는 부모 통합에서 수행한다.
+
+
+## AR-B4 LG-B6 — 관계·대화·쓰기 문맥의 실제 판단
+
+원래16함수와 상수4개를 relationship_context/writing_context/conversation_context의 실제 본문으로 옮겼다. 조건 분기·필터·순서·개수·문자열은 원문과 같고, 구조 값 입력과 동일Session 조회 callback·자기 ActivityLog/시각 구현 경로만 정규화하면 전체 AST가 일치한다. 원래 LangGraph **186 passed / 6.77초**, 기존 테스트 수정0이다.
+
+읽기는 원래 판단 지점에서 수행하며 follow가 허용되지 않거나 source가 없으면 후속 읽기를 생략한다. 대화 부모 순환 차단·조회 실패·마지막6turn과 전날문맥 충족은 원래의 실제 함수에 남는다. B5 Point 상태와 B7 Memory 저장/조회 구현은 복제하지 않고 부모 통합 대상이다. nullable state의 타입만 기존 getattr 동작에 맞게 표현했다. 남은 foreign SQL projection과 graph/provider 조립은 LG-C 실제 소유 전환에서 마무리한다.
+
+LG-B6 최종 후보 검증: **378 passed / 기존 warnings2 / 113.50초**. 원래6보존진단 모두0(protected2139/current2263), 경계762/2564/206legacy, L4 762/14/97, deferred22 PASS. 최초 도입은 실제 제품4파일이며 신규 노드0·기존 테스트 변경0이다. 원본 frozen과 source ledger는 그대로 유지했고 부모의 첫 도입 증거 캡처는 별도로 남아 있다.
+
+
+## AR-B4 LG-C — 실제 조회·graph 실행과 테스트 소유 전환
+
+실제 foreign read/projection10함수는 runtime/resident/langgraph_queries로, 순수 실행 식별자·결과 대응10함수는 Routines execution_results로 이전했다. 같은 구체 모델·Character lookup·timezone 및 명시 helper 인자만 복원하면 원문 전체 AST가 같다. 남은 graph/provider/여러 업무 실행53개 정의는 runtime/resident/langgraph.py에 원문 AST 그대로 있으며, 기존 로깅 category는 명시 문자열로 유지한다. 옛 services/langgraph_resident.py를 제거하고 실제소비자는 runtime/context/GraphState 계약의 defining 경로를 사용한다.
+
+원래 테스트의 LG 관련153함수와 공통 helper10개를 tests/routines/test_resident_graph.py로 옮겼다. 수집된 LG cases166개와 옛 파일의 foreign-owner20개가 원래186개를 보존한다. 원래 DirectLlm fixture18개·AgentWriting1개와 sibling f751611의 readiness1개는 합류 전 원래 파일에 둔다. 따라서 credential synthetic fixture/allowlist/immutable checkpoint 증거를 옮기거나 늘리지 않는다. 원래 assertion과 suppression은 유지하며, 이미 고정된 overload helper/node 지도도 보존한다. 초기 기존 LG·소유별6회귀를 합쳐 **192 passed / 6.72초**다.
+
+보존지도는 원래294LG 정의의 실제목적지를 모두 잇는다. 기존 Memory/공통clip과 Point의 원문 잔여는 함수명·소유·종료조건으로 고정하며 부모 B5/B7 통합이 이미 구현된 서비스를 연결해야 닫힌다. LG source 준비와 GitHub 머지/전체B8 완료를 구분한다.
+
+LG-C 최종 검증: 확장 기존 회귀 **428 passed / 기존 PostgreSQL1 skipped / 기존 warnings3 / 189.69초**. 당시 실패3개는 제거한 LG 파일의 검사 경로2곳이었으며 실제 runtime 경로로 수정한 뒤 해당 아키텍처 검사 **8 passed / 6.20초**를 확인했다. 매개변수 테스트2함수는 frozen에 수집된 정확15노드로 이동지도를 보완했다. 원래6보존진단 source/split/assertion/suppression/API·ORM/node는 전부0(protected2139/current2263), 경계764/2579/205legacy·L4 764/14/97·deferred22 PASS다. 신규 노드0이며 graph 테스트166case는 기존 노드의 위치만 이전했다. 비밀 예외 metadata25개도 그대로 PASS다.
+
+`scripts/verify_m4_contracts.py`의 GraphState 소비는 실제 계약으로 연결했지만, 독립 실행의 옛 148operations/120paths/182schemas snapshot은 현재196/160/266과 달라 실패한다. 이 역사적 baseline을 재작성하지 않았고 현재 source의 API·ORM 보존은 위의 원래6검사에서 따로 동일함을 확인했다. stock 전체 게이트는 부모 최초 source 도입 증거의 선형 합류 뒤에 수행한다.
+
+### AR-B4 후속 통합 — C6 실행·C7 설정·LangGraph LG-C
+
+검증된 main `0e50e0c` 위에 C7-A `3c0fc4a`(C6 `b643b6b` 포함)를 signed merge `0ff08ea`로 합류하고, LG-C `c3c14c03`의 실제 Routines/runtime 소유를 연결했다. `runtime/resident/execution.py`의 두 import는 기존 단일 LangGraph 구현을 `runtime/resident/context.py`와 `langgraph.py`에서 사용한다. 실행 10정의 본문과 두 source가 독립 추가한 context_reads의 16정의는 원래 AST와 동일하다. 같은 파일 이름 때문에 한쪽 계약을 버리지 않았다.
+
+LG 테스트는 원래 node map을 유지하며 Routines 경로로 옮겨졌고, f751의 AgentRun readiness 1node는 tests/routines/test_execution_readiness.py에만 남긴다. 이전 LG 파일에는 아직 별도 소유인 19정의만 유지한다. 원장 JSON은 실제 3-way base로 병합했으며 원래 symbol별 단일 목적지와 실제 multiple destination의 identity를 구분해 경로 변경·소비자 정렬을 함께 보존했다. 자동 inventory는 index 해결 후 실제 tree에서 재생성했다.
+
+최종 고정 tree의 Routines·LangGraph·Social UoW·Package import 회귀 **460 PASS / 5 warnings / 248.61초**. 현재 경계 **802modules / 2758edges / exactlegacy201**, L4 **802modules / 97parity**, deferred runtime **22files** PASS. 원래 source/split/assertion/suppression/APIORM/node 진단은 모두0오류, **protected2260/current2293**이다. main에 이미 기록된 signed869bae 두 경로의 원형을 확인했으며 새 snapshot을 메모리에 추가하지도 않았다. Frozen/checkpoint/additions는 불변이다. 전체 stock capture/Hosted CI/PR/머지는 parent의 순차 통합 단계이며 이 focused 결과로 승격하지 않는다.
+
+C7-B 이후 실제 활동 관리·HTTP와 B5/B7/Lore/Point 최신 협력, G5/G06은 각각 원래 소유 source에서 합류한다. 미전환 협력은 기존 실제 구현을 유지했고 다른 source의 업무 로직을 복제하지 않았다.
