@@ -6,7 +6,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
-from app.core.config import settings
+from app.config import settings
 from app.integrations import bounded_http
 
 

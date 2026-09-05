@@ -12,7 +12,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.domains.identity import models
-from app.core.config import settings
+from app.config import settings
 
 
 FAILURE_WINDOW = timedelta(minutes=15)

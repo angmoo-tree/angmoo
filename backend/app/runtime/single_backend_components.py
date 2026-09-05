@@ -11,7 +11,7 @@ from app.runtime.component_workers import (
     run_projector_component,
     run_scheduler_component,
 )
-from app.core.config import Settings, settings
+from app.config import Settings, settings
 from app.domains.runtime.public import (
     ComponentObservationRegistry,
     RuntimeComponentState,

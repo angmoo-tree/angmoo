@@ -11,7 +11,7 @@ import pytest
 from sqlalchemy.orm import Session
 
 from app import models
-from app.core.config import settings
+from app.config import settings
 from app.domains.relationships.projection.commands import (
     RelationshipStateProjectionCommand,
     SocialEventProjectionCommand,

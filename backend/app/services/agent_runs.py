@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.core import agent_activity_schedule
-from app.core.config import settings
+from app.config import settings
 from app.core.redaction import redact_secret_text, redact_secrets
 from app.core.db import SessionLocal
 from app.credentials import (

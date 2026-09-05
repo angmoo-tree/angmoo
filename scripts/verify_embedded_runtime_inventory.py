@@ -191,6 +191,7 @@ def _postgres_owner(path: str) -> tuple[str, str, str]:
 def build_postgres_inventory() -> dict[str, Any]:
     roots = (
         ROOT / "backend" / "app",
+        ROOT / "backend" / "alembic",
         ROOT / "backend" / "scripts",
         ROOT / "scripts" / "ci",
         ROOT / "compose.yml",
@@ -262,7 +263,7 @@ def _assignment_literals(tree: ast.AST) -> dict[str, object]:
 
 
 def build_migration_inventory() -> dict[str, Any]:
-    directory = ROOT / "backend" / "app" / "alembic" / "versions"
+    directory = ROOT / "backend" / "alembic" / "versions"
     entries: list[dict[str, Any]] = []
     for path in sorted(directory.glob("*.py")):
         text = path.read_text(encoding="utf-8")

@@ -92,8 +92,13 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(_normalized_bytes(path)).hexdigest()
 
 
+# Preserve historical record paths while resolving the unchanged revision after AR-G4.
+ALEMBIC_REVISION_RECORD = "backend/app/alembic/versions/20260831_0086_chat_response_request_lifecycle.py"
+ALEMBIC_REVISION_SOURCE = "backend/alembic/versions/20260831_0086_chat_response_request_lifecycle.py"
+
+
 def _record(relative: str) -> dict[str, Any]:
-    path = ROOT / relative
+    path = ROOT / (ALEMBIC_REVISION_SOURCE if relative == ALEMBIC_REVISION_RECORD else relative)
     if not path.is_file():
         raise InventoryError(f"required file is missing: {relative}")
     data = _normalized_bytes(path)

@@ -1,1015 +1,13 @@
 {
-  "edge_count": 1860,
-  "external_import_count": 2281,
-  "module_count": 679,
+  "edge_count": 1861,
+  "external_import_count": 2012,
+  "module_count": 593,
   "modules": [
     {
       "external_imports": [],
       "imports": [],
       "module": "app",
       "path": "backend/app/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "logging.config",
-        "sqlalchemy"
-      ],
-      "imports": [
-        "app.core.config",
-        "app.core.db",
-        "app.models"
-      ],
-      "module": "app.alembic.env",
-      "path": "backend/app/alembic/env.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260510_0001_initial_community_schema",
-      "path": "backend/app/alembic/versions/20260510_0001_initial_community_schema.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260511_0002_agent_run_credentials",
-      "path": "backend/app/alembic/versions/20260511_0002_agent_run_credentials.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260511_0003_agent_slots",
-      "path": "backend/app/alembic/versions/20260511_0003_agent_slots.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260511_0004_resident_agent_slots",
-      "path": "backend/app/alembic/versions/20260511_0004_resident_agent_slots.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260513_0005_product_slice",
-      "path": "backend/app/alembic/versions/20260513_0005_product_slice.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260513_0006_social_timeline_schema",
-      "path": "backend/app/alembic/versions/20260513_0006_social_timeline_schema.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260514_0007_migrate_comments_to_reply_posts",
-      "path": "backend/app/alembic/versions/20260514_0007_migrate_comments_to_reply_posts.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "re",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260514_0008_character_profile_identity",
-      "path": "backend/app/alembic/versions/20260514_0008_character_profile_identity.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260514_0009_character_banner_url",
-      "path": "backend/app/alembic/versions/20260514_0009_character_banner_url.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260516_0010_agent_action_settings_and_slots",
-      "path": "backend/app/alembic/versions/20260516_0010_agent_action_settings_and_slots.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260516_0011_agent_tendency_analysis",
-      "path": "backend/app/alembic/versions/20260516_0011_agent_tendency_analysis.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260516_0012_llm_credential_model",
-      "path": "backend/app/alembic/versions/20260516_0012_llm_credential_model.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260516_0013_agent_feed_cues",
-      "path": "backend/app/alembic/versions/20260516_0013_agent_feed_cues.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260516_0014_agent_activity_interval",
-      "path": "backend/app/alembic/versions/20260516_0014_agent_activity_interval.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260517_0015_nullable_agent_run_post",
-      "path": "backend/app/alembic/versions/20260517_0015_nullable_agent_run_post.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260519_0016_gemini_flash_lite_only",
-      "path": "backend/app/alembic/versions/20260519_0016_gemini_flash_lite_only.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260519_0017_min_activity_interval_30",
-      "path": "backend/app/alembic/versions/20260519_0017_min_activity_interval_30.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260519_0018_llm_credential_cooldown",
-      "path": "backend/app/alembic/versions/20260519_0018_llm_credential_cooldown.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260520_0019_tree_community",
-      "path": "backend/app/alembic/versions/20260520_0019_tree_community.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260520_0020_google_auth",
-      "path": "backend/app/alembic/versions/20260520_0020_google_auth.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260520_0021_user_profile_setup",
-      "path": "backend/app/alembic/versions/20260520_0021_user_profile_setup.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260520_0022_user_display_name_cooldown",
-      "path": "backend/app/alembic/versions/20260520_0022_user_display_name_cooldown.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260520_0023_user_admin_avatar",
-      "path": "backend/app/alembic/versions/20260520_0023_user_admin_avatar.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260520_0024_drop_user_avatar_url",
-      "path": "backend/app/alembic/versions/20260520_0024_drop_user_avatar_url.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260522_0025_user_deleted_at",
-      "path": "backend/app/alembic/versions/20260522_0025_user_deleted_at.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260522_0026_character_deleted_at",
-      "path": "backend/app/alembic/versions/20260522_0026_character_deleted_at.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260522_0027_user_policy_agreements",
-      "path": "backend/app/alembic/versions/20260522_0027_user_policy_agreements.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "sqlalchemy",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260522_0028_agent_creation_drafts",
-      "path": "backend/app/alembic/versions/20260522_0028_agent_creation_drafts.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "sqlalchemy",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260526_0029_agent_run_gateway_result",
-      "path": "backend/app/alembic/versions/20260526_0029_agent_run_gateway_result.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "sqlalchemy",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260528_0030_post_reports",
-      "path": "backend/app/alembic/versions/20260528_0030_post_reports.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "sqlalchemy",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260529_0031_user_feed_content_filter",
-      "path": "backend/app/alembic/versions/20260529_0031_user_feed_content_filter.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "sqlalchemy",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260529_0032_agent_writing_sampling_settings",
-      "path": "backend/app/alembic/versions/20260529_0032_agent_writing_sampling_settings.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "sqlalchemy",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260529_0033_agent_writing_repetition_level",
-      "path": "backend/app/alembic/versions/20260529_0033_agent_writing_repetition_level.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "sqlalchemy",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260530_0034_local_agent_mode",
-      "path": "backend/app/alembic/versions/20260530_0034_local_agent_mode.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "sqlalchemy",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260530_0035_post_info_metadata",
-      "path": "backend/app/alembic/versions/20260530_0035_post_info_metadata.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260601_0036_character_follow_targets_only",
-      "path": "backend/app/alembic/versions/20260601_0036_character_follow_targets_only.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "pgvector.sqlalchemy",
-        "sqlalchemy",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260604_0037_character_lore_pgvector",
-      "path": "backend/app/alembic/versions/20260604_0037_character_lore_pgvector.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "sqlalchemy",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260605_0038_posts_topic_metadata",
-      "path": "backend/app/alembic/versions/20260605_0038_posts_topic_metadata.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260609_0039_daypart_persistent_session",
-      "path": "backend/app/alembic/versions/20260609_0039_daypart_persistent_session.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260610_0040_agent_public_action_executions",
-      "path": "backend/app/alembic/versions/20260610_0040_agent_public_action_executions.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260610_0041_agent_planner_tendency_profile",
-      "path": "backend/app/alembic/versions/20260610_0041_agent_planner_tendency_profile.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260614_0042_admin_operations",
-      "path": "backend/app/alembic/versions/20260614_0042_admin_operations.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260615_0043_agent_activity_default_limits",
-      "path": "backend/app/alembic/versions/20260615_0043_agent_activity_default_limits.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260615_0044_post_image_generation",
-      "path": "backend/app/alembic/versions/20260615_0044_post_image_generation.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260615_0045_pollinations_post_images",
-      "path": "backend/app/alembic/versions/20260615_0045_pollinations_post_images.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260616_0046_messages_v1",
-      "path": "backend/app/alembic/versions/20260616_0046_messages_v1.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260616_0047_message_default_gemma4_26b",
-      "path": "backend/app/alembic/versions/20260616_0047_message_default_gemma4_26b.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260616_0048_active_hours_presets",
-      "path": "backend/app/alembic/versions/20260616_0048_active_hours_presets.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260616_0049_observe_internal",
-      "path": "backend/app/alembic/versions/20260616_0049_observe_internal.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260617_0050_message_default_gemini25_flash_lite",
-      "path": "backend/app/alembic/versions/20260617_0050_message_default_gemini25_flash_lite.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260617_0051_backfill_unconfigured_message_default",
-      "path": "backend/app/alembic/versions/20260617_0051_backfill_unconfigured_message_default.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260618_0052_local_api_post_image_jobs",
-      "path": "backend/app/alembic/versions/20260618_0052_local_api_post_image_jobs.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "sqlalchemy",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260620_0053_service_image_quota",
-      "path": "backend/app/alembic/versions/20260620_0053_service_image_quota.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260624_0054_agent_relationship_points",
-      "path": "backend/app/alembic/versions/20260624_0054_agent_relationship_points.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260625_0055_character_promotion_usage_consent",
-      "path": "backend/app/alembic/versions/20260625_0055_character_promotion_usage_consent.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260625_0056_agent_activity_reply_limit_30",
-      "path": "backend/app/alembic/versions/20260625_0056_agent_activity_reply_limit_30.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260627_0057_site_operation_settings",
-      "path": "backend/app/alembic/versions/20260627_0057_site_operation_settings.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260705_0058_profile_image_candidates",
-      "path": "backend/app/alembic/versions/20260705_0058_profile_image_candidates.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260721_0059_replicate_image_token",
-      "path": "backend/app/alembic/versions/20260721_0059_replicate_image_token.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260726_0060_local_bot_quota_buckets",
-      "path": "backend/app/alembic/versions/20260726_0060_local_bot_quota_buckets.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260726_0061_auth_login_throttle",
-      "path": "backend/app/alembic/versions/20260726_0061_auth_login_throttle.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260726_0062_external_auth_verification",
-      "path": "backend/app/alembic/versions/20260726_0062_external_auth_verification.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260726_0063_direct_user_like_uniqueness",
-      "path": "backend/app/alembic/versions/20260726_0063_direct_user_like_uniqueness.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260726_0064_google_signup_grants",
-      "path": "backend/app/alembic/versions/20260726_0064_google_signup_grants.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260726_0065_community_mutation_quotas",
-      "path": "backend/app/alembic/versions/20260726_0065_community_mutation_quotas.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260726_0066_lore_parser_leases",
-      "path": "backend/app/alembic/versions/20260726_0066_lore_parser_leases.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260802_0067_unique_resident_character_assignment",
-      "path": "backend/app/alembic/versions/20260802_0067_unique_resident_character_assignment.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260802_0068_message_response_leases",
-      "path": "backend/app/alembic/versions/20260802_0068_message_response_leases.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260804_0069_auth_session_expiry",
-      "path": "backend/app/alembic/versions/20260804_0069_auth_session_expiry.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy",
-        "sqlalchemy.dialects"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260807_0070_world_foundation",
-      "path": "backend/app/alembic/versions/20260807_0070_world_foundation.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "alembic",
-        "collections.abc",
-        "datetime",
-        "hashlib",
-        "json",
-        "sqlalchemy",
-        "unicodedata",
-        "uuid"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260807_0072_angmoo_global_foundation_backfill",
-      "path": "backend/app/alembic/versions/20260807_0072_angmoo_global_foundation_backfill.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy",
-        "sqlalchemy.dialects"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260808_0073_world_character_repertoire",
-      "path": "backend/app/alembic/versions/20260808_0073_world_character_repertoire.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy",
-        "sqlalchemy.dialects"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260809_0074_daily_activity_runtime",
-      "path": "backend/app/alembic/versions/20260809_0074_daily_activity_runtime.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260810_0075_routine_continuous_posts",
-      "path": "backend/app/alembic/versions/20260810_0075_routine_continuous_posts.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "re",
-        "sqlalchemy",
-        "sqlalchemy.dialects",
-        "unicodedata"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260811_0076_world_keyword_feed",
-      "path": "backend/app/alembic/versions/20260811_0076_world_keyword_feed.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy",
-        "sqlalchemy.dialects"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260811_0077_social_events_relationships",
-      "path": "backend/app/alembic/versions/20260811_0077_social_events_relationships.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260812_0078_graph_projection_replay_runs",
-      "path": "backend/app/alembic/versions/20260812_0078_graph_projection_replay_runs.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260815_0079_local_owner_identity",
-      "path": "backend/app/alembic/versions/20260815_0079_local_owner_identity.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy",
-        "uuid"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260816_0080_scheduler_singleton",
-      "path": "backend/app/alembic/versions/20260816_0080_scheduler_singleton.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260818_0081_owner_controlled_world_character",
-      "path": "backend/app/alembic/versions/20260818_0081_owner_controlled_world_character.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260819_0082_owner_manual_social_inbox",
-      "path": "backend/app/alembic/versions/20260819_0082_owner_manual_social_inbox.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [],
-      "module": "app.alembic.versions.20260825_0083_world_package_registry",
-      "path": "backend/app/alembic/versions/20260825_0083_world_package_registry.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [
-        "app.domains.chat.infrastructure.world_scope_migration"
-      ],
-      "module": "app.alembic.versions.20260831_0084_world_scoped_chat_identity",
-      "path": "backend/app/alembic/versions/20260831_0084_world_scoped_chat_identity.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc"
-      ],
-      "imports": [
-        "app.domains.memory.infrastructure.sqlalchemy_models"
-      ],
-      "module": "app.alembic.versions.20260831_0085_canonical_memory_schema",
-      "path": "backend/app/alembic/versions/20260831_0085_canonical_memory_schema.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc"
-      ],
-      "imports": [
-        "app.domains.chat.infrastructure.sqlalchemy_models"
-      ],
-      "module": "app.alembic.versions.20260831_0086_chat_response_request_lifecycle",
-      "path": "backend/app/alembic/versions/20260831_0086_chat_response_request_lifecycle.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc",
-        "sqlalchemy"
-      ],
-      "imports": [
-        "app.domains.chat.infrastructure.model_binding_migration"
-      ],
-      "module": "app.alembic.versions.20260903_0087_world_chat_model_binding",
-      "path": "backend/app/alembic/versions/20260903_0087_world_chat_model_binding.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic",
-        "collections.abc"
-      ],
-      "imports": [
-        "app.domains.social.infrastructure.sqlalchemy_subjective_context_models"
-      ],
-      "module": "app.alembic.versions.20260904_0088_social_action_subjective_context",
-      "path": "backend/app/alembic/versions/20260904_0088_social_action_subjective_context.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "alembic"
-      ],
-      "imports": [
-        "app.core.db",
-        "app.domains.memory.infrastructure.batch_models"
-      ],
-      "module": "app.alembic.versions.20260904_0089_memory_batch",
-      "path": "backend/app/alembic/versions/20260904_0089_memory_batch.py",
       "wildcard_imports": []
     },
     {
@@ -1277,7 +275,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.domains.identity.browser_session",
         "app.domains.identity.dependencies",
@@ -1312,7 +310,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.domains.identity.dependencies",
         "app.domains.relationships.public",
@@ -1370,7 +368,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.domains.chat.public",
         "app.domains.identity.browser_session",
@@ -1462,6 +460,18 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "pathlib",
+        "pydantic",
+        "pydantic_settings",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.config",
+      "path": "backend/app/config.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.contracts.core_experience"
@@ -1515,23 +525,11 @@
         "zoneinfo"
       ],
       "imports": [
-        "app.core.active_hours",
-        "app.core.config"
+        "app.config",
+        "app.core.active_hours"
       ],
       "module": "app.core.agent_activity_schedule",
       "path": "backend/app/core/agent_activity_schedule.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "pathlib",
-        "pydantic",
-        "pydantic_settings",
-        "typing"
-      ],
-      "imports": [],
-      "module": "app.core.config",
-      "path": "backend/app/core/config.py",
       "wildcard_imports": []
     },
     {
@@ -1542,7 +540,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config"
+        "app.config"
       ],
       "module": "app.core.db",
       "path": "backend/app/core/db.py",
@@ -1610,7 +608,7 @@
         "fastapi.staticfiles"
       ],
       "imports": [
-        "app.core.config"
+        "app.config"
       ],
       "module": "app.core.public_media",
       "path": "backend/app/core/public_media.py",
@@ -1635,7 +633,9 @@
         "starlette.types",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.exceptions"
+      ],
       "module": "app.core.request_limits",
       "path": "backend/app/core/request_limits.py",
       "wildcard_imports": []
@@ -1672,7 +672,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config"
+        "app.config"
       ],
       "module": "app.core.security",
       "path": "backend/app/core/security.py",
@@ -1692,7 +692,9 @@
         "time",
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.exceptions"
+      ],
       "module": "app.core.sqlite_concurrency",
       "path": "backend/app/core/sqlite_concurrency.py",
       "wildcard_imports": []
@@ -1793,9 +795,9 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.config",
         "app.core.active_hours",
         "app.core.agent_activity_limits",
-        "app.core.config",
         "app.core.search_text",
         "app.core.security",
         "app.core.unit_of_work",
@@ -2619,7 +1621,6 @@
     {
       "external_imports": [
         "__future__",
-        "base64",
         "binascii",
         "datetime",
         "json",
@@ -2630,7 +1631,8 @@
       "imports": [
         "app.domains.device_home.contracts",
         "app.domains.device_home.exceptions",
-        "app.domains.device_home.policies"
+        "app.domains.device_home.policies",
+        "app.pagination"
       ],
       "module": "app.domains.device_home.repository",
       "path": "backend/app/domains/device_home/repository.py",
@@ -2701,7 +1703,7 @@
         "urllib.parse"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.desktop_loopback",
         "app.domains.identity.exceptions"
       ],
@@ -2719,7 +1721,7 @@
         "urllib.request"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.identity.exceptions",
         "app.integrations.bounded_http"
       ],
@@ -2832,7 +1834,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.domains.identity.browser_session",
         "app.domains.identity.client",
@@ -2855,7 +1857,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.domains.identity.browser_session",
         "app.domains.identity.exceptions",
@@ -2902,7 +1904,7 @@
         "uuid"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.security",
         "app.domains.identity.constants",
         "app.domains.identity.contracts",
@@ -2951,7 +1953,7 @@
     {
       "external_imports": [],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.identity.exceptions",
         "app.domains.identity.models"
       ],
@@ -2974,7 +1976,7 @@
         "uuid"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.identity.exceptions",
         "app.domains.identity.models"
       ],
@@ -3019,7 +2021,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.identity.models"
       ],
       "module": "app.domains.identity.service.login_throttle",
@@ -4559,7 +3561,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.runtime.domain.diagnostic_codes",
         "app.domains.runtime.domain.installation_state"
       ],
@@ -6430,7 +5432,7 @@
         "warnings"
       ],
       "imports": [
-        "app.core.config"
+        "app.config"
       ],
       "module": "app.domains.worlds.infrastructure.world_banner_storage",
       "path": "backend/app/domains/worlds/infrastructure/world_banner_storage.py",
@@ -6449,6 +5451,13 @@
       ],
       "module": "app.domains.worlds.public",
       "path": "backend/app/domains/worlds/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.exceptions",
+      "path": "backend/app/exceptions.py",
       "wildcard_imports": []
     },
     {
@@ -6483,7 +5492,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.redaction",
         "app.providers.contracts",
         "app.providers.gemini",
@@ -6669,12 +5678,13 @@
       ],
       "imports": [
         "app.api.v1.public",
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.core.public_media",
         "app.core.request_limits",
         "app.cruds.community",
         "app.runtime.account_deletion",
+        "app.runtime.logging_config",
         "app.runtime.single_backend_components",
         "app.runtime.startup_security",
         "app.services.hosted_configuration"
@@ -6956,6 +5966,15 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "base64"
+      ],
+      "imports": [],
+      "module": "app.pagination",
+      "path": "backend/app/pagination.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.policies",
@@ -7056,7 +6075,7 @@
       ],
       "imports": [
         "app.api.v1.public",
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.core.public_media",
         "app.core.request_limits",
@@ -7068,6 +6087,7 @@
         "app.runtime.account_deletion",
         "app.runtime.component_workers",
         "app.runtime.configuration",
+        "app.runtime.logging_config",
         "app.runtime.memory.batch_runtime",
         "app.runtime.memory.shutdown",
         "app.runtime.memory_selection_provider",
@@ -7101,7 +6121,7 @@
         "uuid"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.redaction",
         "app.cruds.agent_runs",
         "app.domains.identity.constants",
@@ -7254,7 +6274,7 @@
         "uuid"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.chat.api.schemas",
         "app.domains.chat.application",
         "app.domains.chat.domain",
@@ -7290,7 +6310,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.domains.relationships.ports.projection",
         "app.runtime.graph_projection.process_client",
@@ -7311,7 +6331,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.domains.identity.service.local_owner",
         "app.domains.memory.public",
@@ -7340,6 +6360,7 @@
         "app.domains.runtime.public",
         "app.public_main",
         "app.runtime.configuration",
+        "app.runtime.logging_config",
         "app.runtime.migrations.embedded_data",
         "app.runtime.persistence.runtime_data_path"
       ],
@@ -7369,6 +6390,7 @@
         "app.public_main",
         "app.runtime.configuration",
         "app.runtime.installer_update",
+        "app.runtime.logging_config",
         "app.runtime.migrations.embedded_data",
         "app.runtime.migrations.local_app_data",
         "app.runtime.persistence.runtime_data_path"
@@ -7405,7 +6427,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.relationships.ports.projection",
         "app.integrations.ladybug_projection"
       ],
@@ -7420,7 +6442,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.relationships.graph_read.errors",
         "app.domains.relationships.graph_read.repository",
         "app.domains.relationships.graph_read.schemas",
@@ -7467,7 +6489,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.relationships.public",
         "app.models",
         "app.runtime.graph_projection.relationship_graph_read",
@@ -7572,6 +6594,19 @@
       ],
       "module": "app.runtime.installer_update",
       "path": "backend/app/runtime/installer_update.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "configparser",
+        "logging",
+        "pathlib",
+        "sys"
+      ],
+      "imports": [],
+      "module": "app.runtime.logging_config",
+      "path": "backend/app/runtime/logging_config.py",
       "wildcard_imports": []
     },
     {
@@ -8114,6 +7149,7 @@
       "external_imports": [],
       "imports": [
         "app.core.sqlite_concurrency",
+        "app.exceptions",
         "app.runtime.persistence.runtime_data_path",
         "app.runtime.persistence.sqlalchemy_unit_of_work",
         "app.runtime.persistence.sqlite_database",
@@ -8397,7 +7433,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.runtime.public",
         "app.runtime.component_workers"
       ],
@@ -8445,7 +7481,6 @@
     {
       "external_imports": [
         "__future__",
-        "base64",
         "binascii",
         "collections",
         "cryptography.exceptions",
@@ -8460,9 +7495,10 @@
         "typing"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.domains.social.public",
         "app.domains.world_characters.public",
+        "app.pagination",
         "app.runtime.social.sqlalchemy_read_repository"
       ],
       "module": "app.runtime.social.sqlalchemy_profile_repository",
@@ -8527,6 +7563,7 @@
         "app.domains.social.domain.writes",
         "app.domains.social.infrastructure.sqlalchemy_models",
         "app.domains.world_characters.public",
+        "app.exceptions",
         "app.models",
         "app.schemas.community",
         "app.services.community"
@@ -8565,7 +7602,7 @@
         "urllib.parse"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.security",
         "app.domains.identity.browser_session",
         "app.domains.identity.exceptions"
@@ -8894,7 +7931,7 @@
         "uuid"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.redaction",
         "app.core.security",
         "app.credentials",
@@ -8941,8 +7978,8 @@
         "zoneinfo"
       ],
       "imports": [
+        "app.config",
         "app.core.agent_activity_schedule",
-        "app.core.config",
         "app.core.db",
         "app.core.redaction",
         "app.credentials",
@@ -8983,7 +8020,7 @@
         "zoneinfo"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
@@ -9012,8 +8049,8 @@
         "uuid"
       ],
       "imports": [
+        "app.config",
         "app.core.active_hours",
-        "app.core.config",
         "app.core.image_generation",
         "app.core.redaction",
         "app.core.security",
@@ -9025,6 +8062,7 @@
         "app.cruds.community",
         "app.domains.identity.service.demo_access",
         "app.domains.world_characters.public",
+        "app.exceptions",
         "app.models",
         "app.policies.name_policy",
         "app.runtime.memory_privacy",
@@ -9135,7 +8173,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.models"
       ],
       "module": "app.services.community_abuse_quota",
@@ -9274,7 +8312,7 @@
         "unicodedata"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.redaction",
         "app.core.unit_of_work",
         "app.credentials",
@@ -9388,7 +8426,7 @@
         "uuid"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.models"
       ],
       "module": "app.services.lore_parser_quota",
@@ -9400,7 +8438,7 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.models",
         "app.schemas"
       ],
@@ -9428,7 +8466,7 @@
         "typing"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.models"
       ],
       "module": "app.services.operation_settings",
@@ -9451,7 +8489,7 @@
         "urllib.request"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.integrations.bounded_http",
         "app.services.provider_http"
       ],
@@ -9473,7 +8511,7 @@
         "urllib.parse"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.image_generation",
         "app.core.security",
         "app.credentials",
@@ -9503,7 +8541,7 @@
         "logging"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.cruds.community",
         "app.models",
@@ -9526,7 +8564,7 @@
         "warnings"
       ],
       "imports": [
-        "app.core.config"
+        "app.config"
       ],
       "module": "app.services.profile_media",
       "path": "backend/app/services/profile_media.py",
@@ -9575,7 +8613,7 @@
         "urllib.request"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.integrations.bounded_http",
         "app.services.provider_http"
       ],
@@ -9616,7 +8654,7 @@
         "uuid"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.db",
         "app.domains.runtime.public",
         "app.schemas",
@@ -9677,7 +8715,7 @@
         "__future__"
       ],
       "imports": [
-        "app.core.config",
+        "app.config",
         "app.core.image_generation",
         "app.core.security",
         "app.credentials"

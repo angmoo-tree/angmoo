@@ -16,14 +16,14 @@ from app.domains.identity.router import auth as auth_routes
 from app.domains.identity import browser_session
 from app.core import security
 from app.core.desktop_loopback import DESKTOP_WEBVIEW_AUTHENTICATED_SCOPE_KEY
-from app.core.config import settings
+from app.config import settings
 from app.domains.identity.service import auth as auth_service
 
 
 ALLOWED_ORIGIN = "http://127.0.0.1:3000"
 MIGRATION_PATH = (
     Path(__file__).resolve().parents[2]
-    / "app/alembic/versions/20260804_0069_auth_session_expiry.py"
+    / "alembic/versions/20260804_0069_auth_session_expiry.py"
 )
 
 

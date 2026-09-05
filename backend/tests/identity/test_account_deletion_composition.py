@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from starlette.requests import Request
 
 from app import main, models, public_main
-from app.core.config import settings
+from app.config import settings
 from app.core.db import Base
 from app.domains.identity import dependencies, schemas
 from app.domains.identity.service import auth

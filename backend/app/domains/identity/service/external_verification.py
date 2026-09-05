@@ -12,7 +12,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from app.domains.identity import models
-from app.core.config import settings
+from app.config import settings
 
 
 PROVIDER_GOOGLE = "google"

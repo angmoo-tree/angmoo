@@ -16,7 +16,7 @@ from app.domains.identity import (
     client as turnstile,
 )
 from app.core.db import get_db
-from app.core.config import settings
+from app.config import settings
 from app.domains.identity.service import (
     auth as auth_service,
     demo_access as demo_lock,

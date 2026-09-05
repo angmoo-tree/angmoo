@@ -7,7 +7,7 @@ from typing import Protocol
 from zoneinfo import ZoneInfo
 
 from app.core import active_hours
-from app.core.config import settings
+from app.config import settings
 
 
 APP_TIMEZONE = ZoneInfo("Asia/Seoul")

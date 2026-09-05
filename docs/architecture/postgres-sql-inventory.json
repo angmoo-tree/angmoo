@@ -8,7 +8,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260511_0003_agent_slots.py",
+      "path": "backend/alembic/versions/20260511_0003_agent_slots.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "6d49b780efc3c3c8e326a13b4afedad2ec538804a41364583286235927f94f20",
       "transition_pr": "ER2 PR G"
@@ -20,7 +20,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260516_0013_agent_feed_cues.py",
+      "path": "backend/alembic/versions/20260516_0013_agent_feed_cues.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "e21cbc208d6380f35ded1198129136c4d0c1b18341f3e59e868f0c8f83eb889a",
       "transition_pr": "ER2 PR G"
@@ -32,7 +32,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260530_0034_local_agent_mode.py",
+      "path": "backend/alembic/versions/20260530_0034_local_agent_mode.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "15ca97a843f21890b883e5992602b1bc6ec219245a720b04368f40e0bbbb5a4d",
       "transition_pr": "ER2 PR G"
@@ -46,7 +46,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260604_0037_character_lore_pgvector.py",
+      "path": "backend/alembic/versions/20260604_0037_character_lore_pgvector.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "1dafe3f55ae6bb40dc4ecdd7b642f83b31fb8b22968b589bda2f33c8efdb2782",
       "transition_pr": "ER2 PR G"
@@ -58,7 +58,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260605_0038_posts_topic_metadata.py",
+      "path": "backend/alembic/versions/20260605_0038_posts_topic_metadata.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "7bcc37b2286711d7f5565789fcc327e22cdd7552866644ac15d9819f22c3ede4",
       "transition_pr": "ER2 PR G"
@@ -72,7 +72,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260616_0046_messages_v1.py",
+      "path": "backend/alembic/versions/20260616_0046_messages_v1.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "7ae15de22fe71fd6a403c07256e74ef92e4cc79359030e16c2704a5cd21108ae",
       "transition_pr": "ER2 PR G"
@@ -84,7 +84,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260726_0063_direct_user_like_uniqueness.py",
+      "path": "backend/alembic/versions/20260726_0063_direct_user_like_uniqueness.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "0287d299d24b1f311bc42dd52f1db1a8ee12637bd2bdd225011ffb51f139ceb5",
       "transition_pr": "ER2 PR G"
@@ -96,7 +96,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260802_0067_unique_resident_character_assignment.py",
+      "path": "backend/alembic/versions/20260802_0067_unique_resident_character_assignment.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "20f3089e70651f35d72734c78dc3ca962ccc3ecdc995d54b3e45c91aac213598",
       "transition_pr": "ER2 PR G"
@@ -128,7 +128,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260807_0070_world_foundation.py",
+      "path": "backend/alembic/versions/20260807_0070_world_foundation.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "044ecb158b83815076ab520906c66c42bea662989cd8afc262bba91425abbe9f",
       "transition_pr": "ER2 PR G"
@@ -147,7 +147,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260808_0073_world_character_repertoire.py",
+      "path": "backend/alembic/versions/20260808_0073_world_character_repertoire.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "ff3aa135b269c56b75c6a826875b93fb94fca809ff84eff299393a139e5e6948",
       "transition_pr": "ER2 PR G"
@@ -164,7 +164,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260809_0074_daily_activity_runtime.py",
+      "path": "backend/alembic/versions/20260809_0074_daily_activity_runtime.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "7b7d7862d2a8adfeaa1a0c6da947168ed59302a086f596f31a33749f42e5d59b",
       "transition_pr": "ER2 PR G"
@@ -185,7 +185,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260811_0076_world_keyword_feed.py",
+      "path": "backend/alembic/versions/20260811_0076_world_keyword_feed.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "0baed5ebdb428c158e464efea53c4131013a0b136a7cc6eb2595817330455080",
       "transition_pr": "ER2 PR G"
@@ -204,7 +204,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260811_0077_social_events_relationships.py",
+      "path": "backend/alembic/versions/20260811_0077_social_events_relationships.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "00ff5f8966d202c7de14aa5407de8e543bd7562a53be18a9bb73fbdff50c82c0",
       "transition_pr": "ER2 PR G"
@@ -216,7 +216,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260812_0078_graph_projection_replay_runs.py",
+      "path": "backend/alembic/versions/20260812_0078_graph_projection_replay_runs.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "2fc65c41f5d9ab2bdeebc33a8a5a3369ca495dc536fad8606904f3d73abefaa3",
       "transition_pr": "ER2 PR G"
@@ -228,7 +228,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260815_0079_local_owner_identity.py",
+      "path": "backend/alembic/versions/20260815_0079_local_owner_identity.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "eefebd462d25944a973f643539aa715f1e299709782d450800d8220d5f14b259",
       "transition_pr": "ER2 PR G"
@@ -240,7 +240,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260818_0081_owner_controlled_world_character.py",
+      "path": "backend/alembic/versions/20260818_0081_owner_controlled_world_character.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "51aefaba031795ceae52baad1ecab9722c2d6c46a7da9d3dde4850d43862c1ed",
       "transition_pr": "ER2 PR G"
@@ -254,7 +254,7 @@
         ]
       },
       "owner": "ER2",
-      "path": "backend/app/alembic/versions/20260831_0084_world_scoped_chat_identity.py",
+      "path": "backend/alembic/versions/20260831_0084_world_scoped_chat_identity.py",
       "removal_condition": "SQLite migration parity and synthetic upgrade/rollback/restore PASS",
       "source_sha256": "66262435a719a64d93a3485c5b3127d2d1fe521d12cee6768e919822cf9214e5",
       "transition_pr": "ER2 PR G"
@@ -325,7 +325,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/cruds/community.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "9508dffad905bd5863c8c5e6ca77cd1b76569ae1b3993cbdde9d3dfdbf8972e6",
+      "source_sha256": "97ef9826633ed1077de483f54ef2ae804bd7ef41710645f70a6fbb1bf8caa4fe",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -375,7 +375,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/identity/service/auth.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "0c1c45ad61198dc65a886b8c2faa18229d3ca46d68a0ae7d93031935be46a831",
+      "source_sha256": "c216e59c5b152c384c57f2923f71b2ea1f5e7b868d5305ff435e2828950df437",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -391,7 +391,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/identity/service/external_verification.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "b57c862899b77ede8663999e5dbcdcb249e90050c42a95e3ddc8cac7a888967b",
+      "source_sha256": "a435535059fbf647c9be15cd7a8eb78316c8ecf2a3219f363ba96510b52e171f",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -417,7 +417,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/identity/service/login_throttle.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "64608b876e1f0ef5eab5b29b7ac0adddb1d4024bfff261b897dae6f659fb5bf2",
+      "source_sha256": "d00ec43bc29aed985ff2d8b6d59b274c7a86872613f4c0e9c9bb9af22403352d",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -777,7 +777,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/chat/world_generation.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "cf92fe25ec96fe9de0f27b8a12db5232bb7ac799221947c4ce50ef97854f3d1b",
+      "source_sha256": "1a8c51bcb24c886f52efacf2a9b48366658ef0f2f8a79569cb0aad10d3073d0f",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -899,7 +899,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "742ccb031920abde7e3316f2a875f1f8e2737f26a6b051a8d302f1c811531f8c",
+      "source_sha256": "6ff06f375a971181fb4ec4fe13db2676055ddc76bcde4588538644221626c168",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -963,24 +963,24 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/agent_creation_drafts.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "5d5d85e9b05ea7dfc70ee1031d4e0a8066d3b4fe2c3e85cdcc435a1852f4e102",
+      "source_sha256": "9db47420210f30557d46b02c196f26e09a7d8e2bf161a07680968b2332dd6e79",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
       "markers": {
         "advisory_lock": [
-          561,
-          3089
+          559,
+          3087
         ],
         "driver_or_url": [
-          558,
-          3080
+          556,
+          3078
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/agents.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "17768f4772dec55287476cd7e09a4ed3c251f4b89e2bfa4100e1f26e76a4442d",
+      "source_sha256": "39bbf4efe0126204516a851f3e618bc287b8c4fbacdcbed253223e19ae8afddf",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1008,7 +1008,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/community_abuse_quota.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "e3f1250d6945e80c7456dc6f3afb26f93801046a61c307a80ead42cdb802489a",
+      "source_sha256": "7bc2eeb4617ed8987fc80dc97716b396be74286efc514f2006b77fab402b13e6",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1084,7 +1084,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/services/lore_parser_quota.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "3fc781ea9ccb0caff9a1986e99da09de91abaaefcbd4585019630bd55e746033",
+      "source_sha256": "181d4ce325f93d1086860eae06eed5aa16a116b0d4c6fba3b269e98df3fbe7cc",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1119,7 +1119,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/scripts/migrate_local_credentials.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "143b8873fb4ba992a84d7de15e0220b347e7ce85305ab6a02088f02ddb7d5fd9",
+      "source_sha256": "f9a49c24e9b98d345279fe849209262de99ee6f81613629ed2dbbc610ae41ea0",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

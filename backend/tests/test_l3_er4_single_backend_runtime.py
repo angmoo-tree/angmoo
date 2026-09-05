@@ -269,7 +269,7 @@ def test_fastapi_lifespan_repairs_before_component_start_and_owns_stop(
     monkeypatch,
 ) -> None:
     calls: list[str] = []
-    from app.core.config import settings
+    from app.config import settings
 
     monkeypatch.setattr(settings, "SEED_DEMO_DATA", False)
 
@@ -300,7 +300,7 @@ def test_fastapi_lifespan_repairs_before_component_start_and_owns_stop(
 def test_projector_publishes_process_graph_client_for_its_exact_lifetime(
     monkeypatch,
 ) -> None:
-    from app.core.config import settings
+    from app.config import settings
     from app.runtime import component_workers
 
     calls: list[str] = []

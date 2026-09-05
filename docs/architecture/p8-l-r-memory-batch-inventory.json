@@ -224,15 +224,15 @@
     },
     {
       "path": "backend/app/public_main.py",
-      "sha256": "c04dadf4e4f6950ed16c40e1f64d582800d19bfc8000611f6fda0ee29aaab098"
+      "sha256": "8c882f4cf692ca1d2f7cd479f8d93fc53d7a803f0d22c97cdbd4a174880f8d72"
     },
     {
       "path": "backend/app/runtime/account_deletion.py",
-      "sha256": "53598bca46faed571a41d36e887dadc76404c215bb39752bf2aed9f7bfc132e2"
+      "sha256": "22d84ece18130d4ca04bd462054c6c32437788a58dce693ced100602e183e1f5"
     },
     {
       "path": "backend/app/runtime/desktop_sidecar.py",
-      "sha256": "62d7048116e3eda4b9281408232297ec568a7e19f43f0d7b77d70e6fe4c37fa3"
+      "sha256": "202d5af6af0a90076c87c9d915ba675a50b7c620beb877fd024ded83f8420a54"
     },
     {
       "path": "backend/app/runtime/memory/__init__.py",
@@ -292,11 +292,11 @@
     },
     {
       "path": "backend/app/runtime/single_backend_components.py",
-      "sha256": "1cd8f5e7caeca95f633c3f2f1809623fee3b545bfa4e31930fcb96a931704e1d"
+      "sha256": "8da1ec46358cc86f07709458a33ed98234e643e6b0e903d5fcd7e71ed160bf08"
     },
     {
       "path": "backend/app/services/agents.py",
-      "sha256": "17768f4772dec55287476cd7e09a4ed3c251f4b89e2bfa4100e1f26e76a4442d"
+      "sha256": "39bbf4efe0126204516a851f3e618bc287b8c4fbacdcbed253223e19ae8afddf"
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_api.py",

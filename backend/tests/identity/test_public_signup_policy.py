@@ -10,7 +10,7 @@ from app.public_main import (
     app as public_app,
     validate_public_runtime_settings,
 )
-from app.core.config import settings
+from app.config import settings
 
 
 def _operations(app) -> set[tuple[str, str]]:

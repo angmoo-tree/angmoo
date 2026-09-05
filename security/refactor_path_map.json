@@ -30,6 +30,99 @@
     "frontend/src/features/device-home/ui/device-home.module.css": "frontend/src/features/device-home/components/device-home.module.css",
     "frontend/src/features/device-home/ui/device-home-shell.tsx": "frontend/src/composition/screens/device-home-shell.tsx",
     "frontend/src/features/device-home/ui/device-home-shell.module.css": "frontend/src/composition/screens/device-home-shell.module.css",
+    "backend/app/core/config.py": "backend/app/config.py",
+    "backend/tests/test_startup_security.py": "backend/tests/config/test_startup_security.py",
+    "backend/tests/test_request_body_limits.py": "backend/tests/common/test_request_body_limits.py",
+    "backend/app/alembic/env.py": "backend/alembic/env.py",
+    "backend/app/alembic/script.py.mako": "backend/alembic/script.py.mako",
+    "backend/app/alembic/versions/20260510_0001_initial_community_schema.py": "backend/alembic/versions/20260510_0001_initial_community_schema.py",
+    "backend/app/alembic/versions/20260511_0002_agent_run_credentials.py": "backend/alembic/versions/20260511_0002_agent_run_credentials.py",
+    "backend/app/alembic/versions/20260511_0003_agent_slots.py": "backend/alembic/versions/20260511_0003_agent_slots.py",
+    "backend/app/alembic/versions/20260511_0004_resident_agent_slots.py": "backend/alembic/versions/20260511_0004_resident_agent_slots.py",
+    "backend/app/alembic/versions/20260513_0005_product_slice.py": "backend/alembic/versions/20260513_0005_product_slice.py",
+    "backend/app/alembic/versions/20260513_0006_social_timeline_schema.py": "backend/alembic/versions/20260513_0006_social_timeline_schema.py",
+    "backend/app/alembic/versions/20260514_0007_migrate_comments_to_reply_posts.py": "backend/alembic/versions/20260514_0007_migrate_comments_to_reply_posts.py",
+    "backend/app/alembic/versions/20260514_0008_character_profile_identity.py": "backend/alembic/versions/20260514_0008_character_profile_identity.py",
+    "backend/app/alembic/versions/20260514_0009_character_banner_url.py": "backend/alembic/versions/20260514_0009_character_banner_url.py",
+    "backend/app/alembic/versions/20260516_0010_agent_action_settings_and_slots.py": "backend/alembic/versions/20260516_0010_agent_action_settings_and_slots.py",
+    "backend/app/alembic/versions/20260516_0011_agent_tendency_analysis.py": "backend/alembic/versions/20260516_0011_agent_tendency_analysis.py",
+    "backend/app/alembic/versions/20260516_0012_llm_credential_model.py": "backend/alembic/versions/20260516_0012_llm_credential_model.py",
+    "backend/app/alembic/versions/20260516_0013_agent_feed_cues.py": "backend/alembic/versions/20260516_0013_agent_feed_cues.py",
+    "backend/app/alembic/versions/20260516_0014_agent_activity_interval.py": "backend/alembic/versions/20260516_0014_agent_activity_interval.py",
+    "backend/app/alembic/versions/20260517_0015_nullable_agent_run_post.py": "backend/alembic/versions/20260517_0015_nullable_agent_run_post.py",
+    "backend/app/alembic/versions/20260519_0016_gemini_flash_lite_only.py": "backend/alembic/versions/20260519_0016_gemini_flash_lite_only.py",
+    "backend/app/alembic/versions/20260519_0017_min_activity_interval_30.py": "backend/alembic/versions/20260519_0017_min_activity_interval_30.py",
+    "backend/app/alembic/versions/20260519_0018_llm_credential_cooldown.py": "backend/alembic/versions/20260519_0018_llm_credential_cooldown.py",
+    "backend/app/alembic/versions/20260520_0019_tree_community.py": "backend/alembic/versions/20260520_0019_tree_community.py",
+    "backend/app/alembic/versions/20260520_0020_google_auth.py": "backend/alembic/versions/20260520_0020_google_auth.py",
+    "backend/app/alembic/versions/20260520_0021_user_profile_setup.py": "backend/alembic/versions/20260520_0021_user_profile_setup.py",
+    "backend/app/alembic/versions/20260520_0022_user_display_name_cooldown.py": "backend/alembic/versions/20260520_0022_user_display_name_cooldown.py",
+    "backend/app/alembic/versions/20260520_0023_user_admin_avatar.py": "backend/alembic/versions/20260520_0023_user_admin_avatar.py",
+    "backend/app/alembic/versions/20260520_0024_drop_user_avatar_url.py": "backend/alembic/versions/20260520_0024_drop_user_avatar_url.py",
+    "backend/app/alembic/versions/20260522_0025_user_deleted_at.py": "backend/alembic/versions/20260522_0025_user_deleted_at.py",
+    "backend/app/alembic/versions/20260522_0026_character_deleted_at.py": "backend/alembic/versions/20260522_0026_character_deleted_at.py",
+    "backend/app/alembic/versions/20260522_0027_user_policy_agreements.py": "backend/alembic/versions/20260522_0027_user_policy_agreements.py",
+    "backend/app/alembic/versions/20260522_0028_agent_creation_drafts.py": "backend/alembic/versions/20260522_0028_agent_creation_drafts.py",
+    "backend/app/alembic/versions/20260526_0029_agent_run_gateway_result.py": "backend/alembic/versions/20260526_0029_agent_run_gateway_result.py",
+    "backend/app/alembic/versions/20260528_0030_post_reports.py": "backend/alembic/versions/20260528_0030_post_reports.py",
+    "backend/app/alembic/versions/20260529_0031_user_feed_content_filter.py": "backend/alembic/versions/20260529_0031_user_feed_content_filter.py",
+    "backend/app/alembic/versions/20260529_0032_agent_writing_sampling_settings.py": "backend/alembic/versions/20260529_0032_agent_writing_sampling_settings.py",
+    "backend/app/alembic/versions/20260529_0033_agent_writing_repetition_level.py": "backend/alembic/versions/20260529_0033_agent_writing_repetition_level.py",
+    "backend/app/alembic/versions/20260530_0034_local_agent_mode.py": "backend/alembic/versions/20260530_0034_local_agent_mode.py",
+    "backend/app/alembic/versions/20260530_0035_post_info_metadata.py": "backend/alembic/versions/20260530_0035_post_info_metadata.py",
+    "backend/app/alembic/versions/20260601_0036_character_follow_targets_only.py": "backend/alembic/versions/20260601_0036_character_follow_targets_only.py",
+    "backend/app/alembic/versions/20260604_0037_character_lore_pgvector.py": "backend/alembic/versions/20260604_0037_character_lore_pgvector.py",
+    "backend/app/alembic/versions/20260605_0038_posts_topic_metadata.py": "backend/alembic/versions/20260605_0038_posts_topic_metadata.py",
+    "backend/app/alembic/versions/20260609_0039_daypart_persistent_session.py": "backend/alembic/versions/20260609_0039_daypart_persistent_session.py",
+    "backend/app/alembic/versions/20260610_0040_agent_public_action_executions.py": "backend/alembic/versions/20260610_0040_agent_public_action_executions.py",
+    "backend/app/alembic/versions/20260610_0041_agent_planner_tendency_profile.py": "backend/alembic/versions/20260610_0041_agent_planner_tendency_profile.py",
+    "backend/app/alembic/versions/20260614_0042_admin_operations.py": "backend/alembic/versions/20260614_0042_admin_operations.py",
+    "backend/app/alembic/versions/20260615_0043_agent_activity_default_limits.py": "backend/alembic/versions/20260615_0043_agent_activity_default_limits.py",
+    "backend/app/alembic/versions/20260615_0044_post_image_generation.py": "backend/alembic/versions/20260615_0044_post_image_generation.py",
+    "backend/app/alembic/versions/20260615_0045_pollinations_post_images.py": "backend/alembic/versions/20260615_0045_pollinations_post_images.py",
+    "backend/app/alembic/versions/20260616_0046_messages_v1.py": "backend/alembic/versions/20260616_0046_messages_v1.py",
+    "backend/app/alembic/versions/20260616_0047_message_default_gemma4_26b.py": "backend/alembic/versions/20260616_0047_message_default_gemma4_26b.py",
+    "backend/app/alembic/versions/20260616_0048_active_hours_presets.py": "backend/alembic/versions/20260616_0048_active_hours_presets.py",
+    "backend/app/alembic/versions/20260616_0049_observe_internal.py": "backend/alembic/versions/20260616_0049_observe_internal.py",
+    "backend/app/alembic/versions/20260617_0050_message_default_gemini25_flash_lite.py": "backend/alembic/versions/20260617_0050_message_default_gemini25_flash_lite.py",
+    "backend/app/alembic/versions/20260617_0051_backfill_unconfigured_message_default.py": "backend/alembic/versions/20260617_0051_backfill_unconfigured_message_default.py",
+    "backend/app/alembic/versions/20260618_0052_local_api_post_image_jobs.py": "backend/alembic/versions/20260618_0052_local_api_post_image_jobs.py",
+    "backend/app/alembic/versions/20260620_0053_service_image_quota.py": "backend/alembic/versions/20260620_0053_service_image_quota.py",
+    "backend/app/alembic/versions/20260624_0054_agent_relationship_points.py": "backend/alembic/versions/20260624_0054_agent_relationship_points.py",
+    "backend/app/alembic/versions/20260625_0055_character_promotion_usage_consent.py": "backend/alembic/versions/20260625_0055_character_promotion_usage_consent.py",
+    "backend/app/alembic/versions/20260625_0056_agent_activity_reply_limit_30.py": "backend/alembic/versions/20260625_0056_agent_activity_reply_limit_30.py",
+    "backend/app/alembic/versions/20260627_0057_site_operation_settings.py": "backend/alembic/versions/20260627_0057_site_operation_settings.py",
+    "backend/app/alembic/versions/20260705_0058_profile_image_candidates.py": "backend/alembic/versions/20260705_0058_profile_image_candidates.py",
+    "backend/app/alembic/versions/20260721_0059_replicate_image_token.py": "backend/alembic/versions/20260721_0059_replicate_image_token.py",
+    "backend/app/alembic/versions/20260726_0060_local_bot_quota_buckets.py": "backend/alembic/versions/20260726_0060_local_bot_quota_buckets.py",
+    "backend/app/alembic/versions/20260726_0061_auth_login_throttle.py": "backend/alembic/versions/20260726_0061_auth_login_throttle.py",
+    "backend/app/alembic/versions/20260726_0062_external_auth_verification.py": "backend/alembic/versions/20260726_0062_external_auth_verification.py",
+    "backend/app/alembic/versions/20260726_0063_direct_user_like_uniqueness.py": "backend/alembic/versions/20260726_0063_direct_user_like_uniqueness.py",
+    "backend/app/alembic/versions/20260726_0064_google_signup_grants.py": "backend/alembic/versions/20260726_0064_google_signup_grants.py",
+    "backend/app/alembic/versions/20260726_0065_community_mutation_quotas.py": "backend/alembic/versions/20260726_0065_community_mutation_quotas.py",
+    "backend/app/alembic/versions/20260726_0066_lore_parser_leases.py": "backend/alembic/versions/20260726_0066_lore_parser_leases.py",
+    "backend/app/alembic/versions/20260802_0067_unique_resident_character_assignment.py": "backend/alembic/versions/20260802_0067_unique_resident_character_assignment.py",
+    "backend/app/alembic/versions/20260802_0068_message_response_leases.py": "backend/alembic/versions/20260802_0068_message_response_leases.py",
+    "backend/app/alembic/versions/20260804_0069_auth_session_expiry.py": "backend/alembic/versions/20260804_0069_auth_session_expiry.py",
+    "backend/app/alembic/versions/20260807_0070_world_foundation.py": "backend/alembic/versions/20260807_0070_world_foundation.py",
+    "backend/app/alembic/versions/20260807_0072_angmoo_global_foundation_backfill.py": "backend/alembic/versions/20260807_0072_angmoo_global_foundation_backfill.py",
+    "backend/app/alembic/versions/20260808_0073_world_character_repertoire.py": "backend/alembic/versions/20260808_0073_world_character_repertoire.py",
+    "backend/app/alembic/versions/20260809_0074_daily_activity_runtime.py": "backend/alembic/versions/20260809_0074_daily_activity_runtime.py",
+    "backend/app/alembic/versions/20260810_0075_routine_continuous_posts.py": "backend/alembic/versions/20260810_0075_routine_continuous_posts.py",
+    "backend/app/alembic/versions/20260811_0076_world_keyword_feed.py": "backend/alembic/versions/20260811_0076_world_keyword_feed.py",
+    "backend/app/alembic/versions/20260811_0077_social_events_relationships.py": "backend/alembic/versions/20260811_0077_social_events_relationships.py",
+    "backend/app/alembic/versions/20260812_0078_graph_projection_replay_runs.py": "backend/alembic/versions/20260812_0078_graph_projection_replay_runs.py",
+    "backend/app/alembic/versions/20260815_0079_local_owner_identity.py": "backend/alembic/versions/20260815_0079_local_owner_identity.py",
+    "backend/app/alembic/versions/20260816_0080_scheduler_singleton.py": "backend/alembic/versions/20260816_0080_scheduler_singleton.py",
+    "backend/app/alembic/versions/20260818_0081_owner_controlled_world_character.py": "backend/alembic/versions/20260818_0081_owner_controlled_world_character.py",
+    "backend/app/alembic/versions/20260819_0082_owner_manual_social_inbox.py": "backend/alembic/versions/20260819_0082_owner_manual_social_inbox.py",
+    "backend/app/alembic/versions/20260825_0083_world_package_registry.py": "backend/alembic/versions/20260825_0083_world_package_registry.py",
+    "backend/app/alembic/versions/20260831_0084_world_scoped_chat_identity.py": "backend/alembic/versions/20260831_0084_world_scoped_chat_identity.py",
+    "backend/app/alembic/versions/20260831_0085_canonical_memory_schema.py": "backend/alembic/versions/20260831_0085_canonical_memory_schema.py",
+    "backend/app/alembic/versions/20260831_0086_chat_response_request_lifecycle.py": "backend/alembic/versions/20260831_0086_chat_response_request_lifecycle.py",
+    "backend/app/alembic/versions/20260903_0087_world_chat_model_binding.py": "backend/alembic/versions/20260903_0087_world_chat_model_binding.py",
+    "backend/app/alembic/versions/20260904_0088_social_action_subjective_context.py": "backend/alembic/versions/20260904_0088_social_action_subjective_context.py",
+    "backend/app/alembic/versions/20260904_0089_memory_batch.py": "backend/alembic/versions/20260904_0089_memory_batch.py",
     "backend/app/domains/identity/domain/local_owner.py": "backend/app/domains/identity/contracts.py",
     "backend/app/domains/identity/domain/credential.py": "backend/app/domains/identity/contracts.py",
     "backend/app/domains/identity/api/schemas.py": "backend/app/domains/identity/schemas.py",
@@ -82,6 +175,34 @@
     "tests/test_l2_5_device_home_world_surface.py::test_world_app_read_has_zero_writes_and_zero_provider_calls": "tests/device_home/test_world_surface.py::test_world_app_read_has_zero_writes_and_zero_provider_calls",
     "tests/test_l2_5_device_home_world_surface.py::test_world_app_read_is_exact_owner_scoped_and_launchable": "tests/device_home/test_world_surface.py::test_world_app_read_is_exact_owner_scoped_and_launchable",
     "tests/test_l2_5_device_home_world_surface.py::test_world_app_read_requires_owner_and_active_membership": "tests/device_home/test_world_surface.py::test_world_app_read_requires_owner_and_active_membership",
+    "tests/test_startup_security.py::test_hosted_lifespan_registers_runtime_adapter_only_while_running": "tests/config/test_startup_security.py::test_hosted_lifespan_registers_runtime_adapter_only_while_running",
+    "tests/test_startup_security.py::test_kms_preflight_fails_closed_without_exposing_probe_material[exception]": "tests/config/test_startup_security.py::test_kms_preflight_fails_closed_without_exposing_probe_material[exception]",
+    "tests/test_startup_security.py::test_kms_preflight_fails_closed_without_exposing_probe_material[mismatch]": "tests/config/test_startup_security.py::test_kms_preflight_fails_closed_without_exposing_probe_material[mismatch]",
+    "tests/test_startup_security.py::test_lifespan_security_failure_happens_before_database_seed_or_workers": "tests/config/test_startup_security.py::test_lifespan_security_failure_happens_before_database_seed_or_workers",
+    "tests/test_startup_security.py::test_local_desktop_startup_accepts_embedded_security_contract": "tests/config/test_startup_security.py::test_local_desktop_startup_accepts_embedded_security_contract",
+    "tests/test_startup_security.py::test_local_desktop_startup_rejects_drifted_security_configuration[overrides0-unsafe_app_secret]": "tests/config/test_startup_security.py::test_local_desktop_startup_rejects_drifted_security_configuration[overrides0-unsafe_app_secret]",
+    "tests/test_startup_security.py::test_local_desktop_startup_rejects_drifted_security_configuration[overrides1-unsafe_credential_provider]": "tests/config/test_startup_security.py::test_local_desktop_startup_rejects_drifted_security_configuration[overrides1-unsafe_credential_provider]",
+    "tests/test_startup_security.py::test_local_desktop_startup_rejects_drifted_security_configuration[overrides2-local_database_required]": "tests/config/test_startup_security.py::test_local_desktop_startup_rejects_drifted_security_configuration[overrides2-local_database_required]",
+    "tests/test_startup_security.py::test_local_desktop_startup_rejects_drifted_security_configuration[overrides3-local_desktop_token_required]": "tests/config/test_startup_security.py::test_local_desktop_startup_rejects_drifted_security_configuration[overrides3-local_desktop_token_required]",
+    "tests/test_startup_security.py::test_local_desktop_startup_rejects_drifted_security_configuration[overrides4-local_desktop_origin_invalid]": "tests/config/test_startup_security.py::test_local_desktop_startup_rejects_drifted_security_configuration[overrides4-local_desktop_origin_invalid]",
+    "tests/test_startup_security.py::test_local_desktop_startup_rejects_drifted_security_configuration[overrides5-local_api_docs_forbidden]": "tests/config/test_startup_security.py::test_local_desktop_startup_rejects_drifted_security_configuration[overrides5-local_api_docs_forbidden]",
+    "tests/test_startup_security.py::test_local_desktop_startup_rejects_drifted_security_configuration[overrides6-local_signup_forbidden]": "tests/config/test_startup_security.py::test_local_desktop_startup_rejects_drifted_security_configuration[overrides6-local_signup_forbidden]",
+    "tests/test_startup_security.py::test_nonproduction_startup_does_not_probe_kms[development]": "tests/config/test_startup_security.py::test_nonproduction_startup_does_not_probe_kms[development]",
+    "tests/test_startup_security.py::test_nonproduction_startup_does_not_probe_kms[test]": "tests/config/test_startup_security.py::test_nonproduction_startup_does_not_probe_kms[test]",
+    "tests/test_startup_security.py::test_production_startup_accepts_matching_fake_kms_round_trip": "tests/config/test_startup_security.py::test_production_startup_accepts_matching_fake_kms_round_trip",
+    "tests/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides0-unsafe_app_secret]": "tests/config/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides0-unsafe_app_secret]",
+    "tests/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides1-unsafe_credential_provider]": "tests/config/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides1-unsafe_credential_provider]",
+    "tests/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides2-unsafe_credential_provider]": "tests/config/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides2-unsafe_credential_provider]",
+    "tests/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides3-unsafe_credential_provider]": "tests/config/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides3-unsafe_credential_provider]",
+    "tests/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides4-missing_kms_config]": "tests/config/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides4-missing_kms_config]",
+    "tests/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides5-missing_kms_config]": "tests/config/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides5-missing_kms_config]",
+    "tests/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides6-missing_kms_config]": "tests/config/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides6-missing_kms_config]",
+    "tests/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides7-invalid_kms_endpoint]": "tests/config/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides7-invalid_kms_endpoint]",
+    "tests/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides8-invalid_kms_endpoint]": "tests/config/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides8-invalid_kms_endpoint]",
+    "tests/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides9-invalid_oci_auth_mode]": "tests/config/test_startup_security.py::test_production_startup_rejects_unsafe_security_configuration[overrides9-invalid_oci_auth_mode]",
+    "tests/test_request_body_limits.py::test_request_body_limit_classifies_large_upload_routes": "tests/common/test_request_body_limits.py::test_request_body_limit_classifies_large_upload_routes",
+    "tests/test_request_body_limits.py::test_default_body_limit_rejects_content_length_before_route": "tests/common/test_request_body_limits.py::test_default_body_limit_rejects_content_length_before_route",
+    "tests/test_request_body_limits.py::test_default_body_limit_accepts_exact_boundary": "tests/common/test_request_body_limits.py::test_default_body_limit_accepts_exact_boundary",
     "tests/test_demo_account_lock.py::test_demo_principal_blocks_unsafe_http_methods[POST]": "tests/identity/test_demo_account_lock.py::test_demo_principal_blocks_unsafe_http_methods[POST]",
     "tests/test_demo_account_lock.py::test_normal_principal_remains_mutable": "tests/identity/test_demo_account_lock.py::test_normal_principal_remains_mutable",
     "tests/test_demo_account_lock.py::test_account_delete_route_returns_403_for_locked_demo_user": "tests/identity/test_demo_account_lock.py::test_account_delete_route_returns_403_for_locked_demo_user",
@@ -263,6 +384,655 @@
           "composition/screens/device-home-screen.tsx"
         ]
       }
+    },
+    "AR-G1": {
+      "reason": "Move the single Settings implementation to app.config while preserving backend-root dotenv, SQLite, media and graph defaults. Every active consumer imports the new global module.",
+      "compatibility": "No app.core.config alias remains. Old references are frozen history or explicit checker fixtures, not runtime consumers.",
+      "removed_paths": [
+        "backend/app/core/config.py"
+      ],
+      "consumers": [
+        "backend/app/alembic/env.py",
+        "backend/app/api/v1/routes/auth.py",
+        "backend/app/api/v1/routes/runtime_status.py",
+        "backend/app/api/v1/routes/world_activity_runtime.py",
+        "backend/app/api/v1/routes/world_chat_response.py",
+        "backend/app/core/agent_activity_schedule.py",
+        "backend/app/core/browser_session.py",
+        "backend/app/core/db.py",
+        "backend/app/core/public_media.py",
+        "backend/app/core/security.py",
+        "backend/app/core/startup_security.py",
+        "backend/app/cruds/community.py",
+        "backend/app/domains/identity/api/local_routes.py",
+        "backend/app/domains/runtime/infrastructure/sqlalchemy_application_runtime_probe.py",
+        "backend/app/domains/worlds/infrastructure/world_banner_storage.py",
+        "backend/app/integrations/direct_llm.py",
+        "backend/app/main.py",
+        "backend/app/public_main.py",
+        "backend/app/runtime/chat/world_generation.py",
+        "backend/app/runtime/component_workers.py",
+        "backend/app/runtime/configuration.py",
+        "backend/app/runtime/graph_projection/process_client.py",
+        "backend/app/runtime/graph_projection/relationship_graph_read.py",
+        "backend/app/runtime/graph_projection/social_memory_read.py",
+        "backend/app/runtime/single_backend_components.py",
+        "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+        "backend/app/services/agent_creation_drafts.py",
+        "backend/app/services/agent_runs.py",
+        "backend/app/services/agent_writing.py",
+        "backend/app/services/agents.py",
+        "backend/app/services/auth.py",
+        "backend/app/services/community_abuse_quota.py",
+        "backend/app/services/demo_lock.py",
+        "backend/app/services/external_auth_verification.py",
+        "backend/app/services/langgraph_resident.py",
+        "backend/app/services/login_throttle.py",
+        "backend/app/services/lore_parser_quota.py",
+        "backend/app/services/maintenance.py",
+        "backend/app/services/operation_settings.py",
+        "backend/app/services/pollinations_image.py",
+        "backend/app/services/post_image_generation.py",
+        "backend/app/services/post_image_job_worker.py",
+        "backend/app/services/profile_media.py",
+        "backend/app/services/replicate_image.py",
+        "backend/app/services/resident_tick_scheduler.py",
+        "backend/app/services/service_image_key.py",
+        "backend/app/services/turnstile.py",
+        "backend/scripts/migrate_local_credentials.py",
+        "backend/tests/config/test_startup_security.py",
+        "backend/tests/test_agent_activity_limits.py",
+        "backend/tests/test_auth_session_contract.py",
+        "backend/tests/test_browser_session_security.py",
+        "backend/tests/test_demo_account_lock.py",
+        "backend/tests/test_l1_local_v2_credentials.py",
+        "backend/tests/test_l3_er3_graph_query_parity.py",
+        "backend/tests/test_l3_er4_single_backend_runtime.py",
+        "backend/tests/test_l3_er5_desktop_sidecar_security.py",
+        "backend/tests/test_l3_er7_runtime_composition.py",
+        "backend/tests/test_m3_authorization_deletion.py",
+        "backend/tests/test_m3_credential_privacy.py",
+        "backend/tests/test_m4_public_runtime.py",
+        "backend/tests/test_p8_l_i_graph_recall.py",
+        "backend/tests/test_post_image_generation.py",
+        "backend/tests/test_postgres_security_concurrency.py",
+        "backend/tests/test_private_preview_media.py",
+        "backend/tests/test_profile_media.py",
+        "backend/tests/test_public_signup_policy.py",
+        "backend/tests/test_relationship_graph_api.py",
+        "backend/tests/test_relationship_graph_domain_public.py",
+        "backend/tests/test_turnstile.py",
+        "backend/tests/test_world_creator_routes.py"
+      ],
+      "test_move": "Only the startup-security suite moves into tests/config; other tests retain their domain/runtime ownership."
+    },
+    "AR-G2": {
+      "reason": "Extract existing shared exception identities and byte-only cursor encoding. Preserve original modules as the owners of retry/ASGI/query/crypto behavior.",
+      "split_files": {
+        "backend/app/core/sqlite_concurrency.py": [
+          "backend/app/core/sqlite_concurrency.py",
+          "backend/app/exceptions.py"
+        ],
+        "backend/app/core/request_limits.py": [
+          "backend/app/core/request_limits.py",
+          "backend/app/exceptions.py"
+        ],
+        "backend/app/domains/device_home/repository.py": [
+          "backend/app/domains/device_home/repository.py",
+          "backend/app/pagination.py"
+        ],
+        "backend/app/runtime/social/sqlalchemy_profile_repository.py": [
+          "backend/app/runtime/social/sqlalchemy_profile_repository.py",
+          "backend/app/pagination.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/core/sqlite_concurrency.py::T",
+          "new": "backend/app/core/sqlite_concurrency.py::T",
+          "direct_consumers": [
+            "backend/app/core/sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_shared_sqlite_errors_preserve_existing_catch_identity"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/sqlite_concurrency.py::SqliteConcurrencyError",
+          "new": "backend/app/exceptions.py::SqliteConcurrencyError",
+          "direct_consumers": [
+            "backend/app/core/sqlite_concurrency.py",
+            "backend/app/runtime/persistence/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_shared_sqlite_errors_preserve_existing_catch_identity"
+          ],
+          "disposition": "shared class definition moved; identical object re-exported"
+        },
+        {
+          "old": "backend/app/core/sqlite_concurrency.py::SqliteBusyRetryExhausted",
+          "new": "backend/app/exceptions.py::SqliteBusyRetryExhausted",
+          "direct_consumers": [
+            "backend/app/core/sqlite_concurrency.py",
+            "backend/app/runtime/persistence/__init__.py",
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/services/agents.py",
+            "backend/tests/test_l3_er2_sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_shared_sqlite_errors_preserve_existing_catch_identity"
+          ],
+          "disposition": "shared class definition moved; identical object re-exported"
+        },
+        {
+          "old": "backend/app/core/sqlite_concurrency.py::SqliteTaskQueueFull",
+          "new": "backend/app/exceptions.py::SqliteTaskQueueFull",
+          "direct_consumers": [
+            "backend/app/core/sqlite_concurrency.py",
+            "backend/app/runtime/persistence/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_shared_sqlite_errors_preserve_existing_catch_identity"
+          ],
+          "disposition": "shared class definition moved; identical object re-exported"
+        },
+        {
+          "old": "backend/app/core/sqlite_concurrency.py::SqliteRetryPolicy",
+          "new": "backend/app/core/sqlite_concurrency.py::SqliteRetryPolicy",
+          "direct_consumers": [
+            "backend/app/core/sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_shared_sqlite_errors_preserve_existing_catch_identity"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/sqlite_concurrency.py::run_sqlite_immediate",
+          "new": "backend/app/core/sqlite_concurrency.py::run_sqlite_immediate",
+          "direct_consumers": [
+            "backend/app/core/sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_shared_sqlite_errors_preserve_existing_catch_identity"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/sqlite_concurrency.py::run_sqlite_session_immediate",
+          "new": "backend/app/core/sqlite_concurrency.py::run_sqlite_session_immediate",
+          "direct_consumers": [
+            "backend/app/core/sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_shared_sqlite_errors_preserve_existing_catch_identity"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/sqlite_concurrency.py::_set_busy_timeout",
+          "new": "backend/app/core/sqlite_concurrency.py::_set_busy_timeout",
+          "direct_consumers": [
+            "backend/app/core/sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_shared_sqlite_errors_preserve_existing_catch_identity"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/sqlite_concurrency.py::SqliteBoundedTaskQueue",
+          "new": "backend/app/core/sqlite_concurrency.py::SqliteBoundedTaskQueue",
+          "direct_consumers": [
+            "backend/app/core/sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_shared_sqlite_errors_preserve_existing_catch_identity"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/sqlite_concurrency.py::_is_busy_error",
+          "new": "backend/app/core/sqlite_concurrency.py::_is_busy_error",
+          "direct_consumers": [
+            "backend/app/core/sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_shared_sqlite_errors_preserve_existing_catch_identity"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/sqlite_concurrency.py::__all__",
+          "new": "backend/app/core/sqlite_concurrency.py::__all__",
+          "direct_consumers": [
+            "backend/app/core/sqlite_concurrency.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_shared_sqlite_errors_preserve_existing_catch_identity"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/request_limits.py::DEFAULT_REQUEST_BODY_MAX_BYTES",
+          "new": "backend/app/core/request_limits.py::DEFAULT_REQUEST_BODY_MAX_BYTES",
+          "direct_consumers": [
+            "backend/app/core/request_limits.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/request_limits.py::LORE_UPLOAD_REQUEST_BODY_MAX_BYTES",
+          "new": "backend/app/core/request_limits.py::LORE_UPLOAD_REQUEST_BODY_MAX_BYTES",
+          "direct_consumers": [
+            "backend/app/core/request_limits.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/request_limits.py::PROFILE_MEDIA_REQUEST_BODY_MAX_BYTES",
+          "new": "backend/app/core/request_limits.py::PROFILE_MEDIA_REQUEST_BODY_MAX_BYTES",
+          "direct_consumers": [
+            "backend/app/core/request_limits.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/request_limits.py::WORLD_PACKAGE_UPLOAD_REQUEST_BODY_MAX_BYTES",
+          "new": "backend/app/core/request_limits.py::WORLD_PACKAGE_UPLOAD_REQUEST_BODY_MAX_BYTES",
+          "direct_consumers": [
+            "backend/app/core/request_limits.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/request_limits.py::_LORE_UPLOAD_PATH",
+          "new": "backend/app/core/request_limits.py::_LORE_UPLOAD_PATH",
+          "direct_consumers": [
+            "backend/app/core/request_limits.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/request_limits.py::_DRAFT_MEDIA_PATH",
+          "new": "backend/app/core/request_limits.py::_DRAFT_MEDIA_PATH",
+          "direct_consumers": [
+            "backend/app/core/request_limits.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/request_limits.py::_PROFILE_MEDIA_PATH",
+          "new": "backend/app/core/request_limits.py::_PROFILE_MEDIA_PATH",
+          "direct_consumers": [
+            "backend/app/core/request_limits.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/request_limits.py::_IMAGE_SEED_PATH",
+          "new": "backend/app/core/request_limits.py::_IMAGE_SEED_PATH",
+          "direct_consumers": [
+            "backend/app/core/request_limits.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/request_limits.py::_WORLD_PACKAGE_STAGE_PATH",
+          "new": "backend/app/core/request_limits.py::_WORLD_PACKAGE_STAGE_PATH",
+          "direct_consumers": [
+            "backend/app/core/request_limits.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/request_limits.py::RequestBodyTooLargeError",
+          "new": "backend/app/exceptions.py::RequestBodyTooLargeError",
+          "direct_consumers": [
+            "backend/app/core/request_limits.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks"
+          ],
+          "disposition": "shared class definition moved; identical object re-exported"
+        },
+        {
+          "old": "backend/app/core/request_limits.py::RequestBodyLimitMiddleware",
+          "new": "backend/app/core/request_limits.py::RequestBodyLimitMiddleware",
+          "direct_consumers": [
+            "backend/app/core/request_limits.py",
+            "backend/app/main.py",
+            "backend/app/public_main.py",
+            "backend/tests/common/test_request_body_limits.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/request_limits.py::request_body_limit",
+          "new": "backend/app/core/request_limits.py::request_body_limit",
+          "direct_consumers": [
+            "backend/app/core/request_limits.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/request_limits.py::_content_length",
+          "new": "backend/app/core/request_limits.py::_content_length",
+          "direct_consumers": [
+            "backend/app/core/request_limits.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/core/request_limits.py::_send_too_large",
+          "new": "backend/app/core/request_limits.py::_send_too_large",
+          "direct_consumers": [
+            "backend/app/core/request_limits.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/domains/device_home/repository.py::LOCAL_INSTALLATION_KEY",
+          "new": "backend/app/domains/device_home/repository.py::LOCAL_INSTALLATION_KEY",
+          "direct_consumers": [
+            "backend/app/domains/device_home/repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_device_home_decodes_existing_cursor_and_emits_identical_bytes"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/domains/device_home/repository.py::SqlAlchemyWorldSurfaceRepository",
+          "new": "backend/app/domains/device_home/repository.py::SqlAlchemyWorldSurfaceRepository",
+          "direct_consumers": [
+            "backend/app/domains/device_home/repository.py",
+            "backend/app/domains/device_home/service.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_device_home_decodes_existing_cursor_and_emits_identical_bytes"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/domains/device_home/repository.py::_surface_item",
+          "new": "backend/app/domains/device_home/repository.py::_surface_item",
+          "direct_consumers": [
+            "backend/app/domains/device_home/repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_device_home_decodes_existing_cursor_and_emits_identical_bytes"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/domains/device_home/repository.py::_encode_cursor",
+          "new": "backend/app/domains/device_home/repository.py::_encode_cursor",
+          "direct_consumers": [
+            "backend/app/domains/device_home/repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_device_home_decodes_existing_cursor_and_emits_identical_bytes"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/domains/device_home/repository.py::_decode_cursor",
+          "new": "backend/app/domains/device_home/repository.py::_decode_cursor",
+          "direct_consumers": [
+            "backend/app/domains/device_home/repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_device_home_decodes_existing_cursor_and_emits_identical_bytes"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/domains/device_home/repository.py::_encode_cursor",
+          "new": "backend/app/pagination.py::encode_cursor_bytes",
+          "direct_consumers": [
+            "backend/app/domains/device_home/repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_device_home_decodes_existing_cursor_and_emits_identical_bytes"
+          ],
+          "disposition": "byte codec extracted; domain wrapper, payload and error handling survive at original symbol"
+        },
+        {
+          "old": "backend/app/domains/device_home/repository.py::_decode_cursor",
+          "new": "backend/app/pagination.py::decode_cursor_bytes",
+          "direct_consumers": [
+            "backend/app/domains/device_home/repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_device_home_decodes_existing_cursor_and_emits_identical_bytes"
+          ],
+          "disposition": "byte codec extracted; domain wrapper, payload and error handling survive at original symbol"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_CURSOR_VERSION",
+          "new": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_CURSOR_VERSION",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_CURSOR_AAD",
+          "new": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_CURSOR_AAD",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_CURSOR_NONCE_BYTES",
+          "new": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_CURSOR_NONCE_BYTES",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_MENTION_HANDLE_RE",
+          "new": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_MENTION_HANDLE_RE",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
+          "new": "backend/app/runtime/social/sqlalchemy_profile_repository.py::SqlAlchemyWorldCharacterSocialProfileReader",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/manual_social.py",
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_encode_cursor",
+          "new": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_encode_cursor",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_decode_cursor",
+          "new": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_decode_cursor",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_cursor_key",
+          "new": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_cursor_key",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::__all__",
+          "new": "backend/app/runtime/social/sqlalchemy_profile_repository.py::__all__",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
+          ],
+          "disposition": "retained in existing concrete owner"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_encode_cursor",
+          "new": "backend/app/pagination.py::encode_cursor_bytes",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
+          ],
+          "disposition": "byte codec extracted; domain wrapper, payload and error handling survive at original symbol"
+        },
+        {
+          "old": "backend/app/runtime/social/sqlalchemy_profile_repository.py::_decode_cursor",
+          "new": "backend/app/pagination.py::decode_cursor_bytes",
+          "direct_consumers": [
+            "backend/app/runtime/social/sqlalchemy_profile_repository.py"
+          ],
+          "test_nodes": [
+            "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque"
+          ],
+          "disposition": "byte codec extracted; domain wrapper, payload and error handling survive at original symbol"
+        }
+      ],
+      "compatibility": "Original core modules re-export the same error class objects while retaining their real execution implementations. No duplicate classes or broad old-to-new implementation aliases."
+    },
+    "AR-G3": {
+      "reason": "Connect the former Python root default and Uvicorn default console configuration to a packaged logging.ini while retaining desktop opt-out and existing host handlers. No original source file is removed in this stage.",
+      "added_files": [
+        "backend/logging.ini",
+        "backend/app/runtime/logging_config.py",
+        "backend/tests/logging/test_runtime_logging.py"
+      ],
+      "direct_consumers": [
+        "backend/app/main.py",
+        "backend/app/public_main.py",
+        "backend/app/runtime/contributor_backend.py",
+        "backend/app/runtime/desktop_sidecar.py",
+        "Dockerfile.backend",
+        "desktop/scripts/build-sidecar.ps1"
+      ],
+      "scope": "Existing app.runtime ownership; no new migrated domain/global scope or boundary exception.",
+      "compatibility": "Existing ASGI targets and create_app contracts remain; desktop log_config=None/access_log=False unchanged.",
+      "verification_nodes": [
+        "tests/logging/test_runtime_logging.py::test_ini_preserves_uvicorn_defaults_and_root_warning_without_handlers",
+        "tests/logging/test_runtime_logging.py::test_repeated_factories_preserve_embedding_handlers_levels_and_caplog",
+        "tests/logging/test_runtime_logging.py::test_explicit_root_level_without_handlers_is_preserved",
+        "tests/logging/test_runtime_logging.py::test_source_resource_is_independent_of_working_directory",
+        "tests/logging/test_runtime_logging.py::test_frozen_onefile_and_onedir_read_only_the_bundle_resource[_MEI12345]",
+        "tests/logging/test_runtime_logging.py::test_frozen_onefile_and_onedir_read_only_the_bundle_resource[sidecar/_internal]",
+        "tests/logging/test_runtime_logging.py::test_ini_is_consumed_and_invalid_configuration_fails_before_startup",
+        "tests/logging/test_runtime_logging.py::test_noconsole_subprocess_with_missing_stdio_has_no_formatter_crash",
+        "tests/logging/test_runtime_logging.py::test_missing_bundle_resource_keeps_content_free_sidecar_fatal_protocol",
+        "tests/logging/test_runtime_logging.py::test_contributor_server_and_reload_child_receive_the_same_logging_configuration[False]",
+        "tests/logging/test_runtime_logging.py::test_contributor_server_and_reload_child_receive_the_same_logging_configuration[True]",
+        "tests/logging/test_runtime_logging.py::test_public_and_legacy_cli_keep_their_existing_asgi_target",
+        "tests/logging/test_runtime_logging.py::test_installer_json_stdout_and_existing_redaction_are_unchanged",
+        "tests/logging/test_runtime_logging.py::test_sidecar_serve_health_and_shutdown_preserve_silent_streams_and_endpoint_protocol",
+        "tests/logging/test_runtime_logging.py::test_container_and_both_pyinstaller_layouts_include_logging_resource"
+      ],
+      "remaining": "Full packaged product/installer and required CI after sequential integration; final G12 closeout in B8-B."
+    },
+    "AR-G4": {
+      "scope": "Physical Alembic layout: all 88 immutable revisions, env.py and script.py.mako; no schema or revision graph change. ER0 retains its existing 87-revision historical subset excluding 20260825_0083.",
+      "source_file_count": 90,
+      "retired_legacy_edges": [
+        {
+          "importer": "app.alembic.env",
+          "imported": "app.models",
+          "reason": "env.py moved outside the app package to backend/alembic/env.py; metadata registration remains required and is exercised through Alembic."
+        }
+      ],
+      "current_consumers": [
+        "backend/alembic.ini",
+        "Dockerfile.backend",
+        "scripts/verify_embedded_runtime_inventory.py",
+        "scripts/ci/generate_p8_l_a_inventory.py",
+        "scripts/ci/generate_p8_l_b_chat_domain_inventory.py",
+        "scripts/ci/generate_p8_l_d_world_chat_inventory.py",
+        ".gitleaks.toml"
+      ],
+      "history": "Frozen inventory record paths and JSON remain unchanged. Historical revision readers resolve the moved source explicitly.",
+      "verification": "tests/migrations/test_alembic_layout.py checks PR263 revision Git blobs, actual Alembic graph, external-cwd CLI, and metadata registration on a real in-memory SQLite connection without executing historical upgrades.",
+      "remaining": "AR-G5 must reconnect and revalidate the final app.models Base and model registration. G13 final completion and PR/merge/Actions are not claimed by this physical move.",
+      "security": "Add only the exact new 0072 revision path to the existing fixed-marker Gitleaks allowance; retain the old path for history scans. No secret-value or rule widening."
     },
     "AR-B2-identity": {
       "status": "IMPLEMENTED; focused behavior/guard/public node checks PASS; source capture, integrated validation, PR and merge pending",

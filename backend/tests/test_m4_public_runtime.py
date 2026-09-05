@@ -4,7 +4,7 @@ from fastapi import APIRouter
 import httpx
 import pytest
 
-from app.core.config import settings
+from app.config import settings
 from app.public_main import (
     HostedBackendExtension,
     HostedExtensionConfigurationError,

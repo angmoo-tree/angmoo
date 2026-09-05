@@ -9,7 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.core.config import Settings, settings
+from app.config import Settings, settings
 from app.domains.runtime.domain.diagnostic_codes import RuntimeDiagnosticCode
 from app.domains.runtime.domain.installation_state import (
     ActivityRuntimeStatus,

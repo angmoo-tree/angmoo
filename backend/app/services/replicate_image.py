@@ -11,7 +11,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 
-from app.core.config import settings
+from app.config import settings
 from app.integrations import bounded_http
 from app.services import provider_http
 

@@ -28,6 +28,9 @@ IMMUTABLE_D_FILES = (
     "backend/app/runtime/migrations/sqlite_versions/v3_to_v4_world_scoped_chat.py",
     "backend/app/runtime/migrations/sqlite_versions/manifests/v4.json",
 )
+# The historical inventory keeps its recorded path and content digest. Read
+# the same immutable revision from its current physical location after AR-G4.
+ALEMBIC_REVISION_SOURCE = "backend/alembic/versions/20260831_0084_world_scoped_chat_identity.py"
 REQUIRED_THREAD_COLUMNS = (
     "world_id",
     "requester_world_character_id",
@@ -76,7 +79,7 @@ def _json(path: Path) -> dict[str, Any]:
 
 
 def _record(relative: str) -> dict[str, Any]:
-    path = ROOT / relative
+    path = ROOT / (ALEMBIC_REVISION_SOURCE if relative == IMMUTABLE_D_FILES[0] else relative)
     if not path.is_file():
         raise InventoryError(f"required file is missing: {relative}")
     data = _normalized_bytes(path)
@@ -157,7 +160,7 @@ def _route_operations() -> tuple[str, ...]:
 
 
 def _migration_contract() -> dict[str, Any]:
-    alembic_path = ROOT / IMMUTABLE_D_FILES[0]
+    alembic_path = ROOT / ALEMBIC_REVISION_SOURCE
     alembic_tree = ast.parse(
         alembic_path.read_text(encoding="utf-8"), filename=str(alembic_path)
     )

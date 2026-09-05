@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core import security
-from app.core.config import settings
+from app.config import settings
 from app.core.db import SessionLocal
 from app.domains.identity.exceptions import CredentialMigrationError
 from app.domains.identity.service.credential_migration import migrate_local_credential_envelope

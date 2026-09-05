@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.core.config import settings
+from app.config import settings
 
 
 INFO_BANNER_KEY = "agent_activity_info"

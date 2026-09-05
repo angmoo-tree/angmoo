@@ -6,10 +6,12 @@ from dataclasses import dataclass
 from typing import Any
 
 import uvicorn
+
+from app.runtime.logging_config import configure_application_logging, uvicorn_logging_config
 from fastapi import APIRouter, FastAPI
 
 from app.api.v1.public import create_public_api_router
-from app.core.config import settings
+from app.config import settings
 from app.core.db import SessionLocal
 from app.core.request_limits import RequestBodyLimitMiddleware
 from app.core.public_media import mount_public_media
@@ -182,6 +184,7 @@ def create_app(
     *,
     lifespan_handler: LifespanHandler | None = None,
 ) -> FastAPI:
+    configure_application_logging()
     runtime_app = FastAPI(
         title=settings.project_name,
         lifespan=lifespan_handler or create_lifespan(extension),
@@ -210,7 +213,7 @@ app = create_app(lifespan_handler=lifespan)
 
 
 def main() -> None:
-    uvicorn.run("app.public_main:app", host="0.0.0.0", port=8080, reload=True)
+    uvicorn.run("app.public_main:app", host="0.0.0.0", port=8080, reload=True, log_config=uvicorn_logging_config())
 
 
 if __name__ == "__main__":
