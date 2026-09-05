@@ -13,7 +13,7 @@ from app.core.agent_activity_limits import (
     DEFAULT_MAX_POSTS_PER_DAY,
 )
 from app.core import active_hours
-from app.core.config import settings
+from app.config import settings
 from app.core import security
 from app.core.search_text import build_post_search_document
 from app.core import unit_of_work

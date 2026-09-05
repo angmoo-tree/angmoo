@@ -11,7 +11,7 @@ from fastapi import APIRouter, FastAPI, HTTPException, Request, status
 from sqlalchemy import text
 
 from app.api.v1.public import create_public_api_router
-from app.core.config import Settings, settings
+from app.config import Settings, settings
 from app.core.db import SessionLocal, get_db
 from app.core.request_limits import RequestBodyLimitMiddleware
 from app.core.public_media import mount_public_media

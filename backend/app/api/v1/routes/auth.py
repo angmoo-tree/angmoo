@@ -9,7 +9,7 @@ from app.api.v1.deps import (
     get_db,
 )
 from app.core import browser_session
-from app.core.config import settings
+from app.config import settings
 from app.services import auth as auth_service
 from app.services import demo_lock
 from app.services import login_throttle

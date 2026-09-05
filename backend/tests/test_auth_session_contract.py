@@ -15,7 +15,7 @@ from app.api.v1 import deps as api_deps
 from app.api.v1.routes import auth as auth_routes
 from app.core import browser_session, security
 from app.core.desktop_loopback import DESKTOP_WEBVIEW_AUTHENTICATED_SCOPE_KEY
-from app.core.config import settings
+from app.config import settings
 from app.services import auth as auth_service
 
 

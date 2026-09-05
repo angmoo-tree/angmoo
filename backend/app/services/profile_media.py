@@ -9,7 +9,7 @@ import warnings
 
 from PIL import Image, ImageOps, UnidentifiedImageError
 
-from app.core.config import settings
+from app.config import settings
 
 
 CONTENT_TYPES = {

@@ -4,7 +4,7 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 
 이 문서는 기능을 추가하거나 버그를 수정하는 기여자가 코드의 위치와 연결 방식을 이해하기 위한 설명서입니다. [FastAPI Best Practices](https://github.com/zhanymkanov/fastapi-best-practices#project-structure)의 도메인별 구성을 바탕으로, Angmoo의 로컬 실행·AI 호출·기억·World 경계를 설명합니다.
 
-> **적용 상태 — 2026-09-05:** AR-0 기준선과 AR-1 검사 지원은 PR #259에서 병합됐습니다. `device_home` 첫 backend 파일럿은 PR #260, merge commit `a55c521b9adad624ae1342b2a7b270abc2237f79`로 병합됐고 역할별 파일과 새 경계 검사를 사용합니다. §8.2는 #263 기준의 AR-G0 후속 보존·부분 전환 검사 지원부터 진행 중입니다. 다른 도메인과 전역 기반은 아직 기존 경로와 규칙을 사용합니다. 실제 범위와 검증은 [보존 지도](../docs/architecture/refactor-feature-preservation.md)와 [백엔드 전환 결과](../docs/architecture/refactor-backend-results.md)에 기록합니다.
+> **적용 상태 — 2026-09-05:** AR-0 기준선과 AR-1 검사 지원은 PR #259에서 병합됐습니다. `device_home` 첫 backend 파일럿은 PR #260, merge commit `a55c521b9adad624ae1342b2a7b270abc2237f79`로 병합됐고 역할별 파일과 새 경계 검사를 사용합니다. §8.2는 #263 기준의 AR-G0 후속 보존·부분 전환 검사 지원을 바탕으로 진행 중입니다. AR-G1에서 공통 설정 구현과 실제 소비자를 `app/config.py`로 옮겼습니다. 다른 도메인과 전역 기반은 아직 기존 경로와 규칙을 사용합니다. 실제 범위와 검증·PR·병합 상태는 [보존 지도](../docs/architecture/refactor-feature-preservation.md)와 [백엔드 전환 결과](../docs/architecture/refactor-backend-results.md)에 기록합니다.
 
 ## 목차
 
@@ -292,9 +292,9 @@ Streaming에서는 사용자에게 허용된 응답 event만 전달합니다. �
 
 ### 전역 설정과 업무 설정
 
-목표 `app/config.py`는 공통 환경 설정·타입·기본값을, 도메인 `config.py`는 그 업무의 설정 의미를 담당합니다. 같은 `.env`를 각 서비스에서 새로 읽거나 서로 다른 기본값으로 해석하지 않습니다. 실제 설치 경로·저장된 사용자 설정은 기존 `runtime/configuration.py`와 연결합니다.
+[app/config.py](app/config.py)는 공통 환경 설정·타입·기본값과 단일 `Settings`/`settings`를 소유합니다. 소비자는 `from app.config import ...`로 이를 사용하고, 도메인 `config.py`는 그 업무의 설정 의미를 담당합니다. 같은 `.env`를 각 서비스에서 새로 읽거나 서로 다른 기본값으로 해석하지 않습니다. 실제 설치 경로·저장된 사용자 설정은 기존 `runtime/configuration.py`와 연결합니다.
 
-기존 `app/core/config.py`를 옮길 때도 개발 `.env` 위치는 `backend/.env`로 유지합니다. 소스 파일의 부모 경로가 달라졌다는 이유로 설정 탐색 위치가 바뀌면 안 됩니다. 설치 앱에 개발 `.env`를 필수로 추가하지 않으며, 비밀은 [credential resolver](app/credentials/resolver.py)의 경계를 따릅니다.
+기존 `app/core/config.py`는 제거했고 설정 구현을 중복하거나 호환 alias를 남기지 않습니다. `BACKEND_DIR`는 이동 후에도 `backend`를 가리켜 개발 `.env`, 기본 SQLite, media, graph 경로를 보존합니다. 작업 디렉터리가 달라도 `backend/.env`를 읽고, 환경 변수는 dotenv보다 우선하며 명시적 생성 인자는 환경 변수보다 우선합니다. 이 계약과 cold import의 단일 설정 사용은 [설정 경로 검사](tests/config/test_config_paths.py), 기존 시작 보안 계약은 [시작 보안 검사](tests/config/test_startup_security.py)에서 확인합니다. 설치 앱에 개발 `.env`를 필수로 추가하지 않으며, 비밀은 [credential resolver](app/credentials/resolver.py)의 경계를 따릅니다.
 
 ### 로그와 배포 파일
 
@@ -363,7 +363,8 @@ Import inventory는 현재 사실을 기록하고 import policy는 허용 경계
 | 도메인 `infrastructure`의 ORM·SQL | 같은 도메인 `models.py`·필요한 repository |
 | `ports`, `public.py` | 실제 교체 경계·지원 타입·호환 alias만 필요한 동안 유지 |
 | 전역 `services/cruds/schemas`의 업무 구현 | 해당 업무 도메인 |
-| `app/core/config.py`, `app/core/db.py` | 전역 `app/config.py`, `app/models.py`, `app/database.py` |
+| `app/config.py` | AR-G1에서 전역 설정 구현·소비자 이전, `app/core/config.py` 제거 |
+| `app/core/db.py` | 목표 전역 `app/models.py`, `app/database.py` |
 | 기존 `app/models/`의 업무 ORM | 소유 도메인 모델, 등록은 실행 조립 |
 
 `core`의 나머지 유틸리티와 기존 runtime·provider 코드는 각각의 실제 역할에 따라 유지하거나 옮깁니다. 모든 파일을 여섯 전역 파일에 합치지 않습니다. 사용 중인 구현과 위임만 남은 alias를 구분하고 import·동적 등록·migration·패키징 소비자가 없어진 뒤 옛 파일을 제거합니다.

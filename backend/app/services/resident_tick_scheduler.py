@@ -10,7 +10,7 @@ from typing import Awaitable, Callable, Any
 from uuid import uuid4
 
 from app import schemas
-from app.core.config import Settings, settings
+from app.config import Settings, settings
 from app.core.db import SessionLocal
 from app.domains.runtime.public import (
     SchedulerLeaseCoordinator,

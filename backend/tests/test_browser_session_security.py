@@ -14,7 +14,7 @@ from app import models, schemas
 from app.api.v1 import deps as api_deps
 from app.api.v1.routes import auth as auth_routes
 from app.core import browser_session, security
-from app.core.config import Settings, settings
+from app.config import Settings, settings
 from app.core.startup_security import StartupSecurityError, validate_startup_security
 from app.services import auth as auth_service
 
