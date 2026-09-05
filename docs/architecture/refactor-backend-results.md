@@ -1092,3 +1092,12 @@ Source `7f27efcf4c22dfcaa748d1708774ab54592bf564`는 privacy-safe Runtime 상태
 최종 formatted source의 실제 SQL 함수 본문에 **실제 호출 인수**를 대입하면 6개 상태 서비스 메서드가 원래 AST와 동일하며 모든 원본 helper 본문도 동일하다. 첫 composition 연결에서 domain aggregate가 외부 factory를 역참조하여 경계 검사가 거부했다. 실제 API·contributor·CLI 세 소비자가 외부 조립을 직접 참조하도록 바꾸고 집합 export를 제거해 경계를 복구했다. 규칙을 예외로 우회하지 않았다.
 
 최종 Runtime 진단·HTTP·single-backend·ER7·새 same-Session SQLite 회귀 **37 passed/1 warning/28.96초**다. 새 테스트2nodes는 미커밋 Identity/World/Character 사실을 읽고 caller rollback과 migration 조회 실패 rollback이 같은 Session의 행을 제거하는지 검증한다. 기존 active assignment 조회에 새로운 membership-status 조건을 추가하지 않았다. 경계 **731/2442/legacy222**, L4 parity97, ER0 **81/87/24/44/7 PASS**. 읽기 보존 진단은 source/split/assertion/억제/APIORM/node 모두0, protected2201/current2248이며 stock source/node 도입 원장의 순차 합류는 계속 남아 있다.
+
+
+### AR-B8 Runtime A3 실행 잠금·fence 실제 책임 이전
+
+Source `904be5193f671590c51c061e0206cb312ed05459`는 RuntimeSchedulerLease 실제 ORM을 `domains/runtime/models.py`, 실제 lease 상태 전이를 `service/scheduler_lease.py`, 자체 조회/DB clock/advisory SQL을 `repository/scheduler_lease.py`로 분리했다. Identity row lock은 `runtime/persistence/scheduler_lease.py`에서 원래 Session으로 수행한다. 생성 signature를 유지하는 SQLAlchemy binding은 실제 service를 상속하며 자체 업무 구현을 복제하지 않는다. fence ContextVar와 before-commit 등록은 `runtime/persistence/scheduler_fence.py`에 한 번 정의한다.
+
+중복 실행·stale commit 거부·lease heartbeat·SQLite 경쟁·단일 backend·migration/installer 계약은 **63 PASS/기존 PostgreSQL skip1/49.19초**다. 실제 새 SQL 함수/인수/Identity callback을 펼쳐 원본 모델·메서드·helper·hook **16개 전체 AST**가 동일함을 확인했다. 현재 source/split/assertion/억제/APIORM/node 읽기 진단0(protected2201/current2248), 경계735/2454/legacy222와 L4 parity97 PASS다. 분리 후 A1 소비자10개가 삭제된 구현을 가리키던 지도는 실제 읽는 symbol을 기준으로 새 소비자에 연결했다.
+
+ER0 generator의 실제 scheduler coupling 참조를 service로 바꿔 생성/일치 검사는 PASS다. 다만 기존 ER0 pytest는 **3 PASS/1 FAIL**이다. 업무/SQL 분리로 PostgreSQL marker를 포함한 물리 파일이81→82가 되어 옛 `entry_count < 82` assertion에 걸렸다. SQL 추가나 driver 활성화가 아니며 원문 SQL은 동일하다. 이를 숨기려고 marker/대상을 제외하거나 frozen assertion을 완화하지 않았다. 물리 파일 수에 묶인 기존 구조 검증을 올바른 소유/잔재 기준으로 전환하는 작업을 B8 통합 전 해결해야 한다. 이 source 준비를 전체/merge PASS로 기록하지 않는다. SQLite 실제 CAS 책임 전환·Runtime HTTP/집합 export 제거·G5 등록·G06 삭제 및 순차 도입 원장 합류는 남아 있다.
