@@ -984,3 +984,14 @@ Signed 선행 두 경로를 메모리로만 보충하는 동일 지역 진단이
 기존 langgraph 검증의 과부하 7 nodes와 helper를 `tests/routines/test_run_backoff.py`로 이전했고 원래 테스트 본문 AST 8개가 모두 동일하다. 새 file SQLite 회귀는 caller의 미커밋 Run 실패 결과 조회·observer 격리·rollback 후 원래 판단 복원을 검증한다. 전체 214개 원래 AgentRun 정의를 검사하는 기존 AR-B2-B5의 완전 source map에 실제 목적지와 추출된 query member를 갱신했으며 중복 전체 지도를 새 단계마다 복사하지 않는다. Frozen/checkpoint/additions와 검사 구현은 유지한다.
 
 C5a 기존 영향 범위와 신규 회귀는 **293 passed / 기존 PG 1 skip / 기존 warnings 2 / 25.08초**, 현재 목록·OSS 경계·실행 조립 추가 검증은 **35 passed / 기존 warning 1 / 44.15초**다. 경계 **720 modules / 2,412 edges / exact legacy 209 / cycle 0**, L4 parity97·ER0 85/87/24/44/7·Memory batch 현재 inventory도 통과했다. 읽기 전용 원래 보존 진단의 **source/split/assertion/suppression/API·ORM/node 모두 오류 0**, 기존 보호 **2,139 / 현재 2,246 nodes**다. 선행 signed 두 경로만 메모리에 보충했으며 tracked frozen/checkpoint/additions·검사 구현을 수정하지 않았다. 부모 선형 introduction append 후 stock 전체·CI·installer는 별도 완료 조건이다.
+
+
+## AR-B4-C5b — 읽기 전용 단계 재시도·실행 오류 소유
+
+읽기 전용 retry loop와 분류·진단 9함수 및 설정 6개는 `runtime/resident/read_only_lanes.py`, Run/Slot 기본 오류와 retry/deferred 오류 4개는 Routines의 실제 exceptions 정의로 이전했다. 원래 19개 정의와 기존 retry 테스트 8개 본문 AST는 모두 동일하다. Provider gateway error 객체, logger category, redaction, metadata 갱신 순서, 원인 연결, 재시도 상한·지연·first_error·attempt_errors를 유지한다.
+
+기존 retry 테스트는 `tests/routines/test_read_only_lanes.py`로 assertion/raises/monkeypatch 그대로 이전했다. 취소와 영구 오류의 원객체 전달·호출1회·sleep0을 검증하는 새 2 parameter nodes를 추가했다. 기존 `tests/characters/test_creator_http_errors.py`가 Run 기본 오류의 identity와 Slot 오류 parameterization을 사용하므로 runtime contract의 두 이름은 실제 Routines class 재export만 유지한다. 새 조사용 identity 중복 case는 영구 테스트로 고정하지 않고 외부 read-only probe로만 확인하며 기존 Character 회귀를 계속 보존한다.
+
+교차 도메인의 HTTP 오류 처리는 `routines/contracts/execution_errors.py`의 명시적 두 오류 계약을 사용한다. 실제 정의는 `routines/exceptions.py`의 한 객체이며, Character router와 현재 runtime 계약만 이 지원 표면을 통해 사용한다. 기존 service/schema/contract 경계 검사에 예외를 추가하지 않는다.
+
+C5b 최종 현재 후보는 **406 passed / 기존 PostgreSQL 1 skip / 기존 warnings 6 / 61.65초**다. 경계 **722 modules / 2,418 edges / exact legacy 209 / cycle 0**, L4 parity97·ER0 85/87/24/44/7·Memory batch 현재 inventory도 통과했다. 읽기 전용 원래 보존 진단은 **source/split/assertion/suppression/API·ORM/node 각각 오류 0**, 보호 **2,139 / 현재 2,248 nodes**다. Signed 최초 도입 두 경로만 메모리에 보충했으며 tracked source additions·checkpoint·frozen 자료와 검사 구현은 변경하지 않았다. 부모 선형 도입 append 후 stock 전체·통합 CI·installer는 별도 완료 조건이다.

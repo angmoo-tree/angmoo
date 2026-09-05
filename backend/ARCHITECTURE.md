@@ -640,3 +640,10 @@ Character row lock과 owner-controlled WorldCharacter 제외를 사용하는 배
 ### 실행 실패 후 대기 정책
 
 `routines/service/run_backoff.py`는 사용량 제한·과부하·응답 시간 초과를 구분해 원래 재시도 시각과 표시 메시지를 결정합니다. 최근 실행 이력은 자기 `repository/run_backoff.py`에서 같은 Session으로 읽고, 결과 값은 immutable `contracts/backoff.py`에 둡니다. Provider 요청이나 sleep은 이 정책의 책임이 아닙니다. Character 또는 credential의 최근 실패를 읽는 OR 조건, 시각 범위와 30행 제한을 유지하며, 정책을 조회하기 위해 별도 Session이나 commit을 만들지 않습니다.
+
+
+### 읽기 전용 실행 단계의 재시도
+
+`runtime/resident/read_only_lanes.py`는 읽기 전용 provider 호출의 한정된 재시도와 대기, 오류 분류·진단 payload를 수행합니다. 실제 공개 행동을 실행하거나 재실행하는 역할은 맡지 않습니다. 취소와 재시도 대상이 아닌 오류는 원래 객체로 전파하고, 진단 정보의 합성 순서와 비밀 가림을 유지합니다. Run/slot/retry의 오류 클래스는 `routines/exceptions.py`가 실제로 소유합니다. 현재 runtime contract의 두 Run 오류 export는 기존 Character 오류 동일성 테스트가 소비하는 같은 객체이며, 복제 클래스가 아닙니다. 이 정확한 임시 계약의 종료는 B8 전환에 포함됩니다.
+
+교차 도메인의 HTTP 오류 처리는 `routines/contracts/execution_errors.py`의 명시적 두 오류 계약을 사용한다. 실제 정의는 `routines/exceptions.py`의 한 객체이며, Character router와 현재 runtime 계약만 이 지원 표면을 통해 사용한다. 기존 service/schema/contract 경계 검사에 예외를 추가하지 않는다.

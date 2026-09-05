@@ -809,7 +809,15 @@
     "tests/test_langgraph_resident_engine.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate": "tests/routines/test_run_backoff.py::test_runtime_backoff_keeps_rate_limit_and_timeout_separate",
     "tests/test_langgraph_resident_engine.py::test_runtime_backoff_model_overloaded_bad_gateway": "tests/routines/test_run_backoff.py::test_runtime_backoff_model_overloaded_bad_gateway",
     "tests/test_langgraph_resident_engine.py::test_runtime_backoff_model_overloaded_first_occurrence": "tests/routines/test_run_backoff.py::test_runtime_backoff_model_overloaded_first_occurrence",
-    "tests/test_langgraph_resident_engine.py::test_runtime_backoff_model_overloaded_repeated_occurrence": "tests/routines/test_run_backoff.py::test_runtime_backoff_model_overloaded_repeated_occurrence"
+    "tests/test_langgraph_resident_engine.py::test_runtime_backoff_model_overloaded_repeated_occurrence": "tests/routines/test_run_backoff.py::test_runtime_backoff_model_overloaded_repeated_occurrence",
+    "tests/test_tendency_note_action_selection.py::test_feed_history_sanitize_retry_exhaustion_uses_metadata_fallback_reason": "tests/routines/test_read_only_lanes.py::test_feed_history_sanitize_retry_exhaustion_uses_metadata_fallback_reason",
+    "tests/test_tendency_note_action_selection.py::test_feed_history_sanitize_retry_exhaustion_uses_two_60s_attempts": "tests/routines/test_read_only_lanes.py::test_feed_history_sanitize_retry_exhaustion_uses_two_60s_attempts",
+    "tests/test_tendency_note_action_selection.py::test_feed_history_sanitize_retry_success_after_timeout": "tests/routines/test_read_only_lanes.py::test_feed_history_sanitize_retry_success_after_timeout",
+    "tests/test_tendency_note_action_selection.py::test_feed_scan_retry_exhaustion_defers_without_final_action": "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+    "tests/test_tendency_note_action_selection.py::test_read_only_lane_deferred_retry_at_uses_30_minutes": "tests/routines/test_read_only_lanes.py::test_read_only_lane_deferred_retry_at_uses_30_minutes",
+    "tests/test_tendency_note_action_selection.py::test_read_only_lane_error_classifier_distinguishes_timeout_sources": "tests/routines/test_read_only_lanes.py::test_read_only_lane_error_classifier_distinguishes_timeout_sources",
+    "tests/test_tendency_note_action_selection.py::test_read_only_lane_retry_records_gateway_timing_diagnostics": "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+    "tests/test_tendency_note_action_selection.py::test_read_only_lane_retry_success_after_timeout": "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_success_after_timeout"
   },
   "details": {
     "AR-B1": {
@@ -10868,9 +10876,11 @@
         "backend/app/services/agent_runs.py": [
           "backend/app/domains/routines/constants.py",
           "backend/app/domains/routines/contracts/backoff.py",
+          "backend/app/domains/routines/exceptions.py",
           "backend/app/domains/routines/repository/run_backoff.py",
           "backend/app/domains/routines/service/run_backoff.py",
           "backend/app/domains/runtime/contracts.py",
+          "backend/app/runtime/resident/read_only_lanes.py",
           "backend/app/services/agent_runs.py"
         ],
         "backend/app/services/profile_media.py": [
@@ -11253,62 +11263,80 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::READ_ONLY_LANE_TIMEOUT_SECONDS",
-          "new": "backend/app/services/agent_runs.py::READ_ONLY_LANE_TIMEOUT_SECONDS",
+          "new": "backend/app/runtime/resident/read_only_lanes.py::READ_ONLY_LANE_TIMEOUT_SECONDS",
           "direct_consumers": [
+            "backend/app/runtime/resident/read_only_lanes.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::READ_ONLY_LANE_RETRY_DELAY_MIN_SECONDS",
-          "new": "backend/app/services/agent_runs.py::READ_ONLY_LANE_RETRY_DELAY_MIN_SECONDS",
+          "new": "backend/app/runtime/resident/read_only_lanes.py::READ_ONLY_LANE_RETRY_DELAY_MIN_SECONDS",
           "direct_consumers": [
+            "backend/app/runtime/resident/read_only_lanes.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::READ_ONLY_LANE_RETRY_DELAY_MAX_SECONDS",
-          "new": "backend/app/services/agent_runs.py::READ_ONLY_LANE_RETRY_DELAY_MAX_SECONDS",
+          "new": "backend/app/runtime/resident/read_only_lanes.py::READ_ONLY_LANE_RETRY_DELAY_MAX_SECONDS",
           "direct_consumers": [
+            "backend/app/runtime/resident/read_only_lanes.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::READ_ONLY_LANE_DEFERRED_RETRY_MINUTES",
-          "new": "backend/app/services/agent_runs.py::READ_ONLY_LANE_DEFERRED_RETRY_MINUTES",
+          "new": "backend/app/runtime/resident/read_only_lanes.py::READ_ONLY_LANE_DEFERRED_RETRY_MINUTES",
           "direct_consumers": [
+            "backend/app/runtime/resident/read_only_lanes.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::FEED_HISTORY_SANITIZE_TIMEOUT_SECONDS",
-          "new": "backend/app/services/agent_runs.py::FEED_HISTORY_SANITIZE_TIMEOUT_SECONDS",
+          "new": "backend/app/runtime/resident/read_only_lanes.py::FEED_HISTORY_SANITIZE_TIMEOUT_SECONDS",
           "direct_consumers": [
+            "backend/app/runtime/resident/read_only_lanes.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::FEED_HISTORY_SANITIZE_MAX_ATTEMPTS",
-          "new": "backend/app/services/agent_runs.py::FEED_HISTORY_SANITIZE_MAX_ATTEMPTS",
+          "new": "backend/app/runtime/resident/read_only_lanes.py::FEED_HISTORY_SANITIZE_MAX_ATTEMPTS",
           "direct_consumers": [
+            "backend/app/runtime/resident/read_only_lanes.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
@@ -11563,22 +11591,27 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::ReadOnlyLaneRetryExhausted",
-          "new": "backend/app/services/agent_runs.py::ReadOnlyLaneRetryExhausted",
+          "new": "backend/app/domains/routines/exceptions.py::ReadOnlyLaneRetryExhausted",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/services/agent_runs.py",
+            "backend/app/runtime/resident/read_only_lanes.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::ReadOnlyLaneDeferredError",
-          "new": "backend/app/services/agent_runs.py::ReadOnlyLaneDeferredError",
+          "new": "backend/app/domains/routines/exceptions.py::ReadOnlyLaneDeferredError",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
@@ -12613,92 +12646,119 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_is_read_only_lane_retryable_error",
-          "new": "backend/app/services/agent_runs.py::_is_read_only_lane_retryable_error",
+          "new": "backend/app/runtime/resident/read_only_lanes.py::_is_read_only_lane_retryable_error",
           "direct_consumers": [
+            "backend/app/runtime/resident/read_only_lanes.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_classify_read_only_lane_error",
-          "new": "backend/app/services/agent_runs.py::_classify_read_only_lane_error",
+          "new": "backend/app/runtime/resident/read_only_lanes.py::_classify_read_only_lane_error",
           "direct_consumers": [
+            "backend/app/runtime/resident/read_only_lanes.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_classify_read_only_lane_timeout_source",
-          "new": "backend/app/services/agent_runs.py::_classify_read_only_lane_timeout_source",
+          "new": "backend/app/runtime/resident/read_only_lanes.py::_classify_read_only_lane_timeout_source",
           "direct_consumers": [
+            "backend/app/runtime/resident/read_only_lanes.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_read_only_lane_retry_delay_seconds",
-          "new": "backend/app/services/agent_runs.py::_read_only_lane_retry_delay_seconds",
+          "new": "backend/app/runtime/resident/read_only_lanes.py::_read_only_lane_retry_delay_seconds",
           "direct_consumers": [
+            "backend/app/runtime/resident/read_only_lanes.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_read_only_lane_deferred_retry_at",
-          "new": "backend/app/services/agent_runs.py::_read_only_lane_deferred_retry_at",
+          "new": "backend/app/runtime/resident/read_only_lanes.py::_read_only_lane_deferred_retry_at",
           "direct_consumers": [
+            "backend/app/runtime/resident/read_only_lanes.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_read_only_lane_attempt_error",
-          "new": "backend/app/services/agent_runs.py::_build_read_only_lane_attempt_error",
+          "new": "backend/app/runtime/resident/read_only_lanes.py::_build_read_only_lane_attempt_error",
           "direct_consumers": [
+            "backend/app/runtime/resident/read_only_lanes.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_run_read_only_lane_with_retry",
-          "new": "backend/app/services/agent_runs.py::_run_read_only_lane_with_retry",
+          "new": "backend/app/runtime/resident/read_only_lanes.py::_run_read_only_lane_with_retry",
           "direct_consumers": [
+            "backend/app/runtime/resident/read_only_lanes.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_read_only_lane_deferred_gateway_result",
-          "new": "backend/app/services/agent_runs.py::_build_read_only_lane_deferred_gateway_result",
+          "new": "backend/app/runtime/resident/read_only_lanes.py::_build_read_only_lane_deferred_gateway_result",
           "direct_consumers": [
+            "backend/app/runtime/resident/read_only_lanes.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_feed_history_sanitize_metadata_fallback_reason",
-          "new": "backend/app/services/agent_runs.py::_feed_history_sanitize_metadata_fallback_reason",
+          "new": "backend/app/runtime/resident/read_only_lanes.py::_feed_history_sanitize_metadata_fallback_reason",
           "direct_consumers": [
+            "backend/app/runtime/resident/read_only_lanes.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+            "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+            "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
           ]
         },
         {
@@ -31276,6 +31336,133 @@
       "ownership": "Actual failure classification and backoff decision service consumes its own Run repository; frozen retry decision is a contract. Three original overload constants remain single definitions. Original seven tests and helper move unchanged to Routines tests.",
       "preservation": "Nine actual definitions plus extracted SQL match original AST after exact repository substitution. Every original test/helper body AST matches. OR identity filter, 2h inclusive-lower/exclusive-now window, created/id descending and limit30 are unchanged; same lazy scalar iterator and Session autoflush. Rate limit45 before overload10/30 before timeout10 stays unchanged.",
       "remaining": "Read-only lane retry/provider diagnostics, actual AgentRun/LangGraph orchestration, shared credential/other owner final integration and exact test-only Slot bridge remain later B4-C/B8-A work."
+    },
+    "AR-B4-C5b-read-only-retry": {
+      "status": "IMPLEMENTED — current 406 passed / existing PG1 skipped; read-only original preservation checks0; parent linear introduction and stock integration pending",
+      "checked_execution_source_map": "AR-B2-B5 retains the complete original AgentRun source map, now pointing exact9 helpers/6constants/2retry classes to actual owners.",
+      "split_files": {
+        "backend/app/domains/runtime/contracts.py": [
+          "backend/app/domains/runtime/contracts.py",
+          "backend/app/domains/routines/exceptions.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/runtime/contracts.py::ResidentRuntimeError",
+          "new": "backend/app/domains/runtime/contracts.py::ResidentRuntimeError",
+          "direct_consumers": [
+            "backend/app/services/runtime_boundary.py",
+            "backend/app/runtime/resident/read_only_lanes.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ],
+          "source_member": "Actual Routines base failure definitions move once; old runtime contract exports same class for existing Character identity assertions until the reviewed B8 transition. Resident transport errors remain their original definitions and aliases."
+        },
+        {
+          "old": "backend/app/domains/runtime/contracts.py::ResidentRuntimeAuthError",
+          "new": "backend/app/domains/runtime/contracts.py::ResidentRuntimeAuthError",
+          "direct_consumers": [
+            "backend/app/services/runtime_boundary.py",
+            "backend/app/runtime/resident/read_only_lanes.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ],
+          "source_member": "Actual Routines base failure definitions move once; old runtime contract exports same class for existing Character identity assertions until the reviewed B8 transition. Resident transport errors remain their original definitions and aliases."
+        },
+        {
+          "old": "backend/app/domains/runtime/contracts.py::ResidentRuntimeUnavailableError",
+          "new": "backend/app/domains/runtime/contracts.py::ResidentRuntimeUnavailableError",
+          "direct_consumers": [
+            "backend/app/services/runtime_boundary.py",
+            "backend/app/runtime/resident/read_only_lanes.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ],
+          "source_member": "Actual Routines base failure definitions move once; old runtime contract exports same class for existing Character identity assertions until the reviewed B8 transition. Resident transport errors remain their original definitions and aliases."
+        },
+        {
+          "old": "backend/app/domains/runtime/contracts.py::ResidentRuntimeRegistrationError",
+          "new": "backend/app/domains/runtime/contracts.py::ResidentRuntimeRegistrationError",
+          "direct_consumers": [
+            "backend/app/services/runtime_boundary.py",
+            "backend/app/runtime/resident/read_only_lanes.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ],
+          "source_member": "Actual Routines base failure definitions move once; old runtime contract exports same class for existing Character identity assertions until the reviewed B8 transition. Resident transport errors remain their original definitions and aliases."
+        },
+        {
+          "old": "backend/app/domains/runtime/contracts.py::AgentRunServiceError",
+          "new": "backend/app/domains/routines/exceptions.py::AgentRunServiceError",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/domains/routines/contracts/execution_errors.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ],
+          "source_member": "Actual Routines base failure definitions move once; old runtime contract exports same class for existing Character identity assertions until the reviewed B8 transition. Resident transport errors remain their original definitions and aliases."
+        },
+        {
+          "old": "backend/app/domains/runtime/contracts.py::AgentSlotUnavailableError",
+          "new": "backend/app/domains/routines/exceptions.py::AgentSlotUnavailableError",
+          "direct_consumers": [
+            "backend/app/services/agent_runs.py",
+            "backend/app/domains/routines/contracts/execution_errors.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ],
+          "source_member": "Actual Routines base failure definitions move once; old runtime contract exports same class for existing Character identity assertions until the reviewed B8 transition. Resident transport errors remain their original definitions and aliases."
+        },
+        {
+          "old": "backend/app/domains/runtime/contracts.py::OpenClawGatewayError",
+          "new": "backend/app/domains/runtime/contracts.py::OpenClawGatewayError",
+          "direct_consumers": [
+            "backend/app/services/runtime_boundary.py",
+            "backend/app/runtime/resident/read_only_lanes.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ],
+          "source_member": "Actual Routines base failure definitions move once; old runtime contract exports same class for existing Character identity assertions until the reviewed B8 transition. Resident transport errors remain their original definitions and aliases."
+        },
+        {
+          "old": "backend/app/domains/runtime/contracts.py::OpenClawGatewayAuthError",
+          "new": "backend/app/domains/runtime/contracts.py::OpenClawGatewayAuthError",
+          "direct_consumers": [
+            "backend/app/services/runtime_boundary.py",
+            "backend/app/runtime/resident/read_only_lanes.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+          ],
+          "source_member": "Actual Routines base failure definitions move once; old runtime contract exports same class for existing Character identity assertions until the reviewed B8 transition. Resident transport errors remain their original definitions and aliases."
+        }
+      ],
+      "test_nodes": [
+        "tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+        "tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+        "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep"
+      ],
+      "test_moves": {
+        "backend/tests/test_tendency_note_action_selection.py::test_feed_history_sanitize_retry_exhaustion_uses_metadata_fallback_reason": "backend/tests/routines/test_read_only_lanes.py::test_feed_history_sanitize_retry_exhaustion_uses_metadata_fallback_reason",
+        "backend/tests/test_tendency_note_action_selection.py::test_feed_history_sanitize_retry_exhaustion_uses_two_60s_attempts": "backend/tests/routines/test_read_only_lanes.py::test_feed_history_sanitize_retry_exhaustion_uses_two_60s_attempts",
+        "backend/tests/test_tendency_note_action_selection.py::test_feed_history_sanitize_retry_success_after_timeout": "backend/tests/routines/test_read_only_lanes.py::test_feed_history_sanitize_retry_success_after_timeout",
+        "backend/tests/test_tendency_note_action_selection.py::test_feed_scan_retry_exhaustion_defers_without_final_action": "backend/tests/routines/test_read_only_lanes.py::test_feed_scan_retry_exhaustion_defers_without_final_action",
+        "backend/tests/test_tendency_note_action_selection.py::test_read_only_lane_deferred_retry_at_uses_30_minutes": "backend/tests/routines/test_read_only_lanes.py::test_read_only_lane_deferred_retry_at_uses_30_minutes",
+        "backend/tests/test_tendency_note_action_selection.py::test_read_only_lane_error_classifier_distinguishes_timeout_sources": "backend/tests/routines/test_read_only_lanes.py::test_read_only_lane_error_classifier_distinguishes_timeout_sources",
+        "backend/tests/test_tendency_note_action_selection.py::test_read_only_lane_retry_records_gateway_timing_diagnostics": "backend/tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_records_gateway_timing_diagnostics",
+        "backend/tests/test_tendency_note_action_selection.py::test_read_only_lane_retry_success_after_timeout": "backend/tests/routines/test_read_only_lanes.py::test_read_only_lane_retry_success_after_timeout"
+      },
+      "ownership": "Actual bounded read-only provider retry, delay, classifications and diagnostic payload construction live in runtime/resident/read_only_lanes. Four Run/slot/retry errors have one actual Routines definition. Same caller callbacks and same gateway exception class are used.",
+      "preservation": "19 original definitions and8 existing test bodies/raises/monkeypatches have identical AST. Retry bounds/random delay/sleep, metadata override order, first_error/attempt_errors, diagnostic redaction and established logger category are unchanged. Cancellation/permanent failure propagate the original object without sleep or retry.",
+      "remaining": "Runtime contract keeps exact same-class exports solely for current Character parameterization/class identity test; root B8 error-contract transition must preserve those original assertions. Original real execution imports canonical functions/classes, no duplicate retry wrapper. Remaining provider result/context/prompt/AgentRun/graph roles remain later B4-C.",
+      "supported_error_contract": "routines/contracts/execution_errors.py exports the same two actual classes for Character HTTP/runtime compatibility consumers, following the existing allowed service/schema/contract boundary. Actual definitions remain routines.exceptions; no class copies or boundary exceptions."
     }
   },
   "test_symbols": {

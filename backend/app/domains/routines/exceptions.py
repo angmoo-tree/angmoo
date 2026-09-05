@@ -1,6 +1,9 @@
 """Stable activity lifecycle errors."""
 from __future__ import annotations
 
+from datetime import datetime
+from typing import Any
+
 
 class ActivityRuntimeError(Exception):
     reason_code = "activity_runtime_error"
@@ -96,3 +99,41 @@ class ActivityPolicyDeniedError(Exception):
 
 class AgentRunConflictError(Exception):
     pass
+
+
+class AgentRunServiceError(Exception):
+    pass
+
+
+class AgentSlotUnavailableError(AgentRunServiceError):
+    pass
+
+
+class ReadOnlyLaneRetryExhausted(AgentRunServiceError):
+    def __init__(
+        self,
+        *,
+        lane_name: str,
+        lane_result: dict[str, Any],
+        raw_error: str,
+    ) -> None:
+        self.lane_name = lane_name
+        self.lane_result = lane_result
+        self.raw_error = raw_error
+        super().__init__(raw_error)
+
+
+class ReadOnlyLaneDeferredError(AgentRunServiceError):
+    def __init__(
+        self,
+        *,
+        lane_name: str,
+        retry_at: datetime,
+        gateway_result: dict[str, object],
+        raw_error: str,
+    ) -> None:
+        self.lane_name = lane_name
+        self.retry_at = retry_at
+        self.gateway_result = gateway_result
+        self.raw_error = raw_error
+        super().__init__(raw_error)

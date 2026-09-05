@@ -1,7 +1,7 @@
 {
-  "edge_count": 2412,
-  "external_import_count": 2262,
-  "module_count": 720,
+  "edge_count": 2418,
+  "external_import_count": 2270,
+  "module_count": 722,
   "modules": [
     {
       "external_imports": [],
@@ -931,6 +931,7 @@
         "app.domains.characters.service.state",
         "app.domains.identity.service.demo_access",
         "app.domains.media.contracts",
+        "app.domains.routines.contracts.execution_errors",
         "app.domains.runtime.contracts"
       ],
       "module": "app.domains.characters.router",
@@ -3711,6 +3712,15 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [
+        "app.domains.routines.exceptions"
+      ],
+      "module": "app.domains.routines.contracts.execution_errors",
+      "path": "backend/app/domains/routines/contracts/execution_errors.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "typing"
       ],
@@ -3794,7 +3804,9 @@
     },
     {
       "external_imports": [
-        "__future__"
+        "__future__",
+        "datetime",
+        "typing"
       ],
       "imports": [],
       "module": "app.domains.routines.exceptions",
@@ -4672,7 +4684,9 @@
       "external_imports": [
         "typing"
       ],
-      "imports": [],
+      "imports": [
+        "app.domains.routines.contracts.execution_errors"
+      ],
       "module": "app.domains.runtime.contracts",
       "path": "backend/app/domains/runtime/contracts.py",
       "wildcard_imports": []
@@ -9192,6 +9206,24 @@
       "external_imports": [
         "__future__",
         "asyncio",
+        "datetime",
+        "logging",
+        "random",
+        "typing"
+      ],
+      "imports": [
+        "app.core.redaction",
+        "app.domains.routines.exceptions",
+        "app.domains.runtime.contracts"
+      ],
+      "module": "app.runtime.resident.read_only_lanes",
+      "path": "backend/app/runtime/resident/read_only_lanes.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "asyncio",
         "fcntl",
         "logging",
         "msvcrt",
@@ -10139,12 +10171,12 @@
         "app.domains.routines.service.slot_pool",
         "app.domains.routines.service.slot_recovery",
         "app.domains.routines.service.tick_schedule",
-        "app.domains.runtime.contracts",
         "app.domains.social.public",
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",
         "app.models",
         "app.runtime.resident.activity_policy",
+        "app.runtime.resident.read_only_lanes",
         "app.runtime.resident.slots",
         "app.runtime.routine_posts",
         "app.schemas",

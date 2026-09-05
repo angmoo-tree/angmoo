@@ -14,9 +14,8 @@ from app.domains.characters.service import management as character_service
 from app.domains.characters.service import drafts as draft_lifecycle
 from app.domains.characters.service import state as character_state
 from app.domains.characters.service import creator as creator_policy
-from app.domains.runtime.contracts import (
-    AgentSlotUnavailableError, OpenClawGatewayError, OpenClawGatewayAuthError,
-)
+from app.domains.runtime.contracts import OpenClawGatewayError, OpenClawGatewayAuthError
+from app.domains.routines.contracts.execution_errors import AgentSlotUnavailableError
 from app.domains.media.contracts import InvalidProfileMediaError as MediaValidationError
 from app.domains.identity.service.demo_access import DemoAccountLockedError
 

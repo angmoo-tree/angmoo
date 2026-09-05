@@ -1027,6 +1027,7 @@
       "app.domains.routines.contracts.activity_scope",
       "app.domains.routines.contracts.backoff",
       "app.domains.routines.contracts.clock",
+      "app.domains.routines.contracts.execution_errors",
       "app.domains.routines.contracts.feed_cues",
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
@@ -1223,6 +1224,7 @@
       "app.domains.routines.contracts.activity",
       "app.domains.routines.contracts.activity_policy",
       "app.domains.routines.contracts.clock",
+      "app.domains.routines.contracts.execution_errors",
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.plans",
@@ -1987,14 +1989,6 @@
       },
       {
         "importer": "app.services.runtime_boundary",
-        "target": "app.domains.runtime.contracts",
-        "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
-        "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
-        "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.agent_runs",
         "target": "app.domains.runtime.contracts",
         "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
         "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
