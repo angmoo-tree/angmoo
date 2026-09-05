@@ -666,3 +666,10 @@ Resident Context는 Character/CharacterState, LlmCredential, AgentFeedCue와 Act
 
 
 Operations는 `domains/operations/models.py`의 설정·공지·감사 모델, `service/settings.py`의 DB/환경/기본값 선택, `service/maintenance.py`의 실행 허용·공지 우선순위, `repository.py`의 실제 조회·개인정보 정리를 소유한다. 계정 삭제 조립은 호출자의 같은 Session으로 감사 정보 정리를 요청하고 기존 외부 트랜잭션이 완료를 결정한다. 설정 읽기나 repository가 임의로 commit하지 않는다.
+
+
+### Character 이미지 설정의 책임
+
+`characters/service/image_settings_owner.py`는 소유자 검증, 공유/개인/비활성 키 모드, 외형 설명의 수동·자동 상태, 기준 이미지 교체·삭제 및 quota 응답을 결정합니다. 실제 저장은 `repository/image_settings.py`, 키 암호화·설정 갱신은 `service/image_settings.py`가 소유합니다. 다섯 이미지 설정 HTTP 경로는 Character router를 사용합니다.
+
+Runtime은 기존 서비스 키 가용성과 Social quota 조회를 같은 Session으로 연결합니다. 공통 텍스트 검증 `core/image_prompt_safety.py`는 외부 통신 없이 Character와 Social에서 같은 정의를 사용합니다. 기준 이미지 저장→기존 파일 삭제→setting 변경→commit/refresh 순서와 사용자가 직접 작성한 외형 설명의 보존 조건은 그대로입니다. 남은 management caller의 짧은 runtime 연결은 해당 업무 이동과 함께 종료합니다.

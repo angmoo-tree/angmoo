@@ -324,6 +324,8 @@ def create_app(
     runtime_app.state.creator_workflows = build_creator_workflows
     from app.runtime.characters.creator import build_image_generation_workflows
     runtime_app.state.image_generation_workflows = build_image_generation_workflows
+    from app.runtime.characters.management import build_image_settings_workflows
+    runtime_app.state.image_settings_workflows = build_image_settings_workflows
     runtime_app.add_middleware(RequestBodyLimitMiddleware)
     runtime_app.include_router(
         create_public_api_router(extension.routers if extension else ()),

@@ -39,7 +39,7 @@ from app.integrations import image_provider, pollinations_image, replicate_image
 from app.domains.social.service import media_storage as profile_media
 from app.integrations.media import files as media_files
 from app.services import agent_activity_policy
-from app.services import image_prompt_safety
+from app.core import image_prompt_safety
 from app.domains.operations.service import settings as operation_settings
 from app.services import service_image_key
 from app.services.direct_llm import (

@@ -1,7 +1,7 @@
 {
-  "edge_count": 2495,
-  "external_import_count": 2283,
-  "module_count": 757,
+  "edge_count": 2514,
+  "external_import_count": 2287,
+  "module_count": 758,
   "modules": [
     {
       "external_imports": [],
@@ -510,6 +510,17 @@
       "imports": [],
       "module": "app.core.image_generation",
       "path": "backend/app/core/image_generation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "re",
+        "unicodedata"
+      ],
+      "imports": [],
+      "module": "app.core.image_prompt_safety",
+      "path": "backend/app/core/image_prompt_safety.py",
       "wildcard_imports": []
     },
     {
@@ -1041,6 +1052,7 @@
       "external_imports": [
         "__future__",
         "dataclasses",
+        "datetime",
         "sqlalchemy.orm",
         "typing"
       ],
@@ -1135,6 +1147,7 @@
         "app.domains.characters.service.creator",
         "app.domains.characters.service.drafts",
         "app.domains.characters.service.image_generation",
+        "app.domains.characters.service.image_settings_owner",
         "app.domains.characters.service.management",
         "app.domains.characters.service.media",
         "app.domains.characters.service.state",
@@ -1283,6 +1296,33 @@
       ],
       "module": "app.domains.characters.service.image_settings",
       "path": "backend/app/domains/characters/service/image_settings.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.config",
+        "app.core.image_generation",
+        "app.core.image_prompt_safety",
+        "app.domains.characters.contracts",
+        "app.domains.characters.exceptions",
+        "app.domains.characters.models",
+        "app.domains.characters.repository.image_settings",
+        "app.domains.characters.schemas",
+        "app.domains.characters.service.access",
+        "app.domains.characters.service.image_settings",
+        "app.domains.characters.service.media_storage",
+        "app.domains.identity.service.demo_access",
+        "app.domains.operations.service.settings",
+        "app.integrations.image_provider",
+        "app.integrations.media.files"
+      ],
+      "module": "app.domains.characters.service.image_settings_owner",
+      "path": "backend/app/domains/characters/service/image_settings_owner.py",
       "wildcard_imports": []
     },
     {
@@ -8405,6 +8445,7 @@
         "app.config",
         "app.core.active_hours",
         "app.core.image_generation",
+        "app.core.image_prompt_safety",
         "app.core.prompt_safety",
         "app.core.redaction",
         "app.core.security",
@@ -8421,6 +8462,7 @@
         "app.domains.characters.service.access",
         "app.domains.characters.service.creator",
         "app.domains.characters.service.image_settings",
+        "app.domains.characters.service.image_settings_owner",
         "app.domains.characters.service.management",
         "app.domains.characters.service.media",
         "app.domains.characters.service.media_storage",
@@ -8431,6 +8473,8 @@
         "app.domains.identity.service.demo_access",
         "app.domains.operations.service.maintenance",
         "app.domains.operations.service.settings",
+        "app.domains.routines.service.tick_schedule",
+        "app.domains.social.repository.media",
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",
         "app.exceptions",
@@ -8446,7 +8490,6 @@
         "app.services.agent_runs",
         "app.services.community",
         "app.services.direct_llm",
-        "app.services.image_prompt_safety",
         "app.services.post_image_generation",
         "app.services.runtime_boundary",
         "app.services.service_image_key"
@@ -10831,17 +10874,6 @@
     {
       "external_imports": [
         "__future__",
-        "re",
-        "unicodedata"
-      ],
-      "imports": [],
-      "module": "app.services.image_prompt_safety",
-      "path": "backend/app/services/image_prompt_safety.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
         "asyncio",
         "collections.abc",
         "datetime",
@@ -10969,6 +11001,7 @@
       "imports": [
         "app.config",
         "app.core.image_generation",
+        "app.core.image_prompt_safety",
         "app.core.security",
         "app.credentials",
         "app.cruds.agents",
@@ -10984,7 +11017,6 @@
         "app.schemas",
         "app.services.agent_activity_policy",
         "app.services.direct_llm",
-        "app.services.image_prompt_safety",
         "app.services.service_image_key"
       ],
       "module": "app.services.post_image_generation",

@@ -1,3 +1,4 @@
+from app.domains.characters.service import image_settings_owner
 from app.domains.characters.repository import image_settings as image_setting_repository
 from app.domains.characters.service import image_settings as image_setting_service
 import asyncio
@@ -26,7 +27,8 @@ from app.core.image_generation import (
 )
 from app.config import settings
 from app.cruds import agents as agent_crud
-from app.services import image_prompt_safety, post_image_generation, profile_media, service_image_key
+from app.core import image_prompt_safety
+from app.services import post_image_generation, profile_media, service_image_key
 from app.integrations import pollinations_image
 from app.runtime.characters import management as agent_service
 
@@ -284,9 +286,9 @@ def test_image_settings_read_uses_global_service_model(monkeypatch) -> None:
     checked_models: list[str] = []
 
     monkeypatch.setattr(
-        agent_service,
+        image_settings_owner,
         "_service_image_quota_read",
-        lambda _db, _character_id: {
+        lambda _db, _character_id, **_kwargs: {
             "limit": 3,
             "used": 0,
             "remaining": 3,

@@ -423,7 +423,8 @@
     "backend/app/models/agent_settings.py": "backend/app/domains/characters/models.py",
     "backend/app/models/agent_local_keys.py": "backend/app/domains/local_bot/models.py",
     "backend/app/models/local_bot_quotas.py": "backend/app/domains/local_bot/models.py",
-    "backend/app/services/local_bot_quota.py": "backend/app/domains/local_bot/service/quota.py"
+    "backend/app/services/local_bot_quota.py": "backend/app/domains/local_bot/service/quota.py",
+    "backend/app/services/image_prompt_safety.py": "backend/app/core/image_prompt_safety.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -39446,6 +39447,2545 @@
       ],
       "preserved": "Same prompt strip/hash assignment/commit/refresh/returned attached value; Social retains provider result and cache policy. No added query or commit.",
       "remaining": "B5 replaces current legacy caller with its actual Social service/runtime callback; root final integration binds this exact owner function."
+    },
+    "AR-B8-CHARACTER-IMAGE-A2": {
+      "status": "SOURCE PREPARATION;8 workflows/2 errors/5 HTTP and116 unchanged management definitions whole AST preserved;69PASS/2warnings/9.23s; boundary758/2514/legacy180; original six diagnostics0/protected2201/current2258; source introduction pending",
+      "split_files": {
+        "backend/app/api/v1/routes/agents.py": [
+          "backend/app/api/v1/routes/agents.py",
+          "backend/app/domains/characters/router.py"
+        ],
+        "backend/app/services/agents.py": [
+          "backend/app/domains/characters/exceptions.py",
+          "backend/app/domains/characters/service/access.py",
+          "backend/app/domains/characters/service/creator.py",
+          "backend/app/domains/characters/service/image_settings_owner.py",
+          "backend/app/domains/characters/service/management.py",
+          "backend/app/domains/characters/service/media.py",
+          "backend/app/domains/characters/service/mutations.py",
+          "backend/app/domains/characters/service/persona.py",
+          "backend/app/domains/characters/service/promotion.py",
+          "backend/app/runtime/characters/management.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/api/v1/routes/agents.py::router",
+          "new": "backend/app/api/v1/routes/agents.py::router",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::TENDENCY_ANALYSIS_RETRY_DETAIL",
+          "new": "backend/app/api/v1/routes/agents.py::TENDENCY_ANALYSIS_RETRY_DETAIL",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::_raise_demo_account_locked",
+          "new": "backend/app/api/v1/routes/agents.py::_raise_demo_account_locked",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::delete_agent",
+          "new": "backend/app/api/v1/routes/agents.py::delete_agent",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_local_connection",
+          "new": "backend/app/api/v1/routes/agents.py::get_local_connection",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::issue_local_key",
+          "new": "backend/app/api/v1/routes/agents.py::issue_local_key",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::revoke_local_key",
+          "new": "backend/app/api/v1/routes/agents.py::revoke_local_key",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_feed_cue",
+          "new": "backend/app/api/v1/routes/agents.py::get_feed_cue",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::give_feed_cue",
+          "new": "backend/app/api/v1/routes/agents.py::give_feed_cue",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_image_settings",
+          "new": "backend/app/domains/characters/router.py::get_image_settings",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::update_image_settings",
+          "new": "backend/app/domains/characters/router.py::update_image_settings",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::delete_image_settings_key",
+          "new": "backend/app/domains/characters/router.py::delete_image_settings_key",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::upload_image_seed",
+          "new": "backend/app/domains/characters/router.py::upload_image_seed",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::delete_image_seed",
+          "new": "backend/app/domains/characters/router.py::delete_image_seed",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::update_credential",
+          "new": "backend/app/api/v1/routes/agents.py::update_credential",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_credential_metadata",
+          "new": "backend/app/api/v1/routes/agents.py::get_credential_metadata",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::delete_credential",
+          "new": "backend/app/api/v1/routes/agents.py::delete_credential",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_settings",
+          "new": "backend/app/api/v1/routes/agents.py::get_settings",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::update_settings",
+          "new": "backend/app/api/v1/routes/agents.py::update_settings",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::analyze_tendency",
+          "new": "backend/app/api/v1/routes/agents.py::analyze_tendency",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::activate_agent",
+          "new": "backend/app/api/v1/routes/agents.py::activate_agent",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::deactivate_agent",
+          "new": "backend/app/api/v1/routes/agents.py::deactivate_agent",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::run_now",
+          "new": "backend/app/api/v1/routes/agents.py::run_now",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::first_greeting",
+          "new": "backend/app/api/v1/routes/agents.py::first_greeting",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::list_agents",
+          "new": "backend/app/domains/characters/router.py::list_agents",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::create_agent",
+          "new": "backend/app/domains/characters/router.py::create_agent",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::create_agent_draft",
+          "new": "backend/app/domains/characters/router.py::create_agent_draft",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_agent_draft",
+          "new": "backend/app/domains/characters/router.py::get_agent_draft",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_agent_draft_media",
+          "new": "backend/app/domains/characters/router.py::get_agent_draft_media",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::update_agent_draft",
+          "new": "backend/app/domains/characters/router.py::update_agent_draft",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::enhance_agent_draft_persona",
+          "new": "backend/app/domains/characters/router.py::enhance_agent_draft_persona",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::upload_agent_draft_media",
+          "new": "backend/app/domains/characters/router.py::upload_agent_draft_media",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::generate_agent_draft_media",
+          "new": "backend/app/domains/characters/router.py::generate_agent_draft_media",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_agent_draft_media_usage",
+          "new": "backend/app/domains/characters/router.py::get_agent_draft_media_usage",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_agent_draft_media_candidate_content",
+          "new": "backend/app/domains/characters/router.py::get_agent_draft_media_candidate_content",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::apply_agent_draft_media_candidate",
+          "new": "backend/app/domains/characters/router.py::apply_agent_draft_media_candidate",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::discard_agent_draft_media_candidate",
+          "new": "backend/app/domains/characters/router.py::discard_agent_draft_media_candidate",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::complete_agent_draft",
+          "new": "backend/app/domains/characters/router.py::complete_agent_draft",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_agent",
+          "new": "backend/app/domains/characters/router.py::get_agent",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::update_profile",
+          "new": "backend/app/domains/characters/router.py::update_profile",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::update_persona",
+          "new": "backend/app/domains/characters/router.py::update_persona",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::update_promotion_usage",
+          "new": "backend/app/domains/characters/router.py::update_promotion_usage",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::upload_profile_media",
+          "new": "backend/app/domains/characters/router.py::upload_profile_media",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_image_settings",
+          "new": "backend/app/api/v1/routes/agents.py::get_image_settings",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::update_image_settings",
+          "new": "backend/app/api/v1/routes/agents.py::update_image_settings",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::delete_image_settings_key",
+          "new": "backend/app/api/v1/routes/agents.py::delete_image_settings_key",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::upload_image_seed",
+          "new": "backend/app/api/v1/routes/agents.py::upload_image_seed",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::delete_image_seed",
+          "new": "backend/app/api/v1/routes/agents.py::delete_image_seed",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::generate_profile_media",
+          "new": "backend/app/domains/characters/router.py::generate_profile_media",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_image_generation_workflows.py::test_missing_service_key_does_not_reserve_quota_or_call_provider",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_profile_media_usage",
+          "new": "backend/app/domains/characters/router.py::get_profile_media_usage",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::get_agent_profile_media_candidate_content",
+          "new": "backend/app/domains/characters/router.py::get_agent_profile_media_candidate_content",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::apply_profile_media_candidate",
+          "new": "backend/app/domains/characters/router.py::apply_profile_media_candidate",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
+          ]
+        },
+        {
+          "old": "backend/app/api/v1/routes/agents.py::discard_profile_media_candidate",
+          "new": "backend/app/domains/characters/router.py::discard_profile_media_candidate",
+          "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/api/v1/routes/community.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE",
+          "new": "backend/app/runtime/characters/management.py::SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE",
+          "new": "backend/app/runtime/characters/management.py::WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY",
+          "new": "backend/app/runtime/characters/management.py::SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AGENT_DETAIL_ACTIVITY_LIMIT",
+          "new": "backend/app/runtime/characters/management.py::AGENT_DETAIL_ACTIVITY_LIMIT",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_two_user_object_authorization_matrix_denies_cross_owner_access"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::PROMOTION_USAGE_POLICY_VERSION",
+          "new": "backend/app/domains/characters/service/promotion.py::PROMOTION_USAGE_POLICY_VERSION",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::RUN_NOW_COOLDOWN",
+          "new": "backend/app/runtime/characters/management.py::RUN_NOW_COOLDOWN",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::FIRST_GREETING_COOLDOWN",
+          "new": "backend/app/runtime/characters/management.py::FIRST_GREETING_COOLDOWN",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_first_greeting_cooldown_is_separate_from_run_now_cooldown"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::FIRST_GREETING_SESSION_MARKER",
+          "new": "backend/app/runtime/characters/management.py::FIRST_GREETING_SESSION_MARKER",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::FIRST_GREETING_WRITER_OUTPUT_TOKENS",
+          "new": "backend/app/runtime/characters/management.py::FIRST_GREETING_WRITER_OUTPUT_TOKENS",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::RUN_NOW_SCHEDULER_GUARD_WINDOW",
+          "new": "backend/app/runtime/characters/management.py::RUN_NOW_SCHEDULER_GUARD_WINDOW",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::RUN_NOW_SCHEDULER_HEADROOM",
+          "new": "backend/app/runtime/characters/management.py::RUN_NOW_SCHEDULER_HEADROOM",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::DELETED_CHARACTER_NAME",
+          "new": "backend/app/runtime/characters/management.py::DELETED_CHARACTER_NAME",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_account_deletion_removes_private_graph_and_keeps_public_content",
+            "tests/test_p8_l_r_memory_batch_safety.py::test_character_scrub_removes_its_batches_and_preserves_other_character"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::DELETED_CHARACTER_PLACEHOLDER",
+          "new": "backend/app/runtime/characters/management.py::DELETED_CHARACTER_PLACEHOLDER",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_character_scrub_removes_its_batches_and_preserves_other_character"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::TENDENCY_ACTION_KEYS",
+          "new": "backend/app/runtime/characters/management.py::TENDENCY_ACTION_KEYS",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::TENDENCY_INDEPENDENT_TOPIC_COUNT",
+          "new": "backend/app/runtime/characters/management.py::TENDENCY_INDEPENDENT_TOPIC_COUNT",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::TENDENCY_ANALYSIS_MAX_OUTPUT_TOKENS",
+          "new": "backend/app/runtime/characters/management.py::TENDENCY_ANALYSIS_MAX_OUTPUT_TOKENS",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::FEED_SEED_INTEREST_CRITERIA_MAX_LENGTH",
+          "new": "backend/app/runtime/characters/management.py::FEED_SEED_INTEREST_CRITERIA_MAX_LENGTH",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::TENDENCY_ACTION_DEFAULTS",
+          "new": "backend/app/runtime/characters/management.py::TENDENCY_ACTION_DEFAULTS",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::TENDENCY_LLM_TOOLS_ALLOW",
+          "new": "backend/app/runtime/characters/management.py::TENDENCY_LLM_TOOLS_ALLOW",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::LOCAL_KEY_PREFIX",
+          "new": "backend/app/runtime/characters/management.py::LOCAL_KEY_PREFIX",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_demo_account_lock.py::test_locked_demo_local_bot_is_blocked_before_last_used_update",
+            "tests/identity/test_demo_account_lock.py::test_normal_local_bot_authentication_still_updates_last_used"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::LOCAL_MODE_LLM_BLOCKED_MESSAGE",
+          "new": "backend/app/domains/characters/service/access.py::LOCAL_MODE_LLM_BLOCKED_MESSAGE",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
+            "tests/routines/test_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::PERSONA_PROMPT_SAFETY_FIELDS",
+          "new": "backend/app/domains/characters/service/persona.py::PERSONA_PROMPT_SAFETY_FIELDS",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_TendencyRangePayload",
+          "new": "backend/app/runtime/characters/management.py::_TendencyRangePayload",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_TendencyActionRangesPayload",
+          "new": "backend/app/runtime/characters/management.py::_TendencyActionRangesPayload",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_IndependentPostInitiativePayload",
+          "new": "backend/app/runtime/characters/management.py::_IndependentPostInitiativePayload",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_IndependentPostTopicPayload",
+          "new": "backend/app/runtime/characters/management.py::_IndependentPostTopicPayload",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_PlannerTendencyProfilePayload",
+          "new": "backend/app/runtime/characters/management.py::_PlannerTendencyProfilePayload",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_TendencyAnalysisPayload",
+          "new": "backend/app/runtime/characters/management.py::_TendencyAnalysisPayload",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_FirstGreetingWriterPayload",
+          "new": "backend/app/runtime/characters/management.py::_FirstGreetingWriterPayload",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::INDEPENDENT_POST_PROBABILITY_RANGES",
+          "new": "backend/app/runtime/characters/management.py::INDEPENDENT_POST_PROBABILITY_RANGES",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::TENDENCY_CONTENT_CHARACTER_PHRASES",
+          "new": "backend/app/runtime/characters/management.py::TENDENCY_CONTENT_CHARACTER_PHRASES",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_normalize_angmoo_terms_in_tendency_text_changes_persona_only"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::TENDENCY_PERSONA_CHARACTER_PATTERN",
+          "new": "backend/app/runtime/characters/management.py::TENDENCY_PERSONA_CHARACTER_PATTERN",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_normalize_angmoo_terms_in_tendency_text_changes_persona_only"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AgentServiceError",
+          "new": "backend/app/domains/characters/exceptions.py::AgentServiceError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::DemoAccountLockedError",
+          "new": "backend/app/runtime/characters/management.py::DemoAccountLockedError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_demo_account_lock.py::test_demo_principal_blocks_unsafe_http_methods",
+            "tests/identity/test_demo_account_lock.py::test_agent_route_returns_403_for_locked_demo_error",
+            "tests/identity/test_demo_account_lock.py::test_agent_service_blocks_profile_update_after_ownership_check"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AgentNotFoundError",
+          "new": "backend/app/domains/characters/exceptions.py::AgentNotFoundError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AgentAutonomyCapacityError",
+          "new": "backend/app/runtime/characters/management.py::AgentAutonomyCapacityError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
+            "tests/routines/test_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AgentAutonomyRetryableError",
+          "new": "backend/app/runtime/characters/management.py::AgentAutonomyRetryableError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AgentHandleConflictError",
+          "new": "backend/app/domains/characters/exceptions.py::AgentHandleConflictError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AgentHandleInvalidError",
+          "new": "backend/app/domains/characters/exceptions.py::AgentHandleInvalidError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AgentProfileNameInvalidError",
+          "new": "backend/app/domains/characters/exceptions.py::AgentProfileNameInvalidError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_demo_account_lock.py::test_agent_route_returns_403_for_locked_demo_error",
+            "tests/identity/test_demo_account_lock.py::test_agent_service_blocks_profile_update_after_ownership_check"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::InvalidProfileMediaError",
+          "new": "backend/app/domains/characters/exceptions.py::InvalidProfileMediaError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_profile_media.py::test_rejects_mismatched_mime",
+            "tests/test_profile_media.py::test_rejects_corrupt_image_payload",
+            "tests/test_profile_media.py::test_rejects_oversized_image_payload"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::UnsafeImagePromptError",
+          "new": "backend/app/domains/characters/exceptions.py::UnsafeImagePromptError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::PromptInjectionDetectedError",
+          "new": "backend/app/domains/characters/exceptions.py::PromptInjectionDetectedError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::ImageSettingsInvalidError",
+          "new": "backend/app/domains/characters/exceptions.py::ImageSettingsInvalidError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::CredentialRequiredError",
+          "new": "backend/app/domains/characters/exceptions.py::CredentialRequiredError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::LlmCredentialInvalidError",
+          "new": "backend/app/runtime/characters/management.py::LlmCredentialInvalidError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget",
+            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_keeps_non_json_errors"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::ActiveSlotBusyError",
+          "new": "backend/app/runtime/characters/management.py::ActiveSlotBusyError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
+            "tests/test_google_model_selection.py::test_model_only_credential_update_preserves_existing_key"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::CredentialSyncError",
+          "new": "backend/app/domains/characters/exceptions.py::CredentialSyncError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness",
+            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::TendencyAnalysisParseError",
+          "new": "backend/app/runtime/characters/management.py::TendencyAnalysisParseError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::TendencyPromptInjectionDetectedError",
+          "new": "backend/app/runtime/characters/management.py::TendencyPromptInjectionDetectedError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_rejects_prompt_injection_before_save",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_rejects_hidden_feed_seed_interest_injection",
+            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_route_maps_prompt_injection_to_422"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::TendencyAnalysisRequiredError",
+          "new": "backend/app/runtime/characters/management.py::TendencyAnalysisRequiredError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::ActivityProfileRequiredError",
+          "new": "backend/app/runtime/characters/management.py::ActivityProfileRequiredError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AgentFeedCueConflictError",
+          "new": "backend/app/runtime/characters/management.py::AgentFeedCueConflictError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AgentFeedCueUnavailableError",
+          "new": "backend/app/runtime/characters/management.py::AgentFeedCueUnavailableError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AgentExecutionModeError",
+          "new": "backend/app/domains/characters/exceptions.py::AgentExecutionModeError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
+            "tests/routines/test_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AgentActiveHoursInvalidError",
+          "new": "backend/app/domains/characters/exceptions.py::AgentActiveHoursInvalidError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert",
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
+            "tests/routines/test_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AgentSuspendedError",
+          "new": "backend/app/domains/characters/exceptions.py::AgentSuspendedError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AgentDeleteConfirmationError",
+          "new": "backend/app/runtime/characters/management.py::AgentDeleteConfirmationError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_character_deletion_resets_cross_user_preference_and_removes_private_data"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AgentDeletionCredentialSyncError",
+          "new": "backend/app/runtime/characters/management.py::AgentDeletionCredentialSyncError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::AgentDeletionMediaCleanupError",
+          "new": "backend/app/runtime/characters/management.py::AgentDeletionMediaCleanupError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_character_deletion_resets_cross_user_preference_and_removes_private_data"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::RunNowCooldownError",
+          "new": "backend/app/runtime/characters/management.py::RunNowCooldownError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::FirstGreetingCooldownError",
+          "new": "backend/app/runtime/characters/management.py::FirstGreetingCooldownError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::FirstGreetingUnavailableError",
+          "new": "backend/app/runtime/characters/management.py::FirstGreetingUnavailableError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::RunNowSlotUnavailableError",
+          "new": "backend/app/runtime/characters/management.py::RunNowSlotUnavailableError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::RunNowSlotBusyError",
+          "new": "backend/app/runtime/characters/management.py::RunNowSlotBusyError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::RunNowSchedulerBusyError",
+          "new": "backend/app/runtime/characters/management.py::RunNowSchedulerBusyError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_when_capacity_has_three_live_running_slots",
+            "tests/routines/test_activity_limits.py::test_run_now_single_flight_rejects_one_live_running_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::RunNowSoonScheduledError",
+          "new": "backend/app/runtime/characters/management.py::RunNowSoonScheduledError",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_target_soon_scheduled_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::list_agents",
+          "new": "backend/app/domains/characters/service/management.py::list_agents",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ],
+          "part": "Character selection/mutation and callback ordering"
+        },
+        {
+          "old": "backend/app/services/agents.py::llm_credential_error_message",
+          "new": "backend/app/domains/characters/service/creator.py::llm_credential_error_message",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::ensure_persona_prompt_safety",
+          "new": "backend/app/domains/characters/service/persona.py::ensure_persona_prompt_safety",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_ensure_feed_cue_prompt_safety",
+          "new": "backend/app/runtime/characters/management.py::_ensure_feed_cue_prompt_safety",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_ensure_tendency_prompt_safety",
+          "new": "backend/app/runtime/characters/management.py::_ensure_tendency_prompt_safety",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_field_value",
+          "new": "backend/app/domains/characters/service/persona.py::_field_value",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::create_agent",
+          "new": "backend/app/domains/characters/service/management.py::create_agent",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
+          ],
+          "part": "Character selection/mutation and callback ordering"
+        },
+        {
+          "old": "backend/app/services/agents.py::_validate_initial_activity_settings",
+          "new": "backend/app/runtime/characters/management.py::_validate_initial_activity_settings",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_apply_initial_activity_settings",
+          "new": "backend/app/runtime/characters/management.py::_apply_initial_activity_settings",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_ensure_initial_image_settings",
+          "new": "backend/app/domains/characters/service/image_settings_owner.py::_ensure_initial_image_settings",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_lock_server_llm_autonomy_capacity",
+          "new": "backend/app/runtime/characters/management.py::_lock_server_llm_autonomy_capacity",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_effective_server_llm_autonomy_count",
+          "new": "backend/app/runtime/characters/management.py::_effective_server_llm_autonomy_count",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_reject_server_llm_autonomy_capacity",
+          "new": "backend/app/runtime/characters/management.py::_reject_server_llm_autonomy_capacity",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_reject_world_autonomy_capacity",
+          "new": "backend/app/runtime/characters/management.py::_reject_world_autonomy_capacity",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_log_autonomy_activation_rejection",
+          "new": "backend/app/runtime/characters/management.py::_log_autonomy_activation_rejection",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::get_agent",
+          "new": "backend/app/domains/characters/service/management.py::get_agent",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_two_user_object_authorization_matrix_denies_cross_owner_access"
+          ],
+          "part": "Character selection/mutation and callback ordering"
+        },
+        {
+          "old": "backend/app/services/agents.py::get_local_connection",
+          "new": "backend/app/runtime/characters/management.py::get_local_connection",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_two_user_object_authorization_matrix_denies_cross_owner_access"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::issue_local_key",
+          "new": "backend/app/runtime/characters/management.py::issue_local_key",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::revoke_local_key",
+          "new": "backend/app/runtime/characters/management.py::revoke_local_key",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::get_feed_cue",
+          "new": "backend/app/runtime/characters/management.py::get_feed_cue",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::give_feed_cue",
+          "new": "backend/app/runtime/characters/management.py::give_feed_cue",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_public_activity_entrypoints_use_lane_specific_profile_readiness"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::run_first_greeting",
+          "new": "backend/app/runtime/characters/management.py::run_first_greeting",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_run_first_greeting_writer",
+          "new": "backend/app/runtime/characters/management.py::_run_first_greeting_writer",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_build_first_greeting_writer_prompt",
+          "new": "backend/app/runtime/characters/management.py::_build_first_greeting_writer_prompt",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_attach_first_greeting_image",
+          "new": "backend/app/runtime/characters/management.py::_attach_first_greeting_image",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::update_profile",
+          "new": "backend/app/domains/characters/service/management.py::update_profile",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_demo_account_lock.py::test_agent_route_returns_403_for_locked_demo_error",
+            "tests/identity/test_demo_account_lock.py::test_agent_service_blocks_profile_update_after_ownership_check"
+          ],
+          "part": "Character selection/mutation and callback ordering"
+        },
+        {
+          "old": "backend/app/services/agents.py::update_promotion_usage",
+          "new": "backend/app/domains/characters/service/management.py::update_promotion_usage",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_promotion_usage.py::test_update_promotion_usage_tracks_revocation_and_regrant",
+            "tests/test_agent_promotion_usage.py::test_update_promotion_usage_requires_owner"
+          ],
+          "part": "Character selection/mutation and callback ordering"
+        },
+        {
+          "old": "backend/app/services/agents.py::update_persona",
+          "new": "backend/app/domains/characters/service/management.py::update_persona",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving"
+          ],
+          "part": "Character selection/mutation and callback ordering"
+        },
+        {
+          "old": "backend/app/services/agents.py::upload_profile_media",
+          "new": "backend/app/domains/characters/service/media.py::upload_profile_media",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/runtime/characters/creator.py",
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_media_workflows.py::test_upload_callbacks_keep_session_and_commit_before_activity_log",
+            "tests/test_private_preview_media.py::test_private_preview_requires_owner_and_exact_database_path"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::get_image_settings",
+          "new": "backend/app/domains/characters/service/image_settings_owner.py::get_image_settings",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::update_image_settings",
+          "new": "backend/app/domains/characters/service/image_settings_owner.py::update_image_settings",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::upload_image_seed",
+          "new": "backend/app/domains/characters/service/image_settings_owner.py::upload_image_seed",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::delete_image_seed",
+          "new": "backend/app/domains/characters/service/image_settings_owner.py::delete_image_seed",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::update_credential",
+          "new": "backend/app/runtime/characters/management.py::update_credential",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_google_model_selection.py::test_model_only_credential_update_preserves_existing_key",
+            "tests/test_google_model_selection.py::test_api_key_credential_update_without_slot_commits_in_upsert",
+            "tests/test_google_model_selection.py::test_api_key_credential_update_with_idle_slot_syncs_profile"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::get_credential_metadata",
+          "new": "backend/app/runtime/characters/management.py::get_credential_metadata",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::delete_credential",
+          "new": "backend/app/runtime/characters/management.py::delete_credential",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_ensure_credential_world_scope",
+          "new": "backend/app/runtime/characters/management.py::_ensure_credential_world_scope",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_google_model_selection.py::test_model_only_credential_update_preserves_existing_key",
+            "tests/test_google_model_selection.py::test_api_key_credential_update_without_slot_commits_in_upsert",
+            "tests/test_google_model_selection.py::test_api_key_credential_update_with_idle_slot_syncs_profile"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::get_settings",
+          "new": "backend/app/runtime/characters/management.py::get_settings",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::update_settings",
+          "new": "backend/app/runtime/characters/management.py::update_settings",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
+            "tests/routines/test_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::analyze_tendency",
+          "new": "backend/app/runtime/characters/management.py::analyze_tendency",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::activate_agent",
+          "new": "backend/app/runtime/characters/management.py::activate_agent",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_activate_agent_uow",
+          "new": "backend/app/runtime/characters/management.py::_activate_agent_uow",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full",
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomically"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::deactivate_agent",
+          "new": "backend/app/runtime/characters/management.py::deactivate_agent",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::delete_agent",
+          "new": "backend/app/runtime/characters/management.py::delete_agent",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_character_deletion_resets_cross_user_preference_and_removes_private_data"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_quarantine_agent_private_media",
+          "new": "backend/app/runtime/characters/management.py::_quarantine_agent_private_media",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_character_deletion_resets_cross_user_preference_and_removes_private_data"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_build_tendency_analysis_prompt",
+          "new": "backend/app/runtime/characters/management.py::_build_tendency_analysis_prompt",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term",
+            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_extract_gateway_result_text",
+          "new": "backend/app/runtime/characters/management.py::_extract_gateway_result_text",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_parse_tendency_json",
+          "new": "backend/app/runtime/characters/management.py::_parse_tendency_json",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_normalize_tendency_payload",
+          "new": "backend/app/runtime/characters/management.py::_normalize_tendency_payload",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_normalize_planner_tendency_profile",
+          "new": "backend/app/runtime/characters/management.py::_normalize_planner_tendency_profile",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_calibrated_independent_post_probability",
+          "new": "backend/app/runtime/characters/management.py::_calibrated_independent_post_probability",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_slug_tendency_topic_key",
+          "new": "backend/app/runtime/characters/management.py::_slug_tendency_topic_key",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::normalize_angmoo_terms_in_tendency_text",
+          "new": "backend/app/runtime/characters/management.py::normalize_angmoo_terms_in_tendency_text",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_normalize_angmoo_terms_in_tendency_text_changes_persona_only"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_safe_tendency_text",
+          "new": "backend/app/runtime/characters/management.py::_safe_tendency_text",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_clamped_tendency_int",
+          "new": "backend/app/runtime/characters/management.py::_clamped_tendency_int",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_normalizes_internal_independent_post_profile",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_30_internal_independent_post_topics",
+            "tests/test_tendency_note_action_selection.py::test_tendency_payload_requires_internal_planner_tendency_profile"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_mark_tendency_error",
+          "new": "backend/app/runtime/characters/management.py::_mark_tendency_error",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_tendency_note_action_selection.py::test_tendency_analysis_uses_medium_thinking_and_larger_output_budget"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_has_tendency_analysis",
+          "new": "backend/app/runtime/characters/management.py::_has_tendency_analysis",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime",
+            "tests/test_langgraph_resident_engine.py::test_agent_run_readiness_requires_hidden_feed_seed_criteria"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_ensure_tendency_analysis_ready",
+          "new": "backend/app/runtime/characters/management.py::_ensure_tendency_analysis_ready",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_activity_profile_readiness",
+          "new": "backend/app/runtime/characters/management.py::_activity_profile_readiness",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_replaces_legacy_tendency_gate",
+            "tests/routine_posts/test_runtime.py::test_world_profile_readiness_rejects_incomplete_repertoire",
+            "tests/routine_posts/test_runtime.py::test_legacy_runtime_still_requires_legacy_tendency_analysis"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_ensure_activity_profile_ready",
+          "new": "backend/app/runtime/characters/management.py::_ensure_activity_profile_ready",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_clear_tendency_analysis",
+          "new": "backend/app/runtime/characters/management.py::_clear_tendency_analysis",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_resident_openclaw_sync_enabled",
+          "new": "backend/app/runtime/characters/management.py::_resident_openclaw_sync_enabled",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_bind_slot_auth_profile",
+          "new": "backend/app/runtime/characters/management.py::_bind_slot_auth_profile",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_release_slot_auth_profile",
+          "new": "backend/app/runtime/characters/management.py::_release_slot_auth_profile",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_reload_openclaw_secrets_sync",
+          "new": "backend/app/runtime/characters/management.py::_reload_openclaw_secrets_sync",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_activate_agent_allows_same_user_replacement_at_capacity",
+            "tests/routines/test_activity_limits.py::test_activate_and_deactivate_sync_selected_routine_world_character",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_aware_utc",
+          "new": "backend/app/runtime/characters/management.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_slot_has_live_lease",
+          "new": "backend/app/runtime/characters/management.py::_slot_has_live_lease",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_slot_is_live_running",
+          "new": "backend/app/runtime/characters/management.py::_slot_is_live_running",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_slot_is_assigned_resident",
+          "new": "backend/app/runtime/characters/management.py::_slot_is_assigned_resident",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_allowed_existing_running_resident_slots",
+          "new": "backend/app/runtime/characters/management.py::_allowed_existing_running_resident_slots",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_slot_is_due",
+          "new": "backend/app/runtime/characters/management.py::_slot_is_due",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_slot_is_imminent",
+          "new": "backend/app/runtime/characters/management.py::_slot_is_imminent",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_ensure_run_now_scheduler_safe",
+          "new": "backend/app/runtime/characters/management.py::_ensure_run_now_scheduler_safe",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_ensure_claimed_temporary_run_now_scheduler_safe",
+          "new": "backend/app/runtime/characters/management.py::_ensure_claimed_temporary_run_now_scheduler_safe",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_ensure_imported_world_runtime_enabled",
+          "new": "backend/app/runtime/characters/management.py::_ensure_imported_world_runtime_enabled",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::run_agent_now",
+          "new": "backend/app/runtime/characters/management.py::run_agent_now",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_get_owned_character",
+          "new": "backend/app/domains/characters/service/access.py::_get_owned_character",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_ensure_not_suspended",
+          "new": "backend/app/domains/characters/service/access.py::_ensure_not_suspended",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_is_local_mode",
+          "new": "backend/app/domains/characters/service/access.py::_is_local_mode",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_invalid_active_hours",
+            "tests/routines/test_activity_limits.py::test_update_settings_normalizes_observe_to_internal_enabled",
+            "tests/routines/test_activity_limits.py::test_update_settings_rejects_direct_server_llm_auto_enabled_change"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_ensure_llm_mode",
+          "new": "backend/app/domains/characters/service/access.py::_ensure_llm_mode",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_give_feed_cue_rejects_prompt_injection_without_pending_cue",
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_ensure_local_mode",
+          "new": "backend/app/domains/characters/service/access.py::_ensure_local_mode",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_two_user_object_authorization_matrix_denies_cross_owner_access"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_local_connection_read",
+          "new": "backend/app/runtime/characters/management.py::_local_connection_read",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_two_user_object_authorization_matrix_denies_cross_owner_access"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_local_key_token_prefix",
+          "new": "backend/app/runtime/characters/management.py::_local_key_token_prefix",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_agent_deletion_slot_condition",
+          "new": "backend/app/runtime/characters/management.py::_agent_deletion_slot_condition",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_ensure_agent_deletion_not_busy",
+          "new": "backend/app/runtime/characters/management.py::_ensure_agent_deletion_not_busy",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_character_deletion_resets_cross_user_preference_and_removes_private_data"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_release_openclaw_profile_for_agent",
+          "new": "backend/app/runtime/characters/management.py::_release_openclaw_profile_for_agent",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_character_deletion_resets_cross_user_preference_and_removes_private_data"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_clear_resident_slots_for_agent",
+          "new": "backend/app/runtime/characters/management.py::_clear_resident_slots_for_agent",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_character_deletion_resets_cross_user_preference_and_removes_private_data"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_scrub_agent_data",
+          "new": "backend/app/runtime/characters/management.py::_scrub_agent_data",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_character_deletion_resets_cross_user_preference_and_removes_private_data",
+            "tests/test_p8_l_r_memory_batch_safety.py::test_character_scrub_removes_its_batches_and_preserves_other_character"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_deleted_character_handle",
+          "new": "backend/app/runtime/characters/management.py::_deleted_character_handle",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_p8_l_r_memory_batch_safety.py::test_character_scrub_removes_its_batches_and_preserves_other_character"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_manual_run_available_at",
+          "new": "backend/app/runtime/characters/management.py::_manual_run_available_at",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_run_now_uses_temporary_slot_without_enabling_autonomy",
+            "tests/routines/test_activity_limits.py::test_run_now_keeps_direct_created_world_manual_contract_when_import_registry_exists",
+            "tests/routines/test_activity_limits.py::test_run_now_rejects_without_assigned_slot_and_does_not_fallback"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_first_greeting_available_at",
+          "new": "backend/app/runtime/characters/management.py::_first_greeting_available_at",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_cooldown_is_separate_from_run_now_cooldown",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_claim_first_greeting_run",
+          "new": "backend/app/runtime/characters/management.py::_claim_first_greeting_run",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/routines/test_activity_limits.py::test_first_greeting_claim_is_committed_before_provider_call",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_visible_activity_actions",
+          "new": "backend/app/runtime/characters/management.py::_visible_activity_actions",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_visible_activity_actions_hide_observe"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_build_agent_detail",
+          "new": "backend/app/runtime/characters/management.py::_build_agent_detail",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_set_promotion_usage",
+          "new": "backend/app/domains/characters/service/promotion.py::_set_promotion_usage",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_prompt_injection_before_insert",
+            "tests/routines/test_activity_limits.py::test_create_agent_applies_initial_activity_settings",
+            "tests/routines/test_activity_limits.py::test_create_agent_rejects_invalid_initial_active_hours_before_insert"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_promotion_usage_read",
+          "new": "backend/app/domains/characters/service/promotion.py::_promotion_usage_read",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_image_generation_setting_read",
+          "new": "backend/app/domains/characters/service/image_settings_owner.py::_image_generation_setting_read",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_service_image_quota_read",
+          "new": "backend/app/domains/characters/service/image_settings_owner.py::_service_image_quota_read",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_invalidate_image_visual_identity_if_present",
+          "new": "backend/app/domains/characters/service/image_settings_owner.py::_invalidate_image_visual_identity_if_present",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_settings_read_uses_global_service_model"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_agent_list_sort_key",
+          "new": "backend/app/domains/characters/service/management.py::_agent_list_sort_key",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_activity_log_read",
+          "new": "backend/app/runtime/characters/management.py::_activity_log_read",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::_activity_log_target_profile",
+          "new": "backend/app/runtime/characters/management.py::_activity_log_target_profile",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::create_agent",
+          "new": "backend/app/domains/characters/service/mutations.py::create_owned_character",
+          "part": "Character mutation section; remaining activity/detail composition stays in the separately mapped runtime function.",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_policies.py::test_owned_profile_mutations_preserve_commits_without_activity_or_credential_tables",
+            "tests/identity/test_demo_account_lock.py::test_agent_service_blocks_profile_update_after_ownership_check"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::update_profile",
+          "new": "backend/app/domains/characters/service/mutations.py::update_owned_profile",
+          "part": "Character mutation section; remaining activity/detail composition stays in the separately mapped runtime function.",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_policies.py::test_owned_profile_mutations_preserve_commits_without_activity_or_credential_tables",
+            "tests/identity/test_demo_account_lock.py::test_agent_service_blocks_profile_update_after_ownership_check"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::update_persona",
+          "new": "backend/app/domains/characters/service/mutations.py::update_owned_persona",
+          "part": "Character mutation section; remaining activity/detail composition stays in the separately mapped runtime function.",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_policies.py::test_owned_profile_mutations_preserve_commits_without_activity_or_credential_tables",
+            "tests/identity/test_demo_account_lock.py::test_agent_service_blocks_profile_update_after_ownership_check"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::update_promotion_usage",
+          "new": "backend/app/domains/characters/service/mutations.py::update_owned_promotion",
+          "part": "Character mutation section; remaining activity/detail composition stays in the separately mapped runtime function.",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_creator_policies.py::test_owned_profile_mutations_preserve_commits_without_activity_or_credential_tables",
+            "tests/identity/test_demo_account_lock.py::test_agent_service_blocks_profile_update_after_ownership_check"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::get_agent",
+          "new": "backend/app/runtime/characters/management.py::_build_full_character_detail",
+          "part": "Original runtime tail and transaction/response behavior",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_character_writes_reach_runtime_in_same_session_after_original_commits"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::create_agent",
+          "new": "backend/app/runtime/characters/management.py::_after_character_created",
+          "part": "Original runtime tail and transaction/response behavior",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_character_writes_reach_runtime_in_same_session_after_original_commits"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::update_profile",
+          "new": "backend/app/runtime/characters/management.py::_after_character_profile_updated",
+          "part": "Original runtime tail and transaction/response behavior",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_character_writes_reach_runtime_in_same_session_after_original_commits"
+          ]
+        },
+        {
+          "old": "backend/app/services/agents.py::update_persona",
+          "new": "backend/app/runtime/characters/management.py::_after_character_persona_updated",
+          "part": "Original runtime tail and transaction/response behavior",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_http_workflows.py::test_character_writes_reach_runtime_in_same_session_after_original_commits"
+          ]
+        }
+      ],
+      "direct_consumers": [
+        "backend/app/runtime/characters/management.py",
+        "backend/app/domains/characters/router.py",
+        "backend/app/main.py",
+        "backend/app/public_main.py"
+      ],
+      "preserved": "Same owner admission/error messages/key/provider model decision/quota read timing/seed file-delete-write-commit sequence. Actual owner services and five routes; runtime binds keys and same-Session Social query; shared prompt policy moved unchanged to core."
     }
   }
 }

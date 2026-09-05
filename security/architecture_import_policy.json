@@ -237,10 +237,6 @@
           "importer": "app.runtime.characters.management"
         },
         {
-          "imported": "app.services.image_prompt_safety",
-          "importer": "app.runtime.characters.management"
-        },
-        {
           "imported": "app.services.post_image_generation",
           "importer": "app.runtime.characters.management"
         },
@@ -542,10 +538,6 @@
         },
         {
           "imported": "app.services.direct_llm",
-          "importer": "app.services.post_image_generation"
-        },
-        {
-          "imported": "app.services.image_prompt_safety",
           "importer": "app.services.post_image_generation"
         },
         {
@@ -878,6 +870,7 @@
       "app.domains.characters.service.image_generation",
       "app.domains.characters.service.image_quota",
       "app.domains.characters.service.image_settings",
+      "app.domains.characters.service.image_settings_owner",
       "app.domains.characters.service.management",
       "app.domains.characters.service.media",
       "app.domains.characters.service.media_storage",
@@ -1163,6 +1156,7 @@
       "app.domains.characters.service.image_generation",
       "app.domains.characters.service.image_quota",
       "app.domains.characters.service.image_settings",
+      "app.domains.characters.service.image_settings_owner",
       "app.domains.characters.service.management",
       "app.domains.characters.service.media",
       "app.domains.characters.service.media_storage",

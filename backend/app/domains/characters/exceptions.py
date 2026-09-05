@@ -93,3 +93,11 @@ class CredentialSyncError(AgentServiceError):
 
 class CharacterStateNotFoundError(AgentServiceError):
     pass
+
+
+class ImageSettingsInvalidError(AgentServiceError):
+    pass
+
+
+class UnsafeImagePromptError(AgentServiceError):
+    pass

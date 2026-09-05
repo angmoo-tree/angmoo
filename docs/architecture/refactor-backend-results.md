@@ -1162,3 +1162,12 @@ protected2201/current2255이며 선행 sourceintro 통합/전체 stock gate는 �
 ### AR-B8 Character visual identity 저장 책임
 
 `characters/repository/image_settings.py::store_image_visual_identity`는 원래 post image의 prompt strip·source hash 대입·commit·refresh·반환 5문장을 실제로 소유한다. 기존 `_ensure_visual_identity`가 이 함수를 같은 Session/setting으로 호출하며, 해당 호출을 원래 5문장으로 펼친 전체 async 함수 AST가 동일하다. 기존 image 관련49 PASS/16.44초, ER0와 원래 source/split/assertion/suppression/APIORM/node 읽기 진단0오류(protected2201/current2255)다. 새 test node와 commit/query 추가는 없다. Social의 provider 결과 검증/캐시 정책은 B5에서 실제 이전하며 이 Character 함수를 runtime에서 연결한다. 선행 sourceintro 및 통합 gate는 대기다.
+
+
+### AR-B8 Character image A2 실제 소유자 흐름·HTTP
+
+실제8개 image owner workflow와2개 오류,5개 HTTP 처리 함수를 소유 도메인으로 옮겼다. callback/같은 repository write를 원문으로 펼치면15개 전체 정의가 동일하고 나머지 management116개 정의도 AST가 동일하다. 공유 image prompt 검증은 줄바꿈을 제외한 같은 소스를 `core/image_prompt_safety.py`로 옮겼다. 서비스 키 가용성과 Social 사용량 조회는 같은 Session/시각/원래 호출 위치에서 runtime이 연결한다.
+
+최종69 PASS/2기존 deprecation warnings/9.23초, boundary758/2514/legacy180, L4/ER0 PASS다. 새3nodes는 실제 HTTP+SQLite+임시PNG/WebP를 통해 수동/자동 외형 설명의 보존·초기화, 생성 파일의 삭제와 저장 상태, 업로드/삭제 각각의 단일 commit, 같은 Session quota read, 미소유/누락 key 거절을 확인한다. 기존 assertion/suppression을 바꾸지 않았다. 첫 집중 실행의 잘못 적은 파일명과 이동 import가 같은 줄의 다른 서비스까지 core로 바꾼 collection 오류는 실제 경로/단일 모듈 import로 수정한 뒤 기존66개 및 최종69개를 재실행했다.
+
+처음 지도 진단은 중간 runtime 경로를 frozen 원본처럼 기재한 점과 나중에 추가된 route bookkeeping 이름을 frozen 심벌로 기재한 점을 거부했다. 실제 최초 `services/agents.py`의 기존 전체 소유 지도에 새 목적지를 반영하고 이후 생성된 bookkeeping을 그 frozen 목록에서 제외했다. 원래6진단은 모두0오류(protected2201/current2258), API/ORM/노드/기존assertion·억제는 보존된다. 원장은 선행 B4~B8 합류 뒤 각 최초 signed source에서 추가한다. B8 통합/G5/G06 완료로 표시하지 않는다.
