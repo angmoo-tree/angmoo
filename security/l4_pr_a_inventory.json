@@ -1,8 +1,8 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2165,
-      "internal_edge_count": 2289,
+      "external_import_count": 2169,
+      "internal_edge_count": 2295,
       "legacy_import_exception_count": 0,
       "module_count": 687,
       "module_cycles": [],
@@ -760,10 +760,13 @@
             "imports": [
               "app.compatibility.routine_posts.legacy",
               "app.core.unit_of_work",
+              "app.domains.routine_posts.constants",
               "app.domains.routine_posts.contracts.context",
+              "app.domains.routine_posts.contracts.generation",
               "app.domains.routine_posts.exceptions",
-              "app.domains.routine_posts.infrastructure.direct_llm_provider",
               "app.domains.routine_posts.service.context",
+              "app.domains.routine_posts.service.evidence",
+              "app.domains.routine_posts.service.generation",
               "app.domains.routines.exceptions",
               "app.domains.routines.service.execution.claims",
               "app.domains.routines.service.execution.lifecycle",

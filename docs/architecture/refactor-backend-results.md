@@ -859,3 +859,16 @@ B1의 마지막 수정은 CI가 요구하는 기존 WC suite 경로 문자열 �
 Direct LLM 응답 검증·prompt/transport와 그 public/서비스 별칭은 B3, AgentActivitySetting과 canonical interaction adapter는 B4-C의 실제 남은 소유 전환 범위다. 현재 RoutinePost scope에는 실제 전환한 contract/service만 추가하고 bridge는 정확한 남은 consumer/종료 단계로 기록한다. frozen source/checkpoint/approved nodes/Today predecessor JSON은 변경하지 않는다. 최종 보존 검사와 source introduction·통합 Actions·merge는 이어지는 별도 증거로 기록한다.
 
 B2 최종 고정 후보의 집중 묶음은 **67 passed / 1 기존 PostgreSQL skip / 46.67초**다. 보존 검사는 frozen **1,867/1,907**, 보호 계보 **2,139**, 현재 **2,226 nodes**를 확인했고 API/schema/ORM·기존 assertion/raises/warns/suppression·누락 node·모든 split 증거 오류는 0이다. 종료 코드 1의 항목은 선행 source/test의 부모 append-only introduction 기록 대기뿐이다. 현재 구조 경계 **687 modules / 2,289 edges / legacy exact 235 PASS**, L4 parity **97**, ER0 **81/87/24/44/7** 및 MemoryBatch inventory 검증도 통과했다. 원래 활동 설정 조회의 위치가 context에서 runtime으로 바뀐 한 개 edge만 AR-B4-C 종료 조건으로 추적하며 광역 legacy prefix는 허용하지 않았다.
+
+
+## AR-B4-B3 — RoutinePost 근거 검증·생성 순서·provider 요청 경계
+
+기존 DirectRoutinePostProvider의 실제 계획→검증→게시문 작성 순서는 `service/generation.py`가 소유한다. bounded public context, server-owned identity/continuity/detail/source 검증, Gemini response schema 제한과 상태 효과는 `service/evidence.py`로 옮겼다. immutable RoutineGeneration과 실제 fake/provider 교체 계약은 `contracts/generation.py`, 목적별 credential 해석과 LLM 요청 identity 변환은 `client.py`에 있다. 공유 SDK/transport는 이미 존재하는 `integrations.direct_llm`이며 새 전달 함수를 추가하지 않았다.
+
+원래 값·함수·class 15개의 AST가 foreign read annotation을 제외하고 동일하다. prompt literal/JSON 직렬화, planner 선검증, writer 입력, 2400 token/medium, tracker와 rate-limit callback, error node/lane, runtime의 최종 생성 재검증을 유지했다. 예전 infrastructure provider·initializer, public 및 services/routine_post_planner alias는 직접 소비자를 canonical roles로 연결한 뒤 제거했다. plaintext reveal allowlist의 동일 `_api_key` 항목만 정확 client 경로로 바꾸며 검사 강도/목록 범위는 유지한다. Today inventory의 동결된 predecessor path/SHA는 수정하지 않았다.
+
+기존 검증은 **36 passed / 1 기존 PostgreSQL skip / 20.47초**였고, 새 transport fake 3 cases를 포함한 묶음은 **32 passed / 1 기존 skip / 16.51초**다. 실제 생성 서비스를 호출하여 credential→planner→writer 순서, 잘못된 beat 근거에서 writer 0회, writer 오류 원객체와 node/lane, callback/tracker identity, prompt에 credential 미포함을 검사한다. 생성 성공을 게시 성공으로 기록하지 않으며 새로운 DB write/commit은 없다.
+
+도메인의 실제 역할 모듈만 부분 scope에 추가하고 provider/public의 종료된 bridge는 제거한다. 원래 runtime의 publication/claim·AgentRun/Social 결합, interaction adapter와 활동 설정/lease/log는 AR-B4-C 잔여다. 소스 도입 기록·전체 통합 Actions/installer/merge는 부모 작업에서 순차 확인한다.
+
+B3 최종 집중 묶음은 **70 passed / 1 기존 PostgreSQL skip / 49.02초**다. 전체 보존 검사는 frozen **1,867/1,907**, 보호 계보 **2,139**, 현재 **2,229 nodes**를 확인했고 API/schema/ORM·기존 assertion/raises/warns/suppression·누락 node·모든 split 증거 오류는 0이다. 선행 소스/test의 부모 append-only introduction 기록 대기만 종료 코드 1로 남는다. 현재 구조 경계 **687 modules / 2,295 edges / legacy exact 235 PASS**, L4 parity **97**, ER0 **81/87/24/44/7**, MemoryBatch inventory도 통과했다. 고정된 baseline/checkpoint/Today predecessor는 변경하지 않았다.

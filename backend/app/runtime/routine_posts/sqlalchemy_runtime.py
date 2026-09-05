@@ -13,13 +13,10 @@ from sqlalchemy.orm import Session
 
 from app.compatibility.routine_posts import legacy
 from app.core import unit_of_work
-from app.domains.routine_posts.infrastructure.direct_llm_provider import (
-    ROUTINE_CONTRACT_VERSION,
-    DirectRoutinePostProvider,
-    RoutineGeneration,
-    RoutinePostProvider,
-    validate_routine_generation,
-)
+from app.domains.routine_posts.constants import ROUTINE_CONTRACT_VERSION
+from app.domains.routine_posts.contracts.generation import RoutineGeneration, RoutinePostProvider
+from app.domains.routine_posts.service.evidence import validate_routine_generation
+from app.domains.routine_posts.service.generation import DirectRoutinePostProvider
 from app.domains.routine_posts.exceptions import RoutineContextUnavailable
 from app.domains.routine_posts.contracts.context import RoutineInteractionSource
 from app.domains.routine_posts.service.context import assemble_routine_post_context

@@ -1,6 +1,6 @@
 {
-  "edge_count": 2289,
-  "external_import_count": 2165,
+  "edge_count": 2295,
+  "external_import_count": 2169,
   "module_count": 687,
   "modules": [
     {
@@ -3470,6 +3470,19 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.credentials",
+        "app.integrations.direct_llm"
+      ],
+      "module": "app.domains.routine_posts.client",
+      "path": "backend/app/domains/routine_posts/client.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.routine_posts.constants",
@@ -3502,6 +3515,20 @@
       "external_imports": [
         "__future__",
         "dataclasses",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routine_posts.contracts.context",
+        "app.domains.routine_posts.schemas"
+      ],
+      "module": "app.domains.routine_posts.contracts.generation",
+      "path": "backend/app/domains/routine_posts/contracts/generation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
         "datetime"
       ],
       "imports": [],
@@ -3514,49 +3541,6 @@
       "imports": [],
       "module": "app.domains.routine_posts.exceptions",
       "path": "backend/app/domains/routine_posts/exceptions.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.domains.routine_posts.infrastructure",
-      "path": "backend/app/domains/routine_posts/infrastructure/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "copy",
-        "dataclasses",
-        "json",
-        "pydantic",
-        "typing"
-      ],
-      "imports": [
-        "app.compatibility.routine_posts.legacy",
-        "app.credentials",
-        "app.domains.routine_posts.contracts.context",
-        "app.domains.routine_posts.schemas",
-        "app.domains.routine_posts.utils.text",
-        "app.integrations.direct_llm",
-        "app.providers.gemini"
-      ],
-      "module": "app.domains.routine_posts.infrastructure.direct_llm_provider",
-      "path": "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.routine_posts.contracts.context",
-        "app.domains.routine_posts.contracts.interaction",
-        "app.domains.routine_posts.exceptions",
-        "app.domains.routine_posts.infrastructure.direct_llm_provider",
-        "app.domains.routine_posts.service.context",
-        "app.domains.routine_posts.service.event_context"
-      ],
-      "module": "app.domains.routine_posts.public",
-      "path": "backend/app/domains/routine_posts/public.py",
       "wildcard_imports": []
     },
     {
@@ -3612,6 +3596,44 @@
       ],
       "module": "app.domains.routine_posts.service.event_context",
       "path": "backend/app/domains/routine_posts/service/event_context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "copy",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routine_posts.constants",
+        "app.domains.routine_posts.contracts.context",
+        "app.domains.routine_posts.contracts.generation",
+        "app.domains.routine_posts.schemas",
+        "app.domains.routine_posts.utils.text",
+        "app.domains.routines.service",
+        "app.providers.gemini"
+      ],
+      "module": "app.domains.routine_posts.service.evidence",
+      "path": "backend/app/domains/routine_posts/service/evidence.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "json",
+        "pydantic",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routine_posts.client",
+        "app.domains.routine_posts.contracts.context",
+        "app.domains.routine_posts.contracts.generation",
+        "app.domains.routine_posts.schemas",
+        "app.domains.routine_posts.service.evidence",
+        "app.integrations.direct_llm"
+      ],
+      "module": "app.domains.routine_posts.service.generation",
+      "path": "backend/app/domains/routine_posts/service/generation.py",
       "wildcard_imports": []
     },
     {
@@ -8715,10 +8737,13 @@
       "imports": [
         "app.compatibility.routine_posts.legacy",
         "app.core.unit_of_work",
+        "app.domains.routine_posts.constants",
         "app.domains.routine_posts.contracts.context",
+        "app.domains.routine_posts.contracts.generation",
         "app.domains.routine_posts.exceptions",
-        "app.domains.routine_posts.infrastructure.direct_llm_provider",
         "app.domains.routine_posts.service.context",
+        "app.domains.routine_posts.service.evidence",
+        "app.domains.routine_posts.service.generation",
         "app.domains.routines.exceptions",
         "app.domains.routines.service.execution.claims",
         "app.domains.routines.service.execution.lifecycle",
@@ -10090,18 +10115,6 @@
       ],
       "module": "app.services.resident_tick_scheduler",
       "path": "backend/app/services/resident_tick_scheduler.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "sys"
-      ],
-      "imports": [
-        "app.domains.routine_posts.infrastructure.direct_llm_provider"
-      ],
-      "module": "app.services.routine_post_planner",
-      "path": "backend/app/services/routine_post_planner.py",
       "wildcard_imports": []
     },
     {

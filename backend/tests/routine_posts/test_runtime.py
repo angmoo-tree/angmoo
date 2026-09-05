@@ -39,10 +39,10 @@ from app.services.resident_contracts import LangGraphResidentContext
 from app.domains.routine_posts.contracts.interaction import RoutineInteractionInput
 from app.domains.routine_posts.service.context import assemble_routine_post_context
 from app.runtime.routine_posts.context_references import SqlAlchemyRoutineContextReferences
-from app.services.routine_post_planner import (
+from app.domains.routine_posts.contracts.generation import RoutineGeneration
+from app.domains.routine_posts.service.evidence import (
     GEMINI_ROUTINE_BEAT_PLAN_RESPONSE_SCHEMA,
     GEMINI_ROUTINE_POST_DRAFT_RESPONSE_SCHEMA,
-    RoutineGeneration,
     allowed_continuity_facts,
     build_routine_beat_plan_response_schema,
 )
