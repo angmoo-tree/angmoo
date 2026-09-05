@@ -1139,6 +1139,7 @@
       "app.domains.social.contracts",
       "app.domains.social.contracts.actors",
       "app.domains.social.contracts.inbox",
+      "app.domains.social.contracts.inbox_reads",
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
       "app.domains.social.contracts.search_state",
@@ -1164,6 +1165,8 @@
       "app.domains.social.schemas.manual",
       "app.domains.social.service",
       "app.domains.social.service.activity_results",
+      "app.domains.social.service.feed",
+      "app.domains.social.service.inbox",
       "app.domains.social.service.joint_posts",
       "app.domains.social.service.media_storage",
       "app.domains.social.service.notifications",
@@ -1264,6 +1267,7 @@
       "app.domains.social.contracts",
       "app.domains.social.contracts.actors",
       "app.domains.social.contracts.inbox",
+      "app.domains.social.contracts.inbox_reads",
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
       "app.domains.social.contracts.search_state",
@@ -1276,6 +1280,8 @@
       "app.domains.social.schemas.feed",
       "app.domains.social.schemas.manual",
       "app.domains.social.service.activity_results",
+      "app.domains.social.service.feed",
+      "app.domains.social.service.inbox",
       "app.domains.social.service.joint_posts",
       "app.domains.social.service.media_storage",
       "app.domains.social.service.notifications",
@@ -2441,6 +2447,22 @@
         "owner_stage": "AR-B5 / AR-B8-A",
         "reason": "The remaining named Community callers use the identical profile workflow and bounded limit helper after actual implementation moves to Social ownership.",
         "removal_condition": "Move remaining HTTP and agent callers to canonical services and remove this exact legacy import.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.social.service.feed",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "Remaining old HTTP and agent callers use identical actual Feed/Inbox service functions while their source transition is pending.",
+        "removal_condition": "Move the remaining consumers to canonical Social services and remove this exact import.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.social.service.inbox",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "Remaining old HTTP and agent callers use identical actual Feed/Inbox service functions while their source transition is pending.",
+        "removal_condition": "Move the remaining consumers to canonical Social services and remove this exact import.",
         "review_date": "2026-09-05"
       }
     ]

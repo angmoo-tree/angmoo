@@ -1,3 +1,4 @@
+from app.domains.social.service import feed as social_feed
 from app.domains.social.service import notifications as social_notifications
 
 from app.domains.social.service import presentation as post_presentation
@@ -34,7 +35,7 @@ def test_list_posts_service_uses_feed_limit(monkeypatch) -> None:
         captured["content"] = content
         return page
 
-    monkeypatch.setattr(community_service, "list_feed", fake_list_feed)
+    monkeypatch.setattr(social_feed, "list_feed", fake_list_feed)
 
     db = object()
     assert community_service.list_posts(db, limit=1) == []

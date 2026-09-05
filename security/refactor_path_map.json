@@ -5255,7 +5255,8 @@
           "backend/app/domains/social/service/notifications.py",
           "backend/app/domains/social/service/source_posts.py",
           "backend/app/domains/social/utils/cursors.py",
-          "backend/app/domains/social/utils/text.py"
+          "backend/app/domains/social/utils/text.py",
+          "backend/app/runtime/social/inbox.py"
         ],
         "backend/app/schemas/characters.py": [
           "backend/app/domains/characters/schemas.py",
@@ -6212,13 +6213,17 @@
         },
         {
           "old": "backend/app/cruds/community.py::list_notifications",
-          "new": "backend/app/cruds/community.py::list_notifications",
+          "new": "backend/app/runtime/social/inbox.py::SqlAlchemyUserInboxReads",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py",
+            "backend/app/domains/social/service/inbox.py"
           ],
           "test_nodes": [
-            "tests/test_local_bot_response_contract.py::test_bot_notifications_hide_user_and_recipient_fields"
-          ]
+            "tests/social/test_inbox_workflows.py::test_user_inbox_keeps_single_owner_subquery_and_cursor_scope",
+            "tests/social/test_inbox_workflows.py::test_read_workflow_keeps_missing_guard_and_original_explicit_commit",
+            "tests/social/test_inbox_workflows.py::test_character_inbox_keeps_explicit_user_or_character_scope"
+          ],
+          "destination_member": "SqlAlchemyUserInboxReads.list_notifications"
         },
         {
           "old": "backend/app/cruds/community.py::list_notifications_for_agent",
@@ -6272,22 +6277,28 @@
         },
         {
           "old": "backend/app/cruds/community.py::get_notification_for_user",
-          "new": "backend/app/cruds/community.py::get_notification_for_user",
+          "new": "backend/app/runtime/social/inbox.py::SqlAlchemyUserInboxReads",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/cruds/community.py",
+            "backend/app/domains/social/service/inbox.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
-          ]
+            "tests/social/test_inbox_workflows.py::test_user_inbox_keeps_single_owner_subquery_and_cursor_scope",
+            "tests/social/test_inbox_workflows.py::test_read_workflow_keeps_missing_guard_and_original_explicit_commit",
+            "tests/social/test_inbox_workflows.py::test_character_inbox_keeps_explicit_user_or_character_scope"
+          ],
+          "destination_member": "SqlAlchemyUserInboxReads.get_notification_for_user"
         },
         {
           "old": "backend/app/cruds/community.py::mark_notification_read",
-          "new": "backend/app/domains/social/repository/inbox.py::mark_notification_read",
+          "new": "backend/app/domains/social/service/notifications.py::mark_notification_read",
           "direct_consumers": [
-            "backend/app/cruds/community.py"
+            "backend/app/cruds/community.py",
+            "backend/app/domains/social/service/inbox.py"
           ],
           "test_nodes": [
-            "tests/test_m3_authorization_deletion.py::test_two_user_object_authorization_matrix_denies_cross_owner_access"
+            "tests/social/test_inbox_workflows.py::test_read_workflow_keeps_missing_guard_and_original_explicit_commit",
+            "tests/social/test_inbox_workflows.py::test_character_inbox_keeps_explicit_user_or_character_scope"
           ]
         },
         {
@@ -13516,6 +13527,8 @@
           "backend/app/domains/social/constants.py",
           "backend/app/domains/social/exceptions.py",
           "backend/app/domains/social/service/activity_results.py",
+          "backend/app/domains/social/service/feed.py",
+          "backend/app/domains/social/service/inbox.py",
           "backend/app/domains/social/service/notifications.py",
           "backend/app/domains/social/service/posts.py",
           "backend/app/domains/social/service/presentation.py",
@@ -14498,22 +14511,24 @@
         },
         {
           "old": "backend/app/services/community.py::list_posts",
-          "new": "backend/app/services/community.py::list_posts",
+          "new": "backend/app/domains/social/service/feed.py::list_posts",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
+            "tests/test_local_bot_response_contract.py::test_bot_following_feed_hides_author_user_id"
           ]
         },
         {
           "old": "backend/app/services/community.py::list_feed",
-          "new": "backend/app/services/community.py::list_feed",
+          "new": "backend/app/domains/social/service/feed.py::list_feed",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
+            "tests/test_local_bot_response_contract.py::test_bot_following_feed_hides_author_user_id"
           ]
         },
         {
@@ -14568,22 +14583,24 @@
         },
         {
           "old": "backend/app/services/community.py::list_following_feed",
-          "new": "backend/app/services/community.py::list_following_feed",
+          "new": "backend/app/domains/social/service/feed.py::list_following_feed",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
+            "tests/test_local_bot_response_contract.py::test_bot_following_feed_hides_author_user_id"
           ]
         },
         {
           "old": "backend/app/services/community.py::list_character_following_feed",
-          "new": "backend/app/services/community.py::list_character_following_feed",
+          "new": "backend/app/domains/social/service/feed.py::list_character_following_feed",
           "direct_consumers": [
             "backend/app/services/community.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/test_community_posts_route.py::test_list_posts_service_uses_feed_limit",
+            "tests/test_local_bot_response_contract.py::test_bot_following_feed_hides_author_user_id"
           ]
         },
         {
@@ -14847,42 +14864,56 @@
         },
         {
           "old": "backend/app/services/community.py::list_notifications",
-          "new": "backend/app/services/community.py::list_notifications",
+          "new": "backend/app/domains/social/service/inbox.py::SocialInboxService",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/services/community.py",
+            "backend/app/runtime/social/inbox.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
-          ]
+            "tests/social/test_inbox_workflows.py::test_user_inbox_keeps_single_owner_subquery_and_cursor_scope",
+            "tests/social/test_inbox_workflows.py::test_read_workflow_keeps_missing_guard_and_original_explicit_commit",
+            "tests/social/test_inbox_workflows.py::test_character_inbox_keeps_explicit_user_or_character_scope"
+          ],
+          "destination_member": "SocialInboxService.list_notifications"
         },
         {
           "old": "backend/app/services/community.py::mark_notification_read",
-          "new": "backend/app/services/community.py::mark_notification_read",
+          "new": "backend/app/domains/social/service/inbox.py::SocialInboxService",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/services/community.py",
+            "backend/app/runtime/social/inbox.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
-          ]
+            "tests/social/test_inbox_workflows.py::test_user_inbox_keeps_single_owner_subquery_and_cursor_scope",
+            "tests/social/test_inbox_workflows.py::test_read_workflow_keeps_missing_guard_and_original_explicit_commit",
+            "tests/social/test_inbox_workflows.py::test_character_inbox_keeps_explicit_user_or_character_scope"
+          ],
+          "destination_member": "SocialInboxService.mark_notification_read"
         },
         {
           "old": "backend/app/services/community.py::list_notifications_for_character",
-          "new": "backend/app/services/community.py::list_notifications_for_character",
+          "new": "backend/app/domains/social/service/inbox.py::list_notifications_for_character",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/services/community.py",
+            "backend/app/runtime/social/inbox.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_inbox_workflows.py::test_user_inbox_keeps_single_owner_subquery_and_cursor_scope",
+            "tests/social/test_inbox_workflows.py::test_read_workflow_keeps_missing_guard_and_original_explicit_commit",
+            "tests/social/test_inbox_workflows.py::test_character_inbox_keeps_explicit_user_or_character_scope"
           ]
         },
         {
           "old": "backend/app/services/community.py::mark_character_notification_read",
-          "new": "backend/app/services/community.py::mark_character_notification_read",
+          "new": "backend/app/domains/social/service/inbox.py::mark_character_notification_read",
           "direct_consumers": [
-            "backend/app/services/community.py"
+            "backend/app/services/community.py",
+            "backend/app/runtime/social/inbox.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_inbox_workflows.py::test_user_inbox_keeps_single_owner_subquery_and_cursor_scope",
+            "tests/social/test_inbox_workflows.py::test_read_workflow_keeps_missing_guard_and_original_explicit_commit",
+            "tests/social/test_inbox_workflows.py::test_character_inbox_keeps_explicit_user_or_character_scope"
           ]
         },
         {
@@ -18680,6 +18711,23 @@
         "tests/social/test_profile_workflows.py::test_profile_workflow_preserves_fail_closed_order_and_deleted_display"
       ],
       "remaining": "Feed/inbox/agent workflows, media jobs, Relationships/projection and HTTP ownership transition."
+    },
+    "AR-B5-B7": {
+      "status": "IMPLEMENTED; focused57 PASS; original11 function bodies/query order unchanged; API/ORM/assertions/full split PASS; source introduction and integration pending",
+      "scope": "Actual Feed selection and owner policy, Inbox page/missing/read workflow, original explicit read commit; cross-owner Character/Notification query remains one SQL in runtime composition.",
+      "source_split_owners": [
+        "AR-B2-B1 full Community CRUD source map",
+        "AR-B2-B6 full Community service source map"
+      ],
+      "new_tests": [
+        "backend/tests/social/test_inbox_workflows.py"
+      ],
+      "test_nodes": [
+        "tests/social/test_inbox_workflows.py::test_user_inbox_keeps_single_owner_subquery_and_cursor_scope",
+        "tests/social/test_inbox_workflows.py::test_read_workflow_keeps_missing_guard_and_original_explicit_commit",
+        "tests/social/test_inbox_workflows.py::test_character_inbox_keeps_explicit_user_or_character_scope"
+      ],
+      "remaining": "Today/search/agent/resident workflows, media jobs, Relationships/projection, HTTP ownership and legacy cleanup."
     }
   }
 }

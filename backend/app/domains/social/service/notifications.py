@@ -1,12 +1,13 @@
-from collections.abc import Iterable
-from app.domains.social.service.presentation import _mentioned_characters_for_texts
 """Notification admission and persistence in the caller's current write context."""
+from collections.abc import Iterable
+from datetime import datetime, timezone
 import json
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from app.core import unit_of_work
 from app.domains.social.models import posts as models
+from app.domains.social.service.presentation import _mentioned_characters_for_texts
 
 
 def create_notification(
@@ -131,3 +132,12 @@ def _notify_mentioned_characters(
             post_id=post.id,
             source_post_id=None,
         )
+
+
+def mark_notification_read(
+    db: Session, notification: models.Notification
+) -> models.Notification:
+    notification.read_at = datetime.now(timezone.utc)
+    db.commit()
+    db.refresh(notification)
+    return notification

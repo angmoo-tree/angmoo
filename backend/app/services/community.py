@@ -1,3 +1,8 @@
+from app.domains.social.service.feed import list_posts, list_feed, list_following_feed, list_character_following_feed
+from app.domains.social.service.inbox import list_notifications_for_character, mark_character_notification_read
+from app.runtime.social.inbox import inbox_service
+list_notifications = inbox_service.list_notifications
+mark_notification_read = inbox_service.mark_notification_read
 from app.domains.social.service.profiles import (
     follow_profile,
     get_follow_status,
@@ -1414,28 +1419,8 @@ def _raise_agent_tool_authorization_error(
     raise AgentRunAuthorizationError(detail)
 
 
-def list_posts(db: Session, *, limit: int = 20) -> list[schemas.PostSummary]:
-    return list_feed(db, limit=limit, content="all").items
 
 
-def list_feed(
-    db: Session,
-    *,
-    limit: int = 20,
-    cursor: str | None = None,
-    content: schemas.FeedContentFilter = "all",
-) -> schemas.FeedPage:
-    posts, next_cursor = community_crud.list_timeline_posts(
-        db, limit=_safe_limit(limit), cursor=cursor, content_filter=content
-    )
-    return schemas.FeedPage(
-        items=[
-            _post_summary(db, post)
-            for post in posts
-            if _is_post_public_context_visible(db, post)
-        ],
-        next_cursor=next_cursor,
-    )
 
 
 def list_today_popular_posts(
@@ -1578,70 +1563,6 @@ def search_nest(
     )
 
 
-def list_following_feed(
-    db: Session,
-    user: models.User,
-    *,
-    limit: int = 20,
-    cursor: str | None = None,
-    content: schemas.FeedContentFilter = "all",
-) -> schemas.FeedPage:
-    followed_user_ids, followed_character_ids = community_crud.get_followed_profiles_for_user(
-        db, user.id
-    )
-    posts, next_cursor = community_crud.list_timeline_posts(
-        db,
-        limit=_safe_limit(limit),
-        cursor=cursor,
-        content_filter=content,
-        followed_user_ids=followed_user_ids,
-        followed_character_ids=followed_character_ids,
-    )
-    return schemas.FeedPage(
-        items=[
-            _post_summary(db, post)
-            for post in posts
-            if _is_post_public_context_visible(db, post)
-        ],
-        next_cursor=next_cursor,
-    )
-
-
-def list_character_following_feed(
-    db: Session,
-    user: models.User,
-    character_id: str,
-    *,
-    limit: int = 20,
-    cursor: str | None = None,
-    content: schemas.FeedContentFilter = "all",
-) -> schemas.FeedPage:
-    character = community_crud.get_character(db, character_id)
-    if character is None or character.deleted_at is not None:
-        raise CharacterNotFoundError(character_id)
-    if character.owner_id != user.id:
-        raise CharacterOwnershipError(
-            f"user {user.id} cannot read following feed for character {character.id}"
-        )
-    followed_user_ids, followed_character_ids = (
-        community_crud.get_followed_profiles_for_character(db, character.id)
-    )
-    posts, next_cursor = community_crud.list_timeline_posts(
-        db,
-        limit=_safe_limit(limit),
-        cursor=cursor,
-        content_filter=content,
-        followed_user_ids=followed_user_ids,
-        followed_character_ids=followed_character_ids,
-    )
-    return schemas.FeedPage(
-        items=[
-            _post_summary(db, post)
-            for post in posts
-            if _is_post_public_context_visible(db, post)
-        ],
-        next_cursor=next_cursor,
-    )
 
 
 
@@ -1688,59 +1609,14 @@ def list_character_following_feed(
 
 
 
-def list_notifications(
-    db: Session, user: models.User, *, limit: int = 50, cursor: str | None = None
-) -> schemas.NotificationPage:
-    notifications, next_cursor = community_crud.list_notifications(
-        db, user=user, limit=max(1, min(limit, 100)), cursor=cursor
-    )
-    return schemas.NotificationPage(
-        items=[_notification_read(db, item) for item in notifications],
-        next_cursor=next_cursor,
-    )
 
 
-def mark_notification_read(
-    db: Session, user: models.User, notification_id: int
-) -> schemas.NotificationRead:
-    notification = community_crud.get_notification_for_user(
-        db, user=user, notification_id=notification_id
-    )
-    if notification is None:
-        raise NotificationNotFoundError(notification_id)
-    return _notification_read(db, community_crud.mark_notification_read(db, notification))
 
 
-def list_notifications_for_character(
-    db: Session,
-    *,
-    user_id: str,
-    character_id: str,
-    limit: int = 50,
-    cursor: str | None = None,
-) -> schemas.NotificationPage:
-    notifications, next_cursor = community_crud.list_notifications_for_agent_page(
-        db,
-        user_id=user_id,
-        character_id=character_id,
-        limit=max(1, min(limit, 100)),
-        cursor=cursor,
-    )
-    return schemas.NotificationPage(
-        items=[_notification_read(db, item) for item in notifications],
-        next_cursor=next_cursor,
-    )
 
 
-def mark_character_notification_read(
-    db: Session, *, user_id: str, character_id: str, notification_id: int
-) -> schemas.NotificationRead:
-    notification = community_crud.get_notification_for_agent(
-        db, user_id=user_id, character_id=character_id, notification_id=notification_id
-    )
-    if notification is None:
-        raise NotificationNotFoundError(notification_id)
-    return _notification_read(db, community_crud.mark_notification_read(db, notification))
+
+
 
 
 def create_agent_tool_comment(

@@ -676,3 +676,12 @@ B5-B5 최종 보존 검사: #258/#263 API/schema/ORM 차이 0, 변경 기존 테
 새 `tests/social/test_profile_workflows.py`의 **2 nodes**는 실제 SQLite에서 팔로우 중복 요청의 동일 결과/알림 1개, 해제 상태와 caller rollback, 소유하지 않은 follower와 self-follow의 쓰기 전 거절, 없는 User 오류, 삭제된 Character의 기존 표시 가림과 신규 팔로우 거절을 검증한다. 기존 관련 회귀와 함께 **44 passed / 1 existing warning / 7.55s**다. 같은 Session과 deferred commit 동작을 유지하며 추가 provider 요청은 없다.
 
 #258/#263 API·schema·ORM 차이 0, 기존 보호 테스트 변경 0, 전체 split evidence PASS다. 원래 AR-B2-B6의 전체 Community symbol 지도를 유지하면서 정확히 18개의 목적지를 갱신했다. 경계 검사는 **669 modules / 2,189 edges / 241 exact legacy edges**로 통과했다. 신규 source 도입 capture와 통합 Actions/PR/merge는 root의 후속 검증이며 전체 B5 완료를 의미하지 않는다.
+
+
+## AR-B5-B7 — Feed 목록·Inbox 조회와 읽음 처리
+
+Feed 목록·following의 실제 함수 4개, Inbox 업무 함수 4개를 Social service로 이전했다. 사용자 Inbox의 Character 소유 subquery와 Notification 조회 2개는 `runtime/social/inbox.py`에서 같은 Session·한 번의 SQL로 연결한다. 읽음 상태의 실제 대입·commit·refresh는 `service/notifications.py`가 소유한다. 원본 11개 함수의 본문은 소유 import/collaborator 이름을 정규화했을 때 동일하며 조건·정렬·cursor·오류·commit 순서도 같다.
+
+신규 `tests/social/test_inbox_workflows.py`의 **3 nodes**는 한 번의 owner subquery·삭제/다른 owner 제외·cursor/잘못된 cursor의 기존 처리, 없는 대상의 쓰기 전 차단, 원래 명시적 read commit이 같은 Session의 미저장 변경까지 확정하는 계약, Character inbox의 명시적 recipient OR 범위를 검증한다. 첫 집중 실행은 **56 passed / 1 failed**였다. 실패는 Feed helper의 monkeypatch가 옛 module을 대상으로 한 경우였으며 실제 새 소유 함수로 옮겼고 assertion은 변경하지 않았다.
+
+수정 후 **57 passed / 1 existing warning / 13.63s**, #258/#263 API·schema·ORM 차이 0, 변경 보호 테스트 1개 파일의 assertion PASS, 전체 split evidence PASS다. 원래 Community CRUD/서비스 전체 symbol 지도를 갱신하고 새로운 source/test capture는 root가 순차 수행한다. Today·검색·agent/resident·미디어 job, Relationships/projection과 최종 HTTP·호환 소비자 종료는 아직 B5 잔여다.

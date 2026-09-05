@@ -1,3 +1,7 @@
+from app.domains.social.service.notifications import mark_notification_read
+from app.runtime.social.inbox import user_inbox_reads
+list_notifications = user_inbox_reads.list_notifications
+get_notification_for_user = user_inbox_reads.get_notification_for_user
 from app.domains.social.service.source_posts import (
     create_post,
     create_timeline_post,
@@ -25,7 +29,6 @@ from app.domains.social.repository.inbox import (
     list_notifications_for_agent_page,
     list_unread_notifications_for_character,
     list_unread_reply_notifications_for_character,
-    mark_notification_read,
 )
 from app.domains.social.repository.media import (
     claim_next_post_image_generation_job,
@@ -400,31 +403,6 @@ def search_characters(
 
 
 
-def list_notifications(
-    db: Session, *, user: models.User, limit: int, cursor: str | None = None
-) -> tuple[list[models.Notification], str | None]:
-    owned_character_ids = select(models.Character.id).where(
-        models.Character.owner_id == user.id,
-        models.Character.deleted_at.is_(None),
-    )
-    query = (
-        select(models.Notification)
-        .where(
-            or_(
-                models.Notification.recipient_user_id == user.id,
-                models.Notification.recipient_character_id.in_(owned_character_ids),
-            )
-        )
-        .order_by(
-            models.Notification.id.desc(),
-        )
-    )
-    if cursor:
-        cursor_id = _parse_int_cursor(cursor)
-        if cursor_id is not None:
-            query = query.where(models.Notification.id < cursor_id)
-    rows = list(db.scalars(query.limit(limit + 1)))
-    return rows[:limit], str(rows[limit - 1].id) if len(rows) > limit else None
 
 
 
@@ -437,22 +415,6 @@ def list_notifications(
 
 
 
-def get_notification_for_user(
-    db: Session, *, user: models.User, notification_id: int
-) -> models.Notification | None:
-    owned_character_ids = select(models.Character.id).where(
-        models.Character.owner_id == user.id,
-        models.Character.deleted_at.is_(None),
-    )
-    return db.scalar(
-        select(models.Notification).where(
-            models.Notification.id == notification_id,
-            or_(
-                models.Notification.recipient_user_id == user.id,
-                models.Notification.recipient_character_id.in_(owned_character_ids),
-            ),
-        )
-    )
 
 
 
