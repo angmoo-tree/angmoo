@@ -14,7 +14,7 @@ from app.api.v1.routes.manual_social import router as manual_social_router
 from app.api.v1.routes.world_chat import entry_router
 from app.api.v1.routes.world_chat import router as world_chat_router
 from app.core.db import Base, get_db
-from app.domains.world_characters.api.routes import router as world_character_router
+from app.domains.world_characters.router.profile import router as world_character_router
 
 FRONTEND_HEADERS = {"Origin": "http://127.0.0.1:3000"}
 

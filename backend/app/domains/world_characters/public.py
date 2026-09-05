@@ -9,9 +9,6 @@ from app.domains.world_characters.contracts.public_profile import (
     WorldCharacterProfileNotFoundError,
     WorldCharacterPublicProfile,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_public_profile import (
-    SqlAlchemyWorldCharacterPublicProfileReader,
-)
 from app.domains.world_characters.contracts.owner_identity import (
     OwnerControlledIdentityError,
 )
@@ -56,10 +53,6 @@ from app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup imp
     set_active_world_character_autonomy,
     update_world_character_role,
 )
-from app.domains.world_characters.application.studio_lifecycle import (
-    leave_studio_world_character,
-    list_studio_character_candidates,
-)
 from app.domains.world_characters.contracts.studio_lifecycle import (
     StudioWorldCharacterBusyError,
     StudioWorldCharacterConflictError,
@@ -67,9 +60,6 @@ from app.domains.world_characters.contracts.studio_lifecycle import (
     StudioWorldCharacterLifecycleError,
     StudioWorldCharacterNotFoundError,
     StudioWorldCharacterValidationError,
-)
-from app.domains.world_characters.infrastructure.sqlalchemy_studio_lifecycle import (
-    SqlAlchemyStudioWorldCharacterLifecycle,
 )
 from app.domains.world_characters.service.seed import (
     seed_autonomous_world_character,
@@ -105,7 +95,6 @@ __all__ = [
     "StudioWorldCharacterLifecycleError",
     "StudioWorldCharacterNotFoundError",
     "StudioWorldCharacterValidationError",
-    "SqlAlchemyStudioWorldCharacterLifecycle",
     "WorldActivityCandidate",
     "WorldActivityRepertoire",
     "WorldCharacter",
@@ -114,7 +103,6 @@ __all__ = [
     "WorldCharacterProfileForbiddenError",
     "WorldCharacterProfileNotFoundError",
     "WorldCharacterPublicProfile",
-    "SqlAlchemyWorldCharacterPublicProfileReader",
     "OwnerControlledIdentityService",
     "approve_setup",
     "character_contract_hash",
@@ -125,8 +113,6 @@ __all__ = [
     "get_world_entry",
     "is_owner_controlled_character",
     "is_expected_autonomous_runtime_pair",
-    "leave_studio_world_character",
-    "list_studio_character_candidates",
     "lock_world_autonomy_capacity",
     "owner_controlled_character_ids",
     "preflight_setup",

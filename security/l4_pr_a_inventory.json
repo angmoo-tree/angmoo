@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2041,
-      "internal_edge_count": 1937,
+      "external_import_count": 2037,
+      "internal_edge_count": 1934,
       "legacy_import_exception_count": 0,
-      "module_count": 618,
+      "module_count": 617,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -551,7 +551,8 @@
               "app.domains.social.public",
               "app.domains.world_characters.public",
               "app.pagination",
-              "app.runtime.social.sqlalchemy_read_repository"
+              "app.runtime.social.sqlalchemy_read_repository",
+              "app.runtime.world_characters.composition"
             ],
             "module": "app.runtime.social.sqlalchemy_profile_repository",
             "path": "backend/app/runtime/social/sqlalchemy_profile_repository.py"
@@ -1102,7 +1103,7 @@
       },
       {
         "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
-        "sha256": "1443f5ce298f85a71cae49627294eeeed640c2c1b4b3ebd8d4f472cf4f11f1d1"
+        "sha256": "d6c5fe8ccdb8174ce57a513d039616aa83d2d4c75161d50362b102bd3117b236"
       },
       {
         "path": "backend/tests/test_l4_social_search_projection.py",

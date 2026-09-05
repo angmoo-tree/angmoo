@@ -443,3 +443,8 @@ Creator 이미지 한도는 `service/image_quota.py`, draft 응답·파싱·쿨�
 
 
 WorldCharacter의 소유자 identity는 `service/owner_identity.py`의 실제 조회·생성·수정 서비스가 담당합니다. 설치 소유자 확인은 Identity의 `service/owner_context.py`, 특수 Character seed·프로필 쓰기는 Character의 `service/owner_controlled.py`에 요청합니다. 일반 create/update의 commit/rollback/refresh는 WC 서비스가 유지하고 Package seed는 같은 Session에서 flush만 합니다. 이전 application forwarding 함수와 repository Protocol은 실제 호출 전환 후 제거했습니다.
+
+
+WorldCharacter의 공개 프로필·Studio·후보 조회와 퇴장 정책은 `service/public_profile.py`, `service/studio.py`, `service/lifecycle.py`에 있습니다. World 권한 확인·프로필 표현·퇴장 버전 및 상태 판단은 이 서비스가 소유합니다. Character/WorldMembership을 함께 읽는 기존 SQL은 `runtime/world_characters/queries.py`가 같은 Session에서 실행하며 `contracts/queries.py` 계약으로 주입됩니다. API와 다른 runtime 소비자는 `runtime/world_characters/composition.py` 또는 공통 HTTP 연결 `app/api/world_character_dependencies.py`에서 조립합니다. 서비스가 runtime을 역으로 import하지 않으며 row 개수·DB 정렬·조회 횟수를 바꾸지 않습니다.
+
+기존 프로필·Studio·소유자 HTTP 7개 경로는 `router/profile.py`에 있습니다. 단순 application forwarding 함수와 repository Protocol은 실제 호출을 옮긴 뒤 제거했으며, 퇴장 runtime guard는 `contracts/lifecycle.py`에 실제 협력 계약으로 남습니다. 선택된 World에서 퇴장할 때 Character의 비활성화도 Character 서비스의 같은 attached 객체 쓰기로 연결하고 commit/rollback은 원래 WC 트랜잭션이 수행합니다.

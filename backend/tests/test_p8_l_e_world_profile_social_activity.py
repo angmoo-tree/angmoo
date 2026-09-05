@@ -13,7 +13,7 @@ from app import models
 from app.domains.identity.dependencies import get_current_user
 from app.api.v1.routes.manual_social import router as manual_social_router
 from app.core.db import Base, get_db
-from app.domains.world_characters.api.routes import router as world_character_router
+from app.domains.world_characters.router.profile import router as world_character_router
 
 
 def _user(user_id: str) -> models.User:

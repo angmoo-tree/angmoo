@@ -17,7 +17,7 @@ from app import models
 from app.domains.identity.dependencies import get_current_user
 from app.core.db import Base, get_db
 from app.cruds import agent_runs as agent_run_crud
-from app.domains.world_characters.api.routes import router
+from app.domains.world_characters.router.profile import router
 from app.services import agent_runs as agent_run_service
 from app.runtime.characters import management as agent_service
 

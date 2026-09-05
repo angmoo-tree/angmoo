@@ -6,6 +6,8 @@ the Memory domain itself remains independent from runtime adapters.
 
 from __future__ import annotations
 
+from app.runtime.world_characters.composition import public_profile_service
+
 from datetime import UTC, datetime
 from dataclasses import asdict
 
@@ -49,9 +51,6 @@ from app.domains.memory.domain.provenance import MemoryProviderMode, MemorySourc
 from app.domains.memory.domain.retention import DEFAULT_MEMORY_RETENTION_DAYS
 from app.domains.memory.domain.scope import MemoryScope
 from app.domains.memory.infrastructure.repository import SqlAlchemyMemoryRepository
-from app.domains.world_characters.public import (
-    SqlAlchemyWorldCharacterPublicProfileReader,
-)
 from app.runtime.memory.sqlalchemy_source_reader import (
     SqlAlchemyMemorySourceEvidenceReader,
 )
@@ -599,7 +598,7 @@ def _related_character(
 
 
 def _character_names(db: Session, scope: MemoryScope) -> dict[str, str]:
-    profiles = SqlAlchemyWorldCharacterPublicProfileReader(db).list_for_world(
+    profiles = public_profile_service(db).list_for_world(
         world_id=scope.world_id,
         current_user_id=scope.owner_id,
     )
