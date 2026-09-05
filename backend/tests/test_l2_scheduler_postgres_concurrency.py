@@ -9,7 +9,7 @@ from sqlalchemy import create_engine, delete
 from sqlalchemy.orm import Session, sessionmaker
 
 from app import models
-from app.domains.runtime.public import SchedulerLeaseHeldError
+from app.domains.runtime.exceptions import SchedulerLeaseHeldError
 from app.runtime.persistence.scheduler_lease import SqlAlchemySchedulerLeaseRepository
 
 

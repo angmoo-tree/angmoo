@@ -1,7 +1,7 @@
 {
-  "edge_count": 2469,
+  "edge_count": 2457,
   "external_import_count": 2303,
-  "module_count": 741,
+  "module_count": 735,
   "modules": [
     {
       "external_imports": [],
@@ -4596,20 +4596,6 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.domains.runtime.api",
-      "path": "backend/app/domains/runtime/api/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.domains.runtime.application",
-      "path": "backend/app/domains/runtime/application/__init__.py",
-      "wildcard_imports": []
-    },
-    {
       "external_imports": [
         "__future__",
         "datetime",
@@ -4797,28 +4783,12 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.domains.runtime.domain",
-      "path": "backend/app/domains/runtime/domain/__init__.py",
-      "wildcard_imports": []
-    },
-    {
       "external_imports": [
         "typing"
       ],
       "imports": [],
       "module": "app.domains.runtime.exceptions",
       "path": "backend/app/domains/runtime/exceptions.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.runtime.models"
-      ],
-      "module": "app.domains.runtime.infrastructure",
-      "path": "backend/app/domains/runtime/infrastructure/__init__.py",
       "wildcard_imports": []
     },
     {
@@ -4845,40 +4815,6 @@
       ],
       "module": "app.domains.runtime.policies.lease",
       "path": "backend/app/domains/runtime/policies/lease.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.runtime.contracts.data_paths",
-        "app.domains.runtime.contracts.lease_store",
-        "app.domains.runtime.contracts.search",
-        "app.domains.runtime.contracts.status_reader",
-        "app.domains.runtime.contracts.transaction"
-      ],
-      "module": "app.domains.runtime.ports",
-      "path": "backend/app/domains/runtime/ports/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.runtime.constants",
-        "app.domains.runtime.contracts.components",
-        "app.domains.runtime.contracts.lease",
-        "app.domains.runtime.contracts.status",
-        "app.domains.runtime.contracts.status_reader",
-        "app.domains.runtime.exceptions",
-        "app.domains.runtime.models",
-        "app.domains.runtime.policies.lease",
-        "app.domains.runtime.ports",
-        "app.domains.runtime.schemas",
-        "app.domains.runtime.service.components",
-        "app.domains.runtime.service.lease_coordinator",
-        "app.domains.runtime.service.status"
-      ],
-      "module": "app.domains.runtime.public",
-      "path": "backend/app/domains/runtime/public.py",
       "wildcard_imports": []
     },
     {
@@ -5392,7 +5328,7 @@
         "typing"
       ],
       "imports": [
-        "app.domains.runtime.public"
+        "app.domains.runtime.contracts.search"
       ],
       "module": "app.domains.social.ports.search_index",
       "path": "backend/app/domains/social/ports/search_index.py",
@@ -7929,7 +7865,8 @@
         "app.core.public_media",
         "app.core.request_limits",
         "app.cruds.community",
-        "app.domains.runtime.public",
+        "app.domains.runtime.contracts.status",
+        "app.domains.runtime.service.components",
         "app.domains.world_packages.storage.import_media",
         "app.runtime.account_deletion",
         "app.runtime.characters.creator",
@@ -8351,7 +8288,8 @@
       ],
       "imports": [
         "app.core.redaction",
-        "app.domains.runtime.public",
+        "app.domains.runtime.schemas",
+        "app.domains.runtime.service.status",
         "app.public_main",
         "app.runtime.configuration",
         "app.runtime.diagnostics.status_composition",
@@ -9510,7 +9448,9 @@
         "app.config",
         "app.core.db",
         "app.domains.routines.schemas",
-        "app.domains.runtime.public",
+        "app.domains.runtime.contracts.lease",
+        "app.domains.runtime.exceptions",
+        "app.domains.runtime.service.lease_coordinator",
         "app.runtime.persistence.scheduler_fence",
         "app.runtime.persistence.scheduler_lease",
         "app.runtime.routines.lifecycle_references",
@@ -9709,7 +9649,7 @@
       ],
       "imports": [
         "app.core.search_text",
-        "app.domains.runtime.public",
+        "app.domains.runtime.contracts.search",
         "app.domains.social.public",
         "app.models",
         "app.runtime.search.sqlite_fts5"
@@ -9767,7 +9707,10 @@
       ],
       "imports": [
         "app.config",
-        "app.domains.runtime.public",
+        "app.domains.runtime.constants",
+        "app.domains.runtime.contracts.status",
+        "app.domains.runtime.exceptions",
+        "app.domains.runtime.service.components",
         "app.runtime.component_workers"
       ],
       "module": "app.runtime.single_backend_components",

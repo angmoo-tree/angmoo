@@ -10,7 +10,7 @@ from sqlalchemy.pool import StaticPool
 from app import models
 from app.core.db import Base
 from app.core.search_text import build_post_search_document, normalize_search_text
-from app.domains.runtime.public import SearchIndexHit
+from app.domains.runtime.contracts.search import SearchIndexHit
 from app.domains.social.public import SocialSearchState
 from app.runtime.search import CallbackSearchIndexAdapter
 from app.services import world_character_contracts

@@ -158,10 +158,8 @@ def contributor_runtime_status_payload(
     _register_canonical_models()
 
     from app.core.redaction import sanitize_support_bundle_metadata
-    from app.domains.runtime.public import (
-        ReadApplicationRuntimeStatus,
-        runtime_status_read,
-    )
+    from app.domains.runtime.service.status import ReadApplicationRuntimeStatus
+    from app.domains.runtime.schemas import runtime_status_read
     from app.runtime.diagnostics.status_composition import create_runtime_status_reader as SqlAlchemyApplicationRuntimeProbe
     from app.runtime.configuration import compose_runtime
 

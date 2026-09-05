@@ -11,7 +11,35 @@ from sqlalchemy.orm import Session
 from app.domains.identity.dependencies import get_current_user
 from app.domains.runtime import router as runtime_routes
 from app.core.db import get_db
-from app.domains.runtime import public as runtime
+from types import SimpleNamespace as _RuntimeTestNamespace
+from app.domains.runtime.contracts.status import ActivityRuntimeStatus as _runtime_ActivityRuntimeStatus
+from app.domains.runtime.contracts.status import ApplicationRuntimeStatus as _runtime_ApplicationRuntimeStatus
+from app.domains.runtime.contracts.status import InstallationState as _runtime_InstallationState
+from app.domains.runtime.contracts.status import MigrationRuntimeStatus as _runtime_MigrationRuntimeStatus
+from app.domains.runtime.contracts.status import OwnerRuntimeStatus as _runtime_OwnerRuntimeStatus
+from app.domains.runtime.contracts.status import ProjectorRuntimeStatus as _runtime_ProjectorRuntimeStatus
+from app.domains.runtime.contracts.status import ProviderFailureClass as _runtime_ProviderFailureClass
+from app.domains.runtime.contracts.status import ProviderUsageRuntimeStatus as _runtime_ProviderUsageRuntimeStatus
+from app.domains.runtime.contracts.status import RuntimeComponentState as _runtime_RuntimeComponentState
+from app.domains.runtime.contracts.status import RuntimeComponentStatus as _runtime_RuntimeComponentStatus
+from app.domains.runtime.constants import RuntimeDiagnosticCode as _runtime_RuntimeDiagnosticCode
+from app.domains.runtime.contracts.status import SchedulerRuntimeStatus as _runtime_SchedulerRuntimeStatus
+
+# Preserve the original test namespace with the same actual role objects.
+runtime = _RuntimeTestNamespace(
+    ActivityRuntimeStatus=_runtime_ActivityRuntimeStatus,
+    ApplicationRuntimeStatus=_runtime_ApplicationRuntimeStatus,
+    InstallationState=_runtime_InstallationState,
+    MigrationRuntimeStatus=_runtime_MigrationRuntimeStatus,
+    OwnerRuntimeStatus=_runtime_OwnerRuntimeStatus,
+    ProjectorRuntimeStatus=_runtime_ProjectorRuntimeStatus,
+    ProviderFailureClass=_runtime_ProviderFailureClass,
+    ProviderUsageRuntimeStatus=_runtime_ProviderUsageRuntimeStatus,
+    RuntimeComponentState=_runtime_RuntimeComponentState,
+    RuntimeComponentStatus=_runtime_RuntimeComponentStatus,
+    RuntimeDiagnosticCode=_runtime_RuntimeDiagnosticCode,
+    SchedulerRuntimeStatus=_runtime_SchedulerRuntimeStatus,
+)
 from app.domains.runtime.service.status import RUNTIME_MIGRATION_HEAD
 from app.runtime.diagnostics.status_composition import create_runtime_status_reader as SqlAlchemyApplicationRuntimeProbe
 from app.domains.runtime.service.status import _find_opaque_id

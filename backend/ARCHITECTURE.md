@@ -644,3 +644,11 @@ Routines의 `service/tick_schedule.py`는 active hours·다음 실행·재시도
 `routines/schemas/runs.py`는 기존 Run/Slot/Tick 입출력 다섯 형식을 소유합니다. `contracts/activity_policy.py`의 ActivityPolicy는 한 tick에서 허용/차단한 행동과 다음 시각을 담고 기존 prompt 표현을 제공합니다. `service/activity_sessions.py`는 예약 실행과 소유자 수동 실행의 기존 세션 표시를 구별합니다. 실제 허용 판단/횟수 조회/World 활성화 검증은 다음 C3b에서 각각 업무와 runtime 협력으로 이전합니다.
 
 Resident Context는 Character/CharacterState, LlmCredential, AgentFeedCue와 ActivityPolicy의 실제 소유 타입을 그대로 참조합니다. Scheduler도 같은 Routines Tick 응답을 사용하며 별도 DTO나 ORM class를 만들지 않습니다. 이전의 공통 모델/스키마 및 legacy 정책 값 import 세 개는 제거했습니다.
+
+### Runtime 진단과 실행 잠금의 소유권
+
+`domains/runtime/router.py`는 소유자용 `/runtime/status` HTTP와 응답 형식을 담당합니다. InstallationIdentity의 같은 Session 조회와 claimed-owner 판단은 `identity/repository/runtime_access.py` 및 `identity/service/runtime_access.py`에 있습니다. 상태의 privacy-safe 분류와 component overlay는 Runtime `service/status.py`, `service/components.py`에서 읽을 수 있습니다. 다른 업무의 실제 상태 조회와 reader 생성은 `runtime/diagnostics`가 연결하며, 두 앱 생성 profile은 이 reader factory를 한 번 등록합니다.
+
+`RuntimeSchedulerLease` ORM은 Runtime의 `models.py`에 있습니다. 잠금 획득·heartbeat·tick·해제·오래된 실행자 거부 규칙은 `service/scheduler_lease.py`와 `service/sqlite_lease.py`, 실제 SQL과 compare-and-set 조건은 같은 이름의 `repository` 파일이 담당합니다. `runtime/persistence/scheduler_lease.py`는 SQLAlchemy Session factory와 Identity 조회를 연결하고, `sqlite_scheduler_lease.py`는 SQLite engine·읽기 connection·BEGIN IMMEDIATE 재시도·시계를 연결합니다. `scheduler_fence.py`는 실행 context와 단일 before-commit hook의 수명을 담당합니다.
+
+도메인 밖에서 필요한 Runtime 값과 callback 계약은 `contracts/status.py`, `lease.py`, `lease_store.py`, `search.py`, `transaction.py` 등 실제 정의 파일에서 import합니다. 기존 `public.py`와 `api/application/domain/infrastructure/ports` 집합 export는 제거했습니다. 옛 assertion을 보존하는 두 테스트의 local namespace는 동일한 실제 타입과 함수만 묶으며 제품 코드가 사용하지 않습니다. 공통 Base·DB·모델 등록의 G5 통합과 G06 진입점 최종 정리는 이 역할 배치와 구분하여 검증합니다.

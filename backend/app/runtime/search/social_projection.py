@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app import models
 from app.core.search_text import build_post_search_document
-from app.domains.runtime.public import SearchIndexDocument
+from app.domains.runtime.contracts.search import SearchIndexDocument
 from app.domains.social.public import (
     SocialSearchState,
     register_social_search,

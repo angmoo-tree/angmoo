@@ -1,4 +1,1 @@
-"""Local runtime domain.
-
-Consumers should import the stable surface from ``app.domains.runtime.public``.
-"""
+"""Local runtime diagnostics and lease ownership; import the defining role module."""

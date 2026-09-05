@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from app.domains.runtime.public import SearchIndexHit
+from app.domains.runtime.contracts.search import SearchIndexHit
 
 
 @runtime_checkable

@@ -381,10 +381,8 @@ def runtime_health(request: Request) -> dict[str, object]:
         with composition.session_factory() as db:
             db.execute(text("SELECT 1")).scalar_one()
 
-        from app.domains.runtime.public import (
-            RuntimeComponentState,
-            component_observations,
-        )
+        from app.domains.runtime.contracts.status import RuntimeComponentState
+        from app.domains.runtime.service.components import component_observations
         from app.runtime.component_workers import (
             borrow_runtime_graph_client,
         )
