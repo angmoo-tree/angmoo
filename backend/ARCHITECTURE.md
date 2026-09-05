@@ -4,7 +4,7 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 
 이 문서는 기능을 추가하거나 버그를 수정하는 기여자가 코드의 위치와 연결 방식을 이해하기 위한 설명서입니다. [FastAPI Best Practices](https://github.com/zhanymkanov/fastapi-best-practices#project-structure)의 도메인별 구성을 바탕으로, Angmoo의 로컬 실행·AI 호출·기억·World 경계를 설명합니다.
 
-> **적용 상태 — 2026-09-05:** AR-0 기준선과 AR-1 검사 지원은 PR #259에서 병합됐습니다. `device_home` 첫 backend 파일럿은 PR #260, merge commit `a55c521b9adad624ae1342b2a7b270abc2237f79`로 병합됐고 역할별 파일과 새 경계 검사를 사용합니다. 다른 도메인과 전역 기반은 아직 기존 경로와 규칙을 사용합니다. 실제 범위와 검증은 [보존 지도](../docs/architecture/refactor-feature-preservation.md)에 기록합니다.
+> **적용 상태 — 2026-09-05:** AR-0 기준선과 AR-1 검사 지원은 PR #259에서 병합됐습니다. `device_home` 첫 backend 파일럿은 PR #260, merge commit `a55c521b9adad624ae1342b2a7b270abc2237f79`로 병합됐고 역할별 파일과 새 경계 검사를 사용합니다. §8.2는 #263 기준의 AR-G0 후속 보존·부분 전환 검사 지원부터 진행 중입니다. 다른 도메인과 전역 기반은 아직 기존 경로와 규칙을 사용합니다. 실제 범위와 검증은 [보존 지도](../docs/architecture/refactor-feature-preservation.md)와 [백엔드 전환 결과](../docs/architecture/refactor-backend-results.md)에 기록합니다.
 
 ## 목차
 
@@ -52,8 +52,7 @@ backend/
 │   ├── exceptions.py               # 공통 오류 기반
 │   ├── pagination.py               # 공통 cursor·limit 도구
 │   ├── database.py                 # engine·session factory
-│   ├── main.py                     # FastAPI 앱 초기화·연결
-│   ├── public_main.py              # 기존 공개 runtime 진입점
+│   ├── main.py                     # 목표: 단일 앱 생성·지원 실행 구성 연결
 │   ├── runtime/                    # 실행·작업·종료·복구 조립
 │   │   ├── persistence/            # 설치 DB 구성·모델 등록 조립
 │   │   └── migrations/             # embedded SQLite upgrade
@@ -89,6 +88,8 @@ backend/
 `social`의 목록은 역할 설명입니다. 설정이나 보조 함수가 없는 작은 도메인에는 해당 파일이 없어도 됩니다. 현재 `characters`, `world_characters`, `device_home`, `routines`, `routine_posts`, `relationships`, `world_packages` 등의 업무도 자신의 도메인에서 계속 소유합니다. 예제에 없는 기능을 삭제하거나 하나의 거대한 서비스로 합치지 않습니다.
 
 `runtime`, `integrations`, `credentials`는 Angmoo 실행에 필요한 영역입니다. 참조 저장소와 폴더 이름을 맞추기 위해 실행 기능을 없애지 않습니다. `templates`와 `requirements`는 조건부이며, 이번 구조 전환에서 현재 `pyproject.toml`·`uv.lock`을 다른 의존성 관리 방식으로 교체하지 않습니다.
+
+현재 존재하는 `public_main.py`는 G06 전환 중에만 호환 경로로 유지합니다. Local의 명시적 `RuntimeConfig`, 복구, Memory 시작·종료와 각 지원 profile의 계약을 `main.py`의 단일 앱 생성 구현으로 통합한 뒤, 실행·테스트·CI·패키징 소비자를 옮깁니다. 검증 후 호환 파일을 제거하고 그 파일이 없는 후보에서 다시 실행을 확인합니다. 이 목표를 현재 구현 완료로 읽지 않으며, scheduler·DB·Memory의 세부 처리는 소유 runtime과 도메인에 둡니다.
 
 ## 2. 도메인 안에서 코드 찾기
 
@@ -262,7 +263,7 @@ Angmoo는 Docker의 브라우저 실행과 Windows 설치 앱에서 같은 백�
 
 | 영역 | 담당하는 일 |
 | --- | --- |
-| `main.py`, `public_main.py` | 해당 실행 profile의 FastAPI 앱·라우터·오류 handler·startup/shutdown 연결 |
+| `main.py` | 목표 단일 앱 생성과 지원 profile의 router·오류·startup/shutdown 연결. 현재 `public_main.py`의 Local 구현은 G06에서 통합·임시 호환·검증 후 제거 |
 | `runtime` | 설정·DB·서비스 구성, scheduler·worker·lease·종료·복구 |
 | `domains/runtime` | 현재 runtime 상태·진단 등 업무 계약; worker를 실행하는 폴더와 구분 |
 | `integrations`, `providers` | 실제 통신, SDK별 요청·응답·오류·usage 변환, fake 제공 |

@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "checkpoint_commit": "d7037625a19071eb279ad2ea35c3ace6fe5b5289",
+  "description": "Append immutable evidence after each source commit introduces regression tests or source files. Preserve earlier records and the PR263 checkpoint; use capture_refactor_backend_checkpoint.py --append with an exact introduction commit and feature ID.",
+  "records": []
+}
