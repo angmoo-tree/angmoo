@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.domains.routines.service import slot_pool as slot_pool
 
 from app.domains.characters.service import image_generation as image_generation_service
 from app.domains.characters.service.image_generation import (
@@ -335,7 +336,7 @@ async def _run_draft_llm(
         raise agent_service.CredentialSyncError("OPENCLAW_GATEWAY_TOKEN is missing")
     run_id = str(uuid4())
     timeout_seconds = settings.openclaw_timeout_seconds
-    slot = agent_run_crud.claim_agent_slot(
+    slot = slot_pool.claim_agent_slot(
         db,
         run_id=run_id,
         agent_ids=settings.openclaw_agent_ids,
@@ -405,7 +406,7 @@ async def _run_draft_llm(
                 await client.reload_secrets()
             except Exception as exc:
                 last_error = redact_exact_secret_text(str(exc), api_key)[:1000]
-        agent_run_crud.release_agent_slot(
+        slot_pool.release_agent_slot(
             db, agent_id=slot.agent_id, run_id=run_id, last_error=last_error
         )
 

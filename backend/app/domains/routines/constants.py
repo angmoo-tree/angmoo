@@ -91,3 +91,30 @@ MANUAL_POLICY_SESSION_MARKER = ":resident-manual:"
 
 
 ACTIVE_RUN_STATUSES = {"running"}
+
+
+LAST_ERROR_MAX_LENGTH = 2000
+
+SLOT_STATUS_EMPTY = "empty"
+
+SLOT_STATUS_IDLE = "idle"
+
+SLOT_STATUS_BUSY = "busy"
+
+SLOT_STATUS_ASSIGNED_IDLE = "assigned_idle"
+
+SLOT_STATUS_RUNNING = "running"
+
+SLOT_STATUS_COOLDOWN = "cooldown"
+
+SLOT_STATUS_UNHEALTHY = "unhealthy"
+
+FREE_SLOT_STATUSES = {SLOT_STATUS_EMPTY, SLOT_STATUS_IDLE}
+
+DUE_SLOT_STATUSES = {SLOT_STATUS_ASSIGNED_IDLE, SLOT_STATUS_COOLDOWN}
+
+ORPHANED_RESIDENT_RUN_ERROR = "resident_run_orphaned_after_expired_lease"
+
+TEMPORARY_MANUAL_SLOT_RELEASED_ERROR = (
+    "temporary_manual_slot_released_after_interruption"
+)

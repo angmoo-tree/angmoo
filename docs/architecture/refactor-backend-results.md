@@ -949,3 +949,16 @@ Run create/finish/post 연결 및 public execution create/finish, FeedCue create
 Slot Character row lock·claim·nested transaction·만료 복구는 C4b, Relationships 후보와 Daypart Memory는 각 소유 source와 별도로 합류한다. Social의 get_execution/set_social_event_id는 같은 서비스의 겹치지 않는 두 함수로 parent 통합 때 보존한다. 현재 단계는 actual persistence 전환이며 전체 resident 실행이나 B4 완료를 표시하지 않는다.
 
 C4a 최종 후보는 **481 passed / 기존 PG 1 skip / 기존 warnings 5 / 151.53초**다. 경계 **707 modules / 2,368 edges / exact legacy 211 / cycle 0**, L4 parity 97·ER0 81/87/24/44/7·Memory batch 현재 inventory도 통과했다. 원래 보존 함수의 읽기 전용 진단은 **source/split/assertion/suppression/API·ORM/node 각각 오류 0**, 기존 보호 **2,139 / 현재 2,242 nodes**다. 동일한 선행 signed 두 경로만 메모리에 보충했으며 tracked source additions/checkpoint/frozen 자료와 검사 구현은 변경하지 않았다. 부모 선형 도입 append 후 stock 전체 보존 및 통합 Actions·installer는 여전히 별도 조건이다.
+
+
+## AR-B4-C4b1 — Slot pool·복구·반납·lease 실제 소유
+
+외부 ORM을 읽지 않는 슬롯 lifecycle 10개와 실제 query 3개, 원래 상수 12개를 Routines의 역할별 파일로 옮겼다. Pool/state/recovery/assignment release/lease 서비스를 분리하고 assigned/list/active 조회는 repository가 소유한다. **25개 실제 definition의 AST 차이 0**으로 원래 query·with_for_update·skip_locked·commit/rollback/refresh·오류·시간 의미를 유지했다. 기존 SQLite 실제 수동 슬롯 복구·자동 예약·소유자·종료·credential 영향 테스트를 사용하며 새 assertion을 대신 만들어 기준을 바꾸지 않았다.
+
+초기 집중 검증은 **105 passed / 기존 PostgreSQL 전용 18 skip / 기존 warnings 3 / 35.02초**다. PostgreSQL concurrency가 실행됐다고 표시하지 않으며 통합 CI에서 별도로 검증한다. Character/WC를 읽는 배정·선점 네 함수는 원래 CRUD에서 실제 구현을 유지한 채 C4b2로 이어진다.
+
+직접 제품 호출자는 canonical 역할을 사용한다. 기존 activity_limits의 몇몇 assertion은 get_assigned_slot과 서로 다른 업무 조회를 같은 agent_crud 이름으로 검사하므로, 해당 get_assigned_slot 한 개만 원래 파일에서 **동일 repository 함수 객체**로 export한다. 기존 assertion/guard를 변경하거나 새로운 가짜 구현을 만들지 않았다. 정확한 test-only 소비자·bridge·B8-A 종료 조건을 지도와 scope에 기록했으며 이 경로의 폐기를 완료라고 선언하지 않는다.
+
+C4b1 최종 후보 검증은 **415 passed / 기존 19 skip / 기존 warnings 3 / 144.61초**다. Skip은 PostgreSQL 전용 18개와 기존 RoutinePost PostgreSQL 1개이며 실제 PG 동시성 결과를 대신하지 않는다. 경계 **713 modules / 2,395 edges / exact legacy 211 / cycle 0**, L4 parity 97·ER0 84/87/24/44/7·Memory batch 현재 inventory도 통과했다. 실제 SQL이 역할별 파일로 이동하면서 현재 PostgreSQL inventory 파일 수만 81에서 84로 바뀌었고 frozen 원문은 변경하지 않았다.
+
+읽기 전용 보존 진단은 **source/split/assertion/suppression/API·ORM/node 각각 오류 0**, 기존 보호 **2,139 / 현재 2,242 nodes**다. 선행 signed 최초 도입 두 경로만 메모리에 보충했으며 tracked additions/checkpoint/frozen 자료와 검사 구현은 수정하지 않았다. 부모 선형 도입 append 후 stock 전체 검사·Actions·installer 및 C4b2 이후 실행 전환은 남아 있다.

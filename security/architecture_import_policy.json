@@ -1053,6 +1053,7 @@
       "app.domains.routines.repository.plans",
       "app.domains.routines.repository.public_action_executions",
       "app.domains.routines.repository.runs",
+      "app.domains.routines.repository.slots",
       "app.domains.routines.router",
       "app.domains.routines.schemas",
       "app.domains.routines.schemas.plans",
@@ -1079,6 +1080,11 @@
       "app.domains.routines.service.public_action_executions",
       "app.domains.routines.service.runs",
       "app.domains.routines.service.scheduling",
+      "app.domains.routines.service.slot_assignments",
+      "app.domains.routines.service.slot_leases",
+      "app.domains.routines.service.slot_pool",
+      "app.domains.routines.service.slot_recovery",
+      "app.domains.routines.service.slot_state",
       "app.domains.routines.service.tick_schedule",
       "app.domains.routines.utils",
       "app.domains.routines.utils.activity_actions",
@@ -1249,6 +1255,10 @@
       "app.domains.routines.service.public_action_executions",
       "app.domains.routines.service.runs",
       "app.domains.routines.service.scheduling",
+      "app.domains.routines.service.slot_assignments",
+      "app.domains.routines.service.slot_leases",
+      "app.domains.routines.service.slot_pool",
+      "app.domains.routines.service.slot_recovery",
       "app.domains.routines.service.tick_schedule",
       "app.domains.runtime.contracts",
       "app.domains.social.contracts",
@@ -2569,14 +2579,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.cruds.agent_runs",
-        "target": "app.domains.routines.service.tick_schedule",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing not-yet-migrated activity runtime/CRUD uses the identical owner clock or pure graph-state contract. All policy is in the canonical module; no new legacy body is introduced.",
-        "removal_condition": "Switch remaining agent-run/LLM graph/activity CRUD roles in later B4-C slices and remove this exact legacy consumer edge.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.services.agent_runs",
         "target": "app.domains.routines.service.tick_schedule",
         "owner_stage": "AR-B4-C",
@@ -2718,6 +2720,78 @@
         "owner_stage": "AR-B4-C",
         "reason": "Exact active legacy Run/Social caller now invokes the same canonical persistence/query implementation with the original Session and commit mode.",
         "removal_condition": "Retire each precise old caller in B4-C slot/AgentRun/graph or B5 Social actual workflow transition; remaining mixed legacy owner closures are mandatory before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.routines.repository.slots",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing remaining assignment/claim or AgentRun caller invokes the same actual slot helper/constant after its owner move; no duplicated lifecycle.",
+        "removal_condition": "C4b2 moves four remaining foreign-read slot flows and later B4-C moves AgentRun execution; remove precise legacy consumer imports by B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.routines.service.slot_pool",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing remaining assignment/claim or AgentRun caller invokes the same actual slot helper/constant after its owner move; no duplicated lifecycle.",
+        "removal_condition": "C4b2 moves four remaining foreign-read slot flows and later B4-C moves AgentRun execution; remove precise legacy consumer imports by B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agent_runs",
+        "target": "app.domains.routines.service.slot_state",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing remaining assignment/claim or AgentRun caller invokes the same actual slot helper/constant after its owner move; no duplicated lifecycle.",
+        "removal_condition": "C4b2 moves four remaining foreign-read slot flows and later B4-C moves AgentRun execution; remove precise legacy consumer imports by B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.routines.repository.slots",
+        "owner_stage": "AR-B4-C",
+        "reason": "Exact same get_assigned_slot function export preserves existing assertion bindings; production reads use the canonical repository.",
+        "removal_condition": "Close the exact mixed test alias with reviewed test-owner transition by B8-A, preserving every assertion.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.repository.slots",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing remaining assignment/claim or AgentRun caller invokes the same actual slot helper/constant after its owner move; no duplicated lifecycle.",
+        "removal_condition": "C4b2 moves four remaining foreign-read slot flows and later B4-C moves AgentRun execution; remove precise legacy consumer imports by B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.slot_assignments",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing remaining assignment/claim or AgentRun caller invokes the same actual slot helper/constant after its owner move; no duplicated lifecycle.",
+        "removal_condition": "C4b2 moves four remaining foreign-read slot flows and later B4-C moves AgentRun execution; remove precise legacy consumer imports by B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.slot_leases",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing remaining assignment/claim or AgentRun caller invokes the same actual slot helper/constant after its owner move; no duplicated lifecycle.",
+        "removal_condition": "C4b2 moves four remaining foreign-read slot flows and later B4-C moves AgentRun execution; remove precise legacy consumer imports by B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.slot_pool",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing remaining assignment/claim or AgentRun caller invokes the same actual slot helper/constant after its owner move; no duplicated lifecycle.",
+        "removal_condition": "C4b2 moves four remaining foreign-read slot flows and later B4-C moves AgentRun execution; remove precise legacy consumer imports by B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.slot_recovery",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing remaining assignment/claim or AgentRun caller invokes the same actual slot helper/constant after its owner move; no duplicated lifecycle.",
+        "removal_condition": "C4b2 moves four remaining foreign-read slot flows and later B4-C moves AgentRun execution; remove precise legacy consumer imports by B8-A.",
         "review_date": "2026-09-06"
       }
     ]

@@ -232,7 +232,7 @@
     },
     {
       "path": "backend/app/runtime/characters/management.py",
-      "sha256": "42a9ee305feff0d19b5435f7a28b5dff2acab9dd71f8bbf28262eed74fa5f5dd"
+      "sha256": "77b6647a6957ce16a1b5a5e95056c17e670aa7a5c84b4bc4d3e98a32c54e9830"
     },
     {
       "path": "backend/app/runtime/desktop_sidecar.py",

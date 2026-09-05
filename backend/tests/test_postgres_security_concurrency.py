@@ -1,3 +1,5 @@
+from app.domains.routines.service import slot_assignments as slot_assignments
+from app.domains.routines.service import slot_pool as slot_pool
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
@@ -694,7 +696,7 @@ def test_temporary_manual_slot_claim_is_single_flight_across_postgres_sessions()
             )
         )
         db.commit()
-        agent_run_crud.ensure_agent_slots(db, agent_ids)
+        slot_pool.ensure_agent_slots(db, agent_ids)
 
     def attempt() -> str | None:
         with Session(engine) as db:
@@ -735,7 +737,7 @@ def test_temporary_manual_slot_claim_is_single_flight_across_postgres_sessions()
                 "pending:temporary:"
             )
 
-            released = agent_run_crud.release_temporary_resident_slot_assignment(
+            released = slot_assignments.release_temporary_resident_slot_assignment(
                 db,
                 agent_id=claimed_slot.agent_id,
                 user_id=user_id,

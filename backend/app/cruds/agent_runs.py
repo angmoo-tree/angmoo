@@ -1,32 +1,21 @@
+from app.domains.routines.service.slot_state import _clear_resident_slot
+from app.domains.routines.service.slot_pool import ensure_agent_slots
+from app.domains.routines.repository.slots import has_active_resident_slot_run
+from app.domains.routines.constants import (LAST_ERROR_MAX_LENGTH, SLOT_STATUS_EMPTY, SLOT_STATUS_IDLE, SLOT_STATUS_BUSY, SLOT_STATUS_ASSIGNED_IDLE, SLOT_STATUS_RUNNING, SLOT_STATUS_COOLDOWN, SLOT_STATUS_UNHEALTHY, FREE_SLOT_STATUSES, DUE_SLOT_STATUSES, ORPHANED_RESIDENT_RUN_ERROR, TEMPORARY_MANUAL_SLOT_RELEASED_ERROR)
 from app.domains.routines.constants import ACTIVE_RUN_STATUSES
 from app.domains.routines.exceptions import AgentRunConflictError
 import hashlib
 from datetime import UTC, datetime, timedelta
-from typing import Any, Callable
+from typing import Any
 
 from sqlalchemy import func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app import models
-from app.domains.routines.service import tick_schedule as agent_activity_schedule
 from app.core import unit_of_work
 
 
-LAST_ERROR_MAX_LENGTH = 2000
-SLOT_STATUS_EMPTY = "empty"
-SLOT_STATUS_IDLE = "idle"
-SLOT_STATUS_BUSY = "busy"
-SLOT_STATUS_ASSIGNED_IDLE = "assigned_idle"
-SLOT_STATUS_RUNNING = "running"
-SLOT_STATUS_COOLDOWN = "cooldown"
-SLOT_STATUS_UNHEALTHY = "unhealthy"
-FREE_SLOT_STATUSES = {SLOT_STATUS_EMPTY, SLOT_STATUS_IDLE}
-DUE_SLOT_STATUSES = {SLOT_STATUS_ASSIGNED_IDLE, SLOT_STATUS_COOLDOWN}
-ORPHANED_RESIDENT_RUN_ERROR = "resident_run_orphaned_after_expired_lease"
-TEMPORARY_MANUAL_SLOT_RELEASED_ERROR = (
-    "temporary_manual_slot_released_after_interruption"
-)
 RELATIONSHIP_POINT_KINDS = {"mention_received", "reply_received"}
 RELATIONSHIP_POINT_PENDING = "pending"
 RELATIONSHIP_POINT_SELECTED = "selected"
@@ -302,194 +291,6 @@ def mark_relationship_point_failed(
     return point
 
 
-def ensure_agent_slots(
-    db: Session,
-    agent_ids: list[str],
-    *,
-    commit: bool = True,
-) -> None:
-    unique_agent_ids = list(
-        dict.fromkeys(agent_id for agent_id in agent_ids if agent_id)
-    )
-    if not unique_agent_ids:
-        return
-
-    existing = set(
-        db.scalars(
-            select(models.AgentSlot.agent_id).where(
-                models.AgentSlot.agent_id.in_(unique_agent_ids)
-            )
-        )
-    )
-    missing = [
-        models.AgentSlot(agent_id=agent_id, status=SLOT_STATUS_EMPTY)
-        for agent_id in unique_agent_ids
-        if agent_id not in existing
-    ]
-    if not missing:
-        return
-
-    db.add_all(missing)
-    if not commit:
-        db.flush()
-        return
-    try:
-        db.commit()
-    except IntegrityError:
-        db.rollback()
-
-
-def claim_agent_slot(
-    db: Session, *, run_id: str, agent_ids: list[str], lease_seconds: int
-) -> models.AgentSlot | None:
-    unique_agent_ids = list(
-        dict.fromkeys(agent_id for agent_id in agent_ids if agent_id)
-    )
-    if not unique_agent_ids:
-        return None
-
-    ensure_agent_slots(db, unique_agent_ids)
-
-    now = datetime.now(UTC)
-    slot = db.scalar(
-        select(models.AgentSlot)
-        .where(
-            models.AgentSlot.agent_id.in_(unique_agent_ids),
-            or_(
-                models.AgentSlot.status.in_(FREE_SLOT_STATUSES),
-                models.AgentSlot.lease_expires_at <= now,
-            ),
-        )
-        .order_by(models.AgentSlot.updated_at.asc(), models.AgentSlot.agent_id.asc())
-        .with_for_update(skip_locked=True)
-    )
-    if slot is None:
-        db.rollback()
-        return None
-
-    slot.status = SLOT_STATUS_BUSY
-    slot.locked_by_run_id = run_id
-    slot.lease_expires_at = now + timedelta(seconds=lease_seconds)
-    slot.last_error = None
-    db.commit()
-    db.refresh(slot)
-    return slot
-
-
-def release_agent_slot(
-    db: Session,
-    *,
-    agent_id: str,
-    run_id: str,
-    last_error: str | None = None,
-) -> None:
-    slot = db.get(models.AgentSlot, agent_id)
-    if slot is None or slot.locked_by_run_id != run_id:
-        return
-
-    slot.status = SLOT_STATUS_EMPTY
-    slot.locked_by_run_id = None
-    slot.lease_expires_at = None
-    slot.last_error = last_error[:LAST_ERROR_MAX_LENGTH] if last_error else None
-    db.commit()
-
-
-def list_agent_slots(db: Session) -> list[models.AgentSlot]:
-    return list(
-        db.scalars(select(models.AgentSlot).order_by(models.AgentSlot.agent_id.asc()))
-    )
-
-
-def recover_expired_resident_slot_runs(
-    db: Session,
-    *,
-    now: datetime,
-    next_tick_at_factory: Callable[[models.AgentSlot, datetime], datetime] | None = None,
-) -> int:
-    now = agent_activity_schedule.aware_utc(now)
-    slots = list(
-        db.scalars(
-            select(models.AgentSlot)
-            .where(
-                models.AgentSlot.status == SLOT_STATUS_RUNNING,
-                models.AgentSlot.assigned_user_id.is_not(None),
-                models.AgentSlot.assigned_character_id.is_not(None),
-                models.AgentSlot.assigned_credential_id.is_not(None),
-                models.AgentSlot.locked_by_run_id.is_not(None),
-                models.AgentSlot.lease_expires_at.is_not(None),
-                models.AgentSlot.lease_expires_at <= now,
-            )
-            .order_by(
-                models.AgentSlot.lease_expires_at.asc(),
-                models.AgentSlot.agent_id.asc(),
-            )
-            .with_for_update(skip_locked=True)
-        )
-    )
-    recovered_count = 0
-    for slot in slots:
-        locked_run_id = slot.locked_by_run_id or ""
-        lease_expires_at = slot.lease_expires_at
-        if locked_run_id and not locked_run_id.startswith("pending:"):
-            run = db.get(models.AgentRun, locked_run_id)
-            if run is not None and run.status in ACTIVE_RUN_STATUSES:
-                run.status = "failed"
-                run.completed_at = now
-                if run.gateway_result is None:
-                    run.gateway_result = {
-                        "status": "failed",
-                        "reason": ORPHANED_RESIDENT_RUN_ERROR,
-                        "recovered_at": now.isoformat(),
-                        "lease_expires_at": lease_expires_at.isoformat()
-                        if lease_expires_at is not None
-                        else None,
-                    }
-        setting = (
-            db.get(models.AgentActivitySetting, slot.assigned_character_id)
-            if slot.assigned_character_id is not None
-            else None
-        )
-        if setting is None or not setting.auto_enabled:
-            # A run-now lease must not become a persistent assignment after a
-            # process crash. Its AgentRun evidence (when present) was closed
-            # above, so the exact slot can now return to the free pool.
-            _clear_resident_slot(slot)
-            recovered_count += 1
-            continue
-        slot.status = SLOT_STATUS_ASSIGNED_IDLE
-        slot.locked_by_run_id = None
-        slot.lease_expires_at = None
-        if (
-            slot.next_tick_at is None
-            or agent_activity_schedule.aware_utc(slot.next_tick_at) <= now
-        ):
-            slot.next_tick_at = (
-                next_tick_at_factory(slot, now)
-                if next_tick_at_factory is not None
-                else now
-            )
-        slot.last_error = (
-            f"{ORPHANED_RESIDENT_RUN_ERROR}: run_id={locked_run_id or 'unknown'}"
-        )[:LAST_ERROR_MAX_LENGTH]
-        recovered_count += 1
-    if recovered_count:
-        db.commit()
-    return recovered_count
-
-
-def _clear_resident_slot(slot: models.AgentSlot) -> None:
-    slot.status = SLOT_STATUS_EMPTY
-    slot.assigned_user_id = None
-    slot.assigned_character_id = None
-    slot.assigned_credential_id = None
-    slot.next_tick_at = None
-    slot.last_run_at = None
-    slot.heartbeat_interval_seconds = None
-    slot.locked_by_run_id = None
-    slot.lease_expires_at = None
-    slot.last_error = None
-
-
 def assign_resident_slot(
     db: Session,
     *,
@@ -672,94 +473,6 @@ def claim_temporary_resident_slot_assignment(
     return slot
 
 
-def release_temporary_resident_slot_assignment(
-    db: Session,
-    *,
-    agent_id: str,
-    user_id: str,
-    character_id: str,
-    credential_id: str,
-) -> models.AgentSlot | None:
-    """Return an exact manual lease to the pool without disabling autonomy."""
-
-    slot = db.scalar(
-        select(models.AgentSlot)
-        .where(models.AgentSlot.agent_id == agent_id)
-        .with_for_update()
-    )
-    if (
-        slot is None
-        or slot.assigned_user_id != user_id
-        or slot.assigned_character_id != character_id
-        or slot.assigned_credential_id != credential_id
-    ):
-        db.rollback()
-        return None
-
-    setting = db.get(models.AgentActivitySetting, character_id)
-    if setting is not None and setting.auto_enabled:
-        # A concurrent explicit activation adopted this assignment. It is no
-        # longer temporary and must remain scheduled.
-        db.rollback()
-        return slot
-
-    locked_run_id = slot.locked_by_run_id or ""
-    if slot.status == SLOT_STATUS_RUNNING and locked_run_id:
-        if not locked_run_id.startswith("pending:temporary:"):
-            run = db.get(models.AgentRun, locked_run_id)
-            if run is not None and run.status in ACTIVE_RUN_STATUSES:
-                now = datetime.now(UTC)
-                run.status = "failed"
-                run.completed_at = now
-                if run.gateway_result is None:
-                    run.gateway_result = {
-                        "status": "failed",
-                        "reason": TEMPORARY_MANUAL_SLOT_RELEASED_ERROR,
-                        "released_at": now.isoformat(),
-                    }
-    _clear_resident_slot(slot)
-    db.commit()
-    db.refresh(slot)
-    return slot
-
-
-def release_resident_slot_assignment(
-    db: Session, *, user_id: str, character_id: str, commit: bool = True
-) -> models.AgentSlot | None:
-    slots = list(
-        db.scalars(
-            select(models.AgentSlot)
-            .where(
-                models.AgentSlot.assigned_user_id == user_id,
-                models.AgentSlot.assigned_character_id == character_id,
-            )
-            .order_by(
-                (models.AgentSlot.status == SLOT_STATUS_RUNNING).desc(),
-                models.AgentSlot.last_run_at.desc().nullslast(),
-                models.AgentSlot.updated_at.desc(),
-                models.AgentSlot.agent_id.asc(),
-            )
-            .with_for_update(skip_locked=True)
-        )
-    )
-    if not slots:
-        return None
-    running_slot = next(
-        (slot for slot in slots if slot.status == SLOT_STATUS_RUNNING), None
-    )
-    if running_slot is not None:
-        db.rollback()
-        return running_slot
-    for slot in slots:
-        _clear_resident_slot(slot)
-    if commit:
-        db.commit()
-        db.refresh(slots[0])
-    else:
-        db.flush()
-    return slots[0]
-
-
 def claim_resident_slot_assignment(
     db: Session,
     *,
@@ -871,66 +584,3 @@ def claim_due_resident_slots(
     for slot in slots:
         db.refresh(slot)
     return slots
-
-
-def has_active_resident_slot_run(db: Session, *, now: datetime) -> bool:
-    return (
-        db.scalar(
-            select(models.AgentSlot.agent_id)
-            .where(
-                models.AgentSlot.status == SLOT_STATUS_RUNNING,
-                models.AgentSlot.assigned_user_id.is_not(None),
-                models.AgentSlot.assigned_character_id.is_not(None),
-                models.AgentSlot.lease_expires_at > now,
-            )
-            .limit(1)
-        )
-        is not None
-    )
-
-
-def set_resident_slot_run_id(
-    db: Session, *, agent_id: str, run_id: str, lease_seconds: int
-) -> models.AgentSlot | None:
-    slot = db.get(models.AgentSlot, agent_id)
-    if slot is None or slot.status != SLOT_STATUS_RUNNING:
-        return None
-    slot.locked_by_run_id = run_id
-    slot.lease_expires_at = datetime.now(UTC) + timedelta(seconds=lease_seconds)
-    db.commit()
-    db.refresh(slot)
-    return slot
-
-
-def extend_resident_slot_lease(
-    db: Session, *, agent_id: str, run_id: str, lease_seconds: int
-) -> models.AgentSlot | None:
-    slot = db.get(models.AgentSlot, agent_id)
-    if slot is None or slot.locked_by_run_id != run_id:
-        return None
-    slot.lease_expires_at = datetime.now(UTC) + timedelta(seconds=lease_seconds)
-    db.commit()
-    db.refresh(slot)
-    return slot
-
-
-def complete_resident_slot_run(
-    db: Session,
-    *,
-    agent_id: str,
-    run_id: str,
-    heartbeat_interval_seconds: int,
-    next_tick_at: datetime | None = None,
-    last_error: str | None = None,
-) -> None:
-    slot = db.get(models.AgentSlot, agent_id)
-    if slot is None or slot.locked_by_run_id != run_id:
-        return
-    now = datetime.now(UTC)
-    slot.status = SLOT_STATUS_ASSIGNED_IDLE
-    slot.locked_by_run_id = None
-    slot.lease_expires_at = None
-    slot.last_run_at = now
-    slot.next_tick_at = next_tick_at or now + timedelta(seconds=heartbeat_interval_seconds)
-    slot.last_error = last_error[:LAST_ERROR_MAX_LENGTH] if last_error else None
-    db.commit()

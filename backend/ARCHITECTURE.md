@@ -628,3 +628,10 @@ Resident Context는 Character/CharacterState, LlmCredential, AgentFeedCue와 Act
 `routines/service/runs.py`와 `service/feed_cues.py`는 기존 실행 생성·종료 및 FeedCue 소비의 commit/refresh를 소유합니다. 각 조회 SQL은 `repository/runs.py`, `repository/feed_cues.py`에 있습니다. `service/public_action_executions.py`는 공개 행동의 생성·완료를 기록하고 `repository/public_action_executions.py`는 중복 signature를 조회합니다. 공개 행동의 finish_write는 deferred UoW 안에서 flush/refresh만 수행하므로 호출자의 Social 변경과 함께 rollback할 수 있습니다. 이 차이를 동일한 저장 방식으로 합치지 않습니다.
 
 FeedCue 입력의 identity 계약은 user/character의 id만 읽으며 호출자는 원래 attached 객체를 전달합니다. Slot 배정·lease·복구와 여러 업무를 잇는 실행 그래프는 별도 책임입니다. 저장 함수만 옮겼다는 이유로 실행 전체가 전환됐다고 보지 않습니다.
+
+
+### 슬롯 pool·복구·lease의 구분
+
+`routines/service/slot_pool.py`는 빈 슬롯 확보, `slot_recovery.py`는 만료된 실행 복구, `slot_assignments.py`는 임시·상시 배정 반납, `slot_leases.py`는 실행 연결·연장·완료를 소유합니다. `slot_state.py`의 한정된 clear는 같은 attached Slot의 배정 필드만 지웁니다. 조회는 `repository/slots.py`에서 찾습니다. 임시 수동 실행의 종료를 상시 자율활동 배정으로 바꾸거나, 자율활동이 받아들인 배정을 임시 슬롯처럼 지우지 않습니다.
+
+Character row lock과 owner-controlled WorldCharacter 제외를 사용하는 네 배정/선점 함수는 C4b2 전환 범위입니다. 현재 테스트의 혼합 `agent_crud.get_assigned_slot` 이름은 실제 repository 함수의 동일 객체 export만 사용하며, 기존 assertion을 그대로 보존하는 정확한 임시 소비자입니다. 이를 전체 전환 완료로 간주하지 않으며 B8-A 이전에 정리합니다.

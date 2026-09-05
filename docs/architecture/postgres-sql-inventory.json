@@ -274,34 +274,27 @@
     {
       "markers": {
         "row_lock": [
+          316,
+          334,
+          347,
           364,
-          426,
-          515,
-          533,
-          546,
-          563,
-          617,
-          626,
-          642,
-          688,
-          742,
-          788,
-          841
+          418,
+          427,
+          443,
+          501,
+          554
         ],
         "skip_locked": [
-          364,
-          426,
-          546,
-          642,
-          742,
-          788,
-          841
+          347,
+          443,
+          501,
+          554
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/cruds/agent_runs.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "e72a6f6b6fe2277ebb0a66c8647b4feccdf30a43526d4576ec049c9905bdc76c",
+      "source_sha256": "11c50621a6f91a1e31953db28122f3db3ca6312b309540d08b00e61c2931c9c3",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -662,6 +655,52 @@
     },
     {
       "markers": {
+        "row_lock": [
+          26,
+          80
+        ],
+        "skip_locked": [
+          80
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/routines/service/slot_assignments.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "14c6e08763bb7c79808776b60ffb74a94933d576cac1779284ac30760784dc87",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          73
+        ],
+        "skip_locked": [
+          73
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/routines/service/slot_pool.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "7dfcd348e19617512fc9229086282cef80c8b1760ab685c9a71c11bb9636dc55",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          38
+        ],
+        "skip_locked": [
+          38
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/routines/service/slot_recovery.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "dece2dd8b9d0ced175ab680dcc5afac15f586509c210dc63d574ed00bc2015d4",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
         "advisory_lock": [
           334
         ],
@@ -879,18 +918,18 @@
     {
       "markers": {
         "advisory_lock": [
-          516,
-          2974
+          519,
+          2977
         ],
         "driver_or_url": [
-          513,
-          2965
+          516,
+          2968
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/runtime/characters/management.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "42a9ee305feff0d19b5435f7a28b5dff2acab9dd71f8bbf28262eed74fa5f5dd",
+      "source_sha256": "77b6647a6957ce16a1b5a5e95056c17e670aa7a5c84b4bc4d3e98a32c54e9830",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1264,14 +1303,14 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 81,
+  "entry_count": 84,
   "marker_counts": {
     "advisory_lock": 10,
     "driver_or_url": 49,
     "jsonb": 11,
     "pgvector": 5,
-    "row_lock": 34,
-    "skip_locked": 7
+    "row_lock": 37,
+    "skip_locked": 10
   },
   "purpose": "Residual PostgreSQL markers retained only as historical schema evidence, serialized compatibility values, and negative reintroduction guards",
   "schema_version": 1

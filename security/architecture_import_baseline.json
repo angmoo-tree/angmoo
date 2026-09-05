@@ -1,7 +1,7 @@
 {
-  "edge_count": 2368,
-  "external_import_count": 2212,
-  "module_count": 707,
+  "edge_count": 2395,
+  "external_import_count": 2234,
+  "module_count": 713,
   "modules": [
     {
       "external_imports": [],
@@ -758,7 +758,9 @@
         "app.core.unit_of_work",
         "app.domains.routines.constants",
         "app.domains.routines.exceptions",
-        "app.domains.routines.service.tick_schedule",
+        "app.domains.routines.repository.slots",
+        "app.domains.routines.service.slot_pool",
+        "app.domains.routines.service.slot_state",
         "app.models"
       ],
       "module": "app.cruds.agent_runs",
@@ -778,6 +780,7 @@
         "app.core.security",
         "app.core.unit_of_work",
         "app.domains.routines.constants",
+        "app.domains.routines.repository.slots",
         "app.domains.routines.service.activity_logs",
         "app.domains.routines.service.activity_settings",
         "app.models",
@@ -3957,6 +3960,21 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.repository.slots",
+      "path": "backend/app/domains/routines/repository/slots.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "fastapi",
         "sqlalchemy.orm"
       ],
@@ -4380,6 +4398,82 @@
       ],
       "module": "app.domains.routines.service.scheduling",
       "path": "backend/app/domains/routines/service/scheduling.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.models",
+        "app.domains.routines.service.slot_state"
+      ],
+      "module": "app.domains.routines.service.slot_assignments",
+      "path": "backend/app/domains/routines/service/slot_assignments.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.service.slot_leases",
+      "path": "backend/app/domains/routines/service/slot_leases.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.service.slot_pool",
+      "path": "backend/app/domains/routines/service/slot_pool.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.models",
+        "app.domains.routines.service.slot_state",
+        "app.domains.routines.service.tick_schedule"
+      ],
+      "module": "app.domains.routines.service.slot_recovery",
+      "path": "backend/app/domains/routines/service/slot_recovery.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.service.slot_state",
+      "path": "backend/app/domains/routines/service/slot_state.py",
       "wildcard_imports": []
     },
     {
@@ -7693,6 +7787,7 @@
         "app.domains.characters.service.media_storage",
         "app.domains.characters.service.profile",
         "app.domains.identity.service.demo_access",
+        "app.domains.routines.service.slot_pool",
         "app.integrations.azure_translation",
         "app.integrations.bounded_http",
         "app.integrations.image_provider",
@@ -7757,8 +7852,11 @@
         "app.domains.identity.service.demo_access",
         "app.domains.routines.repository.feed_cues",
         "app.domains.routines.repository.runs",
+        "app.domains.routines.repository.slots",
         "app.domains.routines.service.feed_cues",
         "app.domains.routines.service.runs",
+        "app.domains.routines.service.slot_assignments",
+        "app.domains.routines.service.slot_pool",
         "app.domains.world_characters.public",
         "app.domains.world_characters.service.readiness",
         "app.exceptions",
@@ -9928,8 +10026,13 @@
         "app.cruds.agents",
         "app.cruds.community",
         "app.domains.routines.repository.feed_cues",
+        "app.domains.routines.repository.slots",
         "app.domains.routines.service.lifecycle",
         "app.domains.routines.service.runs",
+        "app.domains.routines.service.slot_assignments",
+        "app.domains.routines.service.slot_leases",
+        "app.domains.routines.service.slot_pool",
+        "app.domains.routines.service.slot_recovery",
         "app.domains.routines.service.tick_schedule",
         "app.domains.runtime.contracts",
         "app.domains.social.public",

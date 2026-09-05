@@ -128,7 +128,7 @@ def test_model_only_credential_update_preserves_existing_key(monkeypatch):
     )
 
     monkeypatch.setattr(agent_service, "_get_owned_character", lambda *_: character)
-    monkeypatch.setattr(agent_service.agent_crud, "get_assigned_slot", lambda *_: None)
+    monkeypatch.setattr(agent_service.slot_queries, "get_assigned_slot", lambda *_: None)
     monkeypatch.setattr(
         agent_service.agent_crud,
         "get_character_credential",
@@ -186,7 +186,7 @@ def test_api_key_credential_update_without_slot_commits_in_upsert(monkeypatch):
         return credential
 
     monkeypatch.setattr(agent_service, "_get_owned_character", lambda *_: character)
-    monkeypatch.setattr(agent_service.agent_crud, "get_assigned_slot", lambda *_: None)
+    monkeypatch.setattr(agent_service.slot_queries, "get_assigned_slot", lambda *_: None)
     monkeypatch.setattr(
         agent_service.agent_crud, "upsert_credential", fake_upsert_credential
     )
@@ -262,7 +262,7 @@ def test_api_key_credential_update_with_idle_slot_syncs_profile(monkeypatch):
         bind_calls.append({"slot": slot_read, **kwargs})
 
     monkeypatch.setattr(agent_service, "_get_owned_character", lambda *_: character)
-    monkeypatch.setattr(agent_service.agent_crud, "get_assigned_slot", lambda *_: slot)
+    monkeypatch.setattr(agent_service.slot_queries, "get_assigned_slot", lambda *_: slot)
     monkeypatch.setattr(
         agent_service.agent_crud, "upsert_credential", fake_upsert_credential
     )
@@ -302,7 +302,7 @@ def test_model_only_credential_update_requires_existing_key(monkeypatch):
     character = SimpleNamespace(id="char-1", execution_mode="llm")
 
     monkeypatch.setattr(agent_service, "_get_owned_character", lambda *_: character)
-    monkeypatch.setattr(agent_service.agent_crud, "get_assigned_slot", lambda *_: None)
+    monkeypatch.setattr(agent_service.slot_queries, "get_assigned_slot", lambda *_: None)
     monkeypatch.setattr(
         agent_service.agent_crud,
         "get_character_credential",
@@ -325,7 +325,7 @@ def test_running_slot_blocks_credential_model_update(monkeypatch):
     slot = SimpleNamespace(status=agent_run_crud.SLOT_STATUS_RUNNING)
 
     monkeypatch.setattr(agent_service, "_get_owned_character", lambda *_: character)
-    monkeypatch.setattr(agent_service.agent_crud, "get_assigned_slot", lambda *_: slot)
+    monkeypatch.setattr(agent_service.slot_queries, "get_assigned_slot", lambda *_: slot)
 
     with pytest.raises(agent_service.ActiveSlotBusyError):
         agent_service.update_credential(

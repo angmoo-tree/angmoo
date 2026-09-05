@@ -1,3 +1,4 @@
+from app.domains.routines.repository.slots import get_assigned_slot
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
@@ -297,21 +298,6 @@ def upsert_credential(
     else:
         db.flush()
     return credential
-
-
-def get_assigned_slot(
-    db: Session, character_id: str
-) -> models.AgentSlot | None:
-    return db.scalar(
-        select(models.AgentSlot)
-        .where(models.AgentSlot.assigned_character_id == character_id)
-        .order_by(
-            (models.AgentSlot.status == "running").desc(),
-            models.AgentSlot.last_run_at.desc().nullslast(),
-            models.AgentSlot.updated_at.desc(),
-            models.AgentSlot.agent_id.asc(),
-        )
-    )
 
 
 def set_character_status(db: Session, character: models.Character, status: str) -> None:

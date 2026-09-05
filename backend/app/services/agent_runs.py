@@ -1,3 +1,8 @@
+from app.domains.routines.repository import slots as slot_queries
+from app.domains.routines.service import slot_assignments as slot_assignments
+from app.domains.routines.service import slot_leases as slot_leases
+from app.domains.routines.service import slot_pool as slot_pool
+from app.domains.routines.service import slot_recovery as slot_recovery
 from app.domains.routines.repository import feed_cues as feed_cue_queries
 from app.domains.routines.service import runs as routine_runs
 from app.domains.runtime.contracts import (
@@ -5481,7 +5486,7 @@ def _log_feed_perception_debug(
 def list_resident_slots(db: Session) -> list[schemas.AgentSlotRead]:
     return [
         schemas.AgentSlotRead.model_validate(slot)
-        for slot in agent_run_crud.list_agent_slots(db)
+        for slot in slot_queries.list_agent_slots(db)
     ]
 
 
@@ -5490,7 +5495,7 @@ def list_resident_slots_for_user(
 ) -> list[schemas.AgentSlotPublicRead]:
     return [
         schemas.AgentSlotPublicRead.model_validate(slot)
-        for slot in agent_run_crud.list_agent_slots(db)
+        for slot in slot_queries.list_agent_slots(db)
         if slot.assigned_user_id == user_id
     ]
 
@@ -5580,7 +5585,7 @@ def release_temporary_resident_slot(
     character_id: str,
     credential_id: str,
 ) -> None:
-    agent_run_crud.release_temporary_resident_slot_assignment(
+    slot_assignments.release_temporary_resident_slot_assignment(
         db,
         agent_id=agent_id,
         user_id=user_id,
@@ -5674,7 +5679,7 @@ async def run_community_once(
         [data.agent_id] if data.agent_id else settings.openclaw_agent_ids
     )
     lease_seconds = timeout_seconds + 90
-    slot = agent_run_crud.claim_agent_slot(
+    slot = slot_pool.claim_agent_slot(
         db,
         run_id=run_id,
         agent_ids=candidate_agent_ids,
@@ -5751,7 +5756,7 @@ async def run_community_once(
         else DEFAULT_ACTIVITY_ACTIONS,
     )
     if activity_policy and activity_policy.should_skip_llm:
-        agent_run_crud.release_agent_slot(db, agent_id=agent_id, run_id=run_id)
+        slot_pool.release_agent_slot(db, agent_id=agent_id, run_id=run_id)
         return schemas.OpenClawAgentRunRead(
             run_id=run_id,
             status="skipped",
@@ -5794,7 +5799,7 @@ async def run_community_once(
             )
 
             async def _extend_lease_for_wait(wait_seconds: float) -> None:
-                agent_run_crud.extend_resident_slot_lease(
+                slot_leases.extend_resident_slot_lease(
                     db,
                     agent_id=agent_id,
                     run_id=run_id,
@@ -5841,7 +5846,7 @@ async def run_community_once(
                     "deferred",
                     gateway_result=_stored_gateway_result(gateway_payload),
                 )
-                agent_run_crud.release_agent_slot(
+                slot_pool.release_agent_slot(
                     db,
                     agent_id=agent_id,
                     run_id=run_id,
@@ -5893,7 +5898,7 @@ async def run_community_once(
                 status,
                 gateway_result=_stored_gateway_result(gateway_result),
             )
-            agent_run_crud.release_agent_slot(db, agent_id=agent_id, run_id=run_id)
+            slot_pool.release_agent_slot(db, agent_id=agent_id, run_id=run_id)
             return schemas.OpenClawAgentRunRead(
                 run_id=run_id,
                 status=status,
@@ -6040,7 +6045,7 @@ async def run_community_once(
             )
         gateway_result["feed_perception"] = feed_perception_result
     except agent_run_crud.AgentRunConflictError as exc:
-        agent_run_crud.release_agent_slot(
+        slot_pool.release_agent_slot(
             db,
             agent_id=agent_id,
             run_id=run_id,
@@ -6051,7 +6056,7 @@ async def run_community_once(
         ) from exc
     except Exception:
         routine_runs.mark_agent_run_finished(db, run_id, "failed")
-        agent_run_crud.release_agent_slot(
+        slot_pool.release_agent_slot(
             db,
             agent_id=agent_id,
             run_id=run_id,
@@ -6081,7 +6086,7 @@ async def run_community_once(
         str(gateway_result.get("status", "completed")),
         gateway_result=_stored_gateway_result(gateway_result),
     )
-    agent_run_crud.release_agent_slot(db, agent_id=agent_id, run_id=run_id)
+    slot_pool.release_agent_slot(db, agent_id=agent_id, run_id=run_id)
     if profile_ready and credential is not None:
         try:
             await _release_slot_auth_profile(
@@ -6776,7 +6781,7 @@ async def _run_resident_slot_once(
             f"agent:{slot.agent_id}:owner-controlled-block:"
             f"{slot.assigned_user_id}:{slot.assigned_character_id}"
         )
-        agent_run_crud.complete_resident_slot_run(
+        slot_leases.complete_resident_slot_run(
             db,
             agent_id=slot.agent_id,
             run_id=slot.locked_by_run_id or "",
@@ -6816,7 +6821,7 @@ async def _run_resident_slot_once(
         else timeout_seconds
     )
     lease_seconds = effective_timeout_seconds + 90
-    agent_run_crud.set_resident_slot_run_id(
+    slot_leases.set_resident_slot_run_id(
         db, agent_id=slot.agent_id, run_id=run_id, lease_seconds=lease_seconds
     )
     heartbeat_interval_seconds = slot.heartbeat_interval_seconds or 1800
@@ -6879,7 +6884,7 @@ async def _run_resident_slot_once(
                 "deferred",
                 gateway_result=_stored_gateway_result(gateway_payload),
             )
-            agent_run_crud.complete_resident_slot_run(
+            slot_leases.complete_resident_slot_run(
                 db,
                 agent_id=slot.agent_id,
                 run_id=run_id,
@@ -6969,7 +6974,7 @@ async def _run_resident_slot_once(
                 ),
                 result=summary,
             )
-            agent_run_crud.complete_resident_slot_run(
+            slot_leases.complete_resident_slot_run(
                 db,
                 agent_id=slot.agent_id,
                 run_id=run_id,
@@ -7046,7 +7051,7 @@ async def _run_resident_slot_once(
         if activity_policy and activity_policy.should_skip_llm and not (
             individual_tool_flow and activity_policy.within_active_hours
         ):
-            agent_run_crud.complete_resident_slot_run(
+            slot_leases.complete_resident_slot_run(
                 db,
                 agent_id=slot.agent_id,
                 run_id=run_id,
@@ -7118,7 +7123,7 @@ async def _run_resident_slot_once(
             )
 
             async def _extend_lease_for_wait(wait_seconds: float) -> None:
-                agent_run_crud.extend_resident_slot_lease(
+                slot_leases.extend_resident_slot_lease(
                     db,
                     agent_id=slot.agent_id,
                     run_id=run_id,
@@ -7165,7 +7170,7 @@ async def _run_resident_slot_once(
                     "deferred",
                     gateway_result=_stored_gateway_result(gateway_payload),
                 )
-                agent_run_crud.complete_resident_slot_run(
+                slot_leases.complete_resident_slot_run(
                     db,
                     agent_id=slot.agent_id,
                     run_id=run_id,
@@ -7240,7 +7245,7 @@ async def _run_resident_slot_once(
             )
             if credential.cooldown_until is not None:
                 credential.cooldown_until = None
-            agent_run_crud.complete_resident_slot_run(
+            slot_leases.complete_resident_slot_run(
                 db,
                 agent_id=slot.agent_id,
                 run_id=run_id,
@@ -7443,7 +7448,7 @@ async def _run_resident_slot_once(
                         "cancelled_at": cancelled_at.isoformat(),
                     },
                 )
-            agent_run_crud.complete_resident_slot_run(
+            slot_leases.complete_resident_slot_run(
                 db,
                 agent_id=slot.agent_id,
                 run_id=run_id,
@@ -7460,7 +7465,7 @@ async def _run_resident_slot_once(
             )
         raise
     except agent_run_crud.AgentRunConflictError as exc:
-        agent_run_crud.complete_resident_slot_run(
+        slot_leases.complete_resident_slot_run(
             db,
             agent_id=slot.agent_id,
             run_id=run_id,
@@ -7486,7 +7491,7 @@ async def _run_resident_slot_once(
                 "deferred",
                 gateway_result=_stored_gateway_result(gateway_payload),
             )
-        agent_run_crud.complete_resident_slot_run(
+        slot_leases.complete_resident_slot_run(
             db,
             agent_id=slot.agent_id,
             run_id=run_id,
@@ -7631,7 +7636,7 @@ async def _run_resident_slot_once(
                 if gateway_payload is not None
                 else None,
             )
-        agent_run_crud.complete_resident_slot_run(
+        slot_leases.complete_resident_slot_run(
             db,
             agent_id=slot.agent_id,
             run_id=run_id,
@@ -7949,7 +7954,7 @@ async def _run_resident_slot_once(
             )
     if credential.cooldown_until is not None:
         credential.cooldown_until = None
-    agent_run_crud.complete_resident_slot_run(
+    slot_leases.complete_resident_slot_run(
         db,
         agent_id=slot.agent_id,
         run_id=run_id,
@@ -8077,7 +8082,7 @@ async def tick_resident_slots(
             ),
         ).next_tick_at
 
-    recovered_count = agent_run_crud.recover_expired_resident_slot_runs(
+    recovered_count = slot_recovery.recover_expired_resident_slot_runs(
         db,
         now=now,
         next_tick_at_factory=_recovery_next_tick_at,
@@ -8095,7 +8100,7 @@ async def tick_resident_slots(
         if not allowed_character_ids:
             due_before = [
                 slot
-                for slot in agent_run_crud.list_agent_slots(db)
+                for slot in slot_queries.list_agent_slots(db)
                 if _resident_slot_is_due(slot, now=now)
                 and slot.status in agent_run_crud.DUE_SLOT_STATUSES
             ]
@@ -8107,7 +8112,7 @@ async def tick_resident_slots(
             )
     candidate_character_ids = {
         slot.assigned_character_id
-        for slot in agent_run_crud.list_agent_slots(db)
+        for slot in slot_queries.list_agent_slots(db)
         if slot.assigned_character_id is not None
     }
     owner_controlled_ids = owner_controlled_character_ids(
@@ -8115,7 +8120,7 @@ async def tick_resident_slots(
     )
     due_before = [
         slot
-        for slot in agent_run_crud.list_agent_slots(db)
+        for slot in slot_queries.list_agent_slots(db)
         if _resident_slot_is_due(slot, now=now)
         and slot.status in agent_run_crud.DUE_SLOT_STATUSES
         and slot.assigned_character_id not in owner_controlled_ids

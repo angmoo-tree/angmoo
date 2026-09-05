@@ -1,4 +1,7 @@
 from __future__ import annotations
+from app.domains.routines.repository import slots as slot_queries
+from app.domains.routines.service import slot_assignments as slot_assignments
+from app.domains.routines.service import slot_pool as slot_pool
 from app.domains.routines.repository import feed_cues as feed_cue_queries
 from app.domains.routines.repository import runs as routine_run_queries
 from app.domains.routines.service import feed_cues as feed_cues
@@ -1132,7 +1135,7 @@ def update_credential(
         character=character,
         world_id=data.world_id,
     )
-    current_assigned_slot = agent_crud.get_assigned_slot(db, character.id)
+    current_assigned_slot = slot_queries.get_assigned_slot(db, character.id)
     if (
         current_assigned_slot is not None
         and current_assigned_slot.status == agent_run_crud.SLOT_STATUS_RUNNING
@@ -1242,7 +1245,7 @@ def delete_credential(
     ):
         return
 
-    assigned_slot = agent_crud.get_assigned_slot(db, character.id)
+    assigned_slot = slot_queries.get_assigned_slot(db, character.id)
     if (
         assigned_slot is not None
         and assigned_slot.status == agent_run_crud.SLOT_STATUS_RUNNING
@@ -1260,7 +1263,7 @@ def delete_credential(
                 credential=credential,
             )
             _reload_openclaw_secrets_sync()
-        agent_run_crud.release_resident_slot_assignment(
+        slot_assignments.release_resident_slot_assignment(
             db,
             user_id=user.id,
             character_id=character.id,
@@ -1362,7 +1365,7 @@ def update_settings(
     }
     schedule_changed = bool(data.model_fields_set & schedule_fields)
     setting = agent_crud.update_setting(db, setting, data, commit=False)
-    slot = agent_crud.get_assigned_slot(db, character.id)
+    slot = slot_queries.get_assigned_slot(db, character.id)
     if slot is not None:
         slot.heartbeat_interval_seconds = agent_activity_policy.tick_interval_seconds(
             setting
@@ -1478,7 +1481,7 @@ async def analyze_tendency(
 
     run_id = str(uuid4())
     timeout_seconds = settings.openclaw_timeout_seconds
-    slot = agent_run_crud.claim_agent_slot(
+    slot = slot_pool.claim_agent_slot(
         db,
         run_id=run_id,
         agent_ids=settings.openclaw_agent_ids,
@@ -1575,7 +1578,7 @@ async def analyze_tendency(
                 if last_error is None:
                     last_error = release_error
                     _mark_tendency_error(db, setting, release_error)
-        agent_run_crud.release_agent_slot(
+        slot_pool.release_agent_slot(
             db, agent_id=slot.agent_id, run_id=run_id, last_error=last_error
         )
         if release_error is not None and last_error == release_error:
@@ -1649,7 +1652,7 @@ def _activate_agent_uow(
     if credential is None or not credential.enabled:
         raise CredentialRequiredError("Agent credential is required before activation")
 
-    current_assigned_slot = agent_crud.get_assigned_slot(db, character.id)
+    current_assigned_slot = slot_queries.get_assigned_slot(db, character.id)
     selected_world_character = selected_autonomous_world_character(
         db, character_id=character.id
     )
@@ -1721,7 +1724,7 @@ def _activate_agent_uow(
                 _reload_openclaw_secrets_sync()
             except CredentialSyncError:
                 pass
-            agent_run_crud.release_resident_slot_assignment(
+            slot_assignments.release_resident_slot_assignment(
                 db,
                 user_id=user.id,
                 character_id=character.id,
@@ -1782,7 +1785,7 @@ def deactivate_agent(
 ) -> schemas.AgentDetailRead:
     character = _get_owned_character(db, user, character_id)
     current_setting = agent_crud.ensure_setting(db, character.id)
-    assigned_slot = agent_crud.get_assigned_slot(db, character.id)
+    assigned_slot = slot_queries.get_assigned_slot(db, character.id)
     if assigned_slot is None and not current_setting.auto_enabled:
         changed = set_active_world_character_autonomy(
             db,
@@ -1812,7 +1815,7 @@ def deactivate_agent(
             credential=credential,
         )
         _reload_openclaw_secrets_sync()
-    agent_run_crud.release_resident_slot_assignment(
+    slot_assignments.release_resident_slot_assignment(
         db,
         user_id=user.id,
         character_id=character.id,
@@ -2413,7 +2416,7 @@ def _ensure_run_now_scheduler_safe(
 
     live_running_count = sum(
         1
-        for slot in agent_run_crud.list_agent_slots(db)
+        for slot in slot_queries.list_agent_slots(db)
         if _slot_is_assigned_resident(slot) and _slot_is_live_running(slot, now)
     )
     if live_running_count > _allowed_existing_running_resident_slots():
@@ -2428,7 +2431,7 @@ def _ensure_claimed_temporary_run_now_scheduler_safe(
 ) -> None:
     live_other_running_count = sum(
         1
-        for slot in agent_run_crud.list_agent_slots(db)
+        for slot in slot_queries.list_agent_slots(db)
         if slot.agent_id != target_slot.agent_id
         and _slot_is_assigned_resident(slot)
         and _slot_is_live_running(slot, now)
@@ -2490,7 +2493,7 @@ async def run_agent_now(
         "Do not only save mood/state. Save character state after the public action, "
         "then summarize what you did and why in Korean."
     )
-    assigned_slot = agent_crud.get_assigned_slot(db, character.id)
+    assigned_slot = slot_queries.get_assigned_slot(db, character.id)
     if assigned_slot is not None:
         _ensure_run_now_scheduler_safe(
             db,
@@ -2519,7 +2522,7 @@ async def run_agent_now(
             timeout_seconds=timeout_seconds,
         )
     except agent_run_service.AgentSlotUnavailableError as exc:
-        raced_slot = agent_crud.get_assigned_slot(db, character.id)
+        raced_slot = slot_queries.get_assigned_slot(db, character.id)
         if raced_slot is not None and _slot_is_live_running(
             raced_slot, datetime.now(UTC)
         ):
@@ -3003,7 +3006,7 @@ def _build_agent_detail(
 ) -> schemas.AgentDetailRead:
     setting = agent_crud.ensure_setting(db, character.id)
     credential = agent_crud.get_character_credential(db, character.id)
-    slot = agent_crud.get_assigned_slot(db, character.id)
+    slot = slot_queries.get_assigned_slot(db, character.id)
     recent_activity = agent_crud.list_recent_activity(
         db, character.id, limit=recent_activity_limit
     )

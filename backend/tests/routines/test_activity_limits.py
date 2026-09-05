@@ -1,3 +1,6 @@
+from app.domains.routines.service import slot_leases as slot_leases
+from app.domains.routines.service import slot_pool as slot_pool
+from app.domains.routines.service import slot_recovery as slot_recovery
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
@@ -940,7 +943,7 @@ def test_file_backed_sqlite_tick_claims_two_naive_due_slots(
             )
             slot.locked_by_run_id = run_id
             run_db.commit()
-            agent_run_crud.complete_resident_slot_run(
+            slot_leases.complete_resident_slot_run(
                 run_db,
                 agent_id=agent_id,
                 run_id=run_id,
@@ -1084,12 +1087,12 @@ def test_tick_resident_slots_staggers_claimed_runs(
         lambda db: False,
     )
     monkeypatch.setattr(
-        agent_run_service.agent_run_crud,
+        agent_run_service.slot_recovery,
         "recover_expired_resident_slot_runs",
         lambda db, *, now, next_tick_at_factory=None: 0,
     )
     monkeypatch.setattr(
-        agent_run_service.agent_run_crud,
+        agent_run_service.slot_queries,
         "list_agent_slots",
         lambda db: [],
     )
@@ -1726,7 +1729,7 @@ def test_default_slot_bootstrap_preserves_first_thirty_and_adds_thirty_one_to_fi
         db.commit()
         original_updated_at = {slot.agent_id: slot.updated_at for slot in original}
 
-        agent_run_crud.ensure_agent_slots(db, settings.openclaw_agent_ids)
+        slot_pool.ensure_agent_slots(db, settings.openclaw_agent_ids)
 
         slots = list(db.scalars(select(models.AgentSlot).order_by(models.AgentSlot.agent_id)))
         assert {slot.agent_id for slot in slots} == set(expected_ids)
@@ -2308,7 +2311,7 @@ def test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy() -> 
         db.add_all([run, slot])
         db.commit()
 
-        recovered_count = agent_run_crud.recover_expired_resident_slot_runs(
+        recovered_count = slot_recovery.recover_expired_resident_slot_runs(
             db,
             now=now,
         )
@@ -2374,7 +2377,7 @@ def test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick(
         assert persisted is not None and persisted.next_tick_at is not None
         assert persisted.next_tick_at.tzinfo is None
 
-        recovered_count = agent_run_crud.recover_expired_resident_slot_runs(
+        recovered_count = slot_recovery.recover_expired_resident_slot_runs(
             db,
             now=now,
             next_tick_at_factory=lambda _slot, recovered_at: (
