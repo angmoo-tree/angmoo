@@ -116,7 +116,7 @@ from app.domains.social.infrastructure.sqlalchemy_models import (
 from app.domains.social.infrastructure.sqlalchemy_subjective_context_models import (
     SocialActionSubjectiveContext,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_models import (
+from app.domains.world_packages.models import (
     WorldPackageExport,
     WorldPackageImport,
     WorldPackageImportIdMap,

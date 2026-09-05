@@ -242,7 +242,7 @@ code.
 
 ## Domain-first ownership
 
-`app.domains.world_packages.public` is the only supported cross-domain import.
+`app.domains.world_packages.contracts` is the only supported cross-domain import.
 The domain/application layers must not import FastAPI, SQLAlchemy, provider SDKs,
 runtime implementations, another domain's infrastructure, or filesystem path
 selection. Frontend and Tauri never open SQLite or LadybugDB directly.

@@ -1191,7 +1191,8 @@
   "schema_version": 1,
   "refactor": {
     "domains": [
-      "device_home"
+      "device_home",
+      "world_packages"
     ],
     "globals": [
       "app.config",
@@ -1354,7 +1355,27 @@
       "app.domains.characters.service.management",
       "app.domains.media.contracts",
       "app.domains.runtime.contracts",
-      "app.domains.runtime.schemas"
+      "app.domains.runtime.schemas",
+      "app.domains.world_packages.contracts",
+      "app.domains.world_packages.contracts.export",
+      "app.domains.world_packages.contracts.import_commit",
+      "app.domains.world_packages.contracts.interfaces",
+      "app.domains.world_packages.contracts.preview",
+      "app.domains.world_packages.contracts.runtime",
+      "app.domains.world_packages.contracts.seed",
+      "app.domains.world_packages.schemas",
+      "app.domains.world_packages.schemas.content",
+      "app.domains.world_packages.schemas.http",
+      "app.domains.world_packages.schemas.manifest",
+      "app.domains.world_packages.schemas.v1",
+      "app.domains.world_packages.service",
+      "app.domains.world_packages.service.delivery",
+      "app.domains.world_packages.service.export",
+      "app.domains.world_packages.service.export_projection",
+      "app.domains.world_packages.service.import_approval",
+      "app.domains.world_packages.service.preview",
+      "app.domains.world_packages.service.registry",
+      "app.domains.world_packages.service.staging"
     ],
     "bridges": [
       {
@@ -2067,6 +2088,14 @@
         "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
         "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
         "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.world_packages.models",
+        "owner_stage": "AR-G5",
+        "removal_condition": "Move aggregate model registration to runtime.persistence while installing the single app.models Base in G5.",
+        "reason": "Existing aggregate imports the same four ORM classes; no alternate implementation or reverse edge.",
         "review_date": "2026-09-05"
       }
     ]

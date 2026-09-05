@@ -7,22 +7,22 @@ import pytest
 from sqlalchemy import event
 
 from app import models
-from app.domains.world_packages.domain.collision_policy import (
+from app.domains.world_packages.policies.collision import (
     WorldPackageCollisionPlan, WorldPackageDuplicateState,
 )
-from app.domains.world_packages.domain.errors import WorldPackageContractError
-from app.domains.world_packages.infrastructure.sqlalchemy_destination_seed import (
+from app.domains.world_packages.exceptions import WorldPackageContractError
+from app.runtime.world_packages.seed import (
     SqlAlchemyWorldPackageDestinationSeed,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_registry import (
+from app.domains.world_packages.service.registry import (
     SqlAlchemyWorldPackageRegistry,
 )
-from app.domains.world_packages.infrastructure.sqlalchemy_unit_of_work import (
+from app.runtime.world_packages.seed_uow import (
     SqlAlchemyWorldPackageSeedUnitOfWork,
 )
 from app.domains.worlds.service import creator
 from app.domains.worlds.service import WorldDefinitionValidationError
-from test_l3_5_world_package_uow_registry import _count, _request, _session_factory
+from test_uow_registry import _count, _request, _session_factory
 
 
 @pytest.mark.parametrize("digest_conflict", [False, True])
@@ -42,7 +42,7 @@ def test_completed_import_after_slug_selection_is_resolved_once(
     def find_import(registry, **scope):
         record = original_find(registry, **scope)
         if get_ident() == main_thread:
-            observed.append((registry._db, scope, record))
+            observed.append((registry._repository._db, scope, record))
             order.append("replay" if record is not None else "miss")
         return record
 

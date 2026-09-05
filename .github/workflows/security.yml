@@ -160,10 +160,10 @@ jobs:
             tests/test_refactor_public_node_moves.py
           uv run --directory backend python -m pytest -q \
             tests/test_l3_er7_windows_host_tauri_dev_contract.py \
-            tests/test_l3_5_world_package_v1_contract.py \
-            tests/test_l3_5_world_package_preview.py \
-            tests/test_l3_5_world_package_closeout.py \
-            tests/test_l3_5_world_package_closeout_contract.py \
+            tests/world_packages/test_v1_contract.py \
+            tests/world_packages/test_preview.py \
+            tests/world_packages/test_closeout.py \
+            tests/world_packages/test_closeout_contract.py \
             tests/test_l4_pr_f_closeout_contract.py
       - name: Preserve refactor source, API, ORM, and collected tests
         env:

@@ -1662,6 +1662,494 @@
       "test_suppressions": {
         "tests/world_characters/test_readiness_contract.py": {}
       }
+    },
+    {
+      "commit": "b07fa003f83002d086775d90fa3abbb8fc5072fb",
+      "feature_id": "AR-B3",
+      "reason": "Package roles and exact source-path regression first-introduction evidence",
+      "tracked_files": {
+        "backend/app/domains/world_packages/contracts/__init__.py": "099b295564c40a158dccbe756ee68e952afda9cf",
+        "backend/app/domains/world_packages/policies/__init__.py": "a9a6fc3cb02e5b571bda11b06c330ffd6e8d27db",
+        "backend/app/domains/world_packages/repository/__init__.py": "b28d68c2231398a0b54020b248a294a657a711f3",
+        "backend/app/domains/world_packages/repository/registry.py": "cce16897a1157a57c5e186615ae4c51d1cc84256",
+        "backend/app/domains/world_packages/service/__init__.py": "0066a90bf70ccf19979cac00087e73cc1622865f",
+        "backend/app/domains/world_packages/utils/__init__.py": "1330c6042f03c0286922182ca0e37593a68eae6f"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "91ddee0caa053412599ca6503e1840ddbf608d1e",
+      "feature_id": "AR-B3",
+      "reason": "Package roles and exact source-path regression first-introduction evidence",
+      "tracked_files": {
+        "backend/app/domains/world_packages/archive/__init__.py": "98c0a51e0419e382c4e129f20c1a83a7006f7890",
+        "backend/app/domains/world_packages/service/export_projection.py": "cf3f379def9651ff17420a169e24c2c41b8f52bd",
+        "backend/app/domains/world_packages/service/preview.py": "8c3dc702379f83010757a4f715cca6b614d61961",
+        "backend/app/domains/world_packages/storage/__init__.py": "98c0a51e0419e382c4e129f20c1a83a7006f7890"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "beca573986f5e2135f798334e54b5fbe3bc9c7fa",
+      "feature_id": "AR-B3",
+      "reason": "Package roles and exact source-path regression first-introduction evidence",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_refactor_backend_checkpoint.py::test_chained_literal_path_move_preserves_exact_root_and_predicate",
+        "tests/test_refactor_backend_checkpoint.py::test_chained_path_normalization_rejects_unmapped_roots_calls_and_prefixes[assert (other / 'api' / 'routes.py').exists()]",
+        "tests/test_refactor_backend_checkpoint.py::test_chained_path_normalization_rejects_unmapped_roots_calls_and_prefixes[assert (root / '..' / 'api' / 'routes.py').exists()]",
+        "tests/test_refactor_backend_checkpoint.py::test_chained_path_normalization_rejects_unmapped_roots_calls_and_prefixes[assert (root / 'api' / 'routes.py' / 'extra').exists()]",
+        "tests/test_refactor_backend_checkpoint.py::test_chained_path_normalization_rejects_unmapped_roots_calls_and_prefixes[assert (root / 'api' / 'routes.py.backup').exists()]",
+        "tests/test_refactor_backend_checkpoint.py::test_chained_path_normalization_rejects_unmapped_roots_calls_and_prefixes[assert (root / 'api/routes.py').exists()]",
+        "tests/test_refactor_backend_checkpoint.py::test_chained_path_normalization_rejects_unmapped_roots_calls_and_prefixes[assert (root / 'api_extra' / 'routes.py').exists()]",
+        "tests/test_refactor_backend_checkpoint.py::test_chained_path_normalization_rejects_unmapped_roots_calls_and_prefixes[assert (root / variable / 'routes.py').exists()]",
+        "tests/test_refactor_backend_checkpoint.py::test_chained_path_normalization_rejects_unmapped_roots_calls_and_prefixes[assert (root() / 'api' / 'routes.py').exists()]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_roots_require_a_tracked_path_constructor_and_unique_binding"
+      ],
+      "test_assertions": {
+        "tests/test_refactor_backend_checkpoint.py": {
+          "test_pr263_checkpoint_preserves_hotfix_regressions_beyond_pr258": [
+            "assert p.checkpoint_errors(checkpoint, p.BASELINE.read_bytes()) == []",
+            "assert hotfix",
+            "assert p.missing_nodes(approved, remaining, moves, node_snapshots=[baseline['test_nodes'], checkpoint['test_nodes']]) == [deleted]"
+          ],
+          "test_checkpoint_cannot_be_recaptured_to_hide_a_regression": [
+            "assert any(('checkpoint mutated' in error for error in p.checkpoint_errors(checkpoint, p.BASELINE.read_bytes())))"
+          ],
+          "test_original_baseline_and_wrong_checkpoint_commit_are_rejected": [
+            "assert any(('exact PR263 commit' in error for error in errors))",
+            "assert any(('PR258 source baseline mutated' in error for error in errors))"
+          ],
+          "test_nodes_follow_second_move_and_count_checkpoint_lineage_once": [
+            "assert p.missing_nodes(['old::test', 'pilot::test', 'hotfix::test'], ['final::test', 'hotfix::test', 'new::test'], {'old::test': 'pilot::test', 'pilot::test': 'final::test'}, node_snapshots=[['old::test'], ['pilot::test', 'hotfix::test']]) == []"
+          ],
+          "test_move_cannot_swallow_an_independent_existing_destination": [
+            "pytest.raises(ValueError, match='independent cases cannot collapse')"
+          ],
+          "test_unexplained_missing_renamed_or_merged_test_nodes_are_rejected": [
+            "pytest.raises(ValueError, match=match)"
+          ],
+          "write": [],
+          "snapshot": [],
+          "test_moved_test_cannot_keep_its_name_and_delete_assertion_or_raises": [
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: target}, {}, tmp_path)))"
+          ],
+          "test_assertions_inside_local_test_helpers_cannot_disappear": [
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: node}, {}, tmp_path)))"
+          ],
+          "test_new_skip_or_xfail_cannot_hide_a_collected_regression": [
+            "assert any(('skip/xfail suppression changed' in error for error in p.check_suppressions([expected], {}, tmp_path)))"
+          ],
+          "test_existing_skips_are_preserved_and_collection_hook_suppression_is_guarded": [
+            "assert p.check_suppressions([expected], {}, tmp_path) == []",
+            "assert p.check_suppressions([expected], {}, tmp_path)"
+          ],
+          "test_assertions_accept_explicit_path_move_and_additional_checks": [
+            "assert p.check_assertions([expected], {node: target}, {'backend/app/core/config.py': 'backend/app/config.py'}, tmp_path) == []",
+            "assert p.check_assertions([expected], {node: target}, {}, tmp_path)"
+          ],
+          "test_unchanged_synthetic_legacy_path_fixture_survives_real_move_without_weakening_expectations": [
+            "assert p.check_assertions([expected], {node: node}, files, tmp_path) == []",
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: node}, files, tmp_path)))"
+          ],
+          "test_parameterized_nodes_preserve_the_underlying_class_assertions": [
+            "assert p.check_assertions([expected], {node: target}, {}, tmp_path) == []",
+            "assert p.missing_nodes([node], [target.replace('[v8]', '[v9]')], {node: target}) == [target]"
+          ],
+          "test_missing_or_empty_marker_cannot_preserve_a_source_implementation": [
+            "assert any(('empty package marker' in error for error in p.check_sources([old], {old: target}, tmp_path)))",
+            "assert any(('source missing' in error for error in p.check_sources([old], {old: 'backend/app/missing.py'}, tmp_path)))",
+            "pytest.raises(ValueError, match='absent from frozen')"
+          ],
+          "test_source_moves_follow_multiple_steps_and_reject_unsafe_destination": [
+            "assert p.check_sources(['backend/app/old.py'], {'backend/app/old.py': 'backend/app/intermediate.py', 'backend/app/intermediate.py': 'backend/app/current.py'}, tmp_path) == []",
+            "assert p.check_sources(['backend/app/old.py'], {'backend/app/old.py': '../outside.py'}, tmp_path)"
+          ],
+          "test_addition_records_require_commit_feature_and_reason": [
+            "assert any(('exact introduction commit' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_addition_history_cannot_be_removed_or_rewritten": [
+            "assert any(('history was changed or removed' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_addition_commit_source_and_assertion_provenance_are_checked": [
+            "assert p.addition_errors(additions, checkpoint, tmp_path) == []",
+            "assert any(('source provenance changed' in error for error in errors))",
+            "assert any(('assertion provenance changed' in error for error in errors))"
+          ],
+          "test_later_commit_cannot_claim_it_introduced_an_older_unrecorded_source": [
+            "assert any(('first introduction commit' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_new_committed_source_requires_record_and_mapped_destinations_are_not_new_work": [
+            "assert p.unrecorded_committed_sources(checkpoint, [], targets, tmp_path) == ['committed source lacks append-only introduction evidence: backend/app/new.py']",
+            "assert p.unrecorded_committed_sources(checkpoint, [{'tracked_files': {'backend/app/new.py': 'blob'}}], targets, tmp_path) == []"
+          ],
+          "test_capture_does_not_call_surviving_frozen_bridge_a_new_source": [
+            "assert capture.unprotected_files(tracked, [old], {old: new}) == {added: 'new-test-blob'}"
+          ],
+          "test_new_split_requires_real_symbols_consumers_and_behavior_test_evidence": [
+            "assert p.check_split_evidence({'details': {'AR-B2': detail}}, snapshots, tmp_path) == []",
+            "assert any(('split omits' in error for error in p.check_split_evidence({'details': {'AR-B2': broken}}, snapshots, tmp_path)))",
+            "assert any(('does not define' in error for error in p.check_split_evidence({'details': {'AR-B2': broken}}, snapshots, tmp_path)))"
+          ],
+          "test_package_initializer_move_normalizes_its_exact_import_spelling": [
+            "assert p.normalized_assertion(\"assert 'app.domains.identity.infrastructure' in imports\", literals) == p.normalized_assertion(\"assert 'app.domains.identity.models' in imports\", literals)",
+            "assert p.normalized_assertion(\"assert 'from app.domains.identity.infrastructure import User' in source\", literals) == p.normalized_assertion(\"assert 'from app.domains.identity.models import User' in source\", literals)"
+          ],
+          "test_package_initializer_move_does_not_normalize_unmapped_descendants": [
+            "assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])",
+            "assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])"
+          ],
+          "test_chained_literal_path_move_preserves_exact_root_and_predicate": [
+            "assert p.check_assertions([expected], {old: new}, files, tmp_path) == []",
+            "assert p.check_assertions([expected], {old: new}, {}, tmp_path)",
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {old: new}, files, tmp_path)))"
+          ],
+          "test_chained_path_normalization_rejects_unmapped_roots_calls_and_prefixes": [
+            "assert p.normalized_assertion(fragment, literals, roots=roots) == p.normalized_assertion(fragment, [])"
+          ],
+          "test_literal_roots_require_a_tracked_path_constructor_and_unique_binding": [
+            "assert p.literal_path_roots(source, 'backend/tests/test_old.py')['test_contract']['root'] == 'backend/app/domains/world_packages'",
+            "assert 'root' not in p.literal_path_roots(altered, 'backend/tests/test_old.py').get('test_contract', {})"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_refactor_backend_checkpoint.py": {}
+      }
+    },
+    {
+      "commit": "9f7f4338cc128a870844db883fac8c4e710a8299",
+      "feature_id": "AR-B3",
+      "reason": "Package roles and exact source-path regression first-introduction evidence",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_local_rebinding_syntax[class root: pass]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_local_rebinding_syntax[def Path(*args): pass]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_local_rebinding_syntax[def root(): pass]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_local_rebinding_syntax[from custom import Path]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_local_rebinding_syntax[from custom import value as BASE]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_local_rebinding_syntax[from custom import value as __file__]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_local_rebinding_syntax[from custom import value as root]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_local_rebinding_syntax[try: pass\\n    except Exception as root: pass]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_local_rebinding_syntax[with context() as root: pass]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_module_rebinding_syntax[class BASE: pass]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_module_rebinding_syntax[class Path: pass]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_module_rebinding_syntax[def BASE(): pass]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_module_rebinding_syntax[def Path(*args): pass]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_module_rebinding_syntax[from custom import *]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_module_rebinding_syntax[from custom import Path]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_module_rebinding_syntax[from custom import token as BASE]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_module_rebinding_syntax[from custom import token as __file__]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_module_rebinding_syntax[import custom as Path]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_module_rebinding_syntax[try: pass\\nexcept Exception as BASE: pass]",
+        "tests/test_refactor_backend_checkpoint.py::test_literal_path_anchor_rejects_module_rebinding_syntax[with context() as BASE: pass]"
+      ],
+      "test_assertions": {
+        "tests/test_refactor_backend_checkpoint.py": {
+          "test_pr263_checkpoint_preserves_hotfix_regressions_beyond_pr258": [
+            "assert p.checkpoint_errors(checkpoint, p.BASELINE.read_bytes()) == []",
+            "assert hotfix",
+            "assert p.missing_nodes(approved, remaining, moves, node_snapshots=[baseline['test_nodes'], checkpoint['test_nodes']]) == [deleted]"
+          ],
+          "test_checkpoint_cannot_be_recaptured_to_hide_a_regression": [
+            "assert any(('checkpoint mutated' in error for error in p.checkpoint_errors(checkpoint, p.BASELINE.read_bytes())))"
+          ],
+          "test_original_baseline_and_wrong_checkpoint_commit_are_rejected": [
+            "assert any(('exact PR263 commit' in error for error in errors))",
+            "assert any(('PR258 source baseline mutated' in error for error in errors))"
+          ],
+          "test_nodes_follow_second_move_and_count_checkpoint_lineage_once": [
+            "assert p.missing_nodes(['old::test', 'pilot::test', 'hotfix::test'], ['final::test', 'hotfix::test', 'new::test'], {'old::test': 'pilot::test', 'pilot::test': 'final::test'}, node_snapshots=[['old::test'], ['pilot::test', 'hotfix::test']]) == []"
+          ],
+          "test_move_cannot_swallow_an_independent_existing_destination": [
+            "pytest.raises(ValueError, match='independent cases cannot collapse')"
+          ],
+          "test_unexplained_missing_renamed_or_merged_test_nodes_are_rejected": [
+            "pytest.raises(ValueError, match=match)"
+          ],
+          "write": [],
+          "snapshot": [],
+          "test_moved_test_cannot_keep_its_name_and_delete_assertion_or_raises": [
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: target}, {}, tmp_path)))"
+          ],
+          "test_assertions_inside_local_test_helpers_cannot_disappear": [
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: node}, {}, tmp_path)))"
+          ],
+          "test_new_skip_or_xfail_cannot_hide_a_collected_regression": [
+            "assert any(('skip/xfail suppression changed' in error for error in p.check_suppressions([expected], {}, tmp_path)))"
+          ],
+          "test_existing_skips_are_preserved_and_collection_hook_suppression_is_guarded": [
+            "assert p.check_suppressions([expected], {}, tmp_path) == []",
+            "assert p.check_suppressions([expected], {}, tmp_path)"
+          ],
+          "test_assertions_accept_explicit_path_move_and_additional_checks": [
+            "assert p.check_assertions([expected], {node: target}, {'backend/app/core/config.py': 'backend/app/config.py'}, tmp_path) == []",
+            "assert p.check_assertions([expected], {node: target}, {}, tmp_path)"
+          ],
+          "test_unchanged_synthetic_legacy_path_fixture_survives_real_move_without_weakening_expectations": [
+            "assert p.check_assertions([expected], {node: node}, files, tmp_path) == []",
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: node}, files, tmp_path)))"
+          ],
+          "test_parameterized_nodes_preserve_the_underlying_class_assertions": [
+            "assert p.check_assertions([expected], {node: target}, {}, tmp_path) == []",
+            "assert p.missing_nodes([node], [target.replace('[v8]', '[v9]')], {node: target}) == [target]"
+          ],
+          "test_missing_or_empty_marker_cannot_preserve_a_source_implementation": [
+            "assert any(('empty package marker' in error for error in p.check_sources([old], {old: target}, tmp_path)))",
+            "assert any(('source missing' in error for error in p.check_sources([old], {old: 'backend/app/missing.py'}, tmp_path)))",
+            "pytest.raises(ValueError, match='absent from frozen')"
+          ],
+          "test_source_moves_follow_multiple_steps_and_reject_unsafe_destination": [
+            "assert p.check_sources(['backend/app/old.py'], {'backend/app/old.py': 'backend/app/intermediate.py', 'backend/app/intermediate.py': 'backend/app/current.py'}, tmp_path) == []",
+            "assert p.check_sources(['backend/app/old.py'], {'backend/app/old.py': '../outside.py'}, tmp_path)"
+          ],
+          "test_addition_records_require_commit_feature_and_reason": [
+            "assert any(('exact introduction commit' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_addition_history_cannot_be_removed_or_rewritten": [
+            "assert any(('history was changed or removed' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_addition_commit_source_and_assertion_provenance_are_checked": [
+            "assert p.addition_errors(additions, checkpoint, tmp_path) == []",
+            "assert any(('source provenance changed' in error for error in errors))",
+            "assert any(('assertion provenance changed' in error for error in errors))"
+          ],
+          "test_later_commit_cannot_claim_it_introduced_an_older_unrecorded_source": [
+            "assert any(('first introduction commit' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_new_committed_source_requires_record_and_mapped_destinations_are_not_new_work": [
+            "assert p.unrecorded_committed_sources(checkpoint, [], targets, tmp_path) == ['committed source lacks append-only introduction evidence: backend/app/new.py']",
+            "assert p.unrecorded_committed_sources(checkpoint, [{'tracked_files': {'backend/app/new.py': 'blob'}}], targets, tmp_path) == []"
+          ],
+          "test_capture_does_not_call_surviving_frozen_bridge_a_new_source": [
+            "assert capture.unprotected_files(tracked, [old], {old: new}) == {added: 'new-test-blob'}"
+          ],
+          "test_new_split_requires_real_symbols_consumers_and_behavior_test_evidence": [
+            "assert p.check_split_evidence({'details': {'AR-B2': detail}}, snapshots, tmp_path) == []",
+            "assert any(('split omits' in error for error in p.check_split_evidence({'details': {'AR-B2': broken}}, snapshots, tmp_path)))",
+            "assert any(('does not define' in error for error in p.check_split_evidence({'details': {'AR-B2': broken}}, snapshots, tmp_path)))"
+          ],
+          "test_package_initializer_move_normalizes_its_exact_import_spelling": [
+            "assert p.normalized_assertion(\"assert 'app.domains.identity.infrastructure' in imports\", literals) == p.normalized_assertion(\"assert 'app.domains.identity.models' in imports\", literals)",
+            "assert p.normalized_assertion(\"assert 'from app.domains.identity.infrastructure import User' in source\", literals) == p.normalized_assertion(\"assert 'from app.domains.identity.models import User' in source\", literals)"
+          ],
+          "test_package_initializer_move_does_not_normalize_unmapped_descendants": [
+            "assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])",
+            "assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])"
+          ],
+          "test_chained_literal_path_move_preserves_exact_root_and_predicate": [
+            "assert p.check_assertions([expected], {old: new}, files, tmp_path) == []",
+            "assert p.check_assertions([expected], {old: new}, {}, tmp_path)",
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {old: new}, files, tmp_path)))"
+          ],
+          "test_chained_path_normalization_rejects_unmapped_roots_calls_and_prefixes": [
+            "assert p.normalized_assertion(fragment, literals, roots=roots) == p.normalized_assertion(fragment, [])"
+          ],
+          "test_literal_roots_require_a_tracked_path_constructor_and_unique_binding": [
+            "assert p.literal_path_roots(source, 'backend/tests/test_old.py')['test_contract']['root'] == 'backend/app/domains/world_packages'",
+            "assert 'root' not in p.literal_path_roots(altered, 'backend/tests/test_old.py').get('test_contract', {})"
+          ],
+          "test_literal_path_anchor_rejects_module_rebinding_syntax": [
+            "assert 'root' not in p.literal_path_roots(source, 'backend/tests/test_old.py').get('test_contract', {})"
+          ],
+          "test_literal_path_anchor_rejects_local_rebinding_syntax": [
+            "assert 'root' not in p.literal_path_roots(source, 'backend/tests/test_old.py').get('test_contract', {})"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_refactor_backend_checkpoint.py": {}
+      }
+    },
+    {
+      "commit": "0e7481added543ce52710c9c0b9e0e0894541c5e",
+      "feature_id": "AR-B3",
+      "reason": "Exact path guard regression and final Package composition first-introduction evidence",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_refactor_backend_checkpoint.py::test_exact_windows_file_literal_uses_the_same_reviewed_move",
+        "tests/test_refactor_backend_checkpoint.py::test_file_move_to_initializer_uses_the_canonical_package_import"
+      ],
+      "test_assertions": {
+        "tests/test_refactor_backend_checkpoint.py": {
+          "test_pr263_checkpoint_preserves_hotfix_regressions_beyond_pr258": [
+            "assert p.checkpoint_errors(checkpoint, p.BASELINE.read_bytes()) == []",
+            "assert hotfix",
+            "assert p.missing_nodes(approved, remaining, moves, node_snapshots=[baseline['test_nodes'], checkpoint['test_nodes']]) == [deleted]"
+          ],
+          "test_checkpoint_cannot_be_recaptured_to_hide_a_regression": [
+            "assert any(('checkpoint mutated' in error for error in p.checkpoint_errors(checkpoint, p.BASELINE.read_bytes())))"
+          ],
+          "test_original_baseline_and_wrong_checkpoint_commit_are_rejected": [
+            "assert any(('exact PR263 commit' in error for error in errors))",
+            "assert any(('PR258 source baseline mutated' in error for error in errors))"
+          ],
+          "test_nodes_follow_second_move_and_count_checkpoint_lineage_once": [
+            "assert p.missing_nodes(['old::test', 'pilot::test', 'hotfix::test'], ['final::test', 'hotfix::test', 'new::test'], {'old::test': 'pilot::test', 'pilot::test': 'final::test'}, node_snapshots=[['old::test'], ['pilot::test', 'hotfix::test']]) == []"
+          ],
+          "test_move_cannot_swallow_an_independent_existing_destination": [
+            "pytest.raises(ValueError, match='independent cases cannot collapse')"
+          ],
+          "test_unexplained_missing_renamed_or_merged_test_nodes_are_rejected": [
+            "pytest.raises(ValueError, match=match)"
+          ],
+          "write": [],
+          "snapshot": [],
+          "test_moved_test_cannot_keep_its_name_and_delete_assertion_or_raises": [
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: target}, {}, tmp_path)))"
+          ],
+          "test_assertions_inside_local_test_helpers_cannot_disappear": [
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: node}, {}, tmp_path)))"
+          ],
+          "test_new_skip_or_xfail_cannot_hide_a_collected_regression": [
+            "assert any(('skip/xfail suppression changed' in error for error in p.check_suppressions([expected], {}, tmp_path)))"
+          ],
+          "test_existing_skips_are_preserved_and_collection_hook_suppression_is_guarded": [
+            "assert p.check_suppressions([expected], {}, tmp_path) == []",
+            "assert p.check_suppressions([expected], {}, tmp_path)"
+          ],
+          "test_assertions_accept_explicit_path_move_and_additional_checks": [
+            "assert p.check_assertions([expected], {node: target}, {'backend/app/core/config.py': 'backend/app/config.py'}, tmp_path) == []",
+            "assert p.check_assertions([expected], {node: target}, {}, tmp_path)"
+          ],
+          "test_unchanged_synthetic_legacy_path_fixture_survives_real_move_without_weakening_expectations": [
+            "assert p.check_assertions([expected], {node: node}, files, tmp_path) == []",
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: node}, files, tmp_path)))"
+          ],
+          "test_parameterized_nodes_preserve_the_underlying_class_assertions": [
+            "assert p.check_assertions([expected], {node: target}, {}, tmp_path) == []",
+            "assert p.missing_nodes([node], [target.replace('[v8]', '[v9]')], {node: target}) == [target]"
+          ],
+          "test_missing_or_empty_marker_cannot_preserve_a_source_implementation": [
+            "assert any(('empty package marker' in error for error in p.check_sources([old], {old: target}, tmp_path)))",
+            "assert any(('source missing' in error for error in p.check_sources([old], {old: 'backend/app/missing.py'}, tmp_path)))",
+            "pytest.raises(ValueError, match='absent from frozen')"
+          ],
+          "test_source_moves_follow_multiple_steps_and_reject_unsafe_destination": [
+            "assert p.check_sources(['backend/app/old.py'], {'backend/app/old.py': 'backend/app/intermediate.py', 'backend/app/intermediate.py': 'backend/app/current.py'}, tmp_path) == []",
+            "assert p.check_sources(['backend/app/old.py'], {'backend/app/old.py': '../outside.py'}, tmp_path)"
+          ],
+          "test_addition_records_require_commit_feature_and_reason": [
+            "assert any(('exact introduction commit' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_addition_history_cannot_be_removed_or_rewritten": [
+            "assert any(('history was changed or removed' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_addition_commit_source_and_assertion_provenance_are_checked": [
+            "assert p.addition_errors(additions, checkpoint, tmp_path) == []",
+            "assert any(('source provenance changed' in error for error in errors))",
+            "assert any(('assertion provenance changed' in error for error in errors))"
+          ],
+          "test_later_commit_cannot_claim_it_introduced_an_older_unrecorded_source": [
+            "assert any(('first introduction commit' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_new_committed_source_requires_record_and_mapped_destinations_are_not_new_work": [
+            "assert p.unrecorded_committed_sources(checkpoint, [], targets, tmp_path) == ['committed source lacks append-only introduction evidence: backend/app/new.py']",
+            "assert p.unrecorded_committed_sources(checkpoint, [{'tracked_files': {'backend/app/new.py': 'blob'}}], targets, tmp_path) == []"
+          ],
+          "test_capture_does_not_call_surviving_frozen_bridge_a_new_source": [
+            "assert capture.unprotected_files(tracked, [old], {old: new}) == {added: 'new-test-blob'}"
+          ],
+          "test_new_split_requires_real_symbols_consumers_and_behavior_test_evidence": [
+            "assert p.check_split_evidence({'details': {'AR-B2': detail}}, snapshots, tmp_path) == []",
+            "assert any(('split omits' in error for error in p.check_split_evidence({'details': {'AR-B2': broken}}, snapshots, tmp_path)))",
+            "assert any(('does not define' in error for error in p.check_split_evidence({'details': {'AR-B2': broken}}, snapshots, tmp_path)))"
+          ],
+          "test_package_initializer_move_normalizes_its_exact_import_spelling": [
+            "assert p.normalized_assertion(\"assert 'app.domains.identity.infrastructure' in imports\", literals) == p.normalized_assertion(\"assert 'app.domains.identity.models' in imports\", literals)",
+            "assert p.normalized_assertion(\"assert 'from app.domains.identity.infrastructure import User' in source\", literals) == p.normalized_assertion(\"assert 'from app.domains.identity.models import User' in source\", literals)"
+          ],
+          "test_package_initializer_move_does_not_normalize_unmapped_descendants": [
+            "assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])",
+            "assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])"
+          ],
+          "test_chained_literal_path_move_preserves_exact_root_and_predicate": [
+            "assert p.check_assertions([expected], {old: new}, files, tmp_path) == []",
+            "assert p.check_assertions([expected], {old: new}, {}, tmp_path)",
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {old: new}, files, tmp_path)))"
+          ],
+          "test_chained_path_normalization_rejects_unmapped_roots_calls_and_prefixes": [
+            "assert p.normalized_assertion(fragment, literals, roots=roots) == p.normalized_assertion(fragment, [])"
+          ],
+          "test_literal_roots_require_a_tracked_path_constructor_and_unique_binding": [
+            "assert p.literal_path_roots(source, 'backend/tests/test_old.py')['test_contract']['root'] == 'backend/app/domains/world_packages'",
+            "assert 'root' not in p.literal_path_roots(altered, 'backend/tests/test_old.py').get('test_contract', {})"
+          ],
+          "test_literal_path_anchor_rejects_module_rebinding_syntax": [
+            "assert 'root' not in p.literal_path_roots(source, 'backend/tests/test_old.py').get('test_contract', {})"
+          ],
+          "test_literal_path_anchor_rejects_local_rebinding_syntax": [
+            "assert 'root' not in p.literal_path_roots(source, 'backend/tests/test_old.py').get('test_contract', {})"
+          ],
+          "test_exact_windows_file_literal_uses_the_same_reviewed_move": [
+            "assert p.normalized_assertion(before, literals) == p.normalized_assertion(after, literals)",
+            "assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])"
+          ],
+          "test_file_move_to_initializer_uses_the_canonical_package_import": [
+            "assert p.normalized_assertion(\"assert 'app.domains.world_packages.public' in text\", literals) == p.normalized_assertion(\"assert 'app.domains.world_packages.contracts' in text\", literals)",
+            "assert p.normalized_assertion(\"assert 'from app.domains.world_packages.public import WorldPackagePolicy' in text\", literals) == p.normalized_assertion(\"assert 'from app.domains.world_packages.contracts import WorldPackagePolicy' in text\", literals)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_refactor_backend_checkpoint.py": {}
+      }
+    },
+    {
+      "commit": "6e52d89644f5faa5e0732af1eb015f1ee5085c18",
+      "feature_id": "AR-B3",
+      "reason": "Exact path guard regression and final Package composition first-introduction evidence",
+      "tracked_files": {
+        "backend/app/domains/world_packages/contracts/runtime.py": "a40b57417b0c80ff270fde69697fdf32c941e3da",
+        "backend/app/domains/world_packages/dependencies.py": "658dbca737fd94f57eef6666672a9e6d60e1df7b",
+        "backend/app/domains/world_packages/service/delivery.py": "e984c86afd751d4d1b6cf5dcdc8e49499364cb70",
+        "backend/app/runtime/world_packages/__init__.py": "0ceca2e19ee2ee289bd645cec6abf6066a63d1a2",
+        "backend/app/runtime/world_packages/composition.py": "4087f06a9ebf17daa653c5277fc14cd12d1cbd26",
+        "backend/tests/world_packages/test_composition_delivery.py": "35d92fe5daa22c87d6b03c2c95dd1bfceffb7597"
+      },
+      "test_nodes": [
+        "tests/world_packages/test_composition_delivery.py::test_application_supplied_factories_keep_the_request_session_and_one_recovery",
+        "tests/world_packages/test_composition_delivery.py::test_native_ack_commit_failure_keeps_artifact_for_retry",
+        "tests/world_packages/test_composition_delivery.py::test_prepared_export_commit_failure_rolls_back_and_discards_only_its_artifact[failure0]",
+        "tests/world_packages/test_composition_delivery.py::test_prepared_export_commit_failure_rolls_back_and_discards_only_its_artifact[failure1]"
+      ],
+      "test_assertions": {
+        "tests/world_packages/test_composition_delivery.py": {
+          "test_application_supplied_factories_keep_the_request_session_and_one_recovery": [
+            "assert exporter._source is source",
+            "assert stager._preview_probe is probe",
+            "assert factories.source_snapshot.call_args.args == (db,)",
+            "assert factories.preview_probe.call_args.args == (db,)",
+            "assert first is second is committer",
+            "assert factories.import_committer.call_args.args == (session_factory,)",
+            "assert factories.import_committer.call_count == 1",
+            "assert committer.recover_media.call_count == 1"
+          ],
+          "test_prepared_export_commit_failure_rolls_back_and_discards_only_its_artifact": [
+            "pytest.raises(expected)",
+            "assert db.rollback.call_count == 1",
+            "assert store.discard.call_args.args == ('owned-operation',)",
+            "assert store.discard.call_count == 1",
+            "assert caught.value.reason_code is WorldPackageReasonCode.COMMIT_CONFLICT",
+            "assert caught.value is failure"
+          ],
+          "test_native_ack_commit_failure_keeps_artifact_for_retry": [
+            "pytest.raises(RuntimeError)",
+            "assert caught.value is failure",
+            "assert db.rollback.call_count == 1",
+            "assert registry.record_export_delivery.call_count == 1",
+            "assert registry.record_export_delivery.call_args.args[0].delivery_mode == 'tauri_save_as'",
+            "assert store.discard.call_count == 0"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/world_packages/test_composition_delivery.py": {}
+      }
     }
   ]
 }

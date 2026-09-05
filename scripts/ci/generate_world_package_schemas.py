@@ -17,13 +17,13 @@ if str(BACKEND_ROOT) not in sys.path:
 
 from pydantic import BaseModel  # noqa: E402
 
-from app.domains.world_packages.domain.content import (  # noqa: E402
+from app.domains.world_packages.schemas.content import (  # noqa: E402
     AssetIndexDocument,
     CharactersDocument,
     PortableWorldDefinition,
     WorldCharactersDocument,
 )
-from app.domains.world_packages.domain.manifest import (  # noqa: E402
+from app.domains.world_packages.schemas.manifest import (  # noqa: E402
     WorldPackageManifest,
 )
 

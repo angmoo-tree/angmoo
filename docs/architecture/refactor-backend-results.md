@@ -499,3 +499,72 @@ WC 최종 source와 Character HTTP source를 합친 첫 고정 후보의 집중 
 응답 소유권을 수정한 source `77081dcd3e4e9c284ef415622b69d9004d9815fe`에서 readiness·Character HTTP·Agent 한도·M3 권한/비밀 보호 집중 **96 passed / 3 warnings / 14.03초**를 통과했다. 기존 split 증거의 목적지도 실제 Character schema로 연결한 `4f95df7`에서 stock `check_refactor_preservation.py --contracts --nodes`가 **2,139 protected/current nodes / items37 PASS**로 종료했다. API·OpenAPI·ORM, 원본 assertion/suppression, source와 새 test의 최초 도입 commit 계보를 모두 유지한다. 수정 전 검사의 stale split destination 실패는 이 조정과 재검증으로 닫았으며 기준선·기대 결과를 재생성하지 않았다.
 
 동일 코드의 문서 통합 후보 `aa4f51e`에서 CI 계약 7개와 architecture **630 modules / 2,019 edges / exact legacy 272**, current inventory/public196을 확인했다. 추적 archive **19.17MB** 및 HEAD의 전체 조상 **360 commits / 21.33MB** Gitleaks는 findings0이다. 이 기록 뒤의 변경은 결과 문서뿐이다. PR #277 뒤의 순차 PR·merge·post-merge 및 실제 Installer 검증을 별도로 확인한다. WC의 미전환 외부 aggregate/ORM 소비자와 frozen migration용 동일 객체 alias는 B4~B8/G5의 명시된 범위에 남으며 이 로컬 결과를 B2 전체 완료로 확대하지 않는다.
+
+## AR-B3 Package foundation — 계약·ORM·registry 첫 source slice
+
+G0~G4와 Identity source가 합류한 `abbd08c`의 별도 작업트리에서 시작했다. Python v1/HTTP schema, 불변 request/result, archive/license/collision 정책과 canonical digest를 새 역할로 옮겼다. JSON `schemas/v1`와 synthetic fixtures·golden bytes, 네 ORM의 table/column/FK/constraint는 변경하지 않았다. Registry의 동일 seed version 재사용·전달 충돌 판단은 service가, 동일 Session SQL·flush는 repository가 소유한다. 두 구현 모두 commit하지 않으며 원래 caller의 commit/rollback 경계를 유지한다.
+
+v1 계약과 UoW/registry 테스트 두 파일을 `tests/world_packages`로 옮기고 fixture·Alembic 상대 경로와 실제 CI suite 경로를 함께 전환했다. 원래 assertion/parametrize/node는 보존했다. Pure-source 검사에는 실제 새 역할 파일을 추가해 빈 옛 폴더를 검사하는 통과를 막았고, public의 역사적 pure-contract assertion은 이동표의 정확한 module 대응만 정규화한다. 임의 prefix 치환은 사용하지 않는다.
+
+- Package 8 suites: **89 passed / 1 warning / 46.50초**. JSON schema golden, deterministic ZIP, managed-media stripping, seed/rollback/concurrent replay, browser/native delivery/cancel, preview/archive limits, import/media recovery와 UI·closeout 계약 포함.
+- Architecture boundary: **599 modules / 1,864 edges / legacy exact edges 288, PASS**. 새 계약·정책·ORM·registry **23개 exact module**만 opt-in하며 같은 업무의 옛 소비자 **94개 exact bridge**는 뒤이은 AR-B3 export/staging/import slice에서 제거한다. aggregate ORM 등록은 G5에서 닫는다.
+- API/ORM와 원본 assertion/split/node 보존: 변경·누락 오류 없음. PR258 1,867 / PR263 1,907 / 보호 lineage 2,080 / 현재 2,085. 종료 코드 1의 원인은 선행 Identity의 introduction metadata 미합류 9 source·5 test node뿐이며 root의 선형 source→append capture 단계에서 처리한다. frozen checkpoint·기준선·승인 node는 변경하지 않았다.
+
+이 기록은 첫 source slice의 로컬 검증이며 Package 전체·shared media·순차 PR/Hosted Actions·merge 검증 완료를 뜻하지 않는다. 다음은 export/staging, 이어 import UoW/복구/runtime 조립 전환이다.
+
+
+## AR-B3 Package processing — export·staging·ZIP·media 정제 두 번째 source slice
+
+첫 source `d80e2ed` 위에서 export/staging 실제 서비스, deterministic ZIP writer, bounded ZIP reader, exclusion scanner, staging/export artifact/export-media 저장소를 각 역할 package로 옮겼다. ZIP 제한·이미지 lossless 정제·token 바인딩·expiry·cancel·retry·preview 입력/출력의 구현 조건은 유지했다. 실제 fake/UoW 소비자가 있는 Protocol 10개는 `contracts/interfaces.py`에 모았고, export asset 클래스/Protocol의 호출자 없는 NotImplementedError 메서드 세 개만 제거했다. 실제 import media 파일 보상은 다음 slice 대상이며 삭제하지 않았다.
+
+SQL source snapshot의 portable-key/profile 변환과 preview probe의 trust/duplicate/tamper/collision 판단은 새 service로 분리했다. SQL 조회 class를 먼저 runtime으로 옮기면 옛 router/import committer에서 domain→runtime 역방향이 발생하므로, 이 물리 이전은 마지막 조립 slice와 함께 수행한다. 현재 partial 범위는 36개 실제 역할 module이며 남은 exact bridge는 94→55개로 줄었다. 새 경계 예외는 확대하지 않았다.
+
+- Package 8 suites: **89 passed / 1 warning / 39.41초**. 고정 v1 JSON/ZIP, archive 악성 입력, 이미지 정제, same-session 원자성·replay, 전달/ack/cancel 및 import 복구의 기존 assertion을 유지했다.
+- Architecture boundary: **594 modules / 1,850 edges / legacy exact edges 288, PASS**.
+- 소유 테스트: export·preview 두 파일을 `tests/world_packages`로 추가 이전하고 fixture와 CI source literal을 함께 전환했다. 기존 test node·parameter·assertion은 보존한다.
+- 남은 범위: router/dependencies, import 승인·동일 Session commit/복구 및 startup read projection 조립. source 이후 parent가 선형 introduction capture와 통합/CI/merge 증거를 기록한다.
+
+
+## AR-B3 Package composition — HTTP·delivery·same-session import 최종 source slice
+
+`d80e2ed`의 계약/registry와 `3205878`의 export/staging/archive 처리에 이어 Package 역할 전환을 연결했다. `router.py`는 HTTP 입력·권한·오류/응답을, `dependencies.py`는 기존 요청 Session과 app state의 저장소·runtime factory를, `service/import_approval.py`는 digest에 바인딩된 승인과 preview 복원을 맡는다. `service/delivery.py`로 export preview/준비/native acknowledgment의 commit·rollback·artifact 정리 책임을 옮겼다. Browser stream은 원래처럼 정상 소진 후에만 전달을 기록하고, native stream은 저장 완료 acknowledgment를 기다린다.
+
+여러 도메인의 읽기 projection, World/Character/참여 관계 생성과 import commit/복구는 `app/runtime/world_packages`로 이동했다. 두 app factory가 constructor callback을 연결하며 Package 도메인이 runtime을 import하지 않는다. 기존 Session/sessionmaker, 행 잠금, bounded replay, commit 결과 불명 관찰, media journal 복구 및 importer의 기본 비활성 상태는 유지했다. `storage/import_media.py`가 파일 promotion·compensation을 소유한다. 원래 pure `public.py` export 집합은 `contracts/__init__.py`로 옮겼고 실제 소비자를 전환했다.
+
+- 고정 제품 source의 Package 93 nodes와 L3/L4·architecture·security-route·보존 guard 집중 검사는 **190 passed / 1 warning / 41.26초**였다. 원래 Package 89 nodes를 보존하고 동일 Session/factory 연결·복구 1회·준비 commit 실패 보상·native ack 실패 시 retry artifact 보존 4 nodes를 추가했다.
+- 현재 scope는 `world_packages` 전체다. Package 내부 `api/application/domain/infrastructure/ports/public.py` 파일과 같은 도메인 임시 bridge는 남지 않는다. 네 ORM을 재등록하는 기존 `app.models` aggregate의 incoming edge **1개**만 G5 종료 조건을 갖고 남아 있다.
+- 구조 검사는 **594 modules / 1,861 internal edges / legacy exact 288 PASS**, L4는 **parity nodes 97 PASS**다. ER0는 기존 **75 PostgreSQL source / 87 역사 migration / 24 Neo4j query / 44 Next route / 7 parity workload**를 유지했다. v1 JSON schema `--check`도 통과했다.
+- API/ORM/schema·원래 assertion·split-symbol/consumer·test node 보존 오류는 **0**이다. PR258 **1,867**, PR263 **1,907**, 현재 보호 계보 **2,080**, 수집 **2,121**이다. guard의 종료 코드 1은 선행 Identity/Package/guard source의 append-only introduction metadata가 이 독립 branch에 아직 합류하지 않은 것만 남으며, parent의 source commit 후 선형 capture로 처리한다. 고정 checkpoint·baseline·승인 node·v1/golden·역사 migration은 변경하지 않았다.
+- Route inventory는 Package 9개와 선행 Identity local/auth의 13개 실제 module 경로만 갱신했다. operation·endpoint 이름·접근 분류·권한 assertion은 유지했고 현재 API의 전체 보안 inventory 검사를 통과했다. Windows/Linux CI의 실제 소유 테스트 경로, fixture 상대 경로와 현재 ER0/L4/Memory batch inventory를 함께 연결했다.
+
+보존 guard에서는 고정된 테스트 source의 pathlib anchor·단일 literal binding과 파일 이동표가 정확히 연결된 경우만 chained path를 정규화한다. 임의 root/call/동적 경로·import/함수/클래스/with/except의 재바인딩은 거부한다. Windows 경로는 문자열 전체가 정확히 일치하는 경우만 인정하고 `__init__.py`는 정상 package import 표기를 사용한다. 독립 source `dc3da4b`·`651bded`·`f61cc48`·`1fb943d`에 이를 나눴으며 기존/음성 검사 **67 passed**를 확인했다. 전체 순서 있는 literal tuple에 대한 compiled regex cache만 추가했고, 대표 실제 assertion **122개 출력 동일**, **1.869초→0.057초**를 확인했다. 기존 느린 guard 실행은 중단해 PASS로 사용하지 않았고 최종 수정 이후 전체 검사를 다시 실행했다.
+
+이 결과는 Package의 독립 source 준비와 로컬 회귀 증거다. 선행 B2의 Worlds/Characters/WorldCharacter source가 합류하면 runtime의 해당 지원 import를 canonical 경로로 연결한다. 전체 통합 backend·Docker/Host Tauri/sidecar/NSIS 설치·Hosted Actions·merge는 parent의 순차 검증 대상이며 이 결과로 완료했다고 표시하지 않는다. Shared media 전체는 다음 별도 B3 범위다.
+
+### Package 선형 통합과 전체 백엔드 보존 완료
+
+Worlds·Character·WC의 실제 소유 서비스를 runtime UoW/seed/import/export/preview 조회에서 사용하도록 연결했다. 선행 WC의 동시 replay Hotfix `1666c495`는 이동한 `runtime/world_packages/seed_uow.py`에서 비-import AST 전체가 동일하다. 기존 관찰용 테스트도 실제 registry repository의 같은 Session을 보도록 연결했다. 원래 replay 결과·rollback·digest 충돌·중복 생성 방지 assertion을 유지했으며 집중 **99 passed / 1 warning / 46.12초**다.
+
+source `d80e2ed`·`3205878` 및 guard `dc3da4b`·`651bded`·`1fb943d`, 조립 `a61a0ae`를 선형 introduction 기록에 추가했다. 컴파일 캐시 source `f61cc48`는 새로운 파일/node가 없어 별도 추가 snapshot을 만들지 않았다. `ed89fde`의 stock 전체 보존은 **2,175 protected/current nodes / items37 PASS**다. 첫 검사의 split behavior-test 참조 27개는 모두 원본 Package import test의 이동 전 경로였으며, 기존 source/symbol map을 유지하고 실제 `tests/world_packages/test_import_commit.py`의 같은 node로 연결한 뒤 통과했다.
+
+WC current 구조 검사 보완을 합친 고정 source `1f74549`의 **전체 백엔드 2,153 passed / 기존 22 skipped / 27 warnings / 481.15초**가 통과했다. API·OpenAPI·ORM, JSON v1·deterministic ZIP·미디어 staging/복구·caller transaction·기존 기능의 보존 검사를 유지한다. current architecture **631/2028/legacy272**, public196 및 ER0/L4/Memory batch 현재 경로 검사를 앞선 통합에서 확인했다. 추적 archive **19.30MB**, HEAD 전체 **371 commits / 21.69MB** Gitleaks findings0이다. 이 source 이후 final WC 결과 합류는 문서 한 파일뿐이다.
+
+Package의 application/domain/infrastructure/ports/public.py 생산 구현은 실제 역할 파일로 이전했고, 같은 업무의 불필요한 전달 계층은 제거했다. G5의 등록을 위한 원래 aggregate ORM 소비자는 그 종료 조건으로 추적한다. Media provider/Character·World 이미지 업무 전체는 다음 PR 범위다. 선행 #278 다음 순차 PR-head Actions·실제 Installer·merge·post-merge를 확인하며 이 로컬 결과만으로 §8.2 전체 종료를 선언하지 않는다.
+
+### Package 준비 커밋의 DCO 보완과 보존된 원본 계보
+
+PR #279의 DCO job `101316333023`은 원래 Package 준비 커밋 7개에 Signed-off-by가 없어 실패했다. CONTRIBUTING의 모든 human commit 자체 서명 규칙과 `check_dco.py`는 그대로 유지했다. 미병합 commit의 누락 trailer만 같은 author의 서명으로 보충하고, 후속 Git DAG의 parent와 additions 기록의 구조화된 `record.commit` 참조를 새 SHA로 연결했다. 원 author/committer/date, 7개 이외 메시지 byte, parent 순서와 merge topology는 그대로다.
+
+| 원래 source commit | 서명 보완 후 같은 source commit |
+| --- | --- |
+| `1fb943d3cef9bfc2aed59406cfc69b188293aff6` | `0e7481added543ce52710c9c0b9e0e0894541c5e` |
+| `320587830a054a2c0b05a354348ea14669f7dace` | `91ddee0caa053412599ca6503e1840ddbf608d1e` |
+| `651bded4f3bd15d92043c008286e7307769c423f` | `9f7f4338cc128a870844db883fac8c4e710a8299` |
+| `a61a0ae5c8a0d10b0bb5bdaf27e190cea7ffefa3` | `6e52d89644f5faa5e0732af1eb015f1ee5085c18` |
+| `d80e2ed495f1388e58a693837ca5309e84d92c07` | `b07fa003f83002d086775d90fa3abbb8fc5072fb` |
+| `dc3da4beba804b623ce8691ee9e754b16bb0663c` | `beca573986f5e2135f798334e54b5fbe3bc9c7fa` |
+| `f61cc48d36c6c9134940671587306aabf173efbb` | `9779c059a8a8e69344526ba00edafd8d95bf0608` |
+
+50개 old/new DAG commit을 구성한 최종 후보에서 전체 source/test blobs는 동일하다. 유일한 tree 차이는 기존 additions JSON의 commit 참조이며, tracked_files blob·test_nodes·assertion·suppression·기록 순서·원래 snapshot 내용은 보존했다. 원본 refs는 로컬 `refs/archive/ar-dco-20260905/`에 따로 보관했다. main `38229fa`와 #258/#263 및 동결 baseline/migration은 바꾸지 않았다. 이전 절의 source SHA는 서명 보완 전 실제 검증 기록이며 위와 같은 내용으로 이어진다.
+
+기존 DCO checker는 Package 및 Media 후보 각각 PASS다. 별도 detached Media 후보 `252a8f02f1745cb19f2f7f6a94a60ed3f19c7842`의 stock 전체 보존은 **2,201 protected/current nodes / items37 PASS**이며, 실제 Git의 최초 source 도입·blob·assertion·append-only prefix·API·ORM까지 원래 검사로 통과했다. 별도 독립 검토에서도 각 후보의 기록과 parent/메시지/source 불변식을 확인했다. 새 source/test 의미가 없으므로 앞선 기능 회귀 증거를 유지하며 게시한 새 PR head의 DCO·전체 필수 checks·Installer는 다시 확인한다. 검사 예외·allowlist·DCO remediation 허용 규칙을 추가하지 않았다.
