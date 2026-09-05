@@ -679,3 +679,8 @@ Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥�
 ### Topic Arc의 진행과 복구
 
 `routines/service/topic_arcs.py`가 토픽 단계 정제·시각 기준·다음 단계·진행 의도·복구 허용·시간 연속성을 판단합니다. `policies/resident_clock.py`는 원래 KST 표현과 UTC 보정만 담당합니다. 서비스에 전달되는 `TopicArcWorkflows`는 기존 텍스트 정제 함수, 마지막 게시 시각, 최근 기억 이벤트의 nullable 조회를 연결합니다. 조회는 기존 분기에서 같은 context/Session으로 호출하며, 날짜만으로 결론을 낼 수 있으면 조회하지 않습니다. 실행부의 `partial`은 실제 서비스 함수에 이 협력을 묶는 구성 코드입니다. 서비스 본문을 전달 함수로 다시 구현하거나 context·ORM 객체를 복제하지 않습니다. 공통 clipping과 Memory 이벤트 조회의 이미 구현된 소유 이전은 부모의 B7 통합에서 연결합니다.
+
+
+### 자율 글쓰기의 주제와 확률
+
+`routines/service/independent_topics.py`는 저장된 persona의 관심 기준·주제 목록·자율 글쓰기 확률을 읽어, 오늘 사용한 주제를 제외하고 같은 실행 id에 같은 선택을 만듭니다. 최근 성공 글의 주제와 오늘 성공 글의 주제를 읽는 실제 SQL은 `repository/independent_topics.py`가 소유합니다. 조회는 원래 caller의 Session으로 수행하며 Character 범위, 성공 상태, 정렬, 개수, 오늘의 시각 경계를 유지합니다. 시각 경계 계산은 `policies/resident_clock.py`, 공통 텍스트 정제는 실행 시 연결되는 같은 함수가 담당합니다.

@@ -1,7 +1,7 @@
 {
-  "edge_count": 2482,
-  "external_import_count": 2336,
-  "module_count": 744,
+  "edge_count": 2489,
+  "external_import_count": 2344,
+  "module_count": 746,
   "modules": [
     {
       "external_imports": [],
@@ -3768,7 +3768,9 @@
     },
     {
       "external_imports": [
+        "collections.abc",
         "datetime",
+        "sqlalchemy.orm",
         "typing"
       ],
       "imports": [
@@ -4091,6 +4093,21 @@
       ],
       "module": "app.domains.routines.repository.feed_cues",
       "path": "backend/app/domains/routines/repository/feed_cues.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "logging",
+        "sqlalchemy"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.planning_context",
+        "app.domains.routines.models.resident",
+        "app.domains.routines.policies.resident_clock"
+      ],
+      "module": "app.domains.routines.repository.independent_topics",
+      "path": "backend/app/domains/routines/repository/independent_topics.py",
       "wildcard_imports": []
     },
     {
@@ -4463,6 +4480,20 @@
       ],
       "module": "app.domains.routines.service.feed_cues",
       "path": "backend/app/domains/routines/service/feed_cues.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "hashlib",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.planning_context",
+        "app.domains.routines.repository.independent_topics"
+      ],
+      "module": "app.domains.routines.service.independent_topics",
+      "path": "backend/app/domains/routines/service/independent_topics.py",
       "wildcard_imports": []
     },
     {
@@ -10738,8 +10769,10 @@
         "app.domains.routines.policies.topic_dates",
         "app.domains.routines.policies.writer_outputs",
         "app.domains.routines.policies.writing_contract",
+        "app.domains.routines.repository.independent_topics",
         "app.domains.routines.repository.public_action_executions",
         "app.domains.routines.schemas.resident_planning",
+        "app.domains.routines.service.independent_topics",
         "app.domains.routines.service.public_action_executions",
         "app.domains.routines.service.topic_arcs",
         "app.domains.social.contracts.subjective_context",

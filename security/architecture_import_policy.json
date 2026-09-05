@@ -1044,6 +1044,7 @@
       "app.domains.routines.repository.activity_counts",
       "app.domains.routines.repository.activity_evidence",
       "app.domains.routines.repository.feed_cues",
+      "app.domains.routines.repository.independent_topics",
       "app.domains.routines.repository.plans",
       "app.domains.routines.repository.public_action_executions",
       "app.domains.routines.repository.run_backoff",
@@ -1069,6 +1070,7 @@
       "app.domains.routines.service.execution.lifecycle",
       "app.domains.routines.service.execution_prompts",
       "app.domains.routines.service.feed_cues",
+      "app.domains.routines.service.independent_topics",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
       "app.domains.routines.service.joint_activity.execution",
@@ -1260,6 +1262,7 @@
       "app.domains.routines.service.execution.lifecycle",
       "app.domains.routines.service.execution_prompts",
       "app.domains.routines.service.feed_cues",
+      "app.domains.routines.service.independent_topics",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
       "app.domains.routines.service.joint_activity.execution",
@@ -2959,6 +2962,22 @@
         "owner_stage": "AR-B4-LG-C",
         "reason": "Existing graph wires actual TopicArc service, unchanged clock and same-Session nullable reads; no duplicate policy.",
         "removal_condition": "Move actual graph/runtime module in LG-C; parent B7 connects its already-owned clipping and event query at this existing binding.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.repository.independent_topics",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing resident execution reads canonical own-topic queries and binds the actual initiative service; no copied decision or new transaction.",
+        "removal_condition": "Move remaining graph workflow into runtime in LG-C and close this exact legacy consumer.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.service.independent_topics",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing resident execution reads canonical own-topic queries and binds the actual initiative service; no copied decision or new transaction.",
+        "removal_condition": "Move remaining graph workflow into runtime in LG-C and close this exact legacy consumer.",
         "review_date": "2026-09-06"
       }
     ]

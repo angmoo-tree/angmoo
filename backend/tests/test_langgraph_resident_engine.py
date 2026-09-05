@@ -6170,7 +6170,7 @@ def test_independent_post_roll_uses_internal_profile_and_deterministic_gate(
         ),
     )
     monkeypatch.setattr(
-        langgraph_resident,
+        langgraph_resident.independent_topic_service,
         "_deterministic_independent_post_roll",
         lambda _ctx: 0.27,
     )
@@ -6247,12 +6247,12 @@ def test_independent_post_roll_excludes_today_used_topics(monkeypatch) -> None:
         ),
     )
     monkeypatch.setattr(
-        langgraph_resident,
+        langgraph_resident.independent_topic_queries,
         "_today_independent_topic_keys",
         lambda _ctx: {"topic_1", "topic_2"},
     )
     monkeypatch.setattr(
-        langgraph_resident,
+        langgraph_resident.independent_topic_service,
         "_deterministic_independent_post_roll",
         lambda _ctx: 0.1,
     )
@@ -6277,7 +6277,7 @@ def test_independent_post_roll_blocks_when_today_topics_exhausted(monkeypatch) -
         ),
     )
     monkeypatch.setattr(
-        langgraph_resident,
+        langgraph_resident.independent_topic_queries,
         "_today_independent_topic_keys",
         lambda _ctx: {f"topic_{index}" for index in range(1, 31)},
     )
@@ -6574,7 +6574,7 @@ def test_mandatory_independent_writing_restores_invalid_topic() -> None:
 def test_action_plan_blocks_independent_topic_used_today(monkeypatch) -> None:
     ctx = _writing_filter_context()
     monkeypatch.setattr(
-        langgraph_resident,
+        langgraph_resident.independent_topic_queries,
         "_today_independent_topic_keys",
         lambda _ctx: {"topic_1"},
     )
@@ -7292,7 +7292,7 @@ def test_run_resident_langgraph_failed_result_includes_independent_roll(
         planner_tendency_profile=_independent_post_profile(probability=0.28),
     )
     monkeypatch.setattr(
-        langgraph_resident,
+        langgraph_resident.independent_topic_service,
         "_deterministic_independent_post_roll",
         lambda _ctx: 0.91,
     )
@@ -7326,7 +7326,7 @@ def test_run_resident_langgraph_recursion_result_includes_independent_roll(
         planner_tendency_profile=_independent_post_profile(probability=0.28),
     )
     monkeypatch.setattr(
-        langgraph_resident,
+        langgraph_resident.independent_topic_service,
         "_deterministic_independent_post_roll",
         lambda _ctx: 0.11,
     )

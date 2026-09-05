@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 from app.domains.routines.constants import APP_TIMEZONE
@@ -63,3 +63,25 @@ def _aware_datetime(value: Any) -> datetime | None:
     if value.tzinfo is None:
         return value.replace(tzinfo=UTC)
     return value.astimezone(UTC)
+
+
+def _today_kst_window(ctx: ResidentClockContext) -> tuple[datetime, datetime]:
+    current_kst = ctx.run_started_at.astimezone(APP_TIMEZONE)
+    start_kst = datetime.combine(
+        current_kst.date(),
+        datetime.min.time(),
+        tzinfo=APP_TIMEZONE,
+    )
+    return start_kst.astimezone(UTC), ctx.run_started_at.astimezone(UTC)
+
+
+def _yesterday_kst_window(ctx: ResidentClockContext) -> tuple[datetime, datetime]:
+    current_kst = ctx.run_started_at.astimezone(APP_TIMEZONE)
+    yesterday = current_kst.date() - timedelta(days=1)
+    start_kst = datetime.combine(
+        yesterday,
+        datetime.min.time(),
+        tzinfo=APP_TIMEZONE,
+    )
+    end_kst = start_kst + timedelta(days=1)
+    return start_kst.astimezone(UTC), end_kst.astimezone(UTC)

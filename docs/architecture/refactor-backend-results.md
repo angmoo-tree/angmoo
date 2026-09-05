@@ -1058,3 +1058,12 @@ TopicArc 실제14함수와 시각5함수·요일상수를 소유 service/policie
 원래 Memory 이벤트 구현/clip은 B7 고정 소스를 부모 통합에서 받아야 하므로 이 작업에 같은 helper 파일을 다시 도입하지 않는다. 현재 기존 함수의 실제 callback만 유지하며 전체 LG-B/LG-C 완료나 부모 도입 ledger 완료를 주장하지 않는다.
 
 LG-B2 최종 고정 후보: **376 passed / 기존 warnings2 / 225.61초**, 원래6보존진단 모두0(protected2139/current2261). 경계744/2482/206legacy, L4 744/14/97, deferred22 PASS. 신규 제품2파일(`service/topic_arcs.py`, `policies/resident_clock.py`)과 신규 테스트1파일, 신규 수집노드4개(동일 Session/order1 + 날짜 admission3)이다. 기존 테스트 본문/assertions/노드 변경0. 부모의 source 최초 도입 ledger 합류 전 stock 전체 완료로 표시하지 않는다.
+
+
+## AR-B4 LG-B3a — 실제 주제 선별·확률과 성공 글 조회
+
+원래 자율 주제/확률8함수·날짜 범위2함수·SQL 조회2함수와 선택 상수2개를 역할별 service/repository/clock으로 옮겼다. 전체14정의 AST는 구조 입력 타입·같은 clip·같은 ORM 객체·직접 repository 경로만 복원하면 동일하다. SQL의 Character id/성공 post 필터, created_at/id 역순, 40/120개 한도와 오늘 현재 시각까지의 포함 경계, 오류시 빈 결과를 유지한다. 조회 함수는 새 commit/flush를 하지 않는다.
+
+기존 monkeypatch 준비7곳만 실제 조회/선별 모듈로 연결하며 assertion·skip 계약과 수집 노드를 바꾸지 않는다. 실제 행위 판단을 옮긴 것이며 전체 ActionPlan/Writer/Graph 전환 완료나 부모 도입 ledger 완료를 뜻하지 않는다.
+
+LG-B3a 최종 후보 검증: **376 passed / 기존 warnings2 / 168.59초**. 원래6보존진단 모두0(protected2139/current2261), 경계746/2489/206legacy, L4 746/14/97, deferred22 PASS. 신규 파일은 실제 `service/independent_topics.py`·`repository/independent_topics.py` 두 개이며 새 수집노드0. 기존 테스트7곳은 monkeypatch 준비 대상만 실제 소유자로 바꾸고 assertion·suppression 전체 동등을 확인했다. 부모의 최초 source 도입 증거 캡처와 다른 owner source 최종 합류는 별도이다.

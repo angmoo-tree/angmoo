@@ -1,4 +1,8 @@
 from __future__ import annotations
+from app.domains.routines.service import independent_topics as independent_topic_service
+from app.domains.routines.repository import independent_topics as independent_topic_queries
+from app.domains.routines.policies.resident_clock import _today_kst_window, _yesterday_kst_window
+from app.domains.routines.service.independent_topics import _INDEPENDENT_TOPIC_PROMPT_COUNT, _INDEPENDENT_TOPIC_SELECTION_SALT
 from functools import partial
 from app.domains.routines.contracts.topic_arcs import TopicArcWorkflows
 from app.domains.routines.service import topic_arcs as topic_arc_service
@@ -184,8 +188,6 @@ _MANDATORY_POST_ALLOWED_SKIP_REASONS = {
     "feed_cue_pending_post_blocked",
 }
 _TOPIC_ARC_LOOKBACK = timedelta(hours=48)
-_INDEPENDENT_TOPIC_PROMPT_COUNT = 10
-_INDEPENDENT_TOPIC_SELECTION_SALT = "independent_topics"
 _INBOX_CONVERSATION_JUDGMENTS = {
     "continue_reply",
     "closing_reply",
@@ -212,6 +214,18 @@ def _clip(value: Any, max_chars: int) -> str:
     if len(text) <= max_chars:
         return text
     return text[: max(0, max_chars - 3)].rstrip() + "..."
+
+
+_planner_tendency_profile = independent_topic_service._planner_tendency_profile
+_feed_seed_interest_criteria = partial(independent_topic_service._feed_seed_interest_criteria, clip=_clip)
+_independent_post_topics = partial(independent_topic_service._independent_post_topics, clip=_clip)
+_select_independent_post_topics_for_tick = independent_topic_service._select_independent_post_topics_for_tick
+_independent_post_initiative = independent_topic_service._independent_post_initiative
+_deterministic_independent_post_roll = independent_topic_service._deterministic_independent_post_roll
+_build_independent_post_roll = partial(independent_topic_service._build_independent_post_roll, clip=_clip)
+_base_independent_topic_candidates = partial(independent_topic_service._base_independent_topic_candidates, clip=_clip)
+_recent_independent_topic_keys = independent_topic_queries._recent_independent_topic_keys
+_today_independent_topic_keys = independent_topic_queries._today_independent_topic_keys
 
 
 _topic_arc_workflows = TopicArcWorkflows(
@@ -630,170 +644,20 @@ def _relationship_candidates_from_daypart_memory(
     return candidates
 
 
-def _planner_tendency_profile(ctx: LangGraphResidentContext) -> dict[str, Any]:
-    profile = getattr(ctx.activity_policy, "planner_tendency_profile", None)
-    return profile if isinstance(profile, dict) else {}
 
 
-def _feed_seed_interest_criteria(ctx: LangGraphResidentContext) -> str:
-    criteria = _planner_tendency_profile(ctx).get("feed_seed_interest_criteria")
-    return _clip(criteria, 1200)
 
 
-def _independent_post_topics(ctx: LangGraphResidentContext) -> list[dict[str, str]]:
-    raw_topics = _planner_tendency_profile(ctx).get("independent_post_topics")
-    if not isinstance(raw_topics, list):
-        return []
-    topics: list[dict[str, str]] = []
-    seen_keys: set[str] = set()
-    for raw in raw_topics:
-        if not isinstance(raw, dict):
-            continue
-        key = str(raw.get("key") or "").strip()
-        label = str(raw.get("label") or "").strip()
-        prompt = str(raw.get("prompt") or "").strip()
-        if not key or not label or not prompt or key in seen_keys:
-            continue
-        seen_keys.add(key)
-        topics.append(
-            {
-                "key": _clip(key, 80),
-                "label": _clip(label, 80),
-                "prompt": _clip(prompt, 300),
-            }
-        )
-    return topics
 
 
-def _recent_independent_topic_keys(
-    ctx: LangGraphResidentContext, *, limit: int = 8
-) -> set[str]:
-    db_scalars = getattr(getattr(ctx, "db", None), "scalars", None)
-    if not callable(db_scalars):
-        return set()
-    try:
-        executions = list(
-            db_scalars(
-                select(models.AgentPublicActionExecution)
-                .where(
-                    models.AgentPublicActionExecution.character_id == ctx.character.id
-                )
-                .where(models.AgentPublicActionExecution.action_type == "post")
-                .where(models.AgentPublicActionExecution.status == "succeeded")
-                .order_by(
-                    models.AgentPublicActionExecution.created_at.desc(),
-                    models.AgentPublicActionExecution.id.desc(),
-                )
-                .limit(40)
-            )
-        )
-    except Exception:
-        logger.debug(
-            "Failed to load recent independent topic keys",
-            exc_info=True,
-            extra={"character_id": ctx.character.id},
-        )
-        return set()
-    keys: list[str] = []
-    for execution in executions:
-        result = getattr(execution, "result", None)
-        if not isinstance(result, dict):
-            continue
-        key = str(result.get("topic_key") or "").strip()
-        if key and key not in keys:
-            keys.append(key)
-        if len(keys) >= limit:
-            break
-    return set(keys)
 
 
-def _today_kst_window(ctx: LangGraphResidentContext) -> tuple[datetime, datetime]:
-    current_kst = ctx.run_started_at.astimezone(agent_activity_policy.APP_TIMEZONE)
-    start_kst = datetime.combine(
-        current_kst.date(),
-        datetime.min.time(),
-        tzinfo=agent_activity_policy.APP_TIMEZONE,
-    )
-    return start_kst.astimezone(UTC), ctx.run_started_at.astimezone(UTC)
 
 
-def _today_independent_topic_keys(ctx: LangGraphResidentContext) -> set[str]:
-    db_scalars = getattr(getattr(ctx, "db", None), "scalars", None)
-    if not callable(db_scalars):
-        return set()
-    start_utc, end_utc = _today_kst_window(ctx)
-    try:
-        executions = list(
-            db_scalars(
-                select(models.AgentPublicActionExecution)
-                .where(
-                    models.AgentPublicActionExecution.character_id == ctx.character.id
-                )
-                .where(models.AgentPublicActionExecution.action_type == "post")
-                .where(models.AgentPublicActionExecution.status == "succeeded")
-                .where(models.AgentPublicActionExecution.created_at >= start_utc)
-                .where(models.AgentPublicActionExecution.created_at <= end_utc)
-                .order_by(
-                    models.AgentPublicActionExecution.created_at.desc(),
-                    models.AgentPublicActionExecution.id.desc(),
-                )
-                .limit(120)
-            )
-        )
-    except Exception:
-        logger.debug(
-            "Failed to load today independent topic keys",
-            exc_info=True,
-            extra={"character_id": ctx.character.id},
-        )
-        return set()
-    keys: set[str] = set()
-    for execution in executions:
-        result = getattr(execution, "result", None)
-        if not isinstance(result, dict):
-            continue
-        key = str(result.get("topic_key") or "").strip()
-        if key:
-            keys.add(key)
-    return keys
 
 
-def _select_independent_post_topics_for_tick(
-    ctx: LangGraphResidentContext, topics: list[dict[str, str]]
-) -> list[dict[str, str]]:
-    if len(topics) <= _INDEPENDENT_TOPIC_PROMPT_COUNT:
-        return list(topics)
-    recent_topic_keys = _recent_independent_topic_keys(ctx)
-    decorated: list[tuple[int, str, int, dict[str, str]]] = []
-    for index, topic in enumerate(topics):
-        key = str(topic.get("key") or "").strip()
-        digest = hashlib.sha256(
-            (
-                f"{ctx.run_id}:{ctx.character.id}:"
-                f"{_INDEPENDENT_TOPIC_SELECTION_SALT}:{key}:{index}"
-            ).encode("utf-8")
-        ).hexdigest()
-        recent_rank = 1 if key in recent_topic_keys else 0
-        decorated.append((recent_rank, digest, index, topic))
-    decorated.sort()
-    return [
-        topic
-        for _recent_rank, _digest, _index, topic in decorated[
-            :_INDEPENDENT_TOPIC_PROMPT_COUNT
-        ]
-    ]
 
 
-def _yesterday_kst_window(ctx: LangGraphResidentContext) -> tuple[datetime, datetime]:
-    current_kst = ctx.run_started_at.astimezone(agent_activity_policy.APP_TIMEZONE)
-    yesterday = current_kst.date() - timedelta(days=1)
-    start_kst = datetime.combine(
-        yesterday,
-        datetime.min.time(),
-        tzinfo=agent_activity_policy.APP_TIMEZONE,
-    )
-    end_kst = start_kst + timedelta(days=1)
-    return start_kst.astimezone(UTC), end_kst.astimezone(UTC)
 
 
 def _today_own_root_posts_for_coverage(
@@ -1027,87 +891,10 @@ def _yesterday_handoff_context(ctx: LangGraphResidentContext) -> list[dict[str, 
     return items
 
 
-def _independent_post_initiative(
-    ctx: LangGraphResidentContext,
-) -> dict[str, str | float] | None:
-    profile = _planner_tendency_profile(ctx)
-    raw = profile.get("independent_post_initiative")
-    if not isinstance(raw, dict):
-        return None
-    level = str(raw.get("level") or "").strip()
-    if level not in {"very_low", "low", "medium", "high", "very_high"}:
-        return None
-    try:
-        probability = float(raw.get("tick_probability"))
-    except (TypeError, ValueError):
-        return None
-    probability = max(0.0, min(probability, 0.45))
-    return {"level": level, "tick_probability": round(probability, 4)}
 
 
-def _deterministic_independent_post_roll(ctx: LangGraphResidentContext) -> float:
-    digest = hashlib.sha256(
-        f"{ctx.run_id}:{ctx.character.id}:independent_post".encode("utf-8")
-    ).digest()
-    return round(int.from_bytes(digest[:8], "big") / float(2**64 - 1), 6)
 
 
-def _build_independent_post_roll(
-    ctx: LangGraphResidentContext,
-) -> dict[str, Any]:
-    initiative = _independent_post_initiative(ctx)
-    all_topics = _independent_post_topics(ctx)
-    used_topic_keys_today = _today_independent_topic_keys(ctx)
-    topics = [
-        topic
-        for topic in all_topics
-        if str(topic.get("key") or "").strip() not in used_topic_keys_today
-    ]
-    allowed = "post" in set(ctx.activity_policy.allowed_actions)
-    result: dict[str, Any] = {
-        "available": False,
-        "level": initiative.get("level") if initiative else None,
-        "tick_probability": (
-            initiative.get("tick_probability") if initiative else None
-        ),
-        "roll": None,
-        "passed": False,
-        "topics": [],
-        "topic_pool_size": len(all_topics),
-        "topic_prompt_count": 0,
-        "used_topic_keys_today": sorted(used_topic_keys_today),
-        "available_topic_count_after_today_filter": len(topics),
-        "blocked_reason": None,
-    }
-    if initiative is None:
-        result["blocked_reason"] = "planner_tendency_profile_missing"
-        return result
-    if not allowed:
-        result["blocked_reason"] = "post_not_allowed"
-        return result
-    if not all_topics:
-        result["blocked_reason"] = "independent_post_topics_missing"
-        return result
-    if not topics:
-        result["blocked_reason"] = "independent_topics_exhausted_today"
-        return result
-    roll = _deterministic_independent_post_roll(ctx)
-    probability = float(initiative["tick_probability"])
-    passed = roll <= probability
-    selected_topics = (
-        _select_independent_post_topics_for_tick(ctx, topics) if passed else []
-    )
-    result.update(
-        {
-            "available": True,
-            "roll": roll,
-            "passed": passed,
-            "topics": selected_topics,
-            "topic_prompt_count": len(selected_topics),
-            "blocked_reason": None if passed else "roll_failed",
-        }
-    )
-    return result
 
 
 def _recent_own_root_posts(ctx: LangGraphResidentContext) -> list[dict[str, Any]]:
@@ -1337,7 +1124,7 @@ def _current_daypart_context(ctx: LangGraphResidentContext) -> dict[str, Any]:
         "recent_events": history[-20:],
         "seen_feed_post_ids": sorted(_seen_daypart_feed_post_ids(ctx)),
         "seen_notification_ids": sorted(_seen_daypart_notification_ids(ctx)),
-        "used_topic_keys_today": sorted(_today_independent_topic_keys(ctx)),
+        "used_topic_keys_today": sorted(independent_topic_queries._today_independent_topic_keys(ctx)),
     }
 
 
@@ -1781,15 +1568,6 @@ def _record_feed_seed_selected(
     )
 
 
-def _base_independent_topic_candidates(ctx: LangGraphResidentContext) -> list[dict[str, Any]]:
-    all_topics = _independent_post_topics(ctx)
-    used = _today_independent_topic_keys(ctx)
-    topics = [
-        topic
-        for topic in all_topics
-        if str(topic.get("key") or "").strip() not in used
-    ]
-    return _select_independent_post_topics_for_tick(ctx, topics) if topics else []
 
 
 def _mandatory_post_context(
@@ -4012,7 +3790,7 @@ def _filter_action_plan(
         valid_topic_keys = set(ordered_topic_keys)
 
         def _fallback_topic_key() -> str | None:
-            used_today = _today_independent_topic_keys(ctx)
+            used_today = independent_topic_queries._today_independent_topic_keys(ctx)
             for candidate in ordered_topic_keys:
                 if candidate not in used_today:
                     return candidate
@@ -4076,7 +3854,7 @@ def _filter_action_plan(
         else:
             writing = dict(writing)
             topic_key = str(writing.get("topic_key") or "").strip()
-            if topic_key in _today_independent_topic_keys(ctx):
+            if topic_key in independent_topic_queries._today_independent_topic_keys(ctx):
                 fallback_key = _fallback_topic_key()
                 if mandatory_root_post and fallback_key:
                     writing["topic_key"] = fallback_key
@@ -6197,7 +5975,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
             "topic_prompt_count": len(
                 mandatory_context.get("base_topic_candidates") or []
             ),
-            "used_topic_keys_today": sorted(_today_independent_topic_keys(ctx)),
+            "used_topic_keys_today": sorted(independent_topic_queries._today_independent_topic_keys(ctx)),
             "blocked_reason": mandatory_context.get("blocked_reason"),
             "mandatory": True,
         }
