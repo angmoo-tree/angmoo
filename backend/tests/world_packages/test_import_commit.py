@@ -65,7 +65,7 @@ from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )
 from app.runtime.search import CallbackSearchIndexAdapter
-from app.services import agent_activity_policy
+from app.domains.routines.contracts import activity_policy as agent_activity_policy
 from app.runtime.characters import management as agent_service
 from app.services import langgraph_resident
 from app.services import (
@@ -73,7 +73,7 @@ from app.services import (
     world_character_provider,
 )
 from app.domains.world_characters.service import autonomous_setup as world_character_setup
-from app.services.resident_contracts import LangGraphResidentContext
+from app.runtime.resident.context import LangGraphResidentContext
 from app.services.world_feed_runtime import run_world_keyword_feed
 
 

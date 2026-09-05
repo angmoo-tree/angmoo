@@ -31,16 +31,10 @@
       "removal_condition": "Move active-hour policy behind the activities domain public API."
     },
     {
-      "disposition": "migrate",
-      "module": "app.core.agent_activity_schedule",
-      "owner_stage": "L4",
-      "removal_condition": "Move autonomous tick scheduling behind the runtime domain public API."
-    },
-    {
-      "disposition": "migrate",
-      "module": "app.core.agent_activity_limits",
-      "owner_stage": "L2",
-      "removal_condition": "Move scheduler and resident quota policy behind runtime public ports."
+      "disposition": "keep",
+      "module": "app.core.context_text",
+      "owner_stage": "AR-B4",
+      "removal_condition": null
     },
     {
       "disposition": "keep",

@@ -14,18 +14,18 @@ from app.domains.relationships.infrastructure.sqlalchemy_social_models import (
     SocialEvent,
     SocialEventEvidence,
 )
-from app.domains.social.infrastructure.sqlalchemy_subjective_context_models import (
+from app.domains.social.models.subjective_context import (
     SocialActionSubjectiveContext,
 )
 from app.domains.worlds.models import World
 from app.runtime.social.sqlalchemy_read_repository import (
     social_persistence_models as models,
 )
-from app.domains.social.domain.subjective_context import (
+from app.domains.social.contracts.subjective_context import (
     ActionEmotionLabel, ActionMotivationKind, ActionSubjectiveContextV1,
     SubjectiveContextProvenance,
 )
-from app.domains.social.domain.today_activity import (
+from app.domains.social.contracts.today_activity import (
     TodaySocialActivityKind, TodaySocialActivityRead, TodaySocialActivityRecord,
     TodaySocialCoverageStatus, TodaySocialSubjectiveRecord,
 )

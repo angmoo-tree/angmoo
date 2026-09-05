@@ -1,1 +1,1 @@
-"""Social service responsibilities."""
+"""Social business services and owned media storage."""

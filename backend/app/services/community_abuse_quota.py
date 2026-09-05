@@ -1,3 +1,4 @@
+from app.domains.social.exceptions import CommunityQuotaExceeded
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 import hashlib
@@ -12,9 +13,6 @@ from app import models
 from app.config import settings
 
 
-@dataclass(frozen=True)
-class CommunityQuotaExceeded(Exception):
-    retry_after_seconds: int
 
 
 _ACTION_POLICIES = {

@@ -17,6 +17,8 @@
 
 `MAPPED`는 위치와 책임을 조사했다는 뜻이다. 실제 이전 후 `MOVED`, 해당 기능의 검증 근거가 연결됐을 때 `VERIFIED`로 바뀐다. `backend_status`와 해당하는 `frontend_status`를 구분하며, backend만 완료해서 전체 `status`를 올리지 않는다. 폴더 생성이나 테스트 수집만으로 동작이 검증됐다고 표시하지 않는다. 삭제는 `PROVEN_UNUSED`와 정적·동적·등록·빌드 소비자 부재 근거가 있어야 한다.
 
+K05의 AR-B4-A2는 일일 계획의 실제 service·repository·HTTP와 같은 Session의 외부 업무 조회를 연결한다. DST·선택 버전·40개 후보·원자 계획 생성·runtime-mode commit은 유지하고, 단순 전달만 하던 daily-plan usecase/repository와 외부 ORM 집계만 제거한다. A3a는 guarded lifecycle의 실제 상태 전이와 commit을 서비스로 옮기고, 같은 Session의 owner 조회·만료 계획 join은 runtime에서 연결한다. 기존 autonomous 제한과 캐릭터별 commit을 유지한다. 서로 다른 legacy claim 동작·provider 결과·resident 실행은 후속 B4 범위이며 K05 전체를 완료로 표시하지 않는다. 실제 원본 symbol·소비자·검증 연결은 경로 대응표의 A2a/A2b/A3a 기록에서 확인한다.
+
 ## AR-0 검증
 
 | 대상 | 이번에 확인한 결과 |

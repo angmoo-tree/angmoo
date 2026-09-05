@@ -2404,6 +2404,1528 @@
       "test_suppressions": {
         "tests/media/test_azure_translation.py": {}
       }
+    },
+    {
+      "commit": "869bae55a2e5e665fb731396a7284b53dde8a104",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): establish schemas models and pure activity roles",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/__init__.py": "fa4662dfc7a42fcf25a433e0f82f453daff4e723",
+        "backend/app/domains/routines/exceptions.py": "f41b98e78c5d381f10a9ee4ea42d467a5b79c930",
+        "backend/app/domains/routines/policies/__init__.py": "dea1e54752c26cd3ac39276b4d3b2aa3791d0499",
+        "backend/app/domains/routines/service/__init__.py": "06d8dadc6fb119ce563ff4f018841544c2d72cf5",
+        "backend/app/domains/routines/service/scheduling.py": "34d8468bdae3fe9e48f8ee0bfa60f1cff92b505d",
+        "backend/app/domains/routines/utils/__init__.py": "8e66027f7862e68de82ee77f5b85b37b1dffe4f2",
+        "backend/tests/routines/__init__.py": "1d7497844e229ea93f6d3992adbe2cc8923f0324",
+        "backend/app/domains/routines/models.py": "374c88a0454c5666b8581ca0012b578ef3f43c28",
+        "backend/app/domains/routines/schemas.py": "fe93c7f27a5499651bb7b0230a9071dcae5c2aea"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "b8757f38190c46e49fffd338cc938bf1ab00ff96",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): separate plan decisions and joint reservation ownership",
+      "tracked_files": {
+        "backend/app/domains/routines/constants.py": "a36bd538b28546a3aee7d636ee1e77f71b1f25e2",
+        "backend/app/domains/routines/policies/planning.py": "1d3d700eec630975b2c03dd3ec4ea00c846ada21"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "2b57e7e1c1e84903b1286dbcb9d5e91b1d110303",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own daily plan service and shared-session references",
+      "tracked_files": {
+        "backend/app/domains/routines/dependencies.py": "b98afee2907c3293f8b0c144bff6565e8cc53013",
+        "backend/app/domains/routines/repository/__init__.py": "999145dab491fcb777264527a1cd8d4eb038b47e",
+        "backend/app/domains/routines/repository/plans.py": "4be60796bdd3ac497926a18429b37b260e3a05be",
+        "backend/app/domains/routines/router.py": "b12baa8ae8b48dd795896f14f4678a6f55c3a8b8",
+        "backend/app/runtime/routines/__init__.py": "84b4ba9b9dde58a65d0e1b5c4d5c17710b440ae4",
+        "backend/app/runtime/routines/composition.py": "71ed5b965d9e9275f981f3937262973c18d59e7a",
+        "backend/tests/routines/test_plan_composition.py": "6f716db46d3195aa7220a81c94ea286c6f2c9a9f"
+      },
+      "test_nodes": [
+        "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction[commit]",
+        "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction[rollback]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_plan_composition.py": {
+          "test_mode_change_and_pending_owner_write_share_one_transaction": [
+            "assert write_sessions == [db]",
+            "assert commits == [True]",
+            "pytest.raises(RuntimeError, match='test_commit_failure')",
+            "assert fixture.world_character.activity_runtime_mode == previous_mode",
+            "assert fixture.world_character.version == previous_version",
+            "assert fixture.user.display_name == previous_name",
+            "assert result.activity_runtime_mode == 'routine_resident_v1'",
+            "assert result.autonomous_enabled is False",
+            "assert saved_character is not None",
+            "assert saved_user is not None",
+            "assert saved_character.activity_runtime_mode == (previous_mode if fail_commit else 'routine_resident_v1')",
+            "assert saved_character.version == previous_version + (0 if fail_commit else 1)",
+            "assert saved_character.autonomous_enabled is False",
+            "assert saved_user.display_name == (previous_name if fail_commit else 'Changed in the same request')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_plan_composition.py": {}
+      }
+    },
+    {
+      "commit": "ef60484058b2aa945854154db935ec73b33770f7",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: fix(routines): recover expired claims using consumption owner",
+      "tracked_files": {
+        "backend/tests/routines/test_guarded_claim_recovery.py": "c9737bb07df80169cfcbff7906f6aa6517d6a52d"
+      },
+      "test_nodes": [
+        "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission[autonomous]",
+        "tests/routines/test_guarded_claim_recovery.py::test_guarded_recovery_uses_consumption_owner_and_preserves_admission[owner-controlled]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_guarded_claim_recovery.py": {
+          "test_guarded_recovery_uses_consumption_owner_and_preserves_admission": [
+            "assert other is not None",
+            "assert episode is not None",
+            "assert saved is not None",
+            "assert saved_beat is not None",
+            "assert saved.status == ('claimed' if owner_controlled else 'released')",
+            "assert saved.version == previous_version + (0 if owner_controlled else 1)",
+            "assert saved.claim_run_id == ('guarded-run' if owner_controlled else None)",
+            "assert (saved.claim_expires_at is not None) is owner_controlled",
+            "assert saved.target_activity_beat_id == (beat_id if owner_controlled else None)",
+            "assert saved_beat.status == 'claimed'",
+            "assert saved_beat.claim_run_id == 'guarded-run'",
+            "assert observer.scalar(select(func.count(models.Post.id))) == 0",
+            "assert observer.scalar(select(func.count(models.AgentRun.id))) == 0",
+            "assert observer.scalar(select(func.count(models.SocialEvent.id))) == 1",
+            "pytest.raises(routines.ActivityRuntimeValidationError, match='owner_controlled_automation_disabled')",
+            "assert recover() == routines.RecoveryCounts(beats=0, consumptions=1)",
+            "assert recover() == routines.RecoveryCounts(beats=0, consumptions=0)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_guarded_claim_recovery.py": {}
+      }
+    },
+    {
+      "commit": "06992f7032e9487d72876c3a108aef5081112e14",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own guarded lifecycle and session references",
+      "tracked_files": {
+        "backend/app/runtime/routines/lifecycle_references.py": "bc5bcc47b4a50b6daaecf341bf06c00ddf60abe1",
+        "backend/tests/routines/test_lifecycle_composition.py": "9b6c3763fc30be107b7387fef732daff1282615a"
+      },
+      "test_nodes": [
+        "tests/routines/test_lifecycle_composition.py::test_elapsed_owner_join_observes_pending_state_without_committing",
+        "tests/routines/test_lifecycle_composition.py::test_reconcile_preserves_each_character_commit_when_later_scope_fails"
+      ],
+      "test_assertions": {
+        "tests/routines/test_lifecycle_composition.py": {
+          "engine": [],
+          "test_elapsed_owner_join_observes_pending_state_without_committing": [
+            "assert second is not None",
+            "assert ids == [first.world_character.id]",
+            "assert len(selects) == 1",
+            "assert commits == []",
+            "assert second.world_character.control_mode == 'autonomous'",
+            "assert set(references.elapsed_autonomous_world_character_ids(now=after_dawn)) == {first.world_character.id, second.world_character.id}"
+          ],
+          "test_reconcile_preserves_each_character_commit_when_later_scope_fails": [
+            "assert second is not None",
+            "assert second_item.episode is not None",
+            "assert missing is not None",
+            "pytest.raises(ActivityRuntimeValidationError, match='activity_episode_missing')",
+            "assert commits == [True]",
+            "assert first_saved is not None",
+            "assert second_saved is not None",
+            "assert first_saved.status == 'skipped'",
+            "assert first_saved.terminal_reason_code == 'daypart_window_elapsed'",
+            "assert second_saved.status == 'planned'",
+            "assert second_saved.terminal_reason_code is None",
+            "assert observer.scalar(select(models.ActivityBeat.id).limit(1)) is None",
+            "assert set(actual) == {first.world_character.id, second.world_character.id}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_lifecycle_composition.py": {}
+      }
+    },
+    {
+      "commit": "f54d677a548a8026d3c392f9ae58dee6a1644523",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own execution claims and publication state",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/activity.py": "e123e25212e3d998a32c470e0ee6e9f0fee56c93",
+        "backend/app/domains/routines/service/execution/claims.py": "63a24a791140d6ae0125e825d11778e948fe32ae",
+        "backend/app/domains/routines/service/execution/lifecycle.py": "e396fece12f3562941e739d69e919f6c1ab1e123",
+        "backend/app/runtime/routines/activity_references.py": "ea22e1b77f774673da4cff5f08afe8567da96eb1",
+        "backend/tests/routines/test_execution_composition.py": "919abe965560e595d78b088448d5c0e6f4c24586"
+      },
+      "test_nodes": [
+        "tests/routines/test_execution_composition.py::test_pending_post_and_beat_completion_share_caller_transaction[commit]",
+        "tests/routines/test_execution_composition.py::test_pending_post_and_beat_completion_share_caller_transaction[rollback]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_execution_composition.py": {
+          "test_pending_post_and_beat_completion_share_caller_transaction": [
+            "assert episode is not None",
+            "assert result is claim.row",
+            "assert result.status == 'succeeded'",
+            "assert reads == ['post', 'world_character']",
+            "assert commits == []",
+            "assert saved is not None",
+            "assert saved_episode is not None",
+            "assert observer.get(Post, post.id) is None",
+            "assert observer.get(models.ActivityBeat, beat_id).status == 'claimed'",
+            "assert commits == [True]",
+            "assert commits == []",
+            "assert observer.get(Post, 'pending-completion-post') is not None",
+            "assert saved.status == 'succeeded'",
+            "assert saved.source_post_id == 'pending-completion-post'",
+            "assert saved_episode.last_successful_beat_id == beat_id",
+            "assert saved_episode.next_sequence_no == 2",
+            "assert observer.get(Post, 'pending-completion-post') is None",
+            "assert saved.status == 'claimed'",
+            "assert saved.source_post_id is None",
+            "assert saved_episode.last_successful_beat_id is None",
+            "assert saved_episode.next_sequence_no == 1",
+            "assert result is post",
+            "assert result in db",
+            "assert result is fixture.world_character",
+            "assert result in db",
+            "assert lock_for_update is False"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_execution_composition.py": {}
+      }
+    },
+    {
+      "commit": "a01dc7503923a5bdbaf2d3ddf31ce334664056fa",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(social): establish owned model and value contracts",
+      "tracked_files": {
+        "backend/app/domains/social/models/__init__.py": "433fb01d38c615945ac1416bb620a14d94ece54b",
+        "backend/app/domains/social/schemas/__init__.py": "9770fa132d24fb1794e935423a034774ae205874",
+        "backend/tests/social/test_foundation_contracts.py": "1603aeea21f3a7f732a211438a78374ac2d5a73f"
+      },
+      "test_nodes": [
+        "tests/social/test_foundation_contracts.py::test_all_social_models_share_registered_metadata_and_original_tables",
+        "tests/social/test_foundation_contracts.py::test_frozen_subjective_migration_and_public_values_keep_single_definitions"
+      ],
+      "test_assertions": {
+        "tests/social/test_foundation_contracts.py": {
+          "test_all_social_models_share_registered_metadata_and_original_tables": [
+            "assert posts.Post.comments.property.mapper.class_ is posts.Comment",
+            "assert posts.Post.likes.property.mapper.class_ is posts.PostLike",
+            "assert posts.Post.media.property.mapper.class_ is posts.PostMedia",
+            "assert posts.Post.repost_events.property.mapper.class_ is posts.PostRepost",
+            "assert getattr(registered, name) is model",
+            "assert model.metadata is Base.metadata",
+            "assert Base.metadata.tables[model.__tablename__] is model.__table__",
+            "assert model.__module__ == module.__name__"
+          ],
+          "test_frozen_subjective_migration_and_public_values_keep_single_definitions": [
+            "assert historical.SocialActionSubjectiveContext is context_models.SocialActionSubjectiveContext",
+            "assert historical.create_subjective_context_schema is context_models.create_subjective_context_schema",
+            "assert historical.drop_subjective_context_schema is context_models.drop_subjective_context_schema",
+            "assert historical.SUBJECTIVE_CONTEXT_SCHEMA_TABLES == ('social_action_subjective_contexts',)",
+            "assert public.ActionSubjectiveContextV1 is subjective_context.ActionSubjectiveContextV1",
+            "assert public.SubjectiveContextContractError is subjective_context.SubjectiveContextContractError",
+            "assert public.TodaySocialActivityRead is today_activity.TodaySocialActivityRead",
+            "assert public.OwnerPostCommand is writes.OwnerPostCommand",
+            "assert public.SocialWriteError is writes.SocialWriteError"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_foundation_contracts.py": {}
+      }
+    },
+    {
+      "commit": "c9bc21e03e6aeefcf2cad77d5ff17d57ac5451c8",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(social): own SQL repositories notification rules and request schemas",
+      "tracked_files": {
+        "backend/app/domains/social/repository/__init__.py": "8b1eb9b96196f908c175e539f60c50768424b756",
+        "backend/app/domains/social/repository/inbox.py": "c7512c19d03ddfe040874b5783487aac7e3fe457",
+        "backend/app/domains/social/repository/media.py": "b4d3b3ec3e32b154bad17d815d062e2edae6140d",
+        "backend/app/domains/social/repository/posts.py": "3fe1b7cfd0d62c1ba6c90bb1f4eceef8da284357",
+        "backend/app/domains/social/repository/profiles.py": "f27fc446cae12bc83b8a46f946dc1a691b563e40",
+        "backend/app/domains/social/service/notifications.py": "698549c5c620a4040705ae65b18f1f3b5d1a1073",
+        "backend/app/domains/social/utils/__init__.py": "dd54c559ba585ba99b18d2d5bfc25ffc3ea18523",
+        "backend/app/domains/social/utils/cursors.py": "10fa2a22923c31d844b0ce5e035a1cc680336fad",
+        "backend/app/domains/social/utils/text.py": "18d72eb4137b2b60ad3a77603b6298392e0169ff"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "747861c258c2d8e692d81db34313a621154b7e88",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(social): own post reads and response presentation",
+      "tracked_files": {
+        "backend/app/domains/identity/service/profile.py": "7cab89d91c9284a212c1cdca4a8a0a80e60cad00",
+        "backend/app/domains/social/constants.py": "73113f8ae47bde46533fc8738b91ef81c402c5b9",
+        "backend/app/domains/social/exceptions.py": "338dc5e41725bfab0dd30ee2962008f93ade9084",
+        "backend/app/domains/social/service/posts.py": "34b72ed8000fc019230cf480116fbf4341e4dd15",
+        "backend/app/domains/social/service/presentation.py": "3769929c5254276ea6d685660089eb50e2db8314",
+        "backend/app/domains/social/service/visibility.py": "86a9b7ca32378d928f2d34d42799902f303faba1",
+        "backend/tests/social/test_identity_read_collaboration.py": "b2d1af69f2717b32ed48d946c493e3fd34afdce2"
+      },
+      "test_nodes": [
+        "tests/social/test_identity_read_collaboration.py::test_mentions_use_one_owned_query_and_keep_input_order_and_visibility",
+        "tests/social/test_identity_read_collaboration.py::test_user_lookup_preserves_nullable_same_session_unflushed_identity"
+      ],
+      "test_assertions": {
+        "tests/social/test_identity_read_collaboration.py": {
+          "_user": [],
+          "test_mentions_use_one_owned_query_and_keep_input_order_and_visibility": [
+            "assert [item.handle for item in mentions] == ['beta', 'alpha']",
+            "assert [item.character_id for item in mentions] == ['beta', 'alpha']",
+            "assert len(statements) == 1",
+            "assert 'characters.deleted_at IS NULL' in statements[0]",
+            "assert 'characters.moderation_status' in statements[0]",
+            "assert _mentioned_characters_for_texts(db, 'no mentions here', None) == []",
+            "assert len(statements) == 1",
+            "assert not db.new and (not db.dirty) and (not db.deleted)"
+          ],
+          "test_user_lookup_preserves_nullable_same_session_unflushed_identity": [
+            "assert get_user(db, user.id) is user",
+            "assert get_user(db, user.id).display_name == 'Unflushed local change'",
+            "assert get_user(db, 'missing-owner') is None",
+            "assert events == []",
+            "assert get_user(db, user.id).display_name == 'Owner'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_identity_read_collaboration.py": {}
+      }
+    },
+    {
+      "commit": "1e642e4b1d93c19a3a1115facdbcc596fd7c485e",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(social): own staged joint post link assignments",
+      "tracked_files": {
+        "backend/app/domains/social/service/joint_posts.py": "5ceade197fee3918500f9c54e3ab1a47ac2ec74c",
+        "backend/tests/social/test_joint_post_links.py": "a533637f557dac76289d562f6c666cfa3508fa9f"
+      },
+      "test_nodes": [
+        "tests/social/test_joint_post_links.py::test_joint_links_keep_assignment_stages_and_caller_rollback"
+      ],
+      "test_assertions": {
+        "tests/social/test_joint_post_links.py": {
+          "test_joint_links_keep_assignment_stages_and_caller_rollback": [
+            "assert post.joint_activity_id == 'joint-1'",
+            "assert post.opening_post_id is None",
+            "assert events == []",
+            "assert post.opening_post_id == 'opening-1'",
+            "assert events == []",
+            "assert post in db.dirty",
+            "assert post.joint_activity_id is None",
+            "assert post.opening_post_id is None",
+            "assert events == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_joint_post_links.py": {}
+      }
+    },
+    {
+      "commit": "e3d31c87158f9cfb2b2e46147b784d6efd2c5cd5",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(social): own joint notification admission and persistence",
+      "tracked_files": {
+        "backend/tests/social/test_joint_notifications.py": "cbca4ba1283da0d53a881f4eb22b50b1b3940c52"
+      },
+      "test_nodes": [
+        "tests/social/test_joint_notifications.py::test_joint_notification_keeps_exact_dedupe_payload_and_caller_write_boundary"
+      ],
+      "test_assertions": {
+        "tests/social/test_joint_notifications.py": {
+          "test_joint_notification_keeps_exact_dedupe_payload_and_caller_write_boundary": [
+            "assert changes == []",
+            "assert len(db.new) == 1",
+            "assert notification.notification_type == 'joint_activity_started'",
+            "assert notification.world_id == 'world-1'",
+            "assert notification.recipient_world_character_id == 'wc-recipient'",
+            "assert notification.actor_world_character_id == 'wc-actor'",
+            "assert notification.recipient_character_id == 'character-recipient'",
+            "assert notification.actor_character_id == 'character-actor'",
+            "assert notification.source_social_event_id == 'event-1'",
+            "assert notification.source_joint_activity_id == 'joint-1'",
+            "assert notification.post_id == notification.source_post_id == 'opening-1'",
+            "assert notification.data == '{\"joint_activity_id\":\"joint-1\",\"opening_post_id\":\"opening-1\"}'",
+            "assert changes == ['flush']",
+            "assert changes == ['flush']",
+            "assert not db.new",
+            "assert db.scalars(select(Notification)).all() == [notification]",
+            "assert notification.source_social_event_id == 'event-1'",
+            "assert len(db.new) == 1",
+            "assert changes == ['flush']",
+            "assert db.scalars(select(Notification)).all() == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_joint_notifications.py": {}
+      }
+    },
+    {
+      "commit": "8eae9e7666daa722185bf2c19f126a43fb74e11e",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own joint planning and publication lifecycle",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/joint_activity.py": "012e7953c98bc5dc02d9281aa1e7b6f5eb443251",
+        "backend/app/domains/routines/service/joint_activity/eligibility.py": "84e7ad802165859e2380f0cca56253a3165666ae",
+        "backend/app/domains/routines/service/joint_activity/execution.py": "3eefde4a44112908e4b51b2e7026e065b86d41a1",
+        "backend/app/domains/routines/service/joint_activity/planning.py": "d0d3ecf9c071102740bfe2ce7c65a8d10a22055b",
+        "backend/app/runtime/routines/joint_references.py": "72dd5bd38dc362d06d4daf091f39da3f893e14d4",
+        "backend/tests/routines/test_joint_composition.py": "f761b8bc4a1d4899950819fe0b9c6fc73df9daa9"
+      },
+      "test_nodes": [
+        "tests/routines/test_joint_composition.py::test_opening_post_event_notification_and_participants_share_one_transaction[commit]",
+        "tests/routines/test_joint_composition.py::test_opening_post_event_notification_and_participants_share_one_transaction[rollback]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_joint_composition.py": {
+          "test_opening_post_event_notification_and_participants_share_one_transaction": [
+            "assert started is not None and started in db",
+            "assert operations == ['joint-link', 'opening-link', 'started-event', fixture.acceptor.world_character.id, fixture.proposer.world_character.id, 'notification']",
+            "assert commits == []",
+            "assert len(participants) == 2",
+            "assert {row.participation_status for row in participants} == {expected}",
+            "assert {observer.get(models.ActivityEpisode, row.linked_activity_episode_id).status for row in participants} == {'active' if outcome == 'commit' else 'planned'}",
+            "assert {observer.get(models.DailyActivityPlanItem, row.linked_daily_activity_plan_item_id).status for row in participants} == {'active' if outcome == 'commit' else 'planned'}",
+            "assert joint.status == ('active' if outcome == 'commit' else 'ready')",
+            "assert (observer.get(models.SocialEvent, started_id) is not None) == (outcome == 'commit')",
+            "assert (observer.get(models.SocialEvent, post_event_id) is not None) == (outcome == 'commit')",
+            "assert observer.scalar(select(func.count(models.Notification.id))) == (1 if outcome == 'commit' else 0)",
+            "assert observer.get(models.Post, post.id) is None",
+            "assert observer.get(models.JointActivity, joint_id).status == 'ready'",
+            "assert observer.scalar(select(func.count(models.Notification.id))) == 0",
+            "assert observer.get(models.SocialEvent, started.id) is None",
+            "assert commits == [True]",
+            "assert commits == []",
+            "assert saved_post.joint_activity_id == joint_id",
+            "assert saved_post.opening_post_id == saved_post.id == joint.opening_post_id",
+            "assert saved_post is None and joint.opening_post_id is None",
+            "assert value is post and value in db",
+            "assert value.opening_post_id is None",
+            "assert value is post and value.joint_activity_id == joint_id",
+            "assert kwargs['joint'] is fixture.joint",
+            "assert kwargs['post'] is post",
+            "assert kwargs['post_event'] is post_event",
+            "assert result in db",
+            "assert kwargs['post_id'] == post.id"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_joint_composition.py": {}
+      }
+    },
+    {
+      "commit": "712a2d3e79d202699994d5e18a9ad7eba53422f5",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(social): own source reaction and follow persistence",
+      "tracked_files": {
+        "backend/app/domains/social/contracts/actors.py": "4360ef56de7368ab551e8415a10236ea80cb26b2",
+        "backend/app/domains/social/repository/reactions.py": "7583f6d769c28fdcab455ea04291ecac2ef89b15",
+        "backend/app/domains/social/service/source_posts.py": "3bfa352f3c61a979524cbc695ed7da5c23d9faf9",
+        "backend/tests/social/test_source_write_boundaries.py": "0a6d6a80709fcb369580ea57668ca66aeb80a0e5"
+      },
+      "test_nodes": [
+        "tests/social/test_source_write_boundaries.py::test_follow_values_dedupe_without_foreign_queries_and_keep_caller_rollback",
+        "tests/social/test_source_write_boundaries.py::test_legacy_comment_retains_its_original_explicit_commit_boundary",
+        "tests/social/test_source_write_boundaries.py::test_source_and_reactions_use_actor_values_and_keep_deferred_transaction"
+      ],
+      "test_assertions": {
+        "tests/social/test_source_write_boundaries.py": {
+          "test_source_and_reactions_use_actor_values_and_keep_deferred_transaction": [
+            "assert db.scalar(select(func.count(models.Post.id))) == 0",
+            "assert db.scalar(select(func.count(models.PostLike.id))) == 0",
+            "assert db.scalar(select(func.count(models.PostRepost.id))) == 0",
+            "assert post.author_name == 'Source character'",
+            "assert post.author_user_id == 'source-owner'",
+            "assert post.author_character_id == 'source-character'",
+            "assert created and (not duplicate_created) and (duplicate.id == like.id)",
+            "assert reactions.unlike_post(db, post=post, user=user, character=None)",
+            "assert not reactions.unlike_post(db, post=post, user=user, character=None)",
+            "assert created and repost.user_id == user.id",
+            "assert reactions.get_timeline_repost(db, post=post, user=user, character=None) is timeline",
+            "assert reactions.delete_repost(db, post=post, user=user, character=None)",
+            "assert not reactions.delete_repost(db, post=post, user=user, character=None)",
+            "assert reactions.delete_timeline_reposts(db, post=post, user=user, character=None) == 1",
+            "assert reactions.get_timeline_repost(db, post=post, user=user, character=None) is None",
+            "assert commits == []"
+          ],
+          "test_follow_values_dedupe_without_foreign_queries_and_keep_caller_rollback": [
+            "assert db.scalar(select(func.count(models.ProfileFollow.id))) == 0",
+            "assert created and (not duplicate_created) and (duplicate is follow)",
+            "assert profiles.profile_follow_exists(db, **values)",
+            "assert profiles.delete_follow(db, **values)",
+            "assert not profiles.delete_follow(db, **values)",
+            "assert not profiles.profile_follow_exists(db, **values)",
+            "assert commits == []"
+          ],
+          "test_legacy_comment_retains_its_original_explicit_commit_boundary": [
+            "assert commits == ['commit']",
+            "assert comment.post_id == 'legacy-post'",
+            "assert comment.author_character_id == 'legacy-actor'",
+            "assert comment.content == 'Legacy body'",
+            "assert db.scalar(select(func.count(models.Comment.id))) == 1"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_source_write_boundaries.py": {}
+      }
+    },
+    {
+      "commit": "30052742c2a6c3db9a582b360642cf2de9312cb0",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(social): own timeline writes and canonical World scope",
+      "tracked_files": {
+        "backend/app/domains/social/contracts/timeline.py": "4a67bb4004435b813177640e4798317bbc17813c",
+        "backend/app/domains/social/service/activity_results.py": "0dc578653429cc5a0e9cb9600037bd913e01133a",
+        "backend/app/domains/social/service/timeline.py": "bb0edffe400d392298635473666bd343f03780a7",
+        "backend/app/domains/world_characters/service/social_scope.py": "9f5824e9f12c3049c846866c5fc90cd28001aba0",
+        "backend/app/runtime/social/timeline.py": "8ddc05aa48dfc61af348d4730c088096409cc8be",
+        "backend/tests/social/test_timeline_world_scope.py": "d47c392c7e4c6dd240463f72eea11f3bb2c5a1fe"
+      },
+      "test_nodes": [
+        "tests/social/test_timeline_world_scope.py::test_timeline_scope_keeps_lookup_order_original_errors_and_same_session[None-None-expected_models3]",
+        "tests/social/test_timeline_world_scope.py::test_timeline_scope_keeps_lookup_order_original_errors_and_same_session[active-active_world_required-expected_models0]",
+        "tests/social/test_timeline_world_scope.py::test_timeline_scope_keeps_lookup_order_original_errors_and_same_session[character-target_world_not_active-expected_models1]",
+        "tests/social/test_timeline_world_scope.py::test_timeline_scope_keeps_lookup_order_original_errors_and_same_session[membership-world_membership_not_active-expected_models2]"
+      ],
+      "test_assertions": {
+        "tests/social/test_timeline_world_scope.py": {
+          "test_timeline_scope_keeps_lookup_order_original_errors_and_same_session": [
+            "assert [model for model, _ in calls] == expected_models",
+            "assert [identity for _, identity in calls] == ['character-author', 'wc-author', 'membership-owner'][:len(expected_models)]",
+            "assert read_order == expected_models + (['owner_id'] if missing is None else [])",
+            "assert _timeline_world_scope(db, target=SimpleNamespace(world_id=None), character=None) == (None, None)",
+            "assert calls == []",
+            "pytest.raises(PostWorldScopeError, match=expected_error)",
+            "assert _timeline_world_scope(db, **arguments) == ('world-target', 'wc-author')"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/social/test_timeline_world_scope.py": {}
+      }
+    },
+    {
+      "commit": "85a0d1ee70ec09469b1317f296d3a54877004e08",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routine-posts): own schemas and bounded event context",
+      "tracked_files": {
+        "backend/app/domains/routine_posts/constants.py": "6c6e2782b8ee6e39f8f80a4e2769b1996df20a41",
+        "backend/app/domains/routine_posts/exceptions.py": "5f714bceeb382ce89096163b3dccc49b5040528c",
+        "backend/app/domains/routine_posts/service/__init__.py": "53cbfc2a3e5de7947b4eb9ff94711b7f03135d61",
+        "backend/app/domains/routine_posts/service/event_context.py": "b2d62c98692f5c28709c40a340de0487057f8f68",
+        "backend/app/domains/routine_posts/utils/__init__.py": "4b2fe56b3f07f1a6d00ff92f9b2a859bb5120fc5",
+        "backend/app/domains/routine_posts/utils/text.py": "68562f23ad99c57cf9829cc9abc16dcd3c25a88d",
+        "backend/tests/routine_posts/__init__.py": "7598cd4775f35aeacbffd75e7b19488c10d9a06a"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "a0a82f8383c5fe4a1ea41ed4687b04ab527d14ed",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routine-posts): own context policy and session reads",
+      "tracked_files": {
+        "backend/app/domains/routine_posts/contracts/context.py": "bd9295d6f599a133633fe0a221967bd258618809",
+        "backend/app/runtime/routine_posts/context_references.py": "2c93f329b296526c8618273904f10ad3ebec11d4"
+      },
+      "test_nodes": [
+        "tests/routine_posts/test_runtime.py::test_context_reads_caller_pending_state_and_consumption_without_committing[applied]",
+        "tests/routine_posts/test_runtime.py::test_context_reads_caller_pending_state_and_consumption_without_committing[claimed]"
+      ],
+      "test_assertions": {
+        "tests/routine_posts/test_runtime.py": {
+          "test_routine_gemini_transport_uses_json_schema_without_openapi_extras": [
+            "assert 'responseSchema' not in serialized",
+            "assert serialized['responseJsonSchema'] == response_schema",
+            "assert 'additionalProperties' not in value",
+            "assert 'additional_properties' not in value",
+            "assert '$defs' not in value",
+            "assert '$ref' not in value"
+          ],
+          "test_routine_planner_schema_binds_continuation_to_server_evidence": [
+            "assert properties['scene_kind']['enum'] == ['continue', 'conclude']",
+            "assert properties['continuity_facts'] == {'type': 'array', 'items': {'type': 'string', 'enum': continuity_facts}, 'minItems': 1, 'maxItems': 3}",
+            "assert properties['considered_source_event_ids'] == {'type': 'array', 'items': {'type': 'string', 'enum': event_ids}, 'minItems': 2, 'maxItems': 2}",
+            "assert properties['used_source_event_ids']['items']['enum'] == event_ids",
+            "assert properties['used_detail_keys']['items']['enum'] == detail_keys",
+            "assert properties['source_event_effects']['items']['properties']['source_event_id']['enum'] == event_ids",
+            "assert 'responseSchema' not in serialized",
+            "assert serialized['responseJsonSchema'] == response_schema"
+          ],
+          "test_routine_planner_schema_disallows_evidence_without_prior_success": [
+            "assert properties['scene_kind']['enum'] == ['start']",
+            "assert properties['continuity_facts']['minItems'] == 0",
+            "assert properties['continuity_facts']['maxItems'] == 0",
+            "assert properties['considered_source_event_ids']['minItems'] == 0",
+            "assert properties['considered_source_event_ids']['maxItems'] == 0",
+            "assert properties['used_source_event_ids']['maxItems'] == 0",
+            "assert properties['used_detail_keys']['maxItems'] == 0",
+            "assert properties['source_event_effects']['maxItems'] == 0"
+          ],
+          "StaticInteractionSource::__init__": [],
+          "StaticInteractionSource::candidates": [],
+          "FakeRoutineProvider::__init__": [],
+          "FakeRoutineProvider::generate": [],
+          "TransientFailureProvider::generate": [],
+          "InventedEvidenceProvider::generate": [],
+          "_engine": [],
+          "_utc": [],
+          "_seed": [
+            "assert morning_episode is not None",
+            "assert selected_candidate is not None"
+          ],
+          "test_world_profile_readiness_replaces_legacy_tendency_gate": [
+            "assert not agent_service._has_tendency_analysis(setting)",
+            "assert readiness.ready",
+            "assert readiness.source == 'world_community_profile'",
+            "assert readiness.reason_code is None",
+            "assert readiness.world_id == fixture.world.id",
+            "assert readiness.world_character_id == fixture.world_character.id"
+          ],
+          "test_world_profile_readiness_rejects_incomplete_repertoire": [
+            "assert candidate is not None",
+            "assert not readiness.ready",
+            "assert readiness.source == 'world_community_profile'",
+            "assert readiness.reason_code == 'world_activity_repertoire_not_ready'",
+            "pytest.raises(agent_service.ActivityProfileRequiredError)"
+          ],
+          "test_legacy_runtime_still_requires_legacy_tendency_analysis": [
+            "assert not readiness.ready",
+            "assert readiness.source == 'legacy_tendency'",
+            "assert readiness.reason_code == 'legacy_tendency_not_ready'",
+            "pytest.raises(agent_service.TendencyAnalysisRequiredError)"
+          ],
+          "_resident_context": [],
+          "test_context_bounds_events_and_excludes_cross_world_input": [
+            "assert len(context.source_events) == 8",
+            "assert context.considered_source_event_ids == [f'event-{index:02d}' for index in range(1, 9)]",
+            "assert context.eligible_event_count == 12",
+            "assert context.overflow_reason_counts == {'world_scope_filtered': 1, 'prompt_item_limit': 4}",
+            "assert 'cross-world' not in context.considered_source_event_ids"
+          ],
+          "test_context_reads_caller_pending_state_and_consumption_without_committing": [
+            "assert seen_sessions == [db]",
+            "assert context.episode is fixture.morning_episode",
+            "assert context.state_before['action_note'] == 'caller pending context'",
+            "assert context.considered_source_event_ids == []",
+            "assert context.overflow_reason_counts == {'already_consumed': 1}",
+            "assert fixture.morning_episode.current_state_snapshot == original_state",
+            "assert db.get(models.ActivityEventConsumption, 'context-consumption') is None",
+            "assert observer.get(models.ActivityEpisode, episode_id).current_state_snapshot == original_state",
+            "assert observer.get(models.ActivityEventConsumption, 'context-consumption') is None"
+          ],
+          "test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once": [
+            "assert first['routine_outcome'] == 'POST_SUCCEEDED'",
+            "assert second['routine_outcome'] == 'POST_SUCCEEDED'",
+            "assert first['llm_usage_summary']['provider_call_count'] == 2",
+            "assert second['llm_usage_summary']['provider_call_count'] == 2",
+            "assert provider.calls == 2",
+            "assert len(posts) == 3",
+            "assert len(beats) == 2",
+            "assert [beat.sequence_no for beat in beats] == [1, 2]",
+            "assert all((post.world_id == fixture.world.id for post in posts))",
+            "assert len(routine_posts) == 2",
+            "assert all((post.author_world_character_id == fixture.world_character.id for post in routine_posts))",
+            "assert beats[0].source_post_id == routine_posts[0].id",
+            "assert beats[1].previous_successful_beat_id == beats[0].id",
+            "assert len(post_events) == 2",
+            "assert all((event.world_id == fixture.world.id for event in post_events))",
+            "assert all((event.actor_world_character_id == fixture.world_character.id and event.target_world_character_id is None for event in post_events))",
+            "assert db.scalar(select(func.count(models.SocialEventEvidence.id))) == 3",
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 3",
+            "assert beats[1].source_post_id == routine_posts[1].id",
+            "assert beats[1].result_snapshot['used_source_event_ids'] == ['event-reply-1']",
+            "assert consumption is not None",
+            "assert consumption.status == 'applied'",
+            "assert consumption.source_social_event_id == 'event-reply-1'",
+            "assert fixture.morning_episode.last_successful_beat_id == beats[1].id",
+            "assert fixture.morning_episode.next_sequence_no == 3",
+            "assert no_due['routine_outcome'] == 'BEAT_NOT_DUE'",
+            "assert no_due_provider.calls == 0",
+            "assert db.scalar(select(func.count(models.Post.id))) == 3"
+          ],
+          "test_owner_manual_reply_is_observed_once_on_next_allowed_beat": [
+            "assert first['routine_outcome'] == 'POST_SUCCEEDED'",
+            "assert membership is not None",
+            "assert manual_reply.delivery.provider_call_count == 0",
+            "assert manual_reply.delivery.inbox_status == 'pending'",
+            "assert candidate is not None",
+            "assert second['routine_outcome'] == 'POST_SUCCEEDED'",
+            "assert second['llm_usage_summary']['provider_call_count'] == 2",
+            "assert provider.calls == 2",
+            "assert len(beats) == 2",
+            "assert manual_source_id in beats[1].result_snapshot['used_source_event_ids']",
+            "assert beats[1].result_snapshot['considered_source_event_ids'] == [manual_source_id]",
+            "assert candidate.status == 'consumed'",
+            "assert candidate.target_activity_beat_id == beats[1].id",
+            "assert candidate.consumed_at is not None",
+            "assert db.scalar(select(func.count(models.ActivityEventConsumption.id))) == 0",
+            "assert db.scalar(select(func.count(models.RelationshipState.id))) == 1",
+            "assert db.scalar(select(func.count(models.RelationshipStateChange.id))) == 1",
+            "assert db.scalar(select(func.count(models.GraphProjectionOutbox.id))) == 3",
+            "assert len(posts) == 3",
+            "assert sum((post.reply_to_post_id is not None for post in posts)) == 1",
+            "assert all((post.reply_to_post_id is None for post in posts if post.author_world_character_id == fixture.world_character.id))",
+            "assert no_due['routine_outcome'] == 'BEAT_NOT_DUE'",
+            "assert no_due_provider.calls == 0",
+            "assert db.scalar(select(func.count(models.Post.id))) == 3"
+          ],
+          "test_runtime_closes_elapsed_episode_before_activating_current_daypart": [
+            "assert first['routine_outcome'] == 'POST_SUCCEEDED'",
+            "assert morning_item is not None and morning_item.status == 'active'",
+            "assert fixture.morning_episode.status == 'active'",
+            "assert second['routine_outcome'] == 'POST_SUCCEEDED'",
+            "assert morning_item.status == 'completed'",
+            "assert morning_item.terminal_reason_code == 'daypart_completed'",
+            "assert fixture.morning_episode.status == 'completed'",
+            "assert fixture.morning_episode.terminal_reason_code == 'daypart_completed'",
+            "assert fixture.morning_episode.completion_summary == {'successful_beat_count': 1, 'successful_post_ids': [morning_post_id]}",
+            "assert dawn_item is not None and dawn_item.status == 'skipped'",
+            "assert dawn_item.terminal_reason_code == 'daypart_window_elapsed'",
+            "assert dawn_episode is not None and dawn_episode.status == 'cancelled'",
+            "assert afternoon_item is not None and afternoon_item.status == 'active'",
+            "assert afternoon_episode is not None and afternoon_episode.status == 'active'",
+            "assert provider.calls == 2",
+            "assert db.scalar(select(func.count(models.Post.id))) == 2",
+            "assert db.scalar(select(func.count(models.ActivityBeat.id)).where(models.ActivityBeat.episode_id == 'episode-dawn')) == 0"
+          ],
+          "test_transient_provider_failure_retries_same_beat_without_duplicate_post": [
+            "assert failed['routine_outcome'] == 'provider_transient'",
+            "assert pending is not None",
+            "assert pending.status == 'pending'",
+            "assert pending.attempt_count == 1",
+            "assert succeeded['routine_outcome'] == 'POST_SUCCEEDED'",
+            "assert retried is not None",
+            "assert retried.id == pending.id",
+            "assert retried.status == 'succeeded'",
+            "assert retried.attempt_count == 2",
+            "assert db.scalar(select(func.count(models.ActivityBeat.id))) == 1",
+            "assert db.scalar(select(func.count(models.Post.id))) == 1"
+          ],
+          "test_provider_adapter_cannot_bypass_server_evidence_validation": [
+            "assert result['routine_outcome'] == 'routine_generation_failed'",
+            "assert beat is not None",
+            "assert beat.status == 'failed'",
+            "assert beat.source_post_id is None",
+            "assert db.scalar(select(func.count(models.Post.id))) == 0"
+          ],
+          "test_publish_fault_rolls_back_post_state_and_execution": [
+            "assert result['routine_outcome'] == 'publish_transaction_failed'",
+            "assert beat is not None",
+            "assert beat.status == 'failed'",
+            "assert beat.source_post_id is None",
+            "assert beat.state_after_snapshot is None",
+            "assert fixture.morning_episode.last_successful_beat_id is None",
+            "assert fixture.morning_episode.current_state_snapshot == initial_state",
+            "assert db.scalar(select(func.count(models.Post.id))) == 0",
+            "assert db.scalar(select(func.count(models.AgentPublicActionExecution.id))) == 0",
+            "assert db.scalar(select(func.count(models.AgentActivityLog.id))) == 0"
+          ],
+          "test_runtime_mode_readiness_does_not_enable_autonomy": [
+            "assert updated.activity_runtime_mode == 'routine_resident_v1'",
+            "assert updated.autonomous_enabled is False",
+            "assert fixture.world_character.activity_runtime_mode == 'routine_resident_v1'",
+            "assert fixture.world_character.autonomous_enabled is False"
+          ],
+          "test_langgraph_routes_routine_mode_without_building_legacy_graph": [
+            "assert result == {'engine': 'routine_resident_v1', 'status': 'completed'}"
+          ],
+          "test_langgraph_composes_keyword_feed_only_for_explicit_feed_mode": [
+            "assert result['engine'] == 'routine_resident_v1+keyword_search_v1'",
+            "assert result['status'] == 'completed'",
+            "assert result['publish_result']['public_action_count'] == 1",
+            "assert result['inbox_lane']['outcome'] == 'INBOX_ACTION_SUCCEEDED'",
+            "assert result['llm_usage_summary']['inbox']['provider_call_count'] == 2",
+            "assert result['llm_usage_summary']['routine']['provider_call_count'] == 0",
+            "assert result['llm_usage_summary']['feed']['provider_call_count'] == 0",
+            "assert call_order == ['inbox', 'routine', 'feed']"
+          ],
+          "test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run": [
+            "assert no_action['outcome'] == 'LLM_DECIDED_NO_ACTION'",
+            "assert no_action['planner_invoked'] is True",
+            "assert no_action['decision_source'] == 'llm'",
+            "assert no_action['provider_call_count'] == 1",
+            "assert no_action['public_action_count'] == 0",
+            "assert no_action['handled_notification_count'] == 1",
+            "assert handled == [(71, 'LLM_DECIDED_NO_ACTION')]",
+            "assert not_run['outcome'] == 'INBOX_NOT_RUN'",
+            "assert not_run['planner_invoked'] is False",
+            "assert not_run['decision_source'] == 'code'",
+            "assert not_run['handled_notification_count'] == 0",
+            "assert config is not None",
+            "assert config is not None"
+          ],
+          "test_scoped_post_pair_and_identity_are_validated_by_service": [
+            "pytest.raises(community_service.PostWorldScopeError)",
+            "assert db.scalar(select(func.count(models.Post.id))) == 0"
+          ],
+          "test_same_tick_is_single_flight_across_twenty_postgres_sessions": [
+            "assert outcomes.count('POST_SUCCEEDED') == 1",
+            "assert set(outcomes).issubset({'POST_SUCCEEDED', 'BEAT_ALREADY_CLAIMED', 'BEAT_ALREADY_TERMINAL', 'BEAT_NOT_DUE'})",
+            "assert sum((calls for _outcome, calls in results)) == 1",
+            "assert character is not None",
+            "assert credential is not None",
+            "assert len(beats) == 1",
+            "assert beats[0].status == 'succeeded'",
+            "assert len(posts) == 1",
+            "assert beats[0].source_post_id == posts[0].id"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routine_posts/test_runtime.py": {
+          "test_same_tick_is_single_flight_across_twenty_postgres_sessions": [
+            "pytest.mark.skipif(not os.getenv('SECURITY_CONCURRENCY_DATABASE_URL'), reason='SECURITY_CONCURRENCY_DATABASE_URL is required')"
+          ]
+        }
+      }
+    },
+    {
+      "commit": "7ec40581a5da529bce6fb90fd3fc01ef8e847f3c",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routine-posts): own generation and evidence validation",
+      "tracked_files": {
+        "backend/app/domains/routine_posts/client.py": "84b14503458cb4d752399bd5839c7fe9eda2e6c5",
+        "backend/app/domains/routine_posts/contracts/generation.py": "c1cf4f1c384799f631da29045b6d1dbd9af4ee14",
+        "backend/tests/routine_posts/test_generation.py": "73e1f7067d7b6027dda5292c1e9e15e808f53f36"
+      },
+      "test_nodes": [
+        "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[invalid_plan]",
+        "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[success]",
+        "tests/routine_posts/test_generation.py::test_generation_keeps_two_calls_validation_fence_and_error_identity[writer_error]"
+      ],
+      "test_assertions": {
+        "tests/routine_posts/test_generation.py": {
+          "test_generation_keeps_two_calls_validation_fence_and_error_identity": [
+            "assert sequence == ['credential', *expected_nodes]",
+            "assert len(calls) == len(expected_nodes)",
+            "assert json.loads(calls[0]['user_prompt'])['beat_identity'] == {'episode_id': context.episode.id, 'beat_id': beat.id, 'sequence_no': 1}",
+            "assert db.get(type(fixture.morning_episode), fixture.morning_episode.id).last_successful_beat_id is None",
+            "assert credential is resident.credential",
+            "assert result.plan.beat_id == beat.id",
+            "assert result.draft.body == 'The activity begins.'",
+            "assert writer_input['validated_scene_plan'] == result.plan.model_dump()",
+            "assert writer_input['state_after'] == result.state_after",
+            "assert call['tracker'] is tracker",
+            "assert call['on_rate_limit_wait'] is resident.on_rate_limit_wait",
+            "assert call['context'].node == node",
+            "assert call['context'].credential_id == resident.credential.id",
+            "assert call['context'].character_id == resident.character.id",
+            "assert call['context'].agent_run_id == resident.run_id",
+            "assert call['max_output_tokens'] == 2400",
+            "assert call['thinking_level'] == 'medium'",
+            "assert 'synthetic-routine-key' not in call['system_prompt']",
+            "assert 'synthetic-routine-key' not in call['user_prompt']",
+            "pytest.raises(ValueError, match='routine beat identity mismatch')",
+            "assert raised.value.node == 'RoutineBeatPlanner'",
+            "assert raised.value.lane == 'routine_beat_planner'",
+            "pytest.raises(DirectLlmError)",
+            "assert raised.value is transport_error",
+            "assert raised.value.node == 'PostWriter'",
+            "assert raised.value.lane == 'routine_post_writer'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routine_posts/test_generation.py": {}
+      }
+    },
+    {
+      "commit": "a7645a78be06bbe687b495825edd15b5a312d1a3",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own resident models activity settings and logs",
+      "tracked_files": {
+        "backend/app/domains/routines/models/__init__.py": "6a319193f68f0e13364206d7f109076a46b73134",
+        "backend/app/domains/routines/schemas/__init__.py": "6028ccc732c6a687e3b2a75c0ff650c0492fa3ff",
+        "backend/app/domains/routines/service/activity_logs.py": "91a21d4be2c126658555568d3f709301dd9e0e61",
+        "backend/app/domains/routines/service/activity_settings.py": "630674c3b170a3836ace0171f7ab56b75866c4aa",
+        "backend/tests/routines/test_activity_persistence.py": "3ccb0dd5cf86e52d0835c762e5e0e00efdcdb227"
+      },
+      "test_nodes": [
+        "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+        "tests/routines/test_activity_persistence.py::test_plan_hash_collaboration_keeps_readiness_order_and_attached_character",
+        "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback[False]",
+        "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback[True]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_activity_persistence.py": {
+          "_file_engine": [],
+          "test_setting_update_preserves_explicit_commit_and_caller_rollback": [
+            "assert result is setting",
+            "assert setting.activity_interval_minutes == 90",
+            "assert setting.allow_post == original_allow_post",
+            "assert setting.activity_interval_minutes == (90 if commit else original_interval)",
+            "assert observed.activity_interval_minutes == (90 if commit else original_interval)"
+          ],
+          "test_activity_log_joins_caller_transaction_and_keeps_visibility_policy": [
+            "assert [db.get(models.AgentActivityLog, log_id) for log_id in log_ids] == [None] * 4",
+            "assert result == [last_state, visible]",
+            "assert result[0] is last_state",
+            "assert [observer.get(models.AgentActivityLog, log_id) for log_id in log_ids] == [None] * 4"
+          ],
+          "test_plan_hash_collaboration_keeps_readiness_order_and_attached_character": [
+            "assert len(candidates) == 40",
+            "assert result.character_contract_hash == original_hash(fixture.character)",
+            "assert seen == ['hash', 'repertoire']",
+            "pytest.raises(DailyActivityPlanValidationError, match='world_not_ready')",
+            "assert seen == []",
+            "assert character is fixture.character"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_activity_persistence.py": {}
+      }
+    },
+    {
+      "commit": "6d95f3dbaf15c1e9b1ae430dbe718fc5a683e333",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): separate tick policy and resident lifecycle composition",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/resident.py": "3f24cf22ffe08835146cd48ed19fdd1a4363b975",
+        "backend/app/runtime/resident/__init__.py": "227d8d615997238fc8ffef82299113b9b72bb66e"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "6beec5dc69035e51b533cf4da712c8cbffc89542",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own run schemas and immutable activity policy contracts",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/activity_policy.py": "3d89236419a0038b7bb9c729916e928d02533887",
+        "backend/app/domains/routines/service/activity_sessions.py": "59ea2fd74748301375cc9965dc6e38e5997fa60d"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "db6633bb76332c3ce95b58da8922b6f424bf80bb",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own activity decisions and count queries",
+      "tracked_files": {
+        "backend/app/domains/routines/repository/activity_counts.py": "5d766ce3f4950684611f03c8e7481f8b2db3fbf5",
+        "backend/app/domains/routines/service/activity_policy.py": "230292d0e56e5b4e168e74f343fc16e0a06bccd3",
+        "backend/app/domains/routines/utils/activity_actions.py": "683f78390f2fb5aa342f23af33c0f18e8f75a9bc",
+        "backend/tests/routines/test_activity_policy_transaction.py": "6096904dd80a112539e57fcb246b97dafcc067a8"
+      },
+      "test_nodes": [
+        "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction[False]",
+        "tests/routines/test_activity_policy_transaction.py::test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction[True]",
+        "tests/routines/test_activity_policy_transaction.py::test_unknown_action_and_non_policy_run_do_not_read_world_scope"
+      ],
+      "test_assertions": {
+        "tests/routines/test_activity_policy_transaction.py": {
+          "test_policy_timezone_reader_preserves_setting_commit_and_caller_transaction": [
+            "assert seen == (['timezone'] if existing_setting else ['commit', 'timezone'])",
+            "assert result.within_active_hours is True",
+            "assert ('post' in result.allowed_actions) is (not existing_setting)",
+            "assert activity_settings.get_setting(db, character_id).allow_post is True",
+            "assert session is db",
+            "assert character_id == fixture.character.id",
+            "assert current is not None",
+            "assert current.allow_post is (not existing_setting)",
+            "assert result.blocked_reasons['post'] == 'new post writing is disabled'",
+            "assert stored is not None",
+            "assert stored.allow_post is True"
+          ],
+          "test_unknown_action_and_non_policy_run_do_not_read_world_scope": [
+            "pytest.raises(KeyError, match='unsupported-action')",
+            "assert seen == []",
+            "assert db.in_transaction() is False"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_activity_policy_transaction.py": {}
+      }
+    },
+    {
+      "commit": "cd148d1ae48d3fdc93b9c4e58204c73787653ce8",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): separate activity scope decisions and reads",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/activity_scope.py": "3e63a6994e56dbd9941cc87161c6679947cf3b9e",
+        "backend/app/domains/routines/service/activity_scope.py": "d3dadd9d6dd409e30a62a5c80701b8a5b6a2ea44",
+        "backend/app/runtime/resident/activity_policy.py": "88e6718fa61c52359eac930cdc10f778ef36ebae",
+        "backend/app/runtime/resident/activity_scope.py": "e93f59a2a5a77cbf0f5df9728d0ae224d78461ef",
+        "backend/tests/routines/test_activity_scope_transaction.py": "bf6e2953c57482954180756ea7a55f2a7db8c513"
+      },
+      "test_nodes": [
+        "tests/routines/test_activity_scope_transaction.py::test_enabled_world_character_does_not_open_a_database_transaction",
+        "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing[False]",
+        "tests/routines/test_activity_scope_transaction.py::test_import_activation_gate_reads_caller_pending_registry_without_committing[True]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_activity_scope_transaction.py": {
+          "test_enabled_world_character_does_not_open_a_database_transaction": [
+            "assert activity_policy.is_imported_world_runtime_locked(db, character) is False",
+            "assert statements == []",
+            "assert db.in_transaction() is False"
+          ],
+          "test_import_activation_gate_reads_caller_pending_registry_without_committing": [
+            "assert active is not None",
+            "assert activity_policy.is_imported_world_runtime_locked_for_character(db, character_id=fixture.character.id) is True",
+            "assert activity_policy.is_imported_world_runtime_locked(db, fixture.world_character) is True",
+            "assert commits == []",
+            "assert db.get(WorldPackageImport, registry.import_id) is None",
+            "assert activity_policy.is_imported_world_runtime_locked_for_character(db, character_id=fixture.character.id) is False",
+            "assert observer.get(WorldPackageImport, registry.import_id) is None",
+            "assert activity_policy.is_imported_world_runtime_locked_for_character(observer, character_id=fixture.character.id) is False"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_activity_scope_transaction.py": {}
+      }
+    },
+    {
+      "commit": "5ffc14225843528ae91d9e4b9cd6aa601d0e9409",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own run and feed cue persistence",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/feed_cues.py": "eecc6841c7713031e237650043e9e5b97dbd1016",
+        "backend/app/domains/routines/repository/feed_cues.py": "abb2b6218bf4d384331014d41482255b194c2bb6",
+        "backend/app/domains/routines/repository/public_action_executions.py": "8cf2933c0edf262e97d791180d804285de4f5c5d",
+        "backend/app/domains/routines/repository/runs.py": "ecb0f188e1d92fbf9ab7831443a488b54e99d6cf",
+        "backend/app/domains/routines/service/feed_cues.py": "d0a81043762afba0dd4ad3ae0ec652b5bda54d94",
+        "backend/app/domains/routines/service/public_action_executions.py": "9b252265ce9dce89a79921638665f7a888066a84",
+        "backend/app/domains/routines/service/runs.py": "5abdd1a6f3fc26580c3d9ade20d653726e792ac0",
+        "backend/tests/routines/test_run_persistence.py": "1ac26c9ca90b5a98441323d140af105552b53854"
+      },
+      "test_nodes": [
+        "tests/routines/test_run_persistence.py::test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write",
+        "tests/routines/test_run_persistence.py::test_public_execution_deferred_write_and_finish_share_caller_rollback",
+        "tests/routines/test_run_persistence.py::test_run_write_preserves_commit_conflict_rollback_and_finished_lookup"
+      ],
+      "test_assertions": {
+        "tests/routines/test_run_persistence.py": {
+          "_run": [],
+          "test_run_write_preserves_commit_conflict_rollback_and_finished_lookup": [
+            "assert run_queries.get_active_run_for_tool_auth_key(db, 'fixture-tool-key') is run",
+            "pytest.raises(AgentRunConflictError, match='An active agent run already exists')",
+            "assert isinstance(caught.value.__cause__, IntegrityError)",
+            "assert fixture.character.name == original_name",
+            "assert run_queries.get_active_run_for_session(db, run.session_key) is None",
+            "assert run_queries.get_latest_manual_run_for_user(db, fixture.user.id) is run",
+            "assert observer.get(models.AgentRun, run.id).status == 'running'",
+            "assert saved.gateway_result == {'status': 'succeeded'}",
+            "assert saved.completed_at is not None"
+          ],
+          "test_public_execution_deferred_write_and_finish_share_caller_rollback": [
+            "assert execution_queries.get_public_action_execution_by_signature(db, 'pending-public-signature') is None",
+            "assert returned is execution",
+            "assert execution_queries.get_public_action_execution_by_signature(db, 'pending-public-signature') is execution",
+            "assert execution.completed_at is not None",
+            "assert execution.interaction_intent == 'support'",
+            "assert commits == []",
+            "assert execution_queries.get_public_action_execution_by_signature(observer, 'pending-public-signature') is None"
+          ],
+          "test_feed_cue_keeps_committed_creation_consumption_and_missing_no_write": [
+            "assert cue.topic == 'Alchemy class'",
+            "assert cue_queries.get_pending_feed_cue(db, fixture.character.id) is cue",
+            "assert commits == [True]",
+            "assert result is cue",
+            "assert commits == [True, True]",
+            "assert feed_cues.mark_pending_feed_cue_used(db, character_id=fixture.character.id, run_id=None, post_id=post.id) is None",
+            "assert commits == [True, True]",
+            "assert saved.status == 'used'",
+            "assert saved.consumed_run_id is None",
+            "assert saved.consumed_post_id == post.id",
+            "assert saved.consumed_at is not None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_run_persistence.py": {}
+      }
+    },
+    {
+      "commit": "a9c598e9d58b4dbfc4c9fd2ab69efa14724e28a9",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own slot recovery and lease lifecycle",
+      "tracked_files": {
+        "backend/app/domains/routines/repository/slots.py": "7400e197c564f2c810791472ac9d5617f9329404",
+        "backend/app/domains/routines/service/slot_assignments.py": "f5ec297c76df1ee67d7036c321ddc0f60b42b969",
+        "backend/app/domains/routines/service/slot_leases.py": "5761828dae5e56451bdc966a47b699e9724e74e7",
+        "backend/app/domains/routines/service/slot_pool.py": "49b0df1a5bc9e63370e029308d1a68c451a2df1d",
+        "backend/app/domains/routines/service/slot_recovery.py": "5e55b3d33e7c985818a83d173cb14c3997eca6f1",
+        "backend/app/domains/routines/service/slot_state.py": "02c1475218015ed68ec4af98a55d02d52757d5a5"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "f82c72fd7e9f3682ad94b2057433244b35f64537",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own slot assignment and claim policy",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/slots.py": "53b87530acd79531458439139109ee8aa691c37a",
+        "backend/app/domains/routines/service/slot_claims.py": "3190214e4ef271c2cb4a4787eb687c236966473c",
+        "backend/app/runtime/resident/slot_references.py": "84ecedec679ac727f4bfca1bf4aef9e8d049a233",
+        "backend/app/runtime/resident/slots.py": "ce65b88909b761eab9181a8b0b552b52520a7cc1",
+        "backend/tests/routines/test_slot_references.py": "33bc139391743fc27ce76b3200efdf5d1fe92005"
+      },
+      "test_nodes": [
+        "tests/routines/test_slot_references.py::test_character_lock_uses_caller_session_after_slot_pool_write[False]",
+        "tests/routines/test_slot_references.py::test_character_lock_uses_caller_session_after_slot_pool_write[True]",
+        "tests/routines/test_slot_references.py::test_empty_slot_scope_returns_before_queries_or_transactions"
+      ],
+      "test_assertions": {
+        "tests/routines/test_slot_references.py": {
+          "test_character_lock_uses_caller_session_after_slot_pool_write": [
+            "assert references.get_character(character_id) is fixture.character",
+            "assert lock_observations == [commit]",
+            "assert assigned is not None",
+            "assert object_session(assigned) is db",
+            "assert assigned.assigned_character_id == character_id",
+            "assert (saved is not None) is commit",
+            "assert fixture.character.name == ('pending during slot assignment' if commit else original_name)",
+            "assert (saved is not None) is commit",
+            "assert self.db is db",
+            "assert requested_id == character_id",
+            "assert saved.assigned_character_id == character_id",
+            "assert (saved is not None) is commit",
+            "assert saved.assigned_character_id is None"
+          ],
+          "test_empty_slot_scope_returns_before_queries_or_transactions": [
+            "assert references.db is db",
+            "assert slots.claim_due_resident_slots(db, now=datetime(2026, 9, 6, tzinfo=UTC), max_count=2, lease_seconds=60, allowed_character_ids=set(), single_flight=True) == []",
+            "assert slots.assign_resident_slot(db, agent_ids=[], user_id='unused', character_id='unused', credential_id='unused', heartbeat_interval_seconds=60, next_tick_at=datetime(2026, 9, 6, tzinfo=UTC)) is None",
+            "assert slots.claim_temporary_resident_slot_assignment(db, agent_ids=[], user_id='unused', character_id='unused', credential_id='unused', heartbeat_interval_seconds=60, lease_seconds=60) is None",
+            "assert statements == []",
+            "assert not db.in_transaction()"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_slot_references.py": {}
+      }
+    },
+    {
+      "commit": "489b2d1c696e83c2f939e39f136a22e2568d54a4",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own run overload backoff decisions",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/backoff.py": "53ab3c7947e329e3daf073c7e67d90c19e0a6e40",
+        "backend/app/domains/routines/repository/run_backoff.py": "c0c37557ad91eaa75da081bf39aa09d53cdfeb24",
+        "backend/app/domains/routines/service/run_backoff.py": "3a89a3433582e23612a95eb2c7b5706350b8fa32",
+        "backend/tests/routines/test_run_backoff.py": "12397d0422465f39fa90fdbee0a40cad276cd3da"
+      },
+      "test_nodes": [
+        "tests/routines/test_run_backoff.py::test_overload_query_reads_pending_caller_result_without_committing"
+      ],
+      "test_assertions": {
+        "tests/routines/test_run_backoff.py": {
+          "test_runtime_backoff_model_overloaded_first_occurrence": [
+            "assert backoff is not None",
+            "assert backoff.kind == 'model_overloaded'",
+            "assert backoff.retry_at == now + timedelta(minutes=10)",
+            "assert backoff.repeated_overload is False"
+          ],
+          "test_runtime_backoff_model_overloaded_bad_gateway": [
+            "assert backoff is not None",
+            "assert backoff.kind == 'model_overloaded'",
+            "assert backoff.retry_at == now + timedelta(minutes=10)",
+            "assert backoff.repeated_overload is False"
+          ],
+          "test_runtime_backoff_model_overloaded_repeated_occurrence": [
+            "assert backoff is not None",
+            "assert backoff.kind == 'model_overloaded'",
+            "assert backoff.retry_at == now + timedelta(minutes=30)",
+            "assert backoff.repeated_overload is True"
+          ],
+          "test_runtime_backoff_keeps_rate_limit_and_timeout_separate": [
+            "assert rate_limit is not None",
+            "assert rate_limit.kind == 'model_rate_limit'",
+            "assert rate_limit.retry_at == now + timedelta(minutes=45)",
+            "assert timeout is not None",
+            "assert timeout.kind == 'provider_timeout'",
+            "assert timeout.retry_at == now + timedelta(minutes=10)"
+          ],
+          "test_gateway_result_indicates_model_overloaded": [
+            "assert agent_runs._gateway_result_indicates_model_overloaded({'failure_class': 'model_overloaded'})",
+            "assert agent_runs._gateway_result_indicates_model_overloaded({'reason': '모델 일시 과부하로 재시도 예정', 'error': '503 UNAVAILABLE high demand'})",
+            "assert agent_runs._gateway_result_indicates_model_overloaded({'reason': 'model temporarily overloaded', 'error': '502 Bad Gateway'})",
+            "assert not agent_runs._gateway_result_indicates_model_overloaded({'failure_class': 'provider_timeout', 'error': 'request timed out'})"
+          ],
+          "_agent_run_for_overload_test": [],
+          "test_recent_model_overload_detects_same_character_or_credential": [
+            "assert agent_runs._has_recent_model_overloaded_run(db, now=now, character_id='char-1', credential_id=None)",
+            "assert agent_runs._has_recent_model_overloaded_run(db, now=now, character_id=None, credential_id='cred-1')"
+          ],
+          "test_recent_model_overload_ignores_old_or_non_overload_runs": [
+            "assert not agent_runs._has_recent_model_overloaded_run(db, now=now, character_id='char-1', credential_id='cred-1')"
+          ],
+          "test_overload_query_reads_pending_caller_result_without_committing": [
+            "assert backoff.repeated_overload is True",
+            "assert backoff.retry_at == now + timedelta(minutes=30)",
+            "assert commits == []",
+            "assert run.gateway_result == {'failure_class': 'provider_timeout'}",
+            "assert backoff.repeated_overload is False",
+            "assert backoff.retry_at == now + timedelta(minutes=10)",
+            "assert commits == []",
+            "assert saved.gateway_result == {'failure_class': 'provider_timeout'}"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_run_backoff.py": {}
+      }
+    },
+    {
+      "commit": "abb4a534abbd7321b6171e5b30da64348e6be10f",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own read-only retry and execution failures",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/execution_errors.py": "056fda1bba2c64ff9879b83d12fdad306fbd1892",
+        "backend/app/runtime/resident/read_only_lanes.py": "41727e06421be646f93dc1d171ff4f77d9d16dc9",
+        "backend/tests/routines/test_read_only_lanes.py": "6125f1f9bdea53f3dad6b57a164ed4d97555bf75"
+      },
+      "test_nodes": [
+        "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep[caller-cancelled]",
+        "tests/routines/test_read_only_lanes.py::test_non_retryable_lane_exit_preserves_original_error_without_sleep[permanent-gateway-error]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_read_only_lanes.py": {
+          "test_read_only_lane_retry_success_after_timeout": [
+            "assert attempts == [1, 2]",
+            "assert result['status'] == 'ok'",
+            "assert result['attempts'] == 2",
+            "assert result['first_error_class'] == 'openclaw_failover_timeout'",
+            "assert result['retry_delay_seconds'] == 0",
+            "assert 'LLM request timed out' in result['first_error']",
+            "assert result['attempt_errors'][0] == {'agent_run_id': 'run-1', 'lane': 'feed_scan', 'openclaw_run_id': 'run-1-v6-feed-scan-attempt-1', 'provider': 'google', 'model': 'gemini-3.1-flash-lite', 'auth_profile_id': 'google:char-1', 'timeout_seconds': 180, 'attempt': 1, 'error_class': 'openclaw_failover_timeout', 'timeout_source': 'openclaw_embedded_run_timeout', 'error': 'UNAVAILABLE: FailoverError: LLM request timed out.'}"
+          ],
+          "test_feed_history_sanitize_retry_success_after_timeout": [
+            "assert attempts == [1, 2]",
+            "assert result['status'] == 'ok'",
+            "assert result['attempts'] == 2",
+            "assert result['runId'] == 'sanitize-retry-success'",
+            "assert 'feed_history_sanitize_fallback' not in result",
+            "assert result['attempt_errors'][0]['timeout_seconds'] == 60",
+            "assert result['attempt_errors'][0]['attempt'] == 1"
+          ],
+          "test_feed_history_sanitize_retry_exhaustion_uses_two_60s_attempts": [
+            "pytest.raises(agent_runs.ReadOnlyLaneRetryExhausted)",
+            "assert attempts == [1, 2]",
+            "assert lane_result['attempts'] == 2",
+            "assert lane_result['attempt_errors'][0]['timeout_seconds'] == 60",
+            "assert lane_result['attempt_errors'][1]['timeout_seconds'] == 60",
+            "assert lane_result['attempt_errors'][0]['attempt'] == 1",
+            "assert lane_result['attempt_errors'][1]['attempt'] == 2"
+          ],
+          "test_feed_scan_retry_exhaustion_defers_without_final_action": [
+            "pytest.raises(agent_runs.ReadOnlyLaneRetryExhausted)",
+            "assert attempts == [1, 2]",
+            "assert gateway_result['status'] == 'deferred'",
+            "assert gateway_result['reason'] == 'read_only_lane_retry_exhausted'",
+            "assert gateway_result['retry_at'] == '2026-06-06T09:30:00+00:00'",
+            "assert gateway_result['feed_scan_lane']['attempts'] == 2",
+            "assert gateway_result['feed_scan_lane']['failure_class'] == 'openclaw_failover_timeout'",
+            "assert 'first_error' in gateway_result['feed_scan_lane']",
+            "assert gateway_result['feed_scan_lane']['attempt_errors'][1]['attempt'] == 2",
+            "assert gateway_result['feed_scan_lane']['attempt_errors'][1]['timeout_source'] == 'openclaw_embedded_run_timeout'",
+            "assert 'final_action_lane' not in gateway_result"
+          ],
+          "test_read_only_lane_retry_records_gateway_timing_diagnostics": [
+            "pytest.raises(agent_runs.ReadOnlyLaneRetryExhausted)",
+            "assert attempt_error['backend_duration_ms'] == 225000",
+            "assert attempt_error['timeout_source'] == 'backend_gateway_timeout'",
+            "assert attempt_error['call_order_in_run'] == 1",
+            "assert attempt_error['idempotency_key'] == 'run-1-attempt-1'"
+          ],
+          "test_read_only_lane_error_classifier_distinguishes_timeout_sources": [
+            "assert agent_runs._classify_read_only_lane_error('Google Generative AI API error (503): high demand [code=UNAVAILABLE]') == 'google_503_high_demand'",
+            "assert agent_runs._classify_read_only_lane_error('UNAVAILABLE: FailoverError: LLM request timed out.') == 'openclaw_failover_timeout'",
+            "assert agent_runs._classify_read_only_lane_error('OpenClaw Gateway request timed out after 225s') == 'backend_gateway_timeout'",
+            "assert agent_runs._classify_read_only_lane_error('UNAVAILABLE: The AI service is temporarily overloaded.') == 'google_unavailable_unknown'",
+            "assert agent_runs._classify_read_only_lane_timeout_source('LLM idle timeout (180s): no response from model') == 'openclaw_llm_idle_timeout'"
+          ],
+          "test_feed_history_sanitize_retry_exhaustion_uses_metadata_fallback_reason": [
+            "assert agent_runs._feed_history_sanitize_metadata_fallback_reason(retry_exhausted=True) == 'feed_history_sanitize_retry_exhausted_metadata_fallback'",
+            "assert agent_runs._feed_history_sanitize_metadata_fallback_reason(retry_exhausted=False) == 'feed_history_sanitize_metadata_fallback'"
+          ],
+          "test_read_only_lane_deferred_retry_at_uses_30_minutes": [
+            "assert agent_runs._read_only_lane_deferred_retry_at(now) == now + timedelta(minutes=30)"
+          ],
+          "test_non_retryable_lane_exit_preserves_original_error_without_sleep": [
+            "pytest.raises(error_type)",
+            "assert caught.value is failure",
+            "assert attempts == [1]",
+            "assert sleeps == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_read_only_lanes.py": {}
+      }
+    },
+    {
+      "commit": "9974cfa5b360704fa1373b7db58370a1e304f11e",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own stored run results and verify execution bindings",
+      "tracked_files": {
+        "backend/app/domains/routines/service/run_results.py": "3889ff17b834a30d993545dbc2b220cdbb7e48f0",
+        "backend/tests/routines/test_resident_execution_bindings.py": "f96deee32113e0c9fbc65baf21f48671c3e98829",
+        "backend/tests/routines/test_run_results.py": "4d553793f53fb1ccf1e3dcd9767237eadeb33e9f"
+      },
+      "test_nodes": [
+        "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies[_run_resident_individual_tool_flow]",
+        "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies[_run_resident_slot_once]",
+        "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies[run_community_once]",
+        "tests/routines/test_run_results.py::test_missing_snapshot_does_not_commit_other_pending_session_writes",
+        "tests/routines/test_run_results.py::test_pending_writing_results_read_attached_values_without_committing",
+        "tests/routines/test_run_results.py::test_snapshot_commits_same_session_pending_result_and_preserves_input"
+      ],
+      "test_assertions": {
+        "tests/routines/test_resident_execution_bindings.py": {
+          "_required_globals": [],
+          "test_resident_execution_has_all_global_dependencies": [
+            "assert missing == set(), f'{function_name} has unresolved execution dependencies: {sorted(missing)}'"
+          ]
+        },
+        "tests/routines/test_run_results.py": {
+          "test_snapshot_commits_same_session_pending_result_and_preserves_input": [
+            "assert payload == original_payload",
+            "assert commits == [True]",
+            "assert stored['status'] == 'running'",
+            "assert stored['reason'] == 'pending local result'",
+            "assert stored['summary'] == 'Stored safely'",
+            "assert 'unsafe_prompt' not in stored",
+            "assert stored['writing_composition_lanes'] == [{'kind': 'post', 'status': 'completed'}]"
+          ],
+          "test_missing_snapshot_does_not_commit_other_pending_session_writes": [
+            "assert commits == []",
+            "assert run.gateway_result == {'reason': 'other pending change'}",
+            "assert run.gateway_result == original",
+            "assert observer.get(models.AgentRun, run.id).gateway_result == original"
+          ],
+          "test_pending_writing_results_read_attached_values_without_committing": [
+            "assert agent_runs._pending_writing_composition_lanes(db, run.id) == [{'kind': 'reply', 'status': 'pending'}]",
+            "assert commits == []",
+            "assert agent_runs._pending_writing_composition_lanes(db, run.id) == []",
+            "assert agent_runs._pending_writing_composition_lanes(db, 'missing-run') == []",
+            "assert commits == []"
+          ],
+          "test_compact_stored_lane_result_keeps_read_only_attempt_diagnostics": [
+            "assert compact['first_error_class'] == 'google_503_high_demand'",
+            "assert compact['failure_class'] == 'openclaw_failover_timeout'",
+            "assert compact['attempt_errors'][0] == {'attempt': 1, 'lane': 'feed_scan', 'agent_run_id': 'run-1', 'openclaw_run_id': 'run-1-v6-feed-scan-attempt-1', 'provider': 'google', 'model': 'gemini-3.1-flash-lite', 'auth_profile_id': 'google:char-1', 'timeout_seconds': 180, 'backend_request_started_at': '2026-06-06T09:00:00+00:00', 'backend_request_finished_at': '2026-06-06T09:03:00+00:00', 'backend_duration_ms': 180000, 'timeout_source': 'provider_error', 'call_order_in_run': 3, 'error_class': 'google_503_high_demand', 'error': 'Google 503'}"
+          ],
+          "test_compact_stored_lane_result_keeps_inbox_decision_evidence": [
+            "assert compact == {'status': 'observed', 'outcome': 'LLM_DECIDED_NO_ACTION', 'decision_source': 'llm', 'candidate_count': 1, 'planner_invoked': True, 'provider_call_count': 1, 'public_action_count': 0, 'handled_notification_count': 1}"
+          ],
+          "test_stored_gateway_result_keeps_sanitize_fallback_reason": [
+            "assert stored['status'] == 'completed'",
+            "assert stored['feed_history_sanitize_fallback'] == 'metadata_only'",
+            "assert stored['feed_history_sanitize_fallback_reason'] == 'retry_exhausted'",
+            "assert 'unsafe_prompt' not in stored"
+          ],
+          "test_stored_gateway_result_keeps_langgraph_v2_observability": [
+            "assert stored['planner_results'] == {'feed': {'action_count': 1}}",
+            "assert stored['independent_post_decision']['roll_passed'] is True",
+            "assert stored['independent_post_roll'] == 0.11",
+            "assert stored['independent_post_probability'] == 0.28",
+            "assert stored['independent_post_roll_passed'] is True",
+            "assert stored['independent_post_topic_key'] == 'cosplay_preparation'",
+            "assert stored['independent_post_topic_pool_size'] == 30",
+            "assert stored['independent_post_topic_prompt_count'] == 10",
+            "assert stored['action_budget_trim_summary']['actions']['reply']['trimmed'] == 1",
+            "assert stored['write_task_summary']['reply_task_count'] == 2",
+            "assert stored['writer_results']['reply_writer']['missing_task_ids'] == ['reply-2']",
+            "assert 'unsafe_prompt' not in stored"
+          ],
+          "test_stored_gateway_result_preserves_llm_failure_metadata": [
+            "assert stored['failure_node'] == 'PostWriter'",
+            "assert stored['failure_lane'] == 'post_writer'",
+            "assert stored['parse_error_type'] == 'JSONDecodeError'",
+            "assert stored['attempt_count'] == 2",
+            "assert stored['validation_summary'] == [{'path': 'post_body', 'type': 'missing'}]",
+            "assert stored['json_error_diagnostics'] == diagnostics"
+          ],
+          "test_stored_gateway_result_preserves_provider_error_details": [
+            "assert stored['provider_error_hint'] == 'provider_rate_limit'",
+            "assert stored['provider_error'] == provider_error"
+          ],
+          "test_stored_gateway_result_preserves_relationship_review": [
+            "assert stored['relationship_review'] == {'decision': 'unfollow_watch', 'target_character_id': 'char-target', 'reason_tag': 'boundary'}",
+            "assert 'unrelated_debug_blob' not in stored"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_resident_execution_bindings.py": {},
+        "tests/routines/test_run_results.py": {}
+      }
+    },
+    {
+      "commit": "c1e25aff798d1568d945b4ced45c81cbb3275533",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own activity evidence and bounded log queries",
+      "tracked_files": {
+        "backend/app/domains/routines/repository/activity_evidence.py": "901a83e7a828194ec3b7dc640806d34b30ae1a40",
+        "backend/app/domains/routines/service/activity_evidence.py": "a46eea34a1584c2497b5b7d4612e68a13d6d3293",
+        "backend/app/domains/routines/utils/context_text.py": "07965c79f22b2a011d3190ac884c6f78961dd1cd",
+        "backend/tests/routines/test_activity_evidence.py": "e543ed539e1062b780cae9a661275930ad8be17c"
+      },
+      "test_nodes": [
+        "tests/routines/test_activity_evidence.py::test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation",
+        "tests/routines/test_activity_evidence.py::test_latest_evidence_keeps_same_session_order_defaults_and_rollback",
+        "tests/routines/test_activity_evidence.py::test_tick_evidence_preserves_expire_before_read_and_pending_new_log"
+      ],
+      "test_assertions": {
+        "tests/routines/test_activity_evidence.py": {
+          "_log": [],
+          "test_latest_evidence_keeps_same_session_order_defaults_and_rollback": [
+            "assert evidence._latest_v6_feed_interest_payload(db, character_id=character_id, since=since) == {'interests': ['newer-id']}",
+            "assert evidence._latest_v6_inbox_review_payload(db, character_id=character_id, since=since) == {'candidate_notification_id': None}",
+            "assert evidence._latest_v6_feed_history_sanitize_payload(db, character_id=character_id, since=since, action_type='feed_history_sanitized') is None",
+            "assert evidence._latest_v6_feed_interest_payload(db, character_id='another-character', since=since) == {'interests': [], 'post_seed': '', 'no_relevant_signal': True}",
+            "assert commits == []",
+            "assert evidence._latest_v6_feed_interest_payload(db, character_id=character_id, since=since) == {'interests': [], 'post_seed': '', 'no_relevant_signal': True}",
+            "assert observer.get(models.AgentActivityLog, first.id) is None"
+          ],
+          "test_tick_evidence_preserves_expire_before_read_and_pending_new_log": [
+            "assert evidence._has_state_saved_since(db, character_id=character_id, since=since)",
+            "assert saved.action_type == 'state_saved'",
+            "assert not evidence._has_state_saved_since(db, character_id=character_id, since=since + timedelta(seconds=1))",
+            "assert not evidence._has_thread_viewed_since(db, character_id=character_id, since=since)",
+            "assert evidence._has_tick_completed_since(db, character_id=character_id, since=since)",
+            "assert commits == []",
+            "assert not evidence._has_tick_completed_since(db, character_id=character_id, since=since)",
+            "assert observer.get(models.AgentActivityLog, tick.id) is None"
+          ],
+          "test_formatted_evidence_keeps_query_limits_hidden_actions_and_truthful_observation": [
+            "assert 'like evidence 00' in ledger",
+            "assert 'like evidence 19' in ledger",
+            "assert 'like evidence 20' not in ledger",
+            "assert ledger.index('like evidence 00') < ledger.index('like evidence 19')",
+            "assert len(activity.splitlines()) == 20",
+            "assert 'hidden debug' not in activity",
+            "assert 'like evidence 20' not in activity",
+            "assert evidence._format_tick_observation_context_since(db, character_id=character_id, since=since) == '- none'",
+            "assert evidence._format_observation_result(db, character_id=character_id, since=since) == '커뮤니티의 차분한 분위기를 살펴봤어요.'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_activity_evidence.py": {}
+      }
+    },
+    {
+      "commit": "b71c0e326ea6b82ac7e4baaf4dc76231021d40f4",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own resident prompt and writing brief policies",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/prompt_context.py": "8ffd6b8976813d39f5f42eda82aa67c253d44bb1",
+        "backend/app/domains/routines/service/action_prompts.py": "072d89de88fa53dc97d7d0ab8bbb1d89125b631d",
+        "backend/app/domains/routines/service/execution_prompts.py": "05df80ca08242aa6c29239c88cd1f5d5ff14b184",
+        "backend/app/domains/routines/service/perception_prompts.py": "65a7dfb918b150257563455019669f1da0b06877",
+        "backend/app/domains/routines/service/prompt_context.py": "c1829148cbd1cf3dd4e63adfe71453bb22fe47df",
+        "backend/app/domains/routines/service/state_prompts.py": "cad44aebad0621d65e5410694b7f5f085931a3fc",
+        "backend/tests/routines/test_action_briefs.py": "da491b6a6eb91f676151cc28631986921859ad27",
+        "backend/tests/routines/test_perception_prompts.py": "f18944e9805ed1478dc4b42790418442f1d21133",
+        "backend/tests/routines/test_state_prompts.py": "c87430a69819ed66156fda0fff204140ba09d801"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "aa183ecec887d08c31f172c68bd7c40b22492c19",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own decision results and preserve provider calls",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/decision_lanes.py": "d1a7cd9c8014fba4ed238d5f57b7195eb38d4d76",
+        "backend/app/domains/routines/service/decision_results.py": "a2707e8b5e4531bd88177b6033caaec507fd4876",
+        "backend/app/domains/routines/service/execution_results.py": "840a54524e67e91c1983a341b2f7017b72f157e1",
+        "backend/app/domains/routines/service/perception_diagnostics.py": "12ef99b5e261a351ed0b701bcf879501744bdad9",
+        "backend/app/runtime/resident/decision_lanes.py": "0e42e520de024e60ef8f4e593f47a7f025630d50",
+        "backend/app/runtime/resident/gateway_results.py": "adf8f73e50842b29105da1876f6de7445d55cb45",
+        "backend/tests/routines/test_decision_lanes.py": "749da1a282cc0ab03163bc6c294bd2b55df28637",
+        "backend/tests/routines/test_execution_results.py": "f587f1f39d48c2b2e924a519ce07682addf69113"
+      },
+      "test_nodes": [
+        "tests/routines/test_decision_lanes.py::test_action_decision_preserves_policy_fallback_one_call_and_failure_identity",
+        "tests/routines/test_decision_lanes.py::test_feed_perception_skips_without_call_and_preserves_read_only_call_contract",
+        "tests/routines/test_decision_lanes.py::test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit"
+      ],
+      "test_assertions": {
+        "tests/routines/test_decision_lanes.py": {
+          "test_feed_perception_skips_without_call_and_preserves_read_only_call_contract": [
+            "assert detail['status'] == 'skipped'",
+            "assert json.loads(skipped)['interesting_posts'] == []",
+            "assert calls == []",
+            "assert detail['status'] == 'skipped'",
+            "assert calls == []",
+            "assert len(calls) == 1",
+            "assert {k: request[k] for k in ('agent_id', 'session_key', 'idempotency_key', 'provider', 'model', 'auth_profile_id', 'tool_choice', 'tools_allow', 'prompt_mode', 'bootstrap_context_mode', 'bootstrap_context_run_kind')} == {'agent_id': 'agent', 'session_key': 'session:feed-perception', 'idempotency_key': 'run-feed-perception', 'provider': 'provider', 'model': 'model', 'auth_profile_id': 'profile', 'tool_choice': 'none', 'tools_allow': ['angmoo_list_feed'], 'prompt_mode': 'minimal', 'bootstrap_context_mode': 'lightweight', 'bootstrap_context_run_kind': 'default'}",
+            "assert 'p1: rain' in request['extra_system_prompt']",
+            "assert json.loads(normalized)['interesting_posts'] == [{'post_id': 'p1', 'character_thought': 'rain'}]",
+            "assert detail['raw_text'] == response['result']['meta']['finalAssistantVisibleText']",
+            "assert 'must not become output' not in normalized"
+          ],
+          "test_action_decision_preserves_policy_fallback_one_call_and_failure_identity": [
+            "assert decision == {'decision_type': 'observe', 'needs_thread': False, 'thread_candidate_id': '', 'focus_post_ids': [], 'reason': 'listen'}",
+            "assert detail['decision'] is decision",
+            "assert len(calls) == 1",
+            "assert calls[0]['idempotency_key'] == 'run-action-decision'",
+            "assert calls[0]['session_key'] == 'session:action-decision'",
+            "assert calls[0]['provider'] is None",
+            "assert calls[0]['tool_choice'] == 'none'",
+            "assert calls[0]['tools_allow'] == ['angmoo_list_feed']",
+            "pytest.raises(RuntimeError)",
+            "assert caught.value is failure",
+            "assert len(calls) == 2"
+          ],
+          "test_perception_debug_log_keeps_same_session_deferred_rollback_and_default_commit": [
+            "assert list(db.scalars(select(models.AgentActivityLog))) == before",
+            "assert db.get(models.AgentActivityLog, log_id) is None",
+            "assert log in db",
+            "assert log.reason == 'feed_perception_debug run_id=run'",
+            "assert log.target_post_id is None",
+            "assert json.loads(log.result)['run_id'] == 'run'",
+            "assert ': ' not in log.result",
+            "assert persisted.character_id == fixture.character.id",
+            "assert json.loads(persisted.result)['character_thoughts'] == 'tea'",
+            "assert observer.get(models.AgentActivityLog, log_id) is None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_decision_lanes.py": {}
+      }
     }
   ]
 }

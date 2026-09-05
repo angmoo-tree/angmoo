@@ -6,7 +6,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.domains.routine_posts.domain.interaction import RoutineInteractionInput
+from app.domains.routine_posts.contracts.interaction import RoutineInteractionInput
 from app.runtime.social.sqlalchemy_inbox import candidates as manual_inbox_candidates
 
 

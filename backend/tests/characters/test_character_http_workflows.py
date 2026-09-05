@@ -108,7 +108,7 @@ def test_both_application_factories_install_workflows_and_schema_aliases_keep_id
     from app.public_main import create_app as create_public_app
     from app import schemas as aggregate_schemas
     from app.domains.identity.schemas import CredentialRead
-    from app.domains.runtime.schemas import AgentActivityLogRead, AgentSlotRead
+    from app.domains.routines.schemas import AgentActivityLogRead, AgentSlotRead
     for factory in (create_hosted_app, create_public_app):
         app = factory()
         request = Request({"type": "http", "app": app})

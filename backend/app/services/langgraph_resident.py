@@ -1,4 +1,6 @@
 from __future__ import annotations
+from app.domains.routines.repository import public_action_executions as public_action_queries
+from app.domains.routines.service import public_action_executions as public_action_executions
 
 import asyncio
 import hashlib
@@ -35,7 +37,7 @@ from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_FEED_RUNTIME_MODE,
     LEGACY_FEED_RUNTIME_MODE,
 )
-from app.domains.social.domain.subjective_context import (
+from app.domains.social.contracts.subjective_context import (
     ActionEmotionLabel,
     ActionMotivationKind,
     ActionSubjectiveContextV1,
@@ -45,7 +47,7 @@ from app.runtime.routine_posts.sqlalchemy_runtime import (
     routine_world_character_for_character,
     run_routine_post_runtime,
 )
-from app.services import agent_activity_policy
+from app.runtime.resident import activity_policy as agent_activity_policy
 from app.services import character_lore as character_lore_service
 from app.services import community as community_service
 from app.services import langgraph_social_apply
@@ -59,11 +61,9 @@ from app.services.direct_llm import (
     RunLlmTracker,
     generate_json,
 )
-from app.services.llm_context import neutralize_context_text
-from app.services.resident_contracts import (
-    LangGraphResidentContext,
-    ResidentGraphState as _ResidentGraphState,
-)
+from app.core.context_text import neutralize_context_text
+from app.runtime.resident.context import LangGraphResidentContext
+from app.domains.routines.contracts.resident import ResidentGraphState as _ResidentGraphState
 from app.services.world_feed_runtime import run_world_keyword_feed
 
 
@@ -8028,7 +8028,7 @@ def _reserve_public_action(
         target_id=target_id,
         brief_hash=brief_hash,
     )
-    existing = agent_run_crud.get_public_action_execution_by_signature(
+    existing = public_action_queries.get_public_action_execution_by_signature(
         ctx.db, signature
     )
     if existing is not None:
@@ -8046,7 +8046,7 @@ def _reserve_public_action(
             "failure_class": existing.failure_class or "signature_not_retriable",
         }
     try:
-        return agent_run_crud.create_public_action_execution(
+        return public_action_executions.create_public_action_execution(
             ctx.db,
             run_id=ctx.run_id,
             character_id=ctx.character.id,
@@ -8060,7 +8060,7 @@ def _reserve_public_action(
         ), None
     except IntegrityError:
         ctx.db.rollback()
-        existing = agent_run_crud.get_public_action_execution_by_signature(
+        existing = public_action_queries.get_public_action_execution_by_signature(
             ctx.db, signature
         )
         return None, {
@@ -8080,7 +8080,7 @@ def _finish_execution(
     result: dict[str, Any] | None = None,
     failure_class: str | None = None,
 ) -> dict[str, Any]:
-    agent_run_crud.mark_public_action_execution_finished(
+    public_action_executions.mark_public_action_execution_finished(
         ctx.db,
         execution,
         status=status,

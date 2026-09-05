@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.domains.social.domain.observations import (
+from app.domains.social.contracts.observations import (
     SocialObservationCommand,
     SocialObservationResult,
 )

@@ -27,11 +27,11 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "847c8243529d2fc4f755bd82ddb4b2c5e3dd7020887f8f8721331e8629caeea5"
+      "sha256": "00710fc779995e42795865e737ebc856d5bd587ca939cac50c97aaa05e6f9032"
     },
     {
-      "path": "backend/app/services/resident_tick_scheduler.py",
-      "sha256": "1f4946d31434206eea782918244033d0e18e9354b503627964abdb40bb01ff3b"
+      "path": "backend/app/runtime/resident/scheduler.py",
+      "sha256": "7bf69417532f4fd133dcaba93ded775b1b5cd043949e08750d349ac4e3c23094"
     },
     {
       "path": "backend/app/runtime/graph_projection/worker.py",
@@ -141,8 +141,8 @@
         "missing_tests": [],
         "phase": "P3",
         "tests": [
-          "backend/tests/test_daily_activity_runtime.py",
-          "backend/tests/test_agent_activity_limits.py"
+          "backend/tests/routines/test_daily_activity_runtime.py",
+          "backend/tests/routines/test_activity_limits.py"
         ]
       },
       {
@@ -150,7 +150,7 @@
         "missing_tests": [],
         "phase": "P4",
         "tests": [
-          "backend/tests/test_routine_post_runtime.py",
+          "backend/tests/routine_posts/test_runtime.py",
           "backend/tests/test_l3_owner_manual_social_inbox.py"
         ]
       },
@@ -235,9 +235,9 @@
         "bounded drain"
       ],
       "owner": "ER4",
-      "path": "backend/app/services/resident_tick_scheduler.py",
+      "path": "backend/app/runtime/resident/scheduler.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "1f4946d31434206eea782918244033d0e18e9354b503627964abdb40bb01ff3b",
+      "source_sha256": "7bf69417532f4fd133dcaba93ded775b1b5cd043949e08750d349ac4e3c23094",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -287,7 +287,7 @@
       "owner": "ER4",
       "path": "backend/app/public_main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "c05e16bc0ae22651861ef978b43660005ab7a54e738c28d7f5941b9ca60cba41",
+      "source_sha256": "b0fad77a6ab33ce92a52bdc24b302a8d63a27bd0fa9d9556f8ac26c5b5e82206",
       "transition_pr": "ER4 PR J"
     },
     {

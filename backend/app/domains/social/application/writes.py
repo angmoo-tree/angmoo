@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.domains.social.domain.writes import (
+from app.domains.social.contracts.writes import (
     OwnerPostCommand,
     OwnerReplyCommand,
     SocialWriteResult,

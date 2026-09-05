@@ -14,7 +14,7 @@ from app.domains.characters import exceptions, models, schemas
 from app.domains.characters.service import access, creator, image_quota, mutations
 from app.runtime.characters import creator as creator_runtime
 from app.runtime.characters import management
-from app.schemas.agent_runs import UtcInstantResponseModel as old_response_base
+from app.domains.routines.schemas.runs import UtcInstantResponseModel as old_response_base
 
 
 @pytest.fixture

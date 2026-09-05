@@ -6,20 +6,20 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app import models
-from app.domains.social.api.schemas import (
+from app.domains.social.schemas.manual import (
     ManualSocialFeedRead,
     ManualSocialPostRead,
 )
-from app.domains.social.domain import (
+from app.domains.social.contracts import (
     SocialWriteConflictError as ManualSocialConflictError,
 )
-from app.domains.social.domain import (
+from app.domains.social.contracts import (
     SocialWriteError as ManualSocialError,
 )
-from app.domains.social.domain import (
+from app.domains.social.contracts import (
     SocialWriteForbiddenError as ManualSocialForbiddenError,
 )
-from app.domains.social.domain import (
+from app.domains.social.contracts import (
     SocialWriteNotFoundError as ManualSocialNotFoundError,
 )
 from app.domains.world_characters.public import (

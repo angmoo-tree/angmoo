@@ -1476,181 +1476,6 @@ def test_llm_tracker_counts_embedding_separately_from_generate_budget() -> None:
     assert summary["calls"][0]["call_type"] == "embed_content"
 
 
-def test_runtime_backoff_model_overloaded_first_occurrence() -> None:
-    now = datetime(2026, 6, 14, 12, 0, tzinfo=UTC)
-
-    backoff = agent_runs._runtime_error_backoff(
-        RuntimeError("503 UNAVAILABLE high demand"), now=now
-    )
-
-    assert backoff is not None
-    assert backoff.kind == "model_overloaded"
-    assert backoff.retry_at == now + timedelta(minutes=10)
-    assert backoff.repeated_overload is False
-
-
-def test_runtime_backoff_model_overloaded_bad_gateway() -> None:
-    now = datetime(2026, 6, 14, 12, 0, tzinfo=UTC)
-
-    backoff = agent_runs._runtime_error_backoff(
-        RuntimeError("502 Bad Gateway"), now=now
-    )
-
-    assert backoff is not None
-    assert backoff.kind == "model_overloaded"
-    assert backoff.retry_at == now + timedelta(minutes=10)
-    assert backoff.repeated_overload is False
-
-
-def test_runtime_backoff_model_overloaded_repeated_occurrence(monkeypatch) -> None:
-    now = datetime(2026, 6, 14, 12, 0, tzinfo=UTC)
-    monkeypatch.setattr(
-        agent_runs,
-        "_has_recent_model_overloaded_run",
-        lambda *_args, **_kwargs: True,
-    )
-
-    backoff = agent_runs._runtime_error_backoff(
-        RuntimeError("503 UNAVAILABLE high demand"),
-        now=now,
-        db=object(),
-        character_id="char-1",
-        credential_id="cred-1",
-    )
-
-    assert backoff is not None
-    assert backoff.kind == "model_overloaded"
-    assert backoff.retry_at == now + timedelta(minutes=30)
-    assert backoff.repeated_overload is True
-
-
-def test_runtime_backoff_keeps_rate_limit_and_timeout_separate() -> None:
-    now = datetime(2026, 6, 14, 12, 0, tzinfo=UTC)
-
-    rate_limit = agent_runs._runtime_error_backoff(
-        RuntimeError("429 RESOURCE_EXHAUSTED quota exceeded"), now=now
-    )
-    timeout = agent_runs._runtime_error_backoff(RuntimeError("request timed out"), now=now)
-
-    assert rate_limit is not None
-    assert rate_limit.kind == "model_rate_limit"
-    assert rate_limit.retry_at == now + timedelta(minutes=45)
-    assert timeout is not None
-    assert timeout.kind == "provider_timeout"
-    assert timeout.retry_at == now + timedelta(minutes=10)
-
-
-def test_gateway_result_indicates_model_overloaded() -> None:
-    assert agent_runs._gateway_result_indicates_model_overloaded(
-        {"failure_class": "model_overloaded"}
-    )
-    assert agent_runs._gateway_result_indicates_model_overloaded(
-        {
-            "reason": "모델 일시 과부하로 재시도 예정",
-            "error": "503 UNAVAILABLE high demand",
-        }
-    )
-    assert agent_runs._gateway_result_indicates_model_overloaded(
-        {
-            "reason": "model temporarily overloaded",
-            "error": "502 Bad Gateway",
-        }
-    )
-    assert not agent_runs._gateway_result_indicates_model_overloaded(
-        {"failure_class": "provider_timeout", "error": "request timed out"}
-    )
-
-
-def _agent_run_for_overload_test(
-    *,
-    run_id: str,
-    character_id: str,
-    credential_id: str | None,
-    created_at: datetime,
-    failure_class: str = "model_overloaded",
-) -> models.AgentRun:
-    return models.AgentRun(
-        id=run_id,
-        user_id="user-1",
-        character_id=character_id,
-        credential_id=credential_id,
-        agent_id="angmoo-1",
-        session_key=f"session:{run_id}",
-        status="deferred",
-        created_at=created_at,
-        gateway_result={"failure_class": failure_class},
-    )
-
-
-def test_recent_model_overload_detects_same_character_or_credential() -> None:
-    engine = create_engine("sqlite:///:memory:")
-    models.AgentRun.__table__.create(engine)
-    now = datetime(2026, 6, 14, 12, 0, tzinfo=UTC)
-    with Session(engine) as db:
-        db.add_all(
-            [
-                _agent_run_for_overload_test(
-                    run_id="run-character",
-                    character_id="char-1",
-                    credential_id="cred-other",
-                    created_at=now - timedelta(minutes=30),
-                ),
-                _agent_run_for_overload_test(
-                    run_id="run-credential",
-                    character_id="char-other",
-                    credential_id="cred-1",
-                    created_at=now - timedelta(minutes=45),
-                ),
-            ]
-        )
-        db.commit()
-
-        assert agent_runs._has_recent_model_overloaded_run(
-            db,
-            now=now,
-            character_id="char-1",
-            credential_id=None,
-        )
-        assert agent_runs._has_recent_model_overloaded_run(
-            db,
-            now=now,
-            character_id=None,
-            credential_id="cred-1",
-        )
-
-
-def test_recent_model_overload_ignores_old_or_non_overload_runs() -> None:
-    engine = create_engine("sqlite:///:memory:")
-    models.AgentRun.__table__.create(engine)
-    now = datetime(2026, 6, 14, 12, 0, tzinfo=UTC)
-    with Session(engine) as db:
-        db.add_all(
-            [
-                _agent_run_for_overload_test(
-                    run_id="run-old",
-                    character_id="char-1",
-                    credential_id="cred-1",
-                    created_at=now - timedelta(hours=2, seconds=1),
-                ),
-                _agent_run_for_overload_test(
-                    run_id="run-timeout",
-                    character_id="char-1",
-                    credential_id="cred-1",
-                    created_at=now - timedelta(minutes=30),
-                    failure_class="provider_timeout",
-                ),
-            ]
-        )
-        db.commit()
-
-        assert not agent_runs._has_recent_model_overloaded_run(
-            db,
-            now=now,
-            character_id="char-1",
-            credential_id="cred-1",
-        )
-
-
 def test_post_writer_repairs_missing_independent_post_text(monkeypatch) -> None:
     calls: list[dict[str, object]] = []
     post_task = {
@@ -4180,7 +4005,7 @@ def test_public_action_exactly_once_reuses_succeeded_signature(monkeypatch) -> N
     )
 
     monkeypatch.setattr(
-        langgraph_resident.agent_run_crud,
+        langgraph_resident.public_action_queries,
         "get_public_action_execution_by_signature",
         lambda *_args, **_kwargs: existing,
     )
@@ -4189,7 +4014,7 @@ def test_public_action_exactly_once_reuses_succeeded_signature(monkeypatch) -> N
         raise AssertionError("duplicate public action should not be created")
 
     monkeypatch.setattr(
-        langgraph_resident.agent_run_crud,
+        langgraph_resident.public_action_executions,
         "create_public_action_execution",
         fail_create,
     )
@@ -6010,71 +5835,6 @@ def test_llm_failure_meta_includes_provider_error_details() -> None:
     assert meta["failure_lane"] == "supervisor"
     assert meta["provider_error_hint"] == "provider_rate_limit"
     assert meta["provider_error"] == exc.provider_error
-
-
-def test_stored_gateway_result_preserves_llm_failure_metadata() -> None:
-    diagnostics = [{"attempt": 2, "shape_hint": "natural_text_only"}]
-    stored = agent_runs._stored_gateway_result(
-        {
-            "status": "failed",
-            "failure_class": "DirectLlmJsonError",
-            "failure_node": "PostWriter",
-            "failure_lane": "post_writer",
-            "parse_error_type": "JSONDecodeError",
-            "attempt_count": 2,
-            "validation_summary": [{"path": "post_body", "type": "missing"}],
-            "json_error_diagnostics": diagnostics,
-        }
-    )
-
-    assert stored["failure_node"] == "PostWriter"
-    assert stored["failure_lane"] == "post_writer"
-    assert stored["parse_error_type"] == "JSONDecodeError"
-    assert stored["attempt_count"] == 2
-    assert stored["validation_summary"] == [{"path": "post_body", "type": "missing"}]
-    assert stored["json_error_diagnostics"] == diagnostics
-
-
-def test_stored_gateway_result_preserves_provider_error_details() -> None:
-    provider_error = {
-        "provider_http_status": 429,
-        "provider_status": "RESOURCE_EXHAUSTED",
-        "provider_message": "Resource has been exhausted.",
-        "details_present": False,
-    }
-
-    stored = agent_runs._stored_gateway_result(
-        {
-            "status": "failed",
-            "failure_class": "DirectLlmError",
-            "provider_error_hint": "provider_rate_limit",
-            "provider_error": provider_error,
-        }
-    )
-
-    assert stored["provider_error_hint"] == "provider_rate_limit"
-    assert stored["provider_error"] == provider_error
-
-
-def test_stored_gateway_result_preserves_relationship_review() -> None:
-    stored = agent_runs._stored_gateway_result(
-        {
-            "status": "completed",
-            "relationship_review": {
-                "decision": "unfollow_watch",
-                "target_character_id": "char-target",
-                "reason_tag": "boundary",
-            },
-            "unrelated_debug_blob": {"drop": True},
-        }
-    )
-
-    assert stored["relationship_review"] == {
-        "decision": "unfollow_watch",
-        "target_character_id": "char-target",
-        "reason_tag": "boundary",
-    }
-    assert "unrelated_debug_blob" not in stored
 
 
 def test_planner_json_failed_plan_is_recorded_in_planner_results() -> None:

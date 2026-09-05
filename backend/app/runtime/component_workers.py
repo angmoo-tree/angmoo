@@ -18,7 +18,7 @@ from app.runtime.graph_projection.process_client import (
     unregister_process_graph_client,
 )
 from app.runtime.graph_projection.worker import GraphProjectionWorker
-from app.services.resident_tick_scheduler import run_resident_tick_scheduler
+from app.runtime.resident.scheduler import run_resident_tick_scheduler
 
 
 ComponentStateListener = Callable[[str], None]

@@ -22,7 +22,7 @@ from app.domains.chat.domain.today_sns_activity import (  # noqa: E402
     MAX_TODAY_ENTRY_TEXT_CHARS, MAX_TODAY_ROUTER_ENTRIES,
     MAX_TODAY_ROUTER_VIEW_CHARS, TODAY_SNS_ACTIVITY_SNAPSHOT_VERSION,
 )
-from app.domains.social.domain.subjective_context import (  # noqa: E402
+from app.domains.social.contracts.subjective_context import (  # noqa: E402
     ACTION_SUBJECTIVE_CONTEXT_VERSION, MAX_SUBJECTIVE_TEXT_CHARS,
     ActionEmotionLabel, ActionMotivationKind,
 )

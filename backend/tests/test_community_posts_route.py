@@ -1,3 +1,6 @@
+from app.domains.social.service import notifications as social_notifications
+
+from app.domains.social.service import presentation as post_presentation
 from datetime import datetime, timezone
 from types import SimpleNamespace
 
@@ -130,12 +133,12 @@ def test_notify_mentioned_characters_creates_mention_notifications(monkeypatch) 
     created: list[dict[str, object]] = []
 
     monkeypatch.setattr(
-        community_service,
+        social_notifications,
         "_mentioned_characters_for_texts",
         lambda db, *texts: mentions,
     )
     monkeypatch.setattr(
-        community_service.community_crud,
+        social_notifications,
         "create_notification",
         lambda _db, **kwargs: created.append(kwargs),
     )
@@ -190,12 +193,12 @@ def test_notify_mentioned_characters_skips_actor_and_owner_duplicates(
     created: list[dict[str, object]] = []
 
     monkeypatch.setattr(
-        community_service,
+        social_notifications,
         "_mentioned_characters_for_texts",
         lambda db, *texts: mentions,
     )
     monkeypatch.setattr(
-        community_service.community_crud,
+        social_notifications,
         "create_notification",
         lambda _db, **kwargs: created.append(kwargs),
     )
@@ -233,16 +236,16 @@ def test_post_reference_includes_mention_metadata(monkeypatch) -> None:
         name="조광배",
     )
 
-    monkeypatch.setattr(community_service.community_crud, "get_post", lambda db, post_id: post)
-    monkeypatch.setattr(community_service, "_is_post_public_context_visible", lambda db, post: True)
+    monkeypatch.setattr(post_presentation.post_repository, "get_post", lambda db, post_id: post)
+    monkeypatch.setattr(post_presentation, "_is_post_public_context_visible", lambda db, post: True)
     monkeypatch.setattr(
-        community_service,
+        post_presentation,
         "_post_author_identity",
         lambda db, post: {"name": "호나냔", "handle": "honagyn", "avatar_url": None},
     )
-    monkeypatch.setattr(community_service, "_post_media_reads", lambda db, post: [])
+    monkeypatch.setattr(post_presentation, "_post_media_reads", lambda db, post: [])
     monkeypatch.setattr(
-        community_service,
+        post_presentation,
         "_mentioned_characters_for_texts",
         lambda db, *texts: [mention],
     )

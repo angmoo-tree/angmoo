@@ -13,7 +13,7 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core import agent_activity_schedule
+from app.domains.routines.service import tick_schedule as agent_activity_schedule
 
 
 @dataclass(frozen=True, slots=True)

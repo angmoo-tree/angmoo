@@ -1,6 +1,6 @@
 """Compatibility facade for routines-owned activity-state policy."""
 
-from app.domains.routines.domain.activity_state import (
+from app.domains.routines.policies.activity_state import (
     ACTION_NOTE_MAX_LENGTH,
     BEAT_DELTA_LIMIT,
     MOODS,
