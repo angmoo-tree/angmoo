@@ -519,6 +519,100 @@
       "test_suppressions": {
         "tests/config/test_config_paths.py": {}
       }
+    },
+    {
+      "commit": "b5dcdd80f529305f5dffa1dbed2e1900119d20b7",
+      "feature_id": "AR-G2",
+      "reason": "Preserve common error identity and opaque cursor regression coverage introduced by AR-G2.",
+      "tracked_files": {
+        "backend/app/exceptions.py": "f6b0bc7f03fbc42b321e9f9b8af3f61a373087ae",
+        "backend/app/pagination.py": "3c71bfc0a8690c80c8aaaa359157e7785860345c",
+        "backend/tests/common/test_errors_pagination.py": "a66552757027f0cb8548b7ea6cad206dde572392"
+      },
+      "test_nodes": [
+        "tests/common/test_errors_pagination.py::test_cursor_byte_encoding_preserves_padding_and_binary_compatibility[-]",
+        "tests/common/test_errors_pagination.py::test_cursor_byte_encoding_preserves_padding_and_binary_compatibility[\\xff\\x00\\xfe-_wD-]",
+        "tests/common/test_errors_pagination.py::test_cursor_byte_encoding_preserves_padding_and_binary_compatibility[a-YQ]",
+        "tests/common/test_errors_pagination.py::test_cursor_byte_encoding_preserves_padding_and_binary_compatibility[ab-YWI]",
+        "tests/common/test_errors_pagination.py::test_cursor_byte_encoding_preserves_padding_and_binary_compatibility[abc-YWJj]",
+        "tests/common/test_errors_pagination.py::test_device_home_cursor_payload_errors_remain_owned_by_device_home[not-json]",
+        "tests/common/test_errors_pagination.py::test_device_home_cursor_payload_errors_remain_owned_by_device_home[{\"updated_at\":\"2026-09-05T01:02:03\",\"world_id\":\"\"}]",
+        "tests/common/test_errors_pagination.py::test_device_home_cursor_payload_errors_remain_owned_by_device_home[{\"updated_at\":\"invalid\",\"world_id\":\"world-g2\"}]",
+        "tests/common/test_errors_pagination.py::test_device_home_decodes_existing_cursor_and_emits_identical_bytes",
+        "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks[0]",
+        "tests/common/test_errors_pagination.py::test_request_body_limit_catches_the_shared_error_for_streamed_chunks[1]",
+        "tests/common/test_errors_pagination.py::test_shared_busy_error_keeps_different_social_and_autonomy_http_contracts",
+        "tests/common/test_errors_pagination.py::test_shared_sqlite_errors_preserve_existing_catch_identity[SqliteBusyRetryExhausted-sqlite_busy_retry_exhausted]",
+        "tests/common/test_errors_pagination.py::test_shared_sqlite_errors_preserve_existing_catch_identity[SqliteConcurrencyError-sqlite_concurrency_error]",
+        "tests/common/test_errors_pagination.py::test_shared_sqlite_errors_preserve_existing_catch_identity[SqliteTaskQueueFull-sqlite_task_queue_full]",
+        "tests/common/test_errors_pagination.py::test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque",
+        "tests/common/test_errors_pagination.py::test_social_cursor_rejects_changed_ciphertext_and_wrong_secret",
+        "tests/common/test_errors_pagination.py::test_social_cursor_scope_remains_domain_specific[changes0]",
+        "tests/common/test_errors_pagination.py::test_social_cursor_scope_remains_domain_specific[changes1]",
+        "tests/common/test_errors_pagination.py::test_social_cursor_scope_remains_domain_specific[changes2]"
+      ],
+      "test_assertions": {
+        "tests/common/test_errors_pagination.py": {
+          "test_shared_sqlite_errors_preserve_existing_catch_identity": [
+            "assert getattr(sqlite_concurrency, name) is error_type",
+            "assert getattr(persistence, name) is error_type",
+            "assert issubclass(error_type, RuntimeError)",
+            "assert error.reason_code == reason",
+            "assert str(error) == 'existing detail'",
+            "assert error.args == ('existing detail',)",
+            "pytest.raises(sqlite_concurrency.SqliteConcurrencyError)"
+          ],
+          "test_request_body_limit_catches_the_shared_error_for_streamed_chunks": [
+            "assert request_limits.RequestBodyTooLargeError is exceptions.RequestBodyTooLargeError",
+            "assert exceptions.RequestBodyTooLargeError.__bases__ == (Exception,)",
+            "assert sent[0]['status'] == (413 if excess else 200)",
+            "assert response == ({'detail': 'Request body exceeds the allowed limit.'} if excess else {'bytes': limit})",
+            "assert completed == ([] if excess else [limit])"
+          ],
+          "test_shared_busy_error_keeps_different_social_and_autonomy_http_contracts": [
+            "pytest.raises(HTTPException)",
+            "assert social_error.value.status_code == 503",
+            "assert social_error.value.detail == 'sqlite_busy_retry_exhausted'",
+            "pytest.raises(HTTPException)",
+            "assert autonomy_error.value.status_code == 409",
+            "assert autonomy_error.value.detail == detail",
+            "assert agents.agent_service.SqliteBusyRetryExhausted is exceptions.SqliteBusyRetryExhausted"
+          ],
+          "test_device_home_decodes_existing_cursor_and_emits_identical_bytes": [
+            "assert home._decode_cursor(HOME_CURSOR) == (NOW.isoformat(), 'world-g2')",
+            "assert home._encode_cursor(NOW, 'world-g2') == HOME_CURSOR",
+            "assert home._decode_cursor(None) == (None, None)"
+          ],
+          "test_device_home_cursor_payload_errors_remain_owned_by_device_home": [
+            "pytest.raises(InvalidWorldSurfaceCursorError)",
+            "assert error.value.reason_code == 'invalid_world_surface_cursor'"
+          ],
+          "social_query": [],
+          "test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque": [
+            "assert social._decode_cursor(query) == (NOW, 'post-g2')",
+            "assert social._encode_cursor(query, created_at=NOW, item_id='post-g2') == SOCIAL_CURSOR",
+            "assert b'world-g2' not in encrypted",
+            "assert b'wc-g2' not in encrypted",
+            "assert b'post-g2' not in encrypted"
+          ],
+          "test_social_cursor_scope_remains_domain_specific": [
+            "pytest.raises(WorldCharacterSocialProfileValidationError)",
+            "assert error.value.reason_code == 'world_character_social_profile_invalid_request'"
+          ],
+          "test_social_cursor_rejects_changed_ciphertext_and_wrong_secret": [
+            "pytest.raises(WorldCharacterSocialProfileValidationError)",
+            "pytest.raises(WorldCharacterSocialProfileValidationError)"
+          ],
+          "test_cursor_byte_encoding_preserves_padding_and_binary_compatibility": [
+            "assert pagination.encode_cursor_bytes(payload) == encoded",
+            "assert pagination.decode_cursor_bytes(encoded) == payload",
+            "assert pagination.decode_cursor_bytes(encoded + '=' * (-len(encoded) % 4)) == payload"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/common/test_errors_pagination.py": {}
+      }
     }
   ]
 }
