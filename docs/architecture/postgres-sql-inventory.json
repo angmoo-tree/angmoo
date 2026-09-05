@@ -778,19 +778,19 @@
     {
       "markers": {
         "driver_or_url": [
-          9
+          14
         ],
         "row_lock": [
-          10
+          15
         ],
         "skip_locked": [
-          10
+          15
         ]
       },
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/social/repository/image_jobs.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "56955aeb4a6b9ddd4e3a0aeac5b46de17fdbd6f09095fdc84ef243566cdc8ca0",
+      "source_sha256": "288ec0fc9dc972fe7ceb39a89c32e9c65a8341e4678f2f9a2666ab489422dde0",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
