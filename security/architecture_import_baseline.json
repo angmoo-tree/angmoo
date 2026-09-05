@@ -1,7 +1,7 @@
 {
-  "edge_count": 2548,
-  "external_import_count": 2377,
-  "module_count": 758,
+  "edge_count": 2564,
+  "external_import_count": 2392,
+  "module_count": 762,
   "modules": [
     {
       "external_imports": [],
@@ -3739,6 +3739,23 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.planning_context",
+        "app.domains.routines.contracts.resident_prompts",
+        "app.domains.routines.contracts.writer_results"
+      ],
+      "module": "app.domains.routines.contracts.context_reads",
+      "path": "backend/app/domains/routines/contracts/context_reads.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.routines.exceptions"
@@ -4480,6 +4497,20 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "logging",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.context_reads"
+      ],
+      "module": "app.domains.routines.service.conversation_context",
+      "path": "backend/app/domains/routines/service/conversation_context.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.routines.constants",
@@ -4823,6 +4854,20 @@
     {
       "external_imports": [
         "__future__",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.context_reads",
+        "app.domains.routines.service.activity_logs"
+      ],
+      "module": "app.domains.routines.service.relationship_context",
+      "path": "backend/app/domains/routines/service/relationship_context.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "functools",
         "json",
         "typing"
@@ -5063,6 +5108,24 @@
       ],
       "module": "app.domains.routines.service.topic_arcs",
       "path": "backend/app/domains/routines/service/topic_arcs.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "hashlib",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.context_reads",
+        "app.domains.routines.policies.handoff_coverage",
+        "app.domains.routines.policies.resident_clock",
+        "app.domains.routines.repository.independent_topics",
+        "app.domains.routines.service.independent_topics"
+      ],
+      "module": "app.domains.routines.service.writing_context",
+      "path": "backend/app/domains/routines/service/writing_context.py",
       "wildcard_imports": []
     },
     {
@@ -10950,6 +11013,7 @@
         "app.cruds.agents",
         "app.cruds.community",
         "app.domains.routines.contracts.action_planning",
+        "app.domains.routines.contracts.context_reads",
         "app.domains.routines.contracts.resident",
         "app.domains.routines.contracts.topic_arcs",
         "app.domains.routines.policies.action_matching",
@@ -10966,13 +11030,16 @@
         "app.domains.routines.service.action_budgets",
         "app.domains.routines.service.action_plans",
         "app.domains.routines.service.activity_settings",
+        "app.domains.routines.service.conversation_context",
         "app.domains.routines.service.independent_topics",
         "app.domains.routines.service.planner_results",
         "app.domains.routines.service.post_writer_results",
         "app.domains.routines.service.public_action_executions",
+        "app.domains.routines.service.relationship_context",
         "app.domains.routines.service.resident_prompts",
         "app.domains.routines.service.state_outputs",
         "app.domains.routines.service.topic_arcs",
+        "app.domains.routines.service.writing_context",
         "app.domains.routines.service.writing_plans",
         "app.domains.routines.service.writing_tasks",
         "app.domains.social.contracts.subjective_context",

@@ -1016,6 +1016,7 @@
       "app.domains.routines.contracts.activity_scope",
       "app.domains.routines.contracts.backoff",
       "app.domains.routines.contracts.clock",
+      "app.domains.routines.contracts.context_reads",
       "app.domains.routines.contracts.execution_errors",
       "app.domains.routines.contracts.feed_cues",
       "app.domains.routines.contracts.joint_activity",
@@ -1071,6 +1072,7 @@
       "app.domains.routines.service.activity_scope",
       "app.domains.routines.service.activity_sessions",
       "app.domains.routines.service.activity_settings",
+      "app.domains.routines.service.conversation_context",
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
@@ -1090,6 +1092,7 @@
       "app.domains.routines.service.post_writer_results",
       "app.domains.routines.service.prompt_context",
       "app.domains.routines.service.public_action_executions",
+      "app.domains.routines.service.relationship_context",
       "app.domains.routines.service.resident_prompts",
       "app.domains.routines.service.run_backoff",
       "app.domains.routines.service.run_results",
@@ -1105,6 +1108,7 @@
       "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tick_schedule",
       "app.domains.routines.service.topic_arcs",
+      "app.domains.routines.service.writing_context",
       "app.domains.routines.service.writing_plans",
       "app.domains.routines.service.writing_tasks",
       "app.domains.routines.utils",
@@ -1249,6 +1253,7 @@
       "app.domains.routines.contracts.activity",
       "app.domains.routines.contracts.activity_policy",
       "app.domains.routines.contracts.clock",
+      "app.domains.routines.contracts.context_reads",
       "app.domains.routines.contracts.execution_errors",
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
@@ -1274,6 +1279,7 @@
       "app.domains.routines.service.activity_scope",
       "app.domains.routines.service.activity_sessions",
       "app.domains.routines.service.activity_settings",
+      "app.domains.routines.service.conversation_context",
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
@@ -1293,6 +1299,7 @@
       "app.domains.routines.service.post_writer_results",
       "app.domains.routines.service.prompt_context",
       "app.domains.routines.service.public_action_executions",
+      "app.domains.routines.service.relationship_context",
       "app.domains.routines.service.resident_prompts",
       "app.domains.routines.service.run_backoff",
       "app.domains.routines.service.run_results",
@@ -1307,6 +1314,7 @@
       "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tick_schedule",
       "app.domains.routines.service.topic_arcs",
+      "app.domains.routines.service.writing_context",
       "app.domains.routines.service.writing_plans",
       "app.domains.routines.service.writing_tasks",
       "app.domains.runtime.contracts",
@@ -3089,6 +3097,38 @@
         "owner_stage": "AR-B4-LG-C",
         "reason": "Existing graph binds actual prompt/task/outcome services; source strings and same-Session TopicArc reads remain in original decision order.",
         "removal_condition": "Move remaining graph/provider execution composition to LG-C; no old duplicate helper bodies.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.contracts.context_reads",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing graph composes actual context services with nullable source reads; no eager query or duplicated owner write.",
+        "removal_condition": "Move graph/provider execution to LG-C; parent connects existing B5/B7 ownership bodies at exact current callback sites.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.service.conversation_context",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing graph composes actual context services with nullable source reads; no eager query or duplicated owner write.",
+        "removal_condition": "Move graph/provider execution to LG-C; parent connects existing B5/B7 ownership bodies at exact current callback sites.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.service.relationship_context",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing graph composes actual context services with nullable source reads; no eager query or duplicated owner write.",
+        "removal_condition": "Move graph/provider execution to LG-C; parent connects existing B5/B7 ownership bodies at exact current callback sites.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.routines.service.writing_context",
+        "owner_stage": "AR-B4-LG-C",
+        "reason": "Existing graph composes actual context services with nullable source reads; no eager query or duplicated owner write.",
+        "removal_condition": "Move graph/provider execution to LG-C; parent connects existing B5/B7 ownership bodies at exact current callback sites.",
         "review_date": "2026-09-06"
       }
     ]

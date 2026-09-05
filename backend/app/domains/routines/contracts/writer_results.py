@@ -11,7 +11,7 @@ class WriterTaskContext(Protocol):
 
 
 class SavedStateContext(Protocol):
-    state: StatePromptView
+    state: StatePromptView | None
 
 
 JsonContextBuilder = Callable[[Any], dict[str, Any] | None]

@@ -1,4 +1,10 @@
 from __future__ import annotations
+from app.domains.routines.contracts.context_reads import RelationshipContextWorkflows, WritingContextWorkflows, ConversationWorkflows
+from app.domains.routines.service import relationship_context as relationship_context_service
+from app.domains.routines.service import writing_context as writing_context_service
+from app.domains.routines.service import conversation_context as conversation_context_service
+from app.domains.routines.service.relationship_context import _RELATIONSHIP_MEMORY_EVENT_TYPES, _REPLY_TARGET_ALREADY_ANSWERED
+from app.domains.routines.service.conversation_context import _INBOX_CONVERSATION_TURN_LIMIT, _INBOX_DIRECT_EXCHANGE_TURN_LIMIT
 from app.domains.routines.service import resident_prompts as resident_prompts_service
 from app.domains.routines.service import planner_results as planner_results_service
 from app.domains.routines.service import writing_tasks as writing_tasks_service
@@ -195,14 +201,11 @@ logger = logging.getLogger(__name__)
 
 _PUBLIC_ACTIONS = {"post", "reply", "like", "repost", "follow", "unfollow"}
 _GRAPH_SEMAPHORE = asyncio.Semaphore(settings.langgraph_max_concurrent_graphs)
-_REPLY_TARGET_ALREADY_ANSWERED = "reply_target_already_answered_by_character"
 _MANDATORY_POST_ALLOWED_SKIP_REASONS = {
     "action_budget_trimmed",
     "feed_cue_pending_post_blocked",
 }
 _TOPIC_ARC_LOOKBACK = timedelta(hours=48)
-_INBOX_CONVERSATION_TURN_LIMIT = 6
-_INBOX_DIRECT_EXCHANGE_TURN_LIMIT = 6
 
 
 def _langgraph_recursion_limit() -> int:
@@ -215,6 +218,47 @@ def _clip(value: Any, max_chars: int) -> str:
     if len(text) <= max_chars:
         return text
     return text[: max(0, max_chars - 3)].rstrip() + "..."
+
+
+_relationship_context_workflows = RelationshipContextWorkflows(
+    clip=_clip,
+    history=lambda ctx: _daypart_history(ctx),
+    history_prompt=lambda ctx: _daypart_history_for_prompt(ctx),
+    following=lambda ctx, target_id: _target_character_following(ctx, target_id),
+    already_replied=lambda db, **kwargs: _character_already_replied_to_target(db, **kwargs),
+)
+_writing_context_workflows = WritingContextWorkflows(
+    clip=_clip,
+    coerce_topic_arc=lambda value: _coerce_topic_arc_payload(value),
+    topic_arc_for_prompt=lambda value, **kwargs: _topic_arc_for_prompt(value, **kwargs),
+    previous_handoff=lambda ctx: _yesterday_handoff_context(ctx),
+    history_prompt=lambda ctx: _daypart_history_for_prompt(ctx),
+    recent_own_posts=lambda ctx: _recent_own_root_posts(ctx),
+    latest_summary=lambda ctx: _latest_daypart_summary(ctx),
+    seen_feed_posts=lambda ctx: _seen_daypart_feed_post_ids(ctx),
+    seen_notifications=lambda ctx: _seen_daypart_notification_ids(ctx),
+)
+_conversation_workflows = ConversationWorkflows(
+    clip=_clip,
+    get_post=lambda db, post_id: _conversation_context_post(db, post_id),
+    thread_replies=lambda db, post_id, **kwargs: community_crud.list_post_thread_replies(db, post_id, **kwargs),
+)
+_tendency_action_note = partial(relationship_context_service._tendency_action_note, workflows=_relationship_context_workflows)
+_relationship_daypart_memory = partial(relationship_context_service._relationship_daypart_memory, workflows=_relationship_context_workflows)
+_relationship_candidate_from_item = partial(relationship_context_service._relationship_candidate_from_item, workflows=_relationship_context_workflows)
+_relationship_candidates_from_daypart_memory = partial(relationship_context_service._relationship_candidates_from_daypart_memory, workflows=_relationship_context_workflows)
+_has_unfollow_watch = partial(relationship_context_service._has_unfollow_watch, workflows=_relationship_context_workflows)
+_inbox_lane_relationship_memory = partial(relationship_context_service._inbox_lane_relationship_memory, workflows=_relationship_context_workflows)
+_suppress_already_answered_reply_affordance = partial(relationship_context_service._suppress_already_answered_reply_affordance, workflows=_relationship_context_workflows)
+_coverage_text_from_payload = partial(writing_context_service._coverage_text_from_payload, workflows=_writing_context_workflows)
+_compact_yesterday_handoff_event = partial(writing_context_service._compact_yesterday_handoff_event, workflows=_writing_context_workflows)
+_feed_mood_for_prompt = partial(writing_context_service._feed_mood_for_prompt, workflows=_writing_context_workflows)
+_independent_post_context_for_prompt = partial(writing_context_service._independent_post_context_for_prompt, workflows=_writing_context_workflows)
+_current_daypart_context = partial(writing_context_service._current_daypart_context, workflows=_writing_context_workflows)
+_mandatory_post_context = partial(writing_context_service._mandatory_post_context, workflows=_writing_context_workflows)
+_conversation_turn_for_prompt = partial(conversation_context_service._conversation_turn_for_prompt, workflows=_conversation_workflows)
+_thread_root_post_for_conversation_context = partial(conversation_context_service._thread_root_post_for_conversation_context, workflows=_conversation_workflows)
+_inbox_conversation_context = partial(conversation_context_service._inbox_conversation_context, workflows=_conversation_workflows)
 
 
 _task_id_part = partial(writer_tasks_service._task_id_part, clip=_clip)
@@ -505,44 +549,8 @@ def _daypart_history_for_prompt(ctx: LangGraphResidentContext) -> list[dict[str,
     ]
 
 
-_RELATIONSHIP_MEMORY_EVENT_TYPES = {
-    "observation_feed",
-    "observation_inbox",
-    "relationship_review",
-    "unfollow_watch",
-}
 
 
-def _relationship_daypart_memory(ctx: LangGraphResidentContext) -> list[dict[str, Any]]:
-    memory: list[dict[str, Any]] = []
-    for event in _daypart_history(ctx):
-        if event.get("event_type") not in _RELATIONSHIP_MEMORY_EVENT_TYPES:
-            continue
-        payload = event.get("payload") if isinstance(event.get("payload"), dict) else {}
-        memory.append(
-            {
-                "event_type": event.get("event_type"),
-                "source_post_id": event.get("source_post_id"),
-                "notification_id": event.get("notification_id"),
-                "summary": event.get("summary"),
-                "payload": {
-                    key: payload.get(key)
-                    for key in (
-                        "author_character_id",
-                        "actor_character_id",
-                        "target_character_id",
-                        "available_actions",
-                        "relationship_target",
-                        "relationship_signal",
-                        "reason_tag",
-                        "decision",
-                    )
-                    if key in payload
-                },
-                "provided_at": event.get("provided_at"),
-            }
-        )
-    return memory[-24:]
 
 
 def _target_character_following(
@@ -566,147 +574,14 @@ def _target_character_following(
 
 
 
-def _tendency_action_note(ctx: LangGraphResidentContext, action: str) -> str:
-    ranges = getattr(ctx.activity_policy, "tendency_action_ranges", None)
-    if not isinstance(ranges, dict):
-        return ""
-    item = ranges.get(action)
-    if not isinstance(item, dict):
-        return ""
-    return _clip(item.get("note"), 500)
 
 
 
 
-def _relationship_candidate_from_item(
-    *,
-    ctx: LangGraphResidentContext,
-    source: Literal["feed", "inbox"],
-    item: dict[str, Any],
-    action_type: Literal["follow", "unfollow_watch"],
-) -> dict[str, Any] | None:
-    if action_type == "follow" and "follow" not in set(ctx.activity_policy.allowed_actions):
-        return None
-    if action_type == "unfollow_watch" and "unfollow" not in set(
-        ctx.activity_policy.allowed_actions
-    ):
-        return None
-    target_type = "character"
-    target_id = None
-    all_targets = item.get("action_targets") if isinstance(item, dict) else None
-    if action_type == "follow" and isinstance(all_targets, dict):
-        target = all_targets.get("follow")
-        if isinstance(target, dict):
-            target_type = str(target.get("target_type") or "")
-            target_id = str(target.get("target_id") or "").strip() or None
-    if action_type == "unfollow_watch":
-        target_id = (
-            str(
-                item.get("author_character_id")
-                or item.get("actor_character_id")
-                or item.get("target_character_id")
-                or ""
-            ).strip()
-            or None
-        )
-    if target_type != "character" or not target_id or target_id == ctx.character.id:
-        return None
-    currently_following = _target_character_following(ctx, target_id)
-    if action_type == "follow" and currently_following:
-        return None
-    if action_type == "unfollow_watch" and not currently_following:
-        return None
-    return {
-        "source": source,
-        "candidate_action": action_type,
-        "target_type": "character",
-        "target_id": target_id,
-        "target_name": item.get("author") or item.get("actor_name"),
-        "currently_following": currently_following,
-        "post_id": item.get("post_id") or item.get("source_post_id"),
-        "notification_id": item.get("notification_id"),
-        "semantic_summary": _clip(item.get("semantic_summary"), 500),
-        "relationship_signal": _clip(item.get("why_it_mattered"), 300)
-        or "daypart observation",
-    }
 
 
 
 
-def _relationship_candidates_from_daypart_memory(
-    ctx: LangGraphResidentContext,
-) -> list[dict[str, Any]]:
-    candidates: list[dict[str, Any]] = []
-    allowed_actions = set(ctx.activity_policy.allowed_actions)
-    if not ({"follow", "unfollow"} & allowed_actions):
-        return candidates
-    for event in _relationship_daypart_memory(ctx):
-        payload = event.get("payload") if isinstance(event.get("payload"), dict) else {}
-        relationship_target = payload.get("relationship_target")
-        if "follow" in allowed_actions and isinstance(relationship_target, dict):
-            target_id = str(relationship_target.get("target_id") or "").strip()
-            if (
-                str(relationship_target.get("candidate_action") or "") == "follow"
-                and target_id
-                and target_id != ctx.character.id
-                and not _target_character_following(ctx, target_id)
-            ):
-                candidates.append(
-                    {
-                        **relationship_target,
-                        "source": "daypart_memory",
-                        "candidate_action": "follow",
-                        "target_type": "character",
-                        "target_id": target_id,
-                        "post_id": event.get("source_post_id")
-                        or relationship_target.get("post_id"),
-                        "notification_id": event.get("notification_id")
-                        or relationship_target.get("notification_id"),
-                        "semantic_summary": _clip(
-                            relationship_target.get("semantic_summary")
-                            or event.get("summary"),
-                            500,
-                        ),
-                        "relationship_signal": _clip(
-                            relationship_target.get("relationship_signal")
-                            or event.get("summary"),
-                            300,
-                        ),
-                    }
-                )
-        if "unfollow" not in allowed_actions:
-            continue
-        target_id = str(
-            payload.get("target_character_id")
-            or payload.get("actor_character_id")
-            or payload.get("author_character_id")
-            or ""
-        ).strip()
-        if not target_id or not _target_character_following(ctx, target_id):
-            continue
-        signal = str(
-            payload.get("relationship_signal")
-            or payload.get("decision")
-            or event.get("summary")
-            or ""
-        ).strip()
-        if not signal:
-            continue
-        candidates.append(
-            {
-                "source": "daypart_memory",
-                "candidate_action": "unfollow_watch",
-                "target_type": "character",
-                "target_id": target_id,
-                "target_name": None,
-                "currently_following": True,
-                "post_id": event.get("source_post_id"),
-                "notification_id": event.get("notification_id"),
-                "semantic_summary": _clip(event.get("summary"), 500),
-                "relationship_signal": _clip(signal, 300),
-            }
-        )
-    return candidates
 
 
 
@@ -841,69 +716,12 @@ def _today_root_writing_memory_for_prompt(
 
 
 
-def _coverage_text_from_payload(payload: Any) -> str:
-    if not isinstance(payload, dict):
-        return ""
-    parts: list[str] = []
-    topic_arc = _coerce_topic_arc_payload(payload)
-    if topic_arc:
-        parts.append(_clip(topic_arc.get("arc_title"), 300))
-        parts.extend(
-            _clip(step.get("brief"), 300)
-            for step in topic_arc.get("steps", [])
-            if isinstance(step, dict)
-        )
-    for key in ("summary", "memory_note", "topic_signature", "title", "brief"):
-        if key in payload:
-            parts.append(_clip(payload.get(key), 500))
-    state_result = payload.get("state_result")
-    if isinstance(state_result, dict):
-        parts.append(_clip(state_result.get("summary"), 500))
-    publish_result = payload.get("publish_result")
-    if isinstance(publish_result, dict):
-        result = publish_result.get("result")
-        if isinstance(result, dict):
-            parts.append(_clip(result.get("title"), 300))
-            parts.append(_clip(result.get("topic_key"), 120))
-    return " ".join(part for part in parts if part)
 
 
 
 
 
 
-def _compact_yesterday_handoff_event(
-    event: Any, *, coverage_posts: list[dict[str, Any]]
-) -> dict[str, Any] | None:
-    event_type = str(getattr(event, "event_type", "") or "").strip()
-    summary = _clip(getattr(event, "summary", ""), 300)
-    topic_signature = _clip(getattr(event, "topic_signature", ""), 300)
-    payload = getattr(event, "payload", None)
-    coverage_text = " ".join(
-        part
-        for part in (summary, topic_signature, _coverage_text_from_payload(payload))
-        if part
-    )
-    if not summary and not coverage_text:
-        return None
-    provided_at = _aware_datetime(getattr(event, "provided_at", None))
-    material = "|".join(
-        [
-            event_type,
-            str(getattr(event, "id", "") or ""),
-            provided_at.isoformat() if provided_at else "",
-            summary,
-        ]
-    )
-    digest = hashlib.sha256(material.encode("utf-8")).hexdigest()[:12]
-    return {
-        "handoff_id": f"handoff:{digest}",
-        "event_type": event_type,
-        "provided_at": provided_at.isoformat() if provided_at else None,
-        "summary": summary or _clip(topic_signature, 300),
-        "continuity_kind": _handoff_continuity_kind(event_type),
-        **_handoff_coverage(coverage_text or summary, coverage_posts),
-    }
 
 
 def _yesterday_handoff_context(ctx: LangGraphResidentContext) -> list[dict[str, Any]]:
@@ -987,22 +805,6 @@ def _recent_own_root_posts(ctx: LangGraphResidentContext) -> list[dict[str, Any]
     ]
 
 
-def _conversation_turn_for_prompt(
-    post: models.Post,
-    *,
-    current_character_id: str,
-    actor_character_id: str | None,
-    body_chars: int = 280,
-) -> dict[str, Any]:
-    return {
-        "post_id": post.id,
-        "author": _clip(post.author_name, 80),
-        "is_current_character": post.author_character_id == current_character_id,
-        "is_notification_actor": (
-            bool(actor_character_id) and post.author_character_id == actor_character_id
-        ),
-        "body": _clip(post.body, body_chars),
-    }
 
 
 def _conversation_context_post(db: Session, post_id: str | None) -> models.Post | None:
@@ -1019,178 +821,14 @@ def _conversation_context_post(db: Session, post_id: str | None) -> models.Post 
     )
 
 
-def _thread_root_post_for_conversation_context(
-    db: Session, source_post: models.Post
-) -> models.Post:
-    post = source_post
-    seen = {post.id}
-    while post.reply_to_post_id is not None:
-        parent = _conversation_context_post(db, post.reply_to_post_id)
-        if parent is None or parent.id in seen:
-            break
-        post = parent
-        seen.add(post.id)
-    return post
 
 
-def _inbox_conversation_context(
-    db: Session,
-    *,
-    character_id: str,
-    actor_character_id: str | None,
-    source_post_id: str | None,
-) -> dict[str, Any] | None:
-    source_post = _conversation_context_post(db, source_post_id)
-    if source_post is None:
-        return None
-    try:
-        root_post = _thread_root_post_for_conversation_context(db, source_post)
-        replies = community_crud.list_post_thread_replies(
-            db, root_post.id, limit=20
-        )
-    except Exception:
-        logger.debug(
-            "Failed to build inbox conversation context",
-            exc_info=True,
-            extra={"source_post_id": source_post_id},
-        )
-        return None
-
-    replies = sorted(replies, key=lambda item: (item.created_at, item.id))
-    recent_turns = replies[-_INBOX_CONVERSATION_TURN_LIMIT:]
-    pair_character_ids = {
-        character_id,
-        actor_character_id or source_post.author_character_id,
-    }
-    pair_character_ids.discard(None)
-    direct_turns = [
-        post
-        for post in [root_post, *replies]
-        if post.author_character_id in pair_character_ids
-    ][-_INBOX_DIRECT_EXCHANGE_TURN_LIMIT:]
-    return {
-        "root_post": _conversation_turn_for_prompt(
-            root_post,
-            current_character_id=character_id,
-            actor_character_id=actor_character_id,
-            body_chars=160,
-        ),
-        "target_post": _conversation_turn_for_prompt(
-            source_post,
-            current_character_id=character_id,
-            actor_character_id=actor_character_id,
-            body_chars=200,
-        ),
-        "recent_thread_turns": [
-            _conversation_turn_for_prompt(
-                post,
-                current_character_id=character_id,
-                actor_character_id=actor_character_id,
-                body_chars=160,
-            )
-            for post in recent_turns
-        ],
-        "direct_exchange_turns": [
-            _conversation_turn_for_prompt(
-                post,
-                current_character_id=character_id,
-                actor_character_id=actor_character_id,
-                body_chars=160,
-            )
-            for post in direct_turns
-        ],
-    }
 
 
-def _feed_mood_for_prompt(feed_observation: dict[str, Any]) -> dict[str, Any]:
-    items = feed_observation.get("selected_posts")
-    if not isinstance(items, list):
-        items = []
-    return {
-        "theme_topics": feed_observation.get("feed_theme_topics") or [],
-        "returned_count": feed_observation.get("returned_count") or 0,
-        "sample_summaries": [
-            _clip(item.get("semantic_summary") or item.get("topic_signature"), 180)
-            for item in items[:5]
-            if isinstance(item, dict)
-        ],
-    }
 
 
-def _independent_post_context_for_prompt(
-    ctx: LangGraphResidentContext,
-    *,
-    feed_observation: dict[str, Any],
-    independent_post_roll: dict[str, Any],
-    active_topic_arc: dict[str, Any] | None = None,
-) -> dict[str, Any]:
-    current = ctx.run_started_at.astimezone(agent_activity_policy.APP_TIMEZONE)
-    return {
-        "roll": independent_post_roll.get("roll"),
-        "tick_probability": independent_post_roll.get("tick_probability"),
-        "roll_passed": bool(independent_post_roll.get("passed")),
-        "level": independent_post_roll.get("level"),
-        "blocked_reason": independent_post_roll.get("blocked_reason"),
-        "topic_pool_size": independent_post_roll.get("topic_pool_size"),
-        "topic_prompt_count": independent_post_roll.get("topic_prompt_count"),
-        "topics": independent_post_roll.get("topics") or [],
-        "active_topic_arc": _topic_arc_for_prompt(
-            active_topic_arc,
-            current_date=current.date(),
-        ),
-        "yesterday_handoff_context": _yesterday_handoff_context(ctx),
-        "current_time": current.isoformat(),
-        "current_time_reference": _format_current_time_reference(ctx.run_started_at),
-        "daypart": ctx.activity_daypart,
-        "recent_daypart_memory": _daypart_history_for_prompt(ctx)[-12:],
-        "character_state": {
-            "mood": _clip(getattr(ctx.state, "mood", ""), 120),
-            "summary": _clip(getattr(ctx.state, "summary", ""), 600),
-            "memory_note": _clip(getattr(ctx.state, "memory_note", ""), 600),
-        },
-        "recent_own_root_posts": _recent_own_root_posts(ctx),
-        "persona": {
-            "name": ctx.character.name,
-            "handle": ctx.character.handle,
-            "one_liner": _clip(ctx.character.one_liner, 300),
-            "personality": _clip(ctx.character.personality, 900),
-            "speech_style": _clip(ctx.character.speech_style, 900),
-            "worldview": _clip(ctx.character.worldview, 900),
-            "topic_preferences": _clip(ctx.character.topic_preferences, 900),
-            "persona_summary": _clip(ctx.character.persona_summary, 900),
-        },
-        "today_feed_mood": _feed_mood_for_prompt(feed_observation),
-    }
 
 
-def _current_daypart_context(ctx: LangGraphResidentContext) -> dict[str, Any]:
-    history = _daypart_history_for_prompt(ctx)
-    plan = next(
-        (item for item in reversed(history) if item.get("event_type") == "daypart_plan"),
-        None,
-    )
-    summary = next(
-        (
-            item
-            for item in reversed(history)
-            if item.get("event_type") == "daypart_summary"
-        ),
-        None,
-    ) or _latest_daypart_summary(ctx)
-    return {
-        "status": "ready" if history else "missing",
-        "memory_session_key": ctx.memory_session_key,
-        "daypart_start_date": (
-            ctx.daypart_start_date.isoformat() if ctx.daypart_start_date else None
-        ),
-        "activity_daypart": ctx.activity_daypart,
-        "daypart_plan": plan,
-        "previous_daypart_summary": summary,
-        "recent_events": history[-20:],
-        "seen_feed_post_ids": sorted(_seen_daypart_feed_post_ids(ctx)),
-        "seen_notification_ids": sorted(_seen_daypart_notification_ids(ctx)),
-        "used_topic_keys_today": sorted(independent_topic_queries._today_independent_topic_keys(ctx)),
-    }
 
 
 def _compact_daypart_summary_event(
@@ -1598,40 +1236,6 @@ def _record_feed_seed_selected(
 
 
 
-def _mandatory_post_context(
-    ctx: LangGraphResidentContext,
-    *,
-    relationship_points: list[dict[str, Any]],
-    selected_feed_seed: dict[str, Any] | None,
-) -> dict[str, Any]:
-    allowed = set(ctx.activity_policy.allowed_actions)
-    run_mode = getattr(ctx, "run_mode", "scheduled") or "scheduled"
-    post_required = "post" in allowed
-    blocked_reason = None
-    if "post" not in allowed:
-        blocked_reason = "post_not_allowed"
-    return {
-        "run_mode": run_mode,
-        "post_required": post_required,
-        "blocked_reason": blocked_reason,
-        "owner_feed_cue": (
-            {
-                "id": getattr(ctx.feed_cue, "id", None),
-                "topic": _clip(getattr(ctx.feed_cue, "topic", ""), 800),
-            }
-            if ctx.feed_cue is not None
-            else None
-        ),
-        "base_topic_candidates": _base_independent_topic_candidates(ctx),
-        "relationship_point_candidates": relationship_points,
-        "action_continuation_candidates": [],
-        "selected_feed_seed": selected_feed_seed
-        if isinstance(selected_feed_seed, dict)
-        else {"mode": "none"},
-        "current_time_reference": _format_current_time_reference(ctx.run_started_at),
-        "daypart": ctx.activity_daypart,
-        "recent_own_root_posts": _recent_own_root_posts(ctx),
-    }
 
 
 
@@ -2430,36 +2034,6 @@ def _character_already_replied_to_target(
     return existing_reply_id is not None
 
 
-def _suppress_already_answered_reply_affordance(
-    affordance: dict[str, Any],
-    *,
-    db: Session,
-    character_id: str,
-    post_id: str | None,
-) -> tuple[dict[str, Any], bool]:
-    available_raw = affordance.get("available_actions")
-    available = list(available_raw) if isinstance(available_raw, list) else []
-    targets_raw = affordance.get("action_targets")
-    targets = dict(targets_raw) if isinstance(targets_raw, dict) else {}
-    blocked_raw = affordance.get("blocked_actions")
-    blocked = dict(blocked_raw) if isinstance(blocked_raw, dict) else {}
-    has_reply_signal = (
-        "reply" in available
-        or "reply" in targets
-        or blocked.get("reply") == "reply_not_available"
-    )
-    if not has_reply_signal or not _character_already_replied_to_target(
-        db, character_id=character_id, post_id=post_id
-    ):
-        return affordance, False
-
-    updated = dict(affordance)
-    updated["available_actions"] = [item for item in available if item != "reply"]
-    targets.pop("reply", None)
-    updated["action_targets"] = targets
-    blocked["reply"] = _REPLY_TARGET_ALREADY_ANSWERED
-    updated["blocked_actions"] = blocked
-    return updated, True
 
 
 
@@ -2518,21 +2092,6 @@ def _planner_json_failed_plan(
 
 
 
-def _has_unfollow_watch(
-    ctx: LangGraphResidentContext, *, target_id: str, reason_tag: str | None
-) -> bool:
-    if not target_id:
-        return False
-    for event in _relationship_daypart_memory(ctx):
-        if event.get("event_type") != "unfollow_watch":
-            continue
-        payload = event.get("payload") if isinstance(event.get("payload"), dict) else {}
-        if str(payload.get("target_character_id") or "") != target_id:
-            continue
-        if reason_tag and str(payload.get("reason_tag") or "") != reason_tag:
-            continue
-        return True
-    return False
 
 
 
@@ -5052,26 +4611,6 @@ _INBOX_LANE_PRECOMPLETED_NODES = [
 ]
 
 
-def _inbox_lane_relationship_memory(
-    ctx: LangGraphResidentContext,
-) -> dict[str, Any]:
-    logs = agent_crud.list_recent_activity(ctx.db, ctx.character.id, limit=12)
-    return {
-        "recent_activity": [
-            {
-                "action_type": log.action_type,
-                "target_post_id": log.target_post_id,
-                "reason": _clip(log.reason, 240),
-                "result": _clip(log.result, 500),
-                "created_at": log.created_at.isoformat(),
-            }
-            for log in logs
-        ],
-        "daypart_history": _daypart_history_for_prompt(ctx),
-        "relationship_daypart_memory": _relationship_daypart_memory(ctx),
-        "relationship_point_candidates": [],
-        "active_topic_arc": None,
-    }
 
 
 def _inbox_lane_planner_invoked(tracker: RunLlmTracker) -> bool:

@@ -1094,3 +1094,12 @@ LG-B4 최종 후보 검증: **378 passed / 기존 warnings2 / 125.78초**. 원�
 기존 source inspection의 writer prompt 준비 대상1곳을 runtime partial에서 실제 defining service 함수로 바꿨다. 모든 기존 assertion과 suppression은 동일하며 행동 검사를 삭제하지 않았다. 현재 LG source 전체 소유 지도는 원래294정의의 실제 위치를 이어간다. Memory/Lore/Relationships의 이미 구현된 소유 코드는 복제하지 않으며 부모 합류에서 기존 읽기 협력을 교체한다.
 
 LG-B5 최종 후보 검증: **378 passed / 기존 warnings2 / 115.77초**. 원래6보존진단 모두0(protected2139/current2263), 경계758/2548/206legacy, L4 758/14/97, deferred22 PASS. 신규 제품4파일이며 새 테스트 노드0이다. 원본 frozen·append-only ledger는 유지하며 최초 source 캡처와 다른 소유 구현의 순차 합류는 부모 통합에서 수행한다.
+
+
+## AR-B4 LG-B6 — 관계·대화·쓰기 문맥의 실제 판단
+
+원래16함수와 상수4개를 relationship_context/writing_context/conversation_context의 실제 본문으로 옮겼다. 조건 분기·필터·순서·개수·문자열은 원문과 같고, 구조 값 입력과 동일Session 조회 callback·자기 ActivityLog/시각 구현 경로만 정규화하면 전체 AST가 일치한다. 원래 LangGraph **186 passed / 6.77초**, 기존 테스트 수정0이다.
+
+읽기는 원래 판단 지점에서 수행하며 follow가 허용되지 않거나 source가 없으면 후속 읽기를 생략한다. 대화 부모 순환 차단·조회 실패·마지막6turn과 전날문맥 충족은 원래의 실제 함수에 남는다. B5 Point 상태와 B7 Memory 저장/조회 구현은 복제하지 않고 부모 통합 대상이다. nullable state의 타입만 기존 getattr 동작에 맞게 표현했다. 남은 foreign SQL projection과 graph/provider 조립은 LG-C 실제 소유 전환에서 마무리한다.
+
+LG-B6 최종 후보 검증: **378 passed / 기존 warnings2 / 113.50초**. 원래6보존진단 모두0(protected2139/current2263), 경계762/2564/206legacy, L4 762/14/97, deferred22 PASS. 최초 도입은 실제 제품4파일이며 신규 노드0·기존 테스트 변경0이다. 원본 frozen과 source ledger는 그대로 유지했고 부모의 첫 도입 증거 캡처는 별도로 남아 있다.

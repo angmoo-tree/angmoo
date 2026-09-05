@@ -705,3 +705,10 @@ Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥�
 `service/resident_prompts.py`는 persona·writer·상태 기록·Lore 검색 질의의 실제 프롬프트를 만듭니다. 글감과 persona가 시스템 규칙을 덮어쓸 수 없다는 원래 문맥 경계를 유지하며 입력은 이미 읽은 값입니다. `service/writing_tasks.py`는 선택된 행동을 reply/post 작업으로 만들고, 같은 TopicArc 서비스에서 단계·날짜·이전 실행 근거를 읽습니다. 실제 읽기는 기존 협력과 같은 Session으로 필요한 분기에서만 수행합니다. `service/planner_results.py`는 관찰 입력과 각 planner의 결과를 실제 실행 진단에 맞게 표현합니다.
 
 실행 코드는 이 서비스에 기존 공통 텍스트 정제와 TopicArc 협력을 연결합니다. 도메인 내부의 task id·TopicArc·응답 조립은 실제 소유 서비스를 직접 호출하며 같은 기능을 다른 전달 서비스로 중복 구현하지 않습니다. 프롬프트 문구나 토큰 예산은 위치 변경과 함께 바꾸지 않습니다.
+
+
+### 관계·대화·기억을 활동 입력으로 고르는 기준
+
+`service/relationship_context.py`는 현재 follow 상태와 관찰한 기억을 바탕으로 허용된 관계 행동 후보를 고릅니다. 이미 답한 글의 reply 항목을 제외할 때도 원래 읽기 조건을 유지합니다. `service/conversation_context.py`는 같은 Session의 nullable 게시글 조회로 대화의 root를 찾고, 기존 여섯 turn 한도와 작성자 범위로 문맥을 만듭니다. 끊어진 부모·순환·조회 실패는 원래 규칙으로 처리합니다.
+
+`service/writing_context.py`는 현재 Daypart와 전날 이월 문맥을 선택하고 이미 게시된 글이 그 문맥을 충족했는지 표현합니다. 실제 Memory·Social 읽기는 `contracts/context_reads.py`의 필요한 협력으로 연결하며, 현재 실행이 가진 Session·값·조회 순서를 사용합니다. 자기 ActivityLog와 독립 주제는 실제 Routines 서비스가 소유합니다. Point 저장·관계 변경·Memory 이벤트 저장을 이 입력 선택 서비스에 복제하지 않습니다.
