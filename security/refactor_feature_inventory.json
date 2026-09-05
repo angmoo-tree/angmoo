@@ -204,7 +204,12 @@
         "backend/app/domains/memory/router.py",
         "backend/app/domains/memory/service/management.py",
         "backend/app/domains/memory/service/presentation.py",
-        "backend/app/runtime/memory_http.py"
+        "backend/app/runtime/memory_http.py",
+        "backend/app/domains/local_bot/contracts/authentication.py",
+        "backend/app/domains/local_bot/policies/rate_limit_clock.py",
+        "backend/app/domains/local_bot/service/authentication.py",
+        "backend/app/domains/local_bot/service/presentation.py",
+        "backend/app/runtime/local_bot/authentication.py"
       ],
       "test_paths": [
         "backend/tests/config/test_startup_security.py",
@@ -1382,7 +1387,12 @@
         "backend/app/services/local_bot.py",
         "backend/app/services/local_bot_quota.py",
         "backend/app/services/post_image_generation.py",
-        "backend/app/services/world_feed_social_apply.py"
+        "backend/app/services/world_feed_social_apply.py",
+        "backend/app/domains/local_bot/contracts/authentication.py",
+        "backend/app/domains/local_bot/policies/rate_limit_clock.py",
+        "backend/app/domains/local_bot/service/authentication.py",
+        "backend/app/domains/local_bot/service/presentation.py",
+        "backend/app/runtime/local_bot/authentication.py"
       ],
       "test_paths": [
         "backend/tests/routines/test_daily_activity_runtime.py",
@@ -1754,7 +1764,12 @@
         "backend/app/services/world_feed_runtime.py",
         "backend/app/services/world_feed_search.py",
         "backend/app/domains/memory/service/source_evidence.py",
-        "backend/app/runtime/memory/source_queries.py"
+        "backend/app/runtime/memory/source_queries.py",
+        "backend/app/domains/local_bot/contracts/authentication.py",
+        "backend/app/domains/local_bot/policies/rate_limit_clock.py",
+        "backend/app/domains/local_bot/service/authentication.py",
+        "backend/app/domains/local_bot/service/presentation.py",
+        "backend/app/runtime/local_bot/authentication.py"
       ],
       "test_paths": [
         "backend/tests/social/test_foundation_contracts.py",
@@ -3048,7 +3063,12 @@
         "backend/app/domains/memory/router.py",
         "backend/app/domains/memory/service/management.py",
         "backend/app/domains/memory/service/presentation.py",
-        "backend/app/runtime/memory_http.py"
+        "backend/app/runtime/memory_http.py",
+        "backend/app/domains/local_bot/contracts/authentication.py",
+        "backend/app/domains/local_bot/policies/rate_limit_clock.py",
+        "backend/app/domains/local_bot/service/authentication.py",
+        "backend/app/domains/local_bot/service/presentation.py",
+        "backend/app/runtime/local_bot/authentication.py"
       ],
       "test_paths": [
         "backend/tests/characters/test_character_image_generation_workflows.py",
@@ -3704,7 +3724,12 @@
         "frontend/src/shared/desktop/public.ts",
         "frontend/src/shared/navigation/public.ts",
         "frontend/src/shared/navigation/runtime-navigation.ts",
-        "frontend/src/shared/navigation/static-navigation-bridge.tsx"
+        "frontend/src/shared/navigation/static-navigation-bridge.tsx",
+        "backend/app/domains/local_bot/contracts/authentication.py",
+        "backend/app/domains/local_bot/policies/rate_limit_clock.py",
+        "backend/app/domains/local_bot/service/authentication.py",
+        "backend/app/domains/local_bot/service/presentation.py",
+        "backend/app/runtime/local_bot/authentication.py"
       ],
       "target_paths": [
         "frontend/src/composition",
@@ -6456,7 +6481,12 @@
         "backend/app/domains/memory/repository/queue.py",
         "backend/app/domains/memory/repository/items.py",
         "backend/app/domains/memory/service/source_evidence.py",
-        "backend/app/runtime/memory/source_queries.py"
+        "backend/app/runtime/memory/source_queries.py",
+        "backend/app/domains/local_bot/contracts/authentication.py",
+        "backend/app/domains/local_bot/policies/rate_limit_clock.py",
+        "backend/app/domains/local_bot/service/authentication.py",
+        "backend/app/domains/local_bot/service/presentation.py",
+        "backend/app/runtime/local_bot/authentication.py"
       ],
       "test_paths": [
         "backend/tests/test_embedded_data_migration.py",
@@ -10666,7 +10696,12 @@
         "backend/app/domains/routines/service/plans.py",
         "backend/app/domains/routines/service/execution/__init__.py",
         "backend/app/domains/routines/service/joint_scheduling.py",
-        "backend/app/domains/routines/service/joint_reservations.py"
+        "backend/app/domains/routines/service/joint_reservations.py",
+        "backend/app/domains/local_bot/contracts/authentication.py",
+        "backend/app/domains/local_bot/policies/rate_limit_clock.py",
+        "backend/app/domains/local_bot/service/authentication.py",
+        "backend/app/domains/local_bot/service/presentation.py",
+        "backend/app/runtime/local_bot/authentication.py"
       ],
       "preserved_contracts": [
         "Tree board API/schema/posts and existing support functions/consumers survive. Common UI primitives keep visual and interaction contracts. Compatibility sources remain until consumer-free evidence. This is not a deletion allowlist."

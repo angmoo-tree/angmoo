@@ -1189,3 +1189,10 @@ Identity repository/credentials.py는 원래 nullable id 조회, 소유자/활�
 182개 전체 원본 함수·값을 비교했고 정확한 query/owner save/typed workflow만 펼치면 AST가 동일하다. 최초 새 API fixture의 실행모드 server_llm은 실제 DB의 llm/local CHECK에서 거부되었으며, DB규칙을 바꾸지 않고 fixture를 llm과 실제 foreign owner로 수정했다. 최종35 PASS/기존warning1/14.22초다. 새2node는 실제 HTTP+SQLite에서 key 발급→해시조회→인증/사용시각→교체→폐기 및 활동로그를 확인하며 raw token은 연결 읽기에 나오지 않는다. 다른 소유자404와 LLM모드409에서 key/log0도 확인했다.
 
 경계771/2555/legacy177, L4/ER0 PASS, 원래6보존진단0오류(protected2201/current2260)다. Character 접근 서비스의 실제 예외 계약을 그대로 사용하여 새로운 예외계층/규칙을 추가하지 않았다. 원래 Bot 본문과19개 HTTP의 실제 역할 이전, G5/G06/B8 통합은 미완료다.
+## AR-B8 LocalBot A2 — 인증·공개 응답의 실제 소유
+
+부모 source `3b547b2`의 키 repository/write/owner HTTP를 재사용했다. 실제 인증 판단·Context·로그·응답 projection·지역 날짜 경계18정의를 LocalBot 역할에 옮겼고 같은 소유 클래스/nullable caller-Session 조회·상수 경로만 복원하면 원문 전체 AST가 같다. LocalBot DTO19개의 전체 class AST와 JSON schema도 원문과 같다. Social `BotImageRequestRead`는 기존 실제 소유에 유지하며 두 도메인의 역참조 alias를 만들지 않는다.
+
+기존 키 테스트와 demo 인증 테스트의 준비 대상만 실제 repository/write/nullable 협력으로 연결했다. 기존 assertions는 유지한다. 새 회귀2개는 동일 Session·같은 attached 객체·조회 순서와 삭제/실행 모드/소유자 거절 후 키 사용 기록 미수정을 검사한다. 초기 기존 quota/응답/demo/key와 새 검사 **54 passed / 기존 warning1 /9.06초**. 확장·원래 보존 최종 검증은 아래에 추가하며 frozen/checkpoint/additions를 수정하거나 source 도입 증거를 직접 캡처하지 않는다.
+
+LocalBot A2 최종: 원래18정의와 Bot19전체 class AST/JSONschema 동일. 기존 수정2테스트 모듈의 모든 assertion/suppression도 동일하다. 확장 회귀 **71 passed / 기존 warning1 /10.15초**, 남은1실패는 이 slice에서 endpoint module을 바꾸지 않은 Character의 원래 route security inventory가 아직 옛 agents 모듈을 가리키는 G07 통합 항목이다. 실제경계776/2573/175legacy·L4 776/14/97·deferred22 PASS, 원래6보존진단은 모든항목0(protected2201/current2262)이다. 새 테스트2노드는 source 첫 도입 후 부모가 순차 캡처한다. 기존 key 관리5파일 및 모델/Base·frozen/additions는 수정하지 않았다.

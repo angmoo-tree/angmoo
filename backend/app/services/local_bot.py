@@ -1,68 +1,21 @@
+from app.domains.local_bot.contracts.authentication import LocalBotContext
+from app.domains.local_bot.service.presentation import (_bot_post_reference, _bot_post_summary, _bot_post_detail, _bot_feed_page, _bot_post_thread, _bot_notification_read, _bot_notification_page, _bot_profile_ref, _bot_follow_read, _bot_profile_read)
+from app.domains.local_bot.policies.rate_limit_clock import (_remaining_seconds, _local_day_start_utc, _next_local_day_start_utc, _seconds_until)
 from app.domains.local_bot.exceptions import LocalBotAuthError, LocalBotError, LocalBotForbiddenError, LocalBotModeError, LocalBotRateLimitError
 from app.domains.local_bot.constants import MAX_POSTS_PER_DAY, MAX_REACTIONS_PER_DAY, MAX_READS_PER_WINDOW, MAX_REPLIES_PER_DAY, POST_COOLDOWN, RATE_LIMIT_LOG_DEDUPE_WINDOW, REACTION_ACTION_TYPES, REACTION_COOLDOWN, REACTION_COOLDOWN_ACTION_TYPES, READ_WINDOW, REPLY_COOLDOWN, STATE_ACTION_TYPES, STATE_COOLDOWN
-from dataclasses import dataclass
-from datetime import UTC, datetime, time, timedelta
-import logging
-from math import ceil
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app import models
 from app import schemas
-from app.core import security
 from app.core import unit_of_work
 from app.cruds import agents as agent_crud
 from app.services import agent_activity_policy
-from app.runtime.characters import management as agent_service
 from app.services import community as community_service
-from app.domains.identity.service import demo_access as demo_lock
 from app.domains.local_bot.service import quota as local_bot_quota
 from app.services import post_image_generation
-
-
-
-logger = logging.getLogger(__name__)
-
-
-
-
-
-
-
-
-
-
-
-
-@dataclass
-class LocalBotContext:
-    user: models.User
-    character: models.Character
-    local_key: models.AgentLocalKey
-
-
-def authenticate_local_bot(db: Session, token: str) -> LocalBotContext:
-    token = token.strip()
-    if not token.startswith(agent_service.LOCAL_KEY_PREFIX):
-        _log_auth_failure("invalid_prefix", token)
-        raise LocalBotAuthError("Invalid local bot token.")
-    local_key = agent_crud.get_active_local_key_by_hash(db, security.hash_token(token))
-    if local_key is None:
-        _log_auth_failure("not_found_or_revoked", token)
-        raise LocalBotAuthError("Invalid local bot token.")
-    character = db.get(models.Character, local_key.character_id)
-    if character is None or character.deleted_at is not None:
-        raise LocalBotForbiddenError("Local bot character is not available.")
-    if character.execution_mode != "local":
-        raise LocalBotModeError("Only local mode characters can use bot API.")
-    user = db.get(models.User, local_key.owner_id)
-    if user is None or getattr(user, "deleted_at", None) is not None:
-        raise LocalBotForbiddenError("Local bot owner is not available.")
-    if demo_lock.is_locked_demo_user(user):
-        raise LocalBotForbiddenError(demo_lock.DEMO_ACCOUNT_LOCKED_MESSAGE)
-    local_key = agent_crud.mark_local_key_used(db, local_key)
-    return LocalBotContext(user=user, character=character, local_key=local_key)
 
 
 def get_me(db: Session, context: LocalBotContext) -> schemas.BotMeRead:
@@ -510,151 +463,6 @@ def unfollow_profile(
         raise
 
 
-def _bot_post_reference(post: schemas.PostReference | None) -> schemas.BotPostReference | None:
-    if post is None:
-        return None
-    return schemas.BotPostReference(
-        id=post.id,
-        author_name=post.author_name,
-        author_handle=post.author_handle,
-        author_avatar_url=post.author_avatar_url,
-        title=post.title,
-        body=post.body,
-        created_at=post.created_at,
-        post_type=post.post_type,
-        author_character_id=post.author_character_id,
-        media=post.media,
-    )
-
-
-def _bot_post_summary(post: schemas.PostSummary) -> schemas.BotPostSummary:
-    return schemas.BotPostSummary(
-        id=post.id,
-        author_name=post.author_name,
-        author_handle=post.author_handle,
-        author_avatar_url=post.author_avatar_url,
-        title=post.title,
-        body=post.body,
-        created_at=post.created_at,
-        post_type=post.post_type,
-        author_character_id=post.author_character_id,
-        reply_to_post_id=post.reply_to_post_id,
-        quote_post_id=post.quote_post_id,
-        repost_of_post_id=post.repost_of_post_id,
-        comment_count=post.comment_count,
-        like_count=post.like_count,
-        reply_count=post.reply_count,
-        repost_count=post.repost_count,
-        quote_count=post.quote_count,
-        quoted_post=_bot_post_reference(post.quoted_post),
-        reposted_post=_bot_post_reference(post.reposted_post),
-        report_hidden=post.report_hidden,
-        media=post.media,
-    )
-
-
-def _bot_post_detail(
-    post: schemas.PostDetail,
-    *,
-    image_request: schemas.BotImageRequestRead | None = None,
-) -> schemas.BotPostDetail:
-    return schemas.BotPostDetail(
-        id=post.id,
-        author_name=post.author_name,
-        author_handle=post.author_handle,
-        author_avatar_url=post.author_avatar_url,
-        title=post.title,
-        body=post.body,
-        created_at=post.created_at,
-        post_type=post.post_type,
-        author_character_id=post.author_character_id,
-        reply_to_post_id=post.reply_to_post_id,
-        quote_post_id=post.quote_post_id,
-        repost_of_post_id=post.repost_of_post_id,
-        comments=post.comments,
-        like_count=post.like_count,
-        reply_count=post.reply_count,
-        repost_count=post.repost_count,
-        quote_count=post.quote_count,
-        quoted_post=_bot_post_reference(post.quoted_post),
-        reposted_post=_bot_post_reference(post.reposted_post),
-        report_hidden=post.report_hidden,
-        media=post.media,
-        image_request=image_request,
-    )
-
-
-def _bot_feed_page(page: schemas.FeedPage) -> schemas.BotFeedPage:
-    return schemas.BotFeedPage(
-        items=[_bot_post_summary(item) for item in page.items],
-        next_cursor=page.next_cursor,
-    )
-
-
-def _bot_post_thread(thread: schemas.PostThreadRead) -> schemas.BotPostThreadRead:
-    return schemas.BotPostThreadRead(
-        post=_bot_post_detail(thread.post),
-        replies=[_bot_post_summary(reply) for reply in thread.replies],
-    )
-
-
-def _bot_notification_read(
-    notification: schemas.NotificationRead,
-) -> schemas.BotNotificationRead:
-    return schemas.BotNotificationRead(
-        id=notification.id,
-        notification_type=notification.notification_type,
-        post_id=notification.post_id,
-        source_post_id=notification.source_post_id,
-        actor_character_id=notification.actor_character_id,
-        actor_name=notification.actor_name,
-        actor_handle=notification.actor_handle,
-        actor_avatar_url=notification.actor_avatar_url,
-        post_title=notification.post_title,
-        post_body=notification.post_body,
-        source_post_title=notification.source_post_title,
-        source_post_body=notification.source_post_body,
-        read_at=notification.read_at,
-        created_at=notification.created_at,
-    )
-
-
-def _bot_notification_page(
-    page: schemas.NotificationPage,
-) -> schemas.BotNotificationPage:
-    return schemas.BotNotificationPage(
-        items=[_bot_notification_read(item) for item in page.items],
-        next_cursor=page.next_cursor,
-    )
-
-
-def _bot_profile_ref(profile: schemas.ProfileRef) -> schemas.BotProfileRef:
-    return schemas.BotProfileRef.model_validate(profile.model_dump())
-
-
-def _bot_follow_read(follow: schemas.FollowRead) -> schemas.BotFollowRead:
-    return schemas.BotFollowRead(
-        follower=_bot_profile_ref(follow.follower),
-        target=_bot_profile_ref(follow.target),
-        created_at=follow.created_at,
-    )
-
-
-def _bot_profile_read(profile: schemas.ProfileRead) -> schemas.BotProfileRead:
-    return schemas.BotProfileRead(
-        profile=_bot_profile_ref(profile.profile),
-        execution_mode=profile.execution_mode,
-        post_count=profile.post_count,
-        reply_count=profile.reply_count,
-        liked_post_count=profile.liked_post_count,
-        received_like_count=profile.received_like_count,
-        follower_count=profile.follower_count,
-        character_follower_count=profile.character_follower_count,
-        following_count=profile.following_count,
-        one_liner=profile.one_liner,
-    )
-
-
 def _ensure_post_rate_limit(
     db: Session, context: LocalBotContext
 ) -> local_bot_quota.ActionQuota | None:
@@ -875,13 +683,6 @@ def _count_activities_today(
         )
         or 0
     )
-
-
-def _remaining_seconds(latest: datetime | None, cooldown: timedelta, now: datetime) -> int:
-    if latest is None or cooldown <= timedelta(0):
-        return 0
-    ready_at = latest + cooldown
-    return _seconds_until(ready_at, now) if ready_at > now else 0
 
 
 def _ensure_reaction_rate_limit(
@@ -1107,21 +908,6 @@ def _profile_follow_exists(
     )
 
 
-def _local_day_start_utc(now: datetime) -> datetime:
-    local_now = now.astimezone(agent_activity_policy.APP_TIMEZONE)
-    return datetime.combine(
-        local_now.date(), time.min, tzinfo=agent_activity_policy.APP_TIMEZONE
-    ).astimezone(UTC)
-
-
-def _next_local_day_start_utc(now: datetime) -> datetime:
-    return _local_day_start_utc(now + timedelta(days=1))
-
-
-def _seconds_until(until: datetime, now: datetime) -> int:
-    return max(1, ceil((until - now).total_seconds()))
-
-
 def _raise_rate_limit(
     db: Session,
     context: LocalBotContext,
@@ -1165,19 +951,3 @@ def _log_rate_limit(
             f"token_prefix={context.local_key.token_prefix}"
         ),
     )
-
-
-def _log_auth_failure(reason: str, token: str) -> None:
-    logger.info(
-        "local_bot_auth_failed reason=%s token_prefix=%s",
-        reason,
-        _redacted_token_prefix(token),
-    )
-
-
-def _redacted_token_prefix(token: str) -> str:
-    if token.startswith(agent_service.LOCAL_KEY_PREFIX):
-        return f"{token[:24]}..."
-    if not token:
-        return "-"
-    return f"{token[:8]}..."

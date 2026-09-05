@@ -673,3 +673,10 @@ Operations는 `domains/operations/models.py`의 설정·공지·감사 모델, `
 `characters/service/image_settings_owner.py`는 소유자 검증, 공유/개인/비활성 키 모드, 외형 설명의 수동·자동 상태, 기준 이미지 교체·삭제 및 quota 응답을 결정합니다. 실제 저장은 `repository/image_settings.py`, 키 암호화·설정 갱신은 `service/image_settings.py`가 소유합니다. 다섯 이미지 설정 HTTP 경로는 Character router를 사용합니다.
 
 Runtime은 기존 서비스 키 가용성과 Social quota 조회를 같은 Session으로 연결합니다. 공통 텍스트 검증 `core/image_prompt_safety.py`는 외부 통신 없이 Character와 Social에서 같은 정의를 사용합니다. 기준 이미지 저장→기존 파일 삭제→setting 변경→commit/refresh 순서와 사용자가 직접 작성한 외형 설명의 보존 조건은 그대로입니다. 남은 management caller의 짧은 runtime 연결은 해당 업무 이동과 함께 종료합니다.
+### LocalBot 인증과 공개 응답
+
+`local_bot/service/authentication.py`는 토큰 형식과 활성 키, 캐릭터의 삭제·실행 모드, 소유자의 삭제·demo 제한을 순서대로 확인한 뒤 기존 키 사용 기록을 저장합니다. Character와 Identity 조회는 `contracts/authentication.py`에 필요한 nullable 조회로 표현하며 runtime은 실제 소유 서비스를 같은 Session으로 연결합니다. 인증에서 캐릭터나 소유자의 상태를 복제하거나 새 Session을 만들지 않습니다.
+
+`local_bot/service/presentation.py`는 Social 응답을 Bot의 공개 필드로 변환합니다. Bot의 입력·공개 응답 형식은 `local_bot/schemas.py`가 소유하고, Social 이미지 작업 결과인 `BotImageRequestRead`와 공유 글 미디어·댓글은 원래 Social 형식을 사용합니다. 비공개 Character 상태·개인 credential을 공개 projection에 추가하지 않습니다. `policies/rate_limit_clock.py`는 원래의 지역 날짜 경계와 양수 Retry-After 계산을 유지합니다.
+
+현재 실제 Bot 행동·rate-limit 읽기와 HTTP 라우터는 후속 LocalBot 전환 범위입니다. 임시 기존 소비자는 소유 서비스를 직접 연결하며, 이 단계의 인증·응답 분리를 모든 LocalBot 전환의 완료로 해석하지 않습니다.

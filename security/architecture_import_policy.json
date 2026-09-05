@@ -5,10 +5,6 @@
     {
       "edges": [
         {
-          "imported": "app.services.local_bot",
-          "importer": "app.api.v1.deps"
-        },
-        {
           "imported": "app.models",
           "importer": "app.api.v1.routes.agent_runs"
         },
@@ -489,10 +485,6 @@
           "importer": "app.services.local_bot"
         },
         {
-          "imported": "app.runtime.characters.management",
-          "importer": "app.services.local_bot"
-        },
-        {
           "imported": "app.schemas",
           "importer": "app.services.local_bot"
         },
@@ -896,16 +888,20 @@
       "app.domains.identity.service.profile",
       "app.domains.identity.service.world_character_credentials",
       "app.domains.local_bot.constants",
+      "app.domains.local_bot.contracts.authentication",
       "app.domains.local_bot.contracts.key_management",
       "app.domains.local_bot.dependencies",
       "app.domains.local_bot.exceptions",
       "app.domains.local_bot.models",
+      "app.domains.local_bot.policies.rate_limit_clock",
       "app.domains.local_bot.repository.keys",
       "app.domains.local_bot.repository.quota",
       "app.domains.local_bot.router.keys",
       "app.domains.local_bot.schemas",
+      "app.domains.local_bot.service.authentication",
       "app.domains.local_bot.service.key_management",
       "app.domains.local_bot.service.key_records",
+      "app.domains.local_bot.service.presentation",
       "app.domains.local_bot.service.quota",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
@@ -1178,10 +1174,13 @@
       "app.domains.identity.service.owner_context",
       "app.domains.identity.service.profile",
       "app.domains.identity.service.world_character_credentials",
+      "app.domains.local_bot.contracts.authentication",
       "app.domains.local_bot.contracts.key_management",
       "app.domains.local_bot.schemas",
+      "app.domains.local_bot.service.authentication",
       "app.domains.local_bot.service.key_management",
       "app.domains.local_bot.service.key_records",
+      "app.domains.local_bot.service.presentation",
       "app.domains.local_bot.service.quota",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
@@ -1899,14 +1898,6 @@
         "owner_stage": "AR-B2",
         "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
         "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.local_bot",
-        "target": "app.domains.identity.service.demo_access",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
-        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
         "review_date": "2026-09-05"
       },
       {
@@ -2971,6 +2962,46 @@
         "owner_stage": "AR-B8-A",
         "removal_condition": "Remove original same-object CRUD key aliases after LocalBot authentication/actions and remaining callers move; none remain at AR-B8-B.",
         "reason": "Existing caller uses the same key query/write function during actual LocalBot role migration.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.local_bot",
+        "target": "app.domains.local_bot.contracts.authentication",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove this exact existing consumer during remaining LocalBot HTTP/action ownership or G5 schema registration; no such bridge remains at AR-B8-B.",
+        "reason": "Actual original callback or same-object response/clock/context while the specific remaining source is migrated.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.local_bot",
+        "target": "app.domains.local_bot.policies.rate_limit_clock",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove this exact existing consumer during remaining LocalBot HTTP/action ownership or G5 schema registration; no such bridge remains at AR-B8-B.",
+        "reason": "Actual original callback or same-object response/clock/context while the specific remaining source is migrated.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.local_bot",
+        "target": "app.domains.local_bot.service.presentation",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove this exact existing consumer during remaining LocalBot HTTP/action ownership or G5 schema registration; no such bridge remains at AR-B8-B.",
+        "reason": "Actual original callback or same-object response/clock/context while the specific remaining source is migrated.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.api.v1.deps",
+        "target": "app.domains.local_bot.service.authentication",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove this exact existing consumer during remaining LocalBot HTTP/action ownership or G5 schema registration; no such bridge remains at AR-B8-B.",
+        "reason": "Actual original callback or same-object response/clock/context while the specific remaining source is migrated.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.local_bot.schemas",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Remove this exact existing consumer during remaining LocalBot HTTP/action ownership or G5 schema registration; no such bridge remains at AR-B8-B.",
+        "reason": "Actual original callback or same-object response/clock/context while the specific remaining source is migrated.",
         "review_date": "2026-09-06"
       }
     ]
