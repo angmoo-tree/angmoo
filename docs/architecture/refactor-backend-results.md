@@ -15,7 +15,7 @@
 | AR-G4 | LOCAL VERIFIED · PR PENDING | Alembic 물리 경로·역사 본문 보존; G5 최종 모델 등록 연결 대기 |
 | AR-B2 | IDENTITY PR #270 · CHARACTER FOUNDATION INTEGRATION | Identity full backend PASS; Character 기반·Creator 정책 통합 후 HTTP/Worlds/WC 후속 |
 | AR-B3 | NOT STARTED | World Package→media |
-| AR-B4 | ROUTINES A1/A2/A3a LOCAL VERIFIED · INTEGRATION/PR PENDING | 실제 계획·guarded lifecycle 이전; legacy claim·routine_posts·resident 후속 |
+| AR-B4 | ROUTINES A1/A2/A3a/b LOCAL VERIFIED · INTEGRATION/PR PENDING | 실제 계획·guarded lifecycle·실행 claim 이전; joint·routine_posts·resident 후속 |
 | AR-B5 | NOT STARTED | social→relationships→projection |
 | AR-B6 | NOT STARTED | Chat transport→generation→retrieval/response |
 | AR-B7 | NOT STARTED | Memory read/write→owner→batch→runtime |
@@ -515,3 +515,21 @@ Hotfix·계획·공동 활동·게시 실행·scheduler/활동 한도 집중 결
 A3a는 K05 전체 완료가 아니다. legacy claim/공동 실행, routine_posts provider·결과 처리, resident·lease·worker, 선형 통합 후 backend 전체·Hosted·installer 검증은 후속 범위다. 신규 source/test 도입 증거는 source commit을 고정한 뒤 root가 선형 계보에 append한다.
 
 전체 보존 검사는 PR258 **1,867** / PR263 **1,907** / 보호 계보 **2,129** / 현재 **2,173** node를 대조했다. API·ORM·원본 assertion/exception·suppression·split·기존 node 손실은 없으며, exit 1의 항목은 이 준비 branch에 아직 합류하지 않은 선행 source/test 도입 metadata다. 원본 소스나 frozen 기준을 수정하지 않았고, 상세 결과는 작업 산출물 `routines-a3a-preservation.log`에 보존했다.
+
+### AR-B4-A3b — 실행 claim과 게시 성공 상태의 소유권
+
+A3a source `0945889` 이후 `services/activity_runtime.py`의 실제 beat/consumption claim·release·reject·complete·failure를 `routines/service/execution/claims.py`, 실행기에서 사용하던 복구·종료·중단을 `execution/lifecycle.py`로 나눴다. 상태·오류·재시도 한도·episode→beat 잠금·claim commit·IntegrityError rollback/replay는 유지한다. 기존 실행기의 admission과 guarded 경로의 autonomous 검사는 다르므로 서로 바꾸지 않는다. `execution/__init__.py`는 동일 객체 export만 제공하고, 제품 실행은 실제 역할 모듈을 호출한다. 옛 전역 구현과 compatibility의 해당 export는 제거했다.
+
+외부 Post/WC/membership 조회는 `runtime/routines/activity_references.py`에서 원래 Session으로 실행한다. 기존 nullable 조회와 중단 시 WC FOR UPDATE를 유지하고 새 commit을 만들지 않는다. Post는 이 준비 branch의 실제 `app.models.community.Post`이며, B5-A에서 `social.models.posts.Post`로 전환할 정확 소비자와 종료 조건을 담당자에게 전달했다. 이 기존 read를 옮긴 1 edge만 기한을 명시했고 domain에서 외부 ORM을 직접 읽는 예외는 추가하지 않았다.
+
+공통 open-claim 종료 helper는 두 원문의 executable AST가 같음을 확인했다. UTC/due 함수도 기존 별칭·docstring만 정규화했을 때 AST가 동일하여 실제 단일 구현을 사용한다. trigger/terminal 값은 constants, 업무 간 소비 namespace는 lifecycle contract에 있으며 값은 그대로다.
+
+- 신규 SQLite 파일 기반 2 node는 pending Post를 동일 Session에서 읽는 순서, `complete(commit=False)` 후 observer에게 Post/성공 상태가 보이지 않는 점, caller commit 또는 rollback에 따라 게시물·beat·episode가 함께 확정 또는 복원되는 점을 확인한다.
+- 첫 focused 검증 **125 passed / 1 기존 PostgreSQL skip / 2 기존 warnings / 45.89초**. 최초 collection의 미존재 Social public Post import는 이 branch의 실제 모델 경로로 바로잡은 후 처음부터 다시 실행한 결과다.
+- 현재 경계 **637 modules / 2,068 edges / legacy exact 280 PASS**, routines partial role **26개**. L4 parity **97**, ER0 **78 PostgreSQL 파일 / 87 migrations / 24 Neo4j / 44 Next routes / 7 workloads**. 파일 수 변화는 실제 SQL 소유 분할 결과이며 역사적 기준을 덮어쓰지 않는다.
+
+공동 활동의 서로 다른 scheduling/runtime, routine_posts provider·context·게시 조립과 resident·lease·worker는 후속 범위다. 이 source의 최종 보존 및 추가 경로 회귀 결과는 아래에 이어 기록한다.
+
+최종 focused 묶음은 **152 passed / 1 기존 PostgreSQL skip / 3 기존 warnings / 81.87초**다. 실제 이전된 15개 함수/class의 AST는 추가 조회 인자와 정확한 기존 read 추출만 되돌려 비교했을 때 원문과 차이가 없다. claim/완료/실패와 실행기 lifecycle의 원래 상태 전이·오류·트랜잭션 순서를 유지한다.
+
+전체 보존 검사도 PR258 **1,867** / PR263 **1,907** / 보호 계보 **2,129** / 현재 **2,175** node를 대조했으며 API·ORM·원본 assertion/exception·suppression·split·기존 node 손실이 없다. exit 1의 나머지는 선형 통합 시 root가 연결할 source/test 도입 metadata다. 상세 로그는 `routines-a3b-preservation.log`이며 이 준비 source를 merge/전체 backend/Hosted/installer 완료로 표시하지 않는다.

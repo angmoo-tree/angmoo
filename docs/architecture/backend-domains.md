@@ -307,8 +307,12 @@ their consumers move. Guarded elapsed/restart lifecycle now lives in
 `service/lifecycle.py`; `runtime/routines/lifecycle_references.py` supplies the
 original owner records and autonomous elapsed-plan join on the caller's Session.
 The service preserves per-character commits and owner-controlled rejection.
-The differently admitted legacy claim/lifecycle functions and resident execution
-remain following B4 slices, with no catch-up public actions added.
+The differently admitted runner claim/lifecycle functions now live under
+`service/execution/claims.py` and `service/execution/lifecycle.py`, preserving
+episode-before-beat locks and the original flush/commit decisions. Publication
+evidence reads use the caller's Session through `runtime/routines/activity_references.py`.
+Joint scheduling and resident execution remain following B4 slices, with no
+catch-up public actions added.
 
 L3 PR F introduced `app.domains.routine_posts.public` for autonomous routine
 selection, evidence-bounded continuation, two-call writing, and atomic

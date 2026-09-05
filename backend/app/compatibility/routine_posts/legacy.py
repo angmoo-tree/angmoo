@@ -15,7 +15,6 @@ from app.compatibility.routine_posts.canonical_interactions import (
 from app.cruds import agent_runs as agent_run_crud
 from app.schemas.community import PostCreate
 from app.services import (
-    activity_runtime,
     activity_state_contracts,
     agent_activity_policy,
     joint_activity_runtime,
@@ -37,7 +36,6 @@ def canonical_interaction_source() -> object:
 __all__ = [
     "LangGraphResidentContext",
     "PostCreate",
-    "activity_runtime",
     "activity_state_contracts",
     "agent_activity_policy",
     "agent_run_crud",

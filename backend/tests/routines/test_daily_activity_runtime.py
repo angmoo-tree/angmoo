@@ -20,7 +20,8 @@ from app.domains.identity import dependencies as api_deps
 from app.api.v1.routes import world_activity_runtime as runtime_routes
 from app.core.db import Base
 from app.domains.routines import public as routines
-from app.services import activity_runtime
+from app.domains.routines.service import execution as activity_runtime
+from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
 from app.services import activity_state_contracts
 from app.services import daily_activity_plans
 from app.services import joint_activity_scheduling
@@ -676,6 +677,7 @@ def test_beat_success_applies_event_once_and_failure_releases_claim() -> None:
         )
         event_claim = activity_runtime.claim_event_consumption(
             db,
+            references=SqlAlchemyActivityReferences(db),
             world_id=fixture.world_character.world_id,
             consumer_world_character_id=fixture.world_character.id,
             source_social_event_id="event-1",
@@ -701,6 +703,7 @@ def test_beat_success_applies_event_once_and_failure_releases_claim() -> None:
         )
         activity_runtime.complete_activity_beat(
             db,
+            references=SqlAlchemyActivityReferences(db),
             beat_id=beat_claim.row.id,
             claim_run_id="run-1",
             source_post_id=post.id,
@@ -720,6 +723,7 @@ def test_beat_success_applies_event_once_and_failure_releases_claim() -> None:
         ):
             activity_runtime.claim_event_consumption(
                 db,
+                references=SqlAlchemyActivityReferences(db),
                 world_id=fixture.world_character.world_id,
                 consumer_world_character_id=fixture.world_character.id,
                 source_social_event_id="event-1",
@@ -743,6 +747,7 @@ def test_beat_success_applies_event_once_and_failure_releases_claim() -> None:
         )
         released = activity_runtime.claim_event_consumption(
             db,
+            references=SqlAlchemyActivityReferences(db),
             world_id=fixture.world_character.world_id,
             consumer_world_character_id=fixture.world_character.id,
             source_social_event_id="event-2",
@@ -799,6 +804,7 @@ def test_daypart_transition_closes_successful_episode_without_provider_work() ->
         )
         activity_runtime.complete_activity_beat(
             db,
+            references=SqlAlchemyActivityReferences(db),
             beat_id=beat.row.id,
             claim_run_id="daypart-run",
             source_post_id=post.id,
@@ -912,6 +918,7 @@ def test_inactive_membership_interrupts_current_and_cancels_future_items() -> No
         db.commit()
         activity_runtime.complete_activity_beat(
             db,
+            references=SqlAlchemyActivityReferences(db),
             beat_id=beat.row.id,
             claim_run_id="membership-run",
             source_post_id=post.id,
@@ -925,6 +932,7 @@ def test_inactive_membership_interrupts_current_and_cancels_future_items() -> No
 
         result = activity_runtime.interrupt_inactive_world_character(
             db,
+            references=SqlAlchemyActivityReferences(db),
             world_character_id=fixture.world_character.id,
             now=now + timedelta(minutes=2),
         )
@@ -946,6 +954,7 @@ def test_inactive_membership_interrupts_current_and_cancels_future_items() -> No
         assert db.get(models.DailyActivityPlan, plan.id).status == "interrupted"
         replay = activity_runtime.interrupt_inactive_world_character(
             db,
+            references=SqlAlchemyActivityReferences(db),
             world_character_id=fixture.world_character.id,
             now=now + timedelta(minutes=3),
         )
@@ -1087,6 +1096,7 @@ def test_expired_runtime_claims_are_recoverable_after_restart() -> None:
         )
         consumption = activity_runtime.claim_event_consumption(
             db,
+            references=SqlAlchemyActivityReferences(db),
             world_id=fixture.world_character.world_id,
             consumer_world_character_id=fixture.world_character.id,
             source_social_event_id="expired-event",

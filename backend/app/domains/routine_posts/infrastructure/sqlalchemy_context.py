@@ -9,11 +9,12 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.compatibility.routine_posts import legacy
+from app.domains.routines.contracts.lifecycle import DueTick, EVENT_CONSUMPTION_NAMESPACE
+from app.domains.routines.service.scheduling import latest_due_tick
 from app.domains.routine_posts.domain.interaction import RoutineInteractionInput
 
 
 models = legacy.models
-activity_runtime = legacy.activity_runtime
 activity_state_contracts = legacy.activity_state_contracts
 neutralize_context_text = legacy.neutralize_context_text
 
@@ -68,7 +69,7 @@ class RoutinePostContext:
     plan: models.DailyActivityPlan
     item: models.DailyActivityPlanItem
     episode: models.ActivityEpisode
-    due_tick: activity_runtime.DueTick
+    due_tick: DueTick
     previous_beat: models.ActivityBeat | None
     previous_post: models.Post | None
     state_before: dict[str, object]
@@ -291,12 +292,12 @@ def assemble_routine_post_context(
         retry_beat = latest_beat
 
     due_tick = (
-        activity_runtime.DueTick(
+        DueTick(
             scheduled_for=_aware_utc(retry_beat.scheduled_for),
             skipped_tick_count=retry_beat.skipped_tick_count,
         )
         if retry_beat is not None
-        else activity_runtime.latest_due_tick(
+        else latest_due_tick(
             window_start=item.scheduled_start_at,
             window_end=item.scheduled_end_at,
             now=current,
@@ -335,7 +336,7 @@ def assemble_routine_post_context(
                 == world_character.id,
                 models.ActivityEventConsumption.source_social_event_id.in_(event_ids),
                 models.ActivityEventConsumption.namespace
-                == activity_runtime.EVENT_CONSUMPTION_NAMESPACE,
+                == EVENT_CONSUMPTION_NAMESPACE,
             )
         ):
             active_claim = (

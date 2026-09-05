@@ -24,6 +24,10 @@ from app.domains.routine_posts.infrastructure.sqlalchemy_context import (
     assemble_routine_post_context,
 )
 from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routines
+from app.domains.routines.service.execution import claims as activity_claims
+from app.domains.routines.service.execution import lifecycle as activity_lifecycle
+from app.domains.routines import exceptions as activity_errors
+from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
 from app.runtime.social.sqlalchemy_inbox import (
     ManualInboxRuntimeError,
     claimed_observation_post_id,
@@ -50,7 +54,6 @@ from app.integrations.direct_llm import (
 
 models = legacy.models
 agent_run_crud = legacy.agent_run_crud
-activity_runtime = legacy.activity_runtime
 agent_activity_policy = legacy.agent_activity_policy
 joint_activity_runtime = legacy.joint_activity_runtime
 social_event_runtime = legacy.social_event_runtime
@@ -152,7 +155,7 @@ def _failure_code(exc: BaseException) -> str:
     return "routine_generation_failed"
 
 
-def _runtime_error_code(exc: activity_runtime.ActivityRuntimeError) -> str:
+def _runtime_error_code(exc: activity_errors.ActivityRuntimeError) -> str:
     value = str(exc).strip()
     return value.upper() if value else "ROUTINE_RUNTIME_CONFLICT"
 
@@ -173,20 +176,20 @@ def _finish_failed_beat(
     )
     try:
         if retryable and beat.attempt_count < 2:
-            activity_runtime.release_activity_beat_for_retry(
+            activity_claims.release_activity_beat_for_retry(
                 db,
                 beat_id=beat.id,
                 claim_run_id=claim_run_id,
                 reason_code=reason_code,
             )
         else:
-            activity_runtime.fail_activity_beat(
+            activity_claims.fail_activity_beat(
                 db,
                 beat_id=beat.id,
                 claim_run_id=claim_run_id,
                 reason_code=reason_code,
             )
-    except activity_runtime.ActivityRuntimeError:
+    except activity_errors.ActivityRuntimeError:
         db.rollback()
         logger.exception(
             "routine_beat_failure_finalize_failed beat_id=%s run_id=%s",
@@ -239,12 +242,12 @@ async def run_routine_post_runtime(
         )
 
     try:
-        activity_runtime.close_elapsed_dayparts(
+        activity_lifecycle.close_elapsed_dayparts(
             db,
             world_character_id=world_character.id,
             now=resident_context.run_started_at,
         )
-    except activity_runtime.ActivityRuntimeError as exc:
+    except activity_errors.ActivityRuntimeError as exc:
         db.rollback()
         logger.exception(
             'routine_elapsed_daypart_transition_failed run_id=%s '
@@ -291,7 +294,7 @@ async def run_routine_post_runtime(
         scheduled_for=context.due_tick.scheduled_for,
     )
     try:
-        claim = activity_runtime.claim_activity_beat(
+        claim = activity_claims.claim_activity_beat(
             db,
             episode_id=context.episode.id,
             scheduled_for=context.due_tick.scheduled_for,
@@ -305,7 +308,7 @@ async def run_routine_post_runtime(
             skipped_tick_count=context.due_tick.skipped_tick_count,
             now=resident_context.run_started_at,
         )
-    except activity_runtime.ActivityRuntimeError as exc:
+    except activity_errors.ActivityRuntimeError as exc:
         return _safe_result(outcome=_runtime_error_code(exc), tracker=tracker)
     beat = claim.row
     if not isinstance(beat, models.ActivityBeat):
@@ -326,8 +329,9 @@ async def run_routine_post_runtime(
                 )
                 claimed_manual_source_ids.append(event.source_event_id)
             else:
-                activity_runtime.claim_event_consumption(
+                activity_claims.claim_event_consumption(
                     db,
+                    references=SqlAlchemyActivityReferences(db),
                     world_id=context.world.id,
                     consumer_world_character_id=world_character.id,
                     source_social_event_id=event.source_event_id,
@@ -337,7 +341,7 @@ async def run_routine_post_runtime(
                     claim_expires_at=resident_context.run_started_at + CLAIM_LEASE,
                     now=resident_context.run_started_at,
                 )
-    except (activity_runtime.ActivityRuntimeError, ManualInboxRuntimeError) as exc:
+    except (activity_errors.ActivityRuntimeError, ManualInboxRuntimeError) as exc:
         _finish_failed_beat(
             db,
             beat=beat,
@@ -349,7 +353,7 @@ async def run_routine_post_runtime(
         return _safe_result(
             outcome=(
                 _runtime_error_code(exc)
-                if isinstance(exc, activity_runtime.ActivityRuntimeError)
+                if isinstance(exc, activity_errors.ActivityRuntimeError)
                 else "MANUAL_INBOX_CLAIM_CONFLICT"
             ),
             tracker=tracker,
@@ -559,7 +563,7 @@ async def run_routine_post_runtime(
             )
             post = db.get(models.Post, post_read.id)
             if post is None:
-                raise activity_runtime.ActivityRuntimeValidationError(
+                raise activity_errors.ActivityRuntimeValidationError(
                     "publish_evidence_missing"
                 )
             result_snapshot["post_evidence"] = {
@@ -618,8 +622,9 @@ async def run_routine_post_runtime(
                 claim_run_id=resident_context.run_id,
                 now=resident_context.run_started_at,
             )
-            activity_runtime.complete_activity_beat(
+            activity_claims.complete_activity_beat(
                 db,
+                references=SqlAlchemyActivityReferences(db),
                 beat_id=beat.id,
                 claim_run_id=resident_context.run_id,
                 source_post_id=post.id,

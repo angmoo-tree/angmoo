@@ -1,43 +1,27 @@
+"""Lifecycle used after caller admission; preserve the legacy scope contract."""
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Any
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.domains.routines.policies import activity_state
-from app.domains.routines.exceptions import ActivityRuntimeConflictError, ActivityRuntimeNotFoundError, ActivityRuntimeValidationError
-from app.domains.routines.contracts.lifecycle import DaypartTransitionCounts, RecoveryCounts, WorldInterruptionCounts
-from app.domains.routines.service.scheduling import aware_utc
 from app.domains.routines import models
-from app.domains.routines.contracts.lifecycle import LifecycleReferences
-from app.domains.routines.contracts.clock import Clock
-from app.domains.routines.utils.clock import resolve_clock
-
-
 from app.domains.routines.constants import TERMINAL_ITEM_STATUSES
+from app.domains.routines.contracts.activity import ActivityReferences
+from app.domains.routines.contracts.lifecycle import DaypartTransitionCounts, RecoveryCounts, WorldInterruptionCounts
+from app.domains.routines.exceptions import ActivityRuntimeConflictError, ActivityRuntimeNotFoundError, ActivityRuntimeValidationError
+from app.domains.routines.policies import activity_state as activity_state_contracts
 from app.domains.routines.service.execution.claims import _close_open_beat_claims
-
-
-def _require_autonomous(references: LifecycleReferences, world_character_id: str) -> Any:
-    world_character = references.get_world_character(world_character_id)
-    if world_character is None:
-        raise ActivityRuntimeNotFoundError(world_character_id)
-    if world_character.control_mode != "autonomous":
-        raise ActivityRuntimeValidationError("owner_controlled_automation_disabled")
-    return world_character
+from app.domains.routines.service.scheduling import aware_utc as _aware_utc
 
 
 def recover_expired_claims(
     db: Session,
     *,
     now: datetime | None = None,
-    clock: Clock | None = None,
-    references: LifecycleReferences,
 ) -> RecoveryCounts:
-    now = resolve_clock(now=now, clock=clock).now_utc()
-    current = aware_utc(now)
+    current = _aware_utc(now or datetime.now(UTC))
     beats = list(
         db.scalars(
             select(models.ActivityBeat)
@@ -49,12 +33,10 @@ def recover_expired_claims(
         )
     )
     for beat in beats:
-        _require_autonomous(references, beat.world_character_id)
         beat.status = "pending"
         beat.claim_run_id = None
         beat.claim_expires_at = None
         beat.started_at = None
-
     consumptions = list(
         db.scalars(
             select(models.ActivityEventConsumption)
@@ -66,7 +48,6 @@ def recover_expired_claims(
         )
     )
     for row in consumptions:
-        _require_autonomous(references, row.consumer_world_character_id)
         row.status = "released"
         row.claim_run_id = None
         row.claim_expires_at = None
@@ -76,26 +57,21 @@ def recover_expired_claims(
     return RecoveryCounts(beats=len(beats), consumptions=len(consumptions))
 
 
-
-
 def close_elapsed_dayparts(
     db: Session,
     *,
     world_character_id: str,
     now: datetime | None = None,
-    clock: Clock | None = None,
-    references: LifecycleReferences,
 ) -> DaypartTransitionCounts:
-    """Close elapsed items without creating catch-up provider or SNS work."""
+    """Close elapsed items without generating catch-up SNS activity."""
 
-    now = resolve_clock(now=now, clock=clock).now_utc()
-    _require_autonomous(references, world_character_id)
-    current = aware_utc(now)
+    current = _aware_utc(now or datetime.now(UTC))
     items = list(
         db.scalars(
             select(models.DailyActivityPlanItem)
             .where(
-                models.DailyActivityPlanItem.world_character_id == world_character_id,
+                models.DailyActivityPlanItem.world_character_id
+                == world_character_id,
                 models.DailyActivityPlanItem.scheduled_end_at <= current,
                 models.DailyActivityPlanItem.status.in_({"planned", "active"}),
             )
@@ -126,10 +102,12 @@ def close_elapsed_dayparts(
                     .order_by(models.ActivityBeat.sequence_no)
                 )
             )
-            episode.current_state_snapshot = activity_state.apply_state_changes(
-                episode.current_state_snapshot,
-                [],
-                daypart_ended=True,
+            episode.current_state_snapshot = (
+                activity_state_contracts.apply_state_changes(
+                    episode.current_state_snapshot,
+                    [],
+                    daypart_ended=True,
+                )
             )
             episode.status = "completed"
             episode.completed_at = current
@@ -186,43 +164,19 @@ def close_elapsed_dayparts(
     return DaypartTransitionCounts(completed=completed, skipped=skipped)
 
 
-def reconcile_all_elapsed_routines(
-    db: Session,
-    *,
-    now: datetime | None = None,
-    clock: Clock | None = None,
-    references: LifecycleReferences,
-) -> DaypartTransitionCounts:
-    """Reconcile eligible autonomous plans once; owner-controlled rows stay invisible."""
-
-    now = resolve_clock(now=now, clock=clock).now_utc()
-    current = aware_utc(now)
-    world_character_ids = references.elapsed_autonomous_world_character_ids(now=current)
-    completed = 0
-    skipped = 0
-    for world_character_id in world_character_ids:
-        transition = close_elapsed_dayparts(
-            db,
-            world_character_id=world_character_id,
-            references=references,
-            now=current,
-        )
-        completed += transition.completed
-        skipped += transition.skipped
-    return DaypartTransitionCounts(completed=completed, skipped=skipped)
-
-
 def interrupt_inactive_world_character(
     db: Session,
     *,
+    references: ActivityReferences,
     world_character_id: str,
     now: datetime | None = None,
-    clock: Clock | None = None,
-    references: LifecycleReferences,
 ) -> WorldInterruptionCounts:
-    now = resolve_clock(now=now, clock=clock).now_utc()
-    current = aware_utc(now)
-    world_character = _require_autonomous(references, world_character_id)
+    """Stop current/future runtime after a World membership is deactivated."""
+
+    current = _aware_utc(now or datetime.now(UTC))
+    world_character = references.get_world_character(world_character_id, lock_for_update=True)
+    if world_character is None:
+        raise ActivityRuntimeNotFoundError(world_character_id)
     membership = references.get_membership(world_character.membership_id)
     if membership is None or membership.world_id != world_character.world_id:
         raise ActivityRuntimeValidationError("cross_world_reference")
@@ -233,7 +187,8 @@ def interrupt_inactive_world_character(
         db.scalars(
             select(models.DailyActivityPlanItem)
             .where(
-                models.DailyActivityPlanItem.world_character_id == world_character_id,
+                models.DailyActivityPlanItem.world_character_id
+                == world_character_id,
                 models.DailyActivityPlanItem.status.in_({"planned", "active"}),
                 models.DailyActivityPlanItem.scheduled_end_at > current,
             )
@@ -283,4 +238,7 @@ def interrupt_inactive_world_character(
         plan.status = "interrupted"
         plan.version += 1
     db.commit()
-    return WorldInterruptionCounts(interrupted=interrupted, cancelled=cancelled)
+    return WorldInterruptionCounts(
+        interrupted=interrupted,
+        cancelled=cancelled,
+    )

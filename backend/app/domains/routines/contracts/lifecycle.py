@@ -5,6 +5,9 @@ from datetime import datetime
 from typing import Any, Protocol
 
 
+EVENT_CONSUMPTION_NAMESPACE = "next_activity_beat"
+
+
 @dataclass(frozen=True)
 class RecoveryCounts:
     beats: int

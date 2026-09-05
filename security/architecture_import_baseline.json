@@ -1,7 +1,7 @@
 {
-  "edge_count": 2040,
-  "external_import_count": 2068,
-  "module_count": 633,
+  "edge_count": 2068,
+  "external_import_count": 2075,
+  "module_count": 637,
   "modules": [
     {
       "external_imports": [],
@@ -455,7 +455,6 @@
         "app.models",
         "app.runtime.relationships.sqlalchemy_social_event",
         "app.schemas.community",
-        "app.services.activity_runtime",
         "app.services.activity_state_contracts",
         "app.services.agent_activity_policy",
         "app.services.community",
@@ -3458,7 +3457,9 @@
       ],
       "imports": [
         "app.compatibility.routine_posts.legacy",
-        "app.domains.routine_posts.domain.interaction"
+        "app.domains.routine_posts.domain.interaction",
+        "app.domains.routines.contracts.lifecycle",
+        "app.domains.routines.service.scheduling"
       ],
       "module": "app.domains.routine_posts.infrastructure.sqlalchemy_context",
       "path": "backend/app/domains/routine_posts/infrastructure/sqlalchemy_context.py",
@@ -3483,7 +3484,9 @@
     },
     {
       "external_imports": [],
-      "imports": [],
+      "imports": [
+        "app.domains.routines.contracts.lifecycle"
+      ],
       "module": "app.domains.routines.constants",
       "path": "backend/app/domains/routines/constants.py",
       "wildcard_imports": []
@@ -3493,6 +3496,15 @@
       "imports": [],
       "module": "app.domains.routines.contracts",
       "path": "backend/app/domains/routines/contracts/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.contracts.activity",
+      "path": "backend/app/domains/routines/contracts/activity.py",
       "wildcard_imports": []
     },
     {
@@ -3683,6 +3695,64 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.lifecycle",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.service.execution.claims",
+        "app.domains.routines.service.execution.lifecycle",
+        "app.domains.routines.service.scheduling"
+      ],
+      "module": "app.domains.routines.service.execution",
+      "path": "backend/app/domains/routines/service/execution/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity",
+        "app.domains.routines.contracts.lifecycle",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.policies.activity_state",
+        "app.domains.routines.service.scheduling"
+      ],
+      "module": "app.domains.routines.service.execution.claims",
+      "path": "backend/app/domains/routines/service/execution/claims.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity",
+        "app.domains.routines.contracts.lifecycle",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.policies.activity_state",
+        "app.domains.routines.service.execution.claims",
+        "app.domains.routines.service.scheduling"
+      ],
+      "module": "app.domains.routines.service.execution.lifecycle",
+      "path": "backend/app/domains/routines/service/execution/lifecycle.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "__future__",
         "datetime",
@@ -3707,11 +3777,13 @@
         "typing"
       ],
       "imports": [
+        "app.domains.routines.constants",
         "app.domains.routines.contracts.clock",
         "app.domains.routines.contracts.lifecycle",
         "app.domains.routines.exceptions",
         "app.domains.routines.models",
         "app.domains.routines.policies.activity_state",
+        "app.domains.routines.service.execution.claims",
         "app.domains.routines.service.scheduling",
         "app.domains.routines.utils.clock"
       ],
@@ -7770,10 +7842,14 @@
         "app.core.unit_of_work",
         "app.domains.routine_posts.infrastructure.direct_llm_provider",
         "app.domains.routine_posts.infrastructure.sqlalchemy_context",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.service.execution.claims",
+        "app.domains.routines.service.execution.lifecycle",
         "app.domains.routines.service.lifecycle",
         "app.domains.social.domain.subjective_context",
         "app.domains.social.public",
         "app.integrations.direct_llm",
+        "app.runtime.routines.activity_references",
         "app.runtime.social.observations",
         "app.runtime.social.sqlalchemy_inbox",
         "app.runtime.social.subjective_context"
@@ -7787,6 +7863,20 @@
       "imports": [],
       "module": "app.runtime.routines",
       "path": "backend/app/runtime/routines/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.world_characters.models",
+        "app.domains.worlds.models",
+        "app.models.community"
+      ],
+      "module": "app.runtime.routines.activity_references",
+      "path": "backend/app/runtime/routines/activity_references.py",
       "wildcard_imports": []
     },
     {
@@ -8532,26 +8622,6 @@
       ],
       "module": "app.services.activity_proposal_runtime",
       "path": "backend/app/services/activity_proposal_runtime.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.core.ids",
-        "app.domains.routines.contracts.lifecycle",
-        "app.domains.routines.exceptions",
-        "app.domains.routines.policies.activity_state",
-        "app.models"
-      ],
-      "module": "app.services.activity_runtime",
-      "path": "backend/app/services/activity_runtime.py",
       "wildcard_imports": []
     },
     {

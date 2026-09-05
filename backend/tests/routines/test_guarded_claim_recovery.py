@@ -8,7 +8,8 @@ from app.runtime.routines.lifecycle_references import SqlAlchemyLifecycleReferen
 from app import models
 from app.core.db import Base
 from app.domains.routines import public as routines
-from app.services import activity_runtime
+from app.domains.routines.service import execution as activity_runtime
+from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
 from routines.test_daily_activity_runtime import _add_social_event, _prepare, _seed, _utc
 
 
@@ -54,6 +55,7 @@ def test_guarded_recovery_uses_consumption_owner_and_preserves_admission(
         )
         consumption = activity_runtime.claim_event_consumption(
             db,
+            references=SqlAlchemyActivityReferences(db),
             world_id=world.id,
             consumer_world_character_id=fixture.world_character.id,
             source_social_event_id="guarded-expired-event",

@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2068,
-      "internal_edge_count": 2040,
+      "external_import_count": 2075,
+      "internal_edge_count": 2068,
       "legacy_import_exception_count": 0,
-      "module_count": 633,
+      "module_count": 637,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -512,10 +512,14 @@
               "app.core.unit_of_work",
               "app.domains.routine_posts.infrastructure.direct_llm_provider",
               "app.domains.routine_posts.infrastructure.sqlalchemy_context",
+              "app.domains.routines.exceptions",
+              "app.domains.routines.service.execution.claims",
+              "app.domains.routines.service.execution.lifecycle",
               "app.domains.routines.service.lifecycle",
               "app.domains.social.domain.subjective_context",
               "app.domains.social.public",
               "app.integrations.direct_llm",
+              "app.runtime.routines.activity_references",
               "app.runtime.social.observations",
               "app.runtime.social.sqlalchemy_inbox",
               "app.runtime.social.subjective_context"

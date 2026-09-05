@@ -1,24 +1,21 @@
+"""Beat/consumption ownership, lock ordering and publication state transitions."""
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app import models
 from app.core.ids import uuid7_string
+from app.domains.routines import models
+from app.domains.routines.constants import BEAT_TRIGGER_KINDS, TERMINAL_ITEM_STATUSES
+from app.domains.routines.contracts.lifecycle import EVENT_CONSUMPTION_NAMESPACE
+from app.domains.routines.contracts.activity import ActivityReferences
+from app.domains.routines.exceptions import ActivityRuntimeConflictError, ActivityRuntimeNotFoundError, ActivityRuntimeValidationError
 from app.domains.routines.policies import activity_state as activity_state_contracts
-from app.domains.routines.exceptions import ActivityRuntimeConflictError, ActivityRuntimeError, ActivityRuntimeNotFoundError, ActivityRuntimeValidationError
-from app.domains.routines.contracts.lifecycle import DaypartTransitionCounts, DueTick, RecoveryCounts, WorldInterruptionCounts
-
-
-EVENT_CONSUMPTION_NAMESPACE = "next_activity_beat"
-BEAT_TRIGGER_KINDS = frozenset({"scheduled", "comment_influenced", "joint_activity"})
-TERMINAL_ITEM_STATUSES = frozenset(
-    {"completed", "skipped", "interrupted", "cancelled"}
-)
+from app.domains.routines.service.scheduling import aware_utc as _aware_utc
 
 
 @dataclass(frozen=True)
@@ -27,56 +24,11 @@ class RuntimeClaimResult:
     reused: bool
 
 
-def _aware_utc(value: datetime) -> datetime:
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)
-
-
 def _require_future_expiry(expiry: datetime, *, now: datetime) -> datetime:
     normalized = _aware_utc(expiry)
     if normalized <= now:
         raise ActivityRuntimeValidationError("claim_expiry_invalid")
     return normalized
-
-
-def latest_due_tick(
-    *,
-    window_start: datetime,
-    window_end: datetime,
-    now: datetime,
-    activity_interval_minutes: int,
-    last_scheduled_for: datetime | None = None,
-) -> DueTick | None:
-    """Return only the newest due tick in the current daypart window.
-
-    Older due ticks are counted, not replayed.  This is the P3 restart burst
-    boundary; the scheduler can persist the returned count on ActivityBeat.
-    """
-
-    if not 30 <= activity_interval_minutes <= 1440:
-        raise ActivityRuntimeValidationError("activity_interval_out_of_range")
-    start = _aware_utc(window_start)
-    end = _aware_utc(window_end)
-    current = _aware_utc(now)
-    if start >= end:
-        raise ActivityRuntimeValidationError("plan_item_window_invalid")
-    if current < start or current >= end:
-        return None
-
-    interval = timedelta(minutes=activity_interval_minutes)
-    latest_index = int((current - start) // interval)
-    first_unhandled_index = 0
-    if last_scheduled_for is not None:
-        previous = _aware_utc(last_scheduled_for)
-        if previous >= start:
-            first_unhandled_index = int((previous - start) // interval) + 1
-    if latest_index < first_unhandled_index:
-        return None
-    return DueTick(
-        scheduled_for=start + (latest_index * interval),
-        skipped_tick_count=latest_index - first_unhandled_index,
-    )
 
 
 def _episode_scope(
@@ -269,6 +221,7 @@ def claim_activity_beat(
 def claim_event_consumption(
     db: Session,
     *,
+    references: ActivityReferences,
     world_id: str,
     consumer_world_character_id: str,
     source_social_event_id: str,
@@ -280,7 +233,7 @@ def claim_event_consumption(
 ) -> RuntimeClaimResult:
     current = _aware_utc(now or datetime.now(UTC))
     expiry = _require_future_expiry(claim_expires_at, now=current)
-    world_character = db.get(models.WorldCharacter, consumer_world_character_id)
+    world_character = references.get_world_character(consumer_world_character_id)
     beat = db.get(models.ActivityBeat, target_activity_beat_id)
     if world_character is None or beat is None:
         raise ActivityRuntimeNotFoundError(source_social_event_id)
@@ -411,6 +364,7 @@ def reject_event_consumption(
 def complete_activity_beat(
     db: Session,
     *,
+    references: ActivityReferences,
     beat_id: str,
     claim_run_id: str,
     source_post_id: str,
@@ -440,8 +394,8 @@ def complete_activity_beat(
     next_state = activity_state_contracts.validate_state_snapshot(
         state_after_snapshot
     )
-    post = db.get(models.Post, source_post_id)
-    world_character = db.get(models.WorldCharacter, beat.world_character_id)
+    post = references.get_post(source_post_id)
+    world_character = references.get_world_character(beat.world_character_id)
     if post is None or world_character is None:
         raise ActivityRuntimeValidationError("publish_evidence_missing")
     if post.author_character_id != world_character.character_id:
@@ -590,47 +544,6 @@ def fail_activity_beat(
     return beat
 
 
-def recover_expired_claims(
-    db: Session,
-    *,
-    now: datetime | None = None,
-) -> RecoveryCounts:
-    current = _aware_utc(now or datetime.now(UTC))
-    beats = list(
-        db.scalars(
-            select(models.ActivityBeat)
-            .where(
-                models.ActivityBeat.status == "claimed",
-                models.ActivityBeat.claim_expires_at <= current,
-            )
-            .with_for_update(skip_locked=True)
-        )
-    )
-    for beat in beats:
-        beat.status = "pending"
-        beat.claim_run_id = None
-        beat.claim_expires_at = None
-        beat.started_at = None
-    consumptions = list(
-        db.scalars(
-            select(models.ActivityEventConsumption)
-            .where(
-                models.ActivityEventConsumption.status == "claimed",
-                models.ActivityEventConsumption.claim_expires_at <= current,
-            )
-            .with_for_update(skip_locked=True)
-        )
-    )
-    for row in consumptions:
-        row.status = "released"
-        row.claim_run_id = None
-        row.claim_expires_at = None
-        row.target_activity_beat_id = None
-        row.version += 1
-    db.commit()
-    return RecoveryCounts(beats=len(beats), consumptions=len(consumptions))
-
-
 def _close_open_beat_claims(
     db: Session,
     *,
@@ -669,193 +582,3 @@ def _close_open_beat_claims(
         beat.claim_run_id = None
         beat.claim_expires_at = None
         beat.completed_at = now
-
-
-def close_elapsed_dayparts(
-    db: Session,
-    *,
-    world_character_id: str,
-    now: datetime | None = None,
-) -> DaypartTransitionCounts:
-    """Close elapsed items without generating catch-up SNS activity."""
-
-    current = _aware_utc(now or datetime.now(UTC))
-    items = list(
-        db.scalars(
-            select(models.DailyActivityPlanItem)
-            .where(
-                models.DailyActivityPlanItem.world_character_id
-                == world_character_id,
-                models.DailyActivityPlanItem.scheduled_end_at <= current,
-                models.DailyActivityPlanItem.status.in_({"planned", "active"}),
-            )
-            .order_by(models.DailyActivityPlanItem.scheduled_start_at)
-            .with_for_update(skip_locked=True)
-        )
-    )
-    completed = 0
-    skipped = 0
-    affected_plan_ids: set[str] = set()
-    for item in items:
-        episode = db.scalar(
-            select(models.ActivityEpisode)
-            .where(models.ActivityEpisode.plan_item_id == item.id)
-            .with_for_update()
-        )
-        if episode is None:
-            raise ActivityRuntimeValidationError("activity_episode_missing")
-        affected_plan_ids.add(item.plan_id)
-        if item.status == "active":
-            successful_beats = list(
-                db.scalars(
-                    select(models.ActivityBeat)
-                    .where(
-                        models.ActivityBeat.episode_id == episode.id,
-                        models.ActivityBeat.status == "succeeded",
-                    )
-                    .order_by(models.ActivityBeat.sequence_no)
-                )
-            )
-            episode.current_state_snapshot = (
-                activity_state_contracts.apply_state_changes(
-                    episode.current_state_snapshot,
-                    [],
-                    daypart_ended=True,
-                )
-            )
-            episode.status = "completed"
-            episode.completed_at = current
-            episode.completion_summary = {
-                "successful_beat_count": len(successful_beats),
-                "successful_post_ids": [
-                    beat.source_post_id
-                    for beat in successful_beats
-                    if beat.source_post_id is not None
-                ],
-            }
-            episode.terminal_reason_code = "daypart_completed"
-            item.status = "completed"
-            item.terminal_reason_code = "daypart_completed"
-            completed += 1
-        else:
-            episode.status = "cancelled"
-            episode.completed_at = current
-            episode.terminal_reason_code = "daypart_window_elapsed"
-            item.status = "skipped"
-            item.terminal_reason_code = "daypart_window_elapsed"
-            skipped += 1
-        episode.version += 1
-        item.version += 1
-        _close_open_beat_claims(
-            db,
-            episode_id=episode.id,
-            reason_code=item.terminal_reason_code or "daypart_window_elapsed",
-            now=current,
-        )
-
-    db.flush()
-    for plan_id in affected_plan_ids:
-        plan = db.scalar(
-            select(models.DailyActivityPlan)
-            .where(models.DailyActivityPlan.id == plan_id)
-            .with_for_update()
-        )
-        if plan is None:
-            raise ActivityRuntimeValidationError("activity_plan_missing")
-        statuses = set(
-            db.scalars(
-                select(models.DailyActivityPlanItem.status).where(
-                    models.DailyActivityPlanItem.plan_id == plan_id
-                )
-            )
-        )
-        if statuses and statuses.issubset(TERMINAL_ITEM_STATUSES):
-            plan.status = "completed"
-        elif "active" in statuses:
-            plan.status = "active"
-        plan.version += 1
-    db.commit()
-    return DaypartTransitionCounts(completed=completed, skipped=skipped)
-
-
-def interrupt_inactive_world_character(
-    db: Session,
-    *,
-    world_character_id: str,
-    now: datetime | None = None,
-) -> WorldInterruptionCounts:
-    """Stop current/future runtime after a World membership is deactivated."""
-
-    current = _aware_utc(now or datetime.now(UTC))
-    world_character = db.scalar(
-        select(models.WorldCharacter)
-        .where(models.WorldCharacter.id == world_character_id)
-        .with_for_update()
-    )
-    if world_character is None:
-        raise ActivityRuntimeNotFoundError(world_character_id)
-    membership = db.get(models.WorldMembership, world_character.membership_id)
-    if membership is None or membership.world_id != world_character.world_id:
-        raise ActivityRuntimeValidationError("cross_world_reference")
-    if membership.status == "active" and world_character.status == "active":
-        raise ActivityRuntimeConflictError("world_membership_still_active")
-
-    items = list(
-        db.scalars(
-            select(models.DailyActivityPlanItem)
-            .where(
-                models.DailyActivityPlanItem.world_character_id
-                == world_character_id,
-                models.DailyActivityPlanItem.status.in_({"planned", "active"}),
-                models.DailyActivityPlanItem.scheduled_end_at > current,
-            )
-            .order_by(models.DailyActivityPlanItem.scheduled_start_at)
-            .with_for_update()
-        )
-    )
-    interrupted = 0
-    cancelled = 0
-    affected_plan_ids: set[str] = set()
-    for item in items:
-        episode = db.scalar(
-            select(models.ActivityEpisode)
-            .where(models.ActivityEpisode.plan_item_id == item.id)
-            .with_for_update()
-        )
-        if episode is None:
-            raise ActivityRuntimeValidationError("activity_episode_missing")
-        affected_plan_ids.add(item.plan_id)
-        if item.status == "active":
-            item.status = "interrupted"
-            episode.status = "interrupted"
-            interrupted += 1
-        else:
-            item.status = "cancelled"
-            episode.status = "cancelled"
-            cancelled += 1
-        item.terminal_reason_code = "world_membership_inactive"
-        episode.terminal_reason_code = "world_membership_inactive"
-        episode.completed_at = current
-        item.version += 1
-        episode.version += 1
-        _close_open_beat_claims(
-            db,
-            episode_id=episode.id,
-            reason_code="world_membership_inactive",
-            now=current,
-        )
-    for plan_id in affected_plan_ids:
-        plan = db.scalar(
-            select(models.DailyActivityPlan)
-            .where(models.DailyActivityPlan.id == plan_id)
-            .with_for_update()
-        )
-        if plan is None:
-            raise ActivityRuntimeValidationError("activity_plan_missing")
-        plan.status = "interrupted"
-        plan.version += 1
-    db.commit()
-    return WorldInterruptionCounts(
-        interrupted=interrupted,
-        cancelled=cancelled,
-    )

@@ -473,10 +473,6 @@
           "importer": "app.services.activity_proposal_runtime"
         },
         {
-          "imported": "app.models",
-          "importer": "app.services.activity_runtime"
-        },
-        {
           "imported": "app.cruds.agents",
           "importer": "app.services.agent_activity_policy"
         },
@@ -1026,10 +1022,6 @@
           "importer": "app.compatibility.routine_posts.legacy"
         },
         {
-          "imported": "app.services.activity_runtime",
-          "importer": "app.compatibility.routine_posts.legacy"
-        },
-        {
           "imported": "app.services.activity_state_contracts",
           "importer": "app.compatibility.routine_posts.legacy"
         },
@@ -1188,6 +1180,19 @@
           "imported": "app.services.world_character_setup"
         }
       ]
+    },
+    {
+      "id": "ar-b4-activity-existing-post-evidence-read",
+      "owner_stage": "L6",
+      "reason": "Only the original app.services.activity_runtime.complete_activity_beat Post read moves to caller-Session runtime references. Post ownership is not yet in this preparation branch; there are no foreign writes or new queries.",
+      "removal_condition": "At AR-B5-A integration replace this exact import with app.domains.social.models.posts.Post and remove this edge. The B5 owner has the exact new consumer path.",
+      "review_date": "2026-09-05",
+      "edges": [
+        {
+          "importer": "app.runtime.routines.activity_references",
+          "imported": "app.models.community"
+        }
+      ]
     }
   ],
   "legacy_module_cycles": [],
@@ -1282,6 +1287,7 @@
       "app.domains.media.schemas",
       "app.domains.routines.constants",
       "app.domains.routines.contracts",
+      "app.domains.routines.contracts.activity",
       "app.domains.routines.contracts.clock",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.plans",
@@ -1296,6 +1302,9 @@
       "app.domains.routines.router",
       "app.domains.routines.schemas",
       "app.domains.routines.service",
+      "app.domains.routines.service.execution",
+      "app.domains.routines.service.execution.claims",
+      "app.domains.routines.service.execution.lifecycle",
       "app.domains.routines.service.joint_reservations",
       "app.domains.routines.service.lifecycle",
       "app.domains.routines.service.plans",
@@ -1377,11 +1386,15 @@
       "app.domains.media.contracts",
       "app.domains.media.schemas",
       "app.domains.routines.contracts",
+      "app.domains.routines.contracts.activity",
       "app.domains.routines.contracts.clock",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.plans",
       "app.domains.routines.schemas",
       "app.domains.routines.service",
+      "app.domains.routines.service.execution",
+      "app.domains.routines.service.execution.claims",
+      "app.domains.routines.service.execution.lifecycle",
       "app.domains.routines.service.joint_reservations",
       "app.domains.routines.service.lifecycle",
       "app.domains.routines.service.plans",
@@ -2156,30 +2169,6 @@
         "owner_stage": "AR-B8-A",
         "reason": "The named legacy consumer uses the canonical World implementation while its own stage remains pending; no new World code imports this bridge.",
         "removal_condition": "Redirect this exact remaining consumer during its owner stage; close worlds.public after WC/Package/Routines callers stop importing its ORM exports.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.activity_runtime",
-        "target": "app.domains.routines.contracts.lifecycle",
-        "owner_stage": "AR-B4-B / AR-B4-C",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.activity_runtime",
-        "target": "app.domains.routines.exceptions",
-        "owner_stage": "AR-B4-B / AR-B4-C",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.activity_runtime",
-        "target": "app.domains.routines.policies.activity_state",
-        "owner_stage": "AR-B4-B / AR-B4-C",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
         "review_date": "2026-09-05"
       },
       {
