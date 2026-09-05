@@ -45,6 +45,15 @@
       "owner_phases": [
         "L0-L4 product URL, privacy UX, provider referer"
       ],
+      "path": "backend/tests/config/test_startup_security.py"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
       "path": "backend/tests/test_browser_session_security.py"
     },
     {
@@ -104,15 +113,6 @@
         "L0-L4 product URL, privacy UX, provider referer"
       ],
       "path": "backend/tests/test_security_secret_scan.py"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "backend/tests/test_startup_security.py"
     },
     {
       "markers": [
