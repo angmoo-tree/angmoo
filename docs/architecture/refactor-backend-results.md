@@ -624,3 +624,11 @@ M1 뒤 남아 있던 기존 credential privacy 테스트의 monkeypatch 위치 �
 공개 media mount는 기존 characters/posts/world-package-imports만 유지한다. World/draft/candidate를 anonymous 정적 경로에 추가하지 않았다. 관련 권한/비공개 검증의 통과를 실제 Installer/real-provider 검증으로 확대하지 않는다. 현재 Media M1~M6의 새 nodes는 26개이며 source introduction·통합 Actions·순차 merge는 root가 관리한다.
 
 M6 고정 후보에서 `--contracts --nodes`는 현재 **2,151 nodes**를 수집했다. 보호 계보 2,125개 대비 API/ORM·기존 assertion/suppression·누락 node·source split 오류는 없었다. 실패 목록은 M1~M5의 root 선형 capture를 기다리는 source 12개·test 21개뿐이며 M6 새 5개는 이 검사 당시 미커밋 도입이었다. source 고정 후 root가 M1~M6의 각 첫 도입 SHA에서 append-only 증거를 추가한다.
+
+### Media 선형 통합 보존과 공개 PR 후보
+
+Package의 실제 owner·같은 Session seed replay 복구와 WC readiness DTO 소유권을 합친 `5c93020186475cf7d175866e920f1e7a0a2ce2e4`는 Media·Character·World·Package·이미지 생성·권한/비밀 보호 집중 **280 passed / 3 warnings / 56.69초**다. 뒤따르는 통합은 선행 current 구조 테스트와 검증 문서·원래 source introduction 기록을 연결했다.
+
+Media M1 `660651d`, M3 `baeaefb`, M4 `9a66655`, M5 `99fb396`, M6 `dd78da6`의 원래 source와 신규 **26개 node**를 고정 commit에서 추출했다. M2 `ea4a7f4`는 기존 파일의 명시 이동이며 새 source/node가 없어 중복 snapshot을 추가하지 않았다. 최종 고정 `e9ffdb83bbebdb784b9c7ebc6ffea1b0bb517cf5`에서 stock 보존은 **2,201 protected/current nodes / items37 PASS**다. API·ORM·원본 test/assertion·symbol split과 최초 도입 계보를 모두 확인했다. 별도 현재 구조 회귀 **69 passed / 15.54초**, HEAD 전체 **381 commits / 21.90MB**, tracked archive **19.42MB** Gitleaks findings0이다.
+
+공유 codec·path·quarantine은 integrations/media, Character·Social별 파일 저장은 각 owner service, Character 이미지 생성의 권한·quota·오류 처리와 HTTP는 해당 owner, World 이미지 변환/commit·rollback은 Worlds owner, SDK 통신/Azure 응답 변환은 integrations가 담당한다. 기존 quota·timeout·image limits·MIME·restore·provider call·usage lock 본문을 보존했다. Social mutation/job, profile_media의 test-only alias 및 사용하지 않는 URL helper, 전역 ORM 등록은 B5/B8/G5의 실제 종료 항목으로 추적한다. 이 PR로 backend 전체 전환 완료를 선언하지 않는다.
