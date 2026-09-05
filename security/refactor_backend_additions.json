@@ -1577,6 +1577,55 @@
       "test_suppressions": {
         "tests/world_characters/test_runtime_mode_write.py": {}
       }
+    },
+    {
+      "commit": "1666c495e30ac5bc79265ac0e802477ff40b61cb",
+      "feature_id": "AR-B2",
+      "reason": "Deterministic same-owner import replay regression and narrowly scoped slug-race recovery",
+      "tracked_files": {
+        "backend/tests/world_packages/test_seed_replay_race.py": "3d68503ae2d44c7c6cd512d2734d4054872208c7"
+      },
+      "test_nodes": [
+        "tests/world_packages/test_seed_replay_race.py::test_completed_import_after_slug_selection_is_resolved_once[False]",
+        "tests/world_packages/test_seed_replay_race.py::test_completed_import_after_slug_selection_is_resolved_once[True]",
+        "tests/world_packages/test_seed_replay_race.py::test_other_validation_does_not_observe_or_replay_even_with_completed_import[reserved_world_role]",
+        "tests/world_packages/test_seed_replay_race.py::test_other_validation_does_not_observe_or_replay_even_with_completed_import[world_slug_unavailable_extra]",
+        "tests/world_packages/test_seed_replay_race.py::test_slug_conflict_without_same_scope_registry_is_not_retried[key]",
+        "tests/world_packages/test_seed_replay_race.py::test_slug_conflict_without_same_scope_registry_is_not_retried[owner]"
+      ],
+      "test_assertions": {
+        "tests/world_packages/test_seed_replay_race.py": {
+          "test_completed_import_after_slug_selection_is_resolved_once": [
+            "assert order == ['miss', 'winner_committed', 'rollback', 'replay']",
+            "assert len(observed) == 2 and observed[0][0] is not observed[1][0]",
+            "assert observed[0][2] is None and observed[1][2].import_id == winner[0].import_id",
+            "assert observed[1][1] == {'local_owner_id': request.local_owner_id, 'idempotency_key': request.idempotency_key}",
+            "pytest.raises(WorldPackageContractError, match='world_package_commit_conflict')",
+            "assert replay.replayed is True",
+            "assert replay.import_id == winner[0].import_id",
+            "assert replay.imported_world_id == winner[0].imported_world_id",
+            "assert replay.id_mappings == winner[0].id_mappings",
+            "assert _count(db, model) == 1"
+          ],
+          "test_slug_conflict_without_same_scope_registry_is_not_retried": [
+            "pytest.raises(WorldDefinitionValidationError, match='^world_slug_unavailable$')",
+            "assert len(attempts) == 1",
+            "assert len(sessions) == 2 and sessions[0] is not sessions[1]",
+            "assert _count(db, models.World) == 1",
+            "assert _count(db, models.WorldPackageImport) == 1"
+          ],
+          "test_other_validation_does_not_observe_or_replay_even_with_completed_import": [
+            "pytest.raises(WorldDefinitionValidationError)",
+            "assert caught.value is error",
+            "assert len(sessions) == 1",
+            "assert _count(db, models.World) == 1",
+            "assert _count(db, models.WorldPackageImport) == 1"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/world_packages/test_seed_replay_race.py": {}
+      }
     }
   ]
 }
