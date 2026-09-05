@@ -2,11 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.domains.routines.domain.lifecycle import (
-    DaypartTransitionCounts,
-    RecoveryCounts,
-)
-from app.domains.routines.ports.clock import Clock
+from app.domains.routines.contracts.lifecycle import DaypartTransitionCounts, RecoveryCounts
+from app.domains.routines.contracts.clock import Clock
 from app.domains.routines.ports.lifecycle_repository import LifecycleRepository
 
 

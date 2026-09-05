@@ -9,17 +9,9 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.ids import uuid7_string
-from app.domains.routines.domain import activity_state as activity_state_contracts
-from app.domains.routines.domain.lifecycle import (
-    ActivityRuntimeConflictError,
-    ActivityRuntimeError,
-    ActivityRuntimeNotFoundError,
-    ActivityRuntimeValidationError,
-    DaypartTransitionCounts,
-    DueTick,
-    RecoveryCounts,
-    WorldInterruptionCounts,
-)
+from app.domains.routines.policies import activity_state as activity_state_contracts
+from app.domains.routines.exceptions import ActivityRuntimeConflictError, ActivityRuntimeError, ActivityRuntimeNotFoundError, ActivityRuntimeValidationError
+from app.domains.routines.contracts.lifecycle import DaypartTransitionCounts, DueTick, RecoveryCounts, WorldInterruptionCounts
 
 
 EVENT_CONSUMPTION_NAMESPACE = "next_activity_beat"

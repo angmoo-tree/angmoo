@@ -218,7 +218,14 @@
     "backend/tests/test_l3_5_world_package_import_commit.py": "backend/tests/world_packages/test_import_commit.py",
     "backend/tests/test_l3_5_world_package_closeout.py": "backend/tests/world_packages/test_closeout.py",
     "backend/tests/test_l3_5_world_package_closeout_contract.py": "backend/tests/world_packages/test_closeout_contract.py",
-    "backend/tests/test_l3_5_world_package_ui_contract.py": "backend/tests/world_packages/test_ui_contract.py"
+    "backend/tests/test_l3_5_world_package_ui_contract.py": "backend/tests/world_packages/test_ui_contract.py",
+    "backend/app/domains/routines/api/schemas.py": "backend/app/domains/routines/schemas.py",
+    "backend/app/domains/routines/domain/activity_state.py": "backend/app/domains/routines/policies/activity_state.py",
+    "backend/app/domains/routines/infrastructure/sqlalchemy_models.py": "backend/app/domains/routines/models.py",
+    "backend/app/domains/routines/ports/clock.py": "backend/app/domains/routines/contracts/clock.py",
+    "backend/app/domains/routines/infrastructure/system_clock.py": "backend/app/domains/routines/utils/clock.py",
+    "backend/tests/test_daily_activity_runtime.py": "backend/tests/routines/test_daily_activity_runtime.py",
+    "backend/app/domains/routines/domain/lifecycle.py": "backend/app/domains/routines/contracts/lifecycle.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -478,7 +485,25 @@
     "tests/test_l3_5_world_package_import_commit.py::test_seed_failure_after_partial_flush_preserves_existing_data": "tests/world_packages/test_import_commit.py::test_seed_failure_after_partial_flush_preserves_existing_data",
     "tests/test_l3_5_world_package_ui_contract.py::test_export_ui_has_preview_browser_delivery_and_opaque_native_save_as": "tests/world_packages/test_ui_contract.py::test_export_ui_has_preview_browser_delivery_and_opaque_native_save_as",
     "tests/test_l3_5_world_package_ui_contract.py::test_import_ui_uses_file_selection_digest_approval_and_atomic_navigation": "tests/world_packages/test_ui_contract.py::test_import_ui_uses_file_selection_digest_approval_and_atomic_navigation",
-    "tests/test_l3_5_world_package_ui_contract.py::test_world_package_import_is_available_from_home_studio_and_static_router": "tests/world_packages/test_ui_contract.py::test_world_package_import_is_available_from_home_studio_and_static_router"
+    "tests/test_l3_5_world_package_ui_contract.py::test_world_package_import_is_available_from_home_studio_and_static_router": "tests/world_packages/test_ui_contract.py::test_world_package_import_is_available_from_home_studio_and_static_router",
+    "tests/test_daily_activity_runtime.py::test_beat_success_applies_event_once_and_failure_releases_claim": "tests/routines/test_daily_activity_runtime.py::test_beat_success_applies_event_once_and_failure_releases_claim",
+    "tests/test_daily_activity_runtime.py::test_character_scrub_removes_private_p3_runtime_before_p2_setup": "tests/routines/test_daily_activity_runtime.py::test_character_scrub_removes_private_p3_runtime_before_p2_setup",
+    "tests/test_daily_activity_runtime.py::test_character_scrub_removes_shared_joint_activity_without_orphaning_peer_plan": "tests/routines/test_daily_activity_runtime.py::test_character_scrub_removes_shared_joint_activity_without_orphaning_peer_plan",
+    "tests/test_daily_activity_runtime.py::test_daypart_transition_closes_successful_episode_without_provider_work": "tests/routines/test_daily_activity_runtime.py::test_daypart_transition_closes_successful_episode_without_provider_work",
+    "tests/test_daily_activity_runtime.py::test_daypart_windows_are_contiguous_across_dst_and_late_access_skips": "tests/routines/test_daily_activity_runtime.py::test_daypart_windows_are_contiguous_across_dst_and_late_access_skips",
+    "tests/test_daily_activity_runtime.py::test_expired_runtime_claims_are_recoverable_after_restart": "tests/routines/test_daily_activity_runtime.py::test_expired_runtime_claims_are_recoverable_after_restart",
+    "tests/test_daily_activity_runtime.py::test_inactive_membership_interrupts_current_and_cancels_future_items": "tests/routines/test_daily_activity_runtime.py::test_inactive_membership_interrupts_current_and_cancels_future_items",
+    "tests/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan": "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
+    "tests/test_daily_activity_runtime.py::test_joint_schedule_conflict_never_links_only_one_participant": "tests/routines/test_daily_activity_runtime.py::test_joint_schedule_conflict_never_links_only_one_participant",
+    "tests/test_daily_activity_runtime.py::test_joint_schedule_links_both_participants_and_claim_has_no_consumption": "tests/routines/test_daily_activity_runtime.py::test_joint_schedule_links_both_participants_and_claim_has_no_consumption",
+    "tests/test_daily_activity_runtime.py::test_latest_due_tick_returns_only_newest_tick_and_counts_missed_work": "tests/routines/test_daily_activity_runtime.py::test_latest_due_tick_returns_only_newest_tick_and_counts_missed_work",
+    "tests/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user": "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
+    "tests/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan": "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan",
+    "tests/test_daily_activity_runtime.py::test_prepare_creates_four_items_without_enabling_autonomy_and_reuses": "tests/routines/test_daily_activity_runtime.py::test_prepare_creates_four_items_without_enabling_autonomy_and_reuses",
+    "tests/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action": "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
+    "tests/test_daily_activity_runtime.py::test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work": "tests/routines/test_daily_activity_runtime.py::test_scheduler_reconciles_all_elapsed_routines_without_catch_up_work",
+    "tests/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates": "tests/routines/test_daily_activity_runtime.py::test_selection_avoids_exact_repeat_for_three_recent_local_dates",
+    "tests/test_daily_activity_runtime.py::test_state_contract_bounds_decay_and_rejects_excess_delta": "tests/routines/test_daily_activity_runtime.py::test_state_contract_bounds_decay_and_rejects_excess_delta"
   },
   "details": {
     "AR-B1": {
@@ -4136,6 +4161,176 @@
       ],
       "runtime_ownership": "World/Character read projection, destination seed, commit and recovery run under app/runtime/world_packages. App factories inject constructor callbacks into Package dependencies; domain modules never import runtime. Existing Session/sessionmaker and row-lock/commit/rollback/media journal order are preserved.",
       "remaining_compatibility": "No Package public/api/application/domain/ports/infrastructure implementation or same-domain bridge remains. app.models aggregate registration is the sole Package incoming bridge and retires in AR-G5. Upstream B2 worlds/characters public consumers in runtime migrate when those source branches join."
+    },
+    "AR-B4-A1-routines-foundation": {
+      "status": "SOURCE IMPLEMENTED — foundation only; focused 50 passed, 1 existing PostgreSQL skip; metadata/integration pending",
+      "split_files": {
+        "backend/app/domains/routines/domain/lifecycle.py": [
+          "backend/app/domains/routines/exceptions.py",
+          "backend/app/domains/routines/contracts/lifecycle.py",
+          "backend/app/domains/routines/service/scheduling.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/domains/routines/domain/lifecycle.py::ActivityRuntimeError",
+          "new": "backend/app/domains/routines/exceptions.py::ActivityRuntimeError",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/scheduling.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_latest_due_tick_returns_only_newest_tick_and_counts_missed_work",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/domain/lifecycle.py::ActivityRuntimeNotFoundError",
+          "new": "backend/app/domains/routines/exceptions.py::ActivityRuntimeNotFoundError",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/scheduling.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_latest_due_tick_returns_only_newest_tick_and_counts_missed_work",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/domain/lifecycle.py::ActivityRuntimeConflictError",
+          "new": "backend/app/domains/routines/exceptions.py::ActivityRuntimeConflictError",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/scheduling.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_latest_due_tick_returns_only_newest_tick_and_counts_missed_work",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/domain/lifecycle.py::ActivityRuntimeValidationError",
+          "new": "backend/app/domains/routines/exceptions.py::ActivityRuntimeValidationError",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/scheduling.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_latest_due_tick_returns_only_newest_tick_and_counts_missed_work",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/domain/lifecycle.py::__all__",
+          "new": "backend/app/domains/routines/exceptions.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/scheduling.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_latest_due_tick_returns_only_newest_tick_and_counts_missed_work",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/domain/lifecycle.py::RecoveryCounts",
+          "new": "backend/app/domains/routines/contracts/lifecycle.py::RecoveryCounts",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_latest_due_tick_returns_only_newest_tick_and_counts_missed_work",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/domain/lifecycle.py::DueTick",
+          "new": "backend/app/domains/routines/contracts/lifecycle.py::DueTick",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_latest_due_tick_returns_only_newest_tick_and_counts_missed_work",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/domain/lifecycle.py::DaypartTransitionCounts",
+          "new": "backend/app/domains/routines/contracts/lifecycle.py::DaypartTransitionCounts",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_latest_due_tick_returns_only_newest_tick_and_counts_missed_work",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/domain/lifecycle.py::WorldInterruptionCounts",
+          "new": "backend/app/domains/routines/contracts/lifecycle.py::WorldInterruptionCounts",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_latest_due_tick_returns_only_newest_tick_and_counts_missed_work",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/domain/lifecycle.py::__all__",
+          "new": "backend/app/domains/routines/contracts/lifecycle.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_latest_due_tick_returns_only_newest_tick_and_counts_missed_work",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/domain/lifecycle.py::aware_utc",
+          "new": "backend/app/domains/routines/service/scheduling.py::aware_utc",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_latest_due_tick_returns_only_newest_tick_and_counts_missed_work",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/domain/lifecycle.py::latest_due_tick",
+          "new": "backend/app/domains/routines/service/scheduling.py::latest_due_tick",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_latest_due_tick_returns_only_newest_tick_and_counts_missed_work",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan"
+          ]
+        },
+        {
+          "old": "backend/app/domains/routines/domain/lifecycle.py::__all__",
+          "new": "backend/app/domains/routines/service/scheduling.py::__all__",
+          "direct_consumers": [
+            "backend/app/domains/routines/public.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_daily_activity_runtime.py::test_latest_due_tick_returns_only_newest_tick_and_counts_missed_work",
+            "tests/routines/test_daily_activity_runtime.py::test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan"
+          ]
+        }
+      ],
+      "owners": {
+        "schemas.py": "7 existing Pydantic DTOs",
+        "models.py": "9 identical ORM classes and same shared Base",
+        "policies/activity_state.py": "bounded pure activity state decisions",
+        "exceptions.py": "stable lifecycle errors",
+        "contracts/lifecycle.py": "immutable lifecycle result records",
+        "service/scheduling.py": "aware UTC and newest due tick decision",
+        "contracts/clock.py / utils/clock.py": "runtime-checkable ClockPort and actual SystemClock/FrozenClock seam"
+      },
+      "remaining": "AR-B4-A2/A3 own actual daily plan, shared Session scope, claim/lifecycle and joint implementation. AR-B4-B/C own provider/result execution and resident composition. Old same-object aggregators have exact bridge owners and do not imply completed domain scope.",
+      "validation": {
+        "focused": "50 passed, 1 skipped / 14.21s; daily plans, proposals, routine post runtime and ER1 clock contracts",
+        "scope": "Exact role modules; old same-domain plan/lifecycle consumers retain explicit AR-B4-A2/A3 bridges, resident/provider AR-B4-B/C, model registration AR-G5",
+        "provenance": "Source commit precedes parent append-only capture; no frozen source/checkpoint changes"
+      }
     }
   }
 }

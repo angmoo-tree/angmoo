@@ -432,3 +432,9 @@ Portable ref/profile 변환은 `service/export_projection.py`, 로컬 export 근
 앱 생성 시 `runtime/world_packages/composition.py`가 구체 constructor를 `WorldPackageRuntimeFactories`로 연결한다. Package dependencies는 전달받은 요청 Session·session factory를 그대로 제공한다. import committer는 기존 초기 복구, 동시 실행 잠금, commit 결과 불명 시 관찰과 media journal 보상 순서를 유지한다. Browser stream의 정상 소진 뒤 전달을 기록하며 취소 시 artifact를 정리한다. Native download는 artifact를 유지하고 명시적인 저장 완료 acknowledgment가 성공적으로 commit된 뒤 정리한다. HTTP router는 권한·입력·상태 코드·응답을 처리하고 이 업무 결정을 중복 구현하지 않는다.
 
 `contracts/__init__.py`는 v1의 순수 공개 타입을 모으며 `contracts/interfaces.py`는 실제 fake·archive·storage·UoW 교체 지점을 정의한다. 런타임 factory 계약은 `contracts/runtime.py`에 있다. 모든 함수에 별도 포트를 생성하지 않으며 같은 역할의 구현을 public 호환 파일로 복제하지 않는다. 아직 전환되지 않은 Worlds/Characters의 지원 계약을 사용하는 runtime 소비자는 해당 B2 source 합류 시 canonical 경로로 연결한다.
+
+### Routines foundation의 현재 역할
+
+AR-B4-A1에서 일일 활동의 입출력은 `domains/routines/schemas.py`, 아홉 ORM은 `models.py`가 소유합니다. 모델은 기존과 같은 Base·table·column·index·FK를 사용합니다. `policies/activity_state.py`는 mood/energy 등의 상태 범위와 delta를 검증하고, `service/scheduling.py`는 이미 지난 tick을 무더기로 재실행하지 않고 가장 최근 due tick과 건너뛴 횟수를 계산합니다. 안정적인 오류는 `exceptions.py`, immutable 결과와 clock 계약은 `contracts/`, 실제 SystemClock/FrozenClock은 `utils/clock.py`에 있습니다.
+
+계획 생성·권한 scope·공동 예약·claim 회복의 실제 service/repository 전환은 뒤의 AR-B4-A2/A3 범위입니다. 현재 domain lifecycle과 전역 activity runtime의 같은 이름 함수는 manual 제외·선택적 now·오류/commit 의미가 달라 단순 별칭으로 통합하지 않습니다. provider/result 실행은 AR-B4-B, resident·lease·worker는 AR-B4-C에서 이어갑니다. 이 부분 전환의 정확한 기존 소비자와 제거 시점은 경계 검사 policy와 보존 지도에 기록합니다.

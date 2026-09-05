@@ -63,7 +63,7 @@ PARITY_WORKLOADS = (
         "phase": "P3",
         "contract": "Daily plan selects four deterministic items with zero provider calls and no missed-slot catch-up",
         "tests": [
-            "backend/tests/test_daily_activity_runtime.py",
+            "backend/tests/routines/test_daily_activity_runtime.py",
             "backend/tests/test_agent_activity_limits.py",
         ],
     },

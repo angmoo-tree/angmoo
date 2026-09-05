@@ -1283,7 +1283,19 @@
       "app.domains.identity.service.demo_access",
       "app.domains.identity.service.external_verification",
       "app.domains.identity.service.local_owner",
-      "app.domains.identity.service.login_throttle"
+      "app.domains.identity.service.login_throttle",
+      "app.domains.routines.contracts",
+      "app.domains.routines.contracts.clock",
+      "app.domains.routines.contracts.lifecycle",
+      "app.domains.routines.exceptions",
+      "app.domains.routines.models",
+      "app.domains.routines.policies",
+      "app.domains.routines.policies.activity_state",
+      "app.domains.routines.schemas",
+      "app.domains.routines.service",
+      "app.domains.routines.service.scheduling",
+      "app.domains.routines.utils",
+      "app.domains.routines.utils.clock"
     ],
     "entries": [
       "app.domains.identity.contracts",
@@ -1296,6 +1308,12 @@
       "app.domains.identity.service.external_verification",
       "app.domains.identity.service.local_owner",
       "app.domains.identity.service.login_throttle",
+      "app.domains.routines.contracts",
+      "app.domains.routines.contracts.clock",
+      "app.domains.routines.contracts.lifecycle",
+      "app.domains.routines.schemas",
+      "app.domains.routines.service",
+      "app.domains.routines.service.scheduling",
       "app.domains.world_packages.contracts",
       "app.domains.world_packages.contracts.export",
       "app.domains.world_packages.contracts.import_commit",
@@ -1367,6 +1385,142 @@
         "review_date": "2026-09-05"
       },
       {
+        "importer": "app.domains.routines.application.daily_plan",
+        "target": "app.domains.routines.contracts.clock",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.application.reconcile_lifecycle",
+        "target": "app.domains.routines.contracts.clock",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.application.reconcile_lifecycle",
+        "target": "app.domains.routines.contracts.lifecycle",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.infrastructure.sqlalchemy_daily_activity_plans",
+        "target": "app.domains.routines.schemas",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.infrastructure.sqlalchemy_daily_plan_models",
+        "target": "app.domains.routines.models",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.infrastructure.sqlalchemy_joint_reservations",
+        "target": "app.domains.routines.models",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.infrastructure.sqlalchemy_lifecycle",
+        "target": "app.domains.routines.contracts.lifecycle",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.infrastructure.sqlalchemy_lifecycle",
+        "target": "app.domains.routines.exceptions",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.infrastructure.sqlalchemy_lifecycle",
+        "target": "app.domains.routines.models",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.infrastructure.sqlalchemy_lifecycle",
+        "target": "app.domains.routines.policies.activity_state",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.infrastructure.sqlalchemy_lifecycle",
+        "target": "app.domains.routines.service.scheduling",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.ports.lifecycle_repository",
+        "target": "app.domains.routines.contracts.lifecycle",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.contracts.clock",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.contracts.lifecycle",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.exceptions",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.service.scheduling",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.routines.public",
+        "target": "app.domains.routines.utils.clock",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
         "importer": "app.models",
         "target": "app.domains.identity.models",
         "owner_stage": "AR-G5",
@@ -1399,6 +1553,14 @@
         "review_date": "2026-09-05"
       },
       {
+        "importer": "app.models.world_activity_runtime",
+        "target": "app.domains.routines.models",
+        "owner_stage": "AR-G5",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
         "importer": "app.schemas",
         "target": "app.domains.identity.schemas",
         "owner_stage": "AR-B8-A",
@@ -1412,6 +1574,46 @@
         "owner_stage": "AR-B8-A",
         "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
         "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.world_activity_runtime",
+        "target": "app.domains.routines.schemas",
+        "owner_stage": "AR-B4-A2 / AR-B4-A3",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.activity_runtime",
+        "target": "app.domains.routines.contracts.lifecycle",
+        "owner_stage": "AR-B4-B / AR-B4-C",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.activity_runtime",
+        "target": "app.domains.routines.exceptions",
+        "owner_stage": "AR-B4-B / AR-B4-C",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.activity_runtime",
+        "target": "app.domains.routines.policies.activity_state",
+        "owner_stage": "AR-B4-B / AR-B4-C",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.activity_state_contracts",
+        "target": "app.domains.routines.policies.activity_state",
+        "owner_stage": "AR-B4-B / AR-B4-C",
+        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
+        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
         "review_date": "2026-09-05"
       },
       {

@@ -1,6 +1,6 @@
 """Compatibility imports for routines-owned API schemas."""
 
-from app.domains.routines.api.schemas import (
+from app.domains.routines.schemas import (
     ActivityDaypart,
     ActivityEpisodeRead,
     ActivityPlanItemStatus,

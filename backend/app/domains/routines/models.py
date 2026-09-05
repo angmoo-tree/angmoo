@@ -4,6 +4,7 @@ from datetime import date, datetime
 from typing import Any
 
 from sqlalchemy import (
+    JSON,
     Boolean,
     CheckConstraint,
     Date,
@@ -17,10 +18,11 @@ from sqlalchemy import (
     func,
     text,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base
-from app.domains.worlds.public import JSON_DOCUMENT
+JSON_DOCUMENT = JSON().with_variant(JSONB(), "postgresql")
 
 
 _ACTIVE_EPISODE = text("status = 'active'")

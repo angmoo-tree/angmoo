@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
-from app.domains.routines.infrastructure import sqlalchemy_models as routine_models
+from app.domains.routines import models as routine_models
 
 
 DAYPARTS = ("dawn", "morning", "afternoon", "evening")

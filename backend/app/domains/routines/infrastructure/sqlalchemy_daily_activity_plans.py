@@ -11,7 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
-from app.domains.routines.api import schemas
+from app.domains.routines import schemas
 from app.domains.routines.infrastructure import sqlalchemy_daily_plan_models as models
 from app.domains.routines.infrastructure import sqlalchemy_joint_reservations
 from app.domains.world_characters.public import character_contract_hash

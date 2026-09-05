@@ -15,7 +15,7 @@ from app.services import (
     activity_proposal_runtime,
     joint_activity_runtime,
 )
-from test_daily_activity_runtime import _engine, _prepare, _seed, _utc
+from routines.test_daily_activity_runtime import _engine, _prepare, _seed, _utc
 
 
 def _post(

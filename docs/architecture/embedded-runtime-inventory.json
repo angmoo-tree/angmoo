@@ -141,7 +141,7 @@
         "missing_tests": [],
         "phase": "P3",
         "tests": [
-          "backend/tests/test_daily_activity_runtime.py",
+          "backend/tests/routines/test_daily_activity_runtime.py",
           "backend/tests/test_agent_activity_limits.py"
         ]
       },

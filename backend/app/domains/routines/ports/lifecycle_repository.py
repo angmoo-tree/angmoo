@@ -3,10 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Protocol
 
-from app.domains.routines.domain.lifecycle import (
-    DaypartTransitionCounts,
-    RecoveryCounts,
-)
+from app.domains.routines.contracts.lifecycle import DaypartTransitionCounts, RecoveryCounts
 
 
 class LifecycleRepository(Protocol):

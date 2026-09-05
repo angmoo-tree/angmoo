@@ -2,7 +2,7 @@
 
 from app.domains.characters.public import Character
 from app.domains.identity.public import LlmCredential, User
-from app.domains.routines.infrastructure.sqlalchemy_models import (
+from app.domains.routines.models import (
     ActivityBeat,
     ActivityEpisode,
     DailyActivityPlan,

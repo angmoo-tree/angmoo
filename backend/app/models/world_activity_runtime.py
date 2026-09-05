@@ -1,6 +1,6 @@
 """Compatibility imports for routines-owned SQLAlchemy models."""
 
-from app.domains.routines.infrastructure.sqlalchemy_models import (
+from app.domains.routines.models import (
     ActivityBeat,
     ActivityEpisode,
     ActivityEventConsumption,

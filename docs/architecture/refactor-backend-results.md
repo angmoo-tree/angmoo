@@ -226,3 +226,17 @@ SQL source snapshot의 portable-key/profile 변환과 preview probe의 trust/dup
 보존 guard에서는 고정된 테스트 source의 pathlib anchor·단일 literal binding과 파일 이동표가 정확히 연결된 경우만 chained path를 정규화한다. 임의 root/call/동적 경로·import/함수/클래스/with/except의 재바인딩은 거부한다. Windows 경로는 문자열 전체가 정확히 일치하는 경우만 인정하고 `__init__.py`는 정상 package import 표기를 사용한다. 독립 source `dc3da4b`·`651bded`·`f61cc48`·`1fb943d`에 이를 나눴으며 기존/음성 검사 **67 passed**를 확인했다. 전체 순서 있는 literal tuple에 대한 compiled regex cache만 추가했고, 대표 실제 assertion **122개 출력 동일**, **1.869초→0.057초**를 확인했다. 기존 느린 guard 실행은 중단해 PASS로 사용하지 않았고 최종 수정 이후 전체 검사를 다시 실행했다.
 
 이 결과는 Package의 독립 source 준비와 로컬 회귀 증거다. 선행 B2의 Worlds/Characters/WorldCharacter source가 합류하면 runtime의 해당 지원 import를 canonical 경로로 연결한다. 전체 통합 backend·Docker/Host Tauri/sidecar/NSIS 설치·Hosted Actions·merge는 parent의 순차 검증 대상이며 이 결과로 완료했다고 표시하지 않는다. Shared media 전체는 다음 별도 B3 범위다.
+
+## AR-B4-A1 — routines ORM·입출력·순수 상태·시간 계약
+
+Package 고정 source `a61a0ae`에서 별도 준비한 첫 routines 소스 단위다. 기존 7 DTO, 9 ORM class, 활동 상태 규칙, clock 계약과 구현을 역할 위치로 옮겼다. lifecycle의 안정적인 오류·결과 record·UTC/due 결정은 각각 exceptions/contracts/service로 실제 분할했으며 원래 class/function body를 보존했다. 일일 계획과 전역 activity runtime의 서로 다른 회복 동작은 아직 통합하지 않았다.
+
+- 기존 daily activity 테스트 18 node를 `tests/routines/test_daily_activity_runtime.py`로 옮겼다. proposal 테스트의 공유 helper import를 package 경로로 명시해 단독 collection에서도 찾을 수 있게 했다. test 이름·parametrize·assertion을 바꾸지 않았다.
+- daily/proposal/routine post/ER1 집중 검사: **50 passed, 1 skipped / 14.21초**. skip은 원래 PostgreSQL 환경 조건의 single-flight 검사다. PostgreSQL 실행을 대신 통과했다고 적지 않는다.
+- 9 ORM class AST body가 기존 source와 모두 동일하다. 최초 개발 중 JSON import 편집 오류로 collection이 실패한 것은 즉시 고쳤고 위 결과는 수정된 tree에서 처음부터 다시 실행한 값이다.
+- 현재 경계 검사 **600 modules / 1,867 edges / legacy exact 288 PASS**. L4 parity 97, ER0 75 PostgreSQL 파일/87 migration/24 Neo4j/44 Next route/7 parity workload 유지.
+- 실제 역할 12개 module만 부분 scope에 올렸고, 같은 구현을 쓰는 기존 plan/lifecycle·전역 소비자 23 edge에 A2/A3·B/C·G5별 제거 조건을 기록했다. 완료 domain scope나 광역 예외를 추가하지 않았다.
+
+이 기록은 foundation의 로컬 source 검증이다. 실제 plan/lifecycle transaction 분리, B4-B provider·결과와 B4-C scheduler/resident, 실제 파일 SQLite 재시작, 통합 전체 backend/Hosted/installer/merge는 남은 작업이다. 새 source/node의 introduction metadata는 source commit 뒤 parent의 선형 capture로 추가하며 frozen baseline/checkpoint를 바꾸지 않는다.
+
+추가 직접 소비자 검증은 domain boundary map·L3 closeout·현재 L4 inventory·embedded LocalAppData migration **29 passed / 31.80초**다. API/ORM·기존 assertion·split-symbol·node 보존 검사에서 계약 차이는 없었고, 보호 node 2,080/현재 node 2,121을 확인했다. 전체 guard의 exit 1은 별도 source branch가 아직 parent introduction metadata를 포함하지 않은 항목으로 남았다. 기존 PR258 1,867/PR263 1,907 기준선은 유지했다.

@@ -14,17 +14,9 @@ from app.domains.routines.application.reconcile_lifecycle import (
     ReconcileElapsedRoutines,
     RecoverExpiredRoutineClaims,
 )
-from app.domains.routines.domain.lifecycle import (
-    ActivityRuntimeConflictError,
-    ActivityRuntimeError,
-    ActivityRuntimeNotFoundError,
-    ActivityRuntimeValidationError,
-    DaypartTransitionCounts,
-    DueTick,
-    RecoveryCounts,
-    WorldInterruptionCounts,
-    latest_due_tick,
-)
+from app.domains.routines.exceptions import ActivityRuntimeConflictError, ActivityRuntimeError, ActivityRuntimeNotFoundError, ActivityRuntimeValidationError
+from app.domains.routines.contracts.lifecycle import DaypartTransitionCounts, DueTick, RecoveryCounts, WorldInterruptionCounts
+from app.domains.routines.service.scheduling import latest_due_tick
 from app.domains.routines.infrastructure.sqlalchemy_daily_activity_plans import (
     DAYPARTS,
     DAYPART_START_HOURS,
@@ -51,8 +43,8 @@ from app.domains.routines.infrastructure.sqlalchemy_lifecycle import (
     close_elapsed_dayparts as _close_elapsed_dayparts,
     interrupt_inactive_world_character as _interrupt_inactive_world_character,
 )
-from app.domains.routines.infrastructure.system_clock import FrozenClock, SystemClock
-from app.domains.routines.ports.clock import Clock, ClockPort
+from app.domains.routines.utils.clock import FrozenClock, SystemClock
+from app.domains.routines.contracts.clock import Clock, ClockPort
 
 
 def _clock(*, now: datetime | None, clock: Clock | None) -> Clock:

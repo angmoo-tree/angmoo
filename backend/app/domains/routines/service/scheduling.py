@@ -1,55 +1,8 @@
+"""Deterministic due-tick decisions for activity windows."""
 from __future__ import annotations
-
-from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
-
-
-class ActivityRuntimeError(Exception):
-    reason_code = "activity_runtime_error"
-
-
-class ActivityRuntimeNotFoundError(ActivityRuntimeError):
-    reason_code = "activity_runtime_not_found"
-
-
-class ActivityRuntimeConflictError(ActivityRuntimeError):
-    reason_code = "activity_runtime_conflict"
-
-    def __init__(self, reason_code: str) -> None:
-        self.reason_code = reason_code
-        super().__init__(reason_code)
-
-
-class ActivityRuntimeValidationError(ActivityRuntimeError):
-    reason_code = "activity_runtime_invalid"
-
-    def __init__(self, reason_code: str) -> None:
-        self.reason_code = reason_code
-        super().__init__(reason_code)
-
-
-@dataclass(frozen=True)
-class RecoveryCounts:
-    beats: int
-    consumptions: int
-
-
-@dataclass(frozen=True)
-class DueTick:
-    scheduled_for: datetime
-    skipped_tick_count: int
-
-
-@dataclass(frozen=True)
-class DaypartTransitionCounts:
-    completed: int
-    skipped: int
-
-
-@dataclass(frozen=True)
-class WorldInterruptionCounts:
-    interrupted: int
-    cancelled: int
+from app.domains.routines.contracts.lifecycle import DueTick
+from app.domains.routines.exceptions import ActivityRuntimeValidationError
 
 
 def aware_utc(value: datetime) -> datetime:
@@ -93,15 +46,4 @@ def latest_due_tick(
     )
 
 
-__all__ = [
-    "ActivityRuntimeConflictError",
-    "ActivityRuntimeError",
-    "ActivityRuntimeNotFoundError",
-    "ActivityRuntimeValidationError",
-    "DaypartTransitionCounts",
-    "DueTick",
-    "RecoveryCounts",
-    "WorldInterruptionCounts",
-    "aware_utc",
-    "latest_due_tick",
-]
+__all__ = ['aware_utc', 'latest_due_tick']

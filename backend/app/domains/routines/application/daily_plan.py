@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-from app.domains.routines.ports.clock import Clock
+from app.domains.routines.contracts.clock import Clock
 from app.domains.routines.ports.daily_plan_repository import DailyPlanRepository
 
 
