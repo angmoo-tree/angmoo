@@ -138,3 +138,11 @@ PR #267의 첫 head `ab8fa23`에서 Gitleaks가 새 cursor 호환 회귀의 공�
 ### 기존 브라우저 검사의 시간 경합 보완
 
 G1 merge의 Core CI frontend에서 Chat 입력 중 표시 검사가 첫 실행·자동 재시도 모두 실패했다. 해당 테스트는 실제 backend 없이 route fixture로 응답하며 650ms 뒤 응답을 끝내므로 CI의 assertion 진행보다 중간 UI 상태가 먼저 사라질 수 있었다. 가상 stream을 입력 중 표시·모델 잠금 확인까지 유지하고 finally에서 완료시키는 동기화로 바꿨다. 제품 UI/API 동작과 기존 expect 표현식 331개는 TypeScript AST로 정확히 같음을 확인했다. 로컬 Chromium에서 해당 시나리오를 재시도 없이 3회 연속 통과했다(1.3분). G1 실패 job은 동일 merge에서 한 번 재실행해 post-merge 결과를 별도로 확인하며, 이후 후보에는 시간 경합을 제거한 검사를 포함한다.
+
+### AR-G2 post-merge 보안 이력 범위 Hotfix
+
+G2 merge `8a72078`의 Security run `33961102583`은 현재 추적 source 검사에 통과했으나 Gitleaks history가 329 commits에서 후속 Character PR의 source Git fingerprint를 탐지해 실패했다. 기본 Gitleaks는 함께 fetch된 다른 ref를 포함하며, 해당 fingerprint의 정확한 허용은 후속 PR 설정에만 있었다. 앞선 후보의 설정으로 미래 PR을 판단하므로 같은 SHA의 결과가 fetch된 refs에 따라 달라졌다.
+
+Gitleaks에 `--log-opts="HEAD"`를 명시해 현재 후보의 **전체 조상 이력**을 검사한다. depth 제한·변경분만 검사·exit-code 무시는 추가하지 않는다. 현재 tracked-tree scan, SHA 고정 binary/checksum, redaction, 기존 별도 Angmoo scanner의 모든 ref·무제한 history 검사는 유지한다. 공개 전 저장소 전체 이력 감사도 이 후보별 Gitleaks 결과로 대체하지 않는다.
+
+실제 Gitleaks8.30.1과 새 synthetic Git fixture에서 (1) 기본값은 무관한 다른 branch의 canary를 탐지, (2) clean HEAD의 전체 이력은 통과, (3) 그 branch를 병합한 뒤 현재 파일에서 삭제된 과거 canary도 HEAD 이력에서 탐지됨을 확인했다. G2 후보 전체 조상 scan은 312 commits·19.65MB·findings0, 기존 CI policy도 PASS다. 원래 G2 post-merge 실패는 역사로 남기고 이 후속 Hotfix의 필수 PR·merge/post-merge 확인으로 종료한다.
