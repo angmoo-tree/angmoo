@@ -455,3 +455,11 @@ Setup slice의 최종 현재 API·ORM 및 전체 split evidence 검사도 PASS�
 ### WC workflow 고정 후보 보존 완료
 
 source `36fd4748cb55744d3effbcfb9d18eb921e0fd8d9`의 기본 전체 검사 `check_refactor_preservation.py --contracts --nodes`가 **protected/current 2,137 / items37 PASS**로 종료했다. #258/#263 API·OpenAPI·ORM·frozen source·assertion/suppression 및 원본 commit별 신규 source/node 계보를 그대로 검사했다. 앞선 오래 실행한 미완료 검사는 이 고정 후보의 stock 검사 결과로 대체하며, 결과 캐시나 검사 생략은 없다. 실제 WC entry/setup HTTP·readiness·혼합 cleanup 종료는 다음 최종 slice이며 workflow의 로컬 PASS를 AR-B2 전체 완료로 확대하지 않는다.
+
+### WC workflow Hosted CI의 현재 구조 검사 정합성 수정
+
+첫 PR #277의 Core/architecture/Local autonomy 검사가 기존 경로를 계속 기대하던 세 테스트를 발견했다. 비밀 키 reveal 위치는 WC `client.py`, 실제 setup 함수는 `service/autonomous_setup.py`, Local Smoke 필수 실행 파일은 WC 소유 setup/owner identity 테스트로 맞췄다. allowlist 함수 집합·실제 함수 존재·필수 suite 존재 assertion을 유지한다. 해당 실패는 기능 검사 삭제로 해결하지 않았다.
+
+경로 결합식 assertion도 같은 원본/목적 파일임을 확인하도록 후속 Package에서 이미 검토한 strict literal-path 검사 구현을 기존 checker 파일에 먼저 반영했다. 원본 constructor·단일 binding·shadowing·전체 파일 경로만 인정하며 부분 prefix나 임의 호출을 허용하지 않는다. 검사 구현은 Package `cc95b50` Git blob과 동일하고 CRLF만 정규화하여 대조했다. 기존 guard와 위 current 검사 **168 passed / 10.69초**, 같은 checker의 Package 고정 테스트 source에서 literal/path/initializer 관련 **33 passed / 34 deselected / 0.30초**다. 신규 회귀의 최초 도입 source/node 계보는 원래 순서인 Package PR에 유지하고 앞선 기록에 삽입하지 않았다.
+
+고정 source `f88c2af55f27be8777e7624208ff2e42e654c10a`의 stock 전체 보존은 **2,137 protected/current nodes / items37 PASS**다. 기존 checkpoint·source·assertion·API/ORM을 유지하고 현재 경로만 바로잡았다. 새 PR-head CI·Installer 결과를 다시 확인한다.
