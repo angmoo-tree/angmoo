@@ -82,18 +82,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.api.v1.routes.community"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.api.v1.routes.community"
-        },
-        {
-          "imported": "app.services.community",
-          "importer": "app.api.v1.routes.community"
-        },
-        {
-          "imported": "app.models",
           "importer": "app.api.v1.routes.tree"
         },
         {
@@ -1180,6 +1168,7 @@
       "app.domains.social.contracts.timeline",
       "app.domains.social.contracts.today_activity",
       "app.domains.social.contracts.writes",
+      "app.domains.social.dependencies",
       "app.domains.social.exceptions",
       "app.domains.social.models",
       "app.domains.social.models.feed",
@@ -1193,6 +1182,7 @@
       "app.domains.social.repository.posts",
       "app.domains.social.repository.profiles",
       "app.domains.social.repository.reactions",
+      "app.domains.social.router",
       "app.domains.social.schemas",
       "app.domains.social.schemas.activity",
       "app.domains.social.schemas.community",

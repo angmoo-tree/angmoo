@@ -705,3 +705,12 @@ Feed 목록·following의 실제 함수 4개, Inbox 업무 함수 4개를 Social
 신규 `tests/social/test_profile_activity_workflows.py` **2 nodes**는 실제 SQLite의 댓글20개·동점순서, lazy state를 포함한 쿼리 순서, hidden activity 제외·state_saved 중복 제거, private field와 로그 원문 마스킹, 없는/삭제 대상의 활동 조회 전 차단을 검증한다. 신규 fixture의 Comment 필드 이름과 identity-map 조건을 수정한 뒤 **25 passed / 4.49s**다. 제품 로직 수정 없이 fixture만 실제 모델·lazy read 조건에 맞췄다.
 
 #258/#263 API·schema·ORM 차이 0, 기존 보호 테스트 변경 0, full split PASS, architecture **682 modules / 2,257 edges / 244 exact legacy edges**다. 원래 로그 읽기 두 의존이 runtime으로 옮겨지고 사용하지 않는 이전 CRUD→agent import 하나를 제거했으며 AR-B4-C의 정확한 후속 소비자를 공유했다. 일반 HTTP·agent/resident·World Feed·media job 및 Relationships/projection 전환은 아직 남아 있고 source capture·Actions·PR/merge는 root가 진행한다.
+
+
+## AR-B5-B10 — Social HTTP 실제 소유와 실행 연결
+
+기본 Social HTTP 31개의 실제 handler는 `social/router.py`로 옮겼다. 입력·오류 변환·응답은 HTTP가, 업무 판단은 기존에 이전한 service가 소유한다. 요청 dependencies는 공통 인증의 동일 함수 객체와 앱에 연결된 서비스를 사용하며 runtime을 import하지 않는다. 두 앱 생성 경로의 `runtime/social/composition.py`는 원래 네 service 인스턴스를 연결한다. 옛 Community API는 Social과 Character state 경로를 원래 순서로 조립하는 공통 HTTP 책임만 남는다.
+
+원본 31개 함수 body/decorator AST는 실제 서비스 소유 이름을 정규화했을 때 동일하다. #258/#263 API/schema/ORM 차이 0이며 변경 보호 테스트 1개 파일의 assertion도 같다. 신규 `tests/social/test_http_ownership.py`의 3 nodes는 두 factory의 정확 서비스 연결·route 순서·동일 인증 함수, 미구성 요청의 명시적 실패, PATCH 입력/404/422/동일 Session 전달을 검증한다. 초기 신규 fixture의 중첩 라우터 순회와 POST/PATCH 불일치를 수정한 뒤 집중 **40 passed / 1 existing warning / 7.75s**다. 제품 동작이나 기존 assertion은 바꾸지 않았다.
+
+전체 split evidence PASS, architecture **685 modules / 2,277 edges / 241 exact legacy edges**, L4 **685 modules / parity97**, ER0 **Postgres78 / migration subset87 / Neo4j24 / Next44 / parity7**다. Agent/resident·World Feed·media job 및 Relationships/projection의 실제 전환은 아직 남아 있다. 신규 source/tests 첫 도입 capture와 통합 Actions/PR/merge는 root가 순차 수행한다.

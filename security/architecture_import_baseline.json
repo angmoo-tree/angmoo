@@ -1,7 +1,7 @@
 {
-  "edge_count": 2257,
-  "external_import_count": 2153,
-  "module_count": 682,
+  "edge_count": 2277,
+  "external_import_count": 2156,
+  "module_count": 685,
   "modules": [
     {
       "external_imports": [],
@@ -184,17 +184,11 @@
     },
     {
       "external_imports": [
-        "fastapi",
-        "sqlalchemy.orm",
-        "typing"
+        "fastapi"
       ],
       "imports": [
-        "app.core.db",
         "app.domains.characters.router",
-        "app.domains.identity.dependencies",
-        "app.models",
-        "app.schemas",
-        "app.services.community"
+        "app.domains.social.router"
       ],
       "module": "app.api.v1.routes.community",
       "path": "backend/app/api/v1/routes/community.py",
@@ -4409,6 +4403,22 @@
     },
     {
       "external_imports": [
+        "fastapi"
+      ],
+      "imports": [
+        "app.api.identity_dependencies",
+        "app.core.db",
+        "app.domains.social.service.discovery",
+        "app.domains.social.service.inbox",
+        "app.domains.social.service.profile_activity",
+        "app.domains.social.service.timeline"
+      ],
+      "module": "app.domains.social.dependencies",
+      "path": "backend/app/domains/social/dependencies.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "dataclasses"
       ],
       "imports": [],
@@ -4659,6 +4669,30 @@
       ],
       "module": "app.domains.social.repository.reactions",
       "path": "backend/app/domains/social/repository/reactions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.actors",
+        "app.domains.social.dependencies",
+        "app.domains.social.exceptions",
+        "app.domains.social.schemas.activity",
+        "app.domains.social.schemas.community",
+        "app.domains.social.service.discovery",
+        "app.domains.social.service.feed",
+        "app.domains.social.service.inbox",
+        "app.domains.social.service.posts",
+        "app.domains.social.service.profile_activity",
+        "app.domains.social.service.profiles",
+        "app.domains.social.service.timeline"
+      ],
+      "module": "app.domains.social.router",
+      "path": "backend/app/domains/social/router.py",
       "wildcard_imports": []
     },
     {
@@ -6854,6 +6888,7 @@
         "app.runtime.characters.management",
         "app.runtime.logging_config",
         "app.runtime.single_backend_components",
+        "app.runtime.social.composition",
         "app.runtime.startup_security",
         "app.runtime.world_packages.composition",
         "app.services.hosted_configuration"
@@ -7219,6 +7254,7 @@
         "app.runtime.memory.shutdown",
         "app.runtime.memory_selection_provider",
         "app.runtime.single_backend_components",
+        "app.runtime.social.composition",
         "app.runtime.startup_security",
         "app.runtime.world_characters.recovery",
         "app.runtime.world_packages.composition",
@@ -8706,6 +8742,20 @@
       "imports": [],
       "module": "app.runtime.social",
       "path": "backend/app/runtime/social/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "fastapi"
+      ],
+      "imports": [
+        "app.runtime.social.discovery",
+        "app.runtime.social.inbox",
+        "app.runtime.social.profile_activity",
+        "app.runtime.social.timeline"
+      ],
+      "module": "app.runtime.social.composition",
+      "path": "backend/app/runtime/social/composition.py",
       "wildcard_imports": []
     },
     {

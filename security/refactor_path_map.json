@@ -13579,7 +13579,7 @@
       ]
     },
     "AR-B2-B6": {
-      "status": "Character state admission/HTTP complete; Social tool-run auth/log/deduplication and public activity remain with their real B4/B5 owners",
+      "status": "Character state and Social basic HTTP actual owners moved; Social agent/resident workflows remain with tracked B4/B5 owners",
       "split_files": {
         "backend/app/services/community.py": [
           "backend/app/domains/characters/service/profile.py",
@@ -13606,7 +13606,8 @@
         ],
         "backend/app/api/v1/routes/community.py": [
           "backend/app/api/v1/routes/community.py",
-          "backend/app/domains/characters/router.py"
+          "backend/app/domains/characters/router.py",
+          "backend/app/domains/social/router.py"
         ]
       },
       "split_symbols": [
@@ -16026,302 +16027,392 @@
         },
         {
           "old": "backend/app/api/v1/routes/community.py::list_posts",
-          "new": "backend/app/api/v1/routes/community.py::list_posts",
+          "new": "backend/app/domains/social/router.py::list_posts",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::list_feed",
-          "new": "backend/app/api/v1/routes/community.py::list_feed",
+          "new": "backend/app/domains/social/router.py::list_feed",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::list_today_activity",
-          "new": "backend/app/api/v1/routes/community.py::list_today_activity",
+          "new": "backend/app/domains/social/router.py::list_today_activity",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::list_today_popular_posts",
-          "new": "backend/app/api/v1/routes/community.py::list_today_popular_posts",
+          "new": "backend/app/domains/social/router.py::list_today_popular_posts",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::search_nest",
-          "new": "backend/app/api/v1/routes/community.py::search_nest",
+          "new": "backend/app/domains/social/router.py::search_nest",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::list_following_feed",
-          "new": "backend/app/api/v1/routes/community.py::list_following_feed",
+          "new": "backend/app/domains/social/router.py::list_following_feed",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::list_character_following_feed",
-          "new": "backend/app/api/v1/routes/community.py::list_character_following_feed",
+          "new": "backend/app/domains/social/router.py::list_character_following_feed",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::create_post",
-          "new": "backend/app/api/v1/routes/community.py::create_post",
+          "new": "backend/app/domains/social/router.py::create_post",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::get_post_thread",
-          "new": "backend/app/api/v1/routes/community.py::get_post_thread",
+          "new": "backend/app/domains/social/router.py::get_post_thread",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::get_post",
-          "new": "backend/app/api/v1/routes/community.py::get_post",
+          "new": "backend/app/domains/social/router.py::get_post",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::delete_post",
-          "new": "backend/app/api/v1/routes/community.py::delete_post",
+          "new": "backend/app/domains/social/router.py::delete_post",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::report_post",
-          "new": "backend/app/api/v1/routes/community.py::report_post",
+          "new": "backend/app/domains/social/router.py::report_post",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::create_reply",
-          "new": "backend/app/api/v1/routes/community.py::create_reply",
+          "new": "backend/app/domains/social/router.py::create_reply",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::create_quote",
-          "new": "backend/app/api/v1/routes/community.py::create_quote",
+          "new": "backend/app/domains/social/router.py::create_quote",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::create_comment",
-          "new": "backend/app/api/v1/routes/community.py::create_comment",
+          "new": "backend/app/domains/social/router.py::create_comment",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::like_post",
-          "new": "backend/app/api/v1/routes/community.py::like_post",
+          "new": "backend/app/domains/social/router.py::like_post",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::unlike_post",
-          "new": "backend/app/api/v1/routes/community.py::unlike_post",
+          "new": "backend/app/domains/social/router.py::unlike_post",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::repost_post",
-          "new": "backend/app/api/v1/routes/community.py::repost_post",
+          "new": "backend/app/domains/social/router.py::repost_post",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::unrepost_post",
-          "new": "backend/app/api/v1/routes/community.py::unrepost_post",
+          "new": "backend/app/domains/social/router.py::unrepost_post",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::get_user_profile",
-          "new": "backend/app/api/v1/routes/community.py::get_user_profile",
+          "new": "backend/app/domains/social/router.py::get_user_profile",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::get_user_profile_feed",
-          "new": "backend/app/api/v1/routes/community.py::get_user_profile_feed",
+          "new": "backend/app/domains/social/router.py::get_user_profile_feed",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::get_user_profile_connections",
-          "new": "backend/app/api/v1/routes/community.py::get_user_profile_connections",
+          "new": "backend/app/domains/social/router.py::get_user_profile_connections",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::get_character_profile",
-          "new": "backend/app/api/v1/routes/community.py::get_character_profile",
+          "new": "backend/app/domains/social/router.py::get_character_profile",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::get_character_profile_feed",
-          "new": "backend/app/api/v1/routes/community.py::get_character_profile_feed",
+          "new": "backend/app/domains/social/router.py::get_character_profile_feed",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::get_character_profile_connections",
-          "new": "backend/app/api/v1/routes/community.py::get_character_profile_connections",
+          "new": "backend/app/domains/social/router.py::get_character_profile_connections",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::get_follow_status",
-          "new": "backend/app/api/v1/routes/community.py::get_follow_status",
+          "new": "backend/app/domains/social/router.py::get_follow_status",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::follow_profile",
-          "new": "backend/app/api/v1/routes/community.py::follow_profile",
+          "new": "backend/app/domains/social/router.py::follow_profile",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::unfollow_profile",
-          "new": "backend/app/api/v1/routes/community.py::unfollow_profile",
+          "new": "backend/app/domains/social/router.py::unfollow_profile",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::list_notifications",
-          "new": "backend/app/api/v1/routes/community.py::list_notifications",
+          "new": "backend/app/domains/social/router.py::list_notifications",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
           "old": "backend/app/api/v1/routes/community.py::mark_notification_read",
-          "new": "backend/app/api/v1/routes/community.py::mark_notification_read",
+          "new": "backend/app/domains/social/router.py::mark_notification_read",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
@@ -16336,12 +16427,15 @@
         },
         {
           "old": "backend/app/api/v1/routes/community.py::get_character_activity",
-          "new": "backend/app/api/v1/routes/community.py::get_character_activity",
+          "new": "backend/app/domains/social/router.py::get_character_activity",
           "direct_consumers": [
-            "backend/app/api/v1/routes/community.py"
+            "backend/app/api/v1/routes/community.py",
+            "backend/tests/test_community_posts_route.py",
+            "backend/tests/social/test_http_ownership.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_state_http.py::test_state_service_keeps_owner_gate_legacy_error_and_deferred_write"
+            "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+            "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
           ]
         },
         {
@@ -18864,6 +18958,22 @@
         "AR-B2-B1 original CRUD/Character schema maps; AR-B2-B6 original service map"
       ],
       "remaining": "Actual agent/resident workflows, World Feed UoWs/search, media jobs, Relationships/projection, HTTP/legacy cleanup."
+    },
+    "AR-B5-B10": {
+      "status": "IMPLEMENTED; focused40 PASS; source introduction and integration pending",
+      "scope": "31 actual Social HTTP handlers, request dependency resolution and app composition; original Character state route order retained.",
+      "new_tests": [
+        "backend/tests/social/test_http_ownership.py"
+      ],
+      "test_nodes": [
+        "tests/social/test_http_ownership.py::test_both_factories_bind_social_services_and_preserve_character_state_order",
+        "tests/social/test_http_ownership.py::test_social_dependencies_fail_closed_before_runtime_configuration",
+        "tests/social/test_http_ownership.py::test_inbox_http_preserves_request_values_validation_and_error_mapping"
+      ],
+      "source_split_owners": [
+        "AR-B2-B6 original HTTP full symbol map"
+      ],
+      "remaining": "Agent/resident, World Feed UoWs/search, media jobs, Relationships/projection and final legacy cleanup."
     }
   }
 }

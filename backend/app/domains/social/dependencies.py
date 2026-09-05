@@ -1,0 +1,36 @@
+"""Request access to application-composed Social services and shared HTTP dependencies."""
+from fastapi import Request
+from app.api.identity_dependencies import get_current_user, get_optional_current_user
+from app.core.db import get_db
+from app.domains.social.service.timeline import SocialTimelineService
+from app.domains.social.service.inbox import SocialInboxService
+from app.domains.social.service.discovery import SocialDiscoveryService
+from app.domains.social.service.profile_activity import ProfileActivityService
+
+
+def get_timeline_service(request: Request) -> SocialTimelineService:
+    service = getattr(request.app.state, "social_timeline_service", None)
+    if service is None:
+        raise RuntimeError("social timeline service is not configured")
+    return service
+
+
+def get_inbox_service(request: Request) -> SocialInboxService:
+    service = getattr(request.app.state, "social_inbox_service", None)
+    if service is None:
+        raise RuntimeError("social inbox service is not configured")
+    return service
+
+
+def get_discovery_service(request: Request) -> SocialDiscoveryService:
+    service = getattr(request.app.state, "social_discovery_service", None)
+    if service is None:
+        raise RuntimeError("social discovery service is not configured")
+    return service
+
+
+def get_profile_activity_service(request: Request) -> ProfileActivityService:
+    service = getattr(request.app.state, "social_profile_activity_service", None)
+    if service is None:
+        raise RuntimeError("social profile_activity service is not configured")
+    return service

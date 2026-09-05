@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2153,
-      "internal_edge_count": 2257,
+      "external_import_count": 2156,
+      "internal_edge_count": 2277,
       "legacy_import_exception_count": 0,
-      "module_count": 682,
+      "module_count": 685,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -348,6 +348,18 @@
             "path": "backend/app/domains/social/contracts/writes.py"
           },
           {
+            "imports": [
+              "app.api.identity_dependencies",
+              "app.core.db",
+              "app.domains.social.service.discovery",
+              "app.domains.social.service.inbox",
+              "app.domains.social.service.profile_activity",
+              "app.domains.social.service.timeline"
+            ],
+            "module": "app.domains.social.dependencies",
+            "path": "backend/app/domains/social/dependencies.py"
+          },
+          {
             "imports": [],
             "module": "app.domains.social.exceptions",
             "path": "backend/app/domains/social/exceptions.py"
@@ -498,6 +510,24 @@
             ],
             "module": "app.domains.social.repository.reactions",
             "path": "backend/app/domains/social/repository/reactions.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.actors",
+              "app.domains.social.dependencies",
+              "app.domains.social.exceptions",
+              "app.domains.social.schemas.activity",
+              "app.domains.social.schemas.community",
+              "app.domains.social.service.discovery",
+              "app.domains.social.service.feed",
+              "app.domains.social.service.inbox",
+              "app.domains.social.service.posts",
+              "app.domains.social.service.profile_activity",
+              "app.domains.social.service.profiles",
+              "app.domains.social.service.timeline"
+            ],
+            "module": "app.domains.social.router",
+            "path": "backend/app/domains/social/router.py"
           },
           {
             "imports": [],
@@ -877,6 +907,16 @@
             "imports": [],
             "module": "app.runtime.social",
             "path": "backend/app/runtime/social/__init__.py"
+          },
+          {
+            "imports": [
+              "app.runtime.social.discovery",
+              "app.runtime.social.inbox",
+              "app.runtime.social.profile_activity",
+              "app.runtime.social.timeline"
+            ],
+            "module": "app.runtime.social.composition",
+            "path": "backend/app/runtime/social/composition.py"
           },
           {
             "imports": [

@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from types import SimpleNamespace
 
 from app import schemas
-from app.api.v1.routes import community as community_routes
+from app.domains.social import router as community_routes
 from app.services import community as community_service
 
 
@@ -18,7 +18,7 @@ def test_list_posts_route_passes_limit(monkeypatch) -> None:
         captured["limit"] = limit
         return []
 
-    monkeypatch.setattr(community_routes.community_service, "list_posts", fake_list_posts)
+    monkeypatch.setattr(community_routes.feed_service, "list_posts", fake_list_posts)
 
     db = object()
     assert community_routes.list_posts(limit=1, db=db) == []

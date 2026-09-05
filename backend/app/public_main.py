@@ -314,6 +314,8 @@ def create_app(
     runtime_app.state.creator_workflows = build_creator_workflows
     from app.runtime.world_packages.composition import configure_world_package_runtime
     configure_world_package_runtime(runtime_app)
+    from app.runtime.social.composition import configure_social_runtime
+    configure_social_runtime(runtime_app)
     from app.runtime.characters.creator import build_image_generation_workflows
     runtime_app.state.image_generation_workflows = build_image_generation_workflows
     runtime_app.add_middleware(RequestBodyLimitMiddleware)
