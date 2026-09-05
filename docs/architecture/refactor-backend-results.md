@@ -792,3 +792,15 @@ routines·proposal·routine 게시·Social joint 링크·Package seed 경합 집
 
 새 **1 node**는 `tests/social/test_joint_notifications.py::test_joint_notification_keeps_exact_dedupe_payload_and_caller_write_boundary`다. add-only·정확 중복 기준·기존 event 보존·다른 수신자 분리·caller rollback·원래 JSON을 실제 SQLite로 검증한다. 공동 활동 회귀와 합쳐 **7 passed / 7.42s**다. 원래 성공 source event/claim/participant/plan 상태와 알림의 같은 Session·최종 flush를 유지한다.
 routines 준비의 후속 merge `183e73d`는 Notification helper source `8c9133a`를 실제 계보로 연결한다. 합류 후 joint 링크·proposal 6개는 통과했으나 Notification 신규 테스트를 단독 실행하자 참조 ORM이 등록되지 않아 DDL의 NullType 오류가 발생했다. 다른 테스트의 import 순서에 의존하던 fixture이므로 두 joint 테스트에서 기존 모델 등록 조립을 명시하고 재실행하여 **2 passed / 1.23초**를 확인했다. 제품 모델·DDL·기존 assertion을 바꾸지 않았고 B5 담당에게 같은 fixture 보완을 전달했다.
+
+## AR-B4-A3d — 공동 활동의 실제 참가·계획·시작·종료 소유권
+
+옛 `services/joint_activity_runtime.py`의 실제 본문을 Routines `service/joint_activity/{eligibility,planning,execution}.py`로 나누고 옛 파일을 제거했다. 오류는 `exceptions.py`, immutable OpeningClaim은 `contracts/joint_activity.py`, 원래 tuple/set/lease/attempt 값은 `constants.py`가 소유한다. 같은 역할의 package export에는 전달 함수가 없다. 서로 다른 참가 허용 범위와 오류를 가진 기존 `joint_scheduling.py` 및 plan 예약 helper를 이름이 비슷하다는 이유로 통합하지 않았다.
+
+Foreign WC·membership 조회와 차단·장소·게시 수·SocialEvent evidence SQL은 `SqlAlchemyJointReferences`가 호출자의 Session으로 수행한다. Post ID 대입과 notification 조회/add는 Social 소유 함수로 연결했다. 두 참여자 검증, 원래 lock·claim 만료/attempt·commit, 계획 revision·부분 생성 거부, Post joint ID 선대입, 시작 event 후 다른 참여자→actor 조회→알림→최종 flush, 완료 시 양방향 event와 rows가 있을 때만 commit하는 순서를 그대로 유지한다. 원래 20개 class/function 본문은 협력 호출만 원문으로 복원해 AST 차이 0, 별도 추출한 5개 foreign SQL/event 표현도 차이 0을 확인했다.
+
+새 `tests/routines/test_joint_composition.py`의 **2 nodes**는 실제 별도 연결의 SQLite에서 Post·post event·started event·알림·두 participant/item/episode가 하나의 caller commit으로 함께 보이거나 rollback으로 함께 사라지는지 검사한다. 원래 callback 순서와 같은 attached 객체도 검증하며 callback은 새 Session이나 commit을 만들지 않는다. 첫 집중 검증은 기존 공동 활동·일정·Social helper **25 passed**, 이어 신규 UoW와 routine 게시를 포함해 **44 passed / 1 기존 PostgreSQL skip / 19.46초**다.
+
+기존 happy-path의 `assert apply_joint_post(...) is None`은 원문의 인자와 판단식을 유지한다. 해당 테스트에만 실제 서비스 함수의 Session 협력을 `functools.partial`로 미리 연결하고, 다른 호출은 명시적으로 references를 전달한다. 기존 assertion/raises/warns AST 누락은 0이며 보존 검사는 변경하지 않았다. AR-B5 Proposal 소비자 한 개의 legacy→canonical 호출은 정확한 기한 있는 bridge로 기록하고, B5의 실제 Proposal 전환에서 종료한다. RoutinePost provider/context·resident/lease/activity log와 잔여 public/호환은 다음 B4-B/C 범위이므로 routines는 PARTIAL이다. 최종 집중·통합 보존 검증과 부모의 source-introduction 기록은 별도 후속 기록으로 남긴다.
+
+A3d 최종 집중 검증은 **69 passed / 1 기존 PostgreSQL skip / 66.21초**다. 전체 보존 검사는 frozen **1,867/1,907**, 보호 계보 **2,139**, 현재 **2,217 nodes**를 확인했고 API/ORM·기존 assertion/raises/warns/suppression·누락 node의 차이는 0이다. 지도 검사는 최초에 내부 메서드 이름을 top-level symbol 칸에 기록한 11개 형식 오류를 찾았다. 실제 class 이름을 symbol로, 정확한 메서드는 destination_members로 기록해 교정하며 검사 코드는 바꾸지 않았다. 새/선행 source와 node introduction은 부모의 선형 capture가 남아 있다. 현재 경계는 **674 modules / 2,222 edges / legacy exact 241 PASS**, ER0 **81/87/24/44/7**, L4 parity **97**이다.

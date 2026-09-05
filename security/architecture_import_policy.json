@@ -393,10 +393,6 @@
           "importer": "app.services.activity_proposal_runtime"
         },
         {
-          "imported": "app.services.joint_activity_runtime",
-          "importer": "app.services.activity_proposal_runtime"
-        },
-        {
           "imported": "app.cruds.agents",
           "importer": "app.services.agent_activity_policy"
         },
@@ -591,10 +587,6 @@
         {
           "imported": "app.services.world_feed_search",
           "importer": "app.services.feed_reaction_planner"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.joint_activity_runtime"
         },
         {
           "imported": "app.cruds.agent_runs",
@@ -906,10 +898,6 @@
           "importer": "app.compatibility.routine_posts.legacy"
         },
         {
-          "imported": "app.services.joint_activity_runtime",
-          "importer": "app.compatibility.routine_posts.legacy"
-        },
-        {
           "imported": "app.services.llm_context",
           "importer": "app.compatibility.routine_posts.legacy"
         },
@@ -1136,6 +1124,38 @@
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
+      "app.domains.routines.constants",
+      "app.domains.routines.contracts",
+      "app.domains.routines.contracts.activity",
+      "app.domains.routines.contracts.clock",
+      "app.domains.routines.contracts.joint_activity",
+      "app.domains.routines.contracts.lifecycle",
+      "app.domains.routines.contracts.plans",
+      "app.domains.routines.dependencies",
+      "app.domains.routines.exceptions",
+      "app.domains.routines.models",
+      "app.domains.routines.policies",
+      "app.domains.routines.policies.activity_state",
+      "app.domains.routines.policies.planning",
+      "app.domains.routines.repository",
+      "app.domains.routines.repository.plans",
+      "app.domains.routines.router",
+      "app.domains.routines.schemas",
+      "app.domains.routines.service",
+      "app.domains.routines.service.execution",
+      "app.domains.routines.service.execution.claims",
+      "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.joint_activity",
+      "app.domains.routines.service.joint_activity.eligibility",
+      "app.domains.routines.service.joint_activity.execution",
+      "app.domains.routines.service.joint_activity.planning",
+      "app.domains.routines.service.joint_reservations",
+      "app.domains.routines.service.joint_scheduling",
+      "app.domains.routines.service.lifecycle",
+      "app.domains.routines.service.plans",
+      "app.domains.routines.service.scheduling",
+      "app.domains.routines.utils",
+      "app.domains.routines.utils.clock",
       "app.domains.runtime.contracts",
       "app.domains.runtime.schemas",
       "app.domains.social.constants",
@@ -1217,34 +1237,7 @@
       "app.domains.worlds.service.generation_context",
       "app.domains.worlds.service.reserved_roles",
       "app.domains.worlds.service.scheduling",
-      "app.domains.worlds.storage",
-      "app.domains.routines.constants",
-      "app.domains.routines.contracts",
-      "app.domains.routines.contracts.activity",
-      "app.domains.routines.contracts.clock",
-      "app.domains.routines.contracts.lifecycle",
-      "app.domains.routines.contracts.plans",
-      "app.domains.routines.dependencies",
-      "app.domains.routines.exceptions",
-      "app.domains.routines.models",
-      "app.domains.routines.policies",
-      "app.domains.routines.policies.activity_state",
-      "app.domains.routines.policies.planning",
-      "app.domains.routines.repository",
-      "app.domains.routines.repository.plans",
-      "app.domains.routines.router",
-      "app.domains.routines.schemas",
-      "app.domains.routines.service",
-      "app.domains.routines.service.execution",
-      "app.domains.routines.service.execution.claims",
-      "app.domains.routines.service.execution.lifecycle",
-      "app.domains.routines.service.joint_reservations",
-      "app.domains.routines.service.joint_scheduling",
-      "app.domains.routines.service.lifecycle",
-      "app.domains.routines.service.plans",
-      "app.domains.routines.service.scheduling",
-      "app.domains.routines.utils",
-      "app.domains.routines.utils.clock"
+      "app.domains.worlds.storage"
     ],
     "entries": [
       "app.domains.characters.contracts",
@@ -1280,6 +1273,26 @@
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
+      "app.domains.routines.contracts",
+      "app.domains.routines.contracts.activity",
+      "app.domains.routines.contracts.clock",
+      "app.domains.routines.contracts.joint_activity",
+      "app.domains.routines.contracts.lifecycle",
+      "app.domains.routines.contracts.plans",
+      "app.domains.routines.schemas",
+      "app.domains.routines.service",
+      "app.domains.routines.service.execution",
+      "app.domains.routines.service.execution.claims",
+      "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.joint_activity",
+      "app.domains.routines.service.joint_activity.eligibility",
+      "app.domains.routines.service.joint_activity.execution",
+      "app.domains.routines.service.joint_activity.planning",
+      "app.domains.routines.service.joint_reservations",
+      "app.domains.routines.service.joint_scheduling",
+      "app.domains.routines.service.lifecycle",
+      "app.domains.routines.service.plans",
+      "app.domains.routines.service.scheduling",
       "app.domains.runtime.contracts",
       "app.domains.runtime.schemas",
       "app.domains.social.contracts",
@@ -1350,22 +1363,7 @@
       "app.domains.worlds.schemas",
       "app.domains.worlds.service",
       "app.domains.worlds.service.character_entry",
-      "app.domains.worlds.service.definition",
-      "app.domains.routines.contracts",
-      "app.domains.routines.contracts.activity",
-      "app.domains.routines.contracts.clock",
-      "app.domains.routines.contracts.lifecycle",
-      "app.domains.routines.contracts.plans",
-      "app.domains.routines.schemas",
-      "app.domains.routines.service",
-      "app.domains.routines.service.execution",
-      "app.domains.routines.service.execution.claims",
-      "app.domains.routines.service.execution.lifecycle",
-      "app.domains.routines.service.joint_reservations",
-      "app.domains.routines.service.joint_scheduling",
-      "app.domains.routines.service.lifecycle",
-      "app.domains.routines.service.plans",
-      "app.domains.routines.service.scheduling"
+      "app.domains.worlds.service.definition"
     ],
     "bridges": [
       {
@@ -2393,22 +2391,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.services.joint_activity_runtime",
-        "target": "app.domains.social.service.joint_posts",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Existing joint transaction delegates each original Post link assignment to its Social owner.",
-        "removal_condition": "AR-B4 replaces the legacy joint runtime consumer with typed same-Session collaboration.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.joint_activity_runtime",
-        "target": "app.domains.social.service.notifications",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Joint transaction invokes Social-owned exact notification lookup/add, retaining its own final flush.",
-        "removal_condition": "AR-B4 replaces the legacy joint runtime consumer with typed same-Session collaboration.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.domains.routines.public",
         "target": "app.domains.routines.constants",
         "owner_stage": "AR-B4-A3 / AR-B4-C / AR-G5",
@@ -2518,6 +2500,14 @@
         "owner_stage": "AR-B4-A3b / AR-B4-B / AR-B4-C / AR-G5",
         "removal_condition": "Move this exact legacy claim, joint, provider, scheduler or aggregate consumer to its actual owner; remove the same-object alias after the last tracked caller moves.",
         "reason": "Actual guarded lifecycle is now service-owned; these existing callers or public aliases preserve the original invocation and no-catch-up/per-character commit contracts while their remaining roles transition.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.activity_proposal_runtime",
+        "target": "app.domains.routines.service.joint_activity",
+        "owner_stage": "AR-B5",
+        "reason": "Existing Proposal orchestration now calls the actual joint service; no new policy remains in a compatibility copy. B5 owns the Proposal role transition.",
+        "removal_condition": "Move actual Proposal policy into Relationships and its same-Session joint collaboration into runtime during AR-B5, then remove this exact legacy consumer edge.",
         "review_date": "2026-09-05"
       }
     ]

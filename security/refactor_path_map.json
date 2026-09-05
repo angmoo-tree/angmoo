@@ -328,7 +328,8 @@
     "backend/app/domains/routines/infrastructure/__init__.py": "backend/app/domains/routines/__init__.py",
     "backend/app/domains/routines/ports/__init__.py": "backend/app/domains/routines/__init__.py",
     "backend/app/services/activity_runtime.py": "backend/app/domains/routines/service/execution/__init__.py",
-    "backend/app/services/joint_activity_scheduling.py": "backend/app/domains/routines/service/joint_scheduling.py"
+    "backend/app/services/joint_activity_scheduling.py": "backend/app/domains/routines/service/joint_scheduling.py",
+    "backend/app/services/joint_activity_runtime.py": "backend/app/domains/routines/service/joint_activity/__init__.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -18068,15 +18069,22 @@
       "purpose": "Original Post link assignments remain staged inside the same caller joint transaction; Social owns each single-field mutation without extra validation, flush, commit or query.",
       "split_files": {
         "backend/app/services/joint_activity_runtime.py": [
-          "backend/app/services/joint_activity_runtime.py",
+          "backend/app/domains/routines/constants.py",
+          "backend/app/domains/routines/contracts/joint_activity.py",
+          "backend/app/domains/routines/exceptions.py",
+          "backend/app/domains/routines/service/joint_activity/eligibility.py",
+          "backend/app/domains/routines/service/joint_activity/execution.py",
+          "backend/app/domains/routines/service/joint_activity/planning.py",
+          "backend/app/domains/routines/service/scheduling.py",
           "backend/app/domains/social/service/joint_posts.py",
-          "backend/app/domains/social/service/notifications.py"
+          "backend/app/domains/social/service/notifications.py",
+          "backend/app/runtime/routines/joint_references.py"
         ]
       },
       "split_symbols": [
         {
           "old": "backend/app/services/joint_activity_runtime.py::JointActivityRuntimeError",
-          "new": "backend/app/services/joint_activity_runtime.py::JointActivityRuntimeError",
+          "new": "backend/app/domains/routines/exceptions.py::JointActivityRuntimeError",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18090,7 +18098,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::OpeningClaim",
-          "new": "backend/app/services/joint_activity_runtime.py::OpeningClaim",
+          "new": "backend/app/domains/routines/contracts/joint_activity.py::OpeningClaim",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18104,7 +18112,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::ScheduledJoint",
-          "new": "backend/app/services/joint_activity_runtime.py::ScheduledJoint",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::ScheduledJoint",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18118,7 +18126,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::_aware_utc",
-          "new": "backend/app/services/joint_activity_runtime.py::_aware_utc",
+          "new": "backend/app/domains/routines/service/scheduling.py::aware_utc",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18132,7 +18140,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::_participant_rows",
-          "new": "backend/app/services/joint_activity_runtime.py::_participant_rows",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::_participant_rows",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18146,7 +18154,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::_eligible_world_character",
-          "new": "backend/app/services/joint_activity_runtime.py::_eligible_world_character",
+          "new": "backend/app/domains/routines/service/joint_activity/eligibility.py::_eligible_world_character",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18160,7 +18168,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::_mutually_blocked",
-          "new": "backend/app/services/joint_activity_runtime.py::_mutually_blocked",
+          "new": "backend/app/runtime/routines/joint_references.py::SqlAlchemyJointReferences",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18170,11 +18178,14 @@
             "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
             "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
             "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ],
+          "destination_members": [
+            "mutually_blocked"
           ]
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::validate_pair",
-          "new": "backend/app/services/joint_activity_runtime.py::validate_pair",
+          "new": "backend/app/domains/routines/service/joint_activity/eligibility.py::validate_pair",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18188,7 +18199,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::validate_place",
-          "new": "backend/app/services/joint_activity_runtime.py::validate_place",
+          "new": "backend/app/domains/routines/service/joint_activity/eligibility.py::validate_place",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18202,7 +18213,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::active_commitment_count",
-          "new": "backend/app/services/joint_activity_runtime.py::active_commitment_count",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::active_commitment_count",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18216,7 +18227,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::reservation_for",
-          "new": "backend/app/services/joint_activity_runtime.py::reservation_for",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::reservation_for",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18230,7 +18241,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::slot_available",
-          "new": "backend/app/services/joint_activity_runtime.py::slot_available",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::slot_available",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18244,7 +18255,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::_item_snapshot",
-          "new": "backend/app/services/joint_activity_runtime.py::_item_snapshot",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::_item_snapshot",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18258,7 +18269,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::_joint_snapshot",
-          "new": "backend/app/services/joint_activity_runtime.py::_joint_snapshot",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::_joint_snapshot",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18272,7 +18283,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::_materialize_existing_plan",
-          "new": "backend/app/services/joint_activity_runtime.py::_materialize_existing_plan",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::_materialize_existing_plan",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18286,7 +18297,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::create_scheduled_joint",
-          "new": "backend/app/services/joint_activity_runtime.py::create_scheduled_joint",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::create_scheduled_joint",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18300,7 +18311,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::materialize_reservation_for_new_plan",
-          "new": "backend/app/services/joint_activity_runtime.py::materialize_reservation_for_new_plan",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::materialize_reservation_for_new_plan",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18314,7 +18325,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::claim_opening",
-          "new": "backend/app/services/joint_activity_runtime.py::claim_opening",
+          "new": "backend/app/domains/routines/service/joint_activity/execution.py::claim_opening",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18328,7 +18339,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::release_opening",
-          "new": "backend/app/services/joint_activity_runtime.py::release_opening",
+          "new": "backend/app/domains/routines/service/joint_activity/execution.py::release_opening",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18342,7 +18353,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::apply_joint_post",
-          "new": "backend/app/services/joint_activity_runtime.py::apply_joint_post",
+          "new": "backend/app/domains/routines/service/joint_activity/execution.py::apply_joint_post",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18356,7 +18367,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::complete_due_joint_activities",
-          "new": "backend/app/services/joint_activity_runtime.py::complete_due_joint_activities",
+          "new": "backend/app/domains/routines/service/joint_activity/execution.py::complete_due_joint_activities",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18370,7 +18381,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::DAYPARTS",
-          "new": "backend/app/services/joint_activity_runtime.py::DAYPARTS",
+          "new": "backend/app/domains/routines/constants.py::DAYPARTS",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18384,7 +18395,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::OPENING_LEASE",
-          "new": "backend/app/services/joint_activity_runtime.py::OPENING_LEASE",
+          "new": "backend/app/domains/routines/constants.py::OPENING_LEASE",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18398,7 +18409,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::MAX_PARTICIPANT_OPENING_ATTEMPTS",
-          "new": "backend/app/services/joint_activity_runtime.py::MAX_PARTICIPANT_OPENING_ATTEMPTS",
+          "new": "backend/app/domains/routines/constants.py::MAX_PARTICIPANT_OPENING_ATTEMPTS",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18412,7 +18423,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::MAX_JOINT_OPENING_ATTEMPTS",
-          "new": "backend/app/services/joint_activity_runtime.py::MAX_JOINT_OPENING_ATTEMPTS",
+          "new": "backend/app/domains/routines/constants.py::MAX_JOINT_OPENING_ATTEMPTS",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18426,7 +18437,7 @@
         },
         {
           "old": "backend/app/services/joint_activity_runtime.py::ACTIVE_JOINT_STATUSES",
-          "new": "backend/app/services/joint_activity_runtime.py::ACTIVE_JOINT_STATUSES",
+          "new": "backend/app/domains/routines/constants.py::ACTIVE_JOINT_STATUSES",
           "direct_consumers": [
             "backend/app/services/activity_proposal_runtime.py"
           ],
@@ -18443,7 +18454,7 @@
           "new": "backend/app/domains/social/service/joint_posts.py::set_joint_activity_id",
           "source_member": "post.joint_activity_id = joint.id",
           "direct_consumers": [
-            "backend/app/services/joint_activity_runtime.py"
+            "backend/app/runtime/routines/joint_references.py"
           ],
           "test_nodes": [
             "tests/social/test_joint_post_links.py::test_joint_links_keep_assignment_stages_and_caller_rollback",
@@ -18459,7 +18470,7 @@
           "new": "backend/app/domains/social/service/joint_posts.py::set_opening_post_id",
           "source_member": "post.opening_post_id = joint.opening_post_id; post.opening_post_id = post.id",
           "direct_consumers": [
-            "backend/app/services/joint_activity_runtime.py"
+            "backend/app/runtime/routines/joint_references.py"
           ],
           "test_nodes": [
             "tests/social/test_joint_post_links.py::test_joint_links_keep_assignment_stages_and_caller_rollback",
@@ -18475,7 +18486,7 @@
           "new": "backend/app/domains/social/service/notifications.py::ensure_joint_started_notification",
           "source_member": "existing_notification exact lookup and conditional db.add after other_wc/actor_wc validation; before caller db.flush",
           "direct_consumers": [
-            "backend/app/services/joint_activity_runtime.py"
+            "backend/app/runtime/routines/joint_references.py"
           ],
           "test_nodes": [
             "tests/social/test_joint_notifications.py::test_joint_notification_keeps_exact_dedupe_payload_and_caller_write_boundary",
@@ -20103,6 +20114,632 @@
       "ownership": "Original accepted-unscheduled/exact-window scheduling and representation claim SQL/state/commit belong to service/joint_scheduling.py. Stable scheduling errors and exact original constants move to their roles. ActivityReferences supplies original nullable participant WC/membership reads on caller Session.",
       "distinct_contract": "This scheduling API permits pending/inactive/active WC with active membership and treats active plan items as unavailable. The live proposal opening runtime has a different active-only admission and error family; the two are not merged by name.",
       "remaining": "The product joint opening/publication/completion runtime and Proposal collaboration are next A3d/B5. This historical supported scheduling contract is preserved even though current product callers use the opening runtime; tests retain the original behavior assertions."
+    },
+    "AR-B4-A3d-joint-runtime": {
+      "status": "SOURCE CANDIDATE — final69 passed/1 existing PGskip; API/ORM/assertion/exception/suppression/node loss0; root source introduction pending",
+      "split_files": {
+        "backend/app/services/joint_activity_runtime.py": [
+          "backend/app/domains/routines/constants.py",
+          "backend/app/domains/routines/contracts/joint_activity.py",
+          "backend/app/domains/routines/exceptions.py",
+          "backend/app/domains/routines/service/joint_activity/eligibility.py",
+          "backend/app/domains/routines/service/joint_activity/execution.py",
+          "backend/app/domains/routines/service/joint_activity/planning.py",
+          "backend/app/domains/routines/service/scheduling.py",
+          "backend/app/runtime/routines/activity_references.py",
+          "backend/app/runtime/routines/joint_references.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::DAYPARTS",
+          "new": "backend/app/domains/routines/constants.py::DAYPARTS",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::OPENING_LEASE",
+          "new": "backend/app/domains/routines/constants.py::OPENING_LEASE",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::MAX_PARTICIPANT_OPENING_ATTEMPTS",
+          "new": "backend/app/domains/routines/constants.py::MAX_PARTICIPANT_OPENING_ATTEMPTS",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::MAX_JOINT_OPENING_ATTEMPTS",
+          "new": "backend/app/domains/routines/constants.py::MAX_JOINT_OPENING_ATTEMPTS",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::ACTIVE_JOINT_STATUSES",
+          "new": "backend/app/domains/routines/constants.py::ACTIVE_JOINT_STATUSES",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::JointActivityRuntimeError",
+          "new": "backend/app/domains/routines/exceptions.py::JointActivityRuntimeError",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::OpeningClaim",
+          "new": "backend/app/domains/routines/contracts/joint_activity.py::OpeningClaim",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::ScheduledJoint",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::ScheduledJoint",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::_aware_utc",
+          "new": "backend/app/domains/routines/service/scheduling.py::aware_utc",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::_participant_rows",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::_participant_rows",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::_eligible_world_character",
+          "new": "backend/app/domains/routines/service/joint_activity/eligibility.py::_eligible_world_character",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::_mutually_blocked",
+          "new": "backend/app/runtime/routines/joint_references.py::SqlAlchemyJointReferences",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ],
+          "destination_members": [
+            "mutually_blocked"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::validate_pair",
+          "new": "backend/app/domains/routines/service/joint_activity/eligibility.py::validate_pair",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::validate_place",
+          "new": "backend/app/domains/routines/service/joint_activity/eligibility.py::validate_place",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::active_commitment_count",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::active_commitment_count",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::reservation_for",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::reservation_for",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::slot_available",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::slot_available",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::_item_snapshot",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::_item_snapshot",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::_joint_snapshot",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::_joint_snapshot",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::_materialize_existing_plan",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::_materialize_existing_plan",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::create_scheduled_joint",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::create_scheduled_joint",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::materialize_reservation_for_new_plan",
+          "new": "backend/app/domains/routines/service/joint_activity/planning.py::materialize_reservation_for_new_plan",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::claim_opening",
+          "new": "backend/app/domains/routines/service/joint_activity/execution.py::claim_opening",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::release_opening",
+          "new": "backend/app/domains/routines/service/joint_activity/execution.py::release_opening",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::apply_joint_post",
+          "new": "backend/app/domains/routines/service/joint_activity/execution.py::apply_joint_post",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::complete_due_joint_activities",
+          "new": "backend/app/domains/routines/service/joint_activity/execution.py::complete_due_joint_activities",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/__init__.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/planning.py",
+            "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+            "backend/app/services/activity_proposal_runtime.py",
+            "backend/tests/test_activity_proposal_runtime.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::_eligible_world_character",
+          "new": "backend/app/runtime/routines/activity_references.py::SqlAlchemyActivityReferences",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/runtime/routines/joint_references.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans",
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta"
+          ],
+          "destination_members": [
+            "get_membership",
+            "get_world_character"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::validate_place",
+          "new": "backend/app/runtime/routines/joint_references.py::SqlAlchemyJointReferences",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/runtime/routines/joint_references.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+          ],
+          "destination_members": [
+            "get_enabled_place"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::apply_joint_post",
+          "new": "backend/app/runtime/routines/joint_references.py::SqlAlchemyJointReferences",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/runtime/routines/joint_references.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans",
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta"
+          ],
+          "destination_members": [
+            "ensure_started_notification",
+            "record_started_event",
+            "set_joint_activity_id",
+            "set_opening_post_id"
+          ]
+        },
+        {
+          "old": "backend/app/services/joint_activity_runtime.py::complete_due_joint_activities",
+          "new": "backend/app/runtime/routines/joint_references.py::SqlAlchemyJointReferences",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/joint_activity/eligibility.py",
+            "backend/app/domains/routines/service/joint_activity/execution.py",
+            "backend/app/runtime/routines/joint_references.py"
+          ],
+          "test_nodes": [
+            "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
+            "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
+            "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans",
+            "tests/test_activity_proposal_runtime.py::test_proposal_acceptance_enters_both_plans_and_both_characters_continue_joint_episode",
+            "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta"
+          ],
+          "destination_members": [
+            "record_completed_event",
+            "visible_joint_post_count"
+          ]
+        }
+      ],
+      "ownership": "Active-only participant/place/block policy is service/joint_activity/eligibility.py. Owned reservations, linked plan materialization and revision policy are planning.py. Claim fence, opening/participant state and two-sided completion are execution.py; package exports are identical implementation objects only.",
+      "transaction": "SqlAlchemyJointReferences extends the same-Session ActivityReferences reads. Foreign block/place/post-count/evidence queries retain exact SQL and order. Post field writes and add-only notifications call Social owner functions. Successful event composition uses the existing same-Session event runtime. No callback creates a Session or changes commit/flush ownership.",
+      "publication_order": "Joint Post ID assignment still precedes later validation; opening ID then participant/item/episode state, started event/evidence, nullable other then actor WC reads, exact Notification helper, final caller flush. Opening claim commits before provider execution; complete-due retains skip_locked and per-scan commit only when rows exist.",
+      "remaining": "routines scope stays PARTIAL. B5 owns ActivityProposal policy; its exact legacy consumer uses canonical joint service plus the runtime collaborator until B5 migrates. B4-B/C still owns routine-post provider/context and resident/lease/activity log closure; no full-domain claim."
     }
   }
 }

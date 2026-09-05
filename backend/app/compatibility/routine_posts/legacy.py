@@ -17,7 +17,6 @@ from app.domains.social.schemas.community import PostCreate
 from app.services import (
     activity_state_contracts,
     agent_activity_policy,
-    joint_activity_runtime,
 )
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
@@ -41,7 +40,6 @@ __all__ = [
     "agent_run_crud",
     "canonical_interaction_source",
     "community_service",
-    "joint_activity_runtime",
     "models",
     "neutralize_context_text",
     "social_event_runtime",

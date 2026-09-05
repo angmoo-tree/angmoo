@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from app.runtime.routines.joint_references import SqlAlchemyJointReferences
+
 from datetime import UTC, datetime, timedelta
 from hashlib import sha256
 import json
@@ -55,7 +57,7 @@ from app.integrations.direct_llm import (
 models = legacy.models
 agent_run_crud = legacy.agent_run_crud
 agent_activity_policy = legacy.agent_activity_policy
-joint_activity_runtime = legacy.joint_activity_runtime
+from app.domains.routines.service import joint_activity as joint_activity_runtime
 social_event_runtime = legacy.social_event_runtime
 community_service = legacy.community_service
 LangGraphResidentContext = legacy.LangGraphResidentContext
@@ -223,7 +225,7 @@ async def run_routine_post_runtime(
         return _safe_result(outcome="POST_NOT_ALLOWED", tracker=tracker)
     try:
         joint_activity_runtime.complete_due_joint_activities(
-            db,
+            db, references=SqlAlchemyJointReferences(db),
             world_id=world_character.world_id,
             now=resident_context.run_started_at,
         )
@@ -442,7 +444,7 @@ async def run_routine_post_runtime(
     if joint_activity is not None and joint_activity.opening_post_id is None:
         try:
             opening_claim = joint_activity_runtime.claim_opening(
-                db,
+                db, references=SqlAlchemyJointReferences(db),
                 joint_activity_id=joint_activity.id,
                 claimant_world_character_id=world_character.id,
                 now=resident_context.run_started_at,
@@ -600,7 +602,7 @@ async def run_routine_post_runtime(
             result_snapshot["social_event_id"] = event_result.event.id
             if joint_activity is not None:
                 started_event = joint_activity_runtime.apply_joint_post(
-                    db,
+                    db, references=SqlAlchemyJointReferences(db),
                     joint_activity_id=joint_activity.id,
                     author_world_character_id=world_character.id,
                     post=post,

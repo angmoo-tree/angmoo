@@ -1,4 +1,5 @@
 """Versioned deterministic daily planning constants."""
+from datetime import timedelta
 
 DAYPARTS = ("dawn", "morning", "afternoon", "evening")
 DAYPART_START_HOURS = (0, 6, 12, 18)
@@ -22,3 +23,11 @@ JOINT_SCHEDULING_DAYPARTS = frozenset({"dawn", "morning", "afternoon", "evening"
 JOINT_SCHEDULING_TERMINAL_ITEM_STATUSES = frozenset(
     {"active", "completed", "skipped", "interrupted", "cancelled"}
 )
+
+OPENING_LEASE = timedelta(seconds=120)
+
+MAX_PARTICIPANT_OPENING_ATTEMPTS = 2
+
+MAX_JOINT_OPENING_ATTEMPTS = 4
+
+ACTIVE_JOINT_STATUSES = {"scheduled", "ready", "active"}

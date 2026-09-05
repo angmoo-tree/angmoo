@@ -82,3 +82,9 @@ class JointActivityValidationError(JointActivitySchedulingError):
     def __init__(self, reason_code: str) -> None:
         self.reason_code = reason_code
         super().__init__(reason_code)
+
+
+class JointActivityRuntimeError(Exception):
+    def __init__(self, reason_code: str) -> None:
+        super().__init__(reason_code)
+        self.reason_code = reason_code

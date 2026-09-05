@@ -1,7 +1,7 @@
 {
-  "edge_count": 2193,
-  "external_import_count": 2120,
-  "module_count": 669,
+  "edge_count": 2222,
+  "external_import_count": 2138,
+  "module_count": 674,
   "modules": [
     {
       "external_imports": [],
@@ -447,7 +447,6 @@
         "app.services.activity_state_contracts",
         "app.services.agent_activity_policy",
         "app.services.community",
-        "app.services.joint_activity_runtime",
         "app.services.llm_context",
         "app.services.resident_contracts"
       ],
@@ -3563,7 +3562,9 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
+      "external_imports": [
+        "datetime"
+      ],
       "imports": [
         "app.domains.routines.contracts.lifecycle"
       ],
@@ -3596,6 +3597,20 @@
       "imports": [],
       "module": "app.domains.routines.contracts.clock",
       "path": "backend/app/domains/routines/contracts/clock.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.activity"
+      ],
+      "module": "app.domains.routines.contracts.joint_activity",
+      "path": "backend/app/domains/routines/contracts/joint_activity.py",
       "wildcard_imports": []
     },
     {
@@ -3830,6 +3845,79 @@
       ],
       "module": "app.domains.routines.service.execution.lifecycle",
       "path": "backend/app/domains/routines/service/execution/lifecycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.joint_activity",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.service.joint_activity.eligibility",
+        "app.domains.routines.service.joint_activity.execution",
+        "app.domains.routines.service.joint_activity.planning"
+      ],
+      "module": "app.domains.routines.service.joint_activity",
+      "path": "backend/app/domains/routines/service/joint_activity/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.joint_activity",
+        "app.domains.routines.exceptions"
+      ],
+      "module": "app.domains.routines.service.joint_activity.eligibility",
+      "path": "backend/app/domains/routines/service/joint_activity/eligibility.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.joint_activity",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.service.joint_activity.eligibility",
+        "app.domains.routines.service.joint_activity.planning",
+        "app.domains.routines.service.scheduling"
+      ],
+      "module": "app.domains.routines.service.joint_activity.execution",
+      "path": "backend/app/domains/routines/service/joint_activity/execution.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
+        "datetime",
+        "hashlib",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.ids",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.joint_activity",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.models",
+        "app.domains.routines.service.joint_activity.eligibility",
+        "app.domains.routines.service.scheduling"
+      ],
+      "module": "app.domains.routines.service.joint_activity.planning",
+      "path": "backend/app/domains/routines/service/joint_activity/planning.py",
       "wildcard_imports": []
     },
     {
@@ -8418,11 +8506,13 @@
         "app.domains.routines.exceptions",
         "app.domains.routines.service.execution.claims",
         "app.domains.routines.service.execution.lifecycle",
+        "app.domains.routines.service.joint_activity",
         "app.domains.routines.service.lifecycle",
         "app.domains.social.contracts.subjective_context",
         "app.domains.social.public",
         "app.integrations.direct_llm",
         "app.runtime.routines.activity_references",
+        "app.runtime.routines.joint_references",
         "app.runtime.social.observations",
         "app.runtime.social.sqlalchemy_inbox",
         "app.runtime.social.subjective_context"
@@ -8461,6 +8551,28 @@
       ],
       "module": "app.runtime.routines.composition",
       "path": "backend/app/runtime/routines/composition.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "hashlib",
+        "sqlalchemy",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.infrastructure.sqlalchemy_social_models",
+        "app.domains.social.models.feed",
+        "app.domains.social.models.posts",
+        "app.domains.social.service.joint_posts",
+        "app.domains.social.service.notifications",
+        "app.domains.worlds.models",
+        "app.runtime.relationships.sqlalchemy_social_event",
+        "app.runtime.routines.activity_references"
+      ],
+      "module": "app.runtime.routines.joint_references",
+      "path": "backend/app/runtime/routines/joint_references.py",
       "wildcard_imports": []
     },
     {
@@ -9174,10 +9286,11 @@
       ],
       "imports": [
         "app.core.ids",
+        "app.domains.routines.service.joint_activity",
         "app.models",
+        "app.runtime.routines.joint_references",
         "app.schemas",
-        "app.services.daily_activity_plans",
-        "app.services.joint_activity_runtime"
+        "app.services.daily_activity_plans"
       ],
       "module": "app.services.activity_proposal_runtime",
       "path": "backend/app/services/activity_proposal_runtime.py",
@@ -9456,27 +9569,6 @@
       "imports": [],
       "module": "app.services.image_prompt_safety",
       "path": "backend/app/services/image_prompt_safety.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "dataclasses",
-        "datetime",
-        "hashlib",
-        "json",
-        "sqlalchemy",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.core.ids",
-        "app.domains.social.service.joint_posts",
-        "app.domains.social.service.notifications",
-        "app.models",
-        "app.runtime.relationships.sqlalchemy_social_event"
-      ],
-      "module": "app.services.joint_activity_runtime",
-      "path": "backend/app/services/joint_activity_runtime.py",
       "wildcard_imports": []
     },
     {
