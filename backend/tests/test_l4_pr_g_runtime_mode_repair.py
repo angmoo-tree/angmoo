@@ -8,8 +8,8 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.db import Base, create_database_engine, create_session_factory
-from app.domains.world_characters.api.setup_schemas import WorldCharacterEntryCreate
-from app.domains.world_characters.infrastructure.autonomous_setup_contracts import (
+from app.domains.world_characters.schemas.setup import WorldCharacterEntryCreate
+from app.domains.world_characters.service.setup_validation import (
     character_contract_hash,
 )
 from app.domains.world_characters.infrastructure.sqlalchemy_autonomous_setup import (

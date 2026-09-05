@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.api.identity_dependencies import get_current_user
 from app.api.identity_dependencies import browser_session
 from app.core.db import get_db
-from app.domains.world_characters.api.schemas import (
+from app.domains.world_characters.schemas.identity import (
     OwnerControlledIdentityRead,
     OwnerControlledProfileWrite,
     StudioCharacterCandidateListRead,
@@ -18,11 +18,6 @@ from app.domains.world_characters.api.schemas import (
     WorldCharacterProfileListRead,
     WorldCharacterProfileRead,
     identity_read,
-)
-from app.domains.world_characters.application.owner_controlled_identity import (
-    create_owner_controlled_identity,
-    get_owner_controlled_identity,
-    update_owner_controlled_identity,
 )
 from app.domains.world_characters.application.studio_surface import (
     list_studio_world_characters,
@@ -34,7 +29,7 @@ from app.domains.world_characters.application.public_profile import (
     get_world_character_profile,
     list_world_character_profiles,
 )
-from app.domains.world_characters.domain.owner_controlled_identity import (
+from app.domains.world_characters.contracts.owner_identity import (
     LocalOwnerRequiredError,
     OwnerControlledIdentityConflictError,
     OwnerControlledIdentityError,
@@ -42,8 +37,8 @@ from app.domains.world_characters.domain.owner_controlled_identity import (
     OwnerControlledRoleInvalidError,
     OwnerWorldRequiredError,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_owner_controlled_identity import (
-    SqlAlchemyOwnerControlledIdentityRepository,
+from app.domains.world_characters.service.owner_identity import (
+    OwnerControlledIdentityService,
 )
 from app.domains.world_characters.infrastructure.sqlalchemy_studio_surface import (
     SqlAlchemyStudioWorldCharacterReader,
@@ -51,7 +46,7 @@ from app.domains.world_characters.infrastructure.sqlalchemy_studio_surface impor
 from app.domains.world_characters.infrastructure.sqlalchemy_studio_lifecycle import (
     SqlAlchemyStudioWorldCharacterLifecycle,
 )
-from app.domains.world_characters.domain.public_profile import (
+from app.domains.world_characters.contracts.public_profile import (
     WorldCharacterProfileNotFoundError,
 )
 from app.domains.world_characters.infrastructure.sqlalchemy_public_profile import (
@@ -234,8 +229,7 @@ def read_owner_character(
     browser_session.require_local_frontend_request(request, mutation=False)
     try:
         return identity_read(
-            get_owner_controlled_identity(
-                SqlAlchemyOwnerControlledIdentityRepository(db),
+            OwnerControlledIdentityService(db).get(
                 world_id=world_id,
                 current_user_id=current_user.id,
             )
@@ -260,8 +254,7 @@ def create_owner_character(
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
         return identity_read(
-            create_owner_controlled_identity(
-                SqlAlchemyOwnerControlledIdentityRepository(db),
+            OwnerControlledIdentityService(db).create(
                 world_id=world_id,
                 current_user_id=current_user.id,
                 profile=data.domain_profile(),
@@ -286,8 +279,7 @@ def update_owner_character(
     browser_session.require_local_frontend_request(request, mutation=True)
     try:
         return identity_read(
-            update_owner_controlled_identity(
-                SqlAlchemyOwnerControlledIdentityRepository(db),
+            OwnerControlledIdentityService(db).update(
                 world_id=world_id,
                 current_user_id=current_user.id,
                 profile=data.domain_profile(),

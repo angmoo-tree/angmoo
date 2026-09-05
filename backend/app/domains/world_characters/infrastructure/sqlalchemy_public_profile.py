@@ -6,11 +6,11 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.domains.characters.public import Character
-from app.domains.world_characters.domain.public_profile import (
+from app.domains.world_characters.contracts.public_profile import (
     WorldCharacterProfileNotFoundError,
     WorldCharacterPublicProfile,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_models import WorldCharacter
+from app.domains.world_characters.models import WorldCharacter
 from app.domains.worlds import public as world_service
 from app.domains.worlds.public import WorldMembership
 

@@ -7,9 +7,12 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.ids import uuid7_string
-from app.domains.characters.public import Character
-from app.domains.identity.public import InstallationIdentity, LOCAL_INSTALLATION_KEY
-from app.domains.world_characters.domain.owner_controlled_identity import (
+from app.domains.characters.service.profile import get_character
+from app.domains.characters.service.owner_controlled import (
+    seed_owner_controlled_character, update_owner_controlled_character,
+)
+from app.domains.identity.service.owner_context import is_claimed_local_owner
+from app.domains.world_characters.contracts.owner_identity import (
     LocalOwnerRequiredError,
     OwnerControlledIdentityConflictError,
     OwnerControlledIdentityNotFoundError,
@@ -18,11 +21,11 @@ from app.domains.world_characters.domain.owner_controlled_identity import (
     OwnerControlledRoleInvalidError,
     OwnerWorldRequiredError,
 )
-from app.domains.world_characters.infrastructure.sqlalchemy_models import (
+from app.domains.world_characters.models import (
     CharacterActiveWorld,
     WorldCharacter,
 )
-from app.domains.worlds.public import (
+from app.domains.worlds.service import (
     WorldServiceError,
     get_active_membership,
     get_world,
@@ -30,7 +33,7 @@ from app.domains.worlds.public import (
 )
 
 
-class SqlAlchemyOwnerControlledIdentityRepository:
+class OwnerControlledIdentityService:
     def __init__(self, db: Session) -> None:
         self._db = db
 
@@ -45,7 +48,7 @@ class SqlAlchemyOwnerControlledIdentityRepository:
         world_character = self._find_identity(world_id, current_user_id)
         if world_character is None:
             raise OwnerControlledIdentityNotFoundError(world_id)
-        character = self._db.get(Character, world_character.character_id)
+        character = get_character(self._db, world_character.character_id)
         if character is None or character.deleted_at is not None:
             raise OwnerControlledIdentityNotFoundError(world_id)
         return _snapshot(character, world_character)
@@ -77,7 +80,7 @@ class SqlAlchemyOwnerControlledIdentityRepository:
         world_id: str,
         current_user_id: str,
         profile: OwnerControlledProfile,
-    ) -> tuple[Character, WorldCharacter]:
+    ):
         """Flush owner-controlled identity rows under a caller-owned UoW."""
 
         self._require_local_owner(current_user_id)
@@ -88,23 +91,10 @@ class SqlAlchemyOwnerControlledIdentityRepository:
 
         character_id = uuid7_string()
         world_character_id = uuid7_string()
-        character = Character(
-            id=character_id,
-            owner_id=current_user_id,
-            name=profile.display_name,
-            handle=f"owner-{character_id[-20:]}",
-            avatar_url=profile.avatar_url,
-            banner_url=None,
-            one_liner=profile.intro,
-            personality="",
-            speech_style="",
-            worldview="",
-            topic_preferences=", ".join(profile.interests),
-            safety_rules="",
-            status="active",
-            execution_mode="local",
-            promotion_usage_allowed=False,
-            persona_summary=profile.background or profile.intro,
+        character = seed_owner_controlled_character(
+            self._db, character_id=character_id, owner_id=current_user_id,
+            display_name=profile.display_name, avatar_url=profile.avatar_url,
+            intro=profile.intro, interests=profile.interests, background=profile.background,
         )
         world_character = WorldCharacter(
             id=world_character_id,
@@ -121,8 +111,6 @@ class SqlAlchemyOwnerControlledIdentityRepository:
             local_profile=_profile_document(profile),
             version=1,
         )
-        self._db.add(character)
-        self._db.flush()
         self._db.add(world_character)
         self._db.flush()
         self._db.add(
@@ -150,7 +138,7 @@ class SqlAlchemyOwnerControlledIdentityRepository:
         world_character = self._find_identity(world_id, current_user_id)
         if world_character is None:
             raise OwnerControlledIdentityNotFoundError(world_id)
-        character = self._db.get(Character, world_character.character_id)
+        character = get_character(self._db, world_character.character_id)
         if (
             character is None
             or character.deleted_at is not None
@@ -158,11 +146,10 @@ class SqlAlchemyOwnerControlledIdentityRepository:
         ):
             raise OwnerControlledIdentityNotFoundError(world_id)
 
-        character.name = profile.display_name
-        character.avatar_url = profile.avatar_url
-        character.one_liner = profile.intro
-        character.topic_preferences = ", ".join(profile.interests)
-        character.persona_summary = profile.background or profile.intro
+        update_owner_controlled_character(
+            character, display_name=profile.display_name, avatar_url=profile.avatar_url,
+            intro=profile.intro, interests=profile.interests, background=profile.background,
+        )
         world_character.role_key = profile.role_key
         world_character.local_profile = _profile_document(profile)
         world_character.version += 1
@@ -201,14 +188,7 @@ class SqlAlchemyOwnerControlledIdentityRepository:
         )
 
     def _require_local_owner(self, user_id: str) -> None:
-        installation = self._db.get(
-            InstallationIdentity, LOCAL_INSTALLATION_KEY
-        )
-        if (
-            installation is None
-            or installation.bootstrap_state != "claimed"
-            or installation.owner_user_id != user_id
-        ):
+        if not is_claimed_local_owner(self._db, user_id):
             raise LocalOwnerRequiredError(user_id)
 
     def _require_owned_world_membership(self, world_id: str, user_id: str):
@@ -262,7 +242,7 @@ def _profile_document(profile: OwnerControlledProfile) -> dict[str, object]:
 
 
 def _snapshot(
-    character: Character,
+    character,
     world_character: WorldCharacter,
 ) -> OwnerControlledIdentitySnapshot:
     local_profile = (
@@ -297,4 +277,12 @@ def _snapshot(
     )
 
 
-__all__ = ["SqlAlchemyOwnerControlledIdentityRepository"]
+__all__ = ["OwnerControlledIdentityService"]
+
+
+def is_owner_controlled_character(db: Session, character_id: str) -> bool:
+    return OwnerControlledIdentityService(db).is_owner_controlled_character(character_id)
+
+
+def owner_controlled_character_ids(db: Session, character_ids: set[str]) -> set[str]:
+    return OwnerControlledIdentityService(db).owner_controlled_character_ids(character_ids)

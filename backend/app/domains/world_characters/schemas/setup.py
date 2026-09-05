@@ -6,7 +6,7 @@ import unicodedata
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.domains.worlds.public import (
+from app.domains.worlds.schemas import (
     WorldDaypartProfileInput,
     WorldGenerationContextRead,
     WorldPlaceInput,

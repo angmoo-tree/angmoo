@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.domains.world_characters.domain.studio_lifecycle import (
+from app.domains.world_characters.contracts.studio_lifecycle import (
     StudioCharacterCandidate,
     WorldCharacterLeaveResult,
 )

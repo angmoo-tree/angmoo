@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from app.domains.world_characters.domain.public_profile import (
+from app.domains.world_characters.contracts.public_profile import (
     WorldCharacterPublicProfile,
 )
 from app.domains.world_characters.ports.public_profile import (

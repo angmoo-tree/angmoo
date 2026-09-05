@@ -15,16 +15,14 @@ from app.domains.identity.public import (
     CredentialResolutionError,
     CredentialResolver,
 )
-from app.domains.world_characters.api import setup_schemas as schemas
-from app.domains.world_characters.domain.runtime_modes import (
+from app.domains.world_characters.schemas import setup as schemas
+from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
     AUTONOMOUS_FEED_RUNTIME_MODE,
 )
-from app.domains.world_characters.infrastructure import (
-    autonomous_setup_contracts as world_character_contracts,
-    autonomous_setup_models as models,
-    direct_llm_setup_provider as world_character_provider,
-)
+from app.domains.world_characters.service import setup_validation as world_character_contracts
+from app.domains.world_characters.infrastructure import autonomous_setup_models as models
+from app.domains.world_characters import client as world_character_provider
 from app.domains.world_characters.infrastructure.sqlalchemy_runtime_modes import (
     repair_local_autonomous_runtime_mode,
 )

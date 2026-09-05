@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Protocol
 
-from app.domains.world_characters.domain.studio_surface import StudioWorldCharacter
+from app.domains.world_characters.contracts.studio_surface import StudioWorldCharacter
 
 
 class StudioWorldCharacterReader(Protocol):

@@ -1,30 +1,14 @@
 from __future__ import annotations
 
+from app.domains.world_characters.exceptions import (
+    OwnerControlledIdentityError,
+    LocalOwnerRequiredError,
+    OwnerWorldRequiredError,
+    OwnerControlledIdentityNotFoundError,
+    OwnerControlledIdentityConflictError,
+    OwnerControlledRoleInvalidError,
+)
 from dataclasses import dataclass
-
-
-class OwnerControlledIdentityError(Exception):
-    reason_code = "owner_controlled_identity_error"
-
-
-class LocalOwnerRequiredError(OwnerControlledIdentityError):
-    reason_code = "local_owner_required"
-
-
-class OwnerWorldRequiredError(OwnerControlledIdentityError):
-    reason_code = "owner_world_required"
-
-
-class OwnerControlledIdentityNotFoundError(OwnerControlledIdentityError):
-    reason_code = "owner_controlled_identity_not_found"
-
-
-class OwnerControlledIdentityConflictError(OwnerControlledIdentityError):
-    reason_code = "owner_controlled_identity_exists"
-
-
-class OwnerControlledRoleInvalidError(OwnerControlledIdentityError):
-    reason_code = "owner_controlled_role_invalid"
 
 
 @dataclass(frozen=True)
