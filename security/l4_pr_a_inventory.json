@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2331,
-      "internal_edge_count": 2673,
+      "external_import_count": 2341,
+      "internal_edge_count": 2690,
       "legacy_import_exception_count": 0,
-      "module_count": 775,
+      "module_count": 780,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -654,6 +654,13 @@
             "path": "backend/app/domains/social/contracts/discovery.py"
           },
           {
+            "imports": [
+              "app.domains.social.contracts.actors"
+            ],
+            "module": "app.domains.social.contracts.image_generation",
+            "path": "backend/app/domains/social/contracts/image_generation.py"
+          },
+          {
             "imports": [],
             "module": "app.domains.social.contracts.inbox",
             "path": "backend/app/domains/social/contracts/inbox.py"
@@ -956,6 +963,11 @@
             "path": "backend/app/domains/social/schemas/feed.py"
           },
           {
+            "imports": [],
+            "module": "app.domains.social.schemas.image_generation",
+            "path": "backend/app/domains/social/schemas/image_generation.py"
+          },
+          {
             "imports": [
               "app.domains.social.contracts.profile_activity"
             ],
@@ -1004,6 +1016,33 @@
             ],
             "module": "app.domains.social.service.feed",
             "path": "backend/app/domains/social/service/feed.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.contracts.image_generation"
+            ],
+            "module": "app.domains.social.service.image_attempts",
+            "path": "backend/app/domains/social/service/image_attempts.py"
+          },
+          {
+            "imports": [
+              "app.core.image_generation",
+              "app.domains.social.constants",
+              "app.domains.social.contracts.image_generation"
+            ],
+            "module": "app.domains.social.service.image_prompts",
+            "path": "backend/app/domains/social/service/image_prompts.py"
+          },
+          {
+            "imports": [
+              "app.config",
+              "app.domains.routines.service.tick_schedule",
+              "app.domains.social.exceptions",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.media"
+            ],
+            "module": "app.domains.social.service.image_quota",
+            "path": "backend/app/domains/social/service/image_quota.py"
           },
           {
             "imports": [

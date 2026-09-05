@@ -1131,3 +1131,12 @@ C9-A 최종 집중 **44 passed / 기존 warning 1 / 9.36초**, 경계 **771 modu
 원래 6개 읽기 정책은 Social service, 원래 4개 Social SQL은 repository, active WC/Character/membership의 동일 join은 runtime references로 나누었다. 같은 Session에서 owner→WC→Character→membership 조회 순서와 profile capability 판단, 공개 root/reply 정렬·한도·오류를 유지한다. 원래 읽기는 User를 별도로 읽지 않으며 `owner_membership_inactive`를 사용하므로 작성 정책의 추가 검증/다른 오류를 재사용하지 않는다. Runtime의 기존 두 entry는 실제 service와 구체 references를 조립한다.
 
 SQL·협력 호출을 원문으로 확장한 **6개 정책 AST 동일**. 기존 집중 **13 PASS/7.03초**, 새 동일 Session/조회 순서/변경 관찰/commit 없음 회귀 포함 **14 PASS/8.83초**. 신규 1개 node는 호출자의 미commit Character moderation 변경이 profile capability에 반영되지만 기존 feed 결과를 새로 필터하지 않고 rollback으로 복원됨을 검증한다. 모든 기존 assertion은 유지했다. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
+
+
+## AR-B5-C10-A — 이미지 프롬프트·결과·quota 실제 정책
+
+원래 35개 정의/상수를 Social의 실제 contracts/schema/프롬프트 service/quota service/오류/결과 정책으로 나누었다. Character 모델 import 대신 읽는 prompt 사실만 정의한 구조적 계약을 사용한다. 날짜별 사용량과 service 무료 quota 정책은 원래 Social media SQL과 같은 settings·APP_TIMEZONE 객체를 쓰고 lock/count/예약/commit/refresh/종료 순서를 유지한다. 원래 provider 호출·Character 설정 저장은 다음 실제 workflow 단계에서 연결하며 전역 Operations 설정을 Social로 옮기지 않는다.
+
+기존 이미지/provider/Local Bot 집중 **72 PASS/5.67초**. 신규 실제 SQLite quota 회귀는 KST 자정·naive UTC 입력·한도 초과 시 추가 commit 없음·release 후 미사용·attached는 사용량 유지와 기존 commit 횟수를 검증한다. 최종 **73 PASS/6.06초**, 기존 assertion 수정 없음. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C10-A 최종 확인: 원래 57개 모든 함수/class 본문 동일, API/schema/ORM·기존 assertion·전체 split evidence PASS. 경계 780 modules / 2690 edges / legacy 202, L4/ER0 PASS.

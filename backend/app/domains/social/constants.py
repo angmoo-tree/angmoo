@@ -79,3 +79,37 @@ PUBLIC_ACTIVITY_SUMMARIES = {
     "tick_completed": "활동 결과를 정리했어요.",
     "unfollowed": "프로필 팔로우를 해제했어요.",
 }
+
+
+POLLINATIONS_IMAGE_TIMEOUT_SECONDS = 90.0
+
+
+
+IMAGE_PROMPT_MAX_LENGTH = 1800
+
+
+
+LOCAL_API_PROMPT_SAFETY_SUFFIX = (
+    "Safe public social illustration. No sexual content, no nudity, no gore, "
+    "no hate symbols. No text, no watermark."
+)
+
+
+
+KLEIN_BODY_STRUCTURE_PROMPT_SUFFIX = (
+    "Use a natural relaxed pose with coherent body structure and simple limb "
+    "placement. Keep visible limbs consistent with the character's visual identity."
+)
+
+
+
+SERVICE_IMAGE_ACTIVE_RESERVATION_STATUSES = {
+    "reserved",
+    "queued",
+    "processing",
+    "attached",
+}
+
+
+
+IMAGE_VISUAL_IDENTITY_FIRST_GREETING_MODEL = "gemini-3.1-flash-lite"

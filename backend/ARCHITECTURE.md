@@ -694,3 +694,6 @@ Social 임시 `_SocialPersistenceModels`/`social_persistence_models` export는 �
 
 
 수동 World 피드·스레드는 `social/service/manual_feed.py`에서 읽기 권한, 공개 범위, 작성자 profile capability와 응답을 판단한다. `social/repository/manual_feed.py`는 원래 게시물·댓글·좋아요 query를 소유한다. 여러 도메인을 함께 조회하는 active-profile join과 nullable owner 사실은 `runtime/social/manual_feed_references.py`가 같은 Session으로 제공한다. 읽기와 쓰기의 검증 순서·오류가 다르므로 이름이 비슷하다는 이유로 owner 검증 함수를 통합하지 않는다. 읽기는 commit하지 않고 호출자가 가진 변경을 원래 autoflush 시점에 관찰한다.
+
+
+게시물 이미지의 시각 정체성·scene 프롬프트 규칙은 `social/service/image_prompts.py`, 구조화 출력 검증은 `social/schemas/image_generation.py`, prepared 결과는 `social/contracts/image_generation.py`에 있다. Character 사실은 readonly `ImageCharacter`로 사용한다. 날짜별 사용량·무료 quota 예약/종료 정책은 `social/service/image_quota.py`가 실제 Social media repository를 호출하며 기존 lock→사용량→예약→commit/refresh 순서와 KST 날짜 계산을 유지한다. 오류는 Social exceptions, 실패/건너뜀 결과 작성은 image_attempts가 소유한다.

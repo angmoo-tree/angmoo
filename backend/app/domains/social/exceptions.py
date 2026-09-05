@@ -59,3 +59,9 @@ class CommunityRateLimitedError(CommunityServiceError):
 @dataclass(frozen=True)
 class CommunityQuotaExceeded(Exception):
     retry_after_seconds: int
+
+
+class ServiceImageQuotaError(Exception):
+    def __init__(self, reason: str) -> None:
+        super().__init__(reason)
+        self.reason = reason

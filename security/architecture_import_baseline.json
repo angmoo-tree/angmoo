@@ -1,7 +1,7 @@
 {
-  "edge_count": 2673,
-  "external_import_count": 2331,
-  "module_count": 775,
+  "edge_count": 2690,
+  "external_import_count": 2341,
+  "module_count": 780,
   "modules": [
     {
       "external_imports": [],
@@ -5333,6 +5333,19 @@
       "external_imports": [
         "__future__",
         "dataclasses",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.actors"
+      ],
+      "module": "app.domains.social.contracts.image_generation",
+      "path": "backend/app/domains/social/contracts/image_generation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "dataclasses",
         "datetime"
       ],
       "imports": [],
@@ -5851,6 +5864,15 @@
     },
     {
       "external_imports": [
+        "pydantic"
+      ],
+      "imports": [],
+      "module": "app.domains.social.schemas.image_generation",
+      "path": "backend/app/domains/social/schemas/image_generation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime",
         "pydantic",
@@ -5920,6 +5942,49 @@
       ],
       "module": "app.domains.social.service.feed",
       "path": "backend/app/domains/social/service/feed.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.image_generation"
+      ],
+      "module": "app.domains.social.service.image_attempts",
+      "path": "backend/app/domains/social/service/image_attempts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "json",
+        "typing"
+      ],
+      "imports": [
+        "app.core.image_generation",
+        "app.domains.social.constants",
+        "app.domains.social.contracts.image_generation"
+      ],
+      "module": "app.domains.social.service.image_prompts",
+      "path": "backend/app/domains/social/service/image_prompts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.routines.service.tick_schedule",
+        "app.domains.social.exceptions",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.media"
+      ],
+      "module": "app.domains.social.service.image_quota",
+      "path": "backend/app/domains/social/service/image_quota.py",
       "wildcard_imports": []
     },
     {
@@ -11360,7 +11425,6 @@
         "dataclasses",
         "datetime",
         "hashlib",
-        "json",
         "pydantic",
         "sqlalchemy.orm",
         "typing",
@@ -11373,6 +11437,13 @@
         "app.credentials",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.social.constants",
+        "app.domains.social.contracts.image_generation",
+        "app.domains.social.exceptions",
+        "app.domains.social.schemas.image_generation",
+        "app.domains.social.service.image_attempts",
+        "app.domains.social.service.image_prompts",
+        "app.domains.social.service.image_quota",
         "app.domains.social.service.media_storage",
         "app.integrations.image_provider",
         "app.integrations.media.files",

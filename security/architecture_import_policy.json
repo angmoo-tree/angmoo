@@ -1109,6 +1109,7 @@
       "app.domains.social.contracts.activity",
       "app.domains.social.contracts.actors",
       "app.domains.social.contracts.discovery",
+      "app.domains.social.contracts.image_generation",
       "app.domains.social.contracts.inbox",
       "app.domains.social.contracts.inbox_reads",
       "app.domains.social.contracts.manual_feed",
@@ -1143,11 +1144,15 @@
       "app.domains.social.schemas.activity",
       "app.domains.social.schemas.community",
       "app.domains.social.schemas.feed",
+      "app.domains.social.schemas.image_generation",
       "app.domains.social.schemas.manual",
       "app.domains.social.service",
       "app.domains.social.service.activity_results",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
+      "app.domains.social.service.image_attempts",
+      "app.domains.social.service.image_prompts",
+      "app.domains.social.service.image_quota",
       "app.domains.social.service.inbox",
       "app.domains.social.service.joint_posts",
       "app.domains.social.service.manual_feed",
@@ -1332,6 +1337,7 @@
       "app.domains.social.contracts.activity",
       "app.domains.social.contracts.actors",
       "app.domains.social.contracts.discovery",
+      "app.domains.social.contracts.image_generation",
       "app.domains.social.contracts.inbox",
       "app.domains.social.contracts.inbox_reads",
       "app.domains.social.contracts.manual_feed",
@@ -1347,10 +1353,14 @@
       "app.domains.social.schemas.activity",
       "app.domains.social.schemas.community",
       "app.domains.social.schemas.feed",
+      "app.domains.social.schemas.image_generation",
       "app.domains.social.schemas.manual",
       "app.domains.social.service.activity_results",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
+      "app.domains.social.service.image_attempts",
+      "app.domains.social.service.image_prompts",
+      "app.domains.social.service.image_quota",
       "app.domains.social.service.inbox",
       "app.domains.social.service.joint_posts",
       "app.domains.social.service.manual_feed",
@@ -3020,6 +3030,62 @@
         "owner_stage": "AR-B5",
         "removal_condition": "Move this exact Character prefix/tags route aggregation to final G06 API assembly, preserving order and URL contracts.",
         "reason": "The old mixed route module only includes actual Routines and Relationships routers; no duplicate endpoint or business implementation remains.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.social.service.image_attempts",
+        "owner_stage": "AR-B5",
+        "reason": "The remaining legacy image orchestration uses the same actual Social prompt/quota/result/validation definition during its bounded transition.",
+        "removal_condition": "Move the remaining provider/Character bindings and image request/attachment workflow to their actual owners, then retire this exact legacy consumer.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.social.service.image_quota",
+        "owner_stage": "AR-B5",
+        "reason": "The remaining legacy image orchestration uses the same actual Social prompt/quota/result/validation definition during its bounded transition.",
+        "removal_condition": "Move the remaining provider/Character bindings and image request/attachment workflow to their actual owners, then retire this exact legacy consumer.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.social.exceptions",
+        "owner_stage": "AR-B5",
+        "reason": "The remaining legacy image orchestration uses the same actual Social prompt/quota/result/validation definition during its bounded transition.",
+        "removal_condition": "Move the remaining provider/Character bindings and image request/attachment workflow to their actual owners, then retire this exact legacy consumer.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.social.constants",
+        "owner_stage": "AR-B5",
+        "reason": "The remaining legacy image orchestration uses the same actual Social prompt/quota/result/validation definition during its bounded transition.",
+        "removal_condition": "Move the remaining provider/Character bindings and image request/attachment workflow to their actual owners, then retire this exact legacy consumer.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.social.contracts.image_generation",
+        "owner_stage": "AR-B5",
+        "reason": "The remaining legacy image orchestration uses the same actual Social prompt/quota/result/validation definition during its bounded transition.",
+        "removal_condition": "Move the remaining provider/Character bindings and image request/attachment workflow to their actual owners, then retire this exact legacy consumer.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.social.schemas.image_generation",
+        "owner_stage": "AR-B5",
+        "reason": "The remaining legacy image orchestration uses the same actual Social prompt/quota/result/validation definition during its bounded transition.",
+        "removal_condition": "Move the remaining provider/Character bindings and image request/attachment workflow to their actual owners, then retire this exact legacy consumer.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.post_image_generation",
+        "target": "app.domains.social.service.image_prompts",
+        "owner_stage": "AR-B5",
+        "reason": "The remaining legacy image orchestration uses the same actual Social prompt/quota/result/validation definition during its bounded transition.",
+        "removal_condition": "Move the remaining provider/Character bindings and image request/attachment workflow to their actual owners, then retire this exact legacy consumer.",
         "review_date": "2026-09-06"
       }
     ]
