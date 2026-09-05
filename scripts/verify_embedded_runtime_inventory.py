@@ -95,7 +95,7 @@ PARITY_WORKLOADS = (
         "phase": "P7",
         "contract": "Graph projection is replayable, World-isolated, idempotent, outage-tolerant, and query-template compatible",
         "tests": [
-            "backend/tests/test_graph_projection_commands.py",
+            "backend/tests/relationships/test_projection_commands.py",
             "backend/tests/test_graph_projection_replay.py",
             "backend/tests/test_graph_projection_worker.py",
             "backend/tests/test_relationship_graph_repository.py",

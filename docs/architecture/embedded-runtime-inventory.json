@@ -177,7 +177,7 @@
         "missing_tests": [],
         "phase": "P7",
         "tests": [
-          "backend/tests/test_graph_projection_commands.py",
+          "backend/tests/relationships/test_projection_commands.py",
           "backend/tests/test_graph_projection_replay.py",
           "backend/tests/test_graph_projection_worker.py",
           "backend/tests/test_relationship_graph_repository.py",

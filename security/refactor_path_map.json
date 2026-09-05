@@ -381,7 +381,8 @@
     "backend/app/domains/relationships/graph_recall/service.py": "backend/app/domains/relationships/service/graph_recall.py",
     "backend/app/services/activity_proposal_runtime.py": "backend/app/runtime/activity_proposals/composition.py",
     "backend/tests/test_activity_proposal_runtime.py": "backend/tests/relationships/test_activity_proposals.py",
-    "backend/app/runtime/graph_projection/sqlalchemy_state.py": "backend/app/domains/relationships/service/projection_state.py"
+    "backend/app/runtime/graph_projection/sqlalchemy_state.py": "backend/app/domains/relationships/service/projection_state.py",
+    "backend/tests/test_graph_projection_commands.py": "backend/tests/relationships/test_projection_commands.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -834,7 +835,14 @@
     "tests/test_activity_proposal_runtime.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship": "tests/relationships/test_activity_proposals.py::test_failed_proposal_publish_rolls_back_proposal_event_and_relationship",
     "tests/test_activity_proposal_runtime.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision": "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
     "tests/test_activity_proposal_runtime.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta": "tests/relationships/test_activity_proposals.py::test_zero_joint_posts_expire_without_completion_event_or_relationship_delta",
-    "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans": "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans"
+    "tests/test_activity_proposal_runtime.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans": "tests/relationships/test_activity_proposals.py::test_opening_and_followup_failures_preserve_joint_and_both_participant_plans",
+    "tests/test_graph_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres": "tests/relationships/test_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres",
+    "tests/test_graph_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]": "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]",
+    "tests/test_graph_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]": "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]",
+    "tests/test_graph_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]": "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
+    "tests/test_graph_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]": "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
+    "tests/test_graph_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event": "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
+    "tests/test_graph_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion": "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
   },
   "details": {
     "AR-B1": {
@@ -29575,6 +29583,334 @@
         }
       ],
       "new_tests": []
+    },
+    "AR-B5-C5-C": {
+      "status": "IMPLEMENTED; focused47 PASS; original11 definitions and nullable2 query bodies PASS; source introduction pending",
+      "scope": "Relationships owns signature/version/source visibility/command/snapshot decisions and own queries; WorldCharacter owns original historical membership check, and runtime connects same Session/attached records without a new flush or commit.",
+      "split_files": {
+        "backend/app/runtime/graph_projection/sqlalchemy_commands.py": [
+          "backend/app/domains/relationships/service/projection_commands.py",
+          "backend/app/domains/relationships/repository/projection_commands.py",
+          "backend/app/domains/relationships/policies/projection_commands.py",
+          "backend/app/domains/relationships/contracts/projection_commands.py",
+          "backend/app/domains/relationships/constants.py",
+          "backend/app/domains/world_characters/service/projection_scope.py",
+          "backend/app/runtime/graph_projection/command_references.py",
+          "backend/app/runtime/graph_projection/sqlalchemy_commands.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::RELATIONSHIP_PAYLOAD_VERSION",
+          "new": "backend/app/domains/relationships/constants.py::RELATIONSHIP_PAYLOAD_VERSION",
+          "direct_consumers": [
+            "backend/app/domains/relationships/policies/projection_commands.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
+            "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::OBSERVATION_RELATIONSHIP_PAYLOAD_VERSION",
+          "new": "backend/app/domains/relationships/constants.py::OBSERVATION_RELATIONSHIP_PAYLOAD_VERSION",
+          "direct_consumers": [
+            "backend/app/domains/relationships/policies/projection_commands.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
+            "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::SOURCE_EXCLUSION_PAYLOAD_VERSION",
+          "new": "backend/app/domains/relationships/constants.py::SOURCE_EXCLUSION_PAYLOAD_VERSION",
+          "direct_consumers": [
+            "backend/app/domains/relationships/policies/projection_commands.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
+            "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::_IDENTIFIER_LIMIT",
+          "new": "backend/app/domains/relationships/constants.py::_IDENTIFIER_LIMIT",
+          "direct_consumers": [
+            "backend/app/domains/relationships/policies/projection_commands.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
+            "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::_canonical_json",
+          "new": "backend/app/domains/relationships/policies/projection_commands.py::_canonical_json",
+          "direct_consumers": [
+            "backend/app/domains/relationships/policies/projection_commands.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
+            "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::_validate_identifier",
+          "new": "backend/app/domains/relationships/policies/projection_commands.py::_validate_identifier",
+          "direct_consumers": [
+            "backend/app/domains/relationships/policies/projection_commands.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
+            "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::_strict_payload",
+          "new": "backend/app/domains/relationships/policies/projection_commands.py::_strict_payload",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/projection_commands.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
+            "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::_source_exclusion_reason",
+          "new": "backend/app/domains/relationships/service/projection_commands.py::_source_exclusion_reason",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/projection_commands.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
+            "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::_event_command",
+          "new": "backend/app/domains/relationships/service/projection_commands.py::_event_command",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/projection_commands.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
+            "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::build_projection_command",
+          "new": "backend/app/domains/relationships/service/projection_commands.py::build_projection_command",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/sqlalchemy_commands.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
+            "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::_source_exclusion_reason",
+          "new": "backend/app/domains/relationships/repository/projection_commands.py::evidence_for_event",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/projection_commands.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
+            "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::build_projection_command",
+          "new": "backend/app/domains/relationships/repository/projection_commands.py::get_event",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/projection_commands.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
+            "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::build_projection_command",
+          "new": "backend/app/domains/relationships/repository/projection_commands.py::get_relationship",
+          "direct_consumers": [
+            "backend/app/domains/relationships/service/projection_commands.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
+            "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::_world_character",
+          "new": "backend/app/domains/world_characters/service/projection_scope.py::get_projection_world_character",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/command_references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_reads_same_session_sources_and_historical_inactive_membership",
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[False]",
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::_world_character",
+          "new": "backend/app/runtime/graph_projection/command_references.py::SqlAlchemyProjectionCommandReferences",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/sqlalchemy_commands.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_reads_same_session_sources_and_historical_inactive_membership",
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[False]",
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::build_projection_command",
+          "new": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::build_projection_command",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/sqlalchemy_outbox.py",
+            "backend/tests/relationships/test_projection_commands.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_commands.py::test_rehydrates_relationship_snapshot_from_postgres",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[extra_key-payload_invalid]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[signature-signature_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[version-payload_version_unsupported]",
+            "tests/relationships/test_projection_commands.py::test_rejects_untrusted_outbox_before_graph_call[world-world_mismatch]",
+            "tests/relationships/test_projection_commands.py::test_source_exclusion_command_keeps_postgres_audit_event",
+            "tests/relationships/test_projection_commands.py::test_world_replay_restores_relationship_before_source_exclusion"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::_strict_payload",
+          "new": "backend/app/domains/relationships/contracts/projection_commands.py::ProjectionOutboxPayload",
+          "direct_consumers": [
+            "backend/app/domains/relationships/policies/projection_commands.py",
+            "backend/app/domains/relationships/service/projection_commands.py",
+            "backend/app/runtime/graph_projection/command_references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_reads_same_session_sources_and_historical_inactive_membership",
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[False]",
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::_world_character",
+          "new": "backend/app/domains/relationships/contracts/projection_commands.py::ProjectionWorldCharacter",
+          "direct_consumers": [
+            "backend/app/domains/relationships/policies/projection_commands.py",
+            "backend/app/domains/relationships/service/projection_commands.py",
+            "backend/app/runtime/graph_projection/command_references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_reads_same_session_sources_and_historical_inactive_membership",
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[False]",
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::_source_exclusion_reason",
+          "new": "backend/app/domains/relationships/contracts/projection_commands.py::ProjectionPost",
+          "direct_consumers": [
+            "backend/app/domains/relationships/policies/projection_commands.py",
+            "backend/app/domains/relationships/service/projection_commands.py",
+            "backend/app/runtime/graph_projection/command_references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_reads_same_session_sources_and_historical_inactive_membership",
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[False]",
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[True]"
+          ]
+        },
+        {
+          "old": "backend/app/runtime/graph_projection/sqlalchemy_commands.py::build_projection_command",
+          "new": "backend/app/domains/relationships/contracts/projection_commands.py::ProjectionCommandReferences",
+          "direct_consumers": [
+            "backend/app/domains/relationships/policies/projection_commands.py",
+            "backend/app/domains/relationships/service/projection_commands.py",
+            "backend/app/runtime/graph_projection/command_references.py"
+          ],
+          "test_nodes": [
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_reads_same_session_sources_and_historical_inactive_membership",
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[False]",
+            "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[True]"
+          ]
+        }
+      ],
+      "new_tests": [
+        "tests/relationships/test_projection_owner_collaboration.py::test_projection_reads_same_session_sources_and_historical_inactive_membership",
+        "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[False]",
+        "tests/relationships/test_projection_owner_collaboration.py::test_projection_scope_rejects_misrouted_membership_before_target_read[True]"
+      ]
     }
   }
 }

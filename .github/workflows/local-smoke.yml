@@ -198,7 +198,7 @@ jobs:
             tests/test_l3_er2_sqlite_concurrency.py \
             tests/test_l3_er3_ladybug_projection.py \
             tests/test_l3_er3_graph_query_parity.py \
-            tests/test_graph_projection_commands.py \
+            tests/relationships/test_projection_commands.py \
             tests/test_graph_projection_metrics.py \
             tests/test_graph_projection_replay.py \
             tests/test_graph_projection_worker.py \

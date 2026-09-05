@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2283,
-      "internal_edge_count": 2529,
+      "external_import_count": 2287,
+      "internal_edge_count": 2545,
       "legacy_import_exception_count": 0,
-      "module_count": 743,
+      "module_count": 748,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -183,6 +183,14 @@
             "path": "backend/app/domains/relationships/policies/graph_recall.py"
           },
           {
+            "imports": [
+              "app.domains.relationships.constants",
+              "app.domains.relationships.contracts.projection_commands"
+            ],
+            "module": "app.domains.relationships.policies.projection_commands",
+            "path": "backend/app/domains/relationships/policies/projection_commands.py"
+          },
+          {
             "imports": [],
             "module": "app.domains.relationships.policies.proposals",
             "path": "backend/app/domains/relationships/policies/proposals.py"
@@ -230,6 +238,13 @@
             ],
             "module": "app.domains.relationships.repository.points",
             "path": "backend/app/domains/relationships/repository/points.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.models"
+            ],
+            "module": "app.domains.relationships.repository.projection_commands",
+            "path": "backend/app/domains/relationships/repository/projection_commands.py"
           },
           {
             "imports": [
@@ -340,6 +355,17 @@
             ],
             "module": "app.domains.relationships.service.points",
             "path": "backend/app/domains/relationships/service/points.py"
+          },
+          {
+            "imports": [
+              "app.domains.relationships.contracts.projection_commands",
+              "app.domains.relationships.models",
+              "app.domains.relationships.policies.projection_commands",
+              "app.domains.relationships.repository.projection_commands",
+              "app.domains.relationships.repository.projection_state"
+            ],
+            "module": "app.domains.relationships.service.projection_commands",
+            "path": "backend/app/domains/relationships/service/projection_commands.py"
           },
           {
             "imports": [
@@ -1007,6 +1033,16 @@
             "path": "backend/app/runtime/graph_projection/__init__.py"
           },
           {
+            "imports": [
+              "app.domains.relationships.contracts.projection_commands",
+              "app.domains.social.repository.event_evidence",
+              "app.domains.world_characters.exceptions",
+              "app.domains.world_characters.service.projection_scope"
+            ],
+            "module": "app.runtime.graph_projection.command_references",
+            "path": "backend/app/runtime/graph_projection/command_references.py"
+          },
+          {
             "imports": [],
             "module": "app.runtime.graph_projection.metrics",
             "path": "backend/app/runtime/graph_projection/metrics.py"
@@ -1067,7 +1103,8 @@
           {
             "imports": [
               "app.domains.relationships.contracts.projection_commands",
-              "app.models"
+              "app.domains.relationships.service.projection_commands",
+              "app.runtime.graph_projection.command_references"
             ],
             "module": "app.runtime.graph_projection.sqlalchemy_commands",
             "path": "backend/app/runtime/graph_projection/sqlalchemy_commands.py"

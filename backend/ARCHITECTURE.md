@@ -667,3 +667,6 @@ Projection outbox의 업무 상태 전이와 재시도 기준은 Relationships�
 
 
 Canonical SQLite 경로의 `service/sqlite_projection_state.py`는 lease 검증·retry/dead/cancel 판단을, 같은 이름의 repository는 기존 SQL과 CAS를 소유한다. Runtime의 기존 `_write`가 `run_sqlite_immediate`에 같은 connection callback을 전달하여 BEGIN IMMEDIATE·commit·busy retry를 수행한다. 서비스는 engine이나 별도 Session을 만들지 않고, 늦은 worker가 다른 lease의 성공/실패 상태를 덮어쓰지 못하도록 원래 owner·만료·attempt 조건을 그대로 사용한다.
+
+
+Projection 명령의 버전·서명·payload 형식은 `relationships/policies/projection_commands.py`, 현재 canonical source의 적격성과 삭제/숨김·관계 방향·replay snapshot 판단은 `service/projection_commands.py`가 소유한다. Repository는 원래 nullable 조회와 evidence 순서를 유지한다. WorldCharacter의 `service/projection_scope.py`는 기존 World와 membership 연결만 확인하며 active 작성 권한 검사와 구별한다. Runtime은 같은 Session과 attached 객체를 연결하고 기존 ProjectionCommandError로 오류를 변환한다. 그래프 복구가 새로운 사건을 승인하거나 삭제된 source를 다시 공개하는 경로가 되지 않는다.

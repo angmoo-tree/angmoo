@@ -1,7 +1,7 @@
 {
-  "edge_count": 2529,
-  "external_import_count": 2283,
-  "module_count": 743,
+  "edge_count": 2545,
+  "external_import_count": 2287,
+  "module_count": 748,
   "modules": [
     {
       "external_imports": [],
@@ -3447,6 +3447,20 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "__future__",
+        "hashlib",
+        "json"
+      ],
+      "imports": [
+        "app.domains.relationships.constants",
+        "app.domains.relationships.contracts.projection_commands"
+      ],
+      "module": "app.domains.relationships.policies.projection_commands",
+      "path": "backend/app/domains/relationships/policies/projection_commands.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [],
       "module": "app.domains.relationships.policies.proposals",
@@ -3511,6 +3525,18 @@
       ],
       "module": "app.domains.relationships.repository.points",
       "path": "backend/app/domains/relationships/repository/points.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.relationships.models"
+      ],
+      "module": "app.domains.relationships.repository.projection_commands",
+      "path": "backend/app/domains/relationships/repository/projection_commands.py",
       "wildcard_imports": []
     },
     {
@@ -3693,6 +3719,23 @@
       ],
       "module": "app.domains.relationships.service.points",
       "path": "backend/app/domains/relationships/service/points.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.relationships.contracts.projection_commands",
+        "app.domains.relationships.models",
+        "app.domains.relationships.policies.projection_commands",
+        "app.domains.relationships.repository.projection_commands",
+        "app.domains.relationships.repository.projection_state"
+      ],
+      "module": "app.domains.relationships.service.projection_commands",
+      "path": "backend/app/domains/relationships/service/projection_commands.py",
       "wildcard_imports": []
     },
     {
@@ -6310,6 +6353,19 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.world_characters.exceptions",
+        "app.domains.world_characters.models",
+        "app.domains.worlds.service.character_entry"
+      ],
+      "module": "app.domains.world_characters.service.projection_scope",
+      "path": "backend/app/domains/world_characters/service/projection_scope.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "sqlalchemy.orm"
       ],
@@ -8568,6 +8624,20 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.relationships.contracts.projection_commands",
+        "app.domains.social.repository.event_evidence",
+        "app.domains.world_characters.exceptions",
+        "app.domains.world_characters.service.projection_scope"
+      ],
+      "module": "app.runtime.graph_projection.command_references",
+      "path": "backend/app/runtime/graph_projection/command_references.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "dataclasses",
         "threading",
@@ -8661,17 +8731,12 @@
     },
     {
       "external_imports": [
-        "__future__",
-        "datetime",
-        "hashlib",
-        "json",
-        "sqlalchemy",
-        "sqlalchemy.orm",
-        "typing"
+        "sqlalchemy.orm"
       ],
       "imports": [
         "app.domains.relationships.contracts.projection_commands",
-        "app.models"
+        "app.domains.relationships.service.projection_commands",
+        "app.runtime.graph_projection.command_references"
       ],
       "module": "app.runtime.graph_projection.sqlalchemy_commands",
       "path": "backend/app/runtime/graph_projection/sqlalchemy_commands.py",

@@ -1054,3 +1054,12 @@ Relationships service가 원래 worker/batch/시간 검증·lease·retry/dead/ca
 기존 class의 constructor·load_command·_write를 포함한 **10개 policy/SQL/executor AST 계약이 동일**하다. 실제 10-worker claim/reclaim 및 scheduler/projector 경쟁·worker 실패/종료·명령/replay 집중 회귀는 **37 passed / 19.31초**다. 기존 assertion이나 신규 test node는 변경하지 않았다. B5의 mutable feature navigation도 실제 이동 경로에 맞췄으며 frozen baseline/checkpoint/additions와 기능 완료 상태는 유지한다. Source capture/Hosted CI/installer 및 잔여 command/replay/observation·Social agent/media 전환은 후속 통합과 slice에서 진행한다.
 
 최종 canonical TTL 연결과 실제 트리의 같은 회귀도 **37 passed / 17.82초**이며, 경계 **743 modules / 2,529 edges / exact legacy 213**, API·응답 스키마·ORM 및 전체 split evidence 오류 0을 확인했다. L4·ER0 current inventory도 통과했다.
+
+
+## AR-B5-C5-C — canonical source 기반 명령·서명·범위 판단
+
+Relationships가 payload 버전/서명/형식, source 적격성·삭제/숨김, 관계 방향과 replay snapshot의 실제 판단을 소유한다. 자체 event/relationship/evidence 조회는 repository, WorldCharacter의 원래 nullable 조회와 membership World 확인은 해당 서비스, Social Post는 기존 unfiltered owner query에 연결했다. Runtime은 caller Session을 전달하며 별도 Session·flush·commit을 만들지 않는다. 비활성 membership도 과거 관계 복구에 사용할 수 있었던 기존 의미를 active-author 정책과 합치지 않았다.
+
+원래 **11개 정의와 nullable 조회 2개 AST 계약이 동일**하며, 집중 **47 passed / 14.94초**다. 기존 Command 테스트 7개 node를 `tests/relationships/test_projection_commands.py`로 이동하고 workflow/ER0 실제 소비자와 정확 node 지도를 갱신했다. 새 3개 node는 같은 Session·attached identity·숨김 pending write 감지·caller rollback·inactive 과거 membership 허용 및 missing/다른 World membership을 target 조회 전에 차단하는 오류를 검증한다. 첫 추출 실행은 이미 존재하는 동일 source-exclusion 상수를 확인해 정지했고, 중복 정의 대신 기존 같은 값에 연결한 뒤 진행했다. 기존 assertion/DDL/frozen 승인 범위는 변경하지 않았다. Source capture와 전체 B5/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C5-C 최종 경계는 **748 modules / 2,545 edges / exact legacy 212**이며 더 이상 필요 없는 runtime→global models 예외 1개를 종료했다. PR258/263 API·응답·ORM와 full split evidence가 통과했고, 옮긴 기존 7개 node의 assertion/parametrize 계약도 직접 동일 비교했다. L4·ER0 current inventory가 통과했다.
