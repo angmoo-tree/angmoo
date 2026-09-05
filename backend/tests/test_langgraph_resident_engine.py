@@ -5694,7 +5694,7 @@ def test_v8_planner_prompts_route_seed_and_relationship_without_topic_arc() -> N
     )
     assert "Optionally include writing.topic_arc" not in source
     writer_source = inspect.getsource(
-        langgraph_resident._build_post_writer_planner_user_prompt
+        langgraph_resident.resident_prompts_service._build_post_writer_planner_user_prompt
     )
     assert "source_mix is feed_seed" in writer_source
     assert "source_mix is relationship_point" in writer_source

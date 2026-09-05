@@ -1085,3 +1085,12 @@ LG-B3b 최종 고정 후보 검증: **378 passed / 기존 warnings2 / 176.55초*
 DirectLlmJsonError인 경우만 자체 validation_summary를 읽는 원래 isinstance 분기는 runtime에 그대로 두며 실제 서비스가 명시적으로 연결된 변환기를 호출한다. 실제 성공·재사용 행동만 fallback 기억 근거에 쓰고, 허용된 필드의 길이 오류만 정제한 뒤 원래 StateWrite 전체 검증을 다시 통과해야 한다. provider 호출·재시도 횟수·기존 prompt payload는 변경하지 않았다. 남은 prompt 판단과 graph/provider 조립은 후속 LG 전환이다.
 
 LG-B4 최종 후보 검증: **378 passed / 기존 warnings2 / 125.78초**. 원래6보존진단 모두0(protected2139/current2263), 경계754/2519/206legacy, L4 754/14/97, deferred22 PASS. 신규 실제 제품4파일이며 새 테스트 노드0·기존 테스트 변경0이다. 원본 frozen과 append-only ledger를 변경하지 않았으며 부모의 source 첫 도입 캡처 후 stock 통합 검증을 진행한다.
+
+
+## AR-B4 LG-B5 — 실제 프롬프트·작업 구성·planner 결과
+
+원문17함수를 resident_prompts/writing_tasks/planner_results로 이전했다. 좁은 persona/state 입력과 같은 도메인의 실제 helper를 연결하는 kwargs만 복원하면 전체 AST와 문구가 같다. provider 호출은 없다. 원래 선택·task id·TopicArc 날짜/근거 조회·writer 순서·JSON 필드를 유지한다.
+
+기존 source inspection의 writer prompt 준비 대상1곳을 runtime partial에서 실제 defining service 함수로 바꿨다. 모든 기존 assertion과 suppression은 동일하며 행동 검사를 삭제하지 않았다. 현재 LG source 전체 소유 지도는 원래294정의의 실제 위치를 이어간다. Memory/Lore/Relationships의 이미 구현된 소유 코드는 복제하지 않으며 부모 합류에서 기존 읽기 협력을 교체한다.
+
+LG-B5 최종 후보 검증: **378 passed / 기존 warnings2 / 115.77초**. 원래6보존진단 모두0(protected2139/current2263), 경계758/2548/206legacy, L4 758/14/97, deferred22 PASS. 신규 제품4파일이며 새 테스트 노드0이다. 원본 frozen·append-only ledger는 유지하며 최초 source 캡처와 다른 소유 구현의 순차 합류는 부모 통합에서 수행한다.

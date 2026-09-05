@@ -698,3 +698,10 @@ Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥�
 `routines/policies/writer_tasks.py`는 실행·글감에서 같은 writer task id를 만듭니다. `service/post_writer_results.py`는 필수 작성 제약과 기본 계획을 유지하며, task id와 실제 제목·본문이 일치한 결과만 적용합니다. Lore id와 조회 방식은 원래 허용된 개수와 길이로 남깁니다.
 
 `service/state_outputs.py`는 성공·재사용된 공개 행동으로 기억 근거를 만들고, 글자 수 제한만 어긴 상태 응답을 정제한 뒤 전체 Pydantic 응답 검증을 다시 수행합니다. 오류 종류에 따른 provider 예외 해석은 runtime의 같은 분기로 연결합니다. 상태 정책 안에서 provider를 다시 호출하거나 가짜 성공 근거를 만들지 않습니다. 입력은 기존 saved state와 graph state를 그대로 사용하며 ORM 복제나 새 DB 접근을 추가하지 않습니다.
+
+
+### Resident 프롬프트와 실제 writer 작업
+
+`service/resident_prompts.py`는 persona·writer·상태 기록·Lore 검색 질의의 실제 프롬프트를 만듭니다. 글감과 persona가 시스템 규칙을 덮어쓸 수 없다는 원래 문맥 경계를 유지하며 입력은 이미 읽은 값입니다. `service/writing_tasks.py`는 선택된 행동을 reply/post 작업으로 만들고, 같은 TopicArc 서비스에서 단계·날짜·이전 실행 근거를 읽습니다. 실제 읽기는 기존 협력과 같은 Session으로 필요한 분기에서만 수행합니다. `service/planner_results.py`는 관찰 입력과 각 planner의 결과를 실제 실행 진단에 맞게 표현합니다.
+
+실행 코드는 이 서비스에 기존 공통 텍스트 정제와 TopicArc 협력을 연결합니다. 도메인 내부의 task id·TopicArc·응답 조립은 실제 소유 서비스를 직접 호출하며 같은 기능을 다른 전달 서비스로 중복 구현하지 않습니다. 프롬프트 문구나 토큰 예산은 위치 변경과 함께 바꾸지 않습니다.
