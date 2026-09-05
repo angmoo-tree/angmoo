@@ -38726,6 +38726,726 @@
       ],
       "preserved": "Original quota row locks, nested insert/IntegrityError behavior, day reset/cooldown, caller-owned action completion and consume_read explicit commit. All DTO/ORM definitions unchanged.",
       "remaining": "LocalBot main workflow/auth/owner key/HTTP, Social DTO ownership, global aggregates and final boundary retirement."
+    },
+    "AR-B8-CHARACTER-IMAGE-IDENTITY-WRITE": {
+      "status": "SOURCE PREPARATION; original whole async workflow AST identical after exact five-statement owner-write expansion;49PASS/16.44s; original six preservation diagnostics0/protected2201/current2255; source introduction pending",
+      "split_files": {
+        "backend/app/services/post_image_generation.py": [
+          "backend/app/services/post_image_generation.py",
+          "backend/app/domains/characters/repository/image_settings.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/post_image_generation.py::_ensure_visual_identity",
+          "new": "backend/app/domains/characters/repository/image_settings.py::store_image_visual_identity",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::POLLINATIONS_IMAGE_TIMEOUT_SECONDS",
+          "new": "backend/app/services/post_image_generation.py::POLLINATIONS_IMAGE_TIMEOUT_SECONDS",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::IMAGE_PROMPT_MAX_LENGTH",
+          "new": "backend/app/services/post_image_generation.py::IMAGE_PROMPT_MAX_LENGTH",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::LOCAL_API_PROMPT_SAFETY_SUFFIX",
+          "new": "backend/app/services/post_image_generation.py::LOCAL_API_PROMPT_SAFETY_SUFFIX",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::KLEIN_BODY_STRUCTURE_PROMPT_SUFFIX",
+          "new": "backend/app/services/post_image_generation.py::KLEIN_BODY_STRUCTURE_PROMPT_SUFFIX",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::SERVICE_IMAGE_ACTIVE_RESERVATION_STATUSES",
+          "new": "backend/app/services/post_image_generation.py::SERVICE_IMAGE_ACTIVE_RESERVATION_STATUSES",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::IMAGE_VISUAL_IDENTITY_FIRST_GREETING_MODEL",
+          "new": "backend/app/services/post_image_generation.py::IMAGE_VISUAL_IDENTITY_FIRST_GREETING_MODEL",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::ServiceImageQuotaError",
+          "new": "backend/app/services/post_image_generation.py::ServiceImageQuotaError",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_VisualIdentityPayload",
+          "new": "backend/app/services/post_image_generation.py::_VisualIdentityPayload",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_ImagePromptPayload",
+          "new": "backend/app/services/post_image_generation.py::_ImagePromptPayload",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_ReferenceImage",
+          "new": "backend/app/services/post_image_generation.py::_ReferenceImage",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::PreparedPostImage",
+          "new": "backend/app/services/post_image_generation.py::PreparedPostImage",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::prepare_post_image",
+          "new": "backend/app/services/post_image_generation.py::prepare_post_image",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::create_local_api_post_image_request",
+          "new": "backend/app/services/post_image_generation.py::create_local_api_post_image_request",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::prepare_local_api_post_image",
+          "new": "backend/app/services/post_image_generation.py::prepare_local_api_post_image",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::attach_prepared_post_image",
+          "new": "backend/app/services/post_image_generation.py::attach_prepared_post_image",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::release_prepared_post_image_quota",
+          "new": "backend/app/services/post_image_generation.py::release_prepared_post_image_quota",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_ensure_visual_identity",
+          "new": "backend/app/services/post_image_generation.py::_ensure_visual_identity",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_resolve_visual_identity",
+          "new": "backend/app/services/post_image_generation.py::_resolve_visual_identity",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_refine_image_prompt",
+          "new": "backend/app/services/post_image_generation.py::_refine_image_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_visual_identity_system_prompt",
+          "new": "backend/app/services/post_image_generation.py::_visual_identity_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_image_prompt_system_prompt",
+          "new": "backend/app/services/post_image_generation.py::_image_prompt_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_default_image_prompt_system_prompt",
+          "new": "backend/app/services/post_image_generation.py::_default_image_prompt_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_klein_image_prompt_system_prompt",
+          "new": "backend/app/services/post_image_generation.py::_klein_image_prompt_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_flux_schnell_image_prompt_system_prompt",
+          "new": "backend/app/services/post_image_generation.py::_flux_schnell_image_prompt_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_zimage_image_prompt_system_prompt",
+          "new": "backend/app/services/post_image_generation.py::_zimage_image_prompt_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_sana_image_prompt_system_prompt",
+          "new": "backend/app/services/post_image_generation.py::_sana_image_prompt_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_pruna_edit_image_prompt_system_prompt",
+          "new": "backend/app/services/post_image_generation.py::_pruna_edit_image_prompt_system_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_compose_pollinations_prompt",
+          "new": "backend/app/services/post_image_generation.py::_compose_pollinations_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_append_prompt_suffix",
+          "new": "backend/app/services/post_image_generation.py::_append_prompt_suffix",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_compose_local_api_pollinations_prompt",
+          "new": "backend/app/services/post_image_generation.py::_compose_local_api_pollinations_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_fallback_visual_identity",
+          "new": "backend/app/services/post_image_generation.py::_fallback_visual_identity",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_pollinations_reference_url",
+          "new": "backend/app/services/post_image_generation.py::_pollinations_reference_url",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_reference_image_url",
+          "new": "backend/app/services/post_image_generation.py::_reference_image_url",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_accepts_pollinations_reference",
+          "new": "backend/app/services/post_image_generation.py::_accepts_pollinations_reference",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_requires_pollinations_reference",
+          "new": "backend/app/services/post_image_generation.py::_requires_pollinations_reference",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_requires_reference",
+          "new": "backend/app/services/post_image_generation.py::_requires_reference",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_allows_reference_fallback",
+          "new": "backend/app/services/post_image_generation.py::_allows_reference_fallback",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_select_reference_image",
+          "new": "backend/app/services/post_image_generation.py::_select_reference_image",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_build_reference_image",
+          "new": "backend/app/services/post_image_generation.py::_build_reference_image",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_public_media_url",
+          "new": "backend/app/services/post_image_generation.py::_public_media_url",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_mime_type_from_url",
+          "new": "backend/app/services/post_image_generation.py::_mime_type_from_url",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_daily_image_count",
+          "new": "backend/app/services/post_image_generation.py::_daily_image_count",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_daily_image_usage",
+          "new": "backend/app/services/post_image_generation.py::_daily_image_usage",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_daily_image_window_count",
+          "new": "backend/app/services/post_image_generation.py::_daily_image_window_count",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_daily_image_window",
+          "new": "backend/app/services/post_image_generation.py::_daily_image_window",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_image_key_source",
+          "new": "backend/app/services/post_image_generation.py::_image_key_source",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_has_user_image_key",
+          "new": "backend/app/services/post_image_generation.py::_has_user_image_key",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_image_model_for_key_source",
+          "new": "backend/app/services/post_image_generation.py::_image_model_for_key_source",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_image_key_for_source",
+          "new": "backend/app/services/post_image_generation.py::_image_key_for_source",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_service_failure_class",
+          "new": "backend/app/services/post_image_generation.py::_service_failure_class",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_service_quota_date",
+          "new": "backend/app/services/post_image_generation.py::_service_quota_date",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_reserve_service_image_quota",
+          "new": "backend/app/services/post_image_generation.py::_reserve_service_image_quota",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_finalize_service_image_quota",
+          "new": "backend/app/services/post_image_generation.py::_finalize_service_image_quota",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_image_llm_model_for_writing_mode",
+          "new": "backend/app/services/post_image_generation.py::_image_llm_model_for_writing_mode",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_local_api_image_skip_reason",
+          "new": "backend/app/services/post_image_generation.py::_local_api_image_skip_reason",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_unsafe_image_text_reason",
+          "new": "backend/app/services/post_image_generation.py::_unsafe_image_text_reason",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_log_local_api_image_rejected",
+          "new": "backend/app/services/post_image_generation.py::_log_local_api_image_rejected",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::json_safe_prompt",
+          "new": "backend/app/services/post_image_generation.py::json_safe_prompt",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::json_dumps",
+          "new": "backend/app/services/post_image_generation.py::json_dumps",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_pollinations_failed",
+          "new": "backend/app/services/post_image_generation.py::_pollinations_failed",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_replicate_failed",
+          "new": "backend/app/services/post_image_generation.py::_replicate_failed",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_skipped",
+          "new": "backend/app/services/post_image_generation.py::_skipped",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        },
+        {
+          "old": "backend/app/services/post_image_generation.py::_failed",
+          "new": "backend/app/services/post_image_generation.py::_failed",
+          "direct_consumers": [
+            "backend/app/services/post_image_generation.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_prepare_post_image_flux_uses_visual_identity_without_reference"
+          ]
+        }
+      ],
+      "direct_consumers": [
+        "backend/app/services/post_image_generation.py"
+      ],
+      "preserved": "Same prompt strip/hash assignment/commit/refresh/returned attached value; Social retains provider result and cache policy. No added query or commit.",
+      "remaining": "B5 replaces current legacy caller with its actual Social service/runtime callback; root final integration binds this exact owner function."
     }
   }
 }

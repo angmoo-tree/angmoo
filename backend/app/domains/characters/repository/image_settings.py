@@ -56,3 +56,17 @@ def image_secret_character(db: Session, character_id: str) -> models.Character |
 def save_setting(db: Session, setting: models.AgentImageGenerationSetting) -> None:
     db.commit()
     db.refresh(setting)
+
+
+def store_image_visual_identity(
+    db: Session,
+    setting: models.AgentImageGenerationSetting,
+    *,
+    identity_prompt: str,
+    source_hash: str,
+) -> str | None:
+    setting.visual_identity_prompt = identity_prompt.strip()
+    setting.visual_identity_source_hash = source_hash
+    db.commit()
+    db.refresh(setting)
+    return setting.visual_identity_prompt

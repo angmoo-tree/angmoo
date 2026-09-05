@@ -749,11 +749,9 @@ async def _ensure_visual_identity(
         if reference.source == "banner":
             return None
         return None
-    setting.visual_identity_prompt = identity.identity_prompt.strip()
-    setting.visual_identity_source_hash = reference.source_hash
-    db.commit()
-    db.refresh(setting)
-    return setting.visual_identity_prompt
+    return image_setting_repository.store_image_visual_identity(
+        db, setting, identity_prompt=identity.identity_prompt, source_hash=reference.source_hash,
+    )
 
 
 async def _resolve_visual_identity(

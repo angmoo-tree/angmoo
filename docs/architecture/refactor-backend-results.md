@@ -1157,3 +1157,8 @@ Source `e703fbc41963a1504a2b9cade64023a307dee4bb`는 LocalBot actual3ORM·입력
 실제 SQL에 원래 인수를 펼친 AST로97개 전체 정의·상수가 동일하며 기존 관련50 PASS/20.07초다. 새 node는 없다. 현재 경계757/2495/182legacy와 L4/ER0 PASS, 원래 source/assertion/suppression/APIORM/node 진단0이다. 최초 split 진단은 삭제된 quota 경로를 가리키던 옛 Lore 소비자2개가 실패했다. 같은 이름의 다른 `_aware_utc`/APP_TIMEZONE을 실제 Lore 소비자로 기재한 목록을 실제 `character_lore/service/parser_quota.py` 내부 호출 및 `service/documents.py` import로 좁혔고 원래 split 검사를 다시 실행해0오류를 확인했다. 제품 코드·테스트 기대값을 변경하지 않았다.
 
 protected2201/current2255이며 선행 sourceintro 통합/전체 stock gate는 대기다. LocalBot 인증/owner key/행동서비스/HTTP, G5 모델등록 및 B8 최종 검증은 남아 있다.
+
+
+### AR-B8 Character visual identity 저장 책임
+
+`characters/repository/image_settings.py::store_image_visual_identity`는 원래 post image의 prompt strip·source hash 대입·commit·refresh·반환 5문장을 실제로 소유한다. 기존 `_ensure_visual_identity`가 이 함수를 같은 Session/setting으로 호출하며, 해당 호출을 원래 5문장으로 펼친 전체 async 함수 AST가 동일하다. 기존 image 관련49 PASS/16.44초, ER0와 원래 source/split/assertion/suppression/APIORM/node 읽기 진단0오류(protected2201/current2255)다. 새 test node와 commit/query 추가는 없다. Social의 provider 결과 검증/캐시 정책은 B5에서 실제 이전하며 이 Character 함수를 runtime에서 연결한다. 선행 sourceintro 및 통합 gate는 대기다.
