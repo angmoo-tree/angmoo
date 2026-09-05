@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, event, select
 from sqlalchemy.orm import Session
 
+from app import models as _registered_models  # noqa: F401 - register referenced ORM types before isolated table DDL
 from app.domains.social.models.posts import Notification
 from app.domains.social.service.notifications import ensure_joint_started_notification
 

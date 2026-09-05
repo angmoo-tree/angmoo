@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
+from app import models as _registered_models  # noqa: F401 - register referenced ORM types before isolated table DDL
 from app.domains.social.models.posts import Post
 from app.domains.social.service.joint_posts import set_joint_activity_id, set_opening_post_id
 
