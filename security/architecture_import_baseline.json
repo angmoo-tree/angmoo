@@ -1,7 +1,7 @@
 {
-  "edge_count": 2147,
-  "external_import_count": 2109,
-  "module_count": 662,
+  "edge_count": 2175,
+  "external_import_count": 2125,
+  "module_count": 667,
   "modules": [
     {
       "external_imports": [],
@@ -440,6 +440,7 @@
       ],
       "imports": [
         "app.compatibility.routine_posts.canonical_interactions",
+        "app.core.context_text",
         "app.cruds.agent_runs",
         "app.domains.social.schemas.community",
         "app.models",
@@ -449,7 +450,6 @@
         "app.services.agent_activity_policy",
         "app.services.community",
         "app.services.joint_activity_runtime",
-        "app.services.llm_context",
         "app.services.resident_contracts"
       ],
       "module": "app.compatibility.routine_posts.legacy",
@@ -534,6 +534,15 @@
       ],
       "module": "app.core.agent_activity_schedule",
       "path": "backend/app/core/agent_activity_schedule.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "re"
+      ],
+      "imports": [],
+      "module": "app.core.context_text",
+      "path": "backend/app/core/context_text.py",
       "wildcard_imports": []
     },
     {
@@ -4242,6 +4251,7 @@
     },
     {
       "external_imports": [
+        "datetime",
         "typing"
       ],
       "imports": [],
@@ -4307,6 +4317,17 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.social.contracts.timeline",
+      "path": "backend/app/domains/social/contracts/timeline.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "dataclasses",
         "datetime",
@@ -4330,7 +4351,9 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
+      "external_imports": [
+        "dataclasses"
+      ],
       "imports": [],
       "module": "app.domains.social.exceptions",
       "path": "backend/app/domains/social/exceptions.py",
@@ -4626,6 +4649,19 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [
+        "json",
+        "typing"
+      ],
+      "imports": [
+        "app.core.context_text",
+        "app.domains.social.constants"
+      ],
+      "module": "app.domains.social.service.activity_results",
+      "path": "backend/app/domains/social/service/activity_results.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [],
       "imports": [
         "app.domains.social.models.posts"
@@ -4651,13 +4687,15 @@
     },
     {
       "external_imports": [
+        "collections.abc",
         "json",
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
       "imports": [
         "app.core.unit_of_work",
-        "app.domains.social.models.posts"
+        "app.domains.social.models.posts",
+        "app.domains.social.service.presentation"
       ],
       "module": "app.domains.social.service.notifications",
       "path": "backend/app/domains/social/service/notifications.py",
@@ -4712,6 +4750,32 @@
       ],
       "module": "app.domains.social.service.source_posts",
       "path": "backend/app/domains/social/service/source_posts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy.orm",
+        "uuid"
+      ],
+      "imports": [
+        "app.domains.characters.service.profile",
+        "app.domains.social.contracts.actors",
+        "app.domains.social.contracts.timeline",
+        "app.domains.social.exceptions",
+        "app.domains.social.models.posts",
+        "app.domains.social.repository.posts",
+        "app.domains.social.repository.reactions",
+        "app.domains.social.schemas.community",
+        "app.domains.social.service.activity_results",
+        "app.domains.social.service.notifications",
+        "app.domains.social.service.presentation",
+        "app.domains.social.service.source_posts",
+        "app.domains.social.service.visibility",
+        "app.domains.world_characters.service.social_scope"
+      ],
+      "module": "app.domains.social.service.timeline",
+      "path": "backend/app/domains/social/service/timeline.py",
       "wildcard_imports": []
     },
     {
@@ -5282,6 +5346,20 @@
       ],
       "module": "app.domains.world_characters.service.setup_validation",
       "path": "backend/app/domains/world_characters/service/setup_validation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.world_characters.exceptions",
+        "app.domains.world_characters.models",
+        "app.domains.worlds.service.character_entry"
+      ],
+      "module": "app.domains.world_characters.service.social_scope",
+      "path": "backend/app/domains/world_characters/service/social_scope.py",
       "wildcard_imports": []
     },
     {
@@ -8596,6 +8674,22 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.cruds.agents",
+        "app.domains.social.service.timeline",
+        "app.runtime.relationships.sqlalchemy_social_event",
+        "app.services.community_abuse_quota"
+      ],
+      "module": "app.runtime.social.timeline",
+      "path": "backend/app/runtime/social/timeline.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "collections.abc",
         "secrets",
@@ -9080,7 +9174,7 @@
         "typing"
       ],
       "imports": [
-        "app.services.llm_context"
+        "app.core.context_text"
       ],
       "module": "app.services.agent_briefs",
       "path": "backend/app/services/agent_briefs.py",
@@ -9105,6 +9199,7 @@
       "imports": [
         "app.config",
         "app.core.agent_activity_schedule",
+        "app.core.context_text",
         "app.core.db",
         "app.core.redaction",
         "app.credentials",
@@ -9124,7 +9219,6 @@
         "app.services.community",
         "app.services.direct_llm",
         "app.services.langgraph_resident",
-        "app.services.llm_context",
         "app.services.maintenance",
         "app.services.runtime_boundary"
       ],
@@ -9147,6 +9241,7 @@
       ],
       "imports": [
         "app.config",
+        "app.core.context_text",
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
@@ -9155,7 +9250,6 @@
         "app.services.agent_briefs",
         "app.services.character_lore",
         "app.services.community",
-        "app.services.llm_context",
         "app.services.runtime_boundary"
       ],
       "module": "app.services.agent_writing",
@@ -9190,6 +9284,7 @@
         "zoneinfo"
       ],
       "imports": [
+        "app.core.context_text",
         "app.credentials",
         "app.cruds.agents",
         "app.cruds.community",
@@ -9199,7 +9294,6 @@
         "app.schemas",
         "app.services.community",
         "app.services.direct_llm",
-        "app.services.llm_context",
         "app.services.lore_parser_quota"
       ],
       "module": "app.services.character_lore",
@@ -9220,6 +9314,7 @@
         "uuid"
       ],
       "imports": [
+        "app.core.context_text",
         "app.core.search_text",
         "app.core.unit_of_work",
         "app.cruds.agent_runs",
@@ -9229,16 +9324,18 @@
         "app.domains.characters.service.state",
         "app.domains.social.constants",
         "app.domains.social.exceptions",
+        "app.domains.social.service.activity_results",
+        "app.domains.social.service.notifications",
         "app.domains.social.service.posts",
         "app.domains.social.service.presentation",
+        "app.domains.social.service.timeline",
         "app.domains.social.service.visibility",
         "app.models",
-        "app.runtime.relationships.sqlalchemy_social_event",
+        "app.runtime.social.timeline",
         "app.schemas",
         "app.services.agent_activity_policy",
         "app.services.agent_briefs",
-        "app.services.community_abuse_quota",
-        "app.services.llm_context"
+        "app.services.community_abuse_quota"
       ],
       "module": "app.services.community",
       "path": "backend/app/services/community.py",
@@ -9257,6 +9354,7 @@
       ],
       "imports": [
         "app.config",
+        "app.domains.social.exceptions",
         "app.models"
       ],
       "module": "app.services.community_abuse_quota",
@@ -9291,11 +9389,11 @@
         "typing"
       ],
       "imports": [
+        "app.core.context_text",
         "app.credentials",
         "app.providers.gemini",
         "app.schemas",
         "app.services.direct_llm",
-        "app.services.llm_context",
         "app.services.resident_contracts",
         "app.services.world_feed_search"
       ],
@@ -9384,6 +9482,7 @@
       ],
       "imports": [
         "app.config",
+        "app.core.context_text",
         "app.core.redaction",
         "app.core.unit_of_work",
         "app.credentials",
@@ -9402,7 +9501,6 @@
         "app.services.community",
         "app.services.direct_llm",
         "app.services.langgraph_social_apply",
-        "app.services.llm_context",
         "app.services.post_image_generation",
         "app.services.prompt_safety",
         "app.services.resident_contracts",
@@ -9428,15 +9526,6 @@
       ],
       "module": "app.services.langgraph_social_apply",
       "path": "backend/app/services/langgraph_social_apply.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "re"
-      ],
-      "imports": [],
-      "module": "app.services.llm_context",
-      "path": "backend/app/services/llm_context.py",
       "wildcard_imports": []
     },
     {

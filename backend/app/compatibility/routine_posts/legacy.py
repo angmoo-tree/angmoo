@@ -24,7 +24,7 @@ from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )
 from app.services import community as community_service
-from app.services.llm_context import neutralize_context_text
+from app.core.context_text import neutralize_context_text
 from app.services.resident_contracts import LangGraphResidentContext
 
 

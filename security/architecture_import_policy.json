@@ -409,10 +409,6 @@
           "importer": "app.services.agent_activity_policy"
         },
         {
-          "imported": "app.services.llm_context",
-          "importer": "app.services.agent_briefs"
-        },
-        {
           "imported": "app.cruds.agent_runs",
           "importer": "app.services.agent_runs"
         },
@@ -450,10 +446,6 @@
         },
         {
           "imported": "app.services.langgraph_resident",
-          "importer": "app.services.agent_runs"
-        },
-        {
-          "imported": "app.services.llm_context",
           "importer": "app.services.agent_runs"
         },
         {
@@ -497,10 +489,6 @@
           "importer": "app.services.agent_writing"
         },
         {
-          "imported": "app.services.llm_context",
-          "importer": "app.services.agent_writing"
-        },
-        {
           "imported": "app.services.runtime_boundary",
           "importer": "app.services.agent_writing"
         },
@@ -526,10 +514,6 @@
         },
         {
           "imported": "app.services.direct_llm",
-          "importer": "app.services.character_lore"
-        },
-        {
-          "imported": "app.services.llm_context",
           "importer": "app.services.character_lore"
         },
         {
@@ -569,10 +553,6 @@
           "importer": "app.services.community"
         },
         {
-          "imported": "app.services.llm_context",
-          "importer": "app.services.community"
-        },
-        {
           "imported": "app.models",
           "importer": "app.services.community_abuse_quota"
         },
@@ -582,10 +562,6 @@
         },
         {
           "imported": "app.services.direct_llm",
-          "importer": "app.services.feed_reaction_planner"
-        },
-        {
-          "imported": "app.services.llm_context",
           "importer": "app.services.feed_reaction_planner"
         },
         {
@@ -642,10 +618,6 @@
         },
         {
           "imported": "app.services.langgraph_social_apply",
-          "importer": "app.services.langgraph_resident"
-        },
-        {
-          "imported": "app.services.llm_context",
           "importer": "app.services.langgraph_resident"
         },
         {
@@ -922,10 +894,6 @@
           "importer": "app.compatibility.routine_posts.legacy"
         },
         {
-          "imported": "app.services.llm_context",
-          "importer": "app.compatibility.routine_posts.legacy"
-        },
-        {
           "imported": "app.services.resident_contracts",
           "importer": "app.compatibility.routine_posts.legacy"
         }
@@ -1052,6 +1020,23 @@
           "imported": "app.services.runtime_boundary"
         }
       ]
+    },
+    {
+      "id": "ar-b5-timeline-existing-collaboration",
+      "owner_stage": "L6",
+      "reason": "Only the existing Community log_activity and quota calls are connected from runtime while actual Social write policy moves into its service. The same Session and commit behavior are preserved; no new operation is introduced.",
+      "removal_condition": "B4-C replaces the existing AgentActivityLog writer; G5/B8 resolves the frozen Identity quota model/public alias and replaces the quota owner. Then remove these two exact runtime edges.",
+      "review_date": "2026-09-05",
+      "edges": [
+        {
+          "importer": "app.runtime.social.timeline",
+          "imported": "app.cruds.agents"
+        },
+        {
+          "importer": "app.runtime.social.timeline",
+          "imported": "app.services.community_abuse_quota"
+        }
+      ]
     }
   ],
   "legacy_module_cycles": [],
@@ -1158,6 +1143,7 @@
       "app.domains.social.contracts.profile_activity",
       "app.domains.social.contracts.search_state",
       "app.domains.social.contracts.subjective_context",
+      "app.domains.social.contracts.timeline",
       "app.domains.social.contracts.today_activity",
       "app.domains.social.contracts.writes",
       "app.domains.social.exceptions",
@@ -1177,12 +1163,14 @@
       "app.domains.social.schemas.feed",
       "app.domains.social.schemas.manual",
       "app.domains.social.service",
+      "app.domains.social.service.activity_results",
       "app.domains.social.service.joint_posts",
       "app.domains.social.service.media_storage",
       "app.domains.social.service.notifications",
       "app.domains.social.service.posts",
       "app.domains.social.service.presentation",
       "app.domains.social.service.source_posts",
+      "app.domains.social.service.timeline",
       "app.domains.social.service.visibility",
       "app.domains.social.utils",
       "app.domains.social.utils.cursors",
@@ -1219,6 +1207,7 @@
       "app.domains.world_characters.service.runtime_modes",
       "app.domains.world_characters.service.seed",
       "app.domains.world_characters.service.setup_validation",
+      "app.domains.world_characters.service.social_scope",
       "app.domains.world_characters.service.studio",
       "app.domains.worlds.contracts",
       "app.domains.worlds.exceptions",
@@ -1277,18 +1266,21 @@
       "app.domains.social.contracts.profile_activity",
       "app.domains.social.contracts.search_state",
       "app.domains.social.contracts.subjective_context",
+      "app.domains.social.contracts.timeline",
       "app.domains.social.contracts.today_activity",
       "app.domains.social.contracts.writes",
       "app.domains.social.schemas",
       "app.domains.social.schemas.community",
       "app.domains.social.schemas.feed",
       "app.domains.social.schemas.manual",
+      "app.domains.social.service.activity_results",
       "app.domains.social.service.joint_posts",
       "app.domains.social.service.media_storage",
       "app.domains.social.service.notifications",
       "app.domains.social.service.posts",
       "app.domains.social.service.presentation",
       "app.domains.social.service.source_posts",
+      "app.domains.social.service.timeline",
       "app.domains.social.service.visibility",
       "app.domains.world_characters.contracts",
       "app.domains.world_characters.contracts.lifecycle",
@@ -1315,6 +1307,7 @@
       "app.domains.world_characters.service.runtime_modes",
       "app.domains.world_characters.service.seed",
       "app.domains.world_characters.service.setup_validation",
+      "app.domains.world_characters.service.social_scope",
       "app.domains.world_characters.service.studio",
       "app.domains.world_packages.contracts",
       "app.domains.world_packages.contracts.export",
@@ -2397,6 +2390,38 @@
         "owner_stage": "AR-B5 / AR-B8-A",
         "reason": "Temporary same-object alias exposes the actual owned Social source/reaction persistence to remaining named callers.",
         "removal_condition": "Migrate the remaining canonical consumers and remove the old Community CRUD aggregate.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.social.service.activity_results",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
+        "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.social.service.notifications",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
+        "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.social.service.timeline",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
+        "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.community_abuse_quota",
+        "target": "app.domains.social.exceptions",
+        "owner_stage": "AR-B5 / AR-B8-A",
+        "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
+        "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",
         "review_date": "2026-09-05"
       }
     ]

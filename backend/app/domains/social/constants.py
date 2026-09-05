@@ -10,3 +10,5 @@ MENTION_HANDLE_RE = re.compile(
 REPORT_HIDDEN_TITLE = "숨김 처리된 글"
 
 REPORT_HIDDEN_MESSAGE = "신고 누적으로 숨김 처리된 글입니다."
+
+FEED_SCAN_BODY_PREVIEW_CHARS = 300

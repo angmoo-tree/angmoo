@@ -652,3 +652,18 @@ Social 쓰기·프로필·Inbox·agent 도구·미디어 job, Relationships 및 
 새 **3 nodes**는 `tests/social/test_source_write_boundaries.py`에 있다. 실제 SQLite에서 User/Character 테이블 없이 이미 확인된 actor 값만으로 게시물·반응·팔로우가 동작하는지, dedupe·부드러운 삭제와 caller의 deferred commit/rollback이 보존되는지 확인한다. 예외적으로 기존 low-level legacy comment 함수의 명시적 commit도 같은 의미로 보존한다. 신규 팔로우 검증은 첫 이전에서 빠진 `unit_of_work` import를 찾아내어 이를 보완했다. 기존 일반 회귀만으로 놓친 이 실제 소비 경로를 새 테스트로 보호한다.
 
 최종 집중 회귀는 **63 passed / 1 existing warning / 22.93s**다. Architecture는 **662 modules / 2,147 edges / 247 exact legacy edges**, L4는 **662 modules / parity 97**, #258/#263 API/schema/ORM과 전체 split 근거는 동일했다. 신규 joint fixture 2개도 현재 complete ORM 등록을 명시했으며 각각 단독 실행 1 PASS를 확인했다. 제품 DDL이나 기존 assertion을 바꾸지 않았고 테스트 실행 순서에 의존하던 setup만 보완했다. 이 단계는 전체 B5 완료가 아니며 외부 mutation workflow·프로필/Inbox/agent·Relationships/projection은 다음 구현 범위다.
+
+
+## AR-B5-B5 — 실제 timeline 쓰기·알림·World 범위 판단
+
+`SocialTimelineService`는 기존 Community의 글 생성·대꾸·인용·좋아요/해제·리포스트/해제·신고·삭제 9개 실제 함수를 소유한다. 작성자 권한, 기존 quota 처리 위치, 원본/알림/활동 로그, repost/delete 확장, 관계 이벤트 제외 직후 commit을 원래 순서로 유지한다. Runtime은 이전부터 있던 log_activity·quota·관계 이벤트 처리만 같은 Session으로 연결하고 제품 정책을 결정하지 않는다. 구 서비스의 이 함수들은 새 서비스 인스턴스의 같은 bound method만 참조한다. 기존 low-level legacy comment 저장과 HTTP에서의 comments-disabled 오류도 각각 그대로다.
+
+WorldCharacter는 `service/social_scope.py`에서 기존 WC 작성 범위와 current World→WC→World membership 판단을 소유한다. membership 조회는 Worlds의 기존 nullable same-Session getter를 호출한다. Social 오류 메시지/종류와 응답은 같다. 일반 값 계약으로 primitive owner_id를 먼저 평가하던 초기 후보는 원래 조회 순서를 앞당길 수 있어, 이를 관찰하는 신규 **4 cases**를 먼저 실패(4 FAIL)시킨 뒤 동일 attached 객체의 읽기 계약을 전달하도록 고쳤다. owner_id는 원래처럼 멤버십 조회·앞선 guard 이후 읽으며, 실패 경로에서는 불필요하게 읽지 않는다.
+
+알림의 수신 대상·멘션/자기/중복 제외는 `service/notifications.py`로, 제한된 topic/result 문자열은 `service/activity_results.py`로 이전했다. 40줄 공통 문맥 정제는 `services/llm_context.py`에서 `core/context_text.py`로 whole-file 이동하고 실제 소비 import를 전환했다. 정규식/정제 본문은 동일하다. 기존 멘션 notification fixture 2개는 실제 새 소유 함수를 patch하도록 수정했으며 assertion은 그대로다.
+
+최종 집중 회귀는 **107 passed / 1 existing warning / 23.02s**다. 새 4 nodes는 `tests/social/test_timeline_world_scope.py`에서 원래 오류, 같은 Session의 조회 순서, owner_id 읽기 시점, unscoped 0조회 경로를 검증한다. 수동 작성 AI 0·World/owner 차단·Social event/outbox 원자성·source 삭제·기존 이미지 generation·문맥 정제 검증을 함께 실행했다. Architecture는 **667 modules / 2,175 edges / 241 exact legacy edges**다.
+
+Root와 합의한 잔여가 있다. `CommunityMutationQuotaBucket` 실제 정의와 Identity public/legacy auth/common model의 기존 동일 객체 assertion은 유지한다. 해당 모델과 공개 별칭의 최종 소유는 G5/B8에서 검토한다. 이 때문에 기존 quota 호출과 B4-C의 기존 AgentActivityLog 호출 2개만 정확 runtime 경로로 옮겼으며 원래 다른 도메인의 ORM을 서비스에 재수출하지 않았다. 기존 legacy 검사 형식의 owner_stage L6 아래 removal_condition에 정확 AR-B4-C/G5/B8 소유를 기록했다.
+
+B5-B5 최종 보존 검사: #258/#263 API/schema/ORM 차이 0, 변경 기존 테스트 3개 파일 assertion/raises/warns PASS, 전체 split evidence PASS. 기존 검사 형식의 top-level class 매핑에 각 destination_member를 함께 기록했고 실제 nested method 12개가 존재하는지 별도 AST 확인했다. L4 667 modules/parity97, ER0 Postgres78/migration subset87/Neo4j24/Next44/parity7도 통과했다.

@@ -1,4 +1,5 @@
 """Stable Social errors shared by HTTP and autonomous callers."""
+from dataclasses import dataclass
 
 
 class CommunityServiceError(Exception):
@@ -53,3 +54,8 @@ class CommunityRateLimitedError(CommunityServiceError):
     def __init__(self, retry_after_seconds: int) -> None:
         self.retry_after_seconds = max(1, retry_after_seconds)
         super().__init__("Community action temporarily rate limited")
+
+
+@dataclass(frozen=True)
+class CommunityQuotaExceeded(Exception):
+    retry_after_seconds: int

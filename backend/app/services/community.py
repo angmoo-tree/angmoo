@@ -1,3 +1,17 @@
+from app.domains.social.service.activity_results import _clip_text, _safe_topic_text, _body_preview, _fallback_topic_signature, build_post_created_activity_result
+from app.domains.social.service.notifications import _notify_post_owner, _notify_mentioned_characters
+from app.domains.social.service.timeline import _resolve_author_character, _can_delete_post, _reply_title, _quote_title, _timeline_world_scope, create_comment
+from app.runtime.social.timeline import timeline_service
+report_post = timeline_service.report_post
+delete_post = timeline_service.delete_post
+create_post = timeline_service.create_post
+create_reply = timeline_service.create_reply
+create_quote = timeline_service.create_quote
+like_post = timeline_service.like_post
+unlike_post = timeline_service.unlike_post
+repost_post = timeline_service.repost_post
+unrepost_post = timeline_service.unrepost_post
+
 from app.domains.social.exceptions import (
     AgentRunAuthorizationError,
     CharacterNotFoundError,
@@ -63,7 +77,7 @@ from app.services.agent_briefs import (
     is_feed_scan_community_theme_brief,
     normalize_post_seed_intent,
 )
-from app.services.llm_context import neutralize_context_text
+from app.core.context_text import neutralize_context_text
 
 logger = logging.getLogger(__name__)
 
@@ -94,7 +108,7 @@ RECENT_FEED_INTEREST_LOG_SCAN_LIMIT = 20
 RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS = 48
 RECENT_OWN_ROOT_TOPIC_HISTORY_LIMIT = 5
 RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT = 20
-FEED_SCAN_BODY_PREVIEW_CHARS = 300
+from app.domains.social.constants import FEED_SCAN_BODY_PREVIEW_CHARS
 
 
 def _diagnostic_hash(value: str | None) -> str | None:
@@ -163,11 +177,6 @@ def _reject_complete_tick(
     raise AgentRunAuthorizationError(message)
 
 
-def _clip_text(value: str | None, limit: int) -> str:
-    text = (value or "").strip()
-    if len(text) <= limit:
-        return text
-    return f"{text[: max(0, limit - 3)]}..."
 
 
 def _json_object(value: str | None) -> dict[str, object]:
@@ -180,24 +189,14 @@ def _json_object(value: str | None) -> dict[str, object]:
     return parsed if isinstance(parsed, dict) else {}
 
 
-def _safe_topic_text(value: object, limit: int = 300) -> str:
-    return _clip_text(neutralize_context_text(str(value or "")), limit)
 
 
 def _safe_feed_history_post_id(value: object) -> str:
     return _clip_text(neutralize_context_text(str(value or "")).strip(), 64)
 
 
-def _body_preview(value: str | None) -> str:
-    return _safe_topic_text(value, FEED_SCAN_BODY_PREVIEW_CHARS)
 
 
-def _fallback_topic_signature(*, title: str | None, body: str | None) -> str:
-    title_text = _safe_topic_text(title, 120)
-    body_text = _body_preview(body)
-    if title_text and body_text:
-        return _clip_text(f"{title_text} / {body_text}", 300)
-    return _clip_text(title_text or body_text, 300)
 
 
 def _topic_metadata_from_result(value: str | None) -> dict[str, str]:
@@ -257,43 +256,6 @@ def activity_result_text_for_prompt(
     return result or reason or "-"
 
 
-def build_post_created_activity_result(
-    *,
-    post_id: str,
-    title: str | None,
-    body: str | None,
-    topic_signature: str | None = None,
-    novelty_basis: str | None = None,
-    lore_chunk_ids: list[str] | None = None,
-    retrieval_mode: str | None = None,
-    lore_query_mode: str | None = None,
-    message: str | None = None,
-) -> str:
-    topic = _safe_topic_text(topic_signature, 300) or _fallback_topic_signature(
-        title=title, body=body
-    )
-    payload: dict[str, Any] = {
-        "message": message or f"Created post {post_id}.",
-        "created_post_id": post_id,
-        "topic_signature": topic,
-    }
-    novelty = _safe_topic_text(novelty_basis, 500)
-    if novelty:
-        payload["novelty_basis"] = novelty
-    clean_lore_ids = [
-        item.strip()
-        for item in (lore_chunk_ids or [])
-        if isinstance(item, str) and item.strip()
-    ]
-    if clean_lore_ids:
-        payload["lore_chunk_ids"] = clean_lore_ids[:5]
-    clean_retrieval_mode = _safe_topic_text(retrieval_mode, 80)
-    if clean_retrieval_mode:
-        payload["retrieval_mode"] = clean_retrieval_mode
-    clean_lore_query_mode = _safe_topic_text(lore_query_mode, 80)
-    if clean_lore_query_mode:
-        payload["lore_query_mode"] = clean_lore_query_mode
-    return json.dumps(payload, ensure_ascii=False)[:4000]
 
 
 def _feed_seed_consumed_cutoff(*, lookback_days: int) -> datetime:
@@ -1666,446 +1628,26 @@ def list_character_following_feed(
 
 
 
-def report_post(
-    db: Session, user: models.User, post_id: str, data: schemas.PostReportCreate
-) -> schemas.PostReportRead:
-    post = community_crud.get_post_including_report_hidden(db, post_id)
-    if post is None:
-        raise PostNotFoundError(post_id)
-    if community_crud.is_report_hidden(post):
-        raise PostNotFoundError(post_id)
-    if _can_delete_post(db, user, post):
-        raise PostReportNotAllowedError("cannot report your own post")
-    try:
-        community_abuse_quota.consume(
-            db,
-            user_id=user.id,
-            action="report",
-        )
-    except community_abuse_quota.CommunityQuotaExceeded as exc:
-        raise CommunityRateLimitedError(exc.retry_after_seconds) from exc
-
-    _report, created = community_crud.create_post_report(
-        db, post=post, reporter_user=user, data=data
-    )
-    if not created:
-        return schemas.PostReportRead(
-            status="already_reported",
-            already_reported=True,
-            report_hidden=community_crud.is_report_hidden(post),
-        )
-
-    report_count = community_crud.count_post_reports(db, post.id)
-    post.report_count = report_count
-    db.commit()
-    db.refresh(post)
-    return schemas.PostReportRead(
-        status="reported",
-        already_reported=False,
-        report_hidden=community_crud.is_report_hidden(post),
-    )
 
 
-def delete_post(db: Session, user: models.User, post_id: str) -> None:
-    post = community_crud.get_post(db, post_id)
-    if post is None:
-        raise PostNotFoundError(post_id)
-    if not _can_delete_post(db, user, post):
-        raise CharacterOwnershipError(f"user {user.id} cannot delete post {post.id}")
-
-    deleted_at = datetime.now(UTC)
-    if post.post_type == "repost":
-        community_crud.delete_repost_event_for_timeline_post(db, post=post)
-
-    deleted_posts = community_crud.soft_delete_post_tree(
-        db, post=post, deleted_at=deleted_at
-    )
-    index = 0
-    while index < len(deleted_posts):
-        deleted_post = deleted_posts[index]
-        community_crud.delete_repost_events_for_post(db, post=deleted_post)
-        timeline_reposts = community_crud.soft_delete_timeline_reposts_for_source(
-            db, post=deleted_post, deleted_at=deleted_at
-        )
-        for timeline_repost in timeline_reposts:
-            deleted_posts.extend(
-                community_crud.soft_delete_post_tree(
-                    db, post=timeline_repost, deleted_at=deleted_at
-                )
-            )
-        index += 1
-
-    from app.runtime.relationships import (
-        sqlalchemy_social_event as social_event_runtime,
-    )
-
-    social_event_runtime.exclude_events_for_posts(
-        db,
-        post_ids=[deleted_post.id for deleted_post in deleted_posts],
-        reason="source_deleted",
-        invalidated_at=deleted_at,
-    )
-    db.commit()
 
 
-def create_post(
-    db: Session,
-    user: models.User,
-    data: schemas.PostCreate,
-    *,
-    log_manual_activity: bool = True,
-    post_info: schemas.PostInfoMetadata | None = None,
-    world_id: str | None = None,
-    author_world_character_id: str | None = None,
-) -> schemas.PostDetail:
-    character = None
-    if data.author_character_id:
-        character = community_crud.get_character(db, data.author_character_id)
-        if character is None or character.deleted_at is not None:
-            raise CharacterNotFoundError(data.author_character_id)
-        if character.owner_id != user.id:
-            raise CharacterOwnershipError(
-                f"user {user.id} cannot post as character {character.id}"
-            )
-        if character.moderation_status == "suspended":
-            raise CharacterSuspendedError("character_suspended")
-    if (world_id is None) != (author_world_character_id is None):
-        raise PostWorldScopeError("world_scope_pair_required")
-    if world_id is not None and author_world_character_id is not None:
-        if character is None:
-            raise PostWorldScopeError("world_scope_requires_character")
-        world_character = db.get(models.WorldCharacter, author_world_character_id)
-        if (
-            world_character is None
-            or world_character.world_id != world_id
-            or world_character.character_id != character.id
-            or world_character.status != "active"
-        ):
-            raise PostWorldScopeError("world_scope_invalid")
-    post = community_crud.create_post(
-        db,
-        post_id=f"post-{uuid4().hex[:12]}",
-        user=user,
-        character=character,
-        data=data,
-        post_info=post_info,
-        world_id=world_id,
-        author_world_character_id=author_world_character_id,
-    )
-    if character is not None and log_manual_activity:
-        result = build_post_created_activity_result(
-            post_id=post.id,
-            title=post.title,
-            body=post.body,
-            message=f"Created post {post.id}.",
-        )
-        agent_crud.log_activity(
-            db,
-            user_id=user.id,
-            character_id=character.id,
-            action_type="post_created",
-            target_post_id=post.id,
-            reason="manual_post",
-            result=result,
-        )
-    _notify_mentioned_characters(
-        db,
-        post=post,
-        actor_user_id=user.id if character is None else None,
-        actor_character_id=character.id if character else None,
-    )
-    return _post_detail(db, post)
 
 
-def _timeline_world_scope(
-    db: Session,
-    *,
-    target: models.Post,
-    character: models.Character | None,
-) -> tuple[str | None, str | None]:
-    """Derive a timeline mutation's World from its canonical target.
-
-    A scoped target must never trust a client supplied World id. The acting
-    character must currently be active in the target World and its membership
-    must still be active. Legacy unscoped targets remain unscoped until the
-    canonical backfill is applied.
-    """
-
-    if target.world_id is None:
-        return None, None
-    if character is None:
-        raise PostWorldScopeError("world_scope_requires_character")
-    active_world = db.get(models.CharacterActiveWorld, character.id)
-    if active_world is None:
-        raise PostWorldScopeError("active_world_required")
-    world_character = db.get(models.WorldCharacter, active_world.world_character_id)
-    if (
-        world_character is None
-        or world_character.character_id != character.id
-        or world_character.world_id != target.world_id
-        or world_character.status != "active"
-    ):
-        raise PostWorldScopeError("target_world_not_active")
-    membership = db.get(models.WorldMembership, world_character.membership_id)
-    if (
-        membership is None
-        or membership.world_id != target.world_id
-        or membership.user_id != character.owner_id
-        or membership.status != "active"
-    ):
-        raise PostWorldScopeError("world_membership_not_active")
-    return target.world_id, world_character.id
 
 
-def create_reply(
-    db: Session,
-    user: models.User,
-    post_id: str,
-    data: schemas.TimelineReplyCreate,
-    *,
-    activity_reason: str = "manual_reply",
-    enforce_user_quota: bool = True,
-) -> schemas.PostDetail:
-    parent = community_crud.get_post(db, post_id)
-    if parent is None or not _is_post_public_context_visible(db, parent):
-        raise PostNotFoundError(post_id)
-    if enforce_user_quota:
-        try:
-            community_abuse_quota.consume(
-                db,
-                user_id=user.id,
-                action="reply",
-            )
-        except community_abuse_quota.CommunityQuotaExceeded as exc:
-            raise CommunityRateLimitedError(exc.retry_after_seconds) from exc
-    character = _resolve_author_character(db, user, data.author_character_id)
-    world_id, author_world_character_id = _timeline_world_scope(
-        db,
-        target=parent,
-        character=character,
-    )
-    reply = community_crud.create_timeline_post(
-        db,
-        post_id=f"post-{uuid4().hex[:12]}",
-        user=user,
-        character=character,
-        title=_reply_title(parent.title),
-        body=data.body,
-        post_type="reply",
-        reply_to_post_id=parent.id,
-        world_id=world_id,
-        author_world_character_id=author_world_character_id,
-    )
-    if character is not None:
-        agent_crud.log_activity(
-            db,
-            user_id=user.id,
-            character_id=character.id,
-            action_type="replied",
-            target_post_id=parent.id,
-            reason=activity_reason,
-            result=f"Created reply {reply.id}.",
-        )
-    _notify_post_owner(
-        db,
-        notification_type="reply",
-        post=parent,
-        source_post_id=reply.id,
-        actor_user_id=user.id if character is None else None,
-        actor_character_id=character.id if character else None,
-    )
-    _notify_mentioned_characters(
-        db,
-        post=reply,
-        actor_user_id=user.id if character is None else None,
-        actor_character_id=character.id if character else None,
-        skip_character_ids=[parent.author_character_id],
-    )
-    return _post_detail(db, reply)
 
 
-def create_quote(
-    db: Session,
-    user: models.User,
-    post_id: str,
-    data: schemas.TimelineQuoteCreate,
-    *,
-    activity_reason: str = "manual_quote",
-) -> schemas.PostDetail:
-    quoted = community_crud.get_post(db, post_id)
-    if quoted is None or not _is_post_public_context_visible(db, quoted):
-        raise PostNotFoundError(post_id)
-    character = _resolve_author_character(db, user, data.author_character_id)
-    world_id, author_world_character_id = _timeline_world_scope(
-        db,
-        target=quoted,
-        character=character,
-    )
-    quote = community_crud.create_timeline_post(
-        db,
-        post_id=f"post-{uuid4().hex[:12]}",
-        user=user,
-        character=character,
-        title=(data.title or _quote_title(quoted.title)),
-        body=data.body,
-        post_type="quote",
-        quote_post_id=quoted.id,
-        world_id=world_id,
-        author_world_character_id=author_world_character_id,
-    )
-    if character is not None:
-        agent_crud.log_activity(
-            db,
-            user_id=user.id,
-            character_id=character.id,
-            action_type="quoted",
-            target_post_id=quoted.id,
-            reason=activity_reason,
-            result=f"Created quote {quote.id}.",
-        )
-    _notify_post_owner(
-        db,
-        notification_type="quote",
-        post=quoted,
-        source_post_id=quote.id,
-        actor_user_id=user.id if character is None else None,
-        actor_character_id=character.id if character else None,
-    )
-    _notify_mentioned_characters(
-        db,
-        post=quote,
-        actor_user_id=user.id if character is None else None,
-        actor_character_id=character.id if character else None,
-        skip_character_ids=[quoted.author_character_id],
-    )
-    return _post_detail(db, quote)
 
 
-def create_comment(
-    db: Session, post_id: str, data: schemas.CommentCreate
-) -> schemas.CommentRead:
-    raise LegacyCommentsDisabledError(
-        "Legacy comments are disabled. Use /posts/{post_id}/replies."
-    )
 
 
-def like_post(
-    db: Session,
-    user: models.User,
-    post_id: str,
-    data: schemas.PostLikeCreate,
-    *,
-    activity_reason: str = "manual_like",
-) -> schemas.PostDetail:
-    post = community_crud.get_post(db, post_id)
-    if post is None or not _is_post_public_context_visible(db, post):
-        raise PostNotFoundError(post_id)
-    character = _resolve_author_character(db, user, data.character_id)
-    _like, created = community_crud.like_post(
-        db, post=post, user=user, character=character
-    )
-    if character is not None and created:
-        agent_crud.log_activity(
-            db,
-            user_id=user.id,
-            character_id=character.id,
-            action_type="liked",
-            target_post_id=post.id,
-            reason=activity_reason,
-            result=f"Liked post {post.id}.",
-        )
-    if created:
-        _notify_post_owner(
-            db,
-            notification_type="like",
-            post=post,
-            source_post_id=None,
-            actor_user_id=user.id if character is None else None,
-            actor_character_id=character.id if character else None,
-        )
-    return _post_detail(db, post)
 
 
-def unlike_post(
-    db: Session, user: models.User, post_id: str, data: schemas.PostLikeCreate
-) -> schemas.PostDetail:
-    post = community_crud.get_post(db, post_id)
-    if post is None or not _is_post_public_context_visible(db, post):
-        raise PostNotFoundError(post_id)
-    character = _resolve_author_character(db, user, data.character_id)
-    community_crud.unlike_post(db, post=post, user=user, character=character)
-    return _post_detail(db, post)
 
 
-def repost_post(
-    db: Session,
-    user: models.User,
-    post_id: str,
-    data: schemas.PostLikeCreate,
-    *,
-    activity_reason: str = "manual_repost",
-) -> schemas.PostDetail:
-    post = community_crud.get_post(db, post_id)
-    if post is None or not _is_post_public_context_visible(db, post):
-        raise PostNotFoundError(post_id)
-    character = _resolve_author_character(db, user, data.character_id)
-    world_id, author_world_character_id = _timeline_world_scope(
-        db,
-        target=post,
-        character=character,
-    )
-    existing_timeline_repost = community_crud.get_timeline_repost(
-        db, post=post, user=user, character=character
-    )
-    _repost, created = community_crud.create_repost(
-        db, post=post, user=user, character=character
-    )
-    if existing_timeline_repost is not None:
-        return _post_detail(db, existing_timeline_repost)
-    timeline_repost = community_crud.create_timeline_post(
-        db,
-        post_id=f"post-{uuid4().hex[:12]}",
-        user=user,
-        character=character,
-        title=f"Repost: {post.title}"[:160],
-        body="",
-        post_type="repost",
-        repost_of_post_id=post.id,
-        world_id=world_id,
-        author_world_character_id=author_world_character_id,
-    )
-    if character is not None and created:
-        agent_crud.log_activity(
-            db,
-            user_id=user.id,
-            character_id=character.id,
-            action_type="reposted",
-            target_post_id=post.id,
-            reason=activity_reason,
-            result=f"Reposted post {post.id} as {timeline_repost.id}.",
-        )
-    if created:
-        _notify_post_owner(
-            db,
-            notification_type="repost",
-            post=post,
-            source_post_id=timeline_repost.id,
-            actor_user_id=user.id if character is None else None,
-            actor_character_id=character.id if character else None,
-        )
-    return _post_detail(db, timeline_repost)
 
 
-def unrepost_post(
-    db: Session, user: models.User, post_id: str, data: schemas.PostLikeCreate
-) -> schemas.PostDetail:
-    post = community_crud.get_post(db, post_id)
-    if post is None or not _is_post_public_context_visible(db, post):
-        raise PostNotFoundError(post_id)
-    character = _resolve_author_character(db, user, data.character_id)
-    community_crud.delete_repost(db, post=post, user=user, character=character)
-    community_crud.delete_timeline_reposts(db, post=post, user=user, character=character)
-    return _post_detail(db, post)
 
 
 def follow_profile(
@@ -4962,31 +4504,10 @@ def _safe_limit(limit: int) -> int:
     return max(1, min(limit, 100))
 
 
-def _resolve_author_character(
-    db: Session, user: models.User, character_id: str | None
-) -> models.Character | None:
-    if character_id is None:
-        return None
-    character = community_crud.get_character(db, character_id)
-    if character is None:
-        raise CharacterNotFoundError(character_id)
-    if character.deleted_at is not None:
-        raise CharacterNotFoundError(character_id)
-    if character.owner_id != user.id:
-        raise CharacterOwnershipError(
-            f"user {user.id} cannot act as character {character.id}"
-        )
-    if character.moderation_status == "suspended":
-        raise CharacterSuspendedError("character_suspended")
-    return character
 
 
-def _reply_title(title: str) -> str:
-    return f"Re: {title}"[:160]
 
 
-def _quote_title(title: str) -> str:
-    return f"Quote: {title}"[:160]
 
 
 def _profile_ref(
@@ -5197,74 +4718,3 @@ def _ensure_not_self_follow(
     if follower_character is not None and target_character is not None:
         if follower_character.id == target_character.id:
             raise FollowSelfError("character cannot follow itself")
-
-
-def _notify_post_owner(
-    db: Session,
-    *,
-    notification_type: str,
-    post: models.Post,
-    source_post_id: str | None,
-    actor_user_id: str | None,
-    actor_character_id: str | None,
-) -> None:
-    community_crud.create_notification(
-        db,
-        notification_type=notification_type,
-        recipient_user_id=post.author_user_id if post.author_character_id is None else None,
-        recipient_character_id=post.author_character_id,
-        actor_user_id=actor_user_id,
-        actor_character_id=actor_character_id,
-        post_id=post.id,
-        source_post_id=source_post_id,
-    )
-
-
-def _notify_mentioned_characters(
-    db: Session,
-    *,
-    post: models.Post,
-    actor_user_id: str | None,
-    actor_character_id: str | None,
-    skip_character_ids: Iterable[str | None] = (),
-) -> None:
-    skipped = {character_id for character_id in skip_character_ids if character_id}
-    if actor_character_id:
-        skipped.add(actor_character_id)
-    for mention in _mentioned_characters_for_texts(db, post.title, post.body):
-        if mention.character_id in skipped:
-            continue
-        community_crud.create_notification(
-            db,
-            notification_type="mention",
-            recipient_character_id=mention.character_id,
-            actor_user_id=actor_user_id,
-            actor_character_id=actor_character_id,
-            post_id=post.id,
-            source_post_id=None,
-        )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def _can_delete_post(db: Session, user: models.User, post: models.Post) -> bool:
-    if post.author_character_id is not None:
-        character = community_crud.get_character(db, post.author_character_id)
-        return character is not None and character.owner_id == user.id
-    return post.author_user_id == user.id

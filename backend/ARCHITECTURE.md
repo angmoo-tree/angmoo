@@ -19,6 +19,8 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 
 > **Social 저장과 협력:** `service/source_posts.py`는 원본 글·타임라인 글 생성, `repository/reactions.py`는 반응·신고 저장, `repository/profiles.py`는 팔로우 저장을 소유합니다. 이미 검증된 actor의 id/name/display_name을 읽는 협력은 외부 ORM 조회를 대신하는 우회 저장소가 아닙니다. `service/joint_posts.py`의 각 필드 대입과 `notifications.ensure_joint_started_notification`의 query/add는 기존 공동 활동 caller의 Session과 저장 순서를 유지합니다.
 
+> **Social timeline 업무 흐름:** `service/timeline.py::SocialTimelineService`가 원본 글·대꾸·인용·반응·신고·삭제의 실제 권한/흐름/저장 순서를 소유합니다. `runtime/social/timeline.py`는 이미 존재하던 활동 로그·quota·관계 이벤트 처리만 같은 Session으로 연결합니다. WorldCharacter의 현재 World와 멤버십 판단은 `world_characters/service/social_scope.py`에서 수행하며 캐릭터 값을 복사하거나 먼저 읽지 않고 원래 읽기 순서를 보존합니다. 순수 문맥 정제는 `core/context_text.py`, 제한된 topic/게시 결과 표현은 `social/service/activity_results.py`에 있습니다. Identity quota 모델의 역사적 공개 별칭은 G5/B8에서 종료 조건을 검토합니다.
+
 Social의 SQL은 `repository/posts.py`, `profiles.py`, `inbox.py`, `media.py`에서 읽습니다. 다른 업무 ORM을 사용하는 복합 조회는 아직 남은 runtime 전환 범위입니다. `service/notifications.py`는 수신자 없음·자기 자신 알림 제외와 실제 저장 순서를 함께 소유하고, `utils/text.py`·`cursors.py`는 IO 없는 변환만 담당합니다. 기존 SQL helper가 호출하는 `finish_write`는 caller의 지연 commit 구간에서 flush만 하므로, 새 위치를 이유로 commit을 추가하거나 제거하지 않습니다. Community/World Feed의 HTTP DTO는 `schemas/community.py`·`feed.py`에 있습니다. `cruds/community.py`에는 아직 이전하지 않은 여러 업무 조회와 정확한 같은 함수 export가 남으며 B5/B4/G5에서 각 실제 소비자를 전환합니다.
 
 ## 목차

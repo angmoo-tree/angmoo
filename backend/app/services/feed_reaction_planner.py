@@ -18,7 +18,7 @@ from app.services.direct_llm import (
     RunLlmTracker,
     generate_json,
 )
-from app.services.llm_context import neutralize_context_text
+from app.core.context_text import neutralize_context_text
 from app.services.resident_contracts import LangGraphResidentContext
 from app.services.world_feed_search import ReadySearchProfile
 

@@ -84,7 +84,7 @@ def test_l3_current_entrypoints_track_completed_and_pending_migrations() -> None
         / "sqlalchemy_runtime.py": {
             "run_routine_post_runtime",
         },
-        APP_ROOT / "services" / "community.py": {
+        APP_ROOT / "domains" / "social" / "service" / "timeline.py": {
             "create_post",
             "create_reply",
         },

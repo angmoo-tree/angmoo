@@ -46,7 +46,7 @@ from app.services.agent_briefs import (
     is_feed_scan_community_theme_brief,
 )
 from app.services import community as community_service
-from app.services.llm_context import neutralize_context_text
+from app.core.context_text import neutralize_context_text
 from app.services import maintenance as maintenance_service
 from app.services.direct_llm import DirectLlmDeferred
 from app.services.langgraph_resident import (
