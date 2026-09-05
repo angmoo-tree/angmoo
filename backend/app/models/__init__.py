@@ -1,3 +1,4 @@
+from app.domains.memory.models.daypart import AgentDaypartMemoryEvent
 from app.domains.identity.models import AuthExternalVerificationReservation
 from app.domains.identity.models import AuthGoogleSignupGrant
 from app.domains.identity.models import AuthLoginThrottleBucket
@@ -55,7 +56,7 @@ from app.domains.memory.models.items import (
     MemoryScopeSettingModel,
 )
 from app.domains.characters.models import ProfileImageCandidate, ProfileImageQuotaReservation
-from app.models.agent_runs import AgentDaypartMemoryEvent, AgentRelationshipPoint
+from app.models.agent_runs import AgentRelationshipPoint
 from app.domains.routines.models import AgentRun, AgentActivityLog, AgentFeedCue, AgentPublicActionExecution
 from app.domains.characters.models import AgentCreationDraft
 from app.models.admin_ops import AdminAuditLog, SiteOperationBanner, SiteOperationSetting

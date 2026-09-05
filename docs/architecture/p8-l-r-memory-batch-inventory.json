@@ -55,6 +55,10 @@
       "sha256": "f03289f6c0ab0bb0e69e81852f9591c78693a38a99cc3a025144fe88da52ae04"
     },
     {
+      "path": "backend/app/domains/memory/contracts/daypart.py",
+      "sha256": "652fa2fc450d71da8c3e9983eed4b70a5ef71c4428cc64c34efa88f4a6195038"
+    },
+    {
       "path": "backend/app/domains/memory/contracts/inspector.py",
       "sha256": "7377f4c3e050136856edef675924ddf73b9ff63bb4e5e0953a5390fbc9beebdb"
     },
@@ -147,6 +151,10 @@
       "sha256": "adc59fd12e9008f8a62ee2031d7f7bb8a77c9179b35e3d73128f44814cf8ab6e"
     },
     {
+      "path": "backend/app/domains/memory/models/daypart.py",
+      "sha256": "8bcd080a72f3e54ea579eabcf988f477aa3333f530d3216bbfc01f7e321c278b"
+    },
+    {
       "path": "backend/app/domains/memory/models/items.py",
       "sha256": "8783d5a3889ae301b887752768531c56489308b7b37fa0eb273fd80ede5da242"
     },
@@ -161,6 +169,10 @@
     {
       "path": "backend/app/domains/memory/policies/consolidation_output.py",
       "sha256": "ea4948296d0c1b14c500a982e5569e4acb0afe1789fa8dbc51ae4824ae904165"
+    },
+    {
+      "path": "backend/app/domains/memory/policies/daypart.py",
+      "sha256": "b56bc2ff48cd4d16c2d4ce8e0cc83a31a77c53365b34f73e891c9224dafb430f"
     },
     {
       "path": "backend/app/domains/memory/policies/retention.py",
@@ -193,6 +205,10 @@
     {
       "path": "backend/app/domains/memory/repository/consolidation.py",
       "sha256": "fd0a31e5e6aeadf5b1480c34351e0ec2fb4464df968a28c355547c34ef2737a3"
+    },
+    {
+      "path": "backend/app/domains/memory/repository/daypart.py",
+      "sha256": "69bb1d96e1406c5a353c536d9268e98f2ad6a247a5096cb9e2aeb81bfb6130c2"
     },
     {
       "path": "backend/app/domains/memory/repository/delivery.py",
@@ -245,6 +261,14 @@
     {
       "path": "backend/app/domains/memory/service/consolidation.py",
       "sha256": "8cc18d9a5ad2f24f75ccebf4db7682e9a57458fa5eae9fae5219cfe0dbb9847d"
+    },
+    {
+      "path": "backend/app/domains/memory/service/daypart.py",
+      "sha256": "17a1795c22a5f7c358a0407b80b912b4a335f49ad8b2fc33b8e23ad64cc7f935"
+    },
+    {
+      "path": "backend/app/domains/memory/service/daypart_observations.py",
+      "sha256": "fa06c5752c8262c05c7315ffff3ad81716743920c1307fe831f6747be8374b7a"
     },
     {
       "path": "backend/app/domains/memory/service/inspector.py",

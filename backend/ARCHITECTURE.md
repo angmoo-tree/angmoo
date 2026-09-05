@@ -163,6 +163,16 @@ memory/
 
 ## 3. 요청과 작업이 서비스를 사용하는 방식
 
+### Daypart 활동 기억의 소유
+
+Daypart는 resident가 실제로 제공받은 관찰과 완료한 행동을 시간대별로 기록하는 기억입니다. `memory/models/daypart.py`가 기존 `agent_daypart_memory_events` 테이블을 소유하고, `service/daypart.py`가 저장·보존 기간 정리·history·이전 요약 조회를 담당합니다. 복잡한 조회 조건은 `repository/daypart.py`, 시간대 시작과 요약·prompt 필드 형식은 `policies/daypart.py`에 있습니다. 장기 기억의 candidate/item admission과 서로 다른 기존 기록 형식을 합치지 않습니다.
+
+`service/daypart_observations.py`는 이미 제공한 feed/inbox 입력의 중복 판단, compact note와 제공 기록 저장을 수행합니다. 작성자 이름이 필요하면 실행 소유자가 전달한 `DaypartObservationReferences`를 원래 조회 위치에서 호출합니다. 같은 Session을 사용하며, 첫 inbox 관찰을 commit한 뒤 feed 작성자를 조회하는 순서를 유지합니다. Memory가 Social이나 Character ORM을 직접 import하지 않습니다.
+
+LangGraph 실행·관계 행동 선택·provider 호출은 resident의 책임입니다. 관계 포인트 만료 후 Daypart 요약을 저장하는 조립도 실행 위치에 남습니다. Memory의 각 기존 저장은 원래처럼 개별 commit을 하고, 요약 한 그룹의 commit이 실패하면 rollback 후 다음 그룹을 계속 처리합니다. 이 경계를 임의로 하나의 transaction으로 합치면 실패·재시도 동작이 달라집니다. `contracts/daypart.py`는 실행 객체 전체를 import하는 대신 Memory가 읽는 필드와 Session 타입만 설명합니다.
+
+AR-B7 Daypart 전환 중 기존 resident 모듈은 위 실제 구현을 같은 호출명으로 연결합니다. 글로벌 모델 export와 계정·캐릭터 삭제의 기존 다중 업무 UoW는 동일 ORM 객체를 사용하며 AR-B4/AR-B8/G5의 소비자 정리에서 마무리합니다. 이 부분 전환은 전체 resident나 Memory 통합 완료를 뜻하지 않습니다.
+
 업무 동작의 중심은 서비스입니다. HTTP와 예약 작업은 서로 다른 진입점이지만 같은 업무 규칙을 사용합니다.
 
 ```text

@@ -1026,3 +1026,26 @@ C2 최종 후보는 **196 passed / 기존 PG 1 skip / 기존 warnings 3 / 125.17
 C3a 최초 집중 검증은 **200 passed / 기존 PG 1 skip / 기존 warnings 5 / 41.77초**, inventory 갱신 후 최종 후보의 광역 검증은 **268 passed / 기존 PG 1 skip / 기존 warnings 5 / 121.75초**다. 원래 정책의 33개 정의와 Run DTO 5개 정의는 AST 차이 0이며, 런타임 Context의 **21개 resolved type이 전부 같은 실제 객체**다. 경계는 **694 modules / 2,318 edges / exact legacy 222 / cycle 0**, L4·ER0·Memory batch 현재 inventory는 통과했다.
 
 선행 signed 두 경로 blob만 메모리에 보충한 원래 검사 함수의 읽기 전용 진단도 **source/split/assertion/suppression/API·ORM/node 각각 오류 0**, 기존 보호 **2,139 / 현재 2,233 nodes**다. Source introduction metadata는 부모가 선형 append하며 stock 전체 보존·Actions·installer·최종 B4 완료는 별도로 남아 있다. 기존 테스트의 assertion/parametrize/skip 및 frozen 자료를 수정하지 않았다.
+
+
+## AR-B7 Daypart — 활동 관찰·행동 기억의 실제 소유 이전
+
+Memory A9 기반과 B4 signed `6beec5d`를 병합한 뒤 AgentDaypartMemoryEvent의 실제 class를 `memory/models/daypart.py`로 옮겼다. 기존 단일 Base/table/FK/column/default/relationship은 같다. Daypart 저장·조회·요약, feed/inbox 중복 admission과 실제 제공 기록은 Memory의 service/repository/policies가 소유한다. Resident prompt와 Memory가 함께 쓰는 중립화 clipping은 원문 함수 하나를 `core/context_clipping.py`로 옮겼다.
+
+기존 Daypart/LangGraph **204 passed**이며, 새 file SQLite 회귀는 **4 passed / 5.20초**다. 독립 observer로 개별 commit이 보이는지, 같은 timestamp의 ID 정렬과 64/20/12 한도·Character/session/source ID 범위, inbox commit 다음 author 오류·재시도 admission, summary 그룹별 실패 rollback·다음 그룹 진행·재시도를 검증한다. 첫 새 조회 회귀의 기대 목록에 다른 Character ID를 포함한 fixture 오류가 있었으며 실제 기존 Character 필터를 반영하도록 그 새 목록만 수정했다. 기존 test/assertion/skip은 수정하지 않았다.
+
+실제 source 정의 16개는 함수 이름과 지원 Protocol annotation 외 전체 AST가 같다. 나머지 7개는 caller timezone·동일 Session author callback·두 query의 인자 및 summary UoW 분리를 명시적으로 비교한다. 관계 point expiry를 먼저 처리하고 Memory가 이후 summary를 저장하는 순서, 각 commit/rollback, 시간대 시작 직전 1microsecond timestamp, 3일 조회, source IDs, 문자열/문자수·prompt 형식과 provider 호출 위치는 원래 의미를 유지한다.
+
+| 남은 책임 | 소유·종료 단계 |
+| --- | --- |
+| 활동 flag/allowlist·시간대 session key·행동 선택·LangGraph/provider 실행 | AR-B4 resident; 새 Memory 동작을 원래 위치에서 호출 |
+| 관계 Point 상태·만료 | AR-B5 Relationships; 실행 조립에서 Memory 저장 전에 호출 |
+| Post/Character 작성자 읽기 | AR-B4 실행 소유의 same-Session callback; Memory는 외부 ORM을 import하지 않음 |
+| global ORM export·기존 계정/캐릭터 삭제 SQL | AR-G5/AR-B8의 정확한 등록·다중 업무 UoW 소비자 정리 |
+
+현재 부분 경계 **720 modules / 2,426 edges / exact legacy 222**, cycle 0과 L4 parity97·ER0·Memory batch live inventory가 통과했다. 전체 보존·확대 회귀 및 signed source 고정은 진행 중이며 최초 source/node capture, 순차 통합, Actions/installer/PR/merge는 별도 단계다. frozen source/checkpoint/승인 node/API/ORM 및 역사 migration은 변경하지 않았다.
+
+
+Daypart 최종 고정 후보의 확대 회귀는 **265 passed / 66.73초**다. 실제 정의 16개 전체 AST와 명시적으로 분리한 본문·SQL 7개 모두 원문과 동치임을 확인했다. Stock 전체 보존은 아직 append하지 않은 선행 B4 두 파일의 최초 도입 경로에서 중단한다. 읽기 전용 진단은 signed `869bae55a2e5e665fb731396a7284b53dde8a104`의 정확한 두 blob만 메모리에 보충하여 원래 checker 함수를 실행했고 **source/split/assertion/suppression/API·ORM/node 각각 오류 0**, 보호 **2,201 / 현재 2,246 nodes**다. merge history simplification을 피한 `--full-history --no-merges`로 실제 최초 도입을 확인했다. 이 진단은 additions capture나 stock 전체 Gate PASS가 아니다.
+
+A9에서 이미 제거한 recall source를 가리키는 feature inventory의 K12/K15/K16/K22/K23 현재 경로 다섯 곳도 actual `repository/recall.py`·`recall_records.py`로 연결했다. Root의 후속 Memory current-path 정리와 동일한 소유 기준으로 통합한다. 이번 source에 처음 들어오는 파일은 제품 7개·회귀 1개, 신규 test는 4 nodes다. 각 source의 최초 SHA 및 capture는 signed source 고정 후 부모의 선형 통합에서 기록한다.

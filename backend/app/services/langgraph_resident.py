@@ -1,4 +1,21 @@
 from __future__ import annotations
+from app.core.context_clipping import clip_context_text as _clip
+from app.domains.memory.service import daypart as daypart_memory
+from app.domains.memory.policies import daypart as daypart_memory_policy
+from app.domains.memory.contracts.daypart import DaypartEvent
+from app.domains.memory.service.daypart import (
+    history as _daypart_history,
+    latest_summary as _latest_daypart_summary,
+    seen_feed_post_ids as _seen_daypart_feed_post_ids,
+    seen_notification_ids as _seen_daypart_notification_ids,
+    record_event as _record_daypart_event,
+)
+from app.domains.memory.policies.daypart import (
+    compact_daypart_summary_event as _compact_daypart_summary_event,
+    daypart_end_summary_payload as _daypart_end_summary_payload,
+    daypart_end_summary_text as _daypart_end_summary_text,
+)
+
 
 import asyncio
 import hashlib
@@ -440,11 +457,6 @@ _STATE_WRITE_STRING_LIMITS = {
 }
 
 
-def _clip(value: Any, max_chars: int) -> str:
-    text = neutralize_context_text(str(value or "")).strip()
-    if len(text) <= max_chars:
-        return text
-    return text[: max(0, max_chars - 3)].rstrip() + "..."
 
 
 def _validate_topic_arc_step_roles(
@@ -992,7 +1004,7 @@ def _aware_datetime(value: Any) -> datetime | None:
 
 def _latest_topic_arc_event(
     ctx: LangGraphResidentContext, arc_id: str | None
-) -> models.AgentDaypartMemoryEvent | None:
+) -> DaypartEvent | None:
     if not arc_id:
         return None
     db_scalars = getattr(getattr(ctx, "db", None), "scalars", None)
@@ -1000,18 +1012,8 @@ def _latest_topic_arc_event(
         return None
     cutoff = ctx.run_started_at.astimezone(UTC) - _TOPIC_ARC_LOOKBACK
     try:
-        events = list(
-            db_scalars(
-                select(models.AgentDaypartMemoryEvent)
-                .where(models.AgentDaypartMemoryEvent.character_id == ctx.character.id)
-                .where(models.AgentDaypartMemoryEvent.event_type == _TOPIC_ARC_EVENT_TYPE)
-                .where(models.AgentDaypartMemoryEvent.provided_at >= cutoff)
-                .order_by(
-                    models.AgentDaypartMemoryEvent.provided_at.desc(),
-                    models.AgentDaypartMemoryEvent.id.desc(),
-                )
-                .limit(20)
-            )
+        events = daypart_memory.recent_topic_events(
+            ctx.db, character_id=ctx.character.id, event_type=_TOPIC_ARC_EVENT_TYPE, cutoff=cutoff
         )
     except Exception:
         logger.debug(
@@ -1114,50 +1116,10 @@ def _persona_context(character: models.Character, state: models.CharacterState |
     )
 
 
-def _daypart_history(ctx: LangGraphResidentContext) -> list[dict[str, Any]]:
-    if not ctx.memory_session_key:
-        return []
-    events = list(
-        ctx.db.scalars(
-            select(models.AgentDaypartMemoryEvent)
-            .where(
-                models.AgentDaypartMemoryEvent.character_id == ctx.character.id,
-                models.AgentDaypartMemoryEvent.memory_session_key
-                == ctx.memory_session_key,
-            )
-            .order_by(
-                models.AgentDaypartMemoryEvent.provided_at.asc(),
-                models.AgentDaypartMemoryEvent.id.asc(),
-            )
-            .limit(64)
-        )
-    )
-    return [
-        {
-            "event_type": event.event_type,
-            "source_post_id": event.source_post_id,
-            "notification_id": event.notification_id,
-            "topic_signature": event.topic_signature,
-            "summary": _clip(event.summary, 600),
-            "payload": event.payload or {},
-            "provided_at": event.provided_at.isoformat(),
-        }
-        for event in events
-    ]
 
 
 def _daypart_history_for_prompt(ctx: LangGraphResidentContext) -> list[dict[str, Any]]:
-    return [
-        {
-            "event_type": event.get("event_type"),
-            "source_post_id": event.get("source_post_id"),
-            "notification_id": event.get("notification_id"),
-            "topic_signature": event.get("topic_signature"),
-            "summary": _clip(event.get("summary"), 600),
-            "provided_at": event.get("provided_at"),
-        }
-        for event in _daypart_history(ctx)
-    ]
+    return daypart_memory_policy.history_for_prompt(_daypart_history(ctx))
 
 
 _RELATIONSHIP_MEMORY_EVENT_TYPES = {
@@ -1823,29 +1785,10 @@ def _yesterday_handoff_context(ctx: LangGraphResidentContext) -> list[dict[str, 
     start_utc, end_utc = _yesterday_kst_window(ctx)
     coverage_posts = _today_own_root_posts_for_coverage(ctx)
     try:
-        events = list(
-            db_scalars(
-                select(models.AgentDaypartMemoryEvent)
-                .where(models.AgentDaypartMemoryEvent.character_id == ctx.character.id)
-                .where(
-                    models.AgentDaypartMemoryEvent.event_type.in_(
-                        [
-                            _TOPIC_ARC_EVENT_TYPE,
-                            "langgraph_tick",
-                            "observation_feed",
-                            "observation_inbox",
-                            "relationship_review",
-                        ]
-                    )
-                )
-                .where(models.AgentDaypartMemoryEvent.provided_at >= start_utc)
-                .where(models.AgentDaypartMemoryEvent.provided_at < end_utc)
-                .order_by(
-                    models.AgentDaypartMemoryEvent.provided_at.desc(),
-                    models.AgentDaypartMemoryEvent.id.desc(),
-                )
-                .limit(12)
-            )
+        events = daypart_memory.handoff_events(
+            ctx.db, character_id=ctx.character.id,
+            event_types=[_TOPIC_ARC_EVENT_TYPE, "langgraph_tick", "observation_feed", "observation_inbox", "relationship_review"],
+            start_utc=start_utc, end_utc=end_utc,
         )
     except Exception:
         logger.debug(
@@ -2180,179 +2123,18 @@ def _current_daypart_context(ctx: LangGraphResidentContext) -> dict[str, Any]:
     }
 
 
-def _compact_daypart_summary_event(
-    event: models.AgentDaypartMemoryEvent,
-) -> dict[str, Any]:
-    return {
-        "event_type": event.event_type,
-        "memory_session_key": event.memory_session_key,
-        "daypart_start_date": (
-            event.daypart_start_date.isoformat()
-            if event.daypart_start_date
-            else None
-        ),
-        "activity_daypart": event.activity_daypart,
-        "summary": _clip(event.summary, 600),
-        "payload": event.payload or {},
-        "provided_at": event.provided_at.isoformat() if event.provided_at else None,
-    }
 
 
-def _latest_daypart_summary(
-    ctx: LangGraphResidentContext,
-) -> dict[str, Any] | None:
-    db_scalars = getattr(getattr(ctx, "db", None), "scalars", None)
-    if not callable(db_scalars):
-        return None
-    try:
-        query = (
-            select(models.AgentDaypartMemoryEvent)
-            .where(models.AgentDaypartMemoryEvent.character_id == ctx.character.id)
-            .where(models.AgentDaypartMemoryEvent.event_type == "daypart_summary")
-            .where(models.AgentDaypartMemoryEvent.provided_at <= ctx.run_started_at)
-        )
-        if ctx.memory_session_key:
-            query = query.where(
-                models.AgentDaypartMemoryEvent.memory_session_key
-                != ctx.memory_session_key
-            )
-        event = next(
-            iter(
-                db_scalars(
-                    query.order_by(
-                        models.AgentDaypartMemoryEvent.provided_at.desc(),
-                        models.AgentDaypartMemoryEvent.id.desc(),
-                    ).limit(1)
-                )
-            ),
-            None,
-        )
-    except Exception:
-        logger.debug(
-            "Failed to load latest daypart summary",
-            exc_info=True,
-            extra={"character_id": ctx.character.id},
-        )
-        return None
-    return _compact_daypart_summary_event(event) if event is not None else None
 
 
-def _daypart_start_utc(
-    daypart_start_date: date | None,
-    activity_daypart: str | None,
-) -> datetime | None:
-    if daypart_start_date is None or not activity_daypart:
-        return None
-    hour_by_daypart = {"morning": 6, "afternoon": 14, "night": 22}
-    hour = hour_by_daypart.get(activity_daypart)
-    if hour is None:
-        return None
-    return datetime(
-        daypart_start_date.year,
-        daypart_start_date.month,
-        daypart_start_date.day,
-        hour,
-        tzinfo=agent_activity_policy.APP_TIMEZONE,
-    ).astimezone(UTC)
-
-
-def _daypart_end_summary_payload(
-    events: list[models.AgentDaypartMemoryEvent],
-) -> dict[str, Any]:
-    seen_feed_post_ids: list[str] = []
-    seen_notification_ids: list[int] = []
-    root_posts: list[dict[str, Any]] = []
-    public_action_counts: dict[str, int] = {}
-    relationship_point_counts = {"created": 0, "consumed": 0, "skipped": 0}
-    topic_keys: list[str] = []
-
-    def _remember_topic_key(value: Any) -> None:
-        topic_key = _clip(value, 80) or None
-        if topic_key and topic_key not in topic_keys:
-            topic_keys.append(topic_key)
-
-    for event in events:
-        if event.event_type == "observation_feed" and event.source_post_id:
-            if event.source_post_id not in seen_feed_post_ids:
-                seen_feed_post_ids.append(event.source_post_id)
-        if event.event_type == "observation_inbox" and event.notification_id is not None:
-            if event.notification_id not in seen_notification_ids:
-                seen_notification_ids.append(event.notification_id)
-        if event.topic_signature:
-            _remember_topic_key(event.topic_signature)
-
-        payload = event.payload if isinstance(event.payload, dict) else {}
-        if event.event_type == "relationship_point_update":
-            for key in ("created", "consumed", "skipped"):
-                value = payload.get(key)
-                if isinstance(value, list):
-                    relationship_point_counts[key] += len(value)
-            continue
-
-        publish_result = payload.get("publish_result")
-        if not isinstance(publish_result, dict):
-            continue
-        actions = publish_result.get("actions")
-        if not isinstance(actions, list):
-            continue
-        for action in actions:
-            if not isinstance(action, dict):
-                continue
-            if action.get("status") not in {"succeeded", "reused"}:
-                continue
-            action_type = str(action.get("action_type") or "").strip() or "unknown"
-            public_action_counts[action_type] = public_action_counts.get(action_type, 0) + 1
-            result = action.get("result") if isinstance(action.get("result"), dict) else {}
-            if action_type == "post":
-                post_id = _clip(result.get("post_id"), 64) or None
-                topic_key = _clip(result.get("topic_key"), 80) or None
-                if topic_key:
-                    _remember_topic_key(topic_key)
-                root_posts.append(
-                    {
-                        "post_id": post_id,
-                        "topic_key": topic_key,
-                        "title": _clip(result.get("title"), 160) or None,
-                    }
-                )
-
-    return {
-        "source_event_count": len(events),
-        "seen_feed_post_ids": seen_feed_post_ids[:50],
-        "seen_notification_ids": seen_notification_ids[:50],
-        "public_action_counts": public_action_counts,
-        "root_posts": root_posts[:20],
-        "used_topic_keys": topic_keys[:50],
-        "relationship_point_counts": relationship_point_counts,
-        "repetition_prevention": {
-            "seen_feed_post_count": len(seen_feed_post_ids),
-            "seen_notification_count": len(seen_notification_ids),
-            "used_topic_key_count": len(topic_keys),
-        },
-    }
-
-
-def _daypart_end_summary_text(payload: dict[str, Any]) -> str:
-    actions = payload.get("public_action_counts")
-    action_text = (
-        ", ".join(f"{key}={value}" for key, value in sorted(actions.items()))
-        if isinstance(actions, dict) and actions
-        else "none"
+def _daypart_start_utc(daypart_start_date: date | None, activity_daypart: str | None) -> datetime | None:
+    return daypart_memory_policy.daypart_start_utc(
+        daypart_start_date, activity_daypart, timezone=agent_activity_policy.APP_TIMEZONE
     )
-    relationship_counts = payload.get("relationship_point_counts")
-    created = consumed = 0
-    if isinstance(relationship_counts, dict):
-        created = int(relationship_counts.get("created") or 0)
-        consumed = int(relationship_counts.get("consumed") or 0)
-    return _clip(
-        "daypart closed: "
-        f"events={payload.get('source_event_count', 0)}; "
-        f"actions={action_text}; "
-        f"root_posts={len(payload.get('root_posts') or [])}; "
-        f"relationship_points_created={created}; "
-        f"relationship_points_consumed={consumed}",
-        2000,
-    )
+
+
+
+
 
 
 def _finalize_closed_dayparts(ctx: LangGraphResidentContext) -> dict[str, Any]:
@@ -2370,85 +2152,9 @@ def _finalize_closed_dayparts(ctx: LangGraphResidentContext) -> dict[str, Any]:
     except Exception as exc:
         ctx.db.rollback()
         result["relationship_point_expire_error"] = type(exc).__name__
-    if current_start is None:
-        return result
-    db_scalars = getattr(getattr(ctx, "db", None), "scalars", None)
-    if not callable(db_scalars):
-        result["status"] = "skipped"
-        result["reason"] = "db_scalars_unavailable"
-        return result
-    try:
-        events = list(
-            db_scalars(
-                select(models.AgentDaypartMemoryEvent)
-                .where(models.AgentDaypartMemoryEvent.character_id == ctx.character.id)
-                .where(models.AgentDaypartMemoryEvent.provided_at < current_start)
-                .where(
-                    models.AgentDaypartMemoryEvent.provided_at
-                    >= current_start - timedelta(days=3)
-                )
-                .order_by(
-                    models.AgentDaypartMemoryEvent.daypart_start_date.asc(),
-                    models.AgentDaypartMemoryEvent.activity_daypart.asc(),
-                    models.AgentDaypartMemoryEvent.provided_at.asc(),
-                    models.AgentDaypartMemoryEvent.id.asc(),
-                )
-            )
-        )
-    except Exception as exc:
-        ctx.db.rollback()
-        return {
-            **result,
-            "status": "failed",
-            "failure_class": type(exc).__name__,
-        }
-    grouped: dict[tuple[str, date, str], list[models.AgentDaypartMemoryEvent]] = {}
-    for event in events:
-        key = (
-            event.memory_session_key,
-            event.daypart_start_date,
-            event.activity_daypart,
-        )
-        grouped.setdefault(key, []).append(event)
-    for (memory_session_key, daypart_start_date, activity_daypart), group_events in grouped.items():
-        if any(event.event_type == "daypart_summary" for event in group_events):
-            result["summaries_skipped"] += 1
-            continue
-        source_events = [
-            event for event in group_events if event.event_type != "daypart_summary"
-        ]
-        if not source_events:
-            result["summaries_skipped"] += 1
-            continue
-        payload = _daypart_end_summary_payload(source_events)
-        summary = _daypart_end_summary_text(payload)
-        payload["finalized_by_run_id"] = ctx.run_id
-        payload["finalized_at"] = ctx.run_started_at.isoformat()
-        try:
-            ctx.db.add(
-                models.AgentDaypartMemoryEvent(
-                    character_id=ctx.character.id,
-                    memory_session_key=memory_session_key,
-                    daypart_start_date=daypart_start_date,
-                    activity_daypart=activity_daypart,
-                    event_type="daypart_summary",
-                    run_id=ctx.run_id,
-                    summary=summary,
-                    payload=payload,
-                    provided_at=current_start - timedelta(microseconds=1),
-                )
-            )
-            ctx.db.commit()
-            result["summaries_created"] += 1
-        except Exception as exc:
-            ctx.db.rollback()
-            result.setdefault("summary_errors", []).append(
-                {
-                    "memory_session_key": memory_session_key,
-                    "failure_class": type(exc).__name__,
-                }
-            )
-    return result
+    return daypart_memory.finalize_closed_dayparts(
+        ctx, current_start=current_start, result=result
+    )
 
 
 def _character_handle_by_id(ctx: LangGraphResidentContext, character_id: str | None) -> str | None:
@@ -2930,71 +2636,10 @@ def _restore_mandatory_root_writing(
     return updated
 
 
-def _seen_daypart_feed_post_ids(ctx: LangGraphResidentContext) -> set[str]:
-    if not ctx.memory_session_key:
-        return set()
-    return set(
-        ctx.db.scalars(
-            select(models.AgentDaypartMemoryEvent.source_post_id).where(
-                models.AgentDaypartMemoryEvent.character_id == ctx.character.id,
-                models.AgentDaypartMemoryEvent.memory_session_key
-                == ctx.memory_session_key,
-                models.AgentDaypartMemoryEvent.event_type == "observation_feed",
-                models.AgentDaypartMemoryEvent.source_post_id.is_not(None),
-            )
-        )
-    )
 
 
-def _seen_daypart_notification_ids(ctx: LangGraphResidentContext) -> set[int]:
-    if not ctx.memory_session_key:
-        return set()
-    return set(
-        ctx.db.scalars(
-            select(models.AgentDaypartMemoryEvent.notification_id).where(
-                models.AgentDaypartMemoryEvent.character_id == ctx.character.id,
-                models.AgentDaypartMemoryEvent.memory_session_key
-                == ctx.memory_session_key,
-                models.AgentDaypartMemoryEvent.event_type == "observation_inbox",
-                models.AgentDaypartMemoryEvent.notification_id.is_not(None),
-            )
-        )
-    )
 
 
-def _record_daypart_event(
-    ctx: LangGraphResidentContext,
-    *,
-    event_type: str,
-    summary: str,
-    payload: dict[str, Any] | None = None,
-    source_post_id: str | None = None,
-    notification_id: int | None = None,
-    thread_id: str | None = None,
-    topic_signature: str | None = None,
-) -> None:
-    if (
-        ctx.memory_session_key is None
-        or ctx.daypart_start_date is None
-        or ctx.activity_daypart is None
-    ):
-        return
-    event = models.AgentDaypartMemoryEvent(
-        character_id=ctx.character.id,
-        memory_session_key=ctx.memory_session_key,
-        daypart_start_date=ctx.daypart_start_date,
-        activity_daypart=ctx.activity_daypart,
-        event_type=event_type,
-        source_post_id=source_post_id,
-        notification_id=notification_id,
-        thread_id=thread_id,
-        topic_signature=topic_signature,
-        run_id=ctx.run_id,
-        summary=summary[:2000],
-        payload=payload,
-    )
-    ctx.db.add(event)
-    ctx.db.commit()
 
 
 def _format_json_for_prompt(value: Any, *, max_chars: int = 6000) -> str:

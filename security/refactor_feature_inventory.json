@@ -3268,7 +3268,6 @@
         "backend/app/runtime/memory/recall_projection.py",
         "backend/app/runtime/memory/shutdown.py",
         "backend/app/runtime/memory/source_delivery.py",
-        "backend/app/runtime/memory/sqlalchemy_recall.py",
         "backend/app/runtime/memory/sqlalchemy_source_reader.py",
         "backend/app/runtime/memory/sqlite_fts5_recall.py",
         "backend/app/runtime/memory/subjective_source.py",
@@ -3382,7 +3381,9 @@
         "spikes/l3-er1-native-runtime/tauri/src-tauri/src/lib.rs",
         "spikes/l3-er1-native-runtime/tauri/src-tauri/src/main.rs",
         "spikes/l3-er1-native-runtime/tauri/src-tauri/tauri.conf.json",
-        "spikes/l3-er1-native-runtime/tauri/web/index.html"
+        "spikes/l3-er1-native-runtime/tauri/web/index.html",
+        "backend/app/domains/memory/repository/recall.py",
+        "backend/app/domains/memory/repository/recall_records.py"
       ],
       "target_paths": [
         "backend/app/runtime",
@@ -4125,7 +4126,6 @@
         "backend/app/runtime/memory/recall_projection.py",
         "backend/app/runtime/memory/shutdown.py",
         "backend/app/runtime/memory/source_delivery.py",
-        "backend/app/runtime/memory/sqlalchemy_recall.py",
         "backend/app/runtime/memory/sqlalchemy_source_reader.py",
         "backend/app/runtime/memory/sqlite_fts5_recall.py",
         "backend/app/runtime/memory/subjective_source.py",
@@ -4137,7 +4137,17 @@
         "frontend/src/features/memory/ui/memory-scope-summary.tsx",
         "frontend/src/features/memory/ui/memory-workspace.module.css",
         "frontend/src/features/memory/ui/memory-workspace.tsx",
-        "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx"
+        "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
+        "backend/app/domains/memory/contracts/daypart.py",
+        "backend/app/domains/memory/models/daypart.py",
+        "backend/app/domains/memory/policies/daypart.py",
+        "backend/app/domains/memory/repository/daypart.py",
+        "backend/app/domains/memory/service/daypart.py",
+        "backend/app/domains/memory/service/daypart_observations.py",
+        "backend/app/core/context_clipping.py",
+        "backend/tests/memory/test_daypart_ownership.py",
+        "backend/app/domains/memory/repository/recall.py",
+        "backend/app/domains/memory/repository/recall_records.py"
       ],
       "target_paths": [
         "backend/app/domains/memory/service",
@@ -4255,7 +4265,12 @@
       "backend_status": "MAPPED",
       "frontend_status": "MAPPED",
       "backend_contract_preparation": "AR-B7-A0/A1: actual HTTP schemas/errors and closed value/pure policy owners; service/SQL/runtime and B7 merge pending",
-      "backend_service_preparation": "AR-B7-A2: actual Memory workflow owners and existing exercised typed collaborators; SQL/HTTP/runtime and integration pending"
+      "backend_service_preparation": "AR-B7-A2: actual Memory workflow owners and existing exercised typed collaborators; SQL/HTTP/runtime and integration pending",
+      "backend_daypart_scope": {
+        "stage": "AR-B7-DAYPART",
+        "status": "LOCAL VERIFIED: 265 tests; source/PR/integration pending",
+        "notes": "Owns actual Daypart event model, same-Session read/write/deduplication and deterministic summary policy; does not own AgentRun execution or RelationshipPoint state. No provider call or token/context format change."
+      }
     },
     {
       "id": "K16",
@@ -4343,14 +4358,15 @@
         "backend/app/runtime/memory/recall_projection.py",
         "backend/app/runtime/memory/shutdown.py",
         "backend/app/runtime/memory/source_delivery.py",
-        "backend/app/runtime/memory/sqlalchemy_recall.py",
         "backend/app/runtime/memory/sqlalchemy_source_reader.py",
         "backend/app/runtime/memory/sqlite_fts5_recall.py",
         "backend/app/runtime/memory/subjective_source.py",
         "backend/app/runtime/search/__init__.py",
         "backend/app/runtime/search/callback_index.py",
         "backend/app/runtime/search/social_projection.py",
-        "backend/app/runtime/search/sqlite_fts5.py"
+        "backend/app/runtime/search/sqlite_fts5.py",
+        "backend/app/domains/memory/repository/recall.py",
+        "backend/app/domains/memory/repository/recall_records.py"
       ],
       "target_paths": [
         "backend/app/domains/memory/service/recall.py",
@@ -5657,7 +5673,6 @@
         "backend/app/runtime/memory/recall_projection.py",
         "backend/app/runtime/memory/shutdown.py",
         "backend/app/runtime/memory/source_delivery.py",
-        "backend/app/runtime/memory/sqlalchemy_recall.py",
         "backend/app/runtime/memory/sqlalchemy_source_reader.py",
         "backend/app/runtime/memory/sqlite_fts5_recall.py",
         "backend/app/runtime/memory/subjective_source.py",
@@ -5671,7 +5686,9 @@
         "frontend/src/features/memory/ui/memory-workspace.module.css",
         "frontend/src/features/memory/ui/memory-workspace.tsx",
         "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
-        "scripts/ci/generate_p8_l_r_memory_batch_inventory.py"
+        "scripts/ci/generate_p8_l_r_memory_batch_inventory.py",
+        "backend/app/domains/memory/repository/recall.py",
+        "backend/app/domains/memory/repository/recall_records.py"
       ],
       "target_paths": [
         "backend/app/domains/memory/service/batch.py",
@@ -5810,7 +5827,6 @@
         "backend/app/runtime/memory/recall_projection.py",
         "backend/app/runtime/memory/shutdown.py",
         "backend/app/runtime/memory/source_delivery.py",
-        "backend/app/runtime/memory/sqlalchemy_recall.py",
         "backend/app/runtime/memory/sqlalchemy_source_reader.py",
         "backend/app/runtime/memory/sqlite_fts5_recall.py",
         "backend/app/runtime/memory/subjective_source.py",
@@ -5825,7 +5841,9 @@
         "desktop/src-tauri/src/shutdown_runtime.rs",
         "desktop/src-tauri/src/window_policy.rs",
         "desktop/src-tauri/src/world_package_delivery.rs",
-        "frontend/src/shared/runtime/desktop-shutdown-overlay.tsx"
+        "frontend/src/shared/runtime/desktop-shutdown-overlay.tsx",
+        "backend/app/domains/memory/repository/recall.py",
+        "backend/app/domains/memory/repository/recall_records.py"
       ],
       "target_paths": [
         "desktop/src-tauri/src",

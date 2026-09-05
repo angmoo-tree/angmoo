@@ -1,7 +1,7 @@
 {
-  "edge_count": 2401,
-  "external_import_count": 2214,
-  "module_count": 713,
+  "edge_count": 2426,
+  "external_import_count": 2236,
+  "module_count": 720,
   "modules": [
     {
       "external_imports": [],
@@ -474,6 +474,17 @@
       "imports": [],
       "module": "app.core.active_hours",
       "path": "backend/app/core/active_hours.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "typing"
+      ],
+      "imports": [
+        "app.core.context_text"
+      ],
+      "module": "app.core.context_clipping",
+      "path": "backend/app/core/context_clipping.py",
       "wildcard_imports": []
     },
     {
@@ -2480,6 +2491,18 @@
     },
     {
       "external_imports": [
+        "collections.abc",
+        "dataclasses",
+        "datetime",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.memory.contracts.daypart",
+      "path": "backend/app/domains/memory/contracts/daypart.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "dataclasses",
         "datetime",
@@ -2787,6 +2810,20 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.memory.models.daypart",
+      "path": "backend/app/domains/memory/models/daypart.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime",
         "sqlalchemy",
@@ -2847,6 +2884,19 @@
       ],
       "module": "app.domains.memory.policies.consolidation_output",
       "path": "backend/app/domains/memory/policies/consolidation_output.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "typing"
+      ],
+      "imports": [
+        "app.core.context_clipping",
+        "app.domains.memory.contracts.daypart"
+      ],
+      "module": "app.domains.memory.policies.daypart",
+      "path": "backend/app/domains/memory/policies/daypart.py",
       "wildcard_imports": []
     },
     {
@@ -2970,6 +3020,19 @@
       ],
       "module": "app.domains.memory.repository.consolidation",
       "path": "backend/app/domains/memory/repository/consolidation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.memory.models.daypart"
+      ],
+      "module": "app.domains.memory.repository.daypart",
+      "path": "backend/app/domains/memory/repository/daypart.py",
       "wildcard_imports": []
     },
     {
@@ -3211,6 +3274,42 @@
       ],
       "module": "app.domains.memory.service.consolidation",
       "path": "backend/app/domains/memory/service/consolidation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "logging",
+        "sqlalchemy",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.config",
+        "app.core.context_clipping",
+        "app.domains.memory.contracts.daypart",
+        "app.domains.memory.models.daypart",
+        "app.domains.memory.policies.daypart",
+        "app.domains.memory.repository.daypart"
+      ],
+      "module": "app.domains.memory.service.daypart",
+      "path": "backend/app/domains/memory/service/daypart.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.core.context_text",
+        "app.domains.memory.contracts.daypart",
+        "app.domains.memory.repository.daypart",
+        "app.domains.memory.service.daypart"
+      ],
+      "module": "app.domains.memory.service.daypart_observations",
+      "path": "backend/app/domains/memory/service/daypart_observations.py",
       "wildcard_imports": []
     },
     {
@@ -7321,6 +7420,7 @@
         "app.domains.chat.infrastructure.sqlalchemy_models",
         "app.domains.identity.models",
         "app.domains.memory.models.batch",
+        "app.domains.memory.models.daypart",
         "app.domains.memory.models.items",
         "app.domains.relationships.infrastructure.sqlalchemy_models",
         "app.domains.relationships.infrastructure.sqlalchemy_social_models",
@@ -7390,7 +7490,8 @@
         "typing"
       ],
       "imports": [
-        "app.core.db"
+        "app.core.db",
+        "app.domains.memory.models.daypart"
       ],
       "module": "app.models.agent_runs",
       "path": "backend/app/models/agent_runs.py",
@@ -10025,6 +10126,9 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.memory.contracts.daypart",
+        "app.domains.memory.service.daypart",
+        "app.domains.memory.service.daypart_observations",
         "app.domains.routines.service.lifecycle",
         "app.domains.routines.service.tick_schedule",
         "app.domains.runtime.contracts",
@@ -10065,6 +10169,7 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.memory.service.daypart",
         "app.models",
         "app.schemas",
         "app.services.agent_briefs",
@@ -10263,6 +10368,7 @@
       ],
       "imports": [
         "app.config",
+        "app.core.context_clipping",
         "app.core.context_text",
         "app.core.redaction",
         "app.core.unit_of_work",
@@ -10270,6 +10376,9 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.memory.contracts.daypart",
+        "app.domains.memory.policies.daypart",
+        "app.domains.memory.service.daypart",
         "app.domains.routines.contracts.resident",
         "app.domains.social.contracts.subjective_context",
         "app.domains.world_characters.contracts.runtime_modes",
