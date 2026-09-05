@@ -76,7 +76,7 @@ from app.cruds import agents as agent_crud
 from app.cruds import community as community_crud
 from app.runtime.resident import activity_policy as agent_activity_policy
 from app.services import community_abuse_quota
-from app.services.agent_briefs import (
+from app.domains.routines.service.action_briefs import (
     is_feed_scan_community_theme_brief,
     normalize_post_seed_intent,
 )

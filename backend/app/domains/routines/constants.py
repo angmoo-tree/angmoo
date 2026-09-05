@@ -1,6 +1,7 @@
 """Versioned deterministic daily planning constants."""
 import re
 from datetime import timedelta
+from zoneinfo import ZoneInfo
 
 DAYPARTS = ("dawn", "morning", "afternoon", "evening")
 DAYPART_START_HOURS = (0, 6, 12, 18)
@@ -156,4 +157,24 @@ V6_STATE_PUBLIC_ACTION_LEDGER_TYPES = (
     "reposted",
     "followed",
     "unfollowed",
+)
+
+
+APP_TIMEZONE = ZoneInfo("Asia/Seoul")
+
+
+DEFAULT_ACTIVITY_ACTIONS = ("post", "reply", "like", "repost", "follow", "unfollow", "observe")
+
+
+GEMINI_FREE_POLICY_ID = "gemini_free"
+
+
+KOREAN_WEEKDAYS = (
+    "월요일",
+    "화요일",
+    "수요일",
+    "목요일",
+    "금요일",
+    "토요일",
+    "일요일",
 )

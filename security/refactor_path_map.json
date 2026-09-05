@@ -354,7 +354,8 @@
     "backend/tests/test_agent_activity_limits.py": "backend/tests/routines/test_activity_limits.py",
     "backend/tests/test_l2_scheduler_singleton.py": "backend/tests/routines/test_scheduler_singleton.py",
     "backend/app/schemas/agent_runs.py": "backend/app/domains/routines/schemas/runs.py",
-    "backend/app/services/agent_activity_policy.py": "backend/app/domains/routines/service/activity_policy.py"
+    "backend/app/services/agent_activity_policy.py": "backend/app/domains/routines/service/activity_policy.py",
+    "backend/app/services/agent_briefs.py": "backend/app/domains/routines/service/action_briefs.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -824,7 +825,15 @@
     "tests/test_tendency_note_action_selection.py::test_compact_stored_lane_result_keeps_inbox_decision_evidence": "tests/routines/test_run_results.py::test_compact_stored_lane_result_keeps_inbox_decision_evidence",
     "tests/test_tendency_note_action_selection.py::test_compact_stored_lane_result_keeps_read_only_attempt_diagnostics": "tests/routines/test_run_results.py::test_compact_stored_lane_result_keeps_read_only_attempt_diagnostics",
     "tests/test_tendency_note_action_selection.py::test_stored_gateway_result_keeps_langgraph_v2_observability": "tests/routines/test_run_results.py::test_stored_gateway_result_keeps_langgraph_v2_observability",
-    "tests/test_tendency_note_action_selection.py::test_stored_gateway_result_keeps_sanitize_fallback_reason": "tests/routines/test_run_results.py::test_stored_gateway_result_keeps_sanitize_fallback_reason"
+    "tests/test_tendency_note_action_selection.py::test_stored_gateway_result_keeps_sanitize_fallback_reason": "tests/routines/test_run_results.py::test_stored_gateway_result_keeps_sanitize_fallback_reason",
+    "tests/test_daypart_persistent_session.py::test_v6_state_recovery_prompt_is_tool_only_and_compact": "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+    "tests/test_tendency_note_action_selection.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only": "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+    "tests/test_tendency_note_action_selection.py::test_feed_scan_prompt_suppresses_similar_recent_interests": "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+    "tests/test_tendency_note_action_selection.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed": "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+    "tests/test_tendency_note_action_selection.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text": "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+    "tests/test_tendency_note_action_selection.py::test_memory_note_refine_prompt_has_input_voice_boundary": "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+    "tests/test_tendency_note_action_selection.py::test_state_lane_prompt_has_input_voice_boundary": "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+    "tests/test_tendency_note_action_selection.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing": "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing"
   },
   "details": {
     "AR-B1": {
@@ -10887,9 +10896,15 @@
           "backend/app/domains/routines/repository/activity_evidence.py",
           "backend/app/domains/routines/repository/run_backoff.py",
           "backend/app/domains/routines/repository/runs.py",
+          "backend/app/domains/routines/service/action_briefs.py",
+          "backend/app/domains/routines/service/action_prompts.py",
           "backend/app/domains/routines/service/activity_evidence.py",
+          "backend/app/domains/routines/service/execution_prompts.py",
+          "backend/app/domains/routines/service/perception_prompts.py",
+          "backend/app/domains/routines/service/prompt_context.py",
           "backend/app/domains/routines/service/run_backoff.py",
           "backend/app/domains/routines/service/run_results.py",
+          "backend/app/domains/routines/service/state_prompts.py",
           "backend/app/domains/routines/utils/context_text.py",
           "backend/app/domains/runtime/contracts.py",
           "backend/app/runtime/resident/read_only_lanes.py",
@@ -11067,22 +11082,42 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::APP_TIMEZONE",
-          "new": "backend/app/services/agent_runs.py::APP_TIMEZONE",
+          "new": "backend/app/domains/routines/constants.py::APP_TIMEZONE",
           "direct_consumers": [
+            "backend/app/domains/routines/service/action_prompts.py",
+            "backend/app/domains/routines/service/execution_prompts.py",
+            "backend/app/domains/routines/service/perception_prompts.py",
+            "backend/app/domains/routines/service/prompt_context.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::KOREAN_WEEKDAYS",
-          "new": "backend/app/services/agent_runs.py::KOREAN_WEEKDAYS",
+          "new": "backend/app/domains/routines/constants.py::KOREAN_WEEKDAYS",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/prompt_context.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11420,12 +11455,21 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::GEMINI_FREE_POLICY_ID",
-          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_POLICY_ID",
+          "new": "backend/app/domains/routines/constants.py::GEMINI_FREE_POLICY_ID",
           "direct_consumers": [
+            "backend/app/domains/routines/service/action_prompts.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11500,12 +11544,21 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::DEFAULT_ACTIVITY_ACTIONS",
-          "new": "backend/app/services/agent_runs.py::DEFAULT_ACTIVITY_ACTIONS",
+          "new": "backend/app/domains/routines/constants.py::DEFAULT_ACTIVITY_ACTIONS",
           "direct_consumers": [
+            "backend/app/domains/routines/service/action_prompts.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11655,22 +11708,39 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_comments",
-          "new": "backend/app/services/agent_runs.py::_format_comments",
+          "new": "backend/app/domains/routines/service/prompt_context.py::_format_comments",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/execution_prompts.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_feed_cue",
-          "new": "backend/app/services/agent_runs.py::_format_feed_cue",
+          "new": "backend/app/domains/routines/service/prompt_context.py::_format_feed_cue",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/action_prompts.py",
+            "backend/app/domains/routines/service/execution_prompts.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11709,12 +11779,21 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_complete_tick_action_types",
-          "new": "backend/app/services/agent_runs.py::_format_complete_tick_action_types",
+          "new": "backend/app/domains/routines/service/prompt_context.py::_format_complete_tick_action_types",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/execution_prompts.py",
+            "backend/app/domains/routines/service/state_prompts.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12048,12 +12127,20 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_v6_prepared_create_post_brief",
-          "new": "backend/app/services/agent_runs.py::_build_v6_prepared_create_post_brief",
+          "new": "backend/app/domains/routines/service/action_briefs.py::_build_v6_prepared_create_post_brief",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12168,102 +12255,182 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_feed_perception_tendency",
-          "new": "backend/app/services/agent_runs.py::_format_feed_perception_tendency",
+          "new": "backend/app/domains/routines/service/perception_prompts.py::_format_feed_perception_tendency",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/perception_prompts.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_feed_perception_prompt",
-          "new": "backend/app/services/agent_runs.py::_build_feed_perception_prompt",
+          "new": "backend/app/domains/routines/service/perception_prompts.py::_build_feed_perception_prompt",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_v6_inbox_lane_prompt",
-          "new": "backend/app/services/agent_runs.py::_build_v6_inbox_lane_prompt",
+          "new": "backend/app/domains/routines/service/perception_prompts.py::_build_v6_inbox_lane_prompt",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_v6_feed_history_sanitize_lane_prompt",
-          "new": "backend/app/services/agent_runs.py::_build_v6_feed_history_sanitize_lane_prompt",
+          "new": "backend/app/domains/routines/service/perception_prompts.py::_build_v6_feed_history_sanitize_lane_prompt",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_v6_feed_scan_lane_prompt",
-          "new": "backend/app/services/agent_runs.py::_build_v6_feed_scan_lane_prompt",
+          "new": "backend/app/domains/routines/service/perception_prompts.py::_build_v6_feed_scan_lane_prompt",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_current_kst_for_prompt",
-          "new": "backend/app/services/agent_runs.py::_format_current_kst_for_prompt",
+          "new": "backend/app/domains/routines/service/prompt_context.py::_format_current_kst_for_prompt",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/perception_prompts.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_korean_daypart",
-          "new": "backend/app/services/agent_runs.py::_format_korean_daypart",
+          "new": "backend/app/domains/routines/service/prompt_context.py::_format_korean_daypart",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/prompt_context.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_v6_final_action_prompt",
-          "new": "backend/app/services/agent_runs.py::_build_v6_final_action_prompt",
+          "new": "backend/app/domains/routines/service/action_prompts.py::_build_v6_final_action_prompt",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_v6_state_lane_message",
-          "new": "backend/app/services/agent_runs.py::_build_v6_state_lane_message",
+          "new": "backend/app/domains/routines/service/state_prompts.py::_build_v6_state_lane_message",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_v6_state_lane_prompt",
-          "new": "backend/app/services/agent_runs.py::_build_v6_state_lane_prompt",
+          "new": "backend/app/domains/routines/service/state_prompts.py::_build_v6_state_lane_prompt",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12298,22 +12465,39 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_action_decision_allows_thread",
-          "new": "backend/app/services/agent_runs.py::_action_decision_allows_thread",
+          "new": "backend/app/domains/routines/service/action_prompts.py::_action_decision_allows_thread",
           "direct_consumers": [
+            "backend/app/domains/routines/service/action_prompts.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_action_decision_prompt",
-          "new": "backend/app/services/agent_runs.py::_build_action_decision_prompt",
+          "new": "backend/app/domains/routines/service/action_prompts.py::_build_action_decision_prompt",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12358,22 +12542,40 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_has_recent_feed_roots",
-          "new": "backend/app/services/agent_runs.py::_has_recent_feed_roots",
+          "new": "backend/app/domains/routines/service/prompt_context.py::_has_recent_feed_roots",
           "direct_consumers": [
+            "backend/app/domains/routines/service/prompt_context.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_self_post_opportunity",
-          "new": "backend/app/services/agent_runs.py::_format_self_post_opportunity",
+          "new": "backend/app/domains/routines/service/prompt_context.py::_format_self_post_opportunity",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/action_prompts.py",
+            "backend/app/domains/routines/service/execution_prompts.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12507,12 +12709,23 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_state_for_llm_context",
-          "new": "backend/app/services/agent_runs.py::_format_state_for_llm_context",
+          "new": "backend/app/domains/routines/service/prompt_context.py::_format_state_for_llm_context",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/action_prompts.py",
+            "backend/app/domains/routines/service/execution_prompts.py",
+            "backend/app/domains/routines/service/perception_prompts.py",
+            "backend/app/domains/routines/service/state_prompts.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12859,7 +13072,10 @@
           ],
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
+          ],
+          "remaining_owner": "AR-B8-A",
+          "removal_condition": "Review original unused definitions and retained future recovery surface under final original-source preservation; no automatic deletion or feature-loss inference from current zero callers.",
+          "source_member": "Retained original uncalled definition; historical source declaration stays unchanged, no new runtime consumer is claimed."
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_tool_recovery_prompt",
@@ -12869,106 +13085,189 @@
           ],
           "test_nodes": [
             "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
-          ]
+          ],
+          "remaining_owner": "AR-B8-A",
+          "removal_condition": "Review original unused definitions and retained future recovery surface under final original-source preservation; no automatic deletion or feature-loss inference from current zero callers.",
+          "source_member": "Retained original uncalled definition; historical source declaration stays unchanged, no new runtime consumer is claimed."
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_complete_tick_followup_message",
-          "new": "backend/app/services/agent_runs.py::_build_complete_tick_followup_message",
+          "new": "backend/app/domains/routines/service/state_prompts.py::_build_complete_tick_followup_message",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_complete_tick_followup_prompt",
-          "new": "backend/app/services/agent_runs.py::_build_complete_tick_followup_prompt",
+          "new": "backend/app/domains/routines/service/state_prompts.py::_build_complete_tick_followup_prompt",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_memory_note_refine_message",
-          "new": "backend/app/services/agent_runs.py::_build_memory_note_refine_message",
+          "new": "backend/app/domains/routines/service/state_prompts.py::_build_memory_note_refine_message",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_memory_note_refine_prompt",
-          "new": "backend/app/services/agent_runs.py::_build_memory_note_refine_prompt",
+          "new": "backend/app/domains/routines/service/state_prompts.py::_build_memory_note_refine_prompt",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_v6_state_recovery_message",
-          "new": "backend/app/services/agent_runs.py::_build_v6_state_recovery_message",
+          "new": "backend/app/domains/routines/service/state_prompts.py::_build_v6_state_recovery_message",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_v6_state_recovery_prompt",
-          "new": "backend/app/services/agent_runs.py::_build_v6_state_recovery_prompt",
+          "new": "backend/app/domains/routines/service/state_prompts.py::_build_v6_state_recovery_prompt",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_selected_mode_completion_message",
-          "new": "backend/app/services/agent_runs.py::_build_selected_mode_completion_message",
+          "new": "backend/app/domains/routines/service/action_prompts.py::_build_selected_mode_completion_message",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_selected_mode_completion_prompt",
-          "new": "backend/app/services/agent_runs.py::_build_selected_mode_completion_prompt",
+          "new": "backend/app/domains/routines/service/action_prompts.py::_build_selected_mode_completion_prompt",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_extra_system_prompt",
-          "new": "backend/app/services/agent_runs.py::_build_extra_system_prompt",
+          "new": "backend/app/domains/routines/service/execution_prompts.py::_build_extra_system_prompt",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_build_agent_message",
-          "new": "backend/app/services/agent_runs.py::_build_agent_message",
+          "new": "backend/app/domains/routines/service/execution_prompts.py::_build_agent_message",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+            "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+            "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+            "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+            "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+            "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -31772,6 +32071,54 @@
       "ownership": "Routines owns its ActivityLog evidence selection, JSON fallback, actual state/tick/thread completion and truthful observation/public-action ledger. Repository owns independent original nine queries; whitespace-only clipping is pure Routines utility and intentionally differs from Memory neutralizing clip.",
       "preservation": "13 original functions plus5 constants are AST-identical after exact query restoration and one explicit original sanitize event parameter. Nine query expressions retain sameSession/autoflush, expire_all where originally present, nullable handling, integer PK ordering, limits5/10/20 and hidden9 event set. Provider calls and Daypart Memory unchanged.",
       "remaining": "Real provider/graph/context/prompt execution orchestration and exact legacy bridges remain B4-C/B8-A. No B5/B7 ancestry or duplicate owner implementation introduced."
+    },
+    "AR-B4-C5e-resident-prompts": {
+      "status": "IMPLEMENTED — focused429 passed /existing PostgreSQL1skip; boundary732/2457/206 and readonly original6checks0; stock full gate awaits root linear first-source append",
+      "checked_source_map": "Complete AR-B2-B5 map retargets29 prompt functions/four constants; whole-file agent_briefs path move retains every original9 definitions and adds the existing AgentRun prepared-brief policy.",
+      "actual_paths": [
+        "backend/app/domains/routines/constants.py",
+        "backend/app/domains/routines/contracts/prompt_context.py",
+        "backend/app/domains/routines/service/action_briefs.py",
+        "backend/app/domains/routines/service/action_prompts.py",
+        "backend/app/domains/routines/service/execution_prompts.py",
+        "backend/app/domains/routines/service/perception_prompts.py",
+        "backend/app/domains/routines/service/prompt_context.py",
+        "backend/app/domains/routines/service/state_prompts.py"
+      ],
+      "test_nodes": [
+        "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+        "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+        "tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+        "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+        "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+        "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+        "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+        "tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact",
+        "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+      ],
+      "test_moves": {
+        "backend/tests/test_tendency_note_action_selection.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing": "backend/tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+        "backend/tests/test_tendency_note_action_selection.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed": "backend/tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_own_thought_only_for_post_seed",
+        "backend/tests/test_tendency_note_action_selection.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only": "backend/tests/routines/test_perception_prompts.py::test_feed_history_sanitize_prompt_is_scoped_to_history_only",
+        "backend/tests/test_tendency_note_action_selection.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text": "backend/tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
+        "backend/tests/test_tendency_note_action_selection.py::test_state_lane_prompt_has_input_voice_boundary": "backend/tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
+        "backend/tests/test_tendency_note_action_selection.py::test_memory_note_refine_prompt_has_input_voice_boundary": "backend/tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
+        "backend/tests/test_tendency_note_action_selection.py::test_feed_scan_prompt_suppresses_similar_recent_interests": "backend/tests/routines/test_perception_prompts.py::test_feed_scan_prompt_suppresses_similar_recent_interests",
+        "backend/tests/test_daypart_persistent_session.py::test_v6_state_recovery_prompt_is_tool_only_and_compact": "backend/tests/routines/test_state_prompts.py::test_v6_state_recovery_prompt_is_tool_only_and_compact"
+      },
+      "ownership": "Actual prompt context/perception/action/state/execution and writing brief policy reside in Routines purpose-specific service files. Character/State/Post/Comment fields are structural read views; the exact passed objects are used without querying foreign ORM, copying data or a reverse domain dependency.",
+      "preservation": "29 original prompt functions +4 constants +9 original brief definitions match AST after exact four Character/State/Post/Comment annotation-name restoration. Original8 test bodies preserved. No SQL/provider calls or value copying are added; strings/order/constraints/context trust boundaries/time reads remain.",
+      "remaining": "AgentRun provider decoding/social candidate rules and sameSession reads/execution preparation and actual runtime composition remain C5f/C6. Memory daypart original callbacks remain B7 ownership. Large LangGraph graph may remain runtime composition after real policy/query owners are separated; size itself is not a completion gate.",
+      "retained_uncalled_originals": {
+        "paths": [
+          "backend/app/services/agent_runs.py::_build_tool_recovery_message",
+          "backend/app/services/agent_runs.py::_build_tool_recovery_prompt"
+        ],
+        "evidence": "Original c1e25af and current tracked Python consumers have zero calls/imports of these two helpers. Their full original bodies and annotations remain in original file; no fabricated direct consumer or unused alias introduced.",
+        "remaining_owner": "AR-B8-A",
+        "removal_condition": "Review original unused definitions and retained future recovery surface under final original-source preservation; no automatic deletion or feature-loss inference from current zero callers."
+      },
+      "cycle_resolution": "Direct Social schema use introduced an aggregate Routines/Social package cycle despite a supported entry. It was replaced by exact existing Post/Comment structural read views. No boundary rule or exemption changed; package cycle0 restored."
     }
   },
   "test_symbols": {

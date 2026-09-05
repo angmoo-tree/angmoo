@@ -385,10 +385,6 @@
           "importer": "app.services.agent_runs"
         },
         {
-          "imported": "app.services.agent_briefs",
-          "importer": "app.services.agent_runs"
-        },
-        {
           "imported": "app.services.community",
           "importer": "app.services.agent_runs"
         },
@@ -426,10 +422,6 @@
         },
         {
           "imported": "app.schemas",
-          "importer": "app.services.agent_writing"
-        },
-        {
-          "imported": "app.services.agent_briefs",
           "importer": "app.services.agent_writing"
         },
         {
@@ -490,10 +482,6 @@
         },
         {
           "imported": "app.schemas",
-          "importer": "app.services.community"
-        },
-        {
-          "imported": "app.services.agent_briefs",
           "importer": "app.services.community"
         },
         {
@@ -1032,6 +1020,7 @@
       "app.domains.routines.contracts.joint_activity",
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.plans",
+      "app.domains.routines.contracts.prompt_context",
       "app.domains.routines.contracts.resident",
       "app.domains.routines.contracts.slots",
       "app.domains.routines.dependencies",
@@ -1057,6 +1046,8 @@
       "app.domains.routines.schemas.resident",
       "app.domains.routines.schemas.runs",
       "app.domains.routines.service",
+      "app.domains.routines.service.action_briefs",
+      "app.domains.routines.service.action_prompts",
       "app.domains.routines.service.activity_evidence",
       "app.domains.routines.service.activity_logs",
       "app.domains.routines.service.activity_policy",
@@ -1066,6 +1057,7 @@
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.execution_prompts",
       "app.domains.routines.service.feed_cues",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
@@ -1074,7 +1066,9 @@
       "app.domains.routines.service.joint_reservations",
       "app.domains.routines.service.joint_scheduling",
       "app.domains.routines.service.lifecycle",
+      "app.domains.routines.service.perception_prompts",
       "app.domains.routines.service.plans",
+      "app.domains.routines.service.prompt_context",
       "app.domains.routines.service.public_action_executions",
       "app.domains.routines.service.run_backoff",
       "app.domains.routines.service.run_results",
@@ -1086,6 +1080,7 @@
       "app.domains.routines.service.slot_pool",
       "app.domains.routines.service.slot_recovery",
       "app.domains.routines.service.slot_state",
+      "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tick_schedule",
       "app.domains.routines.utils",
       "app.domains.routines.utils.activity_actions",
@@ -1238,6 +1233,8 @@
       "app.domains.routines.schemas.resident",
       "app.domains.routines.schemas.runs",
       "app.domains.routines.service",
+      "app.domains.routines.service.action_briefs",
+      "app.domains.routines.service.action_prompts",
       "app.domains.routines.service.activity_evidence",
       "app.domains.routines.service.activity_logs",
       "app.domains.routines.service.activity_policy",
@@ -1247,6 +1244,7 @@
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
+      "app.domains.routines.service.execution_prompts",
       "app.domains.routines.service.feed_cues",
       "app.domains.routines.service.joint_activity",
       "app.domains.routines.service.joint_activity.eligibility",
@@ -1255,7 +1253,9 @@
       "app.domains.routines.service.joint_reservations",
       "app.domains.routines.service.joint_scheduling",
       "app.domains.routines.service.lifecycle",
+      "app.domains.routines.service.perception_prompts",
       "app.domains.routines.service.plans",
+      "app.domains.routines.service.prompt_context",
       "app.domains.routines.service.public_action_executions",
       "app.domains.routines.service.run_backoff",
       "app.domains.routines.service.run_results",
@@ -1266,6 +1266,7 @@
       "app.domains.routines.service.slot_leases",
       "app.domains.routines.service.slot_pool",
       "app.domains.routines.service.slot_recovery",
+      "app.domains.routines.service.state_prompts",
       "app.domains.routines.service.tick_schedule",
       "app.domains.runtime.contracts",
       "app.domains.social.contracts",
@@ -2799,6 +2800,70 @@
         "owner_stage": "AR-B4-C",
         "reason": "Remaining actual execution/prompt composition consumes the same actual Routines evidence/text function after responsibility extraction.",
         "removal_condition": "Move remaining actual execution/prompt composition in B4-C; retire exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.action_briefs",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
+        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.action_prompts",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
+        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.execution_prompts",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
+        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.perception_prompts",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
+        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.prompt_context",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
+        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.service.state_prompts",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
+        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_writing",
+        "target": "app.domains.routines.service.action_briefs",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
+        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.routines.service.action_briefs",
+        "owner_stage": "AR-B5",
+        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
+        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
         "review_date": "2026-09-06"
       }
     ]

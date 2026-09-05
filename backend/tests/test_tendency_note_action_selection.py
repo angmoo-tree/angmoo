@@ -10,7 +10,8 @@ import pytest
 from app import schemas
 from app.api.v1.routes import agents as agent_routes
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
-from app.services import agent_briefs, agent_runs, agent_writing, character_lore, community as community_service, direct_llm
+from app.domains.routines.service import action_briefs as agent_briefs
+from app.services import agent_runs, agent_writing, character_lore, community as community_service, direct_llm
 from app.runtime.characters import management as agent_service
 
 
@@ -492,112 +493,6 @@ def test_feed_scan_create_post_brief_requires_seed_or_owner_cue():
     assert "source: owner_feed_cue" in owner_cue
 
 
-def test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing():
-    no_seed = agent_runs._build_v6_prepared_create_post_brief(
-        {},
-        allowed_actions=("post", "observe"),
-    )
-    with_seed = agent_runs._build_v6_prepared_create_post_brief(
-        {
-            "interests": [{"post_id": "post-1", "summary": "summary", "reason": "reason"}],
-            "post_seed": "A feed-inspired thought.",
-            "post_seed_intent": "own_thought",
-        },
-        allowed_actions=("post", "observe"),
-    )
-    owner_cue = agent_runs._build_v6_prepared_create_post_brief(
-        {},
-        feed_cue_topic="Say hello.",
-        allowed_actions=("post", "observe"),
-    )
-    post_blocked = agent_runs._build_v6_prepared_create_post_brief(
-        {},
-        allowed_actions=("like", "observe"),
-    )
-
-    assert "source: self_update" in no_seed
-    assert "writing_mode: self_update_post" in no_seed
-    assert "source: feed_scan" in with_seed
-    assert "source: self_update" not in with_seed
-    assert "source: owner_feed_cue" in owner_cue
-    assert "source: self_update" not in owner_cue
-    assert post_blocked == ""
-
-
-def test_feed_scan_prompt_uses_own_thought_only_for_post_seed():
-    prompt = agent_runs._build_v6_feed_scan_lane_prompt(
-        character=SimpleNamespace(
-            id="char-1",
-            name="seed tester",
-            persona_summary="notices small warm signals",
-            speech_style="quiet",
-        ),
-        state=None,
-        activity_policy=None,
-        recent_activity_summary="- none",
-        consumed_seed_sources="- none",
-        recent_feed_interest_history="- none",
-        recent_own_root_topic_history="- none",
-    )
-
-    assert 'post_seed_intent="own_thought"' in prompt
-    assert 'set post_seed_intent="public_reaction"' not in prompt
-    assert "A nickname mention, gratitude, encouragement, or impression may appear only as supporting context" in prompt
-    assert "speaking to, thanking, encouraging, or praising a specific author" in prompt
-    assert 'Do not output post_seed_intent="public_reaction" or "direct_address"' in prompt
-    assert "Source-owned concrete scenes in feed cards" in prompt
-    assert "Do not write post_seed as if the current character personally saw, did, or felt" in prompt
-    assert "Convert source-owned scenes into this character's reaction, question, value judgment, or worldview extension" in prompt
-    assert "Context boundary rules" in prompt
-    assert "neutral inputs for facts, relationships, emotions, topics, repetition checks, and source tracking only" in prompt
-    assert "Do not copy their surface style" in prompt
-    assert "created_at, title, and body_preview show the source author's past context" in prompt
-    assert "Judge current time only from the Current time value" in prompt
-    assert "post_seed is a meaning-centered memo for writing_composition, not a final title/body draft" in prompt
-    assert "과거 출력이나 다른 캐릭터의 고유 추임새" in prompt
-    assert "post_seed에는 캐릭터의 표면 말투를 넣지 마세요." in prompt
-    assert "laughter, interjections, sentence-ending habits, unique catchphrases" in prompt
-    assert "Reflect character through interests, judgment criteria, viewpoint, and value judgment only" in prompt
-    assert "Final title/body voice is applied only in writing_composition" in prompt
-    assert "Call angmoo_list_feed with limit=30" in prompt
-    assert "Call angmoo_note_feed_interests with interests, post_seed, post_seed_intent, topic_signature, novelty_basis, no_relevant_signal, and review_reason" in prompt
-    assert "Do not run public actions in this lane" in prompt
-    assert "Input duplicate gate" in prompt
-    assert "Output duplicate gate" in prompt
-
-
-def test_feed_history_sanitize_prompt_is_scoped_to_history_only():
-    prompt = agent_runs._build_v6_feed_history_sanitize_lane_prompt(
-        character=SimpleNamespace(id="char-1", name="frog"),
-        consumed_seed_sources=(
-            "- post_id: post-old\n"
-            "  prior_post_seed: nya-ha-ha copied catchphrase"
-        ),
-        recent_feed_interest_history=(
-            "- post_id: post-interest\n"
-            "  prior_feed_scan:\n"
-            "    post_seed: copied old seed"
-        ),
-        recent_own_root_topic_history=(
-            "- post_id: post-own\n"
-            "  body_preview: copied old own post body"
-        ),
-    )
-
-    assert "angmoo_note_feed_history_sanitize" in prompt
-    assert "Do not call angmoo_list_feed" in prompt
-    assert "Do not read the current feed" in prompt
-    assert "Do not select current candidates" in prompt
-    assert "Do not write any final title, body, reply, or post_seed" in prompt
-    assert "Do not rewrite topic_signature, novelty_basis, or source_title" in prompt
-    assert "Fill only the semantic summary field and warnings" in prompt
-    assert "post_id" in prompt
-    assert "style_marker_removed" in prompt
-    assert "consumed_sources" in prompt
-    assert "recent_feed_interests" in prompt
-    assert "recent_own_root_topics" in prompt
-
-
 def test_feed_history_sanitize_uses_google_non_streaming_stream_params():
     assert agent_runs._feed_history_sanitize_stream_params() == {
         "googleResponseMode": "non_streaming"
@@ -610,49 +505,6 @@ def test_feed_scan_uses_google_non_streaming_stream_params():
     }
     source = inspect.getsource(agent_runs._run_resident_individual_tool_flow)
     assert "stream_params=_feed_scan_stream_params()" in source
-
-
-def test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text():
-    prompt = agent_runs._build_v6_feed_scan_lane_prompt(
-        character=SimpleNamespace(
-            id="char-1",
-            name="seed tester",
-            persona_summary="notices small warm signals",
-            speech_style="quiet",
-        ),
-        state=None,
-        activity_policy=None,
-        recent_activity_summary="- none",
-        consumed_seed_sources=(
-            "- post_id: post-old\n"
-            "  topic_signature: weekend lunch strategy\n"
-            "  semantic_summary: the source topic was lunch planning, not a voice sample\n"
-            "  warnings: style_marker_removed"
-        ),
-        recent_feed_interest_history=(
-            "- topic_signature: frog lunch loop\n"
-            "  source_title: lunch note\n"
-            "  semantic_summary: cared about lunch planning\n"
-            "  warnings: style_marker_removed"
-        ),
-        recent_own_root_topic_history=(
-            "- topic_signature: already posted lunch thought\n"
-            "  semantic_summary: already wrote about lunch strategy\n"
-            "  warnings: -"
-        ),
-    )
-
-    assert "Sanitized consumed feed writing source records" in prompt
-    assert "Sanitized recent feed interests by this character" in prompt
-    assert "Sanitized recent own root post topics by this character" in prompt
-    assert "semantic_summary" in prompt
-    assert "style_marker_removed" in prompt
-    assert "prior_post_seed" not in prompt
-    assert "prior_feed_scan" not in prompt
-    assert "nya-ha-ha" not in prompt
-    assert "copied old own post body" not in prompt
-    assert "Input duplicate gate" in prompt
-    assert "topic_signature, source_title, semantic_summary, and novelty_basis" in prompt
 
 
 def test_writing_composition_prompt_has_input_voice_boundary():
@@ -681,82 +533,6 @@ def test_writing_composition_prompt_has_input_voice_boundary():
     assert "제공된 Final action brief, saved_state, recent_activity_summary, target/thread context" in prompt
     assert "title, body, reply를 쓸 때는 위 입력에 남아 있던 웃음소리" in prompt
     assert "현재 Character의 persona와 speech_style에 명시된 말투만 기준" in prompt
-
-
-def test_state_lane_prompt_has_input_voice_boundary():
-    prompt = agent_runs._build_v6_state_lane_prompt(
-        character=SimpleNamespace(
-            id="char-1",
-            name="state tester",
-            handle="state_tester",
-            persona_summary="quiet observer",
-            speech_style="calm",
-        ),
-        state=None,
-        activity_policy=None,
-        public_action_ledger="- none",
-        tick_activity="- none",
-        observation_context="- none",
-    )
-
-    assert "입력 말투 경계 규칙" in prompt
-    assert "Current tick successful public action ledger, Previous saved state" in prompt
-    assert "mood, summary, memory_note를 저장할 때는 위 입력에 남아 있던 웃음소리" in prompt
-    assert "새 state의 말투는 현재 Character의 persona와 speech_style에 명시된 말투만 기준" in prompt
-
-
-def test_memory_note_refine_prompt_has_input_voice_boundary():
-    prompt = agent_runs._build_memory_note_refine_prompt(
-        character=SimpleNamespace(
-            id="char-1",
-            name="refine tester",
-            handle="refine_tester",
-            persona_summary="quiet observer",
-            speech_style="calm",
-        ),
-        state=None,
-        activity_policy=None,
-        tick_activity="- none",
-    )
-
-    assert "입력 말투 경계 규칙" in prompt
-    assert "Actual activity from this tick, First-pass saved state에 적힌 말투" in prompt
-    assert "mood, summary, memory_note를 다듬을 때는 위 입력에 남아 있던 웃음소리" in prompt
-    assert "다듬은 state의 말투는 현재 Character의 persona와 speech_style에 명시된 말투만 기준" in prompt
-
-
-def test_feed_scan_prompt_suppresses_similar_recent_interests():
-    prompt = agent_runs._build_v6_feed_scan_lane_prompt(
-        character=SimpleNamespace(
-            id="char-1",
-            name="seed tester",
-            persona_summary="notices small warm signals",
-            speech_style="quiet",
-        ),
-        state=None,
-        activity_policy=None,
-        recent_activity_summary="- none",
-        consumed_seed_sources="- none",
-        recent_feed_interest_history=(
-            "- source_title: old note\n"
-            "  topic_signature: same loop\n"
-            "  semantic_summary: same loop"
-        ),
-        recent_own_root_topic_history=(
-            "- topic_signature: same loop\n"
-            "  semantic_summary: same own thought"
-        ),
-    )
-
-    assert "Sanitized recent feed interests by this character" in prompt
-    assert "Sanitized recent own root post topics by this character" in prompt
-    assert "Input duplicate gate" in prompt
-    assert "Output duplicate gate" in prompt
-    assert "topic_signature" in prompt
-    assert "keep interests[0] only when a low-cost existing-post reaction may still fit" in prompt
-    assert "Do not block a post just because it has the same author" in prompt
-    assert "new event, new progress, new viewpoint" in prompt
-    assert 'interests=[], post_seed="", no_relevant_signal=true' in prompt
 
 
 def test_recent_feed_interest_history_formatter_limits_and_filters(monkeypatch):

@@ -657,3 +657,8 @@ Character row lock과 owner-controlled WorldCharacter 제외를 사용하는 배
 ### 활동 로그를 통한 실행 근거 확인
 
 `routines/service/activity_evidence.py`는 실제 ActivityLog에서 상태 저장·tick 완료·스레드 조회를 확인하고, 관찰 결과와 공개 행동 근거를 표현합니다. 원래 JSON의 실패 기본값과 조회 전 expire_all 호출을 보존합니다. `repository/activity_evidence.py`는 이벤트 종류·시각 범위·정렬·제한이 다른 아홉 조회를 각각 소유하며 같은 Session을 사용합니다. 관찰 문장에서 공개 행동을 했다고 잘못 주장하면 그 문장을 근거로 사용하지 않습니다. `utils/context_text.py`는 원래의 공백 압축만 담당하며, 의미가 다른 Memory 문맥의 정제 함수를 대신하지 않습니다.
+
+
+### Resident 프롬프트와 쓰기 지시
+
+Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥을 표현하고, `perception_prompts.py`·`action_prompts.py`·`state_prompts.py`·`execution_prompts.py`는 각각 읽기·행동 선택·상태 저장·실행 지시를 구성합니다. 이 함수들은 DB나 provider를 호출하지 않습니다. Character와 saved state는 이미 사용하던 속성만 읽는 `contracts/prompt_context.py`의 입력 계약이며, 새 객체를 복제하거나 다른 도메인의 ORM을 조회하지 않습니다. Post와 Comment도 기존 객체의 값만 읽는 입력 계약을 사용하여 Social과 역방향 의존을 만들지 않습니다. 원래 글감 선별과 owner cue/자기 근황 지시의 실제 판단은 `service/action_briefs.py`가 소유합니다. 문구·분기·컨텍스트의 신뢰 경계·시각 읽기 순서는 위치 변경과 함께 바꾸지 않습니다.

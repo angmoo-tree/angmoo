@@ -1,7 +1,7 @@
 {
-  "edge_count": 2429,
-  "external_import_count": 2283,
-  "module_count": 726,
+  "edge_count": 2457,
+  "external_import_count": 2297,
+  "module_count": 732,
   "modules": [
     {
       "external_imports": [],
@@ -3641,7 +3641,8 @@
     {
       "external_imports": [
         "datetime",
-        "re"
+        "re",
+        "zoneinfo"
       ],
       "imports": [
         "app.domains.routines.contracts.lifecycle"
@@ -3766,6 +3767,15 @@
       "imports": [],
       "module": "app.domains.routines.contracts.plans",
       "path": "backend/app/domains/routines/contracts/plans.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.contracts.prompt_context",
+      "path": "backend/app/domains/routines/contracts/prompt_context.py",
       "wildcard_imports": []
     },
     {
@@ -4115,6 +4125,37 @@
     {
       "external_imports": [
         "__future__",
+        "typing"
+      ],
+      "imports": [
+        "app.core.context_text"
+      ],
+      "module": "app.domains.routines.service.action_briefs",
+      "path": "backend/app/domains/routines/service/action_briefs.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime",
+        "json",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.contracts.prompt_context",
+        "app.domains.routines.models",
+        "app.domains.routines.service.action_briefs",
+        "app.domains.routines.service.prompt_context"
+      ],
+      "module": "app.domains.routines.service.action_prompts",
+      "path": "backend/app/domains/routines/service/action_prompts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "datetime",
         "json",
         "sqlalchemy.orm",
@@ -4256,6 +4297,22 @@
       ],
       "module": "app.domains.routines.service.execution.lifecycle",
       "path": "backend/app/domains/routines/service/execution/lifecycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.contracts.prompt_context",
+        "app.domains.routines.models",
+        "app.domains.routines.service.prompt_context"
+      ],
+      "module": "app.domains.routines.service.execution_prompts",
+      "path": "backend/app/domains/routines/service/execution_prompts.py",
       "wildcard_imports": []
     },
     {
@@ -4410,6 +4467,21 @@
     {
       "external_imports": [
         "__future__",
+        "datetime"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.contracts.prompt_context",
+        "app.domains.routines.service.prompt_context"
+      ],
+      "module": "app.domains.routines.service.perception_prompts",
+      "path": "backend/app/domains/routines/service/perception_prompts.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "datetime",
         "hashlib",
         "sqlalchemy",
@@ -4433,6 +4505,21 @@
       ],
       "module": "app.domains.routines.service.plans",
       "path": "backend/app/domains/routines/service/plans.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "datetime"
+      ],
+      "imports": [
+        "app.core.context_text",
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.prompt_context",
+        "app.domains.routines.models"
+      ],
+      "module": "app.domains.routines.service.prompt_context",
+      "path": "backend/app/domains/routines/service/prompt_context.py",
       "wildcard_imports": []
     },
     {
@@ -4604,6 +4691,20 @@
       ],
       "module": "app.domains.routines.service.slot_state",
       "path": "backend/app/domains/routines/service/slot_state.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.contracts.prompt_context",
+        "app.domains.routines.models",
+        "app.domains.routines.service.prompt_context"
+      ],
+      "module": "app.domains.routines.service.state_prompts",
+      "path": "backend/app/domains/routines/service/state_prompts.py",
       "wildcard_imports": []
     },
     {
@@ -10180,17 +10281,6 @@
     },
     {
       "external_imports": [
-        "typing"
-      ],
-      "imports": [
-        "app.core.context_text"
-      ],
-      "module": "app.services.agent_briefs",
-      "path": "backend/app/services/agent_briefs.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
         "asyncio",
         "dataclasses",
         "datetime",
@@ -10218,8 +10308,13 @@
         "app.domains.routines.exceptions",
         "app.domains.routines.repository.feed_cues",
         "app.domains.routines.repository.slots",
+        "app.domains.routines.service.action_briefs",
+        "app.domains.routines.service.action_prompts",
         "app.domains.routines.service.activity_evidence",
+        "app.domains.routines.service.execution_prompts",
         "app.domains.routines.service.lifecycle",
+        "app.domains.routines.service.perception_prompts",
+        "app.domains.routines.service.prompt_context",
         "app.domains.routines.service.run_backoff",
         "app.domains.routines.service.run_results",
         "app.domains.routines.service.runs",
@@ -10227,6 +10322,7 @@
         "app.domains.routines.service.slot_leases",
         "app.domains.routines.service.slot_pool",
         "app.domains.routines.service.slot_recovery",
+        "app.domains.routines.service.state_prompts",
         "app.domains.routines.service.tick_schedule",
         "app.domains.routines.utils.context_text",
         "app.domains.social.public",
@@ -10238,7 +10334,6 @@
         "app.runtime.resident.slots",
         "app.runtime.routine_posts",
         "app.schemas",
-        "app.services.agent_briefs",
         "app.services.community",
         "app.services.direct_llm",
         "app.services.langgraph_resident",
@@ -10268,9 +10363,9 @@
         "app.cruds.agent_runs",
         "app.cruds.agents",
         "app.cruds.community",
+        "app.domains.routines.service.action_briefs",
         "app.models",
         "app.schemas",
-        "app.services.agent_briefs",
         "app.services.character_lore",
         "app.services.community",
         "app.services.runtime_boundary"
@@ -10347,6 +10442,7 @@
         "app.domains.characters.service.state",
         "app.domains.routines.repository.feed_cues",
         "app.domains.routines.repository.runs",
+        "app.domains.routines.service.action_briefs",
         "app.domains.routines.service.feed_cues",
         "app.domains.social.constants",
         "app.domains.social.exceptions",
@@ -10360,7 +10456,6 @@
         "app.runtime.resident.activity_policy",
         "app.runtime.social.timeline",
         "app.schemas",
-        "app.services.agent_briefs",
         "app.services.community_abuse_quota"
       ],
       "module": "app.services.community",

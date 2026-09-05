@@ -1015,3 +1015,17 @@ C5c 보완 후 최종 현재 후보는 **422 passed / 기존 PostgreSQL 1 skip /
 새 SQLite 회귀는 동일 세션의 미커밋 로그·정수 PK 최신 순서·JSON 기본값·rollback, expire_all이 미저장 변경을 폐기한 뒤 조회하는 원래 의미, 공개 행동20개 제한·숨김9유형·사실에 맞는 관찰 문장 선택을 검증한다. 초기 데이터 fixture의 로그 ID를 실제 정수 PK에 맞춰 수정했으며 제품 모델·기존 assertion은 변경하지 않았다. 최종 현재 검증과 부모 선형 통합은 별도로 기록한다.
 
 C5d 최종 현재 후보는 **429 passed / 기존 PostgreSQL 1 skip / 기존 warnings5 / 103.90초**다. 경계 **726 modules / 2,429 edges / exact legacy209 / cycle0**, L4 parity97·ER0 85/87/24/44/7·Memory batch 현재 inventory가 통과했다. 읽기 전용 원래 보존 진단은 **source/split/assertion/suppression/API·ORM/node 각각 오류0**, 보호 **2,139 / 현재2,257 nodes**다. 선행 signed 두 경로의 메모리 보충만 사용했고 tracked frozen/checkpoint/additions·검사 구현은 변경하지 않았다. 부모 source 도입 append 및 ER0 역사·현재 수치 구분 보완 후 stock 전체·CI·installer는 별도 조건이다.
+
+
+## AR-B4-C5e — Resident 실제 프롬프트·글감 지시 소유
+
+기존 prompt29함수·상수4개를 공통 문맥/읽기/행동/상태/실행 역할의 Routines 파일로 분리하고, services/agent_briefs의 실제5함수·4상수를 action_briefs로 이전했다. 기존 준비 글감15줄도 같은 실제 정책 파일에 있다. 원문29함수는 Character/State의 한정된 입력 타입명을 복원하면 AST가 같고, 상수4개·brief9정의도 동일하다. SQL/SDK 호출이나 값 복제·새 provider 요청은 없다.
+
+독립적인 기존 테스트8개는 원래 본문 그대로 소유 파일로 이전했으며, 공통 helper를 함께 사용하는 다른 테스트는 실제 원래 호출과 assertion을 유지했다. 초기 묶음 **254 passed / 기존 warnings2 / 5.68초** 및 실제34함수의 import 후 전역 의존 누락0을 확인했다. 큰 실행 조립의 줄 수는 종료 조건이 아니며 실제 정책·SQL 소유를 마친 뒤 runtime workflow로 배치한다. Memory Daypart와 다른 소유업무 합류 조건은 그대로 유지한다.
+
+원래부터 호출되지 않던 `_build_tool_recovery_message`·`_build_tool_recovery_prompt`는 실제 consumer를 허위로 추가하지 않고 기존 파일에 원문 그대로 남겼다. 현재 C5e 실제 이전은 **29 prompt 함수**다. 두 미호출 정의의 정리 여부는 B8-A가 원문 보존 조건과 함께 검토한다. 활성 실행 경로에는 새 미사용 alias를 추가하지 않았다.
+
+Social의 지원 schema를 prompt 타입으로 직접 사용했을 때 기존 Social→Routines 협력과 package cycle이 만들어지는 것을 원래 경계 검사가 검출했다. Post/Comment도 실제 읽는 값만 입력 계약으로 받아 같은 원래 객체를 사용하는 방식으로 바꾸어 **cycle0**을 복원했다. 경계 규칙/예외는 넓히지 않았고 프롬프트 본문·기존 테스트 AST는 그대로다.
+
+
+C5e 최종 고정 tree 검증: **429 passed / 기존 PostgreSQL 전용1 skipped / 기존 warnings5 /102.78초**. 현재 boundary **732modules /2457edges /exact legacy206 /cycle0**, L4 **732/14/97**, ER0 **85/87/24/44/7**, Memory batch inventory PASS. 읽기 전용 원래6검사(source/split/assertion/suppression/API·ORM/node)는 전부 오류0이며 **보호2139/current2257**이다. 최초 signed869bae의 두 실제 도입 경로를 메모리에서만 복원하여 비교했으며 frozen/checkpoint/additions는 수정하지 않았다. 따라서 stock 전체 게이트는 root의 순차 최초도입 원장 연결 후 검증 대상이며 현재 전체 PASS로 표시하지 않는다. 원본29함수/4상수/brief9정의 및 기존8테스트 AST 동일 확인. 새 bridge는 실제 구독자만 기록했으며 원래 미호출2함수는 후속B8-A 대상으로 원문을 유지했다.
