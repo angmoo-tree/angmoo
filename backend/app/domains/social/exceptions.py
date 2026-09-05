@@ -105,3 +105,7 @@ class WorldFeedStatusNotFoundError(WorldFeedError):
 
 class WorldFeedStatusForbiddenError(WorldFeedError):
     pass
+
+
+class FeedReactionValidationError(ValueError):
+    pass

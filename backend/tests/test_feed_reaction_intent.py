@@ -24,9 +24,9 @@ from app.services import (
     world_character_contracts,
 )
 from app.services.direct_llm import DirectLlmError, RunLlmTracker
-from app.services.feed_reaction_planner import validate_reaction_decision
+from app.domains.social.service.feed_reaction_validation import validate_reaction_decision
 from app.runtime.resident.context import LangGraphResidentContext
-from app.services.world_feed_runtime import run_world_keyword_feed
+from app.runtime.social.feed_cycle import run_world_keyword_feed
 
 
 KEYWORDS = [

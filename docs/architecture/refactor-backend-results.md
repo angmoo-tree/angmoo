@@ -1270,3 +1270,12 @@ C17의 원래 history15/input2/common2/constant4 AST가 동일하며, 입력2 cl
 옛 world_feed_search 구현·keyword_feed application·search_runtime application·search_index port 네 파일은 실제 소비자를 전환한 뒤 제거했다. 남은 Community/WorldFeed 실행·G07 전체 소유권 정리·B5 최종 종료는 계속 진행한다. 현재 aggregate/옛 실행 소비자의 제한된 연결은 제거 조건을 명시했고, 새로운 범용 우회 예외를 만들지 않았다.
 
 C17과 Search source 49c0f1f의 실제 합류 검증은 **303 PASS / 31.36초 / 기존 warning 3개**다. 경계 **818 module / 2876 edge / legacy183**, L4 99 parity와 ER0 84/87/24/44/7, PR #258/#263 API/schema/ORM·변경 보호 테스트4파일 assertion·전체 split evidence 모두 통과했다. 삭제된 WorldFeed apply의 stale bridge와 직접 소비자 항목만 제거했고, 원래 Search 신규2개 회귀와 각 소유 역할을 함께 보존했다. 본 합류는 source 준비이며 parent의 capture·Hosted·전체 통합 Gate와 구분한다.
+
+
+## AR-B5-C18 — World Feed 실행 판단·반응 검증의 실제 소유
+
+WorldFeed 원래9함수와 반응 검증2/error/provider 계약을 Social service/contracts로 옮기고 runtime에는 기존 Session의 실제 타 업무·provider 연결을 두었다. 값7/공개 dispatch/전체 주기 정책이 실제 책임을 나눠 소유하며, 기존 async 전체 흐름과 retained client를 포함한18개 정의의 AST가 정확한 조회·lazy callback 복원 후 동일하다. nullable 조회2는 원래 db.get 의미 그대로다.
+
+기존 반응·Search·World Package 집중 회귀는 **27 PASS / 31.50초 / 기존 warning 1개**다. 새로운 실패 주입 회귀의 첫 실행은 기존7 PASS/신규1 FAIL이었으며, 새 테스트가 잘못 참조한 observation 필드·상태 이름을 실제 post_id/retryable_failed로 고쳤다. 제품/기존 assertion/상태 모델은 변경하지 않았다. Community87·provider client/prompt 마무리·G07·full B5·capture/Hosted는 후속 범위다.
+
+C18 최종 확대 검증은 **330 PASS / 83.41초 / 기존 Starlette warning 1개**다. 새 실패 주입 회귀가 반응·실행·성공 이벤트 rollback, 이전 관찰/친숙함 유지, retryable_failed claim 저장을 확인했다. 경계 **823 module / 2904 edge / legacy179**, L4 parity99와 ER0 84/87/24/44/7, PR #258/#263 API/schema/ORM·변경 보호 테스트2파일 assertion·전체 split evidence도 통과했다. 기존 L6 네 client/owner 연결만 runtime의 정확한 새 위치로 승계했고, 옛 runtime과 aggregate 의존 등 stale8개를 제거했다. 부정확한 테스트 파일명을 지정한 확대 명령은 수집 전 중단돼 실행0이었고, 실제 경로를 확인한 최종 명령의330 PASS만 결과로 사용한다.

@@ -74,7 +74,7 @@ from app.services import (
 )
 from app.domains.world_characters.service import autonomous_setup as world_character_setup
 from app.runtime.resident.context import LangGraphResidentContext
-from app.services.world_feed_runtime import run_world_keyword_feed
+from app.runtime.social.feed_cycle import run_world_keyword_feed
 
 
 FIXTURE_ROOT = (

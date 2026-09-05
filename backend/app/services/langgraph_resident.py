@@ -65,7 +65,7 @@ from app.services.direct_llm import (
 from app.core.context_text import neutralize_context_text
 from app.runtime.resident.context import LangGraphResidentContext
 from app.domains.routines.contracts.resident import ResidentGraphState as _ResidentGraphState
-from app.services.world_feed_runtime import run_world_keyword_feed
+from app.runtime.social.feed_cycle import run_world_keyword_feed
 
 
 logger = logging.getLogger(__name__)

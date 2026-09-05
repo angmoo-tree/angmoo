@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from app.domains.social.contracts.feed_execution import FeedReactionProvider
+from app.domains.social.exceptions import FeedReactionValidationError
+from app.domains.social.service.feed_reaction_validation import validate_reaction_decision, validate_comment_draft
+
 import json
-from typing import Protocol
 
 from pydantic import ValidationError
 
@@ -35,30 +38,8 @@ GEMINI_PROPOSAL_PREVIEW_RESPONSE_SCHEMA = build_gemini_developer_response_schema
 )
 
 
-class FeedReactionValidationError(ValueError):
-    pass
 
 
-class FeedReactionProvider(Protocol):
-    async def plan(
-        self,
-        *,
-        resident_context: LangGraphResidentContext,
-        profile: ReadySearchProfile,
-        candidates: tuple[schemas.WorldFeedCandidateRead, ...],
-        tracker: RunLlmTracker,
-        proposal_eligible_indices: frozenset[int] = frozenset(),
-    ) -> schemas.FeedReactionDecision: ...
-
-    async def write_comment(
-        self,
-        *,
-        resident_context: LangGraphResidentContext,
-        profile: ReadySearchProfile,
-        candidate: schemas.WorldFeedCandidateRead,
-        decision: schemas.FeedReactionDecision,
-        tracker: RunLlmTracker,
-    ) -> schemas.FeedCommentDraft | schemas.JointActivityProposalPreview: ...
 
 
 def _api_key(ctx: LangGraphResidentContext) -> str:
@@ -103,51 +84,8 @@ def _action_notes(profile: ReadySearchProfile) -> dict[str, dict[str, object]]:
     return result
 
 
-def validate_reaction_decision(
-    payload: object,
-    *,
-    candidates: tuple[schemas.WorldFeedCandidateRead, ...],
-    proposal_eligible_indices: frozenset[int] = frozenset(),
-) -> schemas.FeedReactionDecision:
-    decision = schemas.FeedReactionDecision.model_validate(payload)
-    if decision.selected_action is None:
-        return decision
-    index = decision.selected_candidate_index
-    if index is None or index >= len(candidates):
-        raise FeedReactionValidationError("selected candidate is outside server context")
-    candidate = candidates[index]
-    if decision.selected_action not in candidate.allowed_actions:
-        raise FeedReactionValidationError("selected action is not allowed for candidate")
-    if (
-        decision.interaction_intent == "joint_activity_proposal"
-        and int(decision.selected_candidate_index or 0) not in proposal_eligible_indices
-    ):
-        raise FeedReactionValidationError("proposal eligibility is unavailable")
-    return decision
 
 
-def validate_comment_draft(
-    payload: object,
-    *,
-    candidate: schemas.WorldFeedCandidateRead,
-    decision: schemas.FeedReactionDecision,
-) -> schemas.FeedCommentDraft | schemas.JointActivityProposalPreview:
-    if decision.interaction_intent == "ordinary_comment":
-        draft = schemas.FeedCommentDraft.model_validate(payload)
-        if (
-            draft.source_post_id != candidate.post_id
-            or draft.interaction_intent != decision.interaction_intent
-            or draft.comment_purpose != decision.comment_purpose
-        ):
-            raise FeedReactionValidationError("comment evidence mismatch")
-        return draft
-    preview = schemas.JointActivityProposalPreview.model_validate(payload)
-    if (
-        preview.source_post_id != candidate.post_id
-        or preview.target_world_character_id != candidate.author_world_character_id
-    ):
-        raise FeedReactionValidationError("proposal evidence mismatch")
-    return preview
 
 
 class DirectFeedReactionProvider:

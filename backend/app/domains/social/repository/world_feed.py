@@ -127,3 +127,8 @@ def recent_observations(db: Session, *, observer_id: str, recent_limit: int):
         )
         .limit(max(1, min(recent_limit, 50)))
     )
+
+
+
+def get_feed_observation(db: Session, observation_id: str) -> WorldCharacterFeedObservation | None:
+    return db.get(WorldCharacterFeedObservation, observation_id)

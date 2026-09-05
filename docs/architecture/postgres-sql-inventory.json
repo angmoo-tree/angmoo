@@ -833,7 +833,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/social/repository/world_feed.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "f51d3b1673a60ecac67e2c5f32ac35fe51582033ce5896e6b3088f13139ccd69",
+      "source_sha256": "cbf699a6a8bd62b75d848273aa429eb8bf33a63250cca3b6bfb2673690f44b6f",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

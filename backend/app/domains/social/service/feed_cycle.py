@@ -1,256 +1,62 @@
+"""A World feed cycle: durable observation, bounded planning and atomic public effect.
+
+Readiness, NO_ACTION, duplicate execution, stale target, retry and success paths
+retain the original ordering and caller Session. Foreign owner/provider wiring
+is supplied lazily; the service owns all transaction and result decisions.
+"""
+
 from __future__ import annotations
-
-from app.runtime.activity_proposals import composition as activity_proposal_runtime
-
-from datetime import UTC, datetime
-from hashlib import sha256
 import logging
 from time import perf_counter
 from typing import Any
-
 from pydantic import ValidationError
-
-from app import models, schemas
-from app.runtime.social.observations import observe_source
 from app.core import unit_of_work
-from app.cruds import agent_runs as agent_run_crud
-from app.domains.social.public import SocialObservationError
-from app.domains.social.contracts.search_state import SocialSearchUnavailable
-from app.domains.social.contracts.subjective_context import (
-    ActionEmotionLabel,
-    ActionSubjectiveContextV1,
-)
-from app.runtime.social.subjective_composition import record_declared_subjective_context
-from app.services import community as community_service
-from app.runtime.social import world_feed_actions as world_feed_social_apply
-from app.services.direct_llm import (
-    DirectLlmDeferred,
-    DirectLlmError,
-    DirectLlmJsonError,
-    RunLlmTracker,
-)
-from app.services.feed_reaction_planner import (
-    DirectFeedReactionProvider,
+from app.domains.social.schemas import feed as schemas
+from app.domains.social.contracts.feed_execution import (
+    WorldFeedContext,
+    WorldFeedWorkflows,
     FeedReactionProvider,
+)
+from app.domains.social.contracts.observations import SocialObservationError
+from app.domains.social.contracts.search_state import SocialSearchUnavailable
+from app.domains.social.exceptions import (
+    WorldFeedReadinessError,
     FeedReactionValidationError,
+)
+from app.domains.social.service.feed_reaction_validation import (
     validate_reaction_decision,
 )
-from app.runtime.resident.context import LangGraphResidentContext
-from app.domains.social.contracts.world_feed import KeywordClaim, ReadySearchProfile
-from app.domains.social.exceptions import WorldFeedReadinessError
-from app.domains.social.service.world_feed import claim_cycle_keywords, claim_feed_observations, finalize_feed_cycle, mark_claims_retryable
-from app.runtime.social.world_feed_search import load_ready_search_profile, revalidate_candidate_actions, search_world_feed_candidates
+from app.domains.social.service.feed_cycle_values import (
+    _cycle_key,
+    _execution_signature,
+    _brief_hash,
+    _declared_subjective_context,
+    _safe_result,
+    _summary,
+)
+from app.domains.social.service.feed_cycle_publishing import _publish_action
+from app.domains.social.service.world_feed import (
+    claim_cycle_keywords,
+    claim_feed_observations,
+    finalize_feed_cycle,
+    mark_claims_retryable,
+    load_ready_search_profile,
+    search_world_feed_candidates,
+    revalidate_candidate_actions,
+)
+from app.domains.social.repository.world_feed import get_feed_observation
 
-
-logger = logging.getLogger(__name__)
-WORLD_FEED_RUNTIME_VERSION = "world-keyword-feed-runtime-v1"
-
-
-def _aware_utc(value: datetime) -> datetime:
-    if value.tzinfo is None:
-        return value.replace(tzinfo=UTC)
-    return value.astimezone(UTC)
-
-
-def _cycle_key(ctx: LangGraphResidentContext, world_character_id: str) -> str:
-    minute = _aware_utc(ctx.run_started_at).replace(second=0, microsecond=0)
-    raw = "|".join(
-        (
-            WORLD_FEED_RUNTIME_VERSION,
-            world_character_id,
-            minute.isoformat(),
-            ctx.run_mode,
-        )
-    )
-    return sha256(raw.encode("utf-8")).hexdigest()
-
-
-def _execution_signature(
-    *,
-    profile: ReadySearchProfile,
-    candidate: schemas.WorldFeedCandidateRead,
-    decision: schemas.FeedReactionDecision,
-    cycle_key: str,
-) -> str:
-    raw = "|".join(
-        (
-            WORLD_FEED_RUNTIME_VERSION,
-            profile.world_character.id,
-            profile.world.id,
-            str(decision.selected_action or ""),
-            candidate.post_id,
-            str(decision.interaction_intent or ""),
-            cycle_key,
-        )
-    )
-    return sha256(raw.encode("utf-8")).hexdigest()
-
-
-def _brief_hash(brief: str | None) -> str | None:
-    if not brief:
-        return None
-    return sha256(brief.encode("utf-8")).hexdigest()
-
-
-def _declared_subjective_context(
-    decision: schemas.FeedReactionDecision,
-) -> ActionSubjectiveContextV1 | None:
-    action = decision.selected_action
-    if (
-        action is None
-        or decision.motivation_kind is None
-        or decision.motivation_text is None
-    ):
-        return None
-    return ActionSubjectiveContextV1(
-        motivation_kind=decision.motivation_kind,
-        motivation_text=decision.motivation_text,
-        emotion_label=decision.emotion_label or ActionEmotionLabel.UNSPECIFIED,
-        emotion_text=decision.emotion_text,
-        emotion_intensity=decision.emotion_intensity,
-    )
-
-
-def _safe_result(
-    *,
-    outcome: str,
-    tracker: RunLlmTracker,
-    world_id: str | None = None,
-    world_character_id: str | None = None,
-    status: str = "observed",
-    summary: dict[str, object] | None = None,
-    failure_class: str | None = None,
-) -> dict[str, object]:
-    return {
-        "engine": "keyword_search_v1",
-        "status": status,
-        "summary": f"World keyword feed outcome: {outcome}.",
-        "feed_outcome": outcome,
-        "world_id": world_id,
-        "world_character_id": world_character_id,
-        "failure_class": failure_class,
-        "feed_cycle_summary": summary or {},
-        "publish_result": {"public_action_count": 0},
-        "llm_usage_summary": tracker.summary(),
-    }
-
-
-def _summary(
-    *,
-    ctx: LangGraphResidentContext,
-    profile: ReadySearchProfile,
-    claim: KeywordClaim,
-    raw_candidate_count: int,
-    filtered_candidate_count: int,
-    claimed_candidate_count: int,
-    selected_action: str | None,
-    interaction_intent: str | None,
-    outcome: str,
-    reason_code: str | None,
-    query_latency_ms: int,
-    planner_latency_ms: int,
-    writer_latency_ms: int | None,
-    tracker: RunLlmTracker,
-    public_action_execution_id: int | None = None,
-    claim_conflict_count: int = 0,
-    observation_receipt_count: int = 0,
-) -> dict[str, object]:
-    return {
-        "runtime_version": WORLD_FEED_RUNTIME_VERSION,
-        "run_id": ctx.run_id,
-        "world_id": profile.world.id,
-        "world_character_id": profile.world_character.id,
-        "feed_runtime_mode": profile.world_character.feed_runtime_mode,
-        "keyword_count": len(claim.keywords),
-        "keywords": list(claim.keywords),
-        "keyword_offset": claim.cursor_offset,
-        "raw_candidate_count": raw_candidate_count,
-        "filtered_candidate_count": filtered_candidate_count,
-        "claimed_candidate_count": claimed_candidate_count,
-        "claim_conflict_count": claim_conflict_count,
-        "observation_receipt_count": observation_receipt_count,
-        "selected_action": selected_action,
-        "interaction_intent": interaction_intent,
-        "outcome": outcome,
-        "reason_code": reason_code,
-        "query_latency_ms": query_latency_ms,
-        "planner_latency_ms": planner_latency_ms,
-        "writer_latency_ms": writer_latency_ms,
-        "physical_request_count": tracker.summary()["provider_call_count"],
-        "public_action_execution_id": public_action_execution_id,
-    }
-
-
-def _publish_action(
-    ctx: LangGraphResidentContext,
-    *,
-    candidate: schemas.WorldFeedCandidateRead,
-    decision: schemas.FeedReactionDecision,
-    draft: schemas.FeedCommentDraft | schemas.JointActivityProposalPreview | None,
-) -> dict[str, object]:
-    action = decision.selected_action
-    if action == "like":
-        post = community_service.like_agent_tool_post(
-            ctx.db,
-            ctx.session_key,
-            candidate.post_id,
-            schemas.PostLikeCreate(character_id=ctx.character.id),
-        )
-        return {"post_id": post.id, "action": "like"}
-    if action == "comment":
-        if draft is None:
-            raise FeedReactionValidationError("ordinary comment draft is missing")
-        reply = community_service.reply_agent_tool_post(
-            ctx.db,
-            ctx.session_key,
-            candidate.post_id,
-            schemas.TimelineReplyCreate(
-                body=draft.text,
-                author_character_id=ctx.character.id,
-            ),
-        )
-        return {
-            "post_id": reply.id,
-            "reply_to_post_id": candidate.post_id,
-            "action": "comment",
-        }
-    if action == "repost":
-        repost = community_service.repost_agent_tool_post(
-            ctx.db,
-            ctx.session_key,
-            candidate.post_id,
-            schemas.PostLikeCreate(character_id=ctx.character.id),
-        )
-        return {
-            "post_id": repost.id,
-            "repost_of_post_id": candidate.post_id,
-            "action": "repost",
-        }
-    if action == "follow":
-        follow = community_service.follow_agent_tool_profile(
-            ctx.db,
-            ctx.session_key,
-            schemas.FollowCreate(
-                target_type="character",
-                target_id=candidate.author_character_id,
-                follower_character_id=ctx.character.id,
-            ),
-        )
-        return {
-            "target_character_id": follow.target.id,
-            "source_post_id": candidate.post_id,
-            "action": "follow",
-        }
-    raise FeedReactionValidationError("unsupported feed action")
+logger = logging.getLogger("app.services.world_feed_runtime")
 
 
 async def run_world_keyword_feed(
-    ctx: LangGraphResidentContext,
+    ctx: WorldFeedContext,
     *,
+    workflows: WorldFeedWorkflows,
     provider: FeedReactionProvider | None = None,
 ) -> dict[str, Any]:
-    tracker = RunLlmTracker(max_calls=3)
-    active_world = ctx.db.get(models.CharacterActiveWorld, ctx.character.id)
+    tracker = workflows.new_tracker(max_calls=3)
+    active_world = workflows.active_world(ctx.db, ctx.character.id)
     if active_world is None:
         return _safe_result(
             outcome="world_character_not_ready",
@@ -259,6 +65,7 @@ async def run_world_keyword_feed(
     try:
         profile = load_ready_search_profile(
             ctx.db,
+            references=workflows.search_references(ctx.db),
             world_character_id=active_world.world_character_id,
         )
     except WorldFeedReadinessError as exc:
@@ -312,6 +119,7 @@ async def run_world_keyword_feed(
     try:
         search = search_world_feed_candidates(
             ctx.db,
+            references=workflows.search_references(ctx.db),
             profile=profile,
             keywords=claim.keywords,
             allowed_policy_actions=ctx.activity_policy.allowed_actions,
@@ -371,9 +179,7 @@ async def run_world_keyword_feed(
     ctx.db.commit()
     if not claims.candidates:
         reason: schemas.FeedNoActionReason = (
-            "no_candidate"
-            if search.raw_candidate_count == 0
-            else "no_allowed_action"
+            "no_candidate" if search.raw_candidate_count == 0 else "no_allowed_action"
         )
         cycle_summary = _summary(
             ctx=ctx,
@@ -419,7 +225,7 @@ async def run_world_keyword_feed(
     try:
         for candidate in claims.candidates:
             observation_receipts.append(
-                observe_source(
+                workflows.observe_source(
                     ctx.db,
                     world_id=profile.world.id,
                     observer_world_character_id=profile.world_character.id,
@@ -461,14 +267,14 @@ async def run_world_keyword_feed(
     proposal_eligible_indices = frozenset(
         candidate.candidate_index
         for candidate in claims.candidates
-        if activity_proposal_runtime.proposal_eligibility(
+        if workflows.proposals.proposal_eligibility(
             ctx.db,
             actor_world_character_id=profile.world_character.id,
             target_post_id=candidate.post_id,
             now=ctx.run_started_at,
         ).eligible
     )
-    reaction_provider = provider or DirectFeedReactionProvider()
+    reaction_provider = provider or workflows.default_provider()
     planner_started = perf_counter()
     try:
         decision = validate_reaction_decision(
@@ -482,13 +288,18 @@ async def run_world_keyword_feed(
             candidates=claims.candidates,
             proposal_eligible_indices=proposal_eligible_indices,
         )
-    except DirectLlmDeferred:
+    except workflows.llm_deferred:
         mark_claims_retryable(
             ctx.db, observations=claims.observations, now=ctx.run_started_at
         )
         ctx.db.commit()
         raise
-    except (DirectLlmError, ValidationError, FeedReactionValidationError, ValueError) as exc:
+    except (
+        workflows.llm_error,
+        ValidationError,
+        FeedReactionValidationError,
+        ValueError,
+    ) as exc:
         mark_claims_retryable(
             ctx.db, observations=claims.observations, now=ctx.run_started_at
         )
@@ -573,12 +384,14 @@ async def run_world_keyword_feed(
             )
             if decision.interaction_intent == "ordinary_comment":
                 if not isinstance(writer_result, schemas.FeedCommentDraft):
-                    raise FeedReactionValidationError("ordinary writer returned proposal")
+                    raise FeedReactionValidationError(
+                        "ordinary writer returned proposal"
+                    )
             elif not isinstance(writer_result, schemas.JointActivityProposalPreview):
                 raise FeedReactionValidationError("proposal writer returned comment")
             draft = writer_result
             if isinstance(draft, schemas.JointActivityProposalPreview):
-                activity_proposal_runtime.validate_preview(
+                workflows.proposals.validate_preview(
                     ctx.db,
                     preview=draft,
                     world_id=profile.world.id,
@@ -586,13 +399,13 @@ async def run_world_keyword_feed(
                     target_post_id=candidate.post_id,
                     now=ctx.run_started_at,
                 )
-        except DirectLlmDeferred:
+        except workflows.llm_deferred:
             mark_claims_retryable(
                 ctx.db, observations=claims.observations, now=ctx.run_started_at
             )
             ctx.db.commit()
             raise
-        except DirectLlmJsonError:
+        except workflows.llm_json_error:
             reason = "writer_invalid"
             writer_latency_ms = int((perf_counter() - writer_started) * 1000)
             cycle_summary = _summary(
@@ -635,7 +448,7 @@ async def run_world_keyword_feed(
                 world_character_id=profile.world_character.id,
                 summary=cycle_summary,
             )
-        except (DirectLlmError, ValidationError, ValueError) as exc:
+        except (workflows.llm_error, ValidationError, ValueError) as exc:
             mark_claims_retryable(
                 ctx.db, observations=claims.observations, now=ctx.run_started_at
             )
@@ -657,6 +470,7 @@ async def run_world_keyword_feed(
 
     fresh = revalidate_candidate_actions(
         ctx.db,
+        references=workflows.search_references(ctx.db),
         profile=profile,
         candidate=candidate,
         allowed_policy_actions=ctx.activity_policy.allowed_actions,
@@ -711,7 +525,7 @@ async def run_world_keyword_feed(
         decision=decision,
         cycle_key=cycle_key,
     )
-    existing_execution = agent_run_crud.get_public_action_execution_by_signature(
+    existing_execution = workflows.executions.get_public_action_execution_by_signature(
         ctx.db, signature
     )
     if existing_execution is not None and existing_execution.status == "succeeded":
@@ -754,7 +568,7 @@ async def run_world_keyword_feed(
     else:
         try:
             with unit_of_work.deferred_commits():
-                execution = agent_run_crud.create_public_action_execution(
+                execution = workflows.executions.create_public_action_execution(
                     ctx.db,
                     run_id=ctx.run_id,
                     character_id=ctx.character.id,
@@ -779,12 +593,13 @@ async def run_world_keyword_feed(
                 )
                 action_result = _publish_action(
                     ctx,
+                    workflows=workflows.publishing,
                     candidate=candidate,
                     decision=decision,
                     draft=draft,
                 )
                 social_apply = (
-                    world_feed_social_apply.apply_successful_world_feed_action(
+                    workflows.social_apply.apply_successful_world_feed_action(
                         ctx.db,
                         profile=profile,
                         candidate=candidate,
@@ -811,13 +626,13 @@ async def run_world_keyword_feed(
                         ),
                     }
                 )
-                agent_run_crud.mark_public_action_execution_finished(
+                workflows.executions.mark_public_action_execution_finished(
                     ctx.db,
                     execution,
                     status="succeeded",
                     result=action_result,
                 )
-                record_declared_subjective_context(
+                workflows.record_declared_subjective_context(
                     ctx.db,
                     execution=execution,
                     event=social_apply.event,
@@ -866,12 +681,7 @@ async def run_world_keyword_feed(
             refreshed = tuple(
                 row
                 for observation in claims.observations
-                if (
-                    row := ctx.db.get(
-                        models.WorldCharacterFeedObservation, observation.id
-                    )
-                )
-                is not None
+                if (row := get_feed_observation(ctx.db, observation.id)) is not None
             )
             mark_claims_retryable(
                 ctx.db,

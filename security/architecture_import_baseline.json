@@ -1,7 +1,7 @@
 {
-  "edge_count": 2876,
-  "external_import_count": 2432,
-  "module_count": 818,
+  "edge_count": 2904,
+  "external_import_count": 2438,
+  "module_count": 823,
   "modules": [
     {
       "external_imports": [],
@@ -5349,6 +5349,28 @@
     {
       "external_imports": [
         "__future__",
+        "datetime",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.social.contracts.action_scope",
+        "app.domains.social.contracts.observations",
+        "app.domains.social.contracts.search_index",
+        "app.domains.social.contracts.search_state",
+        "app.domains.social.contracts.subjective_context",
+        "app.domains.social.contracts.subjective_persistence",
+        "app.domains.social.contracts.world_feed",
+        "app.domains.social.schemas.community",
+        "app.domains.social.schemas.feed"
+      ],
+      "module": "app.domains.social.contracts.feed_execution",
+      "path": "backend/app/domains/social/contracts/feed_execution.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "dataclasses",
         "typing"
       ],
@@ -6198,6 +6220,69 @@
       ],
       "module": "app.domains.social.service.feed",
       "path": "backend/app/domains/social/service/feed.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
+        "logging",
+        "pydantic",
+        "time",
+        "typing"
+      ],
+      "imports": [
+        "app.core.unit_of_work",
+        "app.domains.social.contracts.feed_execution",
+        "app.domains.social.contracts.observations",
+        "app.domains.social.contracts.search_state",
+        "app.domains.social.exceptions",
+        "app.domains.social.repository.world_feed",
+        "app.domains.social.schemas.feed",
+        "app.domains.social.service.feed_cycle_publishing",
+        "app.domains.social.service.feed_cycle_values",
+        "app.domains.social.service.feed_reaction_validation",
+        "app.domains.social.service.world_feed"
+      ],
+      "module": "app.domains.social.service.feed_cycle",
+      "path": "backend/app/domains/social/service/feed_cycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.social.contracts.feed_execution",
+        "app.domains.social.exceptions",
+        "app.domains.social.schemas.community",
+        "app.domains.social.schemas.feed"
+      ],
+      "module": "app.domains.social.service.feed_cycle_publishing",
+      "path": "backend/app/domains/social/service/feed_cycle_publishing.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "hashlib"
+      ],
+      "imports": [
+        "app.domains.social.constants",
+        "app.domains.social.contracts.feed_execution",
+        "app.domains.social.contracts.subjective_context",
+        "app.domains.social.contracts.world_feed",
+        "app.domains.social.schemas.feed"
+      ],
+      "module": "app.domains.social.service.feed_cycle_values",
+      "path": "backend/app/domains/social/service/feed_cycle_values.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.social.exceptions",
+        "app.domains.social.schemas.feed"
+      ],
+      "module": "app.domains.social.service.feed_reaction_validation",
+      "path": "backend/app/domains/social/service/feed_reaction_validation.py",
       "wildcard_imports": []
     },
     {
@@ -10899,6 +10984,31 @@
     {
       "external_imports": [
         "__future__",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.cruds.agent_runs",
+        "app.domains.social.contracts.feed_execution",
+        "app.domains.social.service.feed_cycle",
+        "app.domains.world_characters.models",
+        "app.runtime.activity_proposals.composition",
+        "app.runtime.resident.context",
+        "app.runtime.social.observations",
+        "app.runtime.social.subjective_composition",
+        "app.runtime.social.world_feed_actions",
+        "app.runtime.social.world_feed_queries",
+        "app.services.community",
+        "app.services.direct_llm",
+        "app.services.feed_reaction_planner"
+      ],
+      "module": "app.runtime.social.feed_cycle",
+      "path": "backend/app/runtime/social/feed_cycle.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "collections.abc",
         "dataclasses",
         "datetime",
@@ -11941,13 +12051,15 @@
       "external_imports": [
         "__future__",
         "json",
-        "pydantic",
-        "typing"
+        "pydantic"
       ],
       "imports": [
         "app.core.context_text",
         "app.credentials",
+        "app.domains.social.contracts.feed_execution",
         "app.domains.social.contracts.world_feed",
+        "app.domains.social.exceptions",
+        "app.domains.social.service.feed_reaction_validation",
         "app.providers.gemini",
         "app.runtime.resident.context",
         "app.schemas",
@@ -12014,6 +12126,7 @@
         "app.models",
         "app.runtime.resident.context",
         "app.runtime.routine_posts.sqlalchemy_runtime",
+        "app.runtime.social.feed_cycle",
         "app.runtime.social.image_generation",
         "app.runtime.social.langgraph_actions",
         "app.runtime.social.observations",
@@ -12023,8 +12136,7 @@
         "app.services.character_lore",
         "app.services.community",
         "app.services.direct_llm",
-        "app.services.prompt_safety",
-        "app.services.world_feed_runtime"
+        "app.services.prompt_safety"
       ],
       "module": "app.services.langgraph_resident",
       "path": "backend/app/services/langgraph_resident.py",
@@ -12245,41 +12357,6 @@
       ],
       "module": "app.services.world_character_provider",
       "path": "backend/app/services/world_character_provider.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__",
-        "datetime",
-        "hashlib",
-        "logging",
-        "pydantic",
-        "time",
-        "typing"
-      ],
-      "imports": [
-        "app.core.unit_of_work",
-        "app.cruds.agent_runs",
-        "app.domains.social.contracts.search_state",
-        "app.domains.social.contracts.subjective_context",
-        "app.domains.social.contracts.world_feed",
-        "app.domains.social.exceptions",
-        "app.domains.social.public",
-        "app.domains.social.service.world_feed",
-        "app.models",
-        "app.runtime.activity_proposals.composition",
-        "app.runtime.resident.context",
-        "app.runtime.social.observations",
-        "app.runtime.social.subjective_composition",
-        "app.runtime.social.world_feed_actions",
-        "app.runtime.social.world_feed_search",
-        "app.schemas",
-        "app.services.community",
-        "app.services.direct_llm",
-        "app.services.feed_reaction_planner"
-      ],
-      "module": "app.services.world_feed_runtime",
-      "path": "backend/app/services/world_feed_runtime.py",
       "wildcard_imports": []
     },
     {
