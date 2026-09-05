@@ -1083,3 +1083,12 @@ Source `849d65968ec815353febdd50b6e975940ab81a8f`는 진단 코드·오류·상�
 최초 수집에서 옛 module namespace로 오류를 가져오던 기존 테스트 한 곳을 발견해 실제 exceptions 모듈에 같은 local alias로 연결했다. 이후 SQLite lease·FTS·single-backend·ER6 업그레이드·ER7 조립·Character 오류 회귀는 **89 passed/1 failed**였다. 실패한 테스트가 실제 파일을 옛 ports 경로로 읽고 있어 새 contracts 경로로 옮겼고, launcher diagnostic 코드 위치 및 기존 의존 방향 검사에도 새 계약 파일을 포함했다. 수정한 검사와 기존 Runtime 진단·HTTP 오류를 포함한 최종 묶음 **37 passed/2 warnings/7.26초**다. 기존 assertion이나 금지 import 규칙은 그대로다.
 
 경계 **727 modules/2434 edges/legacy222 PASS**, L4 parity97 및 L2 launcher6commands/2services PASS다. 원래 보존 함수의 읽기 진단은 source/split/assertion/억제/APIORM/기존 node 모두 **0 errors**, protected2201/current2246이다. Routines 최초 signed source의 두 blob을 메모리에서만 연결한 진단이며 frozen/checkpoint/additions를 갱신하거나 stock 전체 PASS를 선언하지 않았다. 실제 Runtime lease 저장/상태 판정과 외부 canonical 조회, aggregate 종료·G5·G06 제거는 후속 전환 범위다.
+
+
+### AR-B8 Runtime A2 진단 판정과 canonical 조회
+
+Source `7f27efcf4c22dfcaa748d1708774ab54592bf564`는 privacy-safe Runtime 상태/성공활동/provider 실패 분류를 실제 `service/status.py`로 이전했다. Runtime schema/lease 조회2개는 repository, Identity·World·관계 outbox·Routines 조회6개는 runtime query 조립에 둔다. named query9개(조회8/rollback1)는 동일한 요청 Session에 묶이며 생성 때 DB를 읽지 않는다. 기존 설정·시계·200행/1시간 제한·owner predicate·migration 실패 rollback과 metadata 제한을 보존했다.
+
+최종 formatted source의 실제 SQL 함수 본문에 **실제 호출 인수**를 대입하면 6개 상태 서비스 메서드가 원래 AST와 동일하며 모든 원본 helper 본문도 동일하다. 첫 composition 연결에서 domain aggregate가 외부 factory를 역참조하여 경계 검사가 거부했다. 실제 API·contributor·CLI 세 소비자가 외부 조립을 직접 참조하도록 바꾸고 집합 export를 제거해 경계를 복구했다. 규칙을 예외로 우회하지 않았다.
+
+최종 Runtime 진단·HTTP·single-backend·ER7·새 same-Session SQLite 회귀 **37 passed/1 warning/28.96초**다. 새 테스트2nodes는 미커밋 Identity/World/Character 사실을 읽고 caller rollback과 migration 조회 실패 rollback이 같은 Session의 행을 제거하는지 검증한다. 기존 active assignment 조회에 새로운 membership-status 조건을 추가하지 않았다. 경계 **731/2442/legacy222**, L4 parity97, ER0 **81/87/24/44/7 PASS**. 읽기 보존 진단은 source/split/assertion/억제/APIORM/node 모두0, protected2201/current2248이며 stock source/node 도입 원장의 순차 합류는 계속 남아 있다.
