@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2169,
-      "internal_edge_count": 2295,
+      "external_import_count": 2173,
+      "internal_edge_count": 2308,
       "legacy_import_exception_count": 0,
-      "module_count": 687,
+      "module_count": 690,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -750,7 +750,6 @@
               "app.domains.routines.models",
               "app.domains.world_characters.models",
               "app.domains.worlds.models",
-              "app.models.agent_settings",
               "app.runtime.routines.activity_references"
             ],
             "module": "app.runtime.routine_posts.context_references",
@@ -874,7 +873,7 @@
           },
           {
             "imports": [
-              "app.cruds.agents",
+              "app.domains.routines.service.activity_logs",
               "app.domains.social.service.timeline",
               "app.runtime.relationships.sqlalchemy_social_event",
               "app.services.community_abuse_quota"
@@ -888,7 +887,6 @@
             "imports": [
               "app.config",
               "app.core.active_hours",
-              "app.core.agent_activity_limits",
               "app.core.search_text",
               "app.core.security",
               "app.core.unit_of_work",
@@ -897,6 +895,7 @@
               "app.domains.characters.service.profile",
               "app.domains.characters.service.state",
               "app.domains.identity.service.profile",
+              "app.domains.routines.constants",
               "app.domains.social.repository.inbox",
               "app.domains.social.repository.media",
               "app.domains.social.repository.posts",

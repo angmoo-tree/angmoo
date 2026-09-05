@@ -20,7 +20,6 @@ from app.domains.routines.repository.plans import _selection_history
 from app.domains.routines.service import joint_reservations as sqlalchemy_joint_reservations
 from app.domains.routines.service.scheduling import aware_utc as _aware_utc
 from app.domains.routines.utils.clock import resolve_clock
-from app.domains.world_characters.service.setup_validation import character_contract_hash
 
 
 def _load_scope(
@@ -71,7 +70,7 @@ def _ready_repertoire(
     if scope.world_character.status not in {"pending", "inactive", "active"}:
         raise DailyActivityPlanValidationError("world_character_ineligible")
 
-    character_hash = character_contract_hash(scope.character)
+    character_hash = references.character_contract_hash(scope.character)
     world_hash = scope.world.contract_hash
     repertoire = references.get_ready_repertoire(scope.world_character.id)
     if repertoire is None:

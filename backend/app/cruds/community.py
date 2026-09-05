@@ -102,7 +102,7 @@ from sqlalchemy.orm import Session, aliased, selectinload
 
 from app import models
 from app import schemas
-from app.core.agent_activity_limits import (
+from app.domains.routines.constants import (
     DEFAULT_MAX_COMMENTS_PER_DAY,
     DEFAULT_MAX_POSTS_PER_DAY,
 )

@@ -12,6 +12,7 @@ from app.domains.world_characters.models import (
     WorldCommunityProfile,
 )
 from app.domains.world_characters.service.runtime_modes import set_activity_runtime_mode
+from app.domains.world_characters.service.setup_validation import character_contract_hash
 
 
 class SqlAlchemyPlanReferences:
@@ -20,6 +21,9 @@ class SqlAlchemyPlanReferences:
 
     def get_character(self, character_id: str) -> Character | None:
         return self._db.get(Character, character_id)
+
+    def character_contract_hash(self, character: Character) -> str:
+        return character_contract_hash(character)
 
     def find_world_character(
         self, *, character_id: str, world_id: str, lock_for_update: bool = False

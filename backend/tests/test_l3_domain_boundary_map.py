@@ -147,9 +147,22 @@ def test_l3_public_package_anchors_have_no_reverse_dependencies() -> None:
         "sqlalchemy",
     )
 
+    paths: list[Path] = []
     for boundary in (*PUBLIC_BOUNDARIES, *L3_5_PUBLIC_BOUNDARIES):
-        relative = Path("contracts/__init__.py") if boundary == "world_packages" else Path("public.py")
-        path = APP_ROOT / "domains" / boundary / relative
+        if boundary == "routine_posts":
+            relatives = (
+                Path("contracts/__init__.py"),
+                Path("contracts/interaction.py"),
+                Path("contracts/context.py"),
+                Path("contracts/generation.py"),
+            )
+        elif boundary == "world_packages":
+            relatives = (Path("contracts/__init__.py"),)
+        else:
+            relatives = (Path("public.py"),)
+        paths.extend(APP_ROOT / "domains" / boundary / relative for relative in relatives)
+
+    for path in paths:
         assert path.is_file(), path
         imports = _imports(path)
         assert not {

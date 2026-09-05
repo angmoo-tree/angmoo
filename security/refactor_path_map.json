@@ -306,9 +306,9 @@
     "backend/tests/test_l3_5_world_package_closeout_contract.py": "backend/tests/world_packages/test_closeout_contract.py",
     "backend/tests/test_l3_5_world_package_ui_contract.py": "backend/tests/world_packages/test_ui_contract.py",
     "backend/app/services/llm_context.py": "backend/app/core/context_text.py",
-    "backend/app/domains/routines/api/schemas.py": "backend/app/domains/routines/schemas.py",
+    "backend/app/domains/routines/api/schemas.py": "backend/app/domains/routines/schemas/plans.py",
     "backend/app/domains/routines/domain/activity_state.py": "backend/app/domains/routines/policies/activity_state.py",
-    "backend/app/domains/routines/infrastructure/sqlalchemy_models.py": "backend/app/domains/routines/models.py",
+    "backend/app/domains/routines/infrastructure/sqlalchemy_models.py": "backend/app/domains/routines/models/plans.py",
     "backend/app/domains/routines/ports/clock.py": "backend/app/domains/routines/contracts/clock.py",
     "backend/app/domains/routines/infrastructure/system_clock.py": "backend/app/domains/routines/utils/clock.py",
     "backend/tests/test_daily_activity_runtime.py": "backend/tests/routines/test_daily_activity_runtime.py",
@@ -342,7 +342,12 @@
     "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py": "backend/app/domains/routine_posts/service/generation.py",
     "backend/app/domains/routine_posts/infrastructure/__init__.py": "backend/app/domains/routine_posts/service/__init__.py",
     "backend/app/domains/routine_posts/public.py": "backend/app/domains/routine_posts/service/generation.py",
-    "backend/app/services/routine_post_planner.py": "backend/app/domains/routine_posts/service/evidence.py"
+    "backend/app/services/routine_post_planner.py": "backend/app/domains/routine_posts/service/evidence.py",
+    "backend/app/domains/routines/models.py": "backend/app/domains/routines/models/plans.py",
+    "backend/app/domains/routines/schemas.py": "backend/app/domains/routines/schemas/plans.py",
+    "backend/app/models/agent_slots.py": "backend/app/domains/routines/models/resident.py",
+    "backend/app/core/agent_activity_limits.py": "backend/app/domains/routines/constants.py",
+    "backend/app/domains/runtime/schemas.py": "backend/app/domains/routines/schemas/resident.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -5339,7 +5344,7 @@
         "backend/app/schemas/agents.py": [
           "backend/app/domains/characters/schemas.py",
           "backend/app/domains/identity/schemas.py",
-          "backend/app/domains/runtime/schemas.py",
+          "backend/app/domains/routines/schemas/resident.py",
           "backend/app/schemas/agents.py"
         ]
       },
@@ -6836,7 +6841,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentActionRangeRead",
-          "new": "backend/app/domains/runtime/schemas.py::AgentActionRangeRead",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentActionRangeRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -6846,7 +6851,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentActivitySettingRead",
-          "new": "backend/app/domains/runtime/schemas.py::AgentActivitySettingRead",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentActivitySettingRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -6856,7 +6861,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentActivitySettingUpdate",
-          "new": "backend/app/schemas/agents.py::AgentActivitySettingUpdate",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentActivitySettingUpdate",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -6868,7 +6873,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentFeedCueCreate",
-          "new": "backend/app/schemas/agents.py::AgentFeedCueCreate",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentFeedCueCreate",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -6879,7 +6884,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentFeedCueRead",
-          "new": "backend/app/schemas/agents.py::AgentFeedCueRead",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentFeedCueRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -6975,7 +6980,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentActivitySummaryRead",
-          "new": "backend/app/domains/runtime/schemas.py::AgentActivitySummaryRead",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentActivitySummaryRead",
           "direct_consumers": [
             "backend/app/schemas/__init__.py"
           ],
@@ -7047,7 +7052,7 @@
       "split_files": {
         "backend/app/schemas/agent_runs.py": [
           "backend/app/core/response_schemas.py",
-          "backend/app/domains/runtime/schemas.py",
+          "backend/app/domains/routines/schemas/resident.py",
           "backend/app/schemas/agent_runs.py"
         ],
         "backend/app/services/agents.py": [
@@ -7096,7 +7101,7 @@
         },
         {
           "old": "backend/app/schemas/agent_runs.py::AgentActivityLogRead",
-          "new": "backend/app/domains/runtime/schemas.py::AgentActivityLogRead",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentActivityLogRead",
           "direct_consumers": [
             "backend/app/schemas/agent_runs.py"
           ],
@@ -7128,7 +7133,7 @@
         },
         {
           "old": "backend/app/schemas/agent_runs.py::AgentSlotRead",
-          "new": "backend/app/domains/runtime/schemas.py::AgentSlotRead",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentSlotRead",
           "direct_consumers": [
             "backend/app/schemas/agent_runs.py"
           ],
@@ -19275,10 +19280,14 @@
             "backend/app/domains/routines/service/plans.py"
           ],
           "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_plan_hash_collaboration_keeps_readiness_order_and_attached_character",
+            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
             "tests/routines/test_daily_activity_runtime.py::test_owner_api_prepares_reads_and_forbids_other_user",
             "tests/routines/test_daily_activity_runtime.py::test_routines_public_uses_frozen_clock_and_writes_no_public_action",
-            "tests/routines/test_daily_activity_runtime.py::test_invalid_repertoire_is_rejected_without_partial_plan",
             "tests/routines/test_plan_composition.py::test_mode_change_and_pending_owner_write_share_one_transaction"
+          ],
+          "destination_members": [
+            "character_contract_hash"
           ]
         },
         {
@@ -23509,6 +23518,1182 @@
       ],
       "remaining": "RoutinePost domain modules now contain actual flat roles only. Existing runtime publication/claim/agent-run/social composition and successful-interaction adapter continue into B4-C with original Session/commit and provider budgets. Keep partial scope until those named operations and remaining B4-C setting/lease/log bridges close; global schema registration retires G5.",
       "security": "Only the existing plaintext reveal allowlist path moves from infrastructure/direct_llm_provider.py::_api_key to client.py::_api_key. Function name, exact allowlist cardinality and assertion stay unchanged. Today inventory remains frozen predecessor; its historical source literal/SHA are not rewritten."
+    },
+    "AR-B4-C1-resident-foundation": {
+      "status": "IMPLEMENTED — 158 focused passed, existing PG skip1; read-only source/split/assertion/suppression/API/ORM/node diagnostics 0 errors; root linear source introductions and stock integration gate pending",
+      "split_files": {
+        "backend/app/models/agent_runs.py": [
+          "backend/app/domains/routines/models/resident.py",
+          "backend/app/models/agent_runs.py"
+        ],
+        "backend/app/models/agent_settings.py": [
+          "backend/app/domains/routines/models/resident.py",
+          "backend/app/models/agent_settings.py"
+        ],
+        "backend/app/cruds/agents.py": [
+          "backend/app/cruds/agents.py",
+          "backend/app/domains/routines/constants.py",
+          "backend/app/domains/routines/service/activity_logs.py",
+          "backend/app/domains/routines/service/activity_settings.py"
+        ],
+        "backend/app/schemas/agents.py": [
+          "backend/app/domains/characters/schemas.py",
+          "backend/app/domains/identity/schemas.py",
+          "backend/app/domains/routines/schemas/resident.py",
+          "backend/app/schemas/agents.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/models/agent_runs.py::AgentRun",
+          "new": "backend/app/domains/routines/models/resident.py::AgentRun",
+          "direct_consumers": [
+            "backend/app/models/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/models/agent_runs.py::AgentActivityLog",
+          "new": "backend/app/domains/routines/models/resident.py::AgentActivityLog",
+          "direct_consumers": [
+            "backend/app/models/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/models/agent_runs.py::AgentFeedCue",
+          "new": "backend/app/domains/routines/models/resident.py::AgentFeedCue",
+          "direct_consumers": [
+            "backend/app/models/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/models/agent_runs.py::AgentDaypartMemoryEvent",
+          "new": "backend/app/models/agent_runs.py::AgentDaypartMemoryEvent",
+          "direct_consumers": [
+            "backend/app/models/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/models/agent_runs.py::AgentRelationshipPoint",
+          "new": "backend/app/models/agent_runs.py::AgentRelationshipPoint",
+          "direct_consumers": [
+            "backend/app/models/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/models/agent_runs.py::AgentPublicActionExecution",
+          "new": "backend/app/domains/routines/models/resident.py::AgentPublicActionExecution",
+          "direct_consumers": [
+            "backend/app/models/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/models/agent_settings.py::AgentActivitySetting",
+          "new": "backend/app/domains/routines/models/resident.py::AgentActivitySetting",
+          "direct_consumers": [
+            "backend/app/models/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/models/agent_settings.py::AgentImageGenerationSetting",
+          "new": "backend/app/models/agent_settings.py::AgentImageGenerationSetting",
+          "direct_consumers": [
+            "backend/app/models/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::HIDDEN_ACTIVITY_ACTION_TYPES",
+          "new": "backend/app/domains/routines/constants.py::HIDDEN_ACTIVITY_ACTION_TYPES",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/activity_logs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::STATE_SAVE_DEDUPE_WINDOW",
+          "new": "backend/app/domains/routines/constants.py::STATE_SAVE_DEDUPE_WINDOW",
+          "direct_consumers": [
+            "backend/app/domains/routines/service/activity_logs.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::default_auth_profile_id",
+          "new": "backend/app/cruds/agents.py::default_auth_profile_id",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::default_credential_model",
+          "new": "backend/app/cruds/agents.py::default_credential_model",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_setting",
+          "new": "backend/app/domains/routines/service/activity_settings.py::get_setting",
+          "direct_consumers": [
+            "backend/app/cruds/agents.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::ensure_setting",
+          "new": "backend/app/domains/routines/service/activity_settings.py::ensure_setting",
+          "direct_consumers": [
+            "backend/app/cruds/agents.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::update_setting",
+          "new": "backend/app/domains/routines/service/activity_settings.py::update_setting",
+          "direct_consumers": [
+            "backend/app/cruds/agents.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_image_generation_setting",
+          "new": "backend/app/cruds/agents.py::get_image_generation_setting",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::ensure_image_generation_setting",
+          "new": "backend/app/cruds/agents.py::ensure_image_generation_setting",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::_image_secret_scope",
+          "new": "backend/app/cruds/agents.py::_image_secret_scope",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::update_image_generation_setting",
+          "new": "backend/app/cruds/agents.py::update_image_generation_setting",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::clear_image_visual_identity",
+          "new": "backend/app/cruds/agents.py::clear_image_visual_identity",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_character_credential",
+          "new": "backend/app/cruds/agents.py::get_character_credential",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_active_local_key",
+          "new": "backend/app/cruds/agents.py::get_active_local_key",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_active_local_key_by_hash",
+          "new": "backend/app/cruds/agents.py::get_active_local_key_by_hash",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_latest_local_key",
+          "new": "backend/app/cruds/agents.py::get_latest_local_key",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::create_local_key",
+          "new": "backend/app/cruds/agents.py::create_local_key",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::revoke_active_local_key",
+          "new": "backend/app/cruds/agents.py::revoke_active_local_key",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::mark_local_key_used",
+          "new": "backend/app/cruds/agents.py::mark_local_key_used",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::upsert_credential",
+          "new": "backend/app/cruds/agents.py::upsert_credential",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::filter_visible_activity_logs",
+          "new": "backend/app/domains/routines/service/activity_logs.py::filter_visible_activity_logs",
+          "direct_consumers": [
+            "backend/app/cruds/agents.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::list_recent_activity",
+          "new": "backend/app/domains/routines/service/activity_logs.py::list_recent_activity",
+          "direct_consumers": [
+            "backend/app/cruds/agents.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_pending_feed_cue",
+          "new": "backend/app/cruds/agents.py::get_pending_feed_cue",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::create_feed_cue",
+          "new": "backend/app/cruds/agents.py::create_feed_cue",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::mark_pending_feed_cue_used",
+          "new": "backend/app/cruds/agents.py::mark_pending_feed_cue_used",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::log_activity",
+          "new": "backend/app/domains/routines/service/activity_logs.py::log_activity",
+          "direct_consumers": [
+            "backend/app/cruds/agents.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/cruds/agents.py::get_assigned_slot",
+          "new": "backend/app/cruds/agents.py::get_assigned_slot",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::set_character_status",
+          "new": "backend/app/cruds/agents.py::set_character_status",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::disable_other_active_settings",
+          "new": "backend/app/cruds/agents.py::disable_other_active_settings",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::list_other_active_settings",
+          "new": "backend/app/cruds/agents.py::list_other_active_settings",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/cruds/agents.py::count_effective_active_server_llm_autonomy_agents",
+          "new": "backend/app/cruds/agents.py::count_effective_active_server_llm_autonomy_agents",
+          "direct_consumers": [
+            "backend/app/runtime/characters/management.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ],
+          "remaining_owner": "Unchanged real implementation outside C1. RelationshipPoint is B5, DaypartMemoryEvent is B7, image settings and mixed Character/runtime operations retain their named later owner."
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentGoogleModel",
+          "new": "backend/app/schemas/agents.py::AgentGoogleModel",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults",
+            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::GoogleGeminiModel",
+          "new": "backend/app/schemas/agents.py::GoogleGeminiModel",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::PollinationsImageModel",
+          "new": "backend/app/schemas/agents.py::PollinationsImageModel",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_image_generation_setting_mode_sync_and_preserve_key"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::ImageKeyMode",
+          "new": "backend/app/schemas/agents.py::ImageKeyMode",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_image_generation_setting_mode_sync_and_preserve_key"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::WritingRepetitionLevel",
+          "new": "backend/app/schemas/agents.py::WritingRepetitionLevel",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_enabled_idle_slot_reschedules_immediately_after_activity_window_change",
+            "tests/test_agent_activity_limits.py::test_running_slot_keeps_current_schedule_until_run_completion"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentExecutionMode",
+          "new": "backend/app/schemas/agents.py::AgentExecutionMode",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults",
+            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreate",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
+            "tests/characters/test_character_foundation.py::test_profile_create_keeps_its_existing_commit_and_inactive_defaults",
+            "tests/test_agent_activity_limits.py::test_create_agent_applies_initial_activity_settings"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentDeleteCreate",
+          "new": "backend/app/domains/characters/schemas.py::AgentDeleteCreate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_m3_authorization_deletion.py::test_character_deletion_resets_cross_user_preference_and_removes_private_data"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentDraftImageStyle",
+          "new": "backend/app/domains/characters/schemas.py::AgentDraftImageStyle",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentDraftMediaKind",
+          "new": "backend/app/domains/characters/schemas.py::AgentDraftMediaKind",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate",
+            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentDraftMediaDelivery",
+          "new": "backend/app/domains/characters/schemas.py::AgentDraftMediaDelivery",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate",
+            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileImageBucket",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileImageBucket",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftCreate",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_google_model_selection.py::test_agent_google_models_are_allowed_in_agent_model_schemas",
+            "tests/test_google_model_selection.py::test_agent_model_schemas_reject_removed_or_message_only_models",
+            "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftUpdate",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_duplicate_handle",
+            "tests/test_agent_activity_limits.py::test_agent_creation_draft_update_rejects_prompt_injection_without_saving",
+            "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftMediaUpload",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftMediaUpload",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftGenerateMediaCreate",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftGenerateMediaCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_creation_drafts.py::test_apply_draft_media_candidate_promotes_and_cleans_candidate",
+            "tests/test_agent_creation_drafts.py::test_generate_media_creates_server_candidate_and_consumes_daily_quota",
+            "tests/test_agent_creation_drafts.py::test_profile_image_quota_exceeded_skips_translation_and_pollinations"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftComplete",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftComplete",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_promotion_usage.py::test_complete_draft_records_promotion_usage_consent",
+            "tests/test_local_character_creation_policy.py::test_llm_draft_create_and_complete_work_beyond_the_old_cap"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileMediaGenerateCreate",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileMediaGenerateCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_creation_drafts.py::test_generate_profile_media_creates_profile_candidate"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileImageUsageStatusRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileImageUsageStatusRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileImageUsageRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileImageUsageRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftMediaResult",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftMediaResult",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftMediaGenerationRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftMediaGenerationRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileMediaGenerationRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileMediaGenerationRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentCreationDraftRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentCreationDraftRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentFirstGreetingCreate",
+          "new": "backend/app/schemas/agents.py::AgentFirstGreetingCreate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident",
+            "tests/world_packages/test_import_commit.py::test_imported_world_is_inert_until_enable_then_matches_direct_p5_p7_runtime"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentFirstGreetingRead",
+          "new": "backend/app/schemas/agents.py::AgentFirstGreetingRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_provider_boundary_security.py::test_provider_failure_attempt_and_log_never_retain_raw_body"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::CredentialRead",
+          "new": "backend/app/domains/identity/schemas.py::CredentialRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentLocalConnectionRead",
+          "new": "backend/app/schemas/agents.py::AgentLocalConnectionRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentLocalKeyCreateRead",
+          "new": "backend/app/schemas/agents.py::AgentLocalKeyCreateRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::BotCharacterRead",
+          "new": "backend/app/schemas/agents.py::BotCharacterRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::BotMeRead",
+          "new": "backend/app/schemas/agents.py::BotMeRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentActionRangeRead",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentActionRangeRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_activity_setting_read_excludes_internal_planner_tendency_profile"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentActivitySettingRead",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentActivitySettingRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_tendency_note_action_selection.py::test_activity_setting_read_excludes_internal_planner_tendency_profile"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentActivitySettingUpdate",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentActivitySettingUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/routines/service/activity_settings.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentFeedCueCreate",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentFeedCueCreate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/routines/service/activity_settings.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentFeedCueRead",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentFeedCueRead",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/routines/service/activity_settings.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_persistence.py::test_setting_update_preserves_explicit_commit_and_caller_rollback",
+            "tests/routines/test_activity_persistence.py::test_activity_log_joins_caller_transaction_and_keeps_visibility_policy",
+            "tests/test_agent_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
+            "tests/test_agent_activity_limits.py::test_ensure_setting_uses_default_daily_limits",
+            "tests/test_agent_activity_limits.py::test_resident_shutdown_cancellation_marks_run_and_releases_slot",
+            "tests/routine_posts/test_runtime.py::test_routine_runtime_publishes_scoped_continuous_posts_and_consumes_event_once"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileUpdate",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/identity/test_demo_account_lock.py::test_agent_route_returns_403_for_locked_demo_error",
+            "tests/identity/test_demo_account_lock.py::test_agent_service_blocks_profile_update_after_ownership_check",
+            "tests/test_m3_authorization_deletion.py::test_sensitive_update_schemas_ignore_ownership_and_secret_mass_assignment"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentPromotionUsageUpdate",
+          "new": "backend/app/domains/characters/schemas.py::AgentPromotionUsageUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_promotion_usage.py::test_update_promotion_usage_requires_owner",
+            "tests/test_agent_promotion_usage.py::test_update_promotion_usage_tracks_revocation_and_regrant"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentPromotionUsageRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentPromotionUsageRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentPersonaUpdate",
+          "new": "backend/app/domains/characters/schemas.py::AgentPersonaUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_update_persona_rejects_prompt_injection_without_saving",
+            "tests/test_m3_authorization_deletion.py::test_sensitive_update_schemas_ignore_ownership_and_secret_mass_assignment"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentProfileMediaUpload",
+          "new": "backend/app/domains/characters/schemas.py::AgentProfileMediaUpload",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentImageSeedUpload",
+          "new": "backend/app/schemas/agents.py::AgentImageSeedUpload",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentImageGenerationSettingRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentImageGenerationSettingRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentImageGenerationSettingUpdate",
+          "new": "backend/app/schemas/agents.py::AgentImageGenerationSettingUpdate",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
+            "tests/test_post_image_generation.py::test_image_generation_setting_manual_visual_identity_uses_null_hash",
+            "tests/test_post_image_generation.py::test_image_generation_setting_mode_sync_and_preserve_key"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentActivitySummaryRead",
+          "new": "backend/app/domains/routines/schemas/resident.py::AgentActivitySummaryRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_agent_activity_limits.py::test_api_agent_instants_normalize_sqlite_naive_values_to_utc"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentActivityProfileReadinessRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentActivityProfileReadinessRead",
+          "direct_consumers": [
+            "backend/app/domains/world_characters/service/readiness.py",
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/world_characters/test_readiness_contract.py::test_readiness_keeps_shared_dto_and_world_scope_before_stale_profile"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::CredentialUpsert",
+          "new": "backend/app/schemas/agents.py::CredentialUpsert",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/test_google_model_selection.py::test_agent_google_models_are_allowed_in_agent_model_schemas",
+            "tests/test_google_model_selection.py::test_agent_model_schemas_reject_removed_or_message_only_models",
+            "tests/test_google_model_selection.py::test_api_key_credential_update_with_idle_slot_syncs_profile"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentDetailRead",
+          "new": "backend/app/domains/characters/schemas.py::AgentDetailRead",
+          "direct_consumers": [
+            "backend/app/schemas/__init__.py"
+          ],
+          "test_nodes": [
+            "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
+          ]
+        }
+      ],
+      "ownership": "Routines models/resident owns AgentActivitySetting, AgentRun, AgentSlot, AgentPublicActionExecution, AgentFeedCue and AgentActivityLog. Original plans models/schema move whole into models/plans and schemas/plans with identical-object package exports. Activity/slot/log response DTO and settings/feed-cue input are schemas/resident. service/activity_settings owns get/ensure/update; service/activity_logs owns actual hidden/state-dedupe/read/write flow. Original defaults/limits/hidden and 90-second window are constants.",
+      "preservation": "27 actual class/function/value ASTs and previous plan model/schema whole ASTs are identical. Single Base/columns/indexes/FKs/checks/defaults/relationships remain. Settings commit=True commit/refresh versus False flush; log finish_write deferred commit/refresh; query ordering/oversampling and 90-second state dedupe are unchanged.",
+      "remaining": "AgentRelationshipPoint remains real app/models/agent_runs for B5; AgentDaypartMemoryEvent same file for B7. AgentImageGenerationSetting stays real image setting owner for later media/runtime cleanup. Existing mixed CRUD keeps same-function exports only for these C1 functions; new services do not import legacy. Scheduler/lease/agent-run/LLM graphs and action policy, FeedCue workflows and mixed owner filtering are subsequent C2+ work.",
+      "cross_workflow": "runtime/social/timeline now calls canonical activity_logs on the same Session; runtime/routine_posts/context_references reads the canonical same AgentActivitySetting class. B5 later discovery/profile_activity sources have exact mapped ActivityLog/filter/hidden consumers to connect at linear integration; no public-filter policy is combined with Social distinct hidden6 rule.",
+      "cycle_resolution": "Moving actual activity DTO ownership exposed Character.schemas -> Routines -> WC -> Character through a single hash function import. Existing PlanReferences now connects that identical pure hash at the same original point; no global policy relocation, eager input read, query, write or boundary exception. New attached-object/readiness-order regression verifies this seam."
     }
   }
 }

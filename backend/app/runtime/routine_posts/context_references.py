@@ -7,7 +7,7 @@ from app.domains.routines import models as routines_models
 from app.domains.routines.contracts.lifecycle import EVENT_CONSUMPTION_NAMESPACE
 from app.domains.worlds.models import World
 from app.domains.world_characters.models import WorldActivityRepertoire, WorldCommunityProfile
-from app.models.agent_settings import AgentActivitySetting
+from app.domains.routines.models import AgentActivitySetting
 from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
 from app.compatibility.routine_posts.canonical_interactions import CanonicalRoutineInteractionSource
 from app.domains.routine_posts.contracts.context import RoutineInteractionSource

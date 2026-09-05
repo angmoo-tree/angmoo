@@ -31,3 +31,23 @@ MAX_PARTICIPANT_OPENING_ATTEMPTS = 2
 MAX_JOINT_OPENING_ATTEMPTS = 4
 
 ACTIVE_JOINT_STATUSES = {"scheduled", "ready", "active"}
+
+DEFAULT_MAX_COMMENTS_PER_DAY = 30
+DEFAULT_MAX_POSTS_PER_DAY = 10
+
+MAX_COMMENTS_PER_DAY = 60
+MAX_POSTS_PER_DAY = 30
+
+HIDDEN_ACTIVITY_ACTION_TYPES = (
+    "state_save_suppressed",
+    "feed_perception_debug",
+    "feed_viewed",
+    "feed_interests_noted",
+    "feed_seed_consumed",
+    "inbox_notifications_provided",
+    "inbox_reviewed",
+    "observation_note_saved",
+    "complete_tick_rejected",
+)
+
+STATE_SAVE_DEDUPE_WINDOW = timedelta(seconds=90)

@@ -588,3 +588,15 @@ AR-B3-M2에서 이 네 파일의 실제 구현과 모든 Python 소비자를 이
 `routine_posts/schemas.py`는 장면 계획·게시 초안·상태 효과의 Pydantic 형식을 소유합니다. `contracts/interaction.py`는 서버가 관찰한 성공 사건 후보의 값입니다. World·consumer·시간 범위와 기존 소비 여부를 확인하고, 관련도 순서와 글자 수·JSON byte 한도를 적용하는 실제 정책은 `service/event_context.py`에 있습니다. 제한 값은 `constants.py`, 문맥 사용 불가 오류는 `exceptions.py`, 텍스트 표현은 `utils/text.py`에서 찾습니다. 공통 텍스트 정제의 실제 구현은 `core/context_text.py`를 사용합니다.
 
 이벤트를 프롬프트에 넣었다는 사실이 성공적인 행동이나 소비 완료를 뜻하지 않습니다. 이 정책은 후보를 제한하며 실제 게시·source 소비·beat 상태의 저장은 기존 RoutinePost transaction이 담당합니다. AR-B4-B1에서 기존 입력과 정책을 먼저 이전했고, 관련 테스트는 `tests/routine_posts/test_runtime.py`로 모았습니다. 문맥의 immutable 값은 `contracts/context.py`, scope·readiness·이전 성공·claim 만료·재시도와 source 소비 판단은 `service/context.py`가 소유합니다. `runtime/routine_posts/context_references.py`는 호출자의 같은 Session으로 기존 nullable 조회와 SQL을 수행하며 새 Session·commit·명시적 flush를 만들지 않습니다. 문맥에 든 World·참여·계획·episode는 기존 attached 객체의 읽기 값이고 다른 도메인 ORM을 문맥 계약에서 import하거나 복제하지 않습니다. 옛 context 구현과 `services/routine_post_context.py` alias는 제거했습니다. 생성 결과와 provider 교체 계약은 `contracts/generation.py`, 서버 근거·응답 schema·상태 검증과 제한된 공개 문맥은 `service/evidence.py`에 있습니다. `service/generation.py`는 계획 생성→검증→게시문 생성의 실제 두 호출 순서를, `client.py`는 목적별 credential 해석과 외부 호출 식별자 변환을 소유합니다. 공유 통신은 `integrations/direct_llm.py`를 사용하며 새로운 forwarding 계층을 만들지 않습니다. 옛 provider/public/서비스 alias는 제거했습니다. 활동 설정·성공 댓글 관찰·실제 게시 transaction과 resident 조립은 B4-C에서 이어집니다.
+
+
+### 활동 실행 기록과 설정
+
+`routines/models/plans.py`는 일일 계획·episode/beat·공동 활동을, `models/resident.py`는 활동 설정·AgentRun·Slot·공개 행동 실행·FeedCue·활동 로그를 소유합니다. 두 파일은 기존 단일 Base를 사용하고 `models/__init__.py`에서 같은 클래스 객체를 제공합니다. HTTP의 일일 계획 형식은 `schemas/plans.py`, 활동 설정/로그/슬롯과 feed-cue 형식은 `schemas/resident.py`에서 찾습니다. Character 상세 화면은 이 실제 응답 형식을 그대로 사용합니다.
+
+설정의 get/ensure/update는 `service/activity_settings.py`, 활동 로그의 숨김·90초 상태 저장 중복 제거·최신순 조회·저장은 `service/activity_logs.py`가 담당합니다. Settings의 명시적 commit/flush 선택과 log의 `unit_of_work.finish_write`를 유지하므로, 기존 caller가 여러 업무를 한 트랜잭션으로 저장할 때 새 commit을 넣지 않습니다. Social timeline도 같은 Session으로 이 로그 소유 함수를 호출합니다.
+
+AR-B4-C1의 적용은 이 실제 모델/입력/저장 범위입니다. AgentRelationshipPoint는 Relationships, AgentDaypartMemoryEvent는 Memory의 후속 실제 소유로 분리하며 이미지 설정과 섞지 않습니다. Scheduler/lease·실행 그래프·LLM 정책·활동 HTTP와 남은 혼합 CRUD의 순차 이전은 후속 C2+ 작업입니다. 아직 남은 전역 CRUD에는 동일 함수 export를 추적된 임시 소비자로 두며, 새 Routines 서비스는 그 경로를 import하지 않습니다.
+
+
+일일 계획이 필요로 하는 Character contract hash는 이미 존재하는 `PlanReferences`가 WC 소유 함수를 연결합니다. World/WC 준비 확인 뒤, repertoire 조회 직전의 원래 위치에서 같은 attached Character를 전달합니다. Character 상세 응답이 Routines의 실제 DTO를 사용해도 Routines 업무 코드가 WC 구현을 직접 역참조하지 않아 패키지 순환이 생기지 않습니다.

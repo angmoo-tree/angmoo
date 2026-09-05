@@ -872,3 +872,23 @@ B2 최종 고정 후보의 집중 묶음은 **67 passed / 1 기존 PostgreSQL sk
 도메인의 실제 역할 모듈만 부분 scope에 추가하고 provider/public의 종료된 bridge는 제거한다. 원래 runtime의 publication/claim·AgentRun/Social 결합, interaction adapter와 활동 설정/lease/log는 AR-B4-C 잔여다. 소스 도입 기록·전체 통합 Actions/installer/merge는 부모 작업에서 순차 확인한다.
 
 B3 최종 집중 묶음은 **70 passed / 1 기존 PostgreSQL skip / 49.02초**다. 전체 보존 검사는 frozen **1,867/1,907**, 보호 계보 **2,139**, 현재 **2,229 nodes**를 확인했고 API/schema/ORM·기존 assertion/raises/warns/suppression·누락 node·모든 split 증거 오류는 0이다. 선행 소스/test의 부모 append-only introduction 기록 대기만 종료 코드 1로 남는다. 현재 구조 경계 **687 modules / 2,295 edges / legacy exact 235 PASS**, L4 parity **97**, ER0 **81/87/24/44/7**, MemoryBatch inventory도 통과했다. 고정된 baseline/checkpoint/Today predecessor는 변경하지 않았다.
+
+
+## AR-B4-C1 — 활동 설정·실행 기록·로그의 실제 소유 기반
+
+AgentActivitySetting·AgentRun·AgentSlot·AgentPublicActionExecution·AgentFeedCue·AgentActivityLog의 실제 class는 `routines/models/resident.py`로 옮겼다. 기존 계획 모델/schema는 `models/plans.py`와 `schemas/plans.py`로 whole-file 이동하고 같은 객체의 package export를 제공한다. 활동/로그/슬롯 응답 5개와 settings/feed-cue 요청·응답 3개는 `schemas/resident.py`가 소유하며 원래 UTC serialization을 유지한다.
+
+Settings get/ensure/update의 실제 본문은 `service/activity_settings.py`, log/filter/list 본문은 `service/activity_logs.py`, 원래 기본값/제한/hidden9/90초 dedupe 값은 constants가 소유한다. 27개 class/function/value AST와 원래 plan model/schema whole AST의 차이는 0이다. Settings의 commit/refresh 대 flush, log의 deferred finish_write, hidden 제외·created/id DESC·oversampling·state dedupe 순서를 유지했다. global model 등록은 같은 class를 직접 연결하고 삭제된 activity/slot/core limits 및 임시 Runtime 응답 파일은 경로 지도에 기록한다.
+
+최초 기존 집중 묶음은 **135 passed / 1 기존 PostgreSQL skip / 3 기존 warnings / 55.02초**다. 새 file SQLite 검증은 settings commit True/False 및 deferred 로그의 별도 observer 격리·rollback·hidden/state dedupe **3 nodes**다. 최초 신규 fixture가 _seed에 없는 설정을 읽어 실패했으며 실제 ensure_setting을 호출하도록 수정했다. 수정 후 영향 범위는 **86 passed / 3 기존 warnings / 21.07초**다. 기존 assertion/조건을 변경하지 않았다.
+
+AgentRelationshipPoint는 B5, AgentDaypartMemoryEvent는 B7의 실제 소유로 이어지므로 원래 global run model 파일에 남겼다. AgentImageGenerationSetting도 이 활동 설정과 합치지 않았다. Social timeline의 log callback과 RoutinePost의 활동 설정 read는 같은 Session/canonical class로 연결했고 기존 exact legacy 두 edge를 제거한다. 이후 B5 discovery/profile_activity의 ActivityLog/filter/hidden9 소비자는 선행 source 합류 후 같은 소유로 연결한다. Social 별도 hidden6 정책은 합치지 않는다.
+
+현재 scope는 실제 모델/DTO/log/settings만 포함한다. Scheduler/lease·실행 그래프/LLM 정책·FeedCue/slot 쓰기·mixed owner filtering과 HTTP·잔여 호환 종료는 C2+ 범위다. frozen baseline/checkpoint/기존 node/API/ORM 및 historical migrations는 수정하지 않으며 source introduction·통합 Actions/installer/merge는 부모가 선형으로 이어간다.
+
+
+C1 경계 검사에서 DTO 소유 이전에 따라 Character.schemas→Routines→WC→Character의 순환이 드러났다. 원인은 계획의 한 개 character_contract_hash 직접 import였다. 기존 PlanReferences에 동일 hash 읽기 협력을 연결해 원래 World/WC 준비 확인 이후·repertoire 조회 이전 위치와 같은 attached 객체를 유지했고 별도 core 정책이나 경계 예외를 만들지 않았다. 신규 준비 순서 검증 1개를 추가하여 C1 신규 검증은 **4 nodes**다. 설정/로그/계획·활동 제한 집중 묶음은 **99 passed / 2 기존 warnings / 24.43초**다. 이 변경은 source/member map에 같은 함수 호출의 실행 연결로 기록한다.
+
+C1 최종 고정 후보의 집중 검증은 **158 passed / 기존 PostgreSQL 1 skip / 기존 warnings 3 / 77.68초**다. 직전 실행의 유일한 실패는 B3에서 제거한 `routine_posts/public.py`를 기대하는 옛 구조 검사였다. 실제 `contracts`의 interaction/context/generation 및 package 네 파일 모두를 기존 두 assertion과 같은 금지 import 목록으로 검사하도록 연결했다. 제품 동작이나 검사 predicate를 변경하지 않았다.
+
+경계 검사는 **690 modules / 2,308 edges / exact legacy 232**, cycle 0으로 통과했다. Stock 보존 명령은 아직 append되지 않은 선행 B4 최초 도입 두 파일(`routines/models.py`, `schemas.py`)의 후속 이동에서 중단되므로 전체 PASS로 표시하지 않는다. 별도 읽기 전용 진단은 서명된 최초 도입 commit `869bae55a2e5e665fb731396a7284b53dde8a104`의 정확한 두 Git blob만 메모리 snapshot으로 보충하여 원래 검사 함수를 호출했다. **source/split symbols/assertions/suppressions/API·ORM/missing nodes 각각 오류 0**, 보호된 기존 **2,139 lineages / 현재 2,233 nodes**다. tracked baseline/checkpoint/additions·검사 코드는 변경하지 않았다. 부모의 선형 source 도입 append 후 stock 전체 검사는 여전히 필수다.

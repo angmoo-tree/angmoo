@@ -177,10 +177,6 @@
           "importer": "app.models"
         },
         {
-          "imported": "app.models.agent_slots",
-          "importer": "app.models"
-        },
-        {
           "imported": "app.models.character_lore",
           "importer": "app.models"
         },
@@ -1002,26 +998,9 @@
       "edges": [
         {
           "importer": "app.runtime.social.timeline",
-          "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.runtime.social.timeline",
           "imported": "app.services.community_abuse_quota"
         }
       ]
-    },
-    {
-      "owner_stage": "L6",
-      "reason": "B4-B2 relocates the original context get(AgentActivitySetting, character.id) into its same-Session runtime reader. It is the unchanged B4-C activity-setting owner, not a new legacy operation or prefix exemption.",
-      "removal_condition": "AR-B4-C moves AgentActivitySetting to its actual activity owner; switch this one exact nullable read to that owner and remove the edge.",
-      "edges": [
-        {
-          "importer": "app.runtime.routine_posts.context_references",
-          "imported": "app.models.agent_settings"
-        }
-      ],
-      "id": "ar-b4-b2-context-setting-read",
-      "review_date": "2026-09-06"
     }
   ],
   "legacy_module_cycles": [],
@@ -1143,6 +1122,8 @@
       "app.domains.routines.dependencies",
       "app.domains.routines.exceptions",
       "app.domains.routines.models",
+      "app.domains.routines.models.plans",
+      "app.domains.routines.models.resident",
       "app.domains.routines.policies",
       "app.domains.routines.policies.activity_state",
       "app.domains.routines.policies.planning",
@@ -1150,7 +1131,11 @@
       "app.domains.routines.repository.plans",
       "app.domains.routines.router",
       "app.domains.routines.schemas",
+      "app.domains.routines.schemas.plans",
+      "app.domains.routines.schemas.resident",
       "app.domains.routines.service",
+      "app.domains.routines.service.activity_logs",
+      "app.domains.routines.service.activity_settings",
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
@@ -1166,7 +1151,6 @@
       "app.domains.routines.utils",
       "app.domains.routines.utils.clock",
       "app.domains.runtime.contracts",
-      "app.domains.runtime.schemas",
       "app.domains.social.constants",
       "app.domains.social.contracts",
       "app.domains.social.contracts.actors",
@@ -1306,7 +1290,11 @@
       "app.domains.routines.contracts.lifecycle",
       "app.domains.routines.contracts.plans",
       "app.domains.routines.schemas",
+      "app.domains.routines.schemas.plans",
+      "app.domains.routines.schemas.resident",
       "app.domains.routines.service",
+      "app.domains.routines.service.activity_logs",
+      "app.domains.routines.service.activity_settings",
       "app.domains.routines.service.execution",
       "app.domains.routines.service.execution.claims",
       "app.domains.routines.service.execution.lifecycle",
@@ -1320,7 +1308,6 @@
       "app.domains.routines.service.plans",
       "app.domains.routines.service.scheduling",
       "app.domains.runtime.contracts",
-      "app.domains.runtime.schemas",
       "app.domains.social.contracts",
       "app.domains.social.contracts.actors",
       "app.domains.social.contracts.inbox",
@@ -2015,24 +2002,8 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.schemas.agent_runs",
-        "target": "app.domains.runtime.schemas",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
-        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.schemas.agents",
         "target": "app.domains.identity.schemas",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
-        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.schemas.agents",
-        "target": "app.domains.runtime.schemas",
         "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
         "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
         "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
@@ -2597,6 +2568,70 @@
         "reason": "Exact remaining consumer keeps the identical RoutinePost type/function while context and provider roles transition. Converted role modules do not import legacy code.",
         "removal_condition": "Move actual context/provider implementation in AR-B4-B2/B3 and remove the exact legacy consumer; global schema collection retires at G5.",
         "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.api.v1.routes.world_activity_runtime",
+        "target": "app.domains.routines.router",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.routines.constants",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.routines.service.activity_logs",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.agents",
+        "target": "app.domains.routines.service.activity_settings",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.cruds.community",
+        "target": "app.domains.routines.constants",
+        "owner_stage": "AR-B5",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.routines.models",
+        "owner_stage": "AR-G5",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas.agent_runs",
+        "target": "app.domains.routines.schemas",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas.agents",
+        "target": "app.domains.routines.schemas",
+        "owner_stage": "AR-B4-C",
+        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
+        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "review_date": "2026-09-06"
       }
     ]
   }
