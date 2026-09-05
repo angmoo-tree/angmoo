@@ -195,3 +195,117 @@ RUNTIME_LAST_ERROR_PREFIX = "angmoo_runtime:"
 
 
 TOOLS_ALLOW_FEED_PERCEPTION = ["angmoo_list_feed"]
+
+
+TOOL_CHOICE_COMPLETE_TICK = {
+    "mode": "ANY",
+    "allowedFunctionNames": ["angmoo_complete_tick"],
+}
+
+
+TOOL_CHOICE_THREAD_OR_COMPLETE = {
+    "mode": "ANY",
+    "allowedFunctionNames": ["angmoo_get_post_thread", "angmoo_complete_tick"],
+}
+
+
+TOOL_CHOICE_SAVE_STATE = {
+    "mode": "ANY",
+    "allowedFunctionNames": ["angmoo_save_character_state"],
+}
+
+
+TOOLS_ALLOW_COMPLETE_TICK = ["angmoo_complete_tick"]
+
+
+TOOLS_ALLOW_THREAD_OR_COMPLETE = ["angmoo_get_post_thread", "angmoo_complete_tick"]
+
+
+TOOLS_ALLOW_SAVE_STATE = ["angmoo_save_character_state"]
+
+
+TOOLS_ALLOW_V6_INBOX_LANE = [
+    "angmoo_get_notifications",
+    "angmoo_get_post_thread",
+    "angmoo_note_inbox_review",
+]
+
+
+TOOLS_ALLOW_V6_FEED_SCAN_LANE = [
+    "angmoo_list_feed",
+    "angmoo_note_feed_interests",
+]
+
+
+TOOLS_ALLOW_V6_FEED_HISTORY_SANITIZE_LANE = [
+    "angmoo_note_feed_history_sanitize",
+]
+
+
+TOOLS_ALLOW_V6_STATE_LANE = ["angmoo_save_character_state"]
+
+
+TOOLS_ALLOW_COMMUNITY_ONCE = [
+    "angmoo_list_feed",
+    "angmoo_get_post_thread",
+    "angmoo_create_post",
+    "angmoo_reply_to_post",
+    "angmoo_like_post",
+    "angmoo_unlike_post",
+    "angmoo_repost_post",
+    "angmoo_unrepost_post",
+    "angmoo_follow_profile",
+    "angmoo_unfollow_profile",
+    "angmoo_get_profile",
+    "angmoo_get_notifications",
+    "angmoo_mark_notification_read",
+    "angmoo_note_feed_history_sanitize",
+    "angmoo_note_feed_interests",
+    "angmoo_note_inbox_review",
+    "angmoo_observe_community",
+    "angmoo_save_character_state",
+]
+
+
+PUBLIC_ACTION_TOOLS_BY_POLICY = {
+    "post": "angmoo_create_post",
+    "reply": "angmoo_reply_to_post",
+    "like": "angmoo_like_post",
+    "repost": "angmoo_repost_post",
+    "follow": "angmoo_follow_profile",
+    "unfollow": "angmoo_unfollow_profile",
+    "observe": "angmoo_observe_community",
+}
+
+
+PUBLIC_ACTION_BRIEF_TOOLS_BY_POLICY = {
+    **PUBLIC_ACTION_TOOLS_BY_POLICY,
+    "post": "angmoo_create_post_from_brief",
+    "reply": "angmoo_reply_to_post_from_brief",
+}
+
+
+GEMINI_FREE_ALLOWED_ACTIONS = (
+    "post",
+    "reply",
+    "like",
+    "repost",
+    "follow",
+    "unfollow",
+    "observe",
+)
+
+
+GEMINI_FREE_INBOX_CANDIDATE_MAX = 1
+
+
+GEMINI_FREE_FEED_CANDIDATE_MAX = 1
+
+
+GEMINI_FREE_WRITING_SEED_MAX = 1
+
+
+GEMINI_FREE_INBOX_ACTION_MAX = 3
+
+
+GEMINI_FREE_FEED_ACTION_MAX = 4

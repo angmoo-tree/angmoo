@@ -1037,3 +1037,11 @@ C5e 최종 고정 tree 검증: **429 passed / 기존 PostgreSQL 전용1 skipped 
 
 
 C5f 검증은 초기 **73 passed /기존 warnings2/22.28초**, 최종 고정 tree **432 passed /기존 PostgreSQL1 skipped/기존 warnings5/101.48초**이다. 처음 경계 검사가 runtime의 annotation-only app.models·services.runtime_boundary 의존을 잡아냈다. 해당 생성자를 실제 생성하지 않고 주입된 client만 사용하므로 실제 필요한 `DecisionClient`·`DecisionCredential` 계약과 기존 Character/State readview로 타입을 표현했다. 동작과 인자 전달은 그대로이며 새 legacy 예외는 추가하지 않았다. 현재 boundary **738modules/2483edges/exact legacy206/cycle0**, L4 **738/14/97**, ER0 **85/87/24/44/7**, Memory batch PASS. 원래15함수·4상수는 네 한정 타입명을 복원하면 AST가 같고 이동2테스트 본문도 동일하다. 읽기 전용 원래6검사는 오류0, **보호2139/current2260**이며 최초 signed869bae의2경로만 메모리로 보충했다. frozen/checkpoint/additions 불변, stock 전체 게이트는 root의 선형 최초도입 원장 연결 뒤 검증한다.
+
+
+## AR-B4-C6a — Resident 후보·도구·세션·실행 오류 소유
+
+기존 순수 candidate8/tool정책4/session키·시간대6/request옵션3/오류클래스8 총29정의와 active상수19개를 실제 소유로 이전했다. 호출되지 않는 과거 action_menu178줄·recovery2함수와 unused상수2개는 원문보존 및 B8-A 검토 대상으로 남겼으며 허구 소비자나 새 지원경로를 만들지 않았다. 기존 세션3테스트 본문과 KST/settings 객체를 그대로 유지했다. 최종 검증을 아래에 이어 기록한다.
+
+
+C6a 초기 **142 passed /기존warnings6/12.42초**, 최종 고정 tree **441 passed /기존 PostgreSQL1 skipped/기존warnings6/103.78초**. 원문29함수·클래스/19상수 AST 정확동일, 기존 세션3테스트 본문동일이며 새 동작·테스트 node 추가는 없다. 현재 boundary **742modules/2495edges/exact legacy206/cycle0**, L4 **742/14/97**, ER0 **85/87/24/44/7**, Memory batch PASS. 읽기 전용 원래6검사는 오류0이며 **보호2139/current2260**. 최초 signed869bae의2경로만 메모리에서 보충했고 frozen/checkpoint/additions 불변; root의 선형 최초도입 원장 연결 뒤 stock 전체 게이트를 다시 확인한다. 기존 class alias 소비자는 실제 HTTP/runtime의 동일객체 참조를 기록했으며 신규 타입간 상속·오류 메시지·처리순서를 바꾸지 않았다.

@@ -833,7 +833,10 @@
     "tests/test_tendency_note_action_selection.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text": "tests/routines/test_perception_prompts.py::test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text",
     "tests/test_tendency_note_action_selection.py::test_memory_note_refine_prompt_has_input_voice_boundary": "tests/routines/test_state_prompts.py::test_memory_note_refine_prompt_has_input_voice_boundary",
     "tests/test_tendency_note_action_selection.py::test_state_lane_prompt_has_input_voice_boundary": "tests/routines/test_state_prompts.py::test_state_lane_prompt_has_input_voice_boundary",
-    "tests/test_tendency_note_action_selection.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing": "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing"
+    "tests/test_tendency_note_action_selection.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing": "tests/routines/test_action_briefs.py::test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing",
+    "tests/test_daypart_persistent_session.py::test_daypart_main_session_key_changes_by_window": "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+    "tests/test_daypart_persistent_session.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick": "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+    "tests/test_daypart_persistent_session.py::test_night_daypart_keeps_start_date_across_midnight": "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight"
   },
   "details": {
     "AR-B1": {
@@ -10897,6 +10900,7 @@
           "backend/app/domains/routines/repository/run_backoff.py",
           "backend/app/domains/routines/repository/runs.py",
           "backend/app/domains/routines/service/action_briefs.py",
+          "backend/app/domains/routines/service/action_candidates.py",
           "backend/app/domains/routines/service/action_prompts.py",
           "backend/app/domains/routines/service/activity_evidence.py",
           "backend/app/domains/routines/service/decision_results.py",
@@ -10907,12 +10911,15 @@
           "backend/app/domains/routines/service/prompt_context.py",
           "backend/app/domains/routines/service/run_backoff.py",
           "backend/app/domains/routines/service/run_results.py",
+          "backend/app/domains/routines/service/session_keys.py",
           "backend/app/domains/routines/service/state_prompts.py",
+          "backend/app/domains/routines/service/tool_policy.py",
           "backend/app/domains/routines/utils/context_text.py",
           "backend/app/domains/runtime/contracts.py",
           "backend/app/runtime/resident/decision_lanes.py",
           "backend/app/runtime/resident/gateway_results.py",
           "backend/app/runtime/resident/read_only_lanes.py",
+          "backend/app/runtime/resident/request_options.py",
           "backend/app/services/agent_runs.py"
         ],
         "backend/app/services/profile_media.py": [
@@ -11218,62 +11225,80 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::TOOL_CHOICE_COMPLETE_TICK",
-          "new": "backend/app/services/agent_runs.py::TOOL_CHOICE_COMPLETE_TICK",
+          "new": "backend/app/domains/routines/constants.py::TOOL_CHOICE_COMPLETE_TICK",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::TOOL_CHOICE_THREAD_OR_COMPLETE",
-          "new": "backend/app/services/agent_runs.py::TOOL_CHOICE_THREAD_OR_COMPLETE",
+          "new": "backend/app/domains/routines/constants.py::TOOL_CHOICE_THREAD_OR_COMPLETE",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::TOOL_CHOICE_SAVE_STATE",
-          "new": "backend/app/services/agent_runs.py::TOOL_CHOICE_SAVE_STATE",
+          "new": "backend/app/domains/routines/constants.py::TOOL_CHOICE_SAVE_STATE",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_COMPLETE_TICK",
-          "new": "backend/app/services/agent_runs.py::TOOLS_ALLOW_COMPLETE_TICK",
+          "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_COMPLETE_TICK",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_THREAD_OR_COMPLETE",
-          "new": "backend/app/services/agent_runs.py::TOOLS_ALLOW_THREAD_OR_COMPLETE",
+          "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_THREAD_OR_COMPLETE",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_SAVE_STATE",
-          "new": "backend/app/services/agent_runs.py::TOOLS_ALLOW_SAVE_STATE",
+          "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_SAVE_STATE",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11292,12 +11317,15 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_V6_INBOX_LANE",
-          "new": "backend/app/services/agent_runs.py::TOOLS_ALLOW_V6_INBOX_LANE",
+          "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_V6_INBOX_LANE",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11314,22 +11342,28 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_V6_FEED_SCAN_LANE",
-          "new": "backend/app/services/agent_runs.py::TOOLS_ALLOW_V6_FEED_SCAN_LANE",
+          "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_V6_FEED_SCAN_LANE",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_V6_FEED_HISTORY_SANITIZE_LANE",
-          "new": "backend/app/services/agent_runs.py::TOOLS_ALLOW_V6_FEED_HISTORY_SANITIZE_LANE",
+          "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_V6_FEED_HISTORY_SANITIZE_LANE",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11412,62 +11446,80 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_V6_STATE_LANE",
-          "new": "backend/app/services/agent_runs.py::TOOLS_ALLOW_V6_STATE_LANE",
+          "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_V6_STATE_LANE",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::TOOLS_ALLOW_COMMUNITY_ONCE",
-          "new": "backend/app/services/agent_runs.py::TOOLS_ALLOW_COMMUNITY_ONCE",
+          "new": "backend/app/domains/routines/constants.py::TOOLS_ALLOW_COMMUNITY_ONCE",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::PUBLIC_ACTION_TOOLS_BY_POLICY",
-          "new": "backend/app/services/agent_runs.py::PUBLIC_ACTION_TOOLS_BY_POLICY",
+          "new": "backend/app/domains/routines/constants.py::PUBLIC_ACTION_TOOLS_BY_POLICY",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/tool_policy.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_feed_history_sanitize_stream_params",
-          "new": "backend/app/services/agent_runs.py::_feed_history_sanitize_stream_params",
+          "new": "backend/app/runtime/resident/request_options.py::_feed_history_sanitize_stream_params",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_feed_scan_stream_params",
-          "new": "backend/app/services/agent_runs.py::_feed_scan_stream_params",
+          "new": "backend/app/runtime/resident/request_options.py::_feed_scan_stream_params",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::PUBLIC_ACTION_BRIEF_TOOLS_BY_POLICY",
-          "new": "backend/app/services/agent_runs.py::PUBLIC_ACTION_BRIEF_TOOLS_BY_POLICY",
+          "new": "backend/app/domains/routines/constants.py::PUBLIC_ACTION_BRIEF_TOOLS_BY_POLICY",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/tool_policy.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11491,62 +11543,80 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::GEMINI_FREE_ALLOWED_ACTIONS",
-          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_ALLOWED_ACTIONS",
+          "new": "backend/app/domains/routines/constants.py::GEMINI_FREE_ALLOWED_ACTIONS",
           "direct_consumers": [
-            "backend/app/services/agent_runs.py"
+            "backend/app/domains/routines/service/tool_policy.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::GEMINI_FREE_INBOX_CANDIDATE_MAX",
-          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_INBOX_CANDIDATE_MAX",
+          "new": "backend/app/domains/routines/constants.py::GEMINI_FREE_INBOX_CANDIDATE_MAX",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::GEMINI_FREE_FEED_CANDIDATE_MAX",
-          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_FEED_CANDIDATE_MAX",
+          "new": "backend/app/domains/routines/constants.py::GEMINI_FREE_FEED_CANDIDATE_MAX",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::GEMINI_FREE_WRITING_SEED_MAX",
-          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_WRITING_SEED_MAX",
+          "new": "backend/app/domains/routines/constants.py::GEMINI_FREE_WRITING_SEED_MAX",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::GEMINI_FREE_INBOX_ACTION_MAX",
-          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_INBOX_ACTION_MAX",
+          "new": "backend/app/domains/routines/constants.py::GEMINI_FREE_INBOX_ACTION_MAX",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::GEMINI_FREE_FEED_ACTION_MAX",
-          "new": "backend/app/services/agent_runs.py::GEMINI_FREE_FEED_ACTION_MAX",
+          "new": "backend/app/domains/routines/constants.py::GEMINI_FREE_FEED_ACTION_MAX",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11614,72 +11684,98 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::OpenClawNotConfiguredError",
-          "new": "backend/app/services/agent_runs.py::OpenClawNotConfiguredError",
+          "new": "backend/app/domains/routines/exceptions.py::OpenClawNotConfiguredError",
           "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/runtime/characters/management.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::CharacterOwnershipError",
-          "new": "backend/app/services/agent_runs.py::CharacterOwnershipError",
+          "new": "backend/app/domains/routines/exceptions.py::CharacterOwnershipError",
           "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::CredentialNotFoundError",
-          "new": "backend/app/services/agent_runs.py::CredentialNotFoundError",
+          "new": "backend/app/domains/routines/exceptions.py::CredentialNotFoundError",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::CredentialOwnershipError",
-          "new": "backend/app/services/agent_runs.py::CredentialOwnershipError",
+          "new": "backend/app/domains/routines/exceptions.py::CredentialOwnershipError",
           "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::CredentialDisabledError",
-          "new": "backend/app/services/agent_runs.py::CredentialDisabledError",
+          "new": "backend/app/domains/routines/exceptions.py::CredentialDisabledError",
           "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::CredentialRequiredError",
-          "new": "backend/app/services/agent_runs.py::CredentialRequiredError",
+          "new": "backend/app/domains/routines/exceptions.py::CredentialRequiredError",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::CredentialSyncError",
-          "new": "backend/app/services/agent_runs.py::CredentialSyncError",
+          "new": "backend/app/domains/routines/exceptions.py::CredentialSyncError",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11719,12 +11815,16 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::AgentSessionBusyError",
-          "new": "backend/app/services/agent_runs.py::AgentSessionBusyError",
+          "new": "backend/app/domains/routines/exceptions.py::AgentSessionBusyError",
           "direct_consumers": [
+            "backend/app/api/v1/routes/agents.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11780,22 +11880,28 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_profile_ref",
-          "new": "backend/app/services/agent_runs.py::_format_profile_ref",
+          "new": "backend/app/domains/routines/service/action_candidates.py::_format_profile_ref",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_profile_target_parts",
-          "new": "backend/app/services/agent_runs.py::_profile_target_parts",
+          "new": "backend/app/domains/routines/service/action_candidates.py::_profile_target_parts",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11849,12 +11955,16 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_resident_action_candidate_id",
-          "new": "backend/app/services/agent_runs.py::_resident_action_candidate_id",
+          "new": "backend/app/domains/routines/service/action_candidates.py::_resident_action_candidate_id",
           "direct_consumers": [
+            "backend/app/domains/routines/service/action_candidates.py",
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11869,92 +11979,119 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_tool_choice_any",
-          "new": "backend/app/services/agent_runs.py::_tool_choice_any",
+          "new": "backend/app/runtime/resident/request_options.py::_tool_choice_any",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_resident_public_tools_allow",
-          "new": "backend/app/services/agent_runs.py::_resident_public_tools_allow",
+          "new": "backend/app/domains/routines/service/tool_policy.py::_resident_public_tools_allow",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_gemini_free_effective_actions",
-          "new": "backend/app/services/agent_runs.py::_gemini_free_effective_actions",
+          "new": "backend/app/domains/routines/service/tool_policy.py::_gemini_free_effective_actions",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_scratch_session_key",
-          "new": "backend/app/services/agent_runs.py::_scratch_session_key",
+          "new": "backend/app/domains/routines/service/session_keys.py::_scratch_session_key",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_main_run_session_key",
-          "new": "backend/app/services/agent_runs.py::_main_run_session_key",
+          "new": "backend/app/domains/routines/service/session_keys.py::_main_run_session_key",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_tool_auth_key",
-          "new": "backend/app/services/agent_runs.py::_tool_auth_key",
+          "new": "backend/app/domains/routines/service/session_keys.py::_tool_auth_key",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_activity_daypart_window",
-          "new": "backend/app/services/agent_runs.py::_activity_daypart_window",
+          "new": "backend/app/domains/routines/service/session_keys.py::_activity_daypart_window",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_daypart_main_session_key",
-          "new": "backend/app/services/agent_runs.py::_daypart_main_session_key",
+          "new": "backend/app/domains/routines/service/session_keys.py::_daypart_main_session_key",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_daypart_persistent_session_allowed",
-          "new": "backend/app/services/agent_runs.py::_daypart_persistent_session_allowed",
+          "new": "backend/app/domains/routines/service/session_keys.py::_daypart_persistent_session_allowed",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -11979,12 +12116,15 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_v6_inbox_scan_context",
-          "new": "backend/app/services/agent_runs.py::_format_v6_inbox_scan_context",
+          "new": "backend/app/domains/routines/service/action_candidates.py::_format_v6_inbox_scan_context",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12048,12 +12188,15 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_v6_inbox_compact_candidate",
-          "new": "backend/app/services/agent_runs.py::_format_v6_inbox_compact_candidate",
+          "new": "backend/app/domains/routines/service/action_candidates.py::_format_v6_inbox_compact_candidate",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12571,32 +12714,41 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_feed_post_action_status",
-          "new": "backend/app/services/agent_runs.py::_format_feed_post_action_status",
+          "new": "backend/app/domains/routines/service/action_candidates.py::_format_feed_post_action_status",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_feed_post_action_candidates",
-          "new": "backend/app/services/agent_runs.py::_format_feed_post_action_candidates",
+          "new": "backend/app/domains/routines/service/action_candidates.py::_format_feed_post_action_candidates",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
           "old": "backend/app/services/agent_runs.py::_format_actionable_feed_candidate",
-          "new": "backend/app/services/agent_runs.py::_format_actionable_feed_candidate",
+          "new": "backend/app/domains/routines/service/action_candidates.py::_format_actionable_feed_candidate",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12639,12 +12791,15 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_should_allow_resident_thread_tool",
-          "new": "backend/app/services/agent_runs.py::_should_allow_resident_thread_tool",
+          "new": "backend/app/domains/routines/service/tool_policy.py::_should_allow_resident_thread_tool",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -12789,12 +12944,15 @@
         },
         {
           "old": "backend/app/services/agent_runs.py::_policy_allows_observe",
-          "new": "backend/app/services/agent_runs.py::_policy_allows_observe",
+          "new": "backend/app/domains/routines/service/tool_policy.py::_policy_allows_observe",
           "direct_consumers": [
             "backend/app/services/agent_runs.py"
           ],
           "test_nodes": [
-            "tests/characters/test_creator_http_errors.py::test_error_exports_are_same_objects_and_keep_runtime_diagnostics"
+            "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+            "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+            "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+            "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
           ]
         },
         {
@@ -32229,6 +32387,32 @@
       "ownership": "Routines owns actual response constraints/fallback and success-evidence decisions plus own activity log. Runtime owns two gateway requests and external payload/trace handling; existing attached values and gateway client are passed through.",
       "preservation": "Original15 helpers/four constants match full AST after exact client/credential/Character/State annotation-name restoration. The log resolves canonical original activity_logs.log_activity, retaining same Session/finish_write and caller deferral. Original two evidence test bodies unchanged. New three tests verify skip/no-call, one read-only call and idempotency/provider parameters, fallback, original exception identity, SQLite same-Session visibility/rollback/default commit.",
       "remaining": "Resident Social context/admission and same-Session reads remain C6. AgentRun and LangGraph execution composition may remain large after actual policies/SQL reach owners. Memory Daypart/Operations/B5 consumers remain exact future-owner joins; no future ancestry merged."
+    },
+    "AR-B4-C6a-resident-policies": {
+      "status": "IMPLEMENTED — focused142/final441 passed,existing PostgreSQL1skip; boundary742/2495/206 cycle0; readonly6checks0/protected2139/current2260; stock full gate pending root first-source append",
+      "checked_source_map": "Existing complete AR-B2-B5 map retargets29 actual functions/classes and19 active constants, with actual direct original-module error consumers.",
+      "actual_paths": [
+        "backend/app/domains/routines/constants.py",
+        "backend/app/domains/routines/exceptions.py",
+        "backend/app/domains/routines/service/action_candidates.py",
+        "backend/app/domains/routines/service/session_keys.py",
+        "backend/app/domains/routines/service/tool_policy.py",
+        "backend/app/runtime/resident/request_options.py"
+      ],
+      "test_nodes": [
+        "tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+        "tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+        "tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight",
+        "tests/routines/test_resident_execution_bindings.py::test_resident_execution_has_all_global_dependencies"
+      ],
+      "test_moves": {
+        "backend/tests/test_daypart_persistent_session.py::test_daypart_main_session_key_changes_by_window": "backend/tests/routines/test_session_keys.py::test_daypart_main_session_key_changes_by_window",
+        "backend/tests/test_daypart_persistent_session.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick": "backend/tests/routines/test_session_keys.py::test_daypart_persistent_session_requires_flag_allowlist_and_natural_tick",
+        "backend/tests/test_daypart_persistent_session.py::test_night_daypart_keeps_start_date_across_midnight": "backend/tests/routines/test_session_keys.py::test_night_daypart_keeps_start_date_across_midnight"
+      },
+      "ownership": "Routines owns actual candidate/tool/session identity policies and the original eight execution error classes. Runtime owns request option dictionaries. Existing HTTP and execution references see the same error objects through their pending legacy consumer.",
+      "preservation": "Original29 functions/classes and19 constants match full AST. Original3 session tests move with unchanged bodies, KST value and settings object. Original request options, candidate hash, action order/duplicates, overnight daypart, flags/allowlist and error bases/messages remain.",
+      "remaining": "Social same-Session candidate/menu reads and credential preparation remain C6b/c. Uncalled action_menu178lines and recovery2helpers plus original unused two constants remain B8-A evidence, not fabricated supported calls. Memory Daypart/Operations/B5 and LG actual bodies remain their owner work."
     }
   },
   "test_symbols": {

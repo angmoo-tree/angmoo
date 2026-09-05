@@ -1,7 +1,7 @@
 {
-  "edge_count": 2483,
-  "external_import_count": 2311,
-  "module_count": 738,
+  "edge_count": 2495,
+  "external_import_count": 2318,
+  "module_count": 742,
   "modules": [
     {
       "external_imports": [],
@@ -4146,6 +4146,20 @@
     {
       "external_imports": [
         "__future__",
+        "hashlib",
+        "typing"
+      ],
+      "imports": [
+        "app.core.context_text",
+        "app.domains.routines.utils.context_text"
+      ],
+      "module": "app.domains.routines.service.action_candidates",
+      "path": "backend/app/domains/routines/service/action_candidates.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "datetime",
         "json",
         "typing"
@@ -4654,6 +4668,19 @@
     {
       "external_imports": [
         "__future__",
+        "datetime"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.routines.constants"
+      ],
+      "module": "app.domains.routines.service.session_keys",
+      "path": "backend/app/domains/routines/service/session_keys.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__",
         "datetime",
         "hashlib",
         "sqlalchemy",
@@ -4777,6 +4804,20 @@
       ],
       "module": "app.domains.routines.service.tick_schedule",
       "path": "backend/app/domains/routines/service/tick_schedule.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "__future__"
+      ],
+      "imports": [
+        "app.domains.routines.constants",
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.models",
+        "app.domains.routines.service.prompt_context"
+      ],
+      "module": "app.domains.routines.service.tool_policy",
+      "path": "backend/app/domains/routines/service/tool_policy.py",
       "wildcard_imports": []
     },
     {
@@ -9466,6 +9507,15 @@
     },
     {
       "external_imports": [
+        "__future__"
+      ],
+      "imports": [],
+      "module": "app.runtime.resident.request_options",
+      "path": "backend/app/runtime/resident/request_options.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "asyncio",
         "fcntl",
@@ -10397,6 +10447,7 @@
         "app.domains.routines.repository.feed_cues",
         "app.domains.routines.repository.slots",
         "app.domains.routines.service.action_briefs",
+        "app.domains.routines.service.action_candidates",
         "app.domains.routines.service.action_prompts",
         "app.domains.routines.service.activity_evidence",
         "app.domains.routines.service.execution_prompts",
@@ -10408,12 +10459,14 @@
         "app.domains.routines.service.run_backoff",
         "app.domains.routines.service.run_results",
         "app.domains.routines.service.runs",
+        "app.domains.routines.service.session_keys",
         "app.domains.routines.service.slot_assignments",
         "app.domains.routines.service.slot_leases",
         "app.domains.routines.service.slot_pool",
         "app.domains.routines.service.slot_recovery",
         "app.domains.routines.service.state_prompts",
         "app.domains.routines.service.tick_schedule",
+        "app.domains.routines.service.tool_policy",
         "app.domains.routines.utils.context_text",
         "app.domains.social.public",
         "app.domains.world_characters.public",
@@ -10423,6 +10476,7 @@
         "app.runtime.resident.decision_lanes",
         "app.runtime.resident.gateway_results",
         "app.runtime.resident.read_only_lanes",
+        "app.runtime.resident.request_options",
         "app.runtime.resident.slots",
         "app.runtime.routine_posts",
         "app.schemas",

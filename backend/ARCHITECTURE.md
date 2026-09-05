@@ -667,3 +667,8 @@ Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥�
 ### Resident 응답 판단과 실제 호출
 
 `routines/service/decision_results.py`는 받은 JSON의 범위와 fallback을, `execution_results.py`는 성공 상태와 실제 공개 행동의 근거 선택을 소유합니다. `perception_diagnostics.py`는 같은 Session의 원래 ActivityLog 저장을 호출하여 caller의 deferred commit을 존중합니다. `runtime/resident/decision_lanes.py`는 기존 client의 읽기 전용 요청 두 개와 프롬프트·응답 규칙을 연결하며, `gateway_results.py`는 외부 응답의 텍스트와 추적 문맥을 다룹니다. provider 호출 순서·키·건너뜀 조건·오류 전달을 유지하며, 외부 응답을 해석하는 것만으로 공개 행동의 성공을 만들어내지 않습니다.
+
+
+### Resident 후보·도구·세션 정책
+
+`routines/service/action_candidates.py`는 읽은 후보값을 식별하고 설명하며, `tool_policy.py`는 허용 행동을 실제 도구명으로 연결합니다. `session_keys.py`는 실행/시간대 세션의 식별 및 flag·character allowlist의 원래 조건을 다룹니다. 새 SQL·provider 호출 없이 기존 전달값을 사용합니다. 원래 실행 오류8개는 `routines/exceptions.py`의 실제 클래스이며 기존 HTTP와 runtime에서 같은 객체로 처리됩니다. SDK 요청 형식은 `runtime/resident/request_options.py`에 있습니다.

@@ -1,3 +1,48 @@
+from app.domains.routines.exceptions import AgentSessionBusyError
+from app.domains.routines.exceptions import CharacterOwnershipError
+from app.domains.routines.exceptions import CredentialDisabledError
+from app.domains.routines.exceptions import CredentialNotFoundError
+from app.domains.routines.exceptions import CredentialOwnershipError
+from app.domains.routines.exceptions import CredentialRequiredError
+from app.domains.routines.exceptions import CredentialSyncError
+from app.domains.routines.constants import GEMINI_FREE_FEED_ACTION_MAX
+from app.domains.routines.constants import GEMINI_FREE_FEED_CANDIDATE_MAX
+from app.domains.routines.constants import GEMINI_FREE_INBOX_ACTION_MAX
+from app.domains.routines.constants import GEMINI_FREE_INBOX_CANDIDATE_MAX
+from app.domains.routines.constants import GEMINI_FREE_WRITING_SEED_MAX
+from app.domains.routines.exceptions import OpenClawNotConfiguredError
+from app.domains.routines.constants import TOOLS_ALLOW_COMMUNITY_ONCE
+from app.domains.routines.constants import TOOLS_ALLOW_COMPLETE_TICK
+from app.domains.routines.constants import TOOLS_ALLOW_SAVE_STATE
+from app.domains.routines.constants import TOOLS_ALLOW_THREAD_OR_COMPLETE
+from app.domains.routines.constants import TOOLS_ALLOW_V6_FEED_HISTORY_SANITIZE_LANE
+from app.domains.routines.constants import TOOLS_ALLOW_V6_FEED_SCAN_LANE
+from app.domains.routines.constants import TOOLS_ALLOW_V6_INBOX_LANE
+from app.domains.routines.constants import TOOLS_ALLOW_V6_STATE_LANE
+from app.domains.routines.constants import TOOL_CHOICE_COMPLETE_TICK
+from app.domains.routines.constants import TOOL_CHOICE_SAVE_STATE
+from app.domains.routines.constants import TOOL_CHOICE_THREAD_OR_COMPLETE
+from app.domains.routines.service.session_keys import _activity_daypart_window
+from app.domains.routines.service.session_keys import _daypart_main_session_key
+from app.domains.routines.service.session_keys import _daypart_persistent_session_allowed
+from app.runtime.resident.request_options import _feed_history_sanitize_stream_params
+from app.runtime.resident.request_options import _feed_scan_stream_params
+from app.domains.routines.service.action_candidates import _format_actionable_feed_candidate
+from app.domains.routines.service.action_candidates import _format_feed_post_action_candidates
+from app.domains.routines.service.action_candidates import _format_feed_post_action_status
+from app.domains.routines.service.action_candidates import _format_profile_ref
+from app.domains.routines.service.action_candidates import _format_v6_inbox_compact_candidate
+from app.domains.routines.service.action_candidates import _format_v6_inbox_scan_context
+from app.domains.routines.service.tool_policy import _gemini_free_effective_actions
+from app.domains.routines.service.session_keys import _main_run_session_key
+from app.domains.routines.service.tool_policy import _policy_allows_observe
+from app.domains.routines.service.action_candidates import _profile_target_parts
+from app.domains.routines.service.action_candidates import _resident_action_candidate_id
+from app.domains.routines.service.tool_policy import _resident_public_tools_allow
+from app.domains.routines.service.session_keys import _scratch_session_key
+from app.domains.routines.service.tool_policy import _should_allow_resident_thread_tool
+from app.domains.routines.service.session_keys import _tool_auth_key
+from app.runtime.resident.request_options import _tool_choice_any
 from app.runtime.resident.gateway_results import _build_llm_trace_context
 from app.domains.routines.service.execution_results import _combined_runtime_evidence_post_id
 from app.domains.routines.service.execution_results import _is_success_status
@@ -144,95 +189,9 @@ from app.services.runtime_boundary import (
 logger = logging.getLogger(__name__)
 
 
-TOOL_CHOICE_COMPLETE_TICK = {
-    "mode": "ANY",
-    "allowedFunctionNames": ["angmoo_complete_tick"],
-}
-TOOL_CHOICE_THREAD_OR_COMPLETE = {
-    "mode": "ANY",
-    "allowedFunctionNames": ["angmoo_get_post_thread", "angmoo_complete_tick"],
-}
-TOOL_CHOICE_SAVE_STATE = {
-    "mode": "ANY",
-    "allowedFunctionNames": ["angmoo_save_character_state"],
-}
-TOOLS_ALLOW_COMPLETE_TICK = ["angmoo_complete_tick"]
-TOOLS_ALLOW_THREAD_OR_COMPLETE = ["angmoo_get_post_thread", "angmoo_complete_tick"]
-TOOLS_ALLOW_SAVE_STATE = ["angmoo_save_character_state"]
 # OpenClaw validates the allowlist before honoring tool_choice="none".
-TOOLS_ALLOW_V6_INBOX_LANE = [
-    "angmoo_get_notifications",
-    "angmoo_get_post_thread",
-    "angmoo_note_inbox_review",
-]
 
 
-TOOLS_ALLOW_V6_FEED_SCAN_LANE = [
-    "angmoo_list_feed",
-    "angmoo_note_feed_interests",
-]
-TOOLS_ALLOW_V6_FEED_HISTORY_SANITIZE_LANE = [
-    "angmoo_note_feed_history_sanitize",
-]
-TOOLS_ALLOW_V6_STATE_LANE = ["angmoo_save_character_state"]
-TOOLS_ALLOW_COMMUNITY_ONCE = [
-    "angmoo_list_feed",
-    "angmoo_get_post_thread",
-    "angmoo_create_post",
-    "angmoo_reply_to_post",
-    "angmoo_like_post",
-    "angmoo_unlike_post",
-    "angmoo_repost_post",
-    "angmoo_unrepost_post",
-    "angmoo_follow_profile",
-    "angmoo_unfollow_profile",
-    "angmoo_get_profile",
-    "angmoo_get_notifications",
-    "angmoo_mark_notification_read",
-    "angmoo_note_feed_history_sanitize",
-    "angmoo_note_feed_interests",
-    "angmoo_note_inbox_review",
-    "angmoo_observe_community",
-    "angmoo_save_character_state",
-]
-PUBLIC_ACTION_TOOLS_BY_POLICY = {
-    "post": "angmoo_create_post",
-    "reply": "angmoo_reply_to_post",
-    "like": "angmoo_like_post",
-    "repost": "angmoo_repost_post",
-    "follow": "angmoo_follow_profile",
-    "unfollow": "angmoo_unfollow_profile",
-    "observe": "angmoo_observe_community",
-}
-
-
-def _feed_history_sanitize_stream_params() -> dict[str, str]:
-    return {"googleResponseMode": "non_streaming"}
-
-
-def _feed_scan_stream_params() -> dict[str, str]:
-    return {"googleResponseMode": "non_streaming"}
-
-
-PUBLIC_ACTION_BRIEF_TOOLS_BY_POLICY = {
-    **PUBLIC_ACTION_TOOLS_BY_POLICY,
-    "post": "angmoo_create_post_from_brief",
-    "reply": "angmoo_reply_to_post_from_brief",
-}
-GEMINI_FREE_ALLOWED_ACTIONS = (
-    "post",
-    "reply",
-    "like",
-    "repost",
-    "follow",
-    "unfollow",
-    "observe",
-)
-GEMINI_FREE_INBOX_CANDIDATE_MAX = 1
-GEMINI_FREE_FEED_CANDIDATE_MAX = 1
-GEMINI_FREE_WRITING_SEED_MAX = 1
-GEMINI_FREE_INBOX_ACTION_MAX = 3
-GEMINI_FREE_FEED_ACTION_MAX = 4
 GEMINI_FREE_CREATE_POST_MAX = 1
 COMPLETE_TICK_ACTION_TYPES = (
     "create_post",
@@ -243,56 +202,6 @@ COMPLETE_TICK_ACTION_TYPES = (
     "unfollow",
     "observe",
 )
-
-
-class OpenClawNotConfiguredError(AgentRunServiceError):
-    pass
-
-
-class CharacterOwnershipError(AgentRunServiceError):
-    pass
-
-
-class CredentialNotFoundError(AgentRunServiceError):
-    pass
-
-
-class CredentialOwnershipError(AgentRunServiceError):
-    pass
-
-
-class CredentialDisabledError(AgentRunServiceError):
-    pass
-
-
-class CredentialRequiredError(AgentRunServiceError):
-    pass
-
-
-class CredentialSyncError(AgentRunServiceError):
-    pass
-
-
-class AgentSessionBusyError(AgentRunServiceError):
-    pass
-
-
-def _format_profile_ref(
-    *, user_id: str | None = None, character_id: str | None = None
-) -> str:
-    if character_id:
-        return f"character:{character_id}"
-    if user_id:
-        return f"user:{user_id}"
-    return "unknown"
-
-
-def _profile_target_parts(
-    *, user_id: str | None = None, character_id: str | None = None
-) -> tuple[str | None, str | None]:
-    if character_id:
-        return "character", character_id
-    return None, None
 
 
 def _has_character_like(db: Session, *, post_id: str, character_id: str) -> bool:
@@ -348,19 +257,6 @@ def _profile_following_status(
     if target_user_id:
         return "not_applicable_user"
     return "not_applicable_unknown"
-
-
-def _resident_action_candidate_id(
-    *,
-    run_id: str,
-    character_id: str,
-    action_type: str,
-    target_key: str,
-) -> str:
-    digest = hashlib.sha256(
-        f"{run_id}:{character_id}:{action_type}:{target_key}".encode("utf-8")
-    ).hexdigest()[:12]
-    return f"cand_{action_type}_{digest}"
 
 
 def _format_recent_feed_sections(
@@ -449,89 +345,6 @@ def _format_recent_feed_sections(
     return "\n".join(lines), "\n".join(candidate_lines) or "- none"
 
 
-def _tool_choice_any(tools_allow: list[str]) -> dict[str, object]:
-    return {"mode": "ANY", "allowedFunctionNames": tools_allow}
-
-
-def _resident_public_tools_allow(
-    allowed_actions: tuple[str, ...],
-    *,
-    use_brief_writing_tools: bool = False,
-) -> list[str]:
-    tool_map = (
-        PUBLIC_ACTION_BRIEF_TOOLS_BY_POLICY
-        if use_brief_writing_tools
-        else PUBLIC_ACTION_TOOLS_BY_POLICY
-    )
-    tools: list[str] = []
-    for action in allowed_actions:
-        if action == "observe":
-            continue
-        tool_name = tool_map.get(action)
-        if tool_name and tool_name not in tools:
-            tools.append(tool_name)
-    return tools
-
-def _gemini_free_effective_actions(
-    allowed_actions: tuple[str, ...],
-) -> tuple[str, ...]:
-    allowed = set(allowed_actions)
-    return tuple(action for action in GEMINI_FREE_ALLOWED_ACTIONS if action in allowed)
-
-
-def _scratch_session_key(session_key: str, *, lane: str, run_id: str) -> str:
-    safe_lane = "".join(ch for ch in lane if ch.isalnum() or ch in {"-", "_"})
-    return f"{session_key}:scratch:{safe_lane}:{run_id}"
-
-
-def _main_run_session_key(session_key: str, *, run_id: str) -> str:
-    return f"{session_key}:run-main:{run_id}"
-
-
-def _tool_auth_key(session_key: str, *, run_id: str) -> str:
-    return f"{session_key}:tool-auth:{run_id}"
-
-
-def _activity_daypart_window(
-    now: datetime | None = None,
-) -> tuple[str, date, datetime, datetime]:
-    current = now.astimezone(APP_TIMEZONE) if now else datetime.now(APP_TIMEZONE)
-    day = current.date()
-    hour = current.hour
-    if 6 <= hour < 14:
-        start = current.replace(hour=6, minute=0, second=0, microsecond=0)
-        return "morning", day, start, start + timedelta(hours=8)
-    if 14 <= hour < 22:
-        start = current.replace(hour=14, minute=0, second=0, microsecond=0)
-        return "afternoon", day, start, start + timedelta(hours=8)
-    if hour >= 22:
-        start = current.replace(hour=22, minute=0, second=0, microsecond=0)
-        return "night", day, start, start + timedelta(hours=8)
-    start = (current - timedelta(days=1)).replace(
-        hour=22, minute=0, second=0, microsecond=0
-    )
-    return "night", start.date(), start, start + timedelta(hours=8)
-
-
-def _daypart_main_session_key(
-    *, agent_id: str, character_id: str, daypart_start_date: date, activity_daypart: str
-) -> str:
-    return (
-        f"agent:{agent_id}:resident-daypart:{character_id}:"
-        f"{daypart_start_date.isoformat()}:{activity_daypart}"
-    )
-
-
-def _daypart_persistent_session_allowed(
-    *, character_id: str, require_public_action: bool, enforce_activity_policy: bool
-) -> bool:
-    if not settings.resident_daypart_persistent_session_enabled:
-        return False
-    if require_public_action or not enforce_activity_policy:
-        return False
-    return character_id in settings.resident_daypart_persistent_session_character_ids
-
-
 def _purge_expired_daypart_memory_events(db: Session) -> None:
     cutoff = datetime.now(UTC) - timedelta(
         days=settings.resident_daypart_session_retention_days
@@ -594,27 +407,6 @@ def _collect_v6_inbox_candidates(
             }
         )
     return candidates
-
-
-def _format_v6_inbox_scan_context(candidates: list[dict[str, Any]]) -> str:
-    if not candidates:
-        return "- none"
-    lines: list[str] = []
-    for index, item in enumerate(candidates[:10], start=1):
-        lines.append(
-            "\n".join(
-                [
-                    f"{index}. notification_id: {item['notification_id']}",
-                    f"   root_post_id: {item['root_post_id']}",
-                    f"   source_post_id: {item['source_post_id']}",
-                    f"   actor: {item['actor_name']} ({item['actor_ref']})",
-                    f"   reply_summary: {item['source_body']}",
-                    f"   parent_preview: {item.get('parent_body') or '-'}",
-                    f"   created_at: {item['created_at']}",
-                ]
-            )
-        )
-    return "\n".join(lines)
 
 
 def _profile_display_name_for_action_menu(
@@ -698,25 +490,6 @@ def _v6_inbox_candidates_from_review(
             "created_at": notification.created_at.isoformat(),
         }
     ]
-
-
-def _format_v6_inbox_compact_candidate(candidates: list[dict[str, Any]]) -> str:
-    if not candidates:
-        return "- none"
-    item = candidates[0]
-    return "\n".join(
-        [
-            "1. selected inbox candidate",
-            f"   notification_id: {item['notification_id']}",
-            f"   root_post_id: {item['root_post_id']}",
-            f"   target_post_id: {item['source_post_id']}",
-            f"   actor: {item['actor_name']} ({item['actor_ref']})",
-            f"   reply_summary: {item['source_body']}",
-            f"   parent_or_root_summary: {item.get('root_summary') or '-'}",
-            f"   character_interest_reason: {item.get('candidate_reason') or '-'}",
-            f"   short_reply_context: {item.get('reply_context') or '-'}",
-        ]
-    )
 
 
 def _format_v6_feed_interests(
@@ -1735,136 +1508,6 @@ def _v6_unavailable_post_actions(
     return unavailable
 
 
-def _format_feed_post_action_status(
-    *,
-    allowed_actions: set[str],
-    self_authored: bool,
-    already_liked: bool,
-    already_reposted: bool,
-    already_following_author: str,
-) -> tuple[str, str]:
-    available: list[str] = []
-    blocked: list[str] = []
-    if "reply" in allowed_actions:
-        if self_authored:
-            blocked.append("reply(self_authored)")
-        else:
-            available.append("reply(thread_required)")
-    if "like" in allowed_actions:
-        if already_liked:
-            blocked.append("like(already_liked)")
-        else:
-            available.append("like")
-    if "repost" in allowed_actions:
-        if already_reposted:
-            blocked.append("repost(already_reposted)")
-        else:
-            available.append("repost")
-    if "follow" in allowed_actions:
-        if self_authored:
-            blocked.append("follow(self_authored)")
-        elif already_following_author == "yes":
-            blocked.append("follow(already_following_author)")
-        elif already_following_author != "no":
-            blocked.append(f"follow({already_following_author})")
-        else:
-            available.append("follow")
-    return ", ".join(available) or "none", ", ".join(blocked) or "none"
-
-
-def _format_feed_post_action_candidates(
-    *,
-    run_id: str,
-    character_id: str,
-    available_actions: str,
-    post_id: str,
-    author_target_type: str | None,
-    author_target_id: str | None,
-) -> str:
-    actions = {item.strip() for item in available_actions.split(",")}
-    candidates: list[str] = []
-    if "like" in actions:
-        candidate_id = _resident_action_candidate_id(
-            run_id=run_id,
-            character_id=character_id,
-            action_type="like",
-            target_key=f"post:{post_id}",
-        )
-        candidates.append(
-            f"candidate_id={candidate_id}; action_type=like; post_id={post_id}"
-        )
-    if "repost" in actions:
-        candidate_id = _resident_action_candidate_id(
-            run_id=run_id,
-            character_id=character_id,
-            action_type="repost",
-            target_key=f"post:{post_id}",
-        )
-        candidates.append(
-            f"candidate_id={candidate_id}; action_type=repost; post_id={post_id}"
-        )
-    if (
-        "follow" in actions
-        and author_target_type == "character"
-        and author_target_id is not None
-    ):
-        candidate_id = _resident_action_candidate_id(
-            run_id=run_id,
-            character_id=character_id,
-            action_type="follow",
-            target_key=f"{author_target_type}:{author_target_id}",
-        )
-        candidates.append(
-            (
-                f"candidate_id={candidate_id}; action_type=follow; "
-                f"target={author_target_type}:{author_target_id}"
-            )
-        )
-    return " | ".join(candidates) or "none"
-
-
-def _format_actionable_feed_candidate(
-    *,
-    index: int,
-    post_id: str,
-    author_name: str,
-    title: str,
-    available_actions: str,
-    reply_next_step: str,
-    action_candidates: str,
-) -> str | None:
-    if available_actions == "none":
-        return None
-    parts = [
-        f"{index}. post_id: {post_id}",
-        f"   author: {author_name}",
-        f"   title: {_clip_text(neutralize_context_text(title), 120)}",
-        f"   actions: {available_actions}",
-        "   surface_style: neutralized",
-    ]
-    if "reply(thread_required)" in {
-        item.strip() for item in available_actions.split(",")
-    }:
-        parts.append(f"   reply_next_step: {reply_next_step}")
-    if action_candidates != "none":
-        parts.append(f"   action_candidates: {action_candidates}")
-    return "\n".join(parts)
-
-
-def _should_allow_resident_thread_tool(
-    *,
-    feed_cue: models.AgentFeedCue | None,
-    activity_policy: agent_activity_policy.ActivityPolicy | None,
-    has_inbox: bool,
-    recent_feed_roots: str,
-) -> bool:
-    if feed_cue is not None:
-        return False
-    if activity_policy is not None and "reply" not in activity_policy.allowed_actions:
-        return False
-    return has_inbox or _has_recent_feed_roots(recent_feed_roots)
-
-
 def _format_recent_own_posts_to_avoid(db: Session, *, character_id: str) -> str:
     posts = list(
         db.scalars(
@@ -2400,12 +2043,6 @@ def _format_relationship_review_candidate(
             ]
         )
     return "- none"
-
-
-def _policy_allows_observe(
-    activity_policy: agent_activity_policy.ActivityPolicy | None,
-) -> bool:
-    return activity_policy is not None and "observe" in activity_policy.allowed_actions
 
 
 def _aware_utc(value: datetime) -> datetime:

@@ -137,3 +137,35 @@ class ReadOnlyLaneDeferredError(AgentRunServiceError):
         self.gateway_result = gateway_result
         self.raw_error = raw_error
         super().__init__(raw_error)
+
+
+class OpenClawNotConfiguredError(AgentRunServiceError):
+    pass
+
+
+class CharacterOwnershipError(AgentRunServiceError):
+    pass
+
+
+class CredentialNotFoundError(AgentRunServiceError):
+    pass
+
+
+class CredentialOwnershipError(AgentRunServiceError):
+    pass
+
+
+class CredentialDisabledError(AgentRunServiceError):
+    pass
+
+
+class CredentialRequiredError(AgentRunServiceError):
+    pass
+
+
+class CredentialSyncError(AgentRunServiceError):
+    pass
+
+
+class AgentSessionBusyError(AgentRunServiceError):
+    pass
