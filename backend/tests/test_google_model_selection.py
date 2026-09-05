@@ -6,7 +6,7 @@ from pydantic import ValidationError
 
 from app import schemas
 from app.cruds import agent_runs as agent_run_crud
-from app.services import agents as agent_service
+from app.runtime.characters import management as agent_service
 
 
 def test_agent_google_models_are_allowed_in_agent_model_schemas():

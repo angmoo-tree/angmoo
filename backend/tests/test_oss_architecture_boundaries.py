@@ -9,10 +9,10 @@ APP_ROOT = BACKEND_ROOT / "app"
 PUBLIC_RUNTIME_FILES = (
     APP_ROOT / "api" / "v1" / "routes" / "agent_runs.py",
     APP_ROOT / "api" / "v1" / "routes" / "agents.py",
-    APP_ROOT / "services" / "agent_creation_drafts.py",
+    APP_ROOT / "runtime" / "characters" / "creator.py",
     APP_ROOT / "services" / "agent_runs.py",
     APP_ROOT / "services" / "agent_writing.py",
-    APP_ROOT / "services" / "agents.py",
+    APP_ROOT / "runtime" / "characters" / "management.py",
     APP_ROOT / "domains" / "identity" / "service" / "auth.py",
     APP_ROOT / "runtime" / "account_deletion.py",
     APP_ROOT / "services" / "langgraph_resident.py",
@@ -116,9 +116,9 @@ def test_secret_decryption_is_confined_to_credential_resolver():
 
 def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
     allowed: dict[str, set[str]] = {
-        "services/agent_creation_drafts.py": {"_decrypt_draft_api_key"},
+        "runtime/characters/creator.py": {"_decrypt_draft_api_key"},
         "services/agent_runs.py": {"_ensure_slot_auth_profile"},
-        "services/agents.py": {
+        "runtime/characters/management.py": {
             "run_first_greeting",
             "analyze_tendency",
             "_bind_slot_auth_profile",
@@ -186,7 +186,10 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
 def test_public_read_schemas_do_not_expose_secret_storage_fields():
     forbidden = {"encrypted_api_key", "ciphertext", "raw_key", "api_key"}
     violations: dict[str, list[str]] = {}
-    for path in sorted((APP_ROOT / "schemas").glob("*.py")):
+    for path in sorted(
+        path for path in APP_ROOT.rglob("*.py")
+        if path.name == "schemas.py" or "schemas" in path.relative_to(APP_ROOT).parts
+    ):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in tree.body:
             if not isinstance(node, ast.ClassDef) or not node.name.endswith("Read"):

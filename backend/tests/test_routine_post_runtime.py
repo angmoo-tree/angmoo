@@ -30,7 +30,7 @@ from app.services import (
     routine_post_runtime,
     world_character_contracts,
 )
-from app.services import agents as agent_service
+from app.runtime.characters import management as agent_service
 from app.services import community as community_service
 from app.services.agent_activity_policy import ActivityPolicy
 from app.services.direct_llm import DirectLlmCallContext, DirectLlmError

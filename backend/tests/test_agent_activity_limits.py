@@ -18,13 +18,9 @@ from app.core.config import settings
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.domains.worlds import public as world_service
-from app.services import (
-    agent_creation_drafts as draft_service,
-    agent_activity_policy,
-    agent_runs as agent_run_service,
-    agents as agent_service,
-    resident_tick_scheduler,
-)
+from app.services import (agent_activity_policy, agent_runs as agent_run_service, resident_tick_scheduler)
+from app.runtime.characters import creator as draft_service
+from app.runtime.characters import management as agent_service
 
 
 def _create_autonomy_capacity_tables(engine) -> None:

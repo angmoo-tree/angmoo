@@ -11,7 +11,7 @@ from app.api.v1.routes import agents as agent_routes
 from app.domains.identity.router import auth as auth_routes
 from app.core.config import settings
 from app.cruds import agents as agent_crud
-from app.services import agents as agent_service
+from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.services import local_bot as local_bot_service
@@ -398,8 +398,10 @@ def test_agent_route_returns_403_for_locked_demo_error(monkeypatch):
 
 
 def test_agent_service_blocks_profile_update_after_ownership_check(monkeypatch):
+    from app.domains.characters.service import mutations
+
     monkeypatch.setattr(
-        agent_service,
+        mutations,
         "_get_owned_character",
         lambda db, user, character_id: _character(),
     )

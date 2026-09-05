@@ -19,6 +19,7 @@
     {"disposition": "migrate", "module": "app.core.public_media", "owner_stage": "L6", "removal_condition": "Move public media mounting behind the media domain composition API."},
     {"disposition": "keep", "module": "app.core.redaction", "owner_stage": "L0", "removal_condition": null},
     {"disposition": "keep", "module": "app.core.request_limits", "owner_stage": "L0", "removal_condition": null},
+    {"disposition": "keep", "module": "app.core.response_schemas", "owner_stage": "AR-B2-B", "removal_condition": null},
     {"disposition": "migrate", "module": "app.core.search_text", "owner_stage": "L4", "removal_condition": "Move search normalization behind the social feed domain public API."},
     {"disposition": "keep", "module": "app.core.security", "owner_stage": "L1", "removal_condition": null},
     {"disposition": "keep", "module": "app.core.sqlite_concurrency", "owner_stage": "L0", "removal_condition": null},

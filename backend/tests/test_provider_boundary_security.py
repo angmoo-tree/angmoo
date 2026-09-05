@@ -9,13 +9,8 @@ from urllib.request import Request
 import pytest
 
 from app import schemas
-from app.services import (
-    agent_creation_drafts,
-    pollinations_image,
-    post_image_generation,
-    provider_http,
-    replicate_image,
-)
+from app.services import (pollinations_image, post_image_generation, provider_http, replicate_image)
+from app.runtime.characters import creator as agent_creation_drafts
 
 
 CANARY = "phase7-provider-secret-canary-7f1d9e"

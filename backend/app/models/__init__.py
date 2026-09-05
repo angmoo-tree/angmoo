@@ -53,7 +53,7 @@ from app.domains.memory.infrastructure.sqlalchemy_models import (
     MemoryMaintenanceJob,
     MemoryScopeSettingModel,
 )
-from app.models.profile_images import ProfileImageCandidate, ProfileImageQuotaReservation
+from app.domains.characters.models import ProfileImageCandidate, ProfileImageQuotaReservation
 from app.models.agent_runs import (
     AgentActivityLog,
     AgentDaypartMemoryEvent,
@@ -62,7 +62,7 @@ from app.models.agent_runs import (
     AgentRelationshipPoint,
     AgentRun,
 )
-from app.models.agent_creation_drafts import AgentCreationDraft
+from app.domains.characters.models import AgentCreationDraft
 from app.models.admin_ops import AdminAuditLog, SiteOperationBanner, SiteOperationSetting
 from app.models.tree import TreeComment, TreePost
 from app.models.worlds import (

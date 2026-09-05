@@ -231,6 +231,10 @@
       "sha256": "53598bca46faed571a41d36e887dadc76404c215bb39752bf2aed9f7bfc132e2"
     },
     {
+      "path": "backend/app/runtime/characters/management.py",
+      "sha256": "3449dde8c244b0621ba1efd7607a7bc1b8bd9475cc1d50d1f819f20e73a719d4"
+    },
+    {
       "path": "backend/app/runtime/desktop_sidecar.py",
       "sha256": "62d7048116e3eda4b9281408232297ec568a7e19f43f0d7b77d70e6fe4c37fa3"
     },
@@ -295,10 +299,6 @@
       "sha256": "1cd8f5e7caeca95f633c3f2f1809623fee3b545bfa4e31930fcb96a931704e1d"
     },
     {
-      "path": "backend/app/services/agents.py",
-      "sha256": "17768f4772dec55287476cd7e09a4ed3c251f4b89e2bfa4100e1f26e76a4442d"
-    },
-    {
       "path": "backend/tests/test_p8_l_r_memory_batch_api.py",
       "sha256": "944f16c505feb8094f7eb29609f8c362b8199776d9658924d48c0ce370bad921"
     },
@@ -316,7 +316,7 @@
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_safety.py",
-      "sha256": "9c20fa5661f93dd6124a485ae72fb191642bd87b3263b1e291f98ffbd3a47c23"
+      "sha256": "92dd7490acf407a255bdd6c5f69244ba4e6a4c5761494288517f42cc04e3071e"
     },
     {
       "path": "browser-tests/memory-batch-fixture.ts",
@@ -396,7 +396,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_r_memory_batch_inventory.py",
-      "sha256": "6289925d8ad9e560856ac61c1b7b7a695988519cb4364bcf9629d7dabc80190b"
+      "sha256": "3efda78ecc55883f91723673c222d3b251ac5655ed8b0e243ab45d17df2e4a77"
     },
     {
       "path": "scripts/ci/run_windows_installer_supported_upgrade.ps1",

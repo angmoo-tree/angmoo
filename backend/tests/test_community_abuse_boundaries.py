@@ -92,7 +92,7 @@ def test_three_reports_do_not_automatically_hide_post() -> None:
 
 
 def test_saved_character_count_is_not_a_community_abuse_quota() -> None:
-    from app.services import agents
+    from app.runtime.characters import management as agents
 
     assert not hasattr(agents, "_lock_agent_quota")
     assert not hasattr(agents, "_ensure_agent_quota_available")

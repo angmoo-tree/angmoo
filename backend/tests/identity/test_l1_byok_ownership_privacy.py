@@ -19,7 +19,7 @@ from app.core.redaction import sanitize_support_bundle_metadata
 from app.domains.identity.exceptions import CredentialResolutionError
 from app.domains.identity.service.credential_resolution import CredentialResolver
 from app.domains.identity.contracts import CredentialPurpose
-from app.services import agents as agent_service
+from app.runtime.characters import management as agent_service
 
 
 def _app_and_engine(owner: models.User):

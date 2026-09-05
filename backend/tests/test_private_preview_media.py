@@ -10,7 +10,7 @@ from sqlalchemy.pool import StaticPool
 from app import models
 from app.core.config import settings
 from app.core.public_media import mount_public_media
-from app.services import agent_creation_drafts
+from app.runtime.characters import creator as agent_creation_drafts
 
 
 def _engine():
