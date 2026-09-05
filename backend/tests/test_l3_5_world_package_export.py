@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app import models
-from app.api.v1.deps import get_current_user
+from app.domains.identity.dependencies import get_current_user
 from app.core.db import Base, get_db
 from app.domains.world_packages.api.routes import (
     _stream_and_record_delivery,

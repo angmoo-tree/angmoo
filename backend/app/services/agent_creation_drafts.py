@@ -27,14 +27,14 @@ from app.policies import name_policy
 from app.services import agents as agent_service
 from app.services import agent_activity_policy
 from app.services import agent_runs as agent_run_service
-from app.services import demo_lock
+from app.domains.identity.service import demo_access as demo_lock
 from app.services.direct_llm import DirectLlmCallContext, RunLlmTracker, generate_text
 from app.services import operation_settings
 from app.services import image_provider
 from app.services import pollinations_image
 from app.services import prompt_safety
 from app.services import profile_media
-from app.services import bounded_http
+from app.integrations import bounded_http
 from app.services import provider_http
 from app.services import replicate_image
 from app.services import service_image_key

@@ -244,17 +244,10 @@ def initialize_local_installation_identity(
 ) -> None:
     """Ensure the singleton device identity before in-process workers start."""
 
-    from app.domains.identity.application.local_owner import (
-        EnsureLocalInstallationIdentity,
-    )
-    from app.domains.identity.infrastructure.sqlalchemy_identity_repository import (
-        SqlAlchemyIdentityRepository,
-    )
+    from app.domains.identity.service.local_owner import LocalIdentityService
 
     with session_factory() as db:
-        EnsureLocalInstallationIdentity(
-            SqlAlchemyIdentityRepository(db)
-        ).execute()
+        LocalIdentityService(db).ensure_local_installation_identity()
 
 
 __all__ = [

@@ -440,7 +440,7 @@ def test_oversized_request_fails_before_physical_call_reservation(memory_session
 
 
 def test_account_scrub_removes_private_memory_batches_not_other_owner(memory_session):
-    from app.services.auth import _scrub_account_data
+    from app.runtime.account_deletion import _scrub_account_data
     from app.domains.memory.infrastructure.batch_models import (
         MemoryBatchProfile,
         MEMORY_BATCH_TABLES,

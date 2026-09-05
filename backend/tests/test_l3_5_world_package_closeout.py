@@ -13,7 +13,7 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app import models
-from app.api.v1.deps import get_current_user
+from app.domains.identity.dependencies import get_current_user
 from app.core.db import Base, get_db
 from app.domains.device_home.repository import (
     SqlAlchemyWorldSurfaceRepository,

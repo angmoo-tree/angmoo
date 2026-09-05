@@ -7,7 +7,7 @@ import pytest
 from pydantic import SecretStr
 
 from app.core.config import DEFAULT_APP_SECRET, Settings
-from app.core.startup_security import StartupSecurityError, validate_startup_security
+from app.runtime.startup_security import StartupSecurityError, validate_startup_security
 from app.services.runtime_boundary import get_resident_runtime_adapter
 
 

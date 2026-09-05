@@ -4,7 +4,7 @@ from fastapi import APIRouter
 
 from app.api.v1.routes import agent_runs
 from app.api.v1.routes import agents
-from app.api.v1.routes import auth
+from app.domains.identity.router import auth
 from app.api.v1.routes import bot
 from app.api.v1.routes import character_lore
 from app.api.v1.routes import community

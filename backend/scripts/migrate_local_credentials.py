@@ -10,10 +10,8 @@ from app import models
 from app.core import security
 from app.core.config import settings
 from app.core.db import SessionLocal
-from app.domains.identity.application.migrate_local_credentials import (
-    CredentialMigrationError,
-    migrate_local_credential_envelope,
-)
+from app.domains.identity.exceptions import CredentialMigrationError
+from app.domains.identity.service.credential_migration import migrate_local_credential_envelope
 
 
 _MIGRATION_ADVISORY_LOCK = 4_721_001_002

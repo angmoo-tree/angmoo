@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app import models
-from app.api.v1.deps import get_current_user
+from app.domains.identity.dependencies import get_current_user
 from app.core.db import Base, get_db
 from app.domains.device_home.router import router
 from app.providers import registry as provider_registry
@@ -463,7 +463,7 @@ def test_stale_readiness_remains_hidden_from_home_and_explained_in_studio() -> N
 
 
 def test_surface_http_bounds_and_local_frontend_origin_remain_enforced() -> None:
-    from app.core.browser_session import LOCAL_FRONTEND_ORIGIN_HEADER
+    from app.domains.identity.browser_session import LOCAL_FRONTEND_ORIGIN_HEADER
 
     client, engine, principal = _fixture()
     _seed(engine, principal)

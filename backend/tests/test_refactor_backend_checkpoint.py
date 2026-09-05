@@ -269,3 +269,22 @@ def test_new_split_requires_real_symbols_consumers_and_behavior_test_evidence(mo
     broken = copy.deepcopy(detail)
     broken["split_symbols"][0]["new"] = "backend/app/read.py::unknown"
     assert any("does not define" in error for error in p.check_split_evidence({"details": {"AR-B2": broken}}, snapshots, tmp_path))
+
+
+def test_package_initializer_move_normalizes_its_exact_import_spelling() -> None:
+    literals = p.path_literals({
+        "backend/app/domains/identity/infrastructure/__init__.py": "backend/app/domains/identity/models.py",
+    })
+    assert p.normalized_assertion("assert 'app.domains.identity.infrastructure' in imports", literals) == p.normalized_assertion("assert 'app.domains.identity.models' in imports", literals)
+    assert p.normalized_assertion("assert 'from app.domains.identity.infrastructure import User' in source", literals) == p.normalized_assertion("assert 'from app.domains.identity.models import User' in source", literals)
+
+
+def test_package_initializer_move_does_not_normalize_unmapped_descendants() -> None:
+    literals = p.path_literals({
+        "backend/app/domains/identity/infrastructure/__init__.py": "backend/app/domains/identity/models.py",
+    })
+    for suffix in (".unmoved", "/unmoved", "_other"):
+        fragment = f"assert 'app.domains.identity.infrastructure{suffix}' in imports"
+        assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])
+    fragment = "assert 'vendor.app.domains.identity.infrastructure' in imports"
+    assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])

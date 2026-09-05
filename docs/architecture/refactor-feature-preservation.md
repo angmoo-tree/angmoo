@@ -36,7 +36,7 @@
 
 | ID | 기능 | 보존의 핵심 |
 | --- | --- | --- |
-| K01 | owner·인증·BYOK·프로필 | session/CSRF·credential 접근·계정 삭제·비밀 노출 경계 |
+| K01 | identity 역할 파일·공통 HTTP 연결·runtime 계정 삭제로 이전 | session/CSRF·credential 접근·계정 삭제·비밀 노출 경계. 기존 public 소비자는 정확한 부분 scope로 보호 |
 | K02 | Device Home·Phone·World 목록 | owner 범위·launchability와 runtime 상태 구분·빈 상태·재시도·탐색 |
 | K03 | Character·World Creator·Studio | 생성/편집·readiness·membership·definition hash |
 | K04 | WorldCharacter 구성 | 수동/자율 구분·4시간대×10 routine 후보·승인·재시작 |
@@ -106,3 +106,5 @@ Frontend Home은 World 목록을 소유하고, 인증·runtime-status·device-sh
 AR-1은 새 규칙 지원과 허용/거부 fixture를 먼저 제공한다. 실제 코드 이동과 해당 scope 활성화를 같은 PR에서 수행한다. 미전환 영역의 기존 보호 규칙과 전체 순환 검사를 유지하며 넓은 예외로 통과시키지 않는다.
 
 AR-B1은 PR #260에서 legacy alias 없이 병합됐다. AR-F1은 PR #261에서 Home의 화면·공용 코드를 옮겼고 네 feature facade 소비자, 공용 TypeScript bridge 7개, semantic CSS 직접 소비자 7개를 제거 단계와 함께 기록했다. AR-0/1과 두 파일럿의 완료는 전체 리팩터링 완료가 아니다. AR-G·AR-B2 이후·AR-F2 이후·AR-X가 남으며, P8-L-S 실제 AI 품질·인과·사용자 closeout도 별도로 남는다.
+
+AR-B2의 identity 구현은 15개 소유 테스트 파일·기존 133 nodes와 함께 역할 파일로 이전했다. Auth의 계정 삭제 부분은 runtime의 같은 session/UoW workflow로 분리했고 실패 시 DB rollback·비공개 media 복구, 성공 후 purge 순서를 유지한다. Local owner의 실패한 claim 시도 횟수 commit과 session 발급 제한도 보존한다. 두 factory의 callback 연결, HTTP dependency의 같은 객체 identity, 기존 model/schema aggregate 호환은 G06·G05 후속 단계에서 이어받을 계약이다. 현재 적용·검증·PR·병합 결과는 [백엔드 전환 결과](refactor-backend-results.md)에 별도로 기록한다.

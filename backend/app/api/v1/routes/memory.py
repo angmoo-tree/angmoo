@@ -12,8 +12,9 @@ from dataclasses import asdict
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.orm import Session
 
-from app.api.v1.deps import get_current_user, get_db
-from app.core import browser_session
+from app.domains.identity.dependencies import get_current_user
+from app.core.db import get_db
+from app.domains.identity import browser_session
 from app.domains.identity.public import User
 from app.domains.memory.api.schemas import (
     MemoryCorrectionCreate,

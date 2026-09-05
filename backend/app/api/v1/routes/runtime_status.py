@@ -3,8 +3,8 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
-from app.api.v1.deps import get_current_user
-from app.core import browser_session
+from app.domains.identity.dependencies import get_current_user
+from app.domains.identity import browser_session
 from app.core.config import settings
 from app.core.db import get_db
 from app.domains.identity.public import (

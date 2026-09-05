@@ -17,7 +17,7 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session, sessionmaker
 
 from app import models, schemas
-from app.api.v1.deps import get_current_user
+from app.domains.identity.dependencies import get_current_user
 from app.core import security
 from app.core.db import Base, get_db
 from app.core.search_text import build_post_search_document

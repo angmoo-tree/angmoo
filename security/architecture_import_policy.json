@@ -9,18 +9,6 @@
           "importer": "app.alembic.env"
         },
         {
-          "imported": "app.models",
-          "importer": "app.api.v1.deps"
-        },
-        {
-          "imported": "app.services.auth",
-          "importer": "app.api.v1.deps"
-        },
-        {
-          "imported": "app.services.demo_lock",
-          "importer": "app.api.v1.deps"
-        },
-        {
           "imported": "app.services.local_bot",
           "importer": "app.api.v1.deps"
         },
@@ -75,30 +63,6 @@
         {
           "imported": "app.services.runtime_boundary",
           "importer": "app.api.v1.routes.agents"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.api.v1.routes.auth"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.api.v1.routes.auth"
-        },
-        {
-          "imported": "app.services.auth",
-          "importer": "app.api.v1.routes.auth"
-        },
-        {
-          "imported": "app.services.demo_lock",
-          "importer": "app.api.v1.routes.auth"
-        },
-        {
-          "imported": "app.services.login_throttle",
-          "importer": "app.api.v1.routes.auth"
-        },
-        {
-          "imported": "app.services.turnstile",
-          "importer": "app.api.v1.routes.auth"
         },
         {
           "imported": "app.schemas",
@@ -437,14 +401,6 @@
           "importer": "app.services.agent_creation_drafts"
         },
         {
-          "imported": "app.services.bounded_http",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
-          "imported": "app.services.demo_lock",
-          "importer": "app.services.agent_creation_drafts"
-        },
-        {
           "imported": "app.services.direct_llm",
           "importer": "app.services.agent_creation_drafts"
         },
@@ -617,10 +573,6 @@
           "importer": "app.services.agents"
         },
         {
-          "imported": "app.services.demo_lock",
-          "importer": "app.services.agents"
-        },
-        {
           "imported": "app.services.direct_llm",
           "importer": "app.services.agents"
         },
@@ -659,42 +611,6 @@
         {
           "imported": "app.services.world_character_setup",
           "importer": "app.services.agents"
-        },
-        {
-          "imported": "app.cruds.agent_runs",
-          "importer": "app.services.auth"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.auth"
-        },
-        {
-          "imported": "app.schemas",
-          "importer": "app.services.auth"
-        },
-        {
-          "imported": "app.services.demo_lock",
-          "importer": "app.services.auth"
-        },
-        {
-          "imported": "app.services.external_auth_verification",
-          "importer": "app.services.auth"
-        },
-        {
-          "imported": "app.services.login_throttle",
-          "importer": "app.services.auth"
-        },
-        {
-          "imported": "app.services.profile_media",
-          "importer": "app.services.auth"
-        },
-        {
-          "imported": "app.services.runtime_boundary",
-          "importer": "app.services.auth"
-        },
-        {
-          "imported": "app.services.world_character_setup",
-          "importer": "app.services.auth"
         },
         {
           "imported": "app.cruds.agents",
@@ -767,14 +683,6 @@
         {
           "imported": "app.models",
           "importer": "app.services.community_abuse_quota"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.demo_lock"
-        },
-        {
-          "imported": "app.models",
-          "importer": "app.services.external_auth_verification"
         },
         {
           "imported": "app.schemas",
@@ -905,10 +813,6 @@
           "importer": "app.services.local_bot"
         },
         {
-          "imported": "app.services.demo_lock",
-          "importer": "app.services.local_bot"
-        },
-        {
           "imported": "app.services.local_bot_quota",
           "importer": "app.services.local_bot"
         },
@@ -926,10 +830,6 @@
         },
         {
           "imported": "app.models",
-          "importer": "app.services.login_throttle"
-        },
-        {
-          "imported": "app.models",
           "importer": "app.services.lore_parser_quota"
         },
         {
@@ -943,10 +843,6 @@
         {
           "imported": "app.models",
           "importer": "app.services.operation_settings"
-        },
-        {
-          "imported": "app.services.bounded_http",
-          "importer": "app.services.pollinations_image"
         },
         {
           "imported": "app.services.provider_http",
@@ -1017,10 +913,6 @@
           "importer": "app.services.post_image_job_worker"
         },
         {
-          "imported": "app.services.bounded_http",
-          "importer": "app.services.replicate_image"
-        },
-        {
           "imported": "app.services.provider_http",
           "importer": "app.services.replicate_image"
         },
@@ -1055,10 +947,6 @@
         {
           "imported": "app.schemas",
           "importer": "app.services.tree"
-        },
-        {
-          "imported": "app.services.bounded_http",
-          "importer": "app.services.turnstile"
         },
         {
           "imported": "app.models",
@@ -1303,6 +1191,35 @@
       "reason": "The L4 relationship and graph runtimes own SQLAlchemy composition while the aggregate app.models and app.schemas exports remain registered ORM and HTTP-schema boundaries. Relationship domain infrastructure itself has no legacy-layer import.",
       "removal_condition": "Replace the aggregate ORM export with domain-specific persistence registries without changing Alembic metadata discovery.",
       "review_date": "2026-12-01"
+    },
+    {
+      "id": "ar-b2-identity-account-deletion-uow",
+      "owner_stage": "L6",
+      "reason": "Only existing account-deletion edges formerly owned by app.services.auth move with the same Session/UoW workflow. No new foreign-table operation is introduced.",
+      "removal_condition": "Replace each exact legacy persistence call with its owner service during AR-B2 through AR-B8-A, retaining the caller Session and one commit/rollback with media quarantine.",
+      "review_date": "2026-09-05",
+      "edges": [
+        {
+          "importer": "app.runtime.account_deletion",
+          "imported": "app.cruds.agent_runs"
+        },
+        {
+          "importer": "app.runtime.account_deletion",
+          "imported": "app.models"
+        },
+        {
+          "importer": "app.runtime.account_deletion",
+          "imported": "app.services.profile_media"
+        },
+        {
+          "importer": "app.runtime.account_deletion",
+          "imported": "app.services.runtime_boundary"
+        },
+        {
+          "importer": "app.runtime.account_deletion",
+          "imported": "app.services.world_character_setup"
+        }
+      ]
     }
   ],
   "legacy_module_cycles": [],
@@ -1344,6 +1261,154 @@
     "domains": [
       "device_home"
     ],
-    "globals": []
+    "globals": [],
+    "modules": [
+      "app.domains.identity.browser_session",
+      "app.domains.identity.client",
+      "app.domains.identity.constants",
+      "app.domains.identity.contracts",
+      "app.domains.identity.dependencies",
+      "app.domains.identity.exceptions",
+      "app.domains.identity.models",
+      "app.domains.identity.policies",
+      "app.domains.identity.router",
+      "app.domains.identity.router.auth",
+      "app.domains.identity.router.local",
+      "app.domains.identity.schemas",
+      "app.domains.identity.service",
+      "app.domains.identity.service.auth",
+      "app.domains.identity.service.credential_migration",
+      "app.domains.identity.service.credential_resolution",
+      "app.domains.identity.service.demo_access",
+      "app.domains.identity.service.external_verification",
+      "app.domains.identity.service.local_owner",
+      "app.domains.identity.service.login_throttle"
+    ],
+    "entries": [
+      "app.domains.identity.contracts",
+      "app.domains.identity.schemas",
+      "app.domains.identity.service",
+      "app.domains.identity.service.auth",
+      "app.domains.identity.service.credential_migration",
+      "app.domains.identity.service.credential_resolution",
+      "app.domains.identity.service.demo_access",
+      "app.domains.identity.service.external_verification",
+      "app.domains.identity.service.local_owner",
+      "app.domains.identity.service.login_throttle"
+    ],
+    "bridges": [
+      {
+        "importer": "app.domains.identity.public",
+        "target": "app.domains.identity.constants",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.identity.public",
+        "target": "app.domains.identity.contracts",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.identity.public",
+        "target": "app.domains.identity.exceptions",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.identity.public",
+        "target": "app.domains.identity.models",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.identity.public",
+        "target": "app.domains.identity.schemas",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.identity.public",
+        "target": "app.domains.identity.service.credential_resolution",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.identity.models",
+        "owner_stage": "AR-G5",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models.auth",
+        "target": "app.domains.identity.models",
+        "owner_stage": "AR-G5",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models.credentials",
+        "target": "app.domains.identity.models",
+        "owner_stage": "AR-G5",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.identity.schemas",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.schemas.auth",
+        "target": "app.domains.identity.schemas",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.agent_creation_drafts",
+        "target": "app.domains.identity.service.demo_access",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.agents",
+        "target": "app.domains.identity.service.demo_access",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.services.local_bot",
+        "target": "app.domains.identity.service.demo_access",
+        "owner_stage": "AR-B8-A",
+        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
+        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
+        "review_date": "2026-09-05"
+      }
+    ]
   }
 }

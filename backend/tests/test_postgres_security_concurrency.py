@@ -18,11 +18,11 @@ from app.core.config import settings
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import community as community_crud
 from app.services import agents as agent_service
-from app.services import auth as auth_service
+from app.domains.identity.service import auth as auth_service
 from app.services import community_abuse_quota
-from app.services import external_auth_verification
+from app.domains.identity.service import external_verification as external_auth_verification
 from app.services import local_bot_quota
-from app.services import login_throttle
+from app.domains.identity.service import login_throttle
 from app.services import lore_parser_quota
 from app.services import messages as message_service
 from app.services import daily_activity_plans

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.runtime import account_deletion
 
 from datetime import UTC, date, datetime, timedelta
 import json
@@ -19,7 +20,7 @@ from app.credentials import (
 )
 from app.services import agent_creation_drafts as draft_service
 from app.services import agents as agent_service
-from app.services import auth as auth_service
+from app.domains.identity.service import auth as auth_service
 from app.services import character_lore as lore_service
 from app.services import community as community_service
 from app.services import messages as message_service
@@ -449,6 +450,7 @@ def test_account_deletion_removes_private_graph_and_keeps_public_content(
             schemas.AccountDeletionCreate(
                 confirmation=auth_service.ACCOUNT_DELETE_CONFIRMATION
             ),
+            workflow=account_deletion.delete_current_user_account,
         )
 
         for model in PRIVATE_MODELS:
@@ -523,6 +525,7 @@ def test_account_deletion_flushes_active_slot_before_credential_delete(
             schemas.AccountDeletionCreate(
                 confirmation=auth_service.ACCOUNT_DELETE_CONFIRMATION
             ),
+            workflow=account_deletion.delete_current_user_account,
         )
 
         assert db.get(models.LlmCredential, "credential-active-owner") is None
@@ -603,6 +606,7 @@ def test_account_deletion_restores_private_media_when_database_commit_fails(
                 schemas.AccountDeletionCreate(
                     confirmation=auth_service.ACCOUNT_DELETE_CONFIRMATION
                 ),
+                workflow=account_deletion.delete_current_user_account,
             )
         monkeypatch.setattr(db, "commit", original_commit)
 

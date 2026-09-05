@@ -44,7 +44,7 @@ def build_inventory():
         "backend/app/runtime/desktop_sidecar.py",
         "backend/app/runtime/single_backend_components.py",
         "backend/app/api/v1/routes/memory.py",
-        "backend/app/services/auth.py",
+        "backend/app/runtime/account_deletion.py",
         "backend/app/services/agents.py",
         "backend/tests/test_p8_l_r_memory_batch*.py",
         "desktop/src-tauri/src/shutdown_runtime.rs",
