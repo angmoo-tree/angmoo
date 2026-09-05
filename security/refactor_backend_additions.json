@@ -1197,6 +1197,67 @@
       "test_suppressions": {
         "tests/characters/test_character_http_workflows.py": {}
       }
+    },
+    {
+      "commit": "63034348e71ab4ae0bd0611a2ad04e1036244d42",
+      "feature_id": "AR-B2",
+      "reason": "Creator draft lifecycle and original cleanup order through same-session workflow callbacks",
+      "tracked_files": {
+        "backend/app/domains/characters/service/drafts.py": "4bb18c8d4c645521f06e56f93dbcd4b782249848",
+        "backend/tests/characters/test_creator_workflows.py": "fb144ea5a8914ffa927085a492a2b58d699d8b60"
+      },
+      "test_nodes": [
+        "tests/characters/test_creator_workflows.py::test_both_factories_install_creator_and_draft_routes_keep_original_position",
+        "tests/characters/test_creator_workflows.py::test_create_verifies_before_insert_and_keeps_original_cipher_scope",
+        "tests/characters/test_creator_workflows.py::test_enhance_persona_calls_provider_after_owner_gate_and_commits_sanitized_fields",
+        "tests/characters/test_creator_workflows.py::test_expiry_cleanup_rolls_back_only_failed_draft_and_keeps_media_first"
+      ],
+      "test_assertions": {
+        "tests/characters/test_creator_workflows.py": {
+          "_unreachable": [],
+          "_workflows": [],
+          "engine": [],
+          "_draft": [],
+          "test_create_verifies_before_insert_and_keeps_original_cipher_scope": [
+            "assert [name for name, _ in calls] == ['verify', 'commit']",
+            "assert stored.user_id == owner.id",
+            "assert stored.encrypted_api_key != data.api_key",
+            "assert security.decrypt_secret(stored.encrypted_api_key, scope=security.SecretScope(owner_id=owner.id, character_id='', provider=data.provider, purpose='creation_draft')) == data.api_key",
+            "pytest.raises(exceptions.AgentCreationDraftNotFoundError)",
+            "assert drafts.get_draft(db, owner, result.id, workflows=_workflows()).id == result.id",
+            "assert kwargs['db'] is db and kwargs['user'] is owner",
+            "assert list(db.query(models.AgentCreationDraft)) == []",
+            "assert calls == []"
+          ],
+          "test_expiry_cleanup_rolls_back_only_failed_draft_and_keeps_media_first": [
+            "assert deleted_files == ['first-fails', 'second-succeeds']",
+            "assert commits == [db] and rollbacks == [db]",
+            "assert db.get(models.AgentCreationDraft, 'first-fails') is not None",
+            "assert db.get(models.AgentCreationDraft, 'second-succeeds') is None",
+            "assert db.get(models.AgentCreationDraft, 'still-live') is not None",
+            "assert db.get(models.AgentCreationDraft, identifier) is not None"
+          ],
+          "test_enhance_persona_calls_provider_after_owner_gate_and_commits_sanitized_fields": [
+            "pytest.raises(exceptions.AgentCreationDraftNotFoundError)",
+            "assert calls == []",
+            "assert calls == ['provider']",
+            "assert result.personality == 'Careful'",
+            "assert result.topic_preferences == 'Plants\\nRain'",
+            "assert result.persona_enhance_available_at is not None",
+            "assert kwargs['db'] is db and kwargs['user'] is owner",
+            "assert observer.get(models.AgentCreationDraft, draft.id).personality == 'Careful'"
+          ],
+          "test_both_factories_install_creator_and_draft_routes_keep_original_position": [
+            "assert actual is canonical",
+            "assert paths.index('/agents/drafts/{draft_id}') < paths.index('/agents/{character_id}')",
+            "assert workflows.run_llm is runtime._run_draft_llm",
+            "assert workflows.create_character is runtime.agent_service.create_agent"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/characters/test_creator_workflows.py": {}
+      }
     }
   ]
 }
