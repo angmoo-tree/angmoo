@@ -16,11 +16,11 @@ from app.domains.memory.policies.batch import (
 )
 from app.domains.memory.exceptions import MemoryValidationError
 from app.domains.memory.policies.selection_output import MemorySelectionSource
-from app.domains.memory.infrastructure.batch_models import (
+from app.domains.memory.models.batch import (
     MemoryBatchSetting,
     MemoryBatchProfile,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import MemoryMaintenanceJob
+from app.domains.memory.models.items import MemoryMaintenanceJob
 from app.integrations.llm import memory_selection
 from app.providers.contracts import ProviderResponse, ProviderUsage
 from app.runtime.memory.shutdown import MemoryShutdownAdmissionMiddleware

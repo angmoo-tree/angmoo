@@ -7,11 +7,11 @@ from uuid import uuid4
 from sqlalchemy import event, insert, inspect, select, update
 
 from app.core.db import Base
-from app.domains.memory.infrastructure.batch_models import (
+from app.domains.memory.models.batch import (
     MemoryActivationEpoch,
     MemorySourceDelivery,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import MemoryScopeSettingModel
+from app.domains.memory.models.items import MemoryScopeSettingModel
 
 
 logger = logging.getLogger(__name__)

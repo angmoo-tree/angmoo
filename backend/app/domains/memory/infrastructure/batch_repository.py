@@ -25,7 +25,7 @@ from app.domains.memory.exceptions import (
 )
 from app.domains.memory.contracts.items import as_utc, normalize_memory_idempotency_key
 from app.domains.memory.contracts.scope import MemoryScope
-from app.domains.memory.infrastructure.batch_models import (
+from app.domains.memory.models.batch import (
     MemoryBatchProfile,
     MemoryBatchSetting,
     MemoryBatchRun,
@@ -36,7 +36,7 @@ from app.domains.memory.infrastructure.maintenance_queue import (
     SqlAlchemyMemoryMaintenanceQueue,
 )
 from app.domains.memory.infrastructure.repository import SqlAlchemyMemoryRepository
-from app.domains.memory.infrastructure.sqlalchemy_models import (
+from app.domains.memory.models.items import (
     MemoryCandidate,
     MemoryMaintenanceJob,
     MemoryScopeSettingModel,

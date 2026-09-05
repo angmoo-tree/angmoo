@@ -31,7 +31,7 @@ from app.domains.memory.contracts.recall import (  # noqa: E402
     MEMORY_RECALL_GENERATION,
     MEMORY_RECALL_SCHEMA_VERSION,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import (  # noqa: E402
+from app.domains.memory.models.items import (  # noqa: E402
     MEMORY_SCHEMA_V1_TABLES,
 )
 

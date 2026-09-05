@@ -28,7 +28,7 @@ from app.domains.memory.service.items import (
     MemoryWriteLifecycleService,
     memory_evidence_blocked_code,
 )
-from app.domains.memory.infrastructure.batch_models import (
+from app.domains.memory.models.batch import (
     MemoryActivationEpoch,
     MemoryBatchSetting,
     MemorySourceDelivery,
@@ -40,7 +40,7 @@ from app.domains.memory.infrastructure.consolidation_repository import (
     SqlAlchemyMemoryConsolidationRepository,
 )
 from app.domains.memory.infrastructure.repository import SqlAlchemyMemoryRepository
-from app.domains.memory.infrastructure.sqlalchemy_models import (
+from app.domains.memory.models.items import (
     MemoryCandidate,
     MemoryScopeSettingModel,
 )

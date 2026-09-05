@@ -12,7 +12,7 @@ from app.domains.memory.infrastructure import (
     MemoryMaintenanceJob,
     MemoryScopeSettingModel,
 )
-from app.domains.memory.infrastructure.batch_models import MemoryBatchProfile
+from app.domains.memory.models.batch import MemoryBatchProfile
 
 
 def scrub_memory_data(session, *, owner_id: str, character_id: str | None = None):

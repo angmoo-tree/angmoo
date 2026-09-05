@@ -11,7 +11,7 @@ from app.domains.memory.service.batch_selection import MemoryBatchSelectionServi
 from app.domains.memory.service.scope import MemoryScopeService
 from app.domains.memory.policies.batch import MEMORY_CONSENT_VERSION
 from app.domains.memory.exceptions import MemoryConflictError
-from app.domains.memory.infrastructure.batch_models import (
+from app.domains.memory.models.batch import (
     MemoryActivationEpoch,
     MemoryBatchRun,
     MemoryBatchSetting,
@@ -21,7 +21,7 @@ from app.domains.memory.infrastructure.batch_models import (
 from app.domains.memory.infrastructure.batch_repository import (
     SqlAlchemyMemoryBatchRepository,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import (
+from app.domains.memory.models.items import (
     MemoryCandidate,
     MemoryMaintenanceJob,
     MemoryScopeSettingModel,
@@ -441,7 +441,7 @@ def test_oversized_request_fails_before_physical_call_reservation(memory_session
 
 def test_account_scrub_removes_private_memory_batches_not_other_owner(memory_session):
     from app.runtime.account_deletion import _scrub_account_data
-    from app.domains.memory.infrastructure.batch_models import (
+    from app.domains.memory.models.batch import (
         MemoryBatchProfile,
         MEMORY_BATCH_TABLES,
     )
@@ -502,7 +502,7 @@ def test_character_scrub_removes_its_batches_and_preserves_other_character(
     memory_session,
 ):
     from app.runtime.characters.management import _scrub_agent_data
-    from app.domains.memory.infrastructure.batch_models import MemoryBatchProfile
+    from app.domains.memory.models.batch import MemoryBatchProfile
     from app.domains.memory.contracts.scope import MemoryScope
 
     scope, repo, _, _, service = batch_stack(memory_session)

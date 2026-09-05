@@ -31,7 +31,7 @@ E_INVENTORY_SHA256 = (
 from app import models as _models  # noqa: E402,F401 - register canonical metadata
 from app.core.db import Base  # noqa: E402
 from app.domains.memory.contracts.provenance import MemoryKindV1  # noqa: E402
-from app.domains.memory.infrastructure.sqlalchemy_models import (  # noqa: E402
+from app.domains.memory.models.items import (  # noqa: E402
     MEMORY_SCHEMA_V1_TABLES,
 )
 from app.runtime.migrations.sqlite_versions.registry import (  # noqa: E402
@@ -59,7 +59,7 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/contracts/item_store.py",
     "backend/app/domains/memory/contracts/source_evidence.py",
     "backend/app/domains/memory/contracts/maintenance_queue.py",
-    "backend/app/domains/memory/infrastructure/sqlalchemy_models.py",
+    "backend/app/domains/memory/models/items.py",
     "backend/app/domains/memory/infrastructure/repository.py",
     "backend/app/alembic/versions/20260831_0085_canonical_memory_schema.py",
     "backend/app/runtime/migrations/sqlite_versions/v4_to_v5_canonical_memory.py",

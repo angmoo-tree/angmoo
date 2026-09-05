@@ -1,7 +1,7 @@
 {
-  "edge_count": 2087,
+  "edge_count": 2089,
   "external_import_count": 2080,
-  "module_count": 640,
+  "module_count": 642,
   "modules": [
     {
       "external_imports": [],
@@ -2686,7 +2686,7 @@
         "app.domains.memory.infrastructure.maintenance_queue",
         "app.domains.memory.infrastructure.maintenance_unit_of_work",
         "app.domains.memory.infrastructure.repository",
-        "app.domains.memory.infrastructure.sqlalchemy_models"
+        "app.domains.memory.models.items"
       ],
       "module": "app.domains.memory.infrastructure",
       "path": "backend/app/domains/memory/infrastructure/__init__.py",
@@ -2699,21 +2699,16 @@
         "uuid"
       ],
       "imports": [
-        "app.domains.memory.infrastructure.batch_models"
+        "app.domains.memory.models.batch"
       ],
       "module": "app.domains.memory.infrastructure.activation",
       "path": "backend/app/domains/memory/infrastructure/activation.py",
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "datetime",
-        "sqlalchemy",
-        "sqlalchemy.engine",
-        "sqlalchemy.orm"
-      ],
+      "external_imports": [],
       "imports": [
-        "app.core.db"
+        "app.domains.memory.models.batch"
       ],
       "module": "app.domains.memory.infrastructure.batch_models",
       "path": "backend/app/domains/memory/infrastructure/batch_models.py",
@@ -2734,10 +2729,10 @@
         "app.domains.memory.contracts.items",
         "app.domains.memory.contracts.scope",
         "app.domains.memory.exceptions",
-        "app.domains.memory.infrastructure.batch_models",
         "app.domains.memory.infrastructure.maintenance_queue",
         "app.domains.memory.infrastructure.repository",
-        "app.domains.memory.infrastructure.sqlalchemy_models",
+        "app.domains.memory.models.batch",
+        "app.domains.memory.models.items",
         "app.domains.memory.policies.batch",
         "app.domains.memory.policies.consolidation"
       ],
@@ -2759,7 +2754,7 @@
         "app.domains.memory.contracts.scope",
         "app.domains.memory.exceptions",
         "app.domains.memory.infrastructure.repository",
-        "app.domains.memory.infrastructure.sqlalchemy_models",
+        "app.domains.memory.models.items",
         "app.domains.memory.policies.consolidation"
       ],
       "module": "app.domains.memory.infrastructure.consolidation_repository",
@@ -2780,7 +2775,7 @@
         "app.domains.memory.contracts.maintenance_queue",
         "app.domains.memory.contracts.provenance",
         "app.domains.memory.exceptions",
-        "app.domains.memory.infrastructure.sqlalchemy_models"
+        "app.domains.memory.models.items"
       ],
       "module": "app.domains.memory.infrastructure.maintenance_queue",
       "path": "backend/app/domains/memory/infrastructure/maintenance_queue.py",
@@ -2814,11 +2809,34 @@
         "app.domains.memory.contracts.source_evidence",
         "app.domains.memory.exceptions",
         "app.domains.memory.infrastructure.activation",
-        "app.domains.memory.infrastructure.sqlalchemy_models",
+        "app.domains.memory.models.items",
         "app.domains.memory.policies.retention"
       ],
       "module": "app.domains.memory.infrastructure.repository",
       "path": "backend/app/domains/memory/infrastructure/repository.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.memory.models.items"
+      ],
+      "module": "app.domains.memory.infrastructure.sqlalchemy_models",
+      "path": "backend/app/domains/memory/infrastructure/sqlalchemy_models.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.engine",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.core.db"
+      ],
+      "module": "app.domains.memory.models.batch",
+      "path": "backend/app/domains/memory/models/batch.py",
       "wildcard_imports": []
     },
     {
@@ -2834,8 +2852,8 @@
         "app.domains.memory.contracts.provenance",
         "app.domains.memory.policies.retention"
       ],
-      "module": "app.domains.memory.infrastructure.sqlalchemy_models",
-      "path": "backend/app/domains/memory/infrastructure/sqlalchemy_models.py",
+      "module": "app.domains.memory.models.items",
+      "path": "backend/app/domains/memory/models/items.py",
       "wildcard_imports": []
     },
     {
@@ -6287,8 +6305,8 @@
         "app.domains.characters.models",
         "app.domains.chat.infrastructure.sqlalchemy_models",
         "app.domains.identity.models",
-        "app.domains.memory.infrastructure.batch_models",
-        "app.domains.memory.infrastructure.sqlalchemy_models",
+        "app.domains.memory.models.batch",
+        "app.domains.memory.models.items",
         "app.domains.relationships.infrastructure.sqlalchemy_models",
         "app.domains.relationships.infrastructure.sqlalchemy_social_models",
         "app.domains.runtime.infrastructure",
@@ -6906,7 +6924,7 @@
         "app.domains.chat.infrastructure.sqlalchemy_models",
         "app.domains.chat.ports.retrieval_policy",
         "app.domains.identity.public",
-        "app.domains.memory.infrastructure.sqlalchemy_models",
+        "app.domains.memory.models.items",
         "app.domains.world_characters.models",
         "app.domains.worlds.models",
         "app.runtime.relationships.sqlalchemy_social_event"
@@ -7345,11 +7363,11 @@
         "app.domains.memory.contracts.provenance",
         "app.domains.memory.contracts.scope",
         "app.domains.memory.exceptions",
-        "app.domains.memory.infrastructure.batch_models",
         "app.domains.memory.infrastructure.batch_repository",
         "app.domains.memory.infrastructure.consolidation_repository",
         "app.domains.memory.infrastructure.repository",
-        "app.domains.memory.infrastructure.sqlalchemy_models",
+        "app.domains.memory.models.batch",
+        "app.domains.memory.models.items",
         "app.domains.memory.policies.batch",
         "app.domains.memory.policies.consolidation",
         "app.domains.memory.service.batch_selection",
@@ -7387,8 +7405,8 @@
         "time"
       ],
       "imports": [
-        "app.domains.memory.infrastructure.batch_models",
-        "app.domains.memory.infrastructure.sqlalchemy_models"
+        "app.domains.memory.models.batch",
+        "app.domains.memory.models.items"
       ],
       "module": "app.runtime.memory.shutdown",
       "path": "backend/app/runtime/memory/shutdown.py",
@@ -7403,8 +7421,8 @@
       ],
       "imports": [
         "app.core.db",
-        "app.domains.memory.infrastructure.batch_models",
-        "app.domains.memory.infrastructure.sqlalchemy_models"
+        "app.domains.memory.models.batch",
+        "app.domains.memory.models.items"
       ],
       "module": "app.runtime.memory.source_delivery",
       "path": "backend/app/runtime/memory/source_delivery.py",
@@ -7499,7 +7517,7 @@
       "imports": [
         "app.core.db",
         "app.domains.memory.infrastructure",
-        "app.domains.memory.infrastructure.batch_models"
+        "app.domains.memory.models.batch"
       ],
       "module": "app.runtime.memory_privacy",
       "path": "backend/app/runtime/memory_privacy.py",

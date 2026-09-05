@@ -38,7 +38,7 @@ from app.domains.memory.contracts.inspector import (
     MemoryItemEvidenceRecord,
     MemoryItemPage,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import (
+from app.domains.memory.models.items import (
     MemoryCandidate,
     MemoryHotBrief,
     MemoryItem,

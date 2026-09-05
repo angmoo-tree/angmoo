@@ -10,7 +10,7 @@ from app.domains.memory.infrastructure.consolidation_repository import (
 from app.domains.memory.infrastructure.maintenance_unit_of_work import (
     SqlAlchemyMemoryMaintenanceUnitOfWork,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import (
+from app.domains.memory.models.items import (
     MemoryCandidate,
     MemoryHotBrief,
     MemoryHotBriefItem,

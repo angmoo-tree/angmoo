@@ -32,7 +32,7 @@ from app.domains.chat.infrastructure.model_binding_migration import (
 from app.domains.chat.infrastructure.sqlalchemy_models import (
     drop_response_request_schema,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import (
+from app.domains.memory.models.items import (
     drop_memory_schema_v1,
 )
 from app.domains.social.infrastructure.sqlalchemy_subjective_context_models import (
@@ -600,7 +600,7 @@ def _seed_supported_predecessor(
             sql_connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
             sql_connection.commit()
             with sql_connection.begin():
-                from app.domains.memory.infrastructure.batch_models import (
+                from app.domains.memory.models.batch import (
                     MEMORY_BATCH_TABLES,
                 )
                 from app.core.db import Base

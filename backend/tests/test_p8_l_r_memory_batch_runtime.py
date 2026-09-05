@@ -8,7 +8,7 @@ from app import models
 from app.domains.memory.service.batch_selection import MemoryBatchSelectionService
 from app.domains.memory.policies.batch import MEMORY_CONSENT_VERSION
 from app.domains.memory.policies.selection_output import MemorySelectionDecision
-from app.domains.memory.infrastructure.batch_models import (
+from app.domains.memory.models.batch import (
     MemoryBatchRun,
     MemorySelectionDecisionModel,
     MemorySourceDelivery,
@@ -16,7 +16,7 @@ from app.domains.memory.infrastructure.batch_models import (
 from app.domains.memory.infrastructure.batch_repository import (
     SqlAlchemyMemoryBatchRepository,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import (
+from app.domains.memory.models.items import (
     MemoryCandidate,
     MemoryItem,
     MemoryMaintenanceJob,

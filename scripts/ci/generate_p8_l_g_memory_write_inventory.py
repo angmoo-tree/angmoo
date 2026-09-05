@@ -29,7 +29,7 @@ from app.domains.memory.contracts.items import (  # noqa: E402
     MEMORY_WRITE_CONTRACT_VERSION,
 )
 from app.domains.memory.contracts.provenance import MemorySourceTypeV1  # noqa: E402
-from app.domains.memory.infrastructure.sqlalchemy_models import (  # noqa: E402
+from app.domains.memory.models.items import (  # noqa: E402
     MEMORY_SCHEMA_V1_TABLES,
 )
 

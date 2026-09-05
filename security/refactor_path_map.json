@@ -323,7 +323,9 @@
     "backend/app/domains/memory/ports/consolidation_repository.py": "backend/app/domains/memory/contracts/consolidation_store.py",
     "backend/app/domains/memory/ports/maintenance_queue.py": "backend/app/domains/memory/contracts/maintenance_queue.py",
     "backend/app/domains/memory/ports/maintenance_unit_of_work.py": "backend/app/domains/memory/contracts/maintenance_transaction.py",
-    "backend/app/domains/memory/ports/batch.py": "backend/app/domains/memory/contracts/batch.py"
+    "backend/app/domains/memory/ports/batch.py": "backend/app/domains/memory/contracts/batch.py",
+    "backend/app/domains/memory/infrastructure/sqlalchemy_models.py": "backend/app/domains/memory/models/items.py",
+    "backend/app/domains/memory/infrastructure/batch_models.py": "backend/app/domains/memory/models/batch.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -17832,6 +17834,27 @@
       "scope": "Real owner scope CAS/replay, source revalidation, item lifecycle, recall projection and canonical revalidation, retrieval-plan allowlist, consolidation and provider selection execution. Typed store/source/provider/queue/transaction contracts remain only as existing exercised collaborators; no forwarding service or duplicate implementation is added.",
       "preserved": "Exact workflow bodies and constructor requirements, provider budgets/timeouts, claim/commit/rollback order, scope/version CAS, source digest checks, cancellation, retry and deterministic fallback behavior. Existing structural Port class names remain stable for callers and fakes.",
       "remaining": "Actual SQL/FTS/queue repositories, same-Session foreign source reads, HTTP/dependency ownership and startup/shutdown composition; retire public/domain aggregate consumers after those transitions."
+    },
+    "AR-B7-A3": {
+      "status": "SOURCE PREPARATION; original 13 ORM classes and schema builders unchanged; migration/runtime validation pending",
+      "moved_files": {
+        "backend/app/domains/memory/infrastructure/sqlalchemy_models.py": "backend/app/domains/memory/models/items.py",
+        "backend/app/domains/memory/infrastructure/batch_models.py": "backend/app/domains/memory/models/batch.py"
+      },
+      "scope": "Memory item and batch ORM classes, indexes, constraints and exact schema builders now live in models/items.py and models/batch.py. All current production/test/generator imports use these owners.",
+      "historical_migration_aliases": {
+        "backend/app/domains/memory/infrastructure/sqlalchemy_models.py": [
+          "MEMORY_SCHEMA_V1_TABLES",
+          "create_memory_schema_v1",
+          "drop_memory_schema_v1"
+        ],
+        "backend/app/domains/memory/infrastructure/batch_models.py": [
+          "MEMORY_BATCH_TABLES",
+          "create_memory_batch_schema"
+        ]
+      },
+      "preserved": "Frozen Alembic 0085/0089 and embedded v4->v5/v8->v9 bodies remain unchanged. Only their five imported constants/builders are explicitly re-exported at historical paths; no ORM class or builder implementation is duplicated. One existing Base and metadata remain under G5 registration ownership.",
+      "remaining": "Owned SQL repositories/queue, same-Session scope queries, HTTP/runtime composition and G5 registry; retain the two exact aliases while immutable historical revisions require them."
     }
   }
 }

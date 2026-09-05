@@ -29,7 +29,7 @@ from app.domains.memory.contracts.provenance import (
 )
 from app.domains.memory.contracts.scope import MemoryScopeSetting
 from app.domains.memory.infrastructure.repository import SqlAlchemyMemoryRepository
-from app.domains.memory.infrastructure.sqlalchemy_models import (
+from app.domains.memory.models.items import (
     MemoryCandidate,
     MemoryHotBrief,
     MemoryHotBriefItem,

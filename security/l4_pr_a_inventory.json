@@ -2,9 +2,9 @@
   "architecture": {
     "backend": {
       "external_import_count": 2080,
-      "internal_edge_count": 2087,
+      "internal_edge_count": 2089,
       "legacy_import_exception_count": 0,
-      "module_count": 640,
+      "module_count": 642,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1089,7 +1089,7 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "79eed21ca8ff7dc0f0a128b94b37a3513f2bd10f948d354ebd491211c8576ac9"
+        "sha256": "4d3676476bf125b63d89f9c24926c1536e8fc9f48c0d2cc6b090845a9723d738"
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",

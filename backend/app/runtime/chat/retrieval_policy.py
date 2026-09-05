@@ -18,7 +18,7 @@ from app.domains.identity.public import (
     InstallationIdentity,
     LOCAL_INSTALLATION_KEY,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import (
+from app.domains.memory.models.items import (
     MemoryScopeSettingModel,
 )
 from app.domains.world_characters.models import (

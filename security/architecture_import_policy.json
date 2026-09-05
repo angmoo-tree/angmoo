@@ -1200,6 +1200,8 @@
       "app.domains.memory.contracts.scope",
       "app.domains.memory.contracts.source_evidence",
       "app.domains.memory.exceptions",
+      "app.domains.memory.models.batch",
+      "app.domains.memory.models.items",
       "app.domains.memory.policies.batch",
       "app.domains.memory.policies.consolidation",
       "app.domains.memory.policies.consolidation_output",
@@ -2384,22 +2386,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.memory.infrastructure.sqlalchemy_models",
-        "target": "app.domains.memory.contracts.provenance",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.memory.infrastructure.sqlalchemy_models",
-        "target": "app.domains.memory.policies.retention",
-        "owner_stage": "AR-B7 / AR-B8-A",
-        "removal_condition": "Move this recorded actual Memory service/repository/HTTP caller and remove obsolete aggregate exports; no new legacy consumers.",
-        "reason": "Existing consumer uses the original closed value or pure policy from its actual role owner with identical code; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.domains.memory.infrastructure.batch_repository",
         "target": "app.domains.memory.contracts.batch",
         "owner_stage": "AR-B7 / AR-B8-A",
@@ -2437,6 +2423,94 @@
         "owner_stage": "AR-B7 / AR-B8-A",
         "removal_condition": "Transition the recorded actual repository, HTTP or aggregate consumer and retire its old source; no new legacy caller.",
         "reason": "Existing Memory consumer now reaches the original real workflow or exercised typed collaborator from its role owner, without a new forwarding layer.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.memory.infrastructure",
+        "target": "app.domains.memory.models.items",
+        "owner_stage": "AR-B7 / AR-G5",
+        "removal_condition": "Move the recorded actual Memory repository or global model registration to its final owner and retire this legacy consumer.",
+        "reason": "Existing repository or registry consumes the same original ORM class from its canonical owner.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.memory.infrastructure.activation",
+        "target": "app.domains.memory.models.batch",
+        "owner_stage": "AR-B7 / AR-G5",
+        "removal_condition": "Move the recorded actual Memory repository or global model registration to its final owner and retire this legacy consumer.",
+        "reason": "Existing repository or registry consumes the same original ORM class from its canonical owner.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.memory.infrastructure.batch_models",
+        "target": "app.domains.memory.models.batch",
+        "owner_stage": "AR-B7 / AR-G5 historical migrations",
+        "removal_condition": "Retain only the exact five schema constants/builders while immutable Alembic and SQLite revisions import this historical path; no current runtime caller or ORM implementation.",
+        "reason": "Original schema builder object is re-exported for immutable historical revisions; no duplicate implementation.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.memory.infrastructure.batch_repository",
+        "target": "app.domains.memory.models.batch",
+        "owner_stage": "AR-B7 / AR-G5",
+        "removal_condition": "Move the recorded actual Memory repository or global model registration to its final owner and retire this legacy consumer.",
+        "reason": "Existing repository or registry consumes the same original ORM class from its canonical owner.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.memory.infrastructure.batch_repository",
+        "target": "app.domains.memory.models.items",
+        "owner_stage": "AR-B7 / AR-G5",
+        "removal_condition": "Move the recorded actual Memory repository or global model registration to its final owner and retire this legacy consumer.",
+        "reason": "Existing repository or registry consumes the same original ORM class from its canonical owner.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.memory.infrastructure.consolidation_repository",
+        "target": "app.domains.memory.models.items",
+        "owner_stage": "AR-B7 / AR-G5",
+        "removal_condition": "Move the recorded actual Memory repository or global model registration to its final owner and retire this legacy consumer.",
+        "reason": "Existing repository or registry consumes the same original ORM class from its canonical owner.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.memory.infrastructure.maintenance_queue",
+        "target": "app.domains.memory.models.items",
+        "owner_stage": "AR-B7 / AR-G5",
+        "removal_condition": "Move the recorded actual Memory repository or global model registration to its final owner and retire this legacy consumer.",
+        "reason": "Existing repository or registry consumes the same original ORM class from its canonical owner.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.memory.infrastructure.repository",
+        "target": "app.domains.memory.models.items",
+        "owner_stage": "AR-B7 / AR-G5",
+        "removal_condition": "Move the recorded actual Memory repository or global model registration to its final owner and retire this legacy consumer.",
+        "reason": "Existing repository or registry consumes the same original ORM class from its canonical owner.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.domains.memory.infrastructure.sqlalchemy_models",
+        "target": "app.domains.memory.models.items",
+        "owner_stage": "AR-B7 / AR-G5 historical migrations",
+        "removal_condition": "Retain only the exact five schema constants/builders while immutable Alembic and SQLite revisions import this historical path; no current runtime caller or ORM implementation.",
+        "reason": "Original schema builder object is re-exported for immutable historical revisions; no duplicate implementation.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.memory.models.batch",
+        "owner_stage": "AR-B7 / AR-G5",
+        "removal_condition": "Move the recorded actual Memory repository or global model registration to its final owner and retire this legacy consumer.",
+        "reason": "Existing repository or registry consumes the same original ORM class from its canonical owner.",
+        "review_date": "2026-09-05"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.memory.models.items",
+        "owner_stage": "AR-B7 / AR-G5",
+        "removal_condition": "Move the recorded actual Memory repository or global model registration to its final owner and retire this legacy consumer.",
+        "reason": "Existing repository or registry consumes the same original ORM class from its canonical owner.",
         "review_date": "2026-09-05"
       }
     ]

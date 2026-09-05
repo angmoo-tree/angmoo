@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from sqlalchemy import select, update
 
-from app.domains.memory.infrastructure.batch_models import MemoryActivationEpoch
+from app.domains.memory.models.batch import MemoryActivationEpoch
 
 
 def record_activation(session, setting) -> None:

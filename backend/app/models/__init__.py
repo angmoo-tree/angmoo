@@ -36,7 +36,7 @@ from app.domains.chat.infrastructure.sqlalchemy_models import (
     MessageThread,
     UserMessagePreference,
 )
-from app.domains.memory.infrastructure.batch_models import (
+from app.domains.memory.models.batch import (
     MemoryActivationEpoch,
     MemoryBatchProfile,
     MemoryBatchRun,
@@ -44,7 +44,7 @@ from app.domains.memory.infrastructure.batch_models import (
     MemorySelectionDecisionModel,
     MemorySourceDelivery,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import (
+from app.domains.memory.models.items import (
     MemoryCandidate,
     MemoryHotBrief,
     MemoryHotBriefItem,
