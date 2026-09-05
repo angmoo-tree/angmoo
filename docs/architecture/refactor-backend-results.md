@@ -1074,3 +1074,12 @@ Source `bc1a7c18997034b6f96965943323a617b3f9feef`에서 복구 순서·epoch 스
 최종 formatted 함수의 네 repository 본문과 foreign catalog를 다시 펼치면 **전체 원래 workflow AST와 정확히 동일**하다. missing epoch32·회전 scope16·source별32 제한, `[opened_at, closed_at)` 동의 기간, 원본별 누락 anti-join, late row 복구, 기존 kind/source ID·단일 commit을 보존했다. 이전에는 worker에 있던 같은 복구를 서비스가 실제 소유하며 새 policy나 provider 호출은 없다.
 
 배치 runtime/안전/API 및 rollback 회귀 **37 passed / 2 warnings / 14.97초**, 원래 전체 split 검사 **0 errors**, 경계 **726 modules/2442 edges/exact legacy222 PASS**, L4 parity97·current batch·ER0 81/87/24/44/7 PASS다. 초기 부분 scope 기록에서 repository를 외부 entry에 잘못 넣은 항목은 검사에 거부되어 제거했고, repository는 실제 내부 소유 모듈로만 검사한다. 검사 규칙을 완화하지 않았다. Source introduction capture와 B4~B6 순차 합류/전체 B7 Gate는 계속 남아 있다.
+
+
+### AR-B7-A12 Memory 집합 import 종료와 실제 역할 연결
+
+Source `2056bce963e7bae027dfc73265c060f4be390604`는 기존 집합 모듈의 이름 273개가 가리키던 실제 값·타입·함수 객체를 `is`로 확인하고 25개 소비자를 해당 정의 파일로 연결했다. 사용하지 않는 public/domain/API 집합 파일을 제거했고 service/contracts/runtime package는 일반 namespace marker로 남긴다. 기존 Unit of Work 구현은 본문 AST를 유지한 채 `repository/transaction.py`로 이동했다. 불변 SQLite/Alembic revision이 참조하는 다섯 schema export만 정확한 역사적 alias로 유지한다.
+
+Memory·회상·Chat 근거·배치·실행 조립 **295 passed / 2 warnings / 118.57초**, 경계 **723 modules / 2420 edges / exact legacy222 PASS**, L4·current batch inventory도 통과했다. 기존 검사 본문이나 API/ORM 계약은 변경하지 않았다.
+
+전체 stock 보존 실행은 **FAIL/PENDING**으로 남긴다. 최초 오류는 선행 Routines에서 처음 생성된 `models.py`와 `schemas.py`의 이후 이동을 아직 도입 원장에 연결하지 못한 것이다. 둘의 실제 최초 signed source는 `869bae55a2e5e665fb731396a7284b53dde8a104`로 확인했다. 이 오류 이후 protected0/current2246 및 다수 introduction 오류가 출력되므로 이를 전체 보존 PASS나 단순 신규 테스트 누락만으로 해석하지 않는다. 순차 B4~B6 합류와 원본 commit별 source/node capture 뒤 stock gate를 다시 통과해야 한다. 실제 이동 map이나 frozen baseline을 삭제하여 통과시키지 않는다.

@@ -32315,7 +32315,7 @@
       "remaining": "Final old aggregates/compatibility and sequential B4-B6 integration/capture remain."
     },
     "AR-B7-A12": {
-      "status": "SOURCE PREPARATION; 273 exact aggregate object identities and full UoW AST preserved; broad295 PASS/2 warnings/118.57s; boundary723/2420/legacy222; sequential capture/full integration pending",
+      "status": "SOURCE PREPARATION 2056bce; 273 original exported objects keep identity, 25 actual consumers use explicit roles; focused295 PASS/118.57s; boundary723/2420/legacy222 PASS; full stock pending sequential Routines source introductions and test captures",
       "scope": "Remove unused Memory public/domain/API aggregate files; keep ordinary role package markers and exact historical schema aliases. Existing transaction implementation moves unchanged to repository/transaction.py.",
       "aggregate_exports": [
         {
