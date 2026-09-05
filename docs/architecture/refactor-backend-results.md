@@ -1103,3 +1103,12 @@ C5e 최종 고정 tree 검증: **429 passed / 기존 PostgreSQL 전용1 skipped 
 
 
 C5f 검증은 초기 **73 passed /기존 warnings2/22.28초**, 최종 고정 tree **432 passed /기존 PostgreSQL1 skipped/기존 warnings5/101.48초**이다. 처음 경계 검사가 runtime의 annotation-only app.models·services.runtime_boundary 의존을 잡아냈다. 해당 생성자를 실제 생성하지 않고 주입된 client만 사용하므로 실제 필요한 `DecisionClient`·`DecisionCredential` 계약과 기존 Character/State readview로 타입을 표현했다. 동작과 인자 전달은 그대로이며 새 legacy 예외는 추가하지 않았다. 현재 boundary **738modules/2483edges/exact legacy206/cycle0**, L4 **738/14/97**, ER0 **85/87/24/44/7**, Memory batch PASS. 원래15함수·4상수는 네 한정 타입명을 복원하면 AST가 같고 이동2테스트 본문도 동일하다. 읽기 전용 원래6검사는 오류0, **보호2139/current2260**이며 최초 signed869bae의2경로만 메모리로 보충했다. frozen/checkpoint/additions 불변, stock 전체 게이트는 root의 선형 최초도입 원장 연결 뒤 검증한다.
+
+
+### AR-B4 첫 통합 — Routines·Routine Posts·resident 준비와 실행 정책
+
+Media 후보 위에서 signed source `aa183ecec887d08c31f172c68bd7c40b22492c19`까지 `b4e43cdaac01a96abfa57c07a08404b59dacc00b`로 합류했다. 실제 schema/model, plan/일정, 같은 Session의 Context/Joint/Slot/실행 claim, prompt/brief/provider 결정 역할을 옮긴 단계다. AgentRun 마지막 context·실행 조립 및 LangGraph·Character 활동 관리의 남은 업무 이전은 다음 B4 source에서 계속 진행하며 B4 전체 종료가 아니다.
+
+원래 signed 31개 source commit 각각을 Git archive로 검사해 pytest collection·assertion·suppression·OpenAPI/ORM을 수집했다. 기존33개 additions를 보존하고64개로 append했으며 원래 addition_errors의 first-introduction/blob/ancestry 검사를 통과했다. 원래 models.py/schemas.py 중간 목적지가 나중의 split source가 된 두 경로도 최초869bae55 커밋의 정확한 blob으로 기록했다. 현재 tree나 변경된 기대값으로 기준선을 다시 만들지 않았다. **stock 보존 검사 PASS: frozen1867/PR2631907/protected2260/current2260, items37**이다.
+
+최초 전체 backend 실행은2235 PASS/3 FAIL/22 SKIP/27 warnings,1265.51초였다. 실제 실패와 후속 처리: (1) L0 core inventory에 이미 이전한 activity schedule/limit 두 모듈이 남고 새 공통 context_text가 빠졌으므로 실제16개 목록으로 수정했다. 기존 L0 6 tests와 원래 CLI PASS다. (2) isolated docx parser가 부하 중 기존15초 제한을 초과했으나 동일 코드/동일 제한으로 원래 검사 재실행 PASS다. (3) Memory observation fixture의 Post·Observation 동시 add_all이 ORM 등록 순서에 따라 FK를 위반하므로 부모 Post add/flush 후 Observation add로 고쳤다. FK나 assertion은 그대로이며 원래 검사 PASS다. 마지막 두 검사는 함께2 PASS/21.97초다. 초기 실패를 전체 PASS로 바꾸어 기록하지 않으며 PR 전체 CI와 머지 후 설치 검증을 별도로 확인한다.
