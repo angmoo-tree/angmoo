@@ -8,7 +8,7 @@ from sqlalchemy.pool import StaticPool
 from app import schemas
 from model_fixture_support import models
 from app.services import community as community_service
-from app.services import community_abuse_quota
+from app.domains.social.service import abuse_quota as community_abuse_quota
 
 
 def _engine():

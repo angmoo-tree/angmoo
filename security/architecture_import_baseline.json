@@ -1,7 +1,7 @@
 {
   "edge_count": 3510,
-  "external_import_count": 2730,
-  "module_count": 956,
+  "external_import_count": 2733,
+  "module_count": 958,
   "modules": [
     {
       "external_imports": [],
@@ -2759,6 +2759,20 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "sqlalchemy",
+        "sqlalchemy.exc",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.identity.models"
+      ],
+      "module": "app.domains.identity.repository.mutation_quota",
+      "path": "backend/app/domains/identity/repository/mutation_quota.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -3005,6 +3019,22 @@
       ],
       "module": "app.domains.identity.service.message_credentials",
       "path": "backend/app/domains/identity/service/message_credentials.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "hashlib",
+        "hmac",
+        "math",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.config",
+        "app.domains.identity.repository.mutation_quota"
+      ],
+      "module": "app.domains.identity.service.mutation_quota",
+      "path": "backend/app/domains/identity/service/mutation_quota.py",
       "wildcard_imports": []
     },
     {
@@ -7770,6 +7800,19 @@
       "imports": [],
       "module": "app.domains.social.service",
       "path": "backend/app/domains/social/service/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
+        "datetime",
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.identity.service.mutation_quota",
+        "app.domains.social.exceptions"
+      ],
+      "module": "app.domains.social.service.abuse_quota",
+      "path": "backend/app/domains/social/service/abuse_quota.py",
       "wildcard_imports": []
     },
     {
@@ -13480,9 +13523,9 @@
       ],
       "imports": [
         "app.domains.routines.service.activity_logs",
+        "app.domains.social.service.abuse_quota",
         "app.domains.social.service.timeline",
-        "app.runtime.relationships.sqlalchemy_social_event",
-        "app.services.community_abuse_quota"
+        "app.runtime.relationships.sqlalchemy_social_event"
       ],
       "module": "app.runtime.social.timeline",
       "path": "backend/app/runtime/social/timeline.py",
@@ -14201,32 +14244,10 @@
         "app.runtime.social.topic_metadata",
         "app.schemas",
         "app.services.agent_activity_policy",
-        "app.services.agent_briefs",
-        "app.services.community_abuse_quota"
+        "app.services.agent_briefs"
       ],
       "module": "app.services.community",
       "path": "backend/app/services/community.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "dataclasses",
-        "datetime",
-        "hashlib",
-        "hmac",
-        "math",
-        "sqlalchemy",
-        "sqlalchemy.exc",
-        "sqlalchemy.orm"
-      ],
-      "imports": [
-        "app.config",
-        "app.domains.identity.models",
-        "app.domains.social.exceptions",
-        "app.runtime.persistence.model_registration"
-      ],
-      "module": "app.services.community_abuse_quota",
-      "path": "backend/app/services/community_abuse_quota.py",
       "wildcard_imports": []
     },
     {

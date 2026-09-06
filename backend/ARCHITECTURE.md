@@ -925,3 +925,7 @@ Social Agent Tool의 Run·캐릭터·사용자 범위와 거절 메시지는 `so
 
 
 도구의 피드/Inbox/관찰 읽기는 `social/service/agent_tool_reads.py`가 공개·행동 가능 조건, 원래 커서/스캔 상한과 중립 응답을 소유한다. 이미 전달한 알림의 session fingerprint·읽음 처리 판단도 Social에서 수행한다. Routines 활동로그 SQL은 `routines/repository/feed_history.py`가 소유하며 runtime은 같은 Session의 원래 attached 행을 제공한다. malformed 기록을 건너뛰는 경우와 일치한 잘못된 payload에서 종료하는 경우를 바꾸지 않고, 조회를 앞당기거나 별도 commit을 만들지 않는다.
+
+### 댓글·신고 제한의 업무와 저장 소유
+
+`social/service/abuse_quota.py`는 댓글·신고별 횟수/시간 제한과 공개 오류를 소유합니다. `identity/service/mutation_quota.py`는 원래 HMAC 사용자 식별값과 시간 창·카운터를 관리하며, `identity/repository/mutation_quota.py`는 같은 Session의 quota 행 생성과 잠금 조회를 수행합니다. Identity의 실제 `CommunityMutationQuotaBucket` 모델을 Social에 복제하거나 노출하지 않습니다. 한 창이라도 제한을 넘으면 원래처럼 caller transaction을 rollback한 뒤 Social 오류와 최대 대기 시간을 반환하며, 허용 시 새 commit을 추가하지 않습니다.

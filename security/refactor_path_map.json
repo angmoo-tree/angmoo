@@ -559,7 +559,8 @@
     "backend/app/models/world_activity_runtime.py": "backend/app/domains/routines/models/plans.py",
     "backend/app/models/world_character_setup.py": "backend/app/domains/world_characters/models.py",
     "backend/app/models/worlds.py": "backend/app/domains/world_characters/models.py",
-    "backend/app/core/db.py": "backend/app/database.py"
+    "backend/app/core/db.py": "backend/app/database.py",
+    "backend/app/services/community_abuse_quota.py": "backend/app/domains/social/service/abuse_quota.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -19781,8 +19782,10 @@
       "scope": "Actual timeline mutation/report/deletion workflow, Social notification admission, bounded post-result text; WC owns actual author/active-world/member validation, runtime only binds pre-existing same-Session collaborators.",
       "split_files": {
         "backend/app/services/community_abuse_quota.py": [
-          "backend/app/domains/social/exceptions.py",
-          "backend/app/services/community_abuse_quota.py"
+          "backend/app/domains/social/service/abuse_quota.py",
+          "backend/app/domains/identity/service/mutation_quota.py",
+          "backend/app/domains/identity/repository/mutation_quota.py",
+          "backend/app/domains/social/exceptions.py"
         ]
       },
       "split_symbols": [
@@ -19798,7 +19801,7 @@
         },
         {
           "old": "backend/app/services/community_abuse_quota.py::consume",
-          "new": "backend/app/services/community_abuse_quota.py::consume",
+          "new": "backend/app/domains/social/service/abuse_quota.py::consume",
           "direct_consumers": [
             "backend/app/runtime/social/timeline.py"
           ],
@@ -19808,7 +19811,7 @@
         },
         {
           "old": "backend/app/services/community_abuse_quota.py::_ensure_bucket",
-          "new": "backend/app/services/community_abuse_quota.py::_ensure_bucket",
+          "new": "backend/app/domains/identity/repository/mutation_quota.py::ensure_bucket",
           "direct_consumers": [
             "backend/app/runtime/social/timeline.py"
           ],
@@ -19818,7 +19821,7 @@
         },
         {
           "old": "backend/app/services/community_abuse_quota.py::_subject_hash",
-          "new": "backend/app/services/community_abuse_quota.py::_subject_hash",
+          "new": "backend/app/domains/identity/service/mutation_quota.py::_subject_hash",
           "direct_consumers": [
             "backend/app/runtime/social/timeline.py"
           ],
@@ -19828,7 +19831,7 @@
         },
         {
           "old": "backend/app/services/community_abuse_quota.py::_aware_utc",
-          "new": "backend/app/services/community_abuse_quota.py::_aware_utc",
+          "new": "backend/app/domains/identity/service/mutation_quota.py::_aware_utc",
           "direct_consumers": [
             "backend/app/runtime/social/timeline.py"
           ],
@@ -19838,7 +19841,7 @@
         },
         {
           "old": "backend/app/services/community_abuse_quota.py::_ACTION_POLICIES",
-          "new": "backend/app/services/community_abuse_quota.py::_ACTION_POLICIES",
+          "new": "backend/app/domains/social/service/abuse_quota.py::_ACTION_POLICIES",
           "direct_consumers": [
             "backend/app/runtime/social/timeline.py"
           ],
@@ -35982,7 +35985,7 @@
           "old": "backend/app/services/lore_parser_quota.py::_subject_hash",
           "new": "backend/app/domains/character_lore/service/parser_quota.py::_subject_hash",
           "direct_consumers": [
-            "backend/app/services/community_abuse_quota.py",
+            "backend/app/domains/social/service/abuse_quota.py",
             "backend/app/domains/identity/service/external_verification.py",
             "backend/app/domains/identity/service/login_throttle.py",
             "backend/app/domains/character_lore/service/parser_quota.py"
@@ -74910,7 +74913,7 @@
             "backend/app/domains/social/service/today_activity.py",
             "backend/app/domains/social/service/world_feed.py",
             "backend/app/services/community.py",
-            "backend/app/services/community_abuse_quota.py",
+            "backend/app/domains/social/service/abuse_quota.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -74937,7 +74940,7 @@
             "backend/app/domains/social/service/today_activity.py",
             "backend/app/domains/social/service/world_feed.py",
             "backend/app/services/community.py",
-            "backend/app/services/community_abuse_quota.py",
+            "backend/app/domains/social/service/abuse_quota.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -74964,7 +74967,7 @@
             "backend/app/domains/social/service/today_activity.py",
             "backend/app/domains/social/service/world_feed.py",
             "backend/app/services/community.py",
-            "backend/app/services/community_abuse_quota.py",
+            "backend/app/domains/social/service/abuse_quota.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -74991,7 +74994,7 @@
             "backend/app/domains/social/service/today_activity.py",
             "backend/app/domains/social/service/world_feed.py",
             "backend/app/services/community.py",
-            "backend/app/services/community_abuse_quota.py",
+            "backend/app/domains/social/service/abuse_quota.py",
             "backend/app/domains/social/service/feed_cycle.py"
           ],
           "test_nodes": [
@@ -88409,6 +88412,110 @@
       "same_session_evidence": "Original15 methods +retained25 whole AST and extracted query equal after exact callback/type/self restoration. New SQLite verifies attached ordered records, Character/run window scope, malformed payload/boolean ID filtering, pending newest invalid payload without fallback, autoflush and caller rollback.",
       "binding_followup": "Parent maps current LG read callers to runtime/resident/langgraph.py and activity policy build to runtime.resident.activity_policy; no duplicated policy source.",
       "remaining": "Community25 history-note diagnostics/complete-tick/state functions, G07, aliases and full B5/capture/Hosted pending."
+    },
+    "AR-B8-ABUSE-QUOTA": {
+      "status": "SOURCE PREPARATION; actual policy and error in Social, hashed counters and same-Session locked SQL in Identity; original complete workflow AST identical after exact owner expansion; stock/full and source introduction pending",
+      "split_files": {
+        "backend/app/services/community_abuse_quota.py": [
+          "backend/app/domains/social/service/abuse_quota.py",
+          "backend/app/domains/identity/service/mutation_quota.py",
+          "backend/app/domains/identity/repository/mutation_quota.py",
+          "backend/app/domains/social/exceptions.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/community_abuse_quota.py::consume",
+          "new": "backend/app/domains/social/service/abuse_quota.py::consume",
+          "direct_consumers": [
+            "backend/app/runtime/social/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_abuse_quota_transactions.py::test_quota_writes_remain_uncommitted_and_rejection_rolls_back_window_reset",
+            "tests/test_community_abuse_boundaries.py::test_reply_and_report_quotas_persist_only_hashed_subjects"
+          ]
+        },
+        {
+          "old": "backend/app/services/community_abuse_quota.py::_ensure_bucket",
+          "new": "backend/app/domains/identity/repository/mutation_quota.py::ensure_bucket",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/mutation_quota.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_abuse_quota_transactions.py::test_quota_writes_remain_uncommitted_and_rejection_rolls_back_window_reset",
+            "tests/test_community_abuse_boundaries.py::test_reply_and_report_quotas_persist_only_hashed_subjects"
+          ]
+        },
+        {
+          "old": "backend/app/services/community_abuse_quota.py::_subject_hash",
+          "new": "backend/app/domains/identity/service/mutation_quota.py::_subject_hash",
+          "direct_consumers": [
+            "backend/app/domains/social/service/abuse_quota.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_abuse_quota_transactions.py::test_quota_writes_remain_uncommitted_and_rejection_rolls_back_window_reset",
+            "tests/test_community_abuse_boundaries.py::test_reply_and_report_quotas_persist_only_hashed_subjects"
+          ]
+        },
+        {
+          "old": "backend/app/services/community_abuse_quota.py::_aware_utc",
+          "new": "backend/app/domains/identity/service/mutation_quota.py::_aware_utc",
+          "direct_consumers": [
+            "backend/app/domains/social/service/abuse_quota.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_abuse_quota_transactions.py::test_quota_writes_remain_uncommitted_and_rejection_rolls_back_window_reset",
+            "tests/test_community_abuse_boundaries.py::test_reply_and_report_quotas_persist_only_hashed_subjects"
+          ]
+        },
+        {
+          "old": "backend/app/services/community_abuse_quota.py::_ACTION_POLICIES",
+          "new": "backend/app/domains/social/service/abuse_quota.py::_ACTION_POLICIES",
+          "direct_consumers": [
+            "backend/app/runtime/social/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_abuse_quota_transactions.py::test_quota_writes_remain_uncommitted_and_rejection_rolls_back_window_reset",
+            "tests/test_community_abuse_boundaries.py::test_reply_and_report_quotas_persist_only_hashed_subjects"
+          ]
+        },
+        {
+          "old": "backend/app/services/community_abuse_quota.py::CommunityQuotaExceeded",
+          "new": "backend/app/domains/social/exceptions.py::CommunityQuotaExceeded",
+          "direct_consumers": [
+            "backend/app/runtime/social/timeline.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_abuse_quota_transactions.py::test_quota_writes_remain_uncommitted_and_rejection_rolls_back_window_reset",
+            "tests/test_community_abuse_boundaries.py::test_reply_and_report_quotas_persist_only_hashed_subjects"
+          ]
+        },
+        {
+          "old": "backend/app/services/community_abuse_quota.py::consume",
+          "new": "backend/app/domains/identity/service/mutation_quota.py::consume",
+          "direct_consumers": [
+            "backend/app/domains/social/service/abuse_quota.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_abuse_quota_transactions.py::test_quota_writes_remain_uncommitted_and_rejection_rolls_back_window_reset"
+          ]
+        },
+        {
+          "old": "backend/app/services/community_abuse_quota.py::consume",
+          "new": "backend/app/domains/identity/repository/mutation_quota.py::lock_buckets",
+          "direct_consumers": [
+            "backend/app/domains/identity/service/mutation_quota.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_abuse_quota_transactions.py::test_quota_writes_remain_uncommitted_and_rejection_rolls_back_window_reset"
+          ]
+        }
+      ],
+      "transaction": "Same nested insert, tuple filtering and scope-ascending FOR UPDATE; expiry checks before increments, rollback before Social error with maximum retry interval, no added commit. Canonical Identity ORM class is unchanged.",
+      "tests": [
+        "tests/social/test_abuse_quota_transactions.py::test_quota_writes_remain_uncommitted_and_rejection_rolls_back_window_reset",
+        "tests/social/test_abuse_quota_transactions.py::test_unknown_quota_action_rejects_before_touching_session"
+      ]
     }
   },
   "asgi_exports": {
