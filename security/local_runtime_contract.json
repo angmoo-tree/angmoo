@@ -143,6 +143,12 @@
       "module": "app.core.unit_of_work",
       "owner_stage": "L0",
       "removal_condition": null
+    },
+    {
+      "disposition": "keep",
+      "module": "app.core.context_clipping",
+      "owner_stage": "AR-B7-DAYPART",
+      "removal_condition": null
     }
   ],
   "embedded_storage": {
