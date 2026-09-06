@@ -34,9 +34,13 @@
 
 ## 원래 Literal 별칭 다섯 개
 
-`app/schemas/agents.py`의 `AgentGoogleModel`, `GoogleGeminiModel`, `ImageKeyMode`, `WritingRepetitionLevel`, `AgentExecutionMode` 대입 본문을 그대로 유지했다. 현재 제품·테스트에 이 원래 다섯 이름의 직접 소비자는 없다. Character 또는 Routines의 실제 스키마에는 이미 같은 값을 표현하는 별칭이 있으나, 이 사실만으로 원래 export가 같은 객체라고 판단하지 않는다.
+첫 소비자 전환 source `03afe4f49d1435ae22fe8636ea0ca9db0a55c32a`에서는 `app/schemas/agents.py`의 `AgentGoogleModel`, `GoogleGeminiModel`, `ImageKeyMode`, `WritingRepetitionLevel`, `AgentExecutionMode` 대입 본문을 그대로 유지했다. 당시 제품·테스트에 이 원래 다섯 이름의 직접 소비자는 없었다. Character 또는 Routines의 실제 스키마에는 이미 같은 값을 표현하는 별칭이 있었지만, 이 사실만으로 원래 export가 같은 객체라고 판단하지 않았다.
 
-전환 전 같은 Python 프로세스에서 비교한 다섯 값은 모두 동등했다. `WritingRepetitionLevel`은 그 실행에서 실제 Routines 값과 `is` 비교가 거짓이었다. 나머지 네 비교는 그 실행에서 참이었지만 import 순서와 typing 내부 캐시를 일반적인 동일성 보장으로 취급하지 않는다. 최종 정리에서는 원문 별칭의 보존 위치를 정하거나, 지원 중인 소비자가 없다는 근거로 export를 종료하는 결정을 별도로 남겨야 한다. 응답 JSON schema나 enum 순서를 바꾸는 근거로 사용하지 않는다.
+전환 전 같은 Python 프로세스에서 비교한 다섯 값은 모두 동등했다. `WritingRepetitionLevel`은 그 실행에서 실제 Routines 값과 `is` 비교가 거짓이었다. 나머지 네 비교는 그 실행에서 참이었지만 import 순서와 typing 내부 캐시를 일반적인 동일성 보장으로 취급하지 않는다. 응답 JSON schema나 enum 순서를 바꾸는 근거로 사용하지 않는다.
+
+후속 전환에서는 원래 다섯 대입문을 손실 없이 실제 업무 constants로 옮겼다. Character 모델·이미지 키 모드·실행 모드 네 값은 `domains/characters/constants.py`, 글쓰기 반복 수준은 `domains/routines/constants.py`가 소유한다. 현재 실제 Character 스키마의 중복 대입 세 개와 Routines resident의 중복 대입 하나도 제거하고 같은 constants 객체를 import한다. 옛 agents export 역시 그 객체를 명시적으로 import한다. 원문 대입 AST 다섯 개와 스키마 class 본문 36개가 그대로이며, 관련 기존 split 지도 20개도 실제 정의 위치로 연결했다. 신규 함수·DTO·테스트 node는 만들지 않았다.
+
+Identity의 CredentialUpsert가 가진 별도 `AgentGoogleModel` 정의는 같은 provider 값 집합을 사용하는 기존 자격 증명 계약으로 유지한다. Character가 이미 Identity 응답을 소비하는 상황에서 Identity가 Character의 스키마를 역으로 참조하게 만들지 않는다. 원래 provider 선택값과 순서는 공통 provider registry에서 읽는다.
 
 ## 기존 source 검사의 연결 보완
 
@@ -49,3 +53,5 @@
 최종 집중 결과는 **498 passed / 19 skipped / 56.22초**다. 공개 테스트 기준 **604개 전체 보존**, 현재 public profile **2,509개 수집**을 확인했다. 신규 node는 없다. 최초 집중 결과는 **497 passed / 19 skipped / 1 failed**였고, 위 삭제 경로를 실제 전체 source로 연결한 뒤 해당 파일의 **3개 테스트가 통과**했다. Skip 19개는 기존 조건이며 이 작업에서 추가하지 않았다. 첫 보존 검사에서 PR258/263의 API·JSON schema·ORM 계약, 변경된 보호 테스트 37개 파일의 assertion, 기존 전체 split 증거가 모두 통과했다.
 
 기준 source에는 `app.cruds.agents`와 `app.services.agent_runs`의 미등록 legacy 소비자 진단 13개가 이미 있었다. 이번 변경 뒤의 진단도 동일한 13개이며 새 진단은 없다. 이 두 잔여 모듈은 부모의 별도 B8 실제 소비자/호환 종료 범위이고, 이번 단계에서 이들을 위한 ORM 예외를 추가하지 않는다. 스키마 전환으로 종료한 옛 정확 edge는 16개, 제거한 호환 bridge는 4개다. 남은 실제 역사 검사에 필요한 canonical schema import 일곱 개만 정확히 등록했다.
+
+Literal 소유 후속 전환의 집중 검증은 **195 passed / 10.68초**이며, PR258/263 API·JSON schema·ORM 계약과 기존 전체 split 증거도 다시 통과했다. 옛 다섯 export와 Character·Routines·LocalBot의 실제 constants 객체가 명시적인 import를 통해 동일함을 확인했다.

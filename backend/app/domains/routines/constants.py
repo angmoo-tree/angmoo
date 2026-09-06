@@ -1,12 +1,15 @@
 """Versioned deterministic daily planning constants."""
 
 from datetime import timedelta
+from typing import Literal
 
 from app.domains.routines.contracts.lifecycle import EVENT_CONSUMPTION_NAMESPACE
 
 import re
 
 from zoneinfo import ZoneInfo
+
+WritingRepetitionLevel = Literal["off", "light", "normal", "strong"]
 
 DAYPARTS = ("dawn", "morning", "afternoon", "evening")
 

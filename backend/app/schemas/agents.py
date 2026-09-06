@@ -118,12 +118,10 @@ from app.api.schemas.first_greeting import AgentFirstGreetingRead
 
 from app.domains.identity.schemas import CredentialUpsert
 
-AgentGoogleModel = Literal[*AGENT_GOOGLE_MODELS]
-
-GoogleGeminiModel = AgentGoogleModel
-
-ImageKeyMode = Literal["service", "user", "disabled"]
-
-WritingRepetitionLevel = Literal["off", "light", "normal", "strong"]
-
-AgentExecutionMode = Literal["llm", "local"]
+from app.domains.characters.constants import (
+    AgentGoogleModel,
+    GoogleGeminiModel,
+    ImageKeyMode,
+    AgentExecutionMode,
+)
+from app.domains.routines.constants import WritingRepetitionLevel
