@@ -2,13 +2,13 @@ from datetime import UTC, date, datetime
 
 import pytest
 
-from app.domains.memory.domain.batch_policy import (
+from app.domains.memory.policies.batch import (
     daily_slot,
     next_daily_slot,
     schedule_time,
 )
-from app.domains.memory.domain.errors import MemoryValidationError
-from app.domains.memory.domain.selection import MemorySelectionSource, parse_selection
+from app.domains.memory.exceptions import MemoryValidationError
+from app.domains.memory.policies.selection_output import MemorySelectionSource, parse_selection
 
 
 def test_daily_schedule_future_and_consumed_date():

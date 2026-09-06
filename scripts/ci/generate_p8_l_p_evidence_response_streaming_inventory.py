@@ -77,7 +77,7 @@ REQUIRED_FILES = (
     "backend/app/runtime/migrations/sqlite_versions/v6_to_v7_chat_model_binding.py",
     "backend/app/runtime/migrations/sqlite_versions/manifests/v7.json",
     "backend/app/runtime/persistence/sqlite_schema.py",
-    "backend/app/runtime/memory/sqlalchemy_source_reader.py",
+    "backend/app/domains/memory/service/source_evidence.py",
     "backend/tests/test_p8_l_p_evidence_response_streaming.py",
     "backend/tests/test_p8_l_p_frontend_streaming.py",
     "backend/tests/test_p8_l_p_model_hotfix.py",

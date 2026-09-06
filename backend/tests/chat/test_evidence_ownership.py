@@ -7,11 +7,9 @@ from types import SimpleNamespace
 import pytest
 
 from app.domains.chat.service.evidence import EvidenceService
-from app.domains.memory.public import (
-    CanonicalMemoryEvidence,
-    MemoryScope,
-    MemorySourceTypeV1,
-)
+from app.domains.memory.contracts.source_evidence import CanonicalMemoryEvidence
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
 
 
 @pytest.mark.parametrize(

@@ -7,11 +7,9 @@ from typing import Protocol
 from sqlalchemy.orm import Session
 
 from app.domains.chat.contracts.today_sns_activity import TodaySnsActivityReaderPort
-from app.domains.memory.public import (
-    MemoryItemDetail,
-    MemoryScope,
-    MemorySourceEvidenceReaderPort,
-)
+from app.domains.memory.contracts.inspector import MemoryItemDetail
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.contracts.source_evidence import MemorySourceEvidenceReaderPort
 
 
 class RelationshipEvidenceState(Protocol):

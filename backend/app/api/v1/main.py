@@ -9,7 +9,7 @@ from app.api.v1.routes import bot
 from app.api.v1.routes import character_lore
 from app.api.v1.routes import community
 from app.domains.chat.router import messages
-from app.api.v1.routes import memory
+from app.domains.memory import router as memory
 from app.api.v1.routes import tree
 from app.domains.world_characters.router import entry as worlds
 from app.domains.worlds import router as world_creator

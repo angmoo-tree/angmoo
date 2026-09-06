@@ -22,11 +22,11 @@ FROZEN_OUTPUT_SHA256 = "c02287d0d563582522a58c0ca9fd217b6b6985a59eafafa7b6278b6f
 Q_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-q-memory-read-inspector-inventory.json"
 Q_INVENTORY_SHA256 = "543f8f2457abbc03f50b7e0cace5fa8edffe680c74df53379fa21da588da9611"
 
-from app.domains.memory.domain.lifecycle import (  # noqa: E402
+from app.domains.memory.contracts.items import (  # noqa: E402
     MAX_MEMORY_SUMMARY_LENGTH,
     MEMORY_WRITE_CONTRACT_VERSION,
 )
-from app.domains.memory.domain.read_surface import (  # noqa: E402
+from app.domains.memory.contracts.inspector import (  # noqa: E402
     MEMORY_READ_CONTRACT_VERSION,
 )
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest  # noqa: E402
@@ -38,13 +38,13 @@ class InventoryError(RuntimeError):
 
 
 REQUIRED_FILES = (
-    "backend/app/api/v1/routes/memory.py",
+    "backend/app/domains/memory/router.py",
     "backend/app/domains/memory/api/schemas.py",
-    "backend/app/domains/memory/application/scope_control.py",
-    "backend/app/domains/memory/application/write_lifecycle.py",
-    "backend/app/domains/memory/domain/lifecycle.py",
-    "backend/app/domains/memory/infrastructure/repository.py",
-    "backend/app/domains/memory/ports/repository.py",
+    "backend/app/domains/memory/service/scope.py",
+    "backend/app/domains/memory/service/items.py",
+    "backend/app/domains/memory/contracts/items.py",
+    "backend/app/domains/memory/repository/items.py",
+    "backend/app/domains/memory/contracts/item_store.py",
     "backend/app/domains/memory/public.py",
     "backend/app/runtime/memory/recall_projection.py",
     "backend/app/runtime/persistence/sqlite_schema.py",
@@ -127,16 +127,16 @@ def _forbid_imports(relative: str, prefixes: tuple[str, ...]) -> None:
 
 def _boundary_contract() -> dict[str, Any]:
     for relative in (
-        "backend/app/domains/memory/domain/lifecycle.py",
-        "backend/app/domains/memory/application/scope_control.py",
-        "backend/app/domains/memory/application/write_lifecycle.py",
+        "backend/app/domains/memory/contracts/items.py",
+        "backend/app/domains/memory/service/scope.py",
+        "backend/app/domains/memory/service/items.py",
     ):
         _forbid_imports(
             relative,
             ("app.integrations", "app.runtime", "sqlalchemy", "fastapi"),
         )
     _require_text(
-        "backend/app/api/v1/routes/memory.py",
+        "backend/app/domains/memory/router.py",
         (
             '@router.put("/memory/settings"',
             '@router.put("/memories/{memory_id}/pin"',
@@ -147,11 +147,11 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _forbid_text(
-        "backend/app/api/v1/routes/memory.py",
+        "backend/app/domains/memory/router.py",
         ("SELECT ", "INSERT ", "UPDATE ", "DELETE FROM ", "MATCH ", "session.execute("),
     )
     _require_text(
-        "backend/app/domains/memory/application/write_lifecycle.py",
+        "backend/app/domains/memory/service/items.py",
         (
             "def correct_summary(",
             "memory_correction_item_id(",
@@ -161,7 +161,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/memory/infrastructure/repository.py",
+        "backend/app/domains/memory/repository/items.py",
         (
             "def correct_item_summary(",
             "old.status = MemoryItemStatus.SUPERSEDED.value",

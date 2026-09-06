@@ -658,6 +658,8 @@ WC 최종 source와 Character HTTP source를 합친 첫 고정 후보의 집중 
 
 동일 코드의 문서 통합 후보 `aa4f51e`에서 CI 계약 7개와 architecture **630 modules / 2,019 edges / exact legacy 272**, current inventory/public196을 확인했다. 추적 archive **19.17MB** 및 HEAD의 전체 조상 **360 commits / 21.33MB** Gitleaks는 findings0이다. 이 기록 뒤의 변경은 결과 문서뿐이다. PR #277 뒤의 순차 PR·merge·post-merge 및 실제 Installer 검증을 별도로 확인한다. WC의 미전환 외부 aggregate/ORM 소비자와 frozen migration용 동일 객체 alias는 B4~B8/G5의 명시된 범위에 남으며 이 로컬 결과를 B2 전체 완료로 확대하지 않는다.
 
+
+
 ## AR-B5-B1 Social SQL·알림 처리·HTTP DTO
 
 - `cruds/community.py` 원본 중 Social 테이블만 다루는 실제 SQL·변환·알림 생성 함수 **61개**를 이전했습니다. 원본 61개 함수 AST와 Community/WorldFeed schema 전체 AST는 그대로입니다. 단순 export를 새 구현으로 만들지 않았으며 SQL 본문은 repository 4개, 알림 수신자/자기 자신 제외 판단과 저장은 `service/notifications.py`, 문자열·정수 cursor 변환은 utils 2개가 실제 소유합니다.
@@ -829,6 +831,90 @@ Package의 실제 owner·같은 Session seed replay 복구와 WC readiness DTO �
 Media M1 `660651d`, M3 `baeaefb`, M4 `9a66655`, M5 `99fb396`, M6 `dd78da6`의 원래 source와 신규 **26개 node**를 고정 commit에서 추출했다. M2 `ea4a7f4`는 기존 파일의 명시 이동이며 새 source/node가 없어 중복 snapshot을 추가하지 않았다. 최종 고정 `e9ffdb83bbebdb784b9c7ebc6ffea1b0bb517cf5`에서 stock 보존은 **2,201 protected/current nodes / items37 PASS**다. API·ORM·원본 test/assertion·symbol split과 최초 도입 계보를 모두 확인했다. 별도 현재 구조 회귀 **69 passed / 15.54초**, HEAD 전체 **381 commits / 21.90MB**, tracked archive **19.42MB** Gitleaks findings0이다.
 
 공유 codec·path·quarantine은 integrations/media, Character·Social별 파일 저장은 각 owner service, Character 이미지 생성의 권한·quota·오류 처리와 HTTP는 해당 owner, World 이미지 변환/commit·rollback은 Worlds owner, SDK 통신/Azure 응답 변환은 integrations가 담당한다. 기존 quota·timeout·image limits·MIME·restore·provider call·usage lock 본문을 보존했다. Social mutation/job, profile_media의 test-only alias 및 사용하지 않는 URL helper, 전역 ORM 등록은 B5/B8/G5의 실제 종료 항목으로 추적한다. 이 PR로 backend 전체 전환 완료를 선언하지 않는다.
+
+
+### AR-B7-A0 Memory 입출력·오류 기반 준비
+
+기존 Memory 입출력 schema는 `schemas/__init__.py`, 배치 설정 입출력은 `schemas/batch.py`, 다섯 오류 class는 `exceptions.py`로 이전했다. 세 파일의 class 본문 AST는 import 경로를 제외하고 그대로이며 28개 실제 소비자를 연결했다. 기존 domain aggregate는 같은 오류 class를 제공한다. 입출력 검증, 버전·owner/World scope, batch consent/model/일정 필드와 extra-forbid 설정은 바꾸지 않는다.
+
+전체 Memory 완료를 선언하지 않고 세 실제 역할 module만 partial scope로 추가했다. 미전환 Memory 서비스·repository·policy·HTTP의 정확 bridge 18개를 기록했다. Schema 두 module만 외부 entry이며 예외를 임의의 service entry로 올리지 않았다. 현재 architecture **640 modules / 2,087 internal edges / exact legacy 256 PASS**, L4 parity97 및 current Memory batch inventory를 갱신했다. Frozen predecessor inventory와 SQLite migration은 유지한다.
+
+실제 write/recall/consolidation/selection 정책과 SQL·FTS·maintenance queue, batch admission·예약·종료·provider 및 HTTP 서비스 소유권은 다음 B7 범위다. 이 기반 source의 집중 검증·원본 도입 계보 통합·순차 PR/merge는 별도로 기록하며 기존 구현 전체가 이전됐다는 의미가 아니다.
+
+Memory 기반 source `70b74395cb91f383c5f48a530af1cf2a173cb397`의 기존 write/recall inspector/consolidation/owner 제어·batch API/정책/안전·frozen inventory 집중은 **105 passed / 기존 2 warnings / 31.13초**다. 실제 Memory 정책과 SQL 구현은 이 세 파일 이동에서 바꾸지 않았다. 전체 source/node 계보는 선행 B4~B6와 함께 순차 통합하며 B7 전체 완료로 판정하지 않는다.
+
+### AR-B7-A1 Memory 값·정책의 실제 소유권
+
+source `67f5178c3ce5d2dcde41700f4ddd251c01300721`에서 owner/World/subject 범위·저장 항목·회상·retrieval plan·닫힌 source vocabulary는 `contracts/`의 실제 값 정의로, 유효기간·검증·정리 eligibility·provider 출력 검증·배치 일정과 선택 예산은 `policies/`의 실제 판단으로 배치했다. 13개 모듈의 함수/클래스 83개는 import 경로만 정규화하면 원래 AST 전체와 동일하다. 별도 forwarding service를 추가하지 않았다.
+
+같은 고정 후보에서 `pytest -q tests -k 'memory or canonical_retrieval_planner or today_sns'`는 **190 passed / 2,011 deselected / 2 warnings / 67.41초**다. 이는 실제 기억 저장·회상·owner 제어·scope/CSRF·배치 consent·selection 실패·migration·Today SNS 회귀를 포함한다. 경계 **640 modules / 2,087 edges / legacy256**, ER0 **76/87/24/44/7**, L4 parity97 및 현재 Memory batch inventory를 확인했다. 원래 P8-L predecessor JSON과 migration 본문은 재생성하지 않았다. 이동하여 사라진 여덟 old consumer의 exact bridge는 제거하고 아직 전환 전인 실제 Memory consumer만 후속 B7/B8 제거 조건으로 기록했다.
+
+이 단계는 값과 정책의 실제 배치다. SQL·FTS·queue repository, 저장/회상/정리 service, HTTP와 startup/shutdown 조립, 남은 domain/public aggregate 종료는 후속 B7 범위이며 전체 전환 완료로 표시하지 않는다. 최초 도입 기록은 선행 B4~B6 source와 선형 통합 후 고정 commit 기준으로 연결한다.
+
+### AR-B7-A2 Memory 실제 업무 서비스와 사용 중인 협력 계약
+
+고정 source `a131115`에서 실제 scope CAS/replay·item lifecycle·근거 검증·canonical recall·retrieval plan·consolidation·batch selection의 실행 본문을 `service/`에 배치했다. repository/source/provider/queue/transaction의 기존 typed 협력 계약은 `contracts/`에 두며 실제 repository·provider·worker·회귀 fake가 사용하는 계약만 승계한다. 18개 role 파일의 클래스·함수·메서드 **145개 AST가 import 연결만 정규화하면 원문과 동일**하다. 새 전달 service를 추가하거나 provider/DB 호출·commit·rollback 순서를 변경하지 않았다.
+
+동일 source의 Memory·retrieval planner·Today SNS 회귀는 **190 passed / 2,011 deselected / 2 warnings / 54.73초**, 경계 **640/2087/legacy256**, L4 parity97·Memory batch·ER0 **76/87/24/44/7** PASS다. 이 단계에서 application/ports의 원래 파일을 실제 역할로 옮겼으며 공통 SQL 등록과 원래 source snapshot은 보존했다. `Port`가 붙은 기존 구조적 type 이름은 소비자/fake 호환을 위해 유지한다. SQL/FTS/queue 구현과 같은 Session의 외부 업무 조회, HTTP·runtime 조립 및 public/domain aggregate 제거는 다음 단계다.
+
+### AR-B7-A3 Memory ORM 소유와 역사적 migration 연결
+
+Source `7fcecd27fc155242819c3172357da1f8429f3dbf`에서 Memory ORM 13개와 기존 schema 생성 함수의 원문 AST를 유지하면서 `models/items.py`와 `models/batch.py`로 이전했다. 현재 소비자 22개를 연결했고, 고정 Alembic 0085/0089와 SQLite v4→v5/v8→v9의 본문은 변경하지 않았다. 역사적 두 import 경로는 필요한 상수·schema 함수 5개의 같은 객체만 export하며 ORM 구현을 중복하지 않는다.
+
+동일 source의 Memory·retrieval planner·Today SNS·embedded data migration 회귀는 **213 passed / 1,988 deselected / 2 warnings / 102.96초**다. 현재 경계 **642/2089/legacy256**, L4 parity97, ER0 **76/87/24/44/7**과 현재 Memory batch inventory가 통과했다. 원본 API/ORM·기존 assertion·suppression·후속 source/node 계보 보존은 **protected/current 2,201 nodes / 37 items PASS**다. SQL 저장·동일 Session의 타 업무 조회·HTTP/runtime 연결은 다음 전환 대상이며 B7 전체 완료로 표시하지 않는다.
+
+### AR-B7-A4 Memory 저장과 같은 Session의 scope 조회
+
+고정 source `b285eb1db57abdd23ff8a2e24f279683c8b2a9f9`는 item/batch/consolidation/leased queue/activation의 실제 SQL 구현을 `repository/`로 이전한다. 사용자·World·WorldCharacter의 세 조회와 timezone 조회는 `runtime/memory/scope_queries.py`에서 원래 SQL과 호출자 Session을 유지하며, invalid-scope 및 timezone 판단은 Memory repository에 남는다. `composition.py`는 이 같은 Session을 사용하는 typed read 협력을 구성하며 독립 transaction이나 도메인의 runtime 역참조를 추가하지 않는다. 기존 소비자 13개는 실제 factory에 연결했고 원래 constructor-site 이름과 테스트 assertion은 유지했다.
+
+기존 method/module **65개 AST**와 외부 조회 두 본문 AST가 같음을 확인했다. 신규 file SQLite 테스트 4개는 caller의 flush 가시성·observer 비노출·rollback 및 잘못된 owner/World/subject에서도 세 SQL의 원래 순서와 동일 오류를 확인한다. 집중 **33 passed / 19.17초**, Memory·Today SNS·embedded migration 확대 **217 passed / 1,988 deselected / 2 warnings / 111.69초**다. 현재 경계645/2095/legacy256·L4 parity97·ER0 76/87/24/44/7·현재 Memory batch inventory PASS다. Commit 직전 전체 보존은 **기존 2,201 protected / 현재 2,205 nodes / 37 items PASS**다. 신규 source 4개와 신규 test nodes 4개는 B4~B6 이후 순차 통합에서 이 source commit의 도입 증거를 append한다. B7 HTTP·worker 및 나머지 compatibility 종료는 아직 수행 중이다.
+
+### AR-B7-A5 Memory owner 업무·HTTP·실행 조립
+
+Source `17854b02cb5103e9c5a685be982159babe6758a9`에서 Memory HTTP10개는 `router.py`, 실제 설정·consent·pin·correction·delete와 commit/rollback은 `service/management.py`, inspector 표현은 `service/presentation.py`가 소유한다. 실제 서비스·repository를 필요한 시점에 만드는 같은 Session 협력과 profile/credential 조회는 상위 `runtime/memory_http.py`에 둔다. 두 앱 factory와 독립 HTTP fixture 모두 같은 builder를 등록한다. Identity 인증/CSRF는 기존 `api/identity_dependencies`의 동일 callable/object를 사용한다.
+
+기존 HTTP의 10개 업무 본문을 명시적 DI/오류 변환 분리만 정규화하여 비교했고, parameter·decorator·response AST 및 presentation7함수 AST가 같다. API 집중20 PASS 뒤, 관련 profile 읽기가 실패하면 pin이 rollback되는 새 회귀1개를 포함해 **218 passed / 1,988 deselected / 2 warnings / 129.05초**를 확인했다. 경계가 처음 잡은 잘못된 직접 인증 import와 Chat/Memory package cycle은 기존 공통 HTTP 연결 및 패키지 위의 실제 조립으로 해소했으며 **650 modules / 2,122 edges / legacy256 PASS**다. L4 parity97, ER0 76/87/24/44/7, current batch inventory도 통과했다.
+
+전체 보존 검사에서 API/ORM·원본 assertion·skip·split·node 손실은 없고 **기존 protected2,201/current2,206**이다. 검사 exit1은 앞선 A4에서 새로 commit한 source4개/node4개의 introduction capture를 B4~B6 순차 통합 뒤로 남긴 결과다. A5의 새 역할 파일과 새1node도 고정 source의 도입 기록으로 후속 capture하며 guard를 완화하지 않는다. 새 batch/provider 호출·기능 삭제·schema version 변경은 없다. Worker·source/projection·Daypart Memory와 마지막 public/aggregate 정리는 다음 범위다.
+
+
+### AR-B7-A6 Memory source admission 저장
+
+Source `8fa9871f81b8b2b534bdd77baae6243326e0a7c6`에서 실제 ON epoch 동기화 및 delivery 저장 두 함수는 `repository/delivery.py`로 옮겼다. 두 함수의 전체 AST와 동일 Connection·SQL·version/시간·dedupe를 유지한다. Runtime은 Social/Chat 이벤트를 해석하여 해당 저장을 호출하는 SQLAlchemy hook 조립을 담당한다. 기존 commit/rollback과 provider 호출은 추가하지 않았다.
+
+배치 runtime·안전·owner 제어 **33 passed / 1 warning / 14.30초**, 경계 **651/2124/legacy256**, L4 parity97, ER0 76/87/24/44/7 및 current Memory batch inventory PASS다. 새 source1개는 이 고정 commit을 기준으로 후속 순차 capture한다.
+
+### AR-B7-A7 Memory candidate 전달·배치 준비·brief 재생성
+
+Source `e9f881ae4fea642c6c7b4a754fcfe71ac2ba3b7c`에서 `deliver_candidates`, `enqueue_scope`, `rebuild_briefs`의 실제 실행 본문은 `service/batch_preparation.py`가 소유한다. 같은 Session의 저장/원본 근거 조회 네 협력을 명시적으로 받아 기존 candidate 검증, thread별 묶음, byte/candidate 예산, queue 등록, hot brief의 현재 근거 검증과 dirty flag/commit 흐름을 유지한다. Worker는 실행·중지와 실제 협력 연결을 맡는다. 테스트의 기존 직접 호출은 test 지원 모듈에서 실제 runtime builder를 partial로 연결하며 원래 assertion은 유지한다.
+
+세 실제 업무 본문은 명시 factory 주입만 역변환하면 원문 AST와 같다. 배치 runtime·안전·API·owner 제어 **41 passed / 2 warnings / 15.19초**, 경계 **654/2142/legacy256**, L4 parity97·ER0 76/87/24/44/7·current batch inventory PASS다. 새 역할 source와 test 지원 파일은 후속 선형 capture 대상으로 남기며 보호 기준을 재생성하지 않는다. 예약/종료 정책·외부 World join, source reconciliation·canonical recall·Daypart Memory의 실제 책임과 마지막 legacy bridge는 다음 범위다.
+
+
+### AR-B7-A8 Memory 예약·종료 trigger 업무
+
+Source `989cccadc2c36597311d6e112809a238304d6536`에서 consent·종료 cutoff 허가·날짜/시간대/예약·queue admission의 실제 흐름은 `service/batch_scheduling.py`가 소유한다. World timezone과 Memory 설정의 join은 같은 Session의 runtime query로 연결했다. 명시적 협력 추출을 다시 펼치면 전체 workflow와 join AST가 원문과 같고, 종료 허가 한 SQL·flush·조회 순서/limit·예외 시 scope 회전·commit과 provider-free 조건을 유지한다.
+
+집중 **41 passed / 2 warnings / 14.51초**, 경계655/2155/legacy256·L4 parity97·ER0·current batch inventory PASS다. 전체 guard는 기존 API/ORM/assertions/node 손실 없이 protected2201/current2206을 확인했고, 새 source15개/node5개가 아직 선형 introduction capture 전인 점을 보고했다. 최초 A8 split 기록의 불완전한 symbol/test 목록 두 오류는 실제 전체 소유 목록·정확 test node로 보완했으며 원래 `check_split_evidence`를 다시 실행하여 **0 errors**다. 검사 구현과 frozen 기준을 이 보완에서 바꾸지 않았다.
+
+### AR-B7-A9 Memory canonical recall 실제 조회·근거 재검증
+
+Source `9133d7a709f473755aeff149281f80c6794ceefc`에서 실제 item/evidence SQL과 canonical 회상/projection record hydration은 `repository/recall.py`·`recall_records.py`가 소유한다. Query 검증·허용 연산 선택·결과 상태는 기존 Memory recall 서비스가 맡고, 저장소는 모든 projection 후보의 최신 scope·enabled·valid-time·digest·visibility·observation·block을 다시 검증한다. 실제 Character/World membership/block join은 `runtime/memory/recall_queries.py`, 같은 Session source reader 연결은 `recall_composition.py`로 명시했다. 옛 runtime SQL 구현 파일은 제거했고 현재 소비자를 실제 factory에 연결했다.
+
+Read method 본문10개와 canonical helper10개, 외부 join·block SQL 본문은 명시된 factory/query 추출만 역변환하면 AST가 같다. 회상·retrieval planner·consolidation·inspector 집중 **44 passed / 1 warning / 19.10초**, 신규 SQLite 회귀2개를 포함한 canonical 묶음 **7 passed / 26.07초**다. 새 회귀는 Character summary의 caller flush가 같은 Session에서 보이고 observer에는 보이지 않는 점, 원본 Chat 내용을 그 Session 안에서 바꾸면 저장 digest와 달라져 문서가 제외되고 Session 종료 후 두 변경 모두 rollback되는 점을 확인한다. 경계659/2170/legacy256·L4 parity97·ER0 및 current/frozen-chained Memory inventory PASS다.
+
+초기 파일 분류에서 ORM 기반 record hydration을 pure policies로 둔 오류는 경계 검사에서 발견하여 실제 저장 snapshot을 다루는 repository에 배치했다. 일반 pure 정책의 framework 금지 규칙과 외부 entry 허용을 완화하지 않았다. 전체 source/node 계보 capture·B4~B6 합류·최종 B7/백엔드 통합은 별도 진행 중이다.
+
+
+### AR-B7-A10 Memory 원본 근거 판정의 실제 소유
+
+Source `a0b72a97bbabfb1fc2a5d1055ac992fed6c5414d`에서 성공/공개/관찰/차단/active 참여자/주관적 선언/digest 판단의 실제 구현은 `memory/service/source_evidence.py`가 소유한다. 외부 Chat·Social·Relationships·Routines 원본 SQL은 `runtime/memory/source_queries.py`에서 기존 raw row/result를 같은 Session으로 읽고, `source_composition.py`가 둘을 연결한다. 옛 `runtime/memory/sqlalchemy_source_reader.py`는 제거하고 현재 소비자를 실제 factory로 전환했다. Subjective source의 lazy 조회 시점과 현재 응답 형태는 유지한다.
+
+최종 가독성 formatting 이후에도 명시된 query 추출을 역변환하면 **13개 method 본문·16개 SQL 표현식·모든 digest/summary helper AST가 원문과 동일**하다. 기존 성공/노출/실제 관찰/수정·차단 판단, early return, 조회 결과 소비 순서, digest와 summary byte 범위, caller Session 및 commit/rollback 부재를 유지한다. 기존 write lifecycle/canonical recall/Today SNS와 같은 Session 신규 회귀를 포함한 집중 **41 passed / 81.05초**다.
+
+경계 **662 modules / 2177 edges / exact legacy256 PASS**, L4 parity97·current Memory batch 및 frozen chained G/P inventory PASS다. ER0 현재 inventory가 실제 SQL 소유 파일 변경으로 stale인 점을 발견하여 현재 inventory만 재생성했고 **76/87/24/44/7 PASS**를 확인했다. Frozen migration/기능 계약/checkpoint JSON은 재생성하지 않았다.
+
+이 source 고정 직전 stock 전체는 보호2,201/현재2,210 nodes와 API/ORM·assertion/suppression·split을 보존하고, 이미 준비한 새 source/node의 선형 introduction capture 대기만 보고했다. B4~B6 합류 및 실제 도입 commit의 append-only capture 전이므로 전체 B7/§8.2 종료는 아니다.
 
 ## AR-B5-B2 — Social 공개 판단·읽기·응답 조립과 소유 조회
 
@@ -2189,3 +2275,56 @@ Custom history도 후보 `0108a3a`의 전체786 ancestor만 가진 별도 bare �
 고정 `618ca6222fadad6457732616bda00336cc65c601`의 전체 backend는 **2393 passed / 기존22 skipped / 27 warnings / 729.45초**다. 첫 stock은 API/ORM·단언·suppression 및 보호2415=현재2415를 유지했지만 현재 split 소비자 경로3곳에서 종료했다. Character source 조회는 실제 `chat/service/profiles.py`, Graph Validator는 실제 `chat/service/graph_retrieval.py`, Executor는 그 서비스와 `runtime/chat/generation_workflows.py`의 현재 import/call로 목록을 맞췄다. 원본 symbol/파일 및 테스트 이동 지도, 원래 단언과 source 내용은 바꾸지 않았다.
 
 Gitleaks current tree의1건은 최초 signed `57528d22072f7541e7f1f1b982071afd5c1d537c`에서 도입한 Identity message_credentials source의 Git blob40이었다. 원장 key/value와 실제 Git object를 대조한 뒤 metadata 경로·generic-api-key 규칙·정확한 전체 key/hash 행1개에만 적용한다. 같은 행 comma 유무2개는 통과하고 hash/key/prefix/suffix/path 변형5개는 실제 Gitleaks에서 계속 검출됐다. 검토 설정으로 후보의 원래 tree와 HEAD 전체 history는0 findings이며 제품·원장·기존 assertion을 수정하지 않는다. 처음 실패한 stock/Gitleaks 결과는 이력으로 남기고 보정 head의 stock/집중을 확인한다.
+
+## AR-B7 Daypart — 활동 관찰·행동 기억의 실제 소유 이전
+
+Memory A9 기반과 B4 signed `6beec5d`를 병합한 뒤 AgentDaypartMemoryEvent의 실제 class를 `memory/models/daypart.py`로 옮겼다. 기존 단일 Base/table/FK/column/default/relationship은 같다. Daypart 저장·조회·요약, feed/inbox 중복 admission과 실제 제공 기록은 Memory의 service/repository/policies가 소유한다. Resident prompt와 Memory가 함께 쓰는 중립화 clipping은 원문 함수 하나를 `core/context_clipping.py`로 옮겼다.
+
+기존 Daypart/LangGraph **204 passed**이며, 새 file SQLite 회귀는 **4 passed / 5.20초**다. 독립 observer로 개별 commit이 보이는지, 같은 timestamp의 ID 정렬과 64/20/12 한도·Character/session/source ID 범위, inbox commit 다음 author 오류·재시도 admission, summary 그룹별 실패 rollback·다음 그룹 진행·재시도를 검증한다. 첫 새 조회 회귀의 기대 목록에 다른 Character ID를 포함한 fixture 오류가 있었으며 실제 기존 Character 필터를 반영하도록 그 새 목록만 수정했다. 기존 test/assertion/skip은 수정하지 않았다.
+
+실제 source 정의 16개는 함수 이름과 지원 Protocol annotation 외 전체 AST가 같다. 나머지 7개는 caller timezone·동일 Session author callback·두 query의 인자 및 summary UoW 분리를 명시적으로 비교한다. 관계 point expiry를 먼저 처리하고 Memory가 이후 summary를 저장하는 순서, 각 commit/rollback, 시간대 시작 직전 1microsecond timestamp, 3일 조회, source IDs, 문자열/문자수·prompt 형식과 provider 호출 위치는 원래 의미를 유지한다.
+
+| 남은 책임 | 소유·종료 단계 |
+| --- | --- |
+| 활동 flag/allowlist·시간대 session key·행동 선택·LangGraph/provider 실행 | AR-B4 resident; 새 Memory 동작을 원래 위치에서 호출 |
+| 관계 Point 상태·만료 | AR-B5 Relationships; 실행 조립에서 Memory 저장 전에 호출 |
+| Post/Character 작성자 읽기 | AR-B4 실행 소유의 same-Session callback; Memory는 외부 ORM을 import하지 않음 |
+| global ORM export·기존 계정/캐릭터 삭제 SQL | AR-G5/AR-B8의 정확한 등록·다중 업무 UoW 소비자 정리 |
+
+현재 부분 경계 **720 modules / 2,426 edges / exact legacy 222**, cycle 0과 L4 parity97·ER0·Memory batch live inventory가 통과했다. 전체 보존·확대 회귀 및 signed source 고정은 진행 중이며 최초 source/node capture, 순차 통합, Actions/installer/PR/merge는 별도 단계다. frozen source/checkpoint/승인 node/API/ORM 및 역사 migration은 변경하지 않았다.
+
+
+Daypart 최종 고정 후보의 확대 회귀는 **265 passed / 66.73초**다. 실제 정의 16개 전체 AST와 명시적으로 분리한 본문·SQL 7개 모두 원문과 동치임을 확인했다. Stock 전체 보존은 아직 append하지 않은 선행 B4 두 파일의 최초 도입 경로에서 중단한다. 읽기 전용 진단은 signed `869bae55a2e5e665fb731396a7284b53dde8a104`의 정확한 두 blob만 메모리에 보충하여 원래 checker 함수를 실행했고 **source/split/assertion/suppression/API·ORM/node 각각 오류 0**, 보호 **2,201 / 현재 2,246 nodes**다. merge history simplification을 피한 `--full-history --no-merges`로 실제 최초 도입을 확인했다. 이 진단은 additions capture나 stock 전체 Gate PASS가 아니다.
+
+A9에서 이미 제거한 recall source를 가리키는 feature inventory의 K12/K15/K16/K22/K23 현재 경로 다섯 곳도 actual `repository/recall.py`·`recall_records.py`로 연결했다. Root의 후속 Memory current-path 정리와 동일한 소유 기준으로 통합한다. 이번 source에 처음 들어오는 파일은 제품 7개·회귀 1개, 신규 test는 4 nodes다. 각 source의 최초 SHA 및 capture는 signed source 고정 후 부모의 선형 통합에서 기록한다.
+
+
+### Memory Daypart/B4 합류의 관찰 fixture 순서 정합성
+
+Signed merge `299d7043a64e0eb888d3fc3fdf31af24ce8b1ef4`는 Daypart source `d83ef86c8c9e4acbec3c4d47b37b9738f7924fdf`와 선행 실제 Routines 타입·일부 Social 소유 source를 합류했다. A10 근거 판정은 그대로 두고 실제 외부 Routines 모델 import만 runtime source queries에 적용했다. 현재 source/table·서비스와 외부 SQL을 서로 반대로 덮어쓰지 않았다.
+
+첫 합류 회귀는 **44 passed/1 failed**로 기존 Memory source reader의 fixture commit이 FK 오류를 냈다. SQL trace는 `Post` INSERT 전에 `WorldCharacterFeedObservation` INSERT가 실행됨을 확인했다. 두 모델의 실제 module 위치가 분리되며 SQLAlchemy mapper 정렬이 바뀌었고, 원래 fixture가 관계 없는 두 mapper를 `add_all`로 동시에 저장하는 순서에 기대고 있었다. 해당 테스트는 게시물을 add/flush한 뒤 관찰을 add하도록 준비 순서만 명시했다. API/ORM/FK·기존 assertion은 유지한다. 실제 production 관찰 생성은 existing Post를 조회하고 `begin_nested()` 진입 시 pending flush 후 관찰 add/flush를 수행하므로 같은 simultaneous add_all 경로가 없다. 수정 후 같은 합류 묶음 **45 passed/16.06초**다.
+
+### AR-B7-A11 Memory 누락 원본 복구와 동의 epoch 소유
+
+Source `bc1a7c18997034b6f96965943323a617b3f9feef`에서 복구 순서·epoch 스캔 진행·최종 commit은 `memory/service/reconciliation.py`, 실제 Memory epoch/anti-join/delivery SQL은 `repository/reconciliation.py`가 소유한다. 외부 Post/Reaction/Social/Chat/Observation의 기존 다섯 source catalog는 `runtime/memory/source_catalogs.py`가 구성하고 Memory가 전달받아 같은 Session에서 조회한다. Runtime worker는 실제 서비스를 실행한다.
+
+최종 formatted 함수의 네 repository 본문과 foreign catalog를 다시 펼치면 **전체 원래 workflow AST와 정확히 동일**하다. missing epoch32·회전 scope16·source별32 제한, `[opened_at, closed_at)` 동의 기간, 원본별 누락 anti-join, late row 복구, 기존 kind/source ID·단일 commit을 보존했다. 이전에는 worker에 있던 같은 복구를 서비스가 실제 소유하며 새 policy나 provider 호출은 없다.
+
+배치 runtime/안전/API 및 rollback 회귀 **37 passed / 2 warnings / 14.97초**, 원래 전체 split 검사 **0 errors**, 경계 **726 modules/2442 edges/exact legacy222 PASS**, L4 parity97·current batch·ER0 81/87/24/44/7 PASS다. 초기 부분 scope 기록에서 repository를 외부 entry에 잘못 넣은 항목은 검사에 거부되어 제거했고, repository는 실제 내부 소유 모듈로만 검사한다. 검사 규칙을 완화하지 않았다. Source introduction capture와 B4~B6 순차 합류/전체 B7 Gate는 계속 남아 있다.
+
+
+### AR-B7-A12 Memory 집합 import 종료와 실제 역할 연결
+
+Source `2056bce963e7bae027dfc73265c060f4be390604`는 기존 집합 모듈의 이름 273개가 가리키던 실제 값·타입·함수 객체를 `is`로 확인하고 25개 소비자를 해당 정의 파일로 연결했다. 사용하지 않는 public/domain/API 집합 파일을 제거했고 service/contracts/runtime package는 일반 namespace marker로 남긴다. 기존 Unit of Work 구현은 본문 AST를 유지한 채 `repository/transaction.py`로 이동했다. 불변 SQLite/Alembic revision이 참조하는 다섯 schema export만 정확한 역사적 alias로 유지한다.
+
+Memory·회상·Chat 근거·배치·실행 조립 **295 passed / 2 warnings / 118.57초**, 경계 **723 modules / 2420 edges / exact legacy222 PASS**, L4·current batch inventory도 통과했다. 기존 검사 본문이나 API/ORM 계약은 변경하지 않았다.
+
+전체 stock 보존 실행은 **FAIL/PENDING**으로 남긴다. 최초 오류는 선행 Routines에서 처음 생성된 `models.py`와 `schemas.py`의 이후 이동을 아직 도입 원장에 연결하지 못한 것이다. 둘의 실제 최초 signed source는 `869bae55a2e5e665fb731396a7284b53dde8a104`로 확인했다. 이 오류 이후 protected0/current2246 및 다수 introduction 오류가 출력되므로 이를 전체 보존 PASS나 단순 신규 테스트 누락만으로 해석하지 않는다. 순차 B4~B6 합류와 원본 commit별 source/node capture 뒤 stock gate를 다시 통과해야 한다. 실제 이동 map이나 frozen baseline을 삭제하여 통과시키지 않는다.
+B7 순차 후보는 B6 제품 후보 `ef71ceae`에 Memory `16f70f30`을 합친다. 이 source는 Daypart `d83ef86c`를 이미 포함한다. G5·G06·Runtime 후속 ancestry는 앞당기지 않고 기존 두 앱의 Character credential/activity·Package·Routines·Chat 초기화와 새 Memory workflow 등록을 함께 유지한다.
+
+Memory가 소유하는 실제 repository/service와 명시적인 source/scope/recall runtime factory를 새 Chat 소비자에 연결했다. 같은 Session의 canonical 읽기·flush/commit/rollback 순서는 원래 source를 따른다. 원래 A12의 export ledger로18개 소비자를 실제 정의로 연결하고, B5의 실제 Social 모델6개와 B4 LG의 실제 Memory SQL/정책을 각 owner로 승계했다. 원래 Daypart에 남겨 둔498개 다른 업무 symbol은 검토된 기존 B4 decomposition을 그대로 이어받으며 원본 source/test map을 삭제하지 않았다. 현재 destination/consumer/test navigation907건을 실제 경로에 맞췄다.
+
+첫 수집은 옛 Social 모델 집합과 Memory router import 때문에 중단됐고 실제 경로 연결 뒤 **2428개 collection PASS**다. 고정67파일 검사는 **608 PASS / 2 FAIL / 5 warnings / 523.58초**였으며 두 실패는 기존 테스트의 concrete repository 생성에 필요한 same-Session factory와 inspector inventory generator의 옛 Memory contract import였다. 단언/fixture의 업무 의미를 바꾸지 않고 두 import를 연결한 뒤 실패 파일과 Memory scope/source/daypart 회귀는 **29 PASS / 32.43초**다. 존재하지 않는 보조 테스트 경로를 포함한 중간 명령은 수집 전에 종료됐으며 결과에서 제외했다.
+
+별도 읽기 진단의 첫 입력 구성 오류도 기록한다. archive의 전체 test 목록을 희소 assertion 자료에 직접 붙이거나 assertion 자료가 없는 #258 source baseline을 단언 비교에 포함한 진단은 중단했다. 제품 checker와 같은 원래 #263/additions 구성 및 원래 수집기 방식으로9개 signed source의 신규 증거를 메모리에서 계산한 최종 진단은 **assertions0 / split0**이다. baseline/checkpoint/원장·원래 test assertion/skip은 변경하지 않았다. 현재 구조 **1036 modules / 3872 edges / legacy124**, API public196·현재 L4/ER0/Memory batch inventory도 확인했다. 다음 metadata commit에서 B6 원장153개를 불변 prefix로 유지해 원래9개 도입을 append한 뒤 공식 stock·backend 전체·PR Gate를 수행한다. 이 상태를 B7 최종 완료나 전체 backend 종료로 표시하지 않는다.

@@ -7,31 +7,29 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import sessionmaker
 
 from app import models
-from app.domains.memory.application.batch_selection import MemoryBatchSelectionService
-from app.domains.memory.application.scope_control import MemoryScopeService
-from app.domains.memory.domain.batch_policy import MEMORY_CONSENT_VERSION
-from app.domains.memory.domain.errors import MemoryConflictError
-from app.domains.memory.infrastructure.batch_models import (
+from app.domains.memory.service.batch_selection import MemoryBatchSelectionService
+from app.domains.memory.service.scope import MemoryScopeService
+from app.domains.memory.policies.batch import MEMORY_CONSENT_VERSION
+from app.domains.memory.exceptions import MemoryConflictError
+from app.domains.memory.models.batch import (
     MemoryActivationEpoch,
     MemoryBatchRun,
     MemoryBatchSetting,
     MemorySourceDelivery,
     MemorySelectionDecisionModel,
 )
-from app.domains.memory.infrastructure.batch_repository import (
-    SqlAlchemyMemoryBatchRepository,
+from app.runtime.memory.composition import (
+    memory_batch_repository as SqlAlchemyMemoryBatchRepository,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import (
+from app.domains.memory.models.items import (
     MemoryCandidate,
     MemoryMaintenanceJob,
     MemoryScopeSettingModel,
 )
-from app.runtime.memory.batch_runtime import (
-    MemoryBatchRuntime,
-    reconcile_sources,
-    deliver_candidates,
-    schedule_batches,
-)
+from app.runtime.memory.batch_runtime import MemoryBatchRuntime
+from memory.preparation_support import reconcile_sources
+from memory.preparation_support import schedule_batches
+from memory.preparation_support import deliver_candidates
 from app.runtime.memory.shutdown import MemoryShutdownCoordinator
 from app.runtime.memory.source_delivery import (
     install_memory_delivery,
@@ -426,7 +424,7 @@ def test_oversized_request_fails_before_physical_call_reservation(memory_session
     _, repo, job, provider, service = batch_stack(memory_session)
 
     def reject(_sources):
-        from app.domains.memory.domain.errors import MemoryValidationError
+        from app.domains.memory.exceptions import MemoryValidationError
 
         raise MemoryValidationError("memory_selection_input_budget_exceeded")
 
@@ -441,7 +439,7 @@ def test_oversized_request_fails_before_physical_call_reservation(memory_session
 
 def test_account_scrub_removes_private_memory_batches_not_other_owner(memory_session):
     from app.runtime.account_deletion import _scrub_account_data
-    from app.domains.memory.infrastructure.batch_models import (
+    from app.domains.memory.models.batch import (
         MemoryBatchProfile,
         MEMORY_BATCH_TABLES,
     )
@@ -454,7 +452,7 @@ def test_account_scrub_removes_private_memory_batches_not_other_owner(memory_ses
         asyncio.run(service.run_next(lease_token="before-scrub"))
         == "memory_selection_completed"
     )
-    from app.runtime.memory.batch_runtime import rebuild_briefs
+    from memory.preparation_support import rebuild_briefs
 
     rebuild_briefs(memory_session, now=datetime.now(UTC), source_reader=service.reader)
     outsider = models.User(
@@ -502,8 +500,8 @@ def test_character_scrub_removes_its_batches_and_preserves_other_character(
     memory_session,
 ):
     from app.runtime.characters.management import _scrub_agent_data
-    from app.domains.memory.infrastructure.batch_models import MemoryBatchProfile
-    from app.domains.memory.domain.scope import MemoryScope
+    from app.domains.memory.models.batch import MemoryBatchProfile
+    from app.domains.memory.contracts.scope import MemoryScope
 
     scope, repo, _, _, service = batch_stack(memory_session)
     assert (
@@ -543,7 +541,7 @@ def test_character_scrub_removes_its_batches_and_preserves_other_character(
 def test_departed_scope_is_not_called_and_does_not_block_healthy_delivery(
     memory_session,
 ):
-    from app.domains.memory.domain.scope import MemoryScope
+    from app.domains.memory.contracts.scope import MemoryScope
 
     scope, repo, job_id, provider, service = batch_stack(memory_session)
     other_scope = MemoryScope(

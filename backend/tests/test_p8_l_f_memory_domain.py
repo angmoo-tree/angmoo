@@ -9,19 +9,19 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.db import Base
-from app.domains.memory.infrastructure import SqlAlchemyMemoryRepository
-from app.domains.memory.public import (
-    DEFAULT_MEMORY_RETENTION_DAYS,
-    MemoryConflictError,
-    MemoryKindV1,
-    MemoryProviderMode,
-    MemoryScope,
-    MemoryScopeError,
-    MemoryScopeService,
-    MemoryValidationError,
-    is_memory_expired,
-    validate_memory_item_shape,
+from app.runtime.memory.composition import (
+    memory_repository as SqlAlchemyMemoryRepository,
 )
+from app.domains.memory.policies.retention import DEFAULT_MEMORY_RETENTION_DAYS
+from app.domains.memory.exceptions import MemoryConflictError
+from app.domains.memory.contracts.provenance import MemoryKindV1
+from app.domains.memory.contracts.provenance import MemoryProviderMode
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.exceptions import MemoryScopeError
+from app.domains.memory.service.scope import MemoryScopeService
+from app.domains.memory.exceptions import MemoryValidationError
+from app.domains.memory.policies.retention import is_memory_expired
+from app.domains.memory.policies.validation import validate_memory_item_shape
 
 
 def _seed_scope(session: Session) -> MemoryScope:

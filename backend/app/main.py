@@ -208,6 +208,9 @@ def create_app(
     runtime_app.state.character_credential_workflows = build_character_credential_workflows
     from app.runtime.characters.management import configure_character_activity_http
     configure_character_activity_http(runtime_app)
+
+    from app.runtime.memory_http import build_memory_workflows
+    runtime_app.state.memory_workflows = build_memory_workflows
     from app.runtime.characters.management import build_character_media_workflows
     runtime_app.state.character_media_workflows = build_character_media_workflows
     from app.runtime.characters.creator import build_creator_workflows

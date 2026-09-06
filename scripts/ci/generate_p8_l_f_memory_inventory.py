@@ -30,8 +30,8 @@ E_INVENTORY_SHA256 = (
 
 from app import models as _models  # noqa: E402,F401 - register canonical metadata
 from app.core.db import Base  # noqa: E402
-from app.domains.memory.domain.provenance import MemoryKindV1  # noqa: E402
-from app.domains.memory.infrastructure.sqlalchemy_models import (  # noqa: E402
+from app.domains.memory.contracts.provenance import MemoryKindV1  # noqa: E402
+from app.domains.memory.models.items import (  # noqa: E402
     MEMORY_SCHEMA_V1_TABLES,
 )
 from app.runtime.migrations.sqlite_versions.registry import (  # noqa: E402
@@ -53,14 +53,14 @@ class InventoryError(RuntimeError):
 
 REQUIRED_FILES = (
     "backend/app/domains/memory/public.py",
-    "backend/app/domains/memory/domain/provenance.py",
-    "backend/app/domains/memory/domain/retention.py",
-    "backend/app/domains/memory/domain/scope.py",
-    "backend/app/domains/memory/ports/repository.py",
-    "backend/app/domains/memory/ports/source_reader.py",
-    "backend/app/domains/memory/ports/maintenance_queue.py",
-    "backend/app/domains/memory/infrastructure/sqlalchemy_models.py",
-    "backend/app/domains/memory/infrastructure/repository.py",
+    "backend/app/domains/memory/contracts/provenance.py",
+    "backend/app/domains/memory/policies/retention.py",
+    "backend/app/domains/memory/contracts/scope.py",
+    "backend/app/domains/memory/contracts/item_store.py",
+    "backend/app/domains/memory/contracts/source_evidence.py",
+    "backend/app/domains/memory/contracts/maintenance_queue.py",
+    "backend/app/domains/memory/models/items.py",
+    "backend/app/domains/memory/repository/items.py",
     "backend/app/alembic/versions/20260831_0085_canonical_memory_schema.py",
     "backend/app/runtime/migrations/sqlite_versions/v4_to_v5_canonical_memory.py",
     "backend/app/runtime/migrations/sqlite_versions/manifests/v5.json",
@@ -305,7 +305,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/domains/memory/infrastructure/repository.py",
+        "backend/app/domains/memory/repository/items.py",
         (
             "enabled=False",
             "worlds.c.owner_user_id == scope.owner_id",

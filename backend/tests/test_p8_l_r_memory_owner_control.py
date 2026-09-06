@@ -3,8 +3,10 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from app import models
-from app.domains.memory.domain.errors import MemoryNotFoundError
-from app.domains.memory.infrastructure import SqlAlchemyMemoryRepository
+from app.domains.memory.exceptions import MemoryNotFoundError
+from app.runtime.memory.composition import (
+    memory_repository as SqlAlchemyMemoryRepository,
+)
 from test_p8_l_q_memory_read_inspector import (
     FRONTEND_HEADERS,
     _fixture,

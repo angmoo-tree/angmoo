@@ -7,8 +7,8 @@ import time
 from sqlalchemy import select
 from starlette.responses import JSONResponse
 
-from app.domains.memory.infrastructure.batch_models import MemoryBatchRun
-from app.domains.memory.infrastructure.sqlalchemy_models import MemoryMaintenanceJob
+from app.domains.memory.models.batch import MemoryBatchRun
+from app.domains.memory.models.items import MemoryMaintenanceJob
 
 
 class MemoryShutdownCoordinator:

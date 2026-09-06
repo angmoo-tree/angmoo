@@ -21,10 +21,8 @@ from app.domains.chat.service import (
     RetrievalRoutingService,
 )
 from app.domains.identity.contracts import CredentialMaterial
-from app.domains.memory.public import (
-    CanonicalRecallService,
-    CanonicalRetrievalPlanExecutor,
-)
+from app.domains.memory.service.recall import CanonicalRecallService
+from app.domains.memory.service.retrieval_plan import CanonicalRetrievalPlanExecutor
 from app.domains.relationships.service.graph_recall import GraphRecallService
 from app.domains.relationships.service.graph_planning import GraphRetrievalPlanExecutor
 from app.domains.world_characters.models import WorldCharacter

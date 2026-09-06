@@ -16,14 +16,12 @@ from app.domains.chat.repository.response_lifecycle import (
     SqlAlchemyResponseLifecycleRepository,
 )
 from app.domains.chat.service.threads import ThreadService
-from app.domains.memory.public import (
-    MemoryEvidenceAvailability,
-    MemoryLifecycle,
-    MemoryNotFoundError,
-    MemoryScope,
-    MemorySourceEvidenceReaderPort,
-    MemorySourceTypeV1,
-)
+from app.domains.memory.contracts.inspector import MemoryEvidenceAvailability
+from app.domains.memory.contracts.inspector import MemoryLifecycle
+from app.domains.memory.service.management import MemoryNotFoundError
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.contracts.source_evidence import MemorySourceEvidenceReaderPort
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
 
 
 class EvidenceService:

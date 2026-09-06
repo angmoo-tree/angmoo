@@ -9,7 +9,7 @@ from app.api.v1.routes import bot
 from app.api.v1.routes import character_lore
 from app.api.v1.routes import community
 from app.domains.chat.router import messages
-from app.api.v1.routes import memory
+from app.domains.memory import router as memory
 from app.domains.social.router import manual_router as manual_social_router
 from app.api.v1.routes import runtime_status
 from app.api.v1.routes import tree

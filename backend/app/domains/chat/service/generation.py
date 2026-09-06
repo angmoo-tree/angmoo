@@ -48,7 +48,7 @@ from app.domains.chat.service.settings import MessageSettingsService
 from app.domains.chat.service.threads import ThreadService
 from app.domains.chat.service.today_sns_activity import TodaySnsActivityAssembler
 from app.domains.identity.contracts import CredentialMaterial
-from app.domains.memory.public import CanonicalRecallService
+from app.domains.memory.service.recall import CanonicalRecallService
 from app.domains.worlds.service.character_entry import get_character_entry_world
 
 RESPONSE_REQUEST_DEADLINE_SECONDS = 180

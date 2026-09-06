@@ -165,6 +165,16 @@ memory/
 
 ## 3. 요청과 작업이 서비스를 사용하는 방식
 
+### Daypart 활동 기억의 소유
+
+Daypart는 resident가 실제로 제공받은 관찰과 완료한 행동을 시간대별로 기록하는 기억입니다. `memory/models/daypart.py`가 기존 `agent_daypart_memory_events` 테이블을 소유하고, `service/daypart.py`가 저장·보존 기간 정리·history·이전 요약 조회를 담당합니다. 복잡한 조회 조건은 `repository/daypart.py`, 시간대 시작과 요약·prompt 필드 형식은 `policies/daypart.py`에 있습니다. 장기 기억의 candidate/item admission과 서로 다른 기존 기록 형식을 합치지 않습니다.
+
+`service/daypart_observations.py`는 이미 제공한 feed/inbox 입력의 중복 판단, compact note와 제공 기록 저장을 수행합니다. 작성자 이름이 필요하면 실행 소유자가 전달한 `DaypartObservationReferences`를 원래 조회 위치에서 호출합니다. 같은 Session을 사용하며, 첫 inbox 관찰을 commit한 뒤 feed 작성자를 조회하는 순서를 유지합니다. Memory가 Social이나 Character ORM을 직접 import하지 않습니다.
+
+LangGraph 실행·관계 행동 선택·provider 호출은 resident의 책임입니다. 관계 포인트 만료 후 Daypart 요약을 저장하는 조립도 실행 위치에 남습니다. Memory의 각 기존 저장은 원래처럼 개별 commit을 하고, 요약 한 그룹의 commit이 실패하면 rollback 후 다음 그룹을 계속 처리합니다. 이 경계를 임의로 하나의 transaction으로 합치면 실패·재시도 동작이 달라집니다. `contracts/daypart.py`는 실행 객체 전체를 import하는 대신 Memory가 읽는 필드와 Session 타입만 설명합니다.
+
+AR-B7 Daypart 전환 중 기존 resident 모듈은 위 실제 구현을 같은 호출명으로 연결합니다. 글로벌 모델 export와 계정·캐릭터 삭제의 기존 다중 업무 UoW는 동일 ORM 객체를 사용하며 AR-B4/AR-B8/G5의 소비자 정리에서 마무리합니다. 이 부분 전환은 전체 resident나 Memory 통합 완료를 뜻하지 않습니다.
+
 업무 동작의 중심은 서비스입니다. HTTP와 예약 작업은 서로 다른 진입점이지만 같은 업무 규칙을 사용합니다.
 
 ```text
@@ -178,7 +188,7 @@ Router는 요청을 해석하고 응답으로 바꿉니다. Service는 인증된
 
 ### 예: 기억 후보를 만들 때
 
-기존 [Memory write lifecycle](app/domains/memory/application/write_lifecycle.py)은 source의 유효성과 Memory 설정을 확인한 뒤 후보를 저장합니다. 이 파일은 **현재 구조의 예시**이며, 목표에서는 같은 책임을 `memory/service.py` 또는 `memory/service/lifecycle.py`가 맡습니다.
+현재 [Memory write lifecycle](app/domains/memory/service/items.py)은 source의 유효성과 Memory 설정을 확인한 뒤 후보를 저장합니다. scope 검사는 `service/scope.py`, 실제 저장은 `repository/items.py`가 맡습니다.
 
 ```text
 1. 호출자가 actor·World·WorldCharacter·source를 전달한다.
@@ -193,6 +203,26 @@ Router는 요청을 해석하고 응답으로 바꿉니다. Service는 인증된
 `utils.py`는 이런 판단을 모으는 이름이 아닙니다. 기억 보존 가능 여부는 업무 규칙이므로 service 또는 분리한 policy에서 찾을 수 있어야 합니다.
 
 ## 4. 다른 도메인과의 연결
+
+### Memory에서 역할을 찾는 방법
+
+Memory의 HTTP는 `router.py`, 요청과 응답은 `schemas/`, 요청별 실행 연결은 `dependencies.py`에 있습니다. 다음 표는 실제 구현 위치입니다.
+
+| 변경할 동작 | 실제 소유 위치 |
+| --- | --- |
+| 기억 설정·후보·항목·보존·수정 | `service/scope.py`, `items.py`, `management.py`와 `repository/items.py` |
+| 원본의 성공·공개·관찰·차단·digest 판단 | `service/source_evidence.py` |
+| 회상 요청·허용 연산·계획 실행 | `service/recall.py`, `retrieval_plan.py` |
+| 회상 결과의 현재 원본 재검증·문서 구성 | `repository/recall.py`, `recall_records.py` |
+| AI 배치 선택·예약·종료 허가 | `service/batch_selection.py`, `batch_preparation.py`, `batch_scheduling.py` |
+| 동의 기간 안의 누락 원본 복구 | `service/reconciliation.py`와 `repository/reconciliation.py` |
+| 실제로 제공한 Daypart 관찰·행동·요약 | `service/daypart.py`, `daypart_observations.py` |
+
+SQLite의 원본과 scope가 최종 판단 기준입니다. FTS5와 graph 같은 검색 결과만으로 공개 여부·삭제·사용 가능성을 판단하지 않습니다. `runtime/memory/`의 source/recall queries는 외부 도메인 조회를 같은 Session으로 연결하고, projection은 검색 색인과 파일을 관리합니다. `batch_runtime.py`는 worker 시작·중지·실행을 조립하며 위 Memory 서비스를 호출합니다.
+
+서비스에 전달하는 repository·원본 읽기·외부 예약 정보는 `contracts/`의 실제 협력 타입에 명시합니다. 서비스마다 별도 추상 클래스나 중간 전달 서비스를 추가할 필요는 없습니다. commit·rollback은 기존 업무 흐름의 소유자가 결정하므로, 함수 위치를 옮길 때 조회마다 새 Session을 만들거나 저장 시점을 앞당기지 않습니다.
+
+기여 코드는 `memory.public` 같은 집합 공개 모듈을 경유하지 않고 실제 역할 파일을 import합니다. 이전 `domain/`·`api/` 집합 모듈과 `public.py`는 소비자 전환 후 제거했습니다. `infrastructure/sqlalchemy_models.py`와 `batch_models.py`만 불변 SQLite/Alembic revision이 사용하는 정확한 schema helper 5개를 같은 객체로 제공합니다. 새 제품 코드가 이 역사적 경로에 의존하지 않습니다. 현재 작업의 순차 PR·설치·통합 Gate 상태는 실행 결과 문서에서 별도로 확인합니다.
 
 다른 업무가 필요하면 **소유 도메인이 지원하는 함수와 타입을 명시적으로 사용**합니다. 목표 import 형태는 다음과 같습니다. 아래는 위치 설명이며, 현재 checkout에 이 파일이 이미 존재한다는 뜻은 아닙니다.
 
