@@ -3711,3 +3711,9 @@ namespace 표시 파일 제외 후에도 이전과 이후의 **2,507개 수집 n
 순차 Tree/Lore PR에서 backend의 새 도메인만 변경하면 Host Tauri workflow의 제한된 경로 목록에 걸리지 않아 자동 검사가 생성되지 않는 공백을 확인했다. 진행 중인 해당 PR은 정확 head를 지정한 공식 workflow_dispatch 결과를 별도 확인한다. 최종 후보는 push(main)와 pull_request 모두 backend/**를 포함하도록 수정했다. Desktop, script, docs 경로·SHA 고정·권한·실제 Windows 실행 job은 유지하고, YAML을 읽는 기존 검사 실행만 이미 설치한 backend locked venv로 연결했다.
 
 원래 계약 테스트는 그대로 유지하며 각 event의 경로 누락, backend 제외 패턴, paths-ignore를 검출하는 회귀 11개를 추가했다. 수정 전 실제 workflow에서 새 검사 2 FAIL/10 PASS로 공백을 재현했으며, 수정 후 관련 28 PASS/기존 warning1/112.25초와 Host CLI·CI 정책·DCO를 확인했다. Signed 원본은 c9969dbd1866872f1338520a08bfe801c9b14766이고, 이 원본의 새 test node 도입을 다음 보존 원장에 기록한다. 필수 job이 생성되지 않은 상태를 PASS로 세지 않는다.
+
+### AR-B8-B 실제 Chat 구성과 원래 보존 검사의 정합성
+
+현재 후보의 cold/bootstrap·Memory·호환 제거 집중 실행은 최초 350 PASS/2 FAIL/241.76초였다. 실패 둘은 실제 Chat service constructor가 달라져서가 아니라, 원래 제거 증명이 signed fd312의 Runtime import 문장까지 고정한 데서 발생했다. B6의 signed618ca622에서 이미 `world_character_pair_is_blocked`를 같은 Social repository로 직접 연결했으며, 원래 Runtime도 그 함수를 그대로 가져오고 있었다.
+
+검사는 이 원래 re-export binding과 Social blocks 모듈의 전체 AST가 동일한지 먼저 증명하고, 정확히 해당 import 한 문장만 실제 소유 경로로 대조한다. Chat 인스턴스 생성과 연결의 나머지 전체 AST는 계속 동일해야 한다. 다른 block 함수를 같은 이름으로 바꿔 주입하거나 SQL 함수를 stub으로 바꾸는 두 음성 회귀를 추가했다. 제품 코드와 기존 행위 단언은 바꾸지 않았다. 수정 후 원래 제거·Chat 실제 서비스/응답 소유 검사 **46 PASS/43.00초**를 확인했다. 전체 backend와 최종 stock은 이후 정확 후보에서 별도 실행한다.

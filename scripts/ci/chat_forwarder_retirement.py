@@ -232,7 +232,22 @@ def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
         if name not in current or dump(current[name]) != dump(old[name]):
             raise ValueError("Chat durable command changed: " + name)
     composition = "backend/app/runtime/chat/message_composition.py"
-    if dump(ast.parse(before(composition))) != dump(ast.parse((root / composition).read_text(encoding="utf-8-sig"))):
+    expected_composition = ast.parse(before(composition))
+    # B6 already replaced the Runtime re-export with this same Social query.
+    # Prove the signed re-export and the entire actual query module before
+    # allowing precisely that one import change; construction stays exact.
+    block_query = "world_character_pair_is_blocked"
+    block_module = "app.domains.social.repository.blocks"
+    old_block_module = "app.runtime.relationships.sqlalchemy_social_event"
+    protected_import(before("backend/app/runtime/relationships/sqlalchemy_social_event.py"), block_query, block_module, block_query)
+    block_path = "backend/app/domains/social/repository/blocks.py"
+    if dump(ast.parse(before(block_path))) != dump(ast.parse((root / block_path).read_text(encoding="utf-8-sig"))):
+        raise ValueError("Chat original Social block query changed")
+    imports = [n for n in expected_composition.body if isinstance(n, ast.ImportFrom) and n.module == old_block_module and [(a.name, a.asname) for a in n.names] == [(block_query, None)]]
+    if len(imports) != 1:
+        raise ValueError("Chat historical Social block query import changed")
+    imports[0].module = block_module
+    if dump(expected_composition) != dump(ast.parse((root / composition).read_text(encoding="utf-8-sig"))):
         raise ValueError("Chat actual service construction changed")
     route = "backend/app/api/v1/routes/world_chat_response.py"
     expected_route = ast.parse(before(route))

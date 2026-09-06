@@ -35,6 +35,7 @@ def candidate(tmp_path):
         "backend/app/domains/chat/dependencies.py",
         "backend/app/runtime/chat/message_composition.py",
         "backend/app/runtime/chat/generation_workflows.py",
+        "backend/app/domains/social/repository/blocks.py",
         "backend/app/api/v1/routes/world_chat_response.py",
         *(path for path, _ in proof.TESTS.values()),
     ]
@@ -79,7 +80,7 @@ def test_exact_original_layers_and_actual_owner_tests_are_verified(candidate, si
     "route_self_identity", "unsafe_disposition", "missing_disposition", "unrelated_disposition",
     "asyncio_attribute", "asyncio_setattr", "asyncio_nested_import", "module_side_effect",
     "star_import", "retained_package",
-    "relative_import", "exported_uow_stub",
+    "relative_import", "exported_uow_stub", "block_query_binding", "block_query_body",
 ])
 def test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks(candidate, signed_reader, mutation):
     root, moves = candidate
@@ -104,6 +105,10 @@ def test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks(candi
         rewrite(root, "backend/app/domains/chat/service/messages.py", "content = data.content.strip()", "return 'sent'\n        content = data.content.strip()")
     elif mutation == "composition_rebind":
         rewrite(root, "backend/app/runtime/chat/message_composition.py", "message_service = MessageService(thread_service, settings_service)", "message_service = thread_service")
+    elif mutation == "block_query_binding":
+        rewrite(root, "backend/app/runtime/chat/message_composition.py", "from app.domains.social.repository.blocks import world_character_pair_is_blocked", "from app.domains.social.repository.blocks import write_pair_is_blocked as world_character_pair_is_blocked")
+    elif mutation == "block_query_body":
+        rewrite(root, "backend/app/domains/social/repository/blocks.py", "return db.scalar(", "return False\n    return db.scalar(")
     elif mutation == "route_binding_rebind":
         with (root / "backend/app/api/v1/routes/world_chat_response.py").open("a") as stream:
             stream.write("\ngeneration_service = evidence_service\n")
