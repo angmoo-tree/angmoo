@@ -1229,3 +1229,7 @@ from app.domains.social.schemas.community import PostCreate
 `app/schemas`에 남은 `__init__`, `agents`, `characters`, `auth`, `messages`, `media_security`는 과거 import 경로의 객체 동일성 및 구조를 직접 확인하는 테스트 때문에 유지되는 호환 파일이다. 이 테스트에서 옛 import를 새 import로 바꾼 뒤 같은 객체를 자기 자신과 비교하는 방식으로 호환성 종료를 처리하지 않는다. 앱 소비자가 없는 Worlds·SocialMemory·WorldActivityRuntime·WorldCharacterSetup 호환 파일 네 개는 제거했다.
 
 Character의 모델·이미지 키 모드·실행 모드 타입은 `characters/constants.py`, 활동 글쓰기 반복 수준은 `routines/constants.py`가 소유한다. 원래 Literal 별칭 다섯 개의 대입 본문과 값 순서를 이곳에 보존하고, 스키마와 임시 `agents.py` export는 그 같은 객체를 import한다. 값이 같은 `Literal`을 여러 번 정의한 뒤 typing 내부 캐시의 객체 동일성에 의존하지 않는다. 남은 호환 검사와 검증 근거는 [스키마 소비자 전환 기록](../docs/architecture/ar-b8-schema-consumers.md)에 정리한다.
+
+### 외부 LLM과 작성 파라미터 테스트
+
+`tests/integrations/test_direct_llm.py`는 외부 LLM 요청 설정, JSON 응답 진단, 재시도, 사용량 기록과 호출 제한을 검증합니다. 작성 작업이 선택하는 파라미터는 `tests/routines/test_writing_parameters.py`에 둡니다. LangGraph 실행 검사는 기존 `tests/routines/test_resident_graph.py`를 사용합니다. 파일 이름에 이전 실행기의 이름을 남기는 대신 실제 검사 대상의 소유 위치에서 테스트를 찾을 수 있습니다.

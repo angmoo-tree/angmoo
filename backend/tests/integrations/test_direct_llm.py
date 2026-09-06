@@ -1,20 +1,12 @@
 import asyncio
-
-from datetime import UTC
-
-from datetime import datetime
-
+from datetime import UTC, datetime
 from types import SimpleNamespace
 
 import pytest
-
 from google.genai import errors as google_errors
 
-
-
-from app.domains.routines.service import writing_results as agent_writing
-
 from app.integrations import direct_llm as direct_llm
+
 
 def test_generate_content_config_sets_thinking_level() -> None:
     config = direct_llm._generate_content_config(
@@ -29,6 +21,7 @@ def test_generate_content_config_sets_thinking_level() -> None:
     assert config.thinking_config is not None
     assert config.thinking_config.thinking_level.value == "LOW"
 
+
 def test_generate_content_config_sets_medium_thinking_level() -> None:
     config = direct_llm._generate_content_config(
         model="gemini-3.1-flash-lite",
@@ -42,6 +35,7 @@ def test_generate_content_config_sets_medium_thinking_level() -> None:
     assert config.thinking_config is not None
     assert config.thinking_config.thinking_level.value == "MEDIUM"
 
+
 def test_generate_content_config_omits_thinking_config_by_default() -> None:
     config = direct_llm._generate_content_config(
         model="gemini-3.1-flash-lite",
@@ -53,6 +47,7 @@ def test_generate_content_config_omits_thinking_config_by_default() -> None:
     )
 
     assert config.thinking_config is None
+
 
 def test_generate_content_config_omits_sampling_parameters() -> None:
     config = direct_llm._generate_content_config(
@@ -69,10 +64,6 @@ def test_generate_content_config_omits_sampling_parameters() -> None:
     assert "topP" not in payload
     assert "topK" not in payload
 
-def test_writing_composition_stream_params_omit_sampling_parameters() -> None:
-    params = agent_writing._writing_stream_params(SimpleNamespace())
-
-    assert params == {}
 
 def test_llm_tracker_records_thinking_level() -> None:
     tracker = direct_llm.RunLlmTracker(max_calls=1)
@@ -101,6 +92,7 @@ def test_llm_tracker_records_thinking_level() -> None:
     assert call["lane"] == "reply_writer"
     assert call["call_type"] == "generate_content"
     assert call["thinking_level"] == "medium"
+
 
 def test_generate_json_records_postprocess_error_on_repaired_success(monkeypatch) -> None:
     tracker = direct_llm.RunLlmTracker(max_calls=3)
@@ -164,6 +156,7 @@ def test_generate_json_records_postprocess_error_on_repaired_success(monkeypatch
     assert "AIza12345678901234567890" not in first_call["json_postprocess_error"][
         "preview_head"
     ]
+
 
 def test_generate_json_raises_with_diagnostics_after_two_parse_failures(
     monkeypatch,
@@ -229,6 +222,7 @@ def test_generate_json_raises_with_diagnostics_after_two_parse_failures(
     assert exc.last_payload is None
     assert tracker.summary()["calls"][1]["json_postprocess_error"]["attempt"] == 2
 
+
 def test_generate_json_schema_validation_diagnostic(monkeypatch) -> None:
     tracker = direct_llm.RunLlmTracker(max_calls=3)
     context = direct_llm.DirectLlmCallContext(
@@ -292,6 +286,7 @@ def test_generate_json_schema_validation_diagnostic(monkeypatch) -> None:
     calls_text = str(tracker.summary()["calls"])
     assert "B" * 900 not in calls_text
     assert "last_payload" not in calls_text
+
 
 def test_generate_json_retry_hook_can_stop_after_first_validation_failure(
     monkeypatch,
@@ -379,6 +374,7 @@ def test_generate_json_retry_hook_can_stop_after_first_validation_failure(
         }
     ]
 
+
 def test_direct_llm_retries_provider_overload_once(monkeypatch) -> None:
     direct_llm._RATE_LIMITER._buckets.clear()
     responses: list[object] = [
@@ -446,6 +442,7 @@ def test_direct_llm_retries_provider_overload_once(monkeypatch) -> None:
     assert summary["calls"][0]["provider_error_hint"] == "provider_overloaded"
     assert summary["calls"][1]["status"] == "ok"
     assert summary["rate_limit_waits"][0]["reason"] == "provider_overloaded_retry"
+
 
 def test_direct_llm_retries_google_bad_gateway_once(monkeypatch) -> None:
     direct_llm._RATE_LIMITER._buckets.clear()
@@ -526,6 +523,7 @@ def test_direct_llm_retries_google_bad_gateway_once(monkeypatch) -> None:
     assert summary["calls"][1]["status"] == "ok"
     assert summary["rate_limit_waits"][0]["reason"] == "provider_overloaded_retry"
 
+
 def test_direct_llm_does_not_overload_retry_rate_limit(monkeypatch) -> None:
     direct_llm._RATE_LIMITER._buckets.clear()
 
@@ -568,6 +566,7 @@ def test_direct_llm_does_not_overload_retry_rate_limit(monkeypatch) -> None:
 
     assert sleeps == []
     assert tracker.summary()["call_count"] == 1
+
 
 def test_google_provider_error_details_extracts_quota_and_retry_info() -> None:
     exc = google_errors.ClientError(
@@ -617,6 +616,7 @@ def test_google_provider_error_details_extracts_quota_and_retry_info() -> None:
     assert provider_error["retry_delay_seconds"] == 12.0
     assert provider_error["details_present"] is True
 
+
 def test_google_provider_error_details_handles_plain_429() -> None:
     exc = google_errors.ClientError(
         429,
@@ -637,6 +637,7 @@ def test_google_provider_error_details_handles_plain_429() -> None:
     assert provider_error["details_present"] is False
     assert "quota_metric" not in provider_error
     assert "quota_id" not in provider_error
+
 
 def test_direct_llm_provider_error_is_tracked_and_raised(monkeypatch) -> None:
     direct_llm._RATE_LIMITER._buckets.clear()
@@ -691,6 +692,7 @@ def test_direct_llm_provider_error_is_tracked_and_raised(monkeypatch) -> None:
     assert exc_info.value.provider_error_hint == "provider_rate_limit"
     assert exc_info.value.provider_error["provider_http_status"] == 429
 
+
 def test_llm_tracker_counts_embedding_separately_from_generate_budget() -> None:
     tracker = direct_llm.RunLlmTracker(max_calls=1)
     context = direct_llm.DirectLlmCallContext(
@@ -722,6 +724,7 @@ def test_llm_tracker_counts_embedding_separately_from_generate_budget() -> None:
     assert summary["provider_call_count"] == 1
     assert summary["calls"][0]["call_type"] == "embed_content"
 
+
 def test_writer_split_call_budget_allows_json_retry_worst_case(monkeypatch) -> None:
     monkeypatch.setattr(direct_llm.settings, "DIRECT_LLM_MAX_CALLS_PER_RUN", 20)
     logical_calls_with_writer_repairs = 10
@@ -731,6 +734,7 @@ def test_writer_split_call_budget_allows_json_retry_worst_case(monkeypatch) -> N
         logical_calls_with_writer_repairs * json_attempts_per_call
         <= direct_llm.settings.direct_llm_max_calls_per_run
     )
+
 
 def test_direct_llm_rate_limiter_waits_instead_of_failing(monkeypatch) -> None:
     direct_llm._RATE_LIMITER._buckets.clear()

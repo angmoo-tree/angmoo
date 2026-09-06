@@ -2722,3 +2722,11 @@ B5 준비 branch의 실제 업무 이전·옛 Social/Relationships 계층·Commu
 원래 source·split·assertion·suppression·ASGI·API/ORM·노드 보존 진단은 전부 **오류0 / protected2311·current2509**이며, 현재 경계검사는 **1094modules·4081edges·exactlegacy27 PASS**다. L4·Memory batch·ER0·deferred 현재 inventory도 통과했다. 기존 signed869bae 두 경로의 메모리 보충을 사용하는 읽기 전용 진단이며 최종 stock 최초 도입 캡처/선형 통합/CI PASS로 표현하지 않는다.
 
 역사적 M4 verifier는 현재 CI·launcher·공식 README/CONTRIBUTING의 실행 소비자가 없다. 제공된 signed9c14의 결과 문서1212/2319행도 기존148/120/182와 현재196/160/266의 차이를 이미 기록한다. 9c14 원문은 삭제된 LangGraph import에서 실패하며, 여기서는 해당 import만 실제 계약으로 연결했다. 그 오래된 기대값을 다시 쓰거나 현재 API를 과거 크기로 줄이지 않았다.
+
+## AR-G07 — Direct LLM·작성 파라미터 테스트 소유
+
+남아 있던 `test_langgraph_resident_engine.py`의 기존 함수 19개를 실제 책임에 맞춰 이전했다. 외부 LLM 설정·JSON 진단·provider 오류·재시도·tracker·rate limiter의 18개는 `tests/integrations/test_direct_llm.py`, 작성 파라미터 1개는 `tests/routines/test_writing_parameters.py`에 있다. 전체 함수·decorator·단언·조건·provider fixture 값은 동일하며 새 node·package·제품 구현을 만들지 않았다. 이전 LangGraph·실행·readiness 함수들의 정확한 node 이동표는 그대로 이어진다.
+
+Secret scanner의 현재 exact tuple 하나는 옮긴 원본 fixture 경로를 사용한다. 체크포인트 예외의 원본 signed d7037625 경로·commit·Git blob·값 해시와 검토 메타데이터는 유지한다. 기존 allowlist 회귀는 현재 fixture와 동결 fixture의 값 동일성·해시·원본 체크포인트를 계속 검증한다. 실행·수집 및 원래 보존 검사 결과는 source 고정 전에 추가한다.
+
+검증: 기존 이동 19개와 metadata·scanner 회귀를 합쳐 **42 passed / 4.49s**다. 원본 전체 함수·decorator AST 19개와 단언 95개가 동일하며 수집은 **2509 → 2509**, 기존 19개 경로 치환 외 추가·누락·중복이 없다. 실제 scanner도 정확한 새 경로/원래 값만 허용하며 다른 경로·다른 값은 거절한다. 원래 보존 검사 7종 read-only 진단은 모두 오류 0(protected 2311/current 2509)이고, 원래 signed869 도입 2경로의 임시 읽기 증거만 사용했다. 원장 append와 stock 전체 gate·Hosted CI는 부모의 선형 통합 단계에서 진행한다. L4 1094/14/99 및 Memory batch 현재 inventory는 재생성 없이 통과했다.
