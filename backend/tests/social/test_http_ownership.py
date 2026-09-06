@@ -14,7 +14,7 @@ from app.runtime.social import composition, discovery, inbox, profile_activity, 
 
 def test_both_factories_bind_social_services_and_preserve_character_state_order():
     from app.main import create_app as hosted
-    from app.public_main import create_app as local
+    from app.main import create_public_app as local
     for factory in (hosted, local):
         app = factory()
         request = Request({"type": "http", "app": app})

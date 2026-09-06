@@ -49,7 +49,7 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/repository/recall.py",
     "backend/app/runtime/memory/recall_projection.py",
     "backend/app/runtime/configuration.py",
-    "backend/app/public_main.py",
+    "backend/app/main.py",
     "backend/tests/test_p8_l_h_canonical_recall.py",
     "docs/architecture/p8-l-h-canonical-recall.md",
 )

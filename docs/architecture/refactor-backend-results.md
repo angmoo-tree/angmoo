@@ -2625,3 +2625,23 @@ C32 최종 보존은 PR #258/#263 API/schema/ORM·보호 변경7파일 assertion
 - Demo 초기 데이터 생성은 `runtime/bootstrap/demo_seed.py`의 원래 구현을 단일 main에서 호출한다. 정의가 모두 이전된 Community CRUD 파일을 삭제하고 현재 코드와 테스트를 실제 담당 조회/쓰기 함수에 연결했다.
 - 통합 첫 검사 **229 passed / 2 failed**는 Writer 테스트의 삭제된 Community module 대역 두 경로였다. 원래 조건/저장순서 assertion을 유지하고 실제 eight 함수의 대역 위치를 연결한 뒤 해당 파일 **8 passed / 6.28초**.
 - 원본 보호 읽기 진단: 보호2311/current2509, source·split·assertion·suppression·ASGI·API/ORM·missing nodes 모두0. 최종 stock/전체/CI/설치 검증은 이어서 수행한다.
+
+## AR-B8-G06-B — 임시 public_main 제거 소스 준비
+
+삭제 전 `main` 실제 factory·public alias·cold import·기본값·DB 지연 등록 검증은 **26 PASS / 64.01초**였다. 실제 남은 소비자는 HTTP 소유 테스트4파일, Lore/Tree factory 선택2파일, 전용 factory 테스트1파일이며 각각 public export에 연결했다. `app.public_main` 전체를 `app.main`으로 치환하지 않았다. 개발 ASGI·공식 sidecar/contributor·Docker/PyInstaller 실행 참조는 선행 G06에서 이미 main의 실제 public export를 사용한다.
+
+파일 제거 후 관련23파일의 HTTP·lifecycle·cold DB/API import·launcher·sidecar·Alembic/embedded migration·installer upgrade/rollback/공급망 계약은 **200 PASS / 기존 skip1 / 177.17초 / 기존 Starlette warning1**이다. 실제 `public_main.py` 없이 실행했으며 제품의 단일 main factory 본문은 수정하지 않았다. full/public health/OpenAPI·component 기본값과 Memory startup failure/cleanup·media 생성·PostgreSQL DBAPI 금지 단언을 유지한다.
+
+호환 alias5개의 검사는 실제 옛 파일 부재1개와 public/default/component 확인3개로 승계한다. 서명된 G06 `90d7fd7` → G5 `924a836`의 정확 ancestry/DCO, G06의 전용 test 도입, 동일 순수 facade와 실제 main export/default를 검증한다. 최초 도입 원장은 기존 파일의 후속 내용을 다시 기록하지 않으므로 이 원래 Git source를 직접 검증하며 baseline/checkpoint/additions는 변경하지 않는다. 실제 sparse checkpoint로 검사하는 회귀를 포함했다.
+
+전용 테스트의 전체 AST는 정확한 import/export·alias 승계만 허용한다. subprocess의 단일 literal이 실제 `sys.executable -c` 인자로 연결됐는지 먼저 검사하고 내부 AST를 비교한 뒤, 바깥 인자·cwd/env·timeout·반환 코드 및 나머지 lifespan test 전체를 비교한다. self identity·임의 proxy·빈 wrapper를 만들지 않는다. 실제 파일/package 잔존, factory/default/partial/export 변경, shadow import·재할당, 서명/계보 불일치, 부분 identity 묶음, unrelated assertion/실행 순서 변경, `-c` 입력 분리, backend/scripts와 정적/동적 소비자 재도입을 거절하는 검사와 기존 ASGI 검사는 **65 PASS / 16.48초**다. 기존 G5 model facade 제거 검증은 유지했다.
+
+현재 import/L4/Memory batch/deferred inventory를 실제 소스로 갱신했다. successor가 고정한 P8-L-H artifact는 그대로 두고, 원래 historical ASGI 계약·source/symbol map·로그 이름·negative fixture·sys.modules 부재 검사와 현재 실행 소비자를 구분했다. 이 단계는 삭제 소스의 집중 검증이며 최종 선형 도입 원장, 전체 backend/stock 보존, Hosted CI 및 새 bundle·설치형 검증·병합은 부모 통합 단계에 남아 있다. G06/B8 완료를 선언하지 않는다.
+
+G06-B 최종 원문 진단은 source·split symbol·assertion·suppression·ASGI export·API/ORM·node **7개 항목 모두 오류0**이며 보호2201/현재2465다. 기존 서명된 Routines 첫도입2파일을 읽기 진단의 정확 근거로만 추가했고 원장을 쓰지 않았다. 실제 signed G06/G5 전용 test의 assertion Counter도 별도 대조해 오류0이었다. 첫 split 검사는 삭제된 파일을 현재 소비자로 가리키던13개 기록을 발견했으며, 관련 현재 direct_consumer 목록15개를 main으로 연결한 뒤 다시 통과했다. original/source_symbol·역사 경로는 변경하지 않았다. 현재 구조 수집은955 module/3509 edge이며 원래 준비 base의 B4/B5 legacy ORM 소비31건 때문에 architecture gate는 계속 **NOT PASS**다. 해당 소유 전환의 후속 합류로 닫으며 새 예외를 추가하지 않았다. frozen baseline/checkpoint/additions/P8-L-H artifact는 diff0이다.
+
+### G06 현재 통합 후보의 호환 종료
+
+- 현재 main factory의 삭제 전 원래 호환/cold 검증 **6 passed / 28.28초** 후 `public_main.py`를 실제 제거했다. 원래 health·profile·설정·미디어·lifecycle 단언을 실제 main 검증과 연결했다.
+- 삭제된 후보의 엄격 original-source retirement proof, 앱 생성·Hosted/public 계약·시작 보안·config·upgrade 계약: **109 passed / 기존 1 skipped / 70.89초**.
+- immutable signed G06/G5 provenance를 읽는 원본 보존 진단: 보호2311/current2560, source·split·assertion·suppression·ASGI·API/ORM·missing nodes 각0. 공식 launcher/신규 bundle/전체 stock 및 CI Gate는 최종 선형 후보에서 이어진다.

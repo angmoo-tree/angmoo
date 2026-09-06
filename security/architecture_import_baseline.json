@@ -1,7 +1,7 @@
 {
-  "edge_count": 4128,
+  "edge_count": 4127,
   "external_import_count": 3128,
-  "module_count": 1101,
+  "module_count": 1100,
   "modules": [
     {
       "external_imports": [],
@@ -12681,15 +12681,6 @@
       ],
       "module": "app.providers.registry",
       "path": "backend/app/providers/registry.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.main"
-      ],
-      "module": "app.public_main",
-      "path": "backend/app/public_main.py",
       "wildcard_imports": []
     },
     {

@@ -20,15 +20,6 @@
     },
     {
       "markers": [
-        "hosted-extension-type"
-      ],
-      "owner_phases": [
-        "L0-L4 hosted extension compatibility audit"
-      ],
-      "path": "backend/app/public_main.py"
-    },
-    {
-      "markers": [
         "privacy-contact",
         "product-host"
       ],
@@ -194,6 +185,15 @@
         "L0-L4 product URL, privacy UX, provider referer"
       ],
       "path": "frontend/src/lib/seo.ts"
+    },
+    {
+      "markers": [
+        "hosted-extension-type"
+      ],
+      "owner_phases": [
+        "L0-L4 hosted extension compatibility audit"
+      ],
+      "path": "scripts/ci/public_factory_retirement.py"
     },
     {
       "markers": [

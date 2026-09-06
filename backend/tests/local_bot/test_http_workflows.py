@@ -182,7 +182,7 @@ def test_both_app_factories_register_same_bot_workflows_and_shared_http_parser()
     from app.api.authorization import AuthorizationHeader, _bearer_token
     from app.domains.identity import dependencies as identity_dependencies
     from app.main import create_app
-    from app.public_main import create_app as create_public_app
+    from app.main import create_public_app
 
     assert identity_dependencies.AuthorizationHeader is AuthorizationHeader
     assert identity_dependencies._bearer_token is _bearer_token
