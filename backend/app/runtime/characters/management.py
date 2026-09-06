@@ -194,7 +194,6 @@ from app.domains.characters import models as character_models
 
 from app.domains.characters.service import profile as character_profile
 
-from app.core import active_hours
 
 from app.core import security
 

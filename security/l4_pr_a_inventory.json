@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3115,
+      "external_import_count": 3116,
       "internal_edge_count": 4077,
       "legacy_import_exception_count": 0,
-      "module_count": 1091,
+      "module_count": 1092,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -1595,11 +1595,18 @@
           },
           {
             "imports": [
-              "app.core.search_text",
+              "app.core.search_text"
+            ],
+            "module": "app.domains.social.service.search_documents",
+            "path": "backend/app/domains/social/service/search_documents.py"
+          },
+          {
+            "imports": [
               "app.core.unit_of_work",
               "app.domains.social.contracts.actors",
               "app.domains.social.models.posts",
               "app.domains.social.schemas.community",
+              "app.domains.social.service.search_documents",
               "app.domains.social.utils.text"
             ],
             "module": "app.domains.social.service.source_posts",
@@ -1681,12 +1688,12 @@
             "imports": [
               "app.core.bounded_text",
               "app.core.json_objects",
-              "app.core.search_text",
               "app.core.unit_of_work",
               "app.domains.social.contracts.topic_history",
               "app.domains.social.models.posts",
               "app.domains.social.repository.topic_history",
               "app.domains.social.service.activity_results",
+              "app.domains.social.service.search_documents",
               "app.domains.social.service.visibility"
             ],
             "module": "app.domains.social.service.topic_metadata",
@@ -2849,7 +2856,7 @@
       },
       {
         "path": "backend/tests/social/test_feed_reaction_intent.py",
-        "sha256": "27ad9b393e18f0648f9a3fa777a33aa611c68666b220075a5b1a1a8f30d13a62"
+        "sha256": "b8ebf43336a6c5c6a584bf9a1c892b0a6bc57a66f1810cc51fcbe676d1319c32"
       },
       {
         "path": "backend/tests/relationships/test_projection_replay.py",
@@ -2865,7 +2872,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "eb91e9ae5127eccadc952c49ae0028b5a724bc4da379da2c1aaeed7557237f36"
+        "sha256": "f3ed2fd568b9c53cf94e8915beda7c90ea3d48df6527a0ff2d51f25d57d2d4ea"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
@@ -2901,7 +2908,7 @@
       },
       {
         "path": "backend/tests/social/test_world_feed_search.py",
-        "sha256": "8299afe411c1a078d3b1b671a57aea37306a5a211acb037a3b6349312564072e"
+        "sha256": "aed01497163fa24346b3fd62f7ec5ba4728d09192758488fef750b7199a4cda9"
       }
     ],
     "parity_test_node_count": 99,

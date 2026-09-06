@@ -765,7 +765,9 @@
       "app.domains.social.service.agent_tool_state",
       "app.domains.social.service.complete_tick",
       "app.domains.social.service.manual_inbox",
-      "app.domains.social.utils.manual_inbox"
+      "app.domains.social.utils.manual_inbox",
+      "app.domains.routines.policies.active_hours",
+      "app.domains.social.service.search_documents"
     ],
     "entries": [
       "app.domains.character_lore.contracts",
@@ -1236,7 +1238,8 @@
       "app.domains.social.contracts.observation_execution",
       "app.domains.social.service.agent_tool_state",
       "app.domains.social.service.complete_tick",
-      "app.domains.social.service.manual_inbox"
+      "app.domains.social.service.manual_inbox",
+      "app.domains.social.service.search_documents"
     ],
     "bridges": [
       {

@@ -1,7 +1,7 @@
 """Activity-setting defaults and explicit commit/flush update modes."""
 from datetime import UTC, datetime
 from sqlalchemy.orm import Session
-from app.core import active_hours
+from app.domains.routines.policies import active_hours
 from app.domains.routines import models, schemas
 from app.domains.routines.constants import DEFAULT_MAX_COMMENTS_PER_DAY, DEFAULT_MAX_POSTS_PER_DAY
 

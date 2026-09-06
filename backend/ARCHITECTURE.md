@@ -122,6 +122,14 @@ Local의 명시적 `RuntimeConfig`, 복구, Memory 시작·종료와 각 지원 
 
 ## 2. 도메인 안에서 코드 찾기
 
+### 활동 시간과 검색 문서의 소유
+
+활동 시간의 기본값, 최대 17시간 제한, 30분 단위 입력과 자정을 넘는 시간 계산은 `routines/policies/active_hours.py`가 소유합니다. 활동 설정·스케줄·ORM 기본값과 데모 초기화는 같은 규칙을 사용합니다. 입력 오류를 HTTP 오류로 바꾸거나 설정을 저장하는 책임은 기존 Routines service에 있습니다.
+
+`social/service/search_documents.py`는 게시물의 제목·본문·주제 순서와 길이 제한을 적용해 검색용 문서를 만듭니다. 문자열 정규화와 LIKE 검색의 공통 보조 함수는 `core/search_text.py`에 있어 Character 검색, Social 검색과 Memory/FTS5 조립이 함께 사용합니다. 검색 문서는 권한을 판단하는 원본 데이터가 아닙니다.
+
+`core/image_generation.py`는 Character·Social·자격 증명·provider가 함께 쓰는 이미지 모델 목록과 설정값을 소유합니다. 실제 이미지 생성·검증·저장은 각 업무의 service와 integration에 있습니다. `core/public_media.py`는 main이 호출하는 공통 정적 파일 연결이며, 공개 디렉터리와 기존 생성 옵션을 연결합니다. 업로드 검증이나 비공개 preview 판단을 이곳에 합치지 않습니다.
+
 ### Character lore의 기반 소유
 
 업로드한 캐릭터 참고 문서는 `character_lore/models.py`의 source/chunk/parser lease 모델과 JSON 임베딩 타입을 사용합니다. Memory의 사건 기억과 별도 업무입니다. HTTP 입출력은 `schemas.py`, chunk·검색 결과·embedding credential 값은 `contracts.py`, 제한과 오류는 `constants.py`·`exceptions.py`가 실제 정의를 소유합니다.

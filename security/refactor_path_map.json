@@ -640,7 +640,8 @@
     "backend/app/schemas/worlds.py": "backend/app/domains/worlds/schemas.py",
     "backend/app/schemas/world_activity_runtime.py": "backend/app/domains/routines/schemas/plans.py",
     "backend/app/schemas/world_character_setup.py": "backend/app/domains/world_characters/schemas/setup.py",
-    "backend/tests/test_langgraph_resident_engine.py": "backend/tests/integrations/test_direct_llm.py"
+    "backend/tests/test_langgraph_resident_engine.py": "backend/tests/integrations/test_direct_llm.py",
+    "backend/app/core/active_hours.py": "backend/app/domains/routines/policies/active_hours.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -133055,6 +133056,104 @@
         "Architecture1090modules/4072edges/5exactlegacyedges,cycle0; no boundary rule or exception change.",
         "Original seven read-only diagnostics all0,protected2313/current2564. Original signed869 two-path and signed49c0f1f4 two-test first-introduction evidence only; no ledger/frozen write.",
         "L4 current1090/14/99 and Memory batch inventories current; product API/ORM and ASGI profiles unchanged."
+      ]
+    },
+    "AR-B8-CORE-OWNERSHIP": {
+      "status": "SOURCE VALIDATED; parent sequential capture/stock/Hosted pending",
+      "base_commit": "8a2eb91910eca82d18b44edb48445f468cb7656e",
+      "actual_paths": [
+        "backend/app/domains/routines/policies/active_hours.py",
+        "backend/app/domains/social/service/search_documents.py",
+        "backend/app/core/search_text.py"
+      ],
+      "whole_file_move": {
+        "backend/app/core/active_hours.py": "backend/app/domains/routines/policies/active_hours.py"
+      },
+      "active_hours_consumers": [
+        "backend/app/domains/routines/models/resident.py",
+        "backend/app/domains/routines/service/activity_management.py",
+        "backend/app/domains/routines/service/activity_settings.py",
+        "backend/app/domains/routines/service/tick_schedule.py",
+        "backend/app/runtime/bootstrap/demo_seed.py",
+        "backend/app/runtime/characters/management.py",
+        "backend/tests/routines/test_activity_limits.py"
+      ],
+      "search_document_consumers": [
+        "backend/app/domains/social/service/source_posts.py",
+        "backend/app/domains/social/service/topic_metadata.py",
+        "backend/app/runtime/search/social_projection.py",
+        "backend/tests/social/test_feed_reaction_intent.py",
+        "backend/tests/social/test_world_feed_search.py",
+        "backend/tests/world_packages/test_import_commit.py"
+      ],
+      "split_files": {
+        "backend/app/core/search_text.py": [
+          "backend/app/core/search_text.py",
+          "backend/app/domains/social/service/search_documents.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/core/search_text.py::_CONTROL_CATEGORIES",
+          "new": "backend/app/core/search_text.py::_CONTROL_CATEGORIES",
+          "direct_consumers": [
+            "backend/app/core/search_text.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_feed_search.py::test_search_text_normalization_is_deterministic"
+          ]
+        },
+        {
+          "old": "backend/app/core/search_text.py::_WHITESPACE_RE",
+          "new": "backend/app/core/search_text.py::_WHITESPACE_RE",
+          "direct_consumers": [
+            "backend/app/core/search_text.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_feed_search.py::test_search_text_normalization_is_deterministic"
+          ]
+        },
+        {
+          "old": "backend/app/core/search_text.py::normalize_search_text",
+          "new": "backend/app/core/search_text.py::normalize_search_text",
+          "direct_consumers": [
+            "backend/app/domains/social/service/search_documents.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_feed_search.py::test_search_text_normalization_is_deterministic"
+          ]
+        },
+        {
+          "old": "backend/app/core/search_text.py::build_post_search_document",
+          "new": "backend/app/domains/social/service/search_documents.py::build_post_search_document",
+          "direct_consumers": [
+            "backend/app/domains/social/service/source_posts.py",
+            "backend/app/domains/social/service/topic_metadata.py",
+            "backend/app/runtime/search/social_projection.py"
+          ],
+          "test_nodes": [
+            "tests/social/test_world_feed_search.py::test_search_text_normalization_is_deterministic"
+          ]
+        }
+      ],
+      "retained_common": {
+        "app.core.image_generation": "Shared provider model catalogue, common image configuration/defaults and encoding values used by Character, Social, credentials and provider transport. No generation workflow, domain SQL or provider call is owned here.",
+        "app.core.public_media": "Application-level FastAPI StaticFiles mounting for existing public directories; main composition owns the invocation. Upload validation and private preview policy remain in their actual domains.",
+        "app.core.search_text": "Only shared NFKC/control/space normalization and LIKE escaping/term helpers remain. Social Post fields/order/limits are owned by domains.social.service.search_documents."
+      },
+      "behavior": "Original five activity functions/four constants and Social document builder body remain unchanged; existing import local names, ORM defaults, validation error order and same attached Post/Session writes are preserved. No wrapper, SQL/commit change or new test node.",
+      "alias_preservation": "Shared image catalogue actual module and IMAGE_MODEL_OPTIONS/MAX_IMAGES_PER_DAY terminal identities remain in their original location for the independent schema retirement proof.",
+      "tests": [
+        "tests/routines/test_activity_limits.py::test_active_hours_validation_allows_presets_and_custom_under_cap",
+        "tests/routines/test_activity_limits.py::test_active_hours_validation_rejects_all_day_over_cap_and_bad_start",
+        "tests/social/test_world_feed_search.py::test_search_text_normalization_is_deterministic"
+      ],
+      "like_helper_provenance": "The unchanged LIKE helpers were previously moved from cruds/community.py by AR-B2-B1 and AR-B5-C10-B. Those original source maps remain unchanged; they are not falsely reintroduced as original core/search_text.py symbols in this split.",
+      "validation": [
+        "Original current-owner15 definitions and243 consumer definitions AST identical; no actual policy/default/error/session behavior changes.",
+        "107 existing tests PASS/3 existing warnings: activity limits, feed search/reactions, package import, private preview, L0 runtime and L4.",
+        "Original six read-only diagnostics0; protected2313/current2596. Corrected split map separately reruns original check_split_evidence with0errors, preserving original Community LIKE source lineage.",
+        "Architecture1092modules/4077edges/5exactlegacyedges/cycle0; L0services2/core19PASS. New test nodes0; baseline/checkpoint/additions/capture untouched."
       ]
     }
   },

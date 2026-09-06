@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.core import unit_of_work
 from app.core.json_objects import _json_object
 from app.core.bounded_text import _safe_topic_text
-from app.core.search_text import build_post_search_document
+from app.domains.social.service.search_documents import build_post_search_document
 from app.domains.social.models import posts as models
 from app.domains.social.contracts.topic_history import TopicHistoryReferences
 from app.domains.social.repository.topic_history import get_topic_post

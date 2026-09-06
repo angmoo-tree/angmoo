@@ -2797,3 +2797,13 @@ Head `39efec7`의 Security 전체는 PASS였으나 Core backend는 pytest 전 �
 전체 pytest 수집만으로 별도 smoke 명령의 사라진 파일을 발견하지 못했던 점을 보완했다. 기존 CI policy가 실제 workflow pytest step의 literal Python 테스트 경로를 읽어 파일 존재를 확인하며, POSIX/Windows·backend 상대 경로를 지원한다. 실제 새 위치가 존재해도 옛 위치를 거절하고, 유효했던 파일을 삭제하면 거절하는5개 신규 사례와 기존 CI/활동/Memory inventory 관련 검증은 **18 PASS /9.59초**다. 동적 shell 표현과 실제 실행 결과는 해당 workflow가 계속 검증하며 이 정적 검사가 대신하지 않는다. 초기 집중 명령의 존재하지 않는 inventory 테스트 인자는 실행 전 오류로 별도 남기며, 수정 명령의18개 결과만 PASS로 계산했다.
 
 Custom history도 후보 `0108a3a`의 전체786 ancestor만 가진 별도 bare 저장소에서 **8,718 blobs /치명0**을 확인했다. 공유 저장소의 미합류 B8 경로3건과 구분했으며 원래 scanner·exact allowlist25·검사 범위 규칙은 변경하지 않았다. 원격 backend 전체·Local/Host/installer는 수정 head에서 다시 확인한다.
+
+### AR-B8 공통 값과 실제 업무 정책의 소유 정리
+
+`core/active_hours.py`의 5개 함수와 4개 상수는 `routines/policies/active_hours.py`로 실제 이전했다. Routines 모델·설정·시간 계산, 데모 초기화와 기존 테스트의 local module 이름을 유지하고, Character management의 사용하지 않는 import 한 줄은 제거했다. 최대 17시간·30분 단위·end 24:00·자정 경계와 입력 검증의 오류/저장 순서는 바꾸지 않았다.
+
+`core/search_text.py`에서는 게시물 필드별 길이와 결합 순서를 소유한 `build_post_search_document` 한 함수만 `social/service/search_documents.py`로 이전했다. 공유 정규화와 LIKE helper 3개는 core에 그대로 남는다. 원본 글 저장·topic 변경·검색 projection과 기존 테스트의 실제 import를 연결했으며 SQL·Session·flush/commit을 추가하거나 바꾸지 않았다.
+
+공통 image 모델/설정값과 FastAPI 미디어 연결은 실제 공통 지원 역할이므로 `core/image_generation.py`·`core/public_media.py`를 유지한다. current local runtime contract의 오래된 L3/L4/L6 migrate 표기는 실제 이전/keep 사유로 정리했다. 원래 이미지 상수의 schema facade terminal identity 두 개와 정적 파일 디렉터리·check_dir 동작은 변경하지 않았다.
+
+검증: 업무/공유 15개 정의 AST와 소비자 파일 243개 정의 AST가 원문과 동일하다. 기존 활동 시간·설정·검색·Package·private preview·L0/L4 회귀 107개 PASS(기존 경고3)다. 원래 source·assertion·suppression·API/ORM·ASGI·node 진단은 오류0(protected2313/current2596)이며, LIKE2의 원래 Community 출처를 유지하도록 새 core split 기록을 맞춘 뒤 원래 split 검사도 오류0이다. 경계1092 modules/4077 edges/5 exact legacy edges/cycle0, L0 services2/core19를 확인했다. 새로운 test node 없이 원본 baseline/checkpoint/additions와 승인 목록을 보존했으며 source capture·Hosted·전체 B8 통합은 부모 단계에 남긴다.

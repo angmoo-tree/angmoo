@@ -1034,7 +1034,7 @@
         "backend/app/api/v1/routes/world_character_setup.py",
         "backend/app/api/world_character_dependencies.py",
         "backend/app/api/world_errors.py",
-        "backend/app/core/active_hours.py",
+        "backend/app/domains/routines/policies/active_hours.py",
         "backend/app/domains/characters/schemas.py",
         "backend/app/domains/characters/service/owner_controlled.py",
         "backend/app/domains/characters/service/world_lifecycle.py",
@@ -2184,7 +2184,8 @@
         "backend/app/domains/social/repository/world_feed.py",
         "backend/app/runtime/social/world_feed_queries.py",
         "backend/app/runtime/social/world_feed_search.py",
-        "backend/app/runtime/search/binding.py"
+        "backend/app/runtime/search/binding.py",
+        "backend/app/domains/social/service/search_documents.py"
       ],
       "target_paths": [
         "backend/app/domains/social/repository",

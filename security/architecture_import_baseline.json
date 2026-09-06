@@ -1,7 +1,7 @@
 {
   "edge_count": 4077,
-  "external_import_count": 3115,
-  "module_count": 1091,
+  "external_import_count": 3116,
+  "module_count": 1092,
   "modules": [
     {
       "external_imports": [],
@@ -375,13 +375,6 @@
     },
     {
       "external_imports": [],
-      "imports": [],
-      "module": "app.core.active_hours",
-      "path": "backend/app/core/active_hours.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
       "imports": [
         "app.core.context_text"
       ],
@@ -547,7 +540,6 @@
     {
       "external_imports": [
         "__future__",
-        "collections.abc",
         "re",
         "unicodedata"
       ],
@@ -6215,8 +6207,8 @@
         "typing"
       ],
       "imports": [
-        "app.core.active_hours",
         "app.domains.routines.constants",
+        "app.domains.routines.policies.active_hours",
         "app.models"
       ],
       "module": "app.domains.routines.models.resident",
@@ -6241,6 +6233,13 @@
       ],
       "module": "app.domains.routines.policies.action_matching",
       "path": "backend/app/domains/routines/policies/action_matching.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.routines.policies.active_hours",
+      "path": "backend/app/domains/routines/policies/active_hours.py",
       "wildcard_imports": []
     },
     {
@@ -6879,11 +6878,11 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.active_hours",
         "app.domains.routines.constants",
         "app.domains.routines.contracts.activity_management",
         "app.domains.routines.exceptions",
         "app.domains.routines.models",
+        "app.domains.routines.policies.active_hours",
         "app.domains.routines.repository.slots",
         "app.domains.routines.schemas",
         "app.domains.routines.service.activity_policy",
@@ -6959,9 +6958,9 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.active_hours",
         "app.domains.routines.constants",
         "app.domains.routines.models",
+        "app.domains.routines.policies.active_hours",
         "app.domains.routines.schemas"
       ],
       "module": "app.domains.routines.service.activity_settings",
@@ -7948,7 +7947,7 @@
       ],
       "imports": [
         "app.config",
-        "app.core.active_hours"
+        "app.domains.routines.policies.active_hours"
       ],
       "module": "app.domains.routines.service.tick_schedule",
       "path": "backend/app/domains/routines/service/tick_schedule.py",
@@ -10123,15 +10122,27 @@
     },
     {
       "external_imports": [
+        "__future__",
+        "collections.abc"
+      ],
+      "imports": [
+        "app.core.search_text"
+      ],
+      "module": "app.domains.social.service.search_documents",
+      "path": "backend/app/domains/social/service/search_documents.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "sqlalchemy",
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.search_text",
         "app.core.unit_of_work",
         "app.domains.social.contracts.actors",
         "app.domains.social.models.posts",
         "app.domains.social.schemas.community",
+        "app.domains.social.service.search_documents",
         "app.domains.social.utils.text"
       ],
       "module": "app.domains.social.service.source_posts",
@@ -10252,12 +10263,12 @@
       "imports": [
         "app.core.bounded_text",
         "app.core.json_objects",
-        "app.core.search_text",
         "app.core.unit_of_work",
         "app.domains.social.contracts.topic_history",
         "app.domains.social.models.posts",
         "app.domains.social.repository.topic_history",
         "app.domains.social.service.activity_results",
+        "app.domains.social.service.search_documents",
         "app.domains.social.service.visibility"
       ],
       "module": "app.domains.social.service.topic_metadata",
@@ -12730,12 +12741,12 @@
       ],
       "imports": [
         "app.config",
-        "app.core.active_hours",
         "app.core.security",
         "app.domains.characters.models",
         "app.domains.identity.models",
         "app.domains.routines.constants",
         "app.domains.routines.models",
+        "app.domains.routines.policies.active_hours",
         "app.domains.social.models.posts"
       ],
       "module": "app.runtime.bootstrap.demo_seed",
@@ -12849,7 +12860,6 @@
       "imports": [
         "app.api.schemas.first_greeting",
         "app.config",
-        "app.core.active_hours",
         "app.core.image_generation",
         "app.core.image_prompt_safety",
         "app.core.prompt_safety",
@@ -15412,10 +15422,10 @@
         "sqlalchemy.orm"
       ],
       "imports": [
-        "app.core.search_text",
         "app.domains.runtime.contracts.search",
         "app.domains.social.contracts.search_state",
         "app.domains.social.models.posts",
+        "app.domains.social.service.search_documents",
         "app.runtime.persistence.model_registration",
         "app.runtime.search.binding",
         "app.runtime.search.sqlite_fts5"
