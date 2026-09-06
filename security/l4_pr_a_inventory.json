@@ -2466,7 +2466,7 @@
       "policy_allowed_cycle_count": 0
     },
     "frontend": {
-      "candidate_consumer_edge_count": 10,
+      "candidate_consumer_edge_count": 11,
       "candidate_consumers": {
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts": [],
         "frontend/src/app/api/community/posts/[postId]/comments/route.ts": [],
@@ -2482,17 +2482,17 @@
           "frontend/src/composition/screens/post-feed-screen.tsx"
         ],
         "frontend/src/features/relationships/api/relationship-graph.ts": [
-          "frontend/src/features/relationships/ui/relationship-graph-client.tsx"
+          "frontend/src/features/relationships/components/relationship-graph-client.tsx"
         ],
-        "frontend/src/features/relationships/model/relationship-graph.ts": [
-          "frontend/src/features/relationships/api/relationship-graph.ts",
-          "frontend/src/features/relationships/ui/relationship-graph-client.tsx"
-        ],
-        "frontend/src/features/relationships/public.ts": [
+        "frontend/src/features/relationships/components/relationship-graph-client.tsx": [
           "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
           "frontend/src/composition/static-product-router.tsx"
         ],
-        "frontend/src/features/relationships/ui/relationship-graph-client.tsx": [],
+        "frontend/src/features/relationships/types/relationship-graph.ts": [
+          "frontend/src/features/relationships/api/relationship-graph.ts",
+          "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+          "frontend/src/features/relationships/utils/relationship-graph.ts"
+        ],
         "frontend/src/features/social/components/world-social-feed.tsx": [
           "frontend/src/composition/screens/world-app.tsx"
         ],
@@ -2500,7 +2500,7 @@
           "frontend/src/lib/agents.ts"
         ]
       },
-      "candidate_count": 14,
+      "candidate_count": 13,
       "current_candidates": [
         {
           "exports": [
@@ -2547,12 +2547,13 @@
             "metadata"
           ],
           "imports": [
-            "@/features/relationships/public",
+            "@/features/relationships/components/relationship-graph-client",
+            "@/features/relationships/components/relationship-graph-frame",
             "@/lib/seo",
             "next"
           ],
           "path": "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
-          "sha256": "89a95c18d474a7277044eec84be0a27aa983c6a323fa28a1cfc6b3e6782f4df0"
+          "sha256": "2434a13767bb6f1f0f668a44f93b15a67e602fa24353e8859d28da07041c36c3"
         },
         {
           "exports": [
@@ -2617,11 +2618,31 @@
             "getRelationshipGraph"
           ],
           "imports": [
-            "@/features/relationships/model/relationship-graph",
-            "@/shared/runtime/public"
+            "@/features/relationships/types/relationship-graph",
+            "@/lib/runtime/runtime-config"
           ],
           "path": "frontend/src/features/relationships/api/relationship-graph.ts",
-          "sha256": "0e31cbb24f9b7fb677ce79b8b1e99f15335d40a09e561c65ba575fe973c5bd61"
+          "sha256": "8baff939d5a4e32d818cb172d3133cd1d9cc933450a7212c39d06fe96debeb50"
+        },
+        {
+          "exports": [
+            "RelationshipGraphClient"
+          ],
+          "imports": [
+            "@/components/ui/button",
+            "@/components/ui/feedback",
+            "@/components/ui/status",
+            "@/features/relationships/api/relationship-graph",
+            "@/features/relationships/types/relationship-graph",
+            "@/features/relationships/utils/relationship-graph",
+            "@/hooks/use-auth",
+            "@/hooks/use-runtime-navigation",
+            "@/lib/navigation/product-routes",
+            "next/link",
+            "react"
+          ],
+          "path": "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+          "sha256": "da7af0942fc6ca99c70cb7f0b131c7e42c1b49ce758cfa0235951fe7dfecba61"
         },
         {
           "exports": [
@@ -2630,39 +2651,11 @@
             "RelationshipGraphNode",
             "RelationshipGraphPresentationState",
             "RelationshipGraphRead",
-            "RelationshipGraphStatus",
-            "relationshipGraphPresentationState"
+            "RelationshipGraphStatus"
           ],
           "imports": [],
-          "path": "frontend/src/features/relationships/model/relationship-graph.ts",
-          "sha256": "859a1a23a8233c6e5fa80e806673ec9df305204ad365369a7da2c55d453d5cc8"
-        },
-        {
-          "exports": [],
-          "imports": [
-            "./api/relationship-graph",
-            "./model/relationship-graph",
-            "./ui/relationship-graph-client",
-            "./ui/relationship-graph-frame"
-          ],
-          "path": "frontend/src/features/relationships/public.ts",
-          "sha256": "43cc1ef83b1a09738d5ff5958e04573c4fc87721f5a27e19e1844d5d444cc1a9"
-        },
-        {
-          "exports": [
-            "RelationshipGraphClient"
-          ],
-          "imports": [
-            "@/features/relationships/api/relationship-graph",
-            "@/features/relationships/model/relationship-graph",
-            "@/shared/auth/public",
-            "@/shared/navigation/public",
-            "@/shared/ui/public",
-            "next/link",
-            "react"
-          ],
-          "path": "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
-          "sha256": "3904f11140882dae52e4b3bc63c2a84278a798f601b170b254f57877b42e5cb7"
+          "path": "frontend/src/features/relationships/types/relationship-graph.ts",
+          "sha256": "ad5c7c5bd5cf776e9e8a2529adae37afd40917f18fd351f99d8ed88dc990481e"
         },
         {
           "exports": [
@@ -2714,7 +2707,6 @@
           "frontend/src/features/device-shell/public.ts",
           "frontend/src/features/memory/public.ts",
           "frontend/src/features/pwa-shell/public.ts",
-          "frontend/src/features/relationships/public.ts",
           "frontend/src/features/runtime-status/public.ts",
           "frontend/src/features/ui-foundation/public.ts"
         ],

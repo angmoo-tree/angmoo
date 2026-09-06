@@ -3,7 +3,7 @@
 Current: **AR-F2-0~AR-F2-C #291~#294 COMPLETE; AR-F3-A #295 MERGED,
 post-merge validation running; AR-F3-B #296, AR-F3-C #297 and AR-F3-D #298
 local full preservation PASS and CI running; AR-F3-E Social local implementation
-and validation in progress; AR-F3-F~AR-F5-B NOT STARTED**.
+and validation in progress; AR-F3-F local implementation/validation; AR-F3-G~AR-F5-B NOT STARTED**.
 The user delegated implementation, validation, PRs and merges. AR-X, P8-L-S,
 real-provider product verification, Release and Production remain separate.
 
@@ -357,3 +357,14 @@ committed history were deleted.
   Post-merge remains in progress. F3-C and F3-D full preservation each passed
   2753 protected/current nodes and 37 contracts after correcting retired facade
   references in the current feature inventory.
+
+## AR-F3-F Relationships — local implementation
+
+- Move graph UI/frame into components, response types into types, and the
+  unchanged presentation-status function into utils. API request, provider
+  error mapping, World/owner route and native graph-window behavior remain.
+- Next and static consumers use the same actual graph components. Retire the
+  facade with all 11 original exports mapped to their actual declarations.
+- Typecheck, architecture boundary and 324-file frontend preservation PASS.
+  Web/static graph, builds, local source contracts, full preservation and
+  sequential CI/merge/post-merge remain required before completion.

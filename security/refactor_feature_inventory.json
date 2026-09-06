@@ -2523,7 +2523,6 @@
         "frontend/src/components/content/mentioned-text.tsx",
         "frontend/src/composition/screens/post-list-screen.tsx",
         "frontend/src/components/media/post-media-grid.tsx",
-        "frontend/src/features/social/components/social-post-row.tsx",
         "frontend/src/features/social/components/social-presentation.module.css",
         "frontend/src/features/social/components/world-character-social-profile-activity.module.css",
         "frontend/src/features/social/components/world-character-social-profile-activity.tsx",
@@ -2661,7 +2660,6 @@
         "frontend/src/features/social/components/profile-connections-client.tsx",
         "frontend/src/features/social/components/profile-list-row.tsx",
         "frontend/src/features/social/components/search-results-client.tsx",
-        "frontend/src/features/social/components/social-post-row.tsx",
         "frontend/src/features/social/components/social-presentation.module.css",
         "frontend/src/features/social/components/world-character-social-profile-activity.module.css",
         "frontend/src/features/social/components/world-character-social-profile-activity.tsx",
@@ -3057,7 +3055,6 @@
         "frontend/src/features/social/components/notifications-client.tsx",
         "frontend/src/features/social/components/profile-connections-client.tsx",
         "frontend/src/features/social/components/profile-list-row.tsx",
-        "frontend/src/features/social/components/social-post-row.tsx",
         "frontend/src/features/social/components/social-presentation.module.css",
         "frontend/src/features/social/components/world-character-social-profile-activity.module.css",
         "frontend/src/features/social/components/world-character-social-profile-activity.tsx",
@@ -3085,7 +3082,6 @@
         "frontend/src/features/social/components/profile-connections-client.tsx",
         "frontend/src/features/social/components/profile-list-row.tsx",
         "frontend/src/features/social/components/search-results-client.tsx",
-        "frontend/src/features/social/components/social-post-row.tsx",
         "frontend/src/features/social/components/social-presentation.module.css",
         "frontend/src/features/social/components/world-character-social-profile-activity.module.css",
         "frontend/src/features/social/components/world-character-social-profile-activity.tsx",
@@ -3331,11 +3327,11 @@
         "backend/app/domains/routines/service/joint_activity/__init__.py",
         "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
         "frontend/src/features/relationships/api/relationship-graph.ts",
-        "frontend/src/features/relationships/model/relationship-graph.ts",
-        "frontend/src/features/relationships/public.ts",
-        "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
-        "frontend/src/features/relationships/ui/relationship-graph-frame.module.css",
-        "frontend/src/features/relationships/ui/relationship-graph-frame.tsx",
+        "frontend/src/features/relationships/types/relationship-graph.ts",
+        "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+        "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+        "frontend/src/features/relationships/components/relationship-graph-frame.module.css",
+        "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
         "backend/app/domains/routines/service/joint_scheduling.py",
         "backend/app/domains/relationships/service/projection_commands.py",
         "backend/app/domains/relationships/repository/projection_commands.py",
@@ -3414,7 +3410,13 @@
         "backend/app/domains/social/service",
         "backend/app/domains/relationships/service",
         "backend/app/domains/relationships/repository",
-        "backend/app/runtime/relationships"
+        "backend/app/runtime/relationships",
+        "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+        "frontend/src/features/relationships/api/relationship-graph.ts",
+        "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+        "frontend/src/features/relationships/components/relationship-graph-frame.module.css",
+        "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
+        "frontend/src/features/relationships/types/relationship-graph.ts"
       ],
       "entrypoints": [
         "backend/app/domains/relationships/contracts/graph_execution.py::GraphPlanExecutionContext",
@@ -3786,12 +3788,24 @@
         "backend/app/domains/relationships/service/observations.py",
         "backend/app/domains/relationships/repository/observations.py",
         "backend/app/domains/relationships/contracts/observations.py",
-        "backend/app/runtime/relationships/observation_references.py"
+        "backend/app/runtime/relationships/observation_references.py",
+        "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+        "frontend/src/features/relationships/api/relationship-graph.ts",
+        "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+        "frontend/src/features/relationships/components/relationship-graph-frame.module.css",
+        "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
+        "frontend/src/features/relationships/types/relationship-graph.ts"
       ],
       "target_paths": [
         "backend/app/runtime/graph_projection",
         "backend/app/runtime/persistence",
-        "backend/app/domains/relationships"
+        "backend/app/domains/relationships",
+        "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+        "frontend/src/features/relationships/api/relationship-graph.ts",
+        "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+        "frontend/src/features/relationships/components/relationship-graph-frame.module.css",
+        "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
+        "frontend/src/features/relationships/types/relationship-graph.ts"
       ],
       "entrypoints": [
         "backend/app/domains/relationships/contracts/graph_execution.py::GraphPlanExecutionContext",
@@ -14780,7 +14794,7 @@
   },
   "frontend_transition": {
     "checkpoint_commit": "33e9df8593272f6c81236c477ae73ef057d0d3dd",
-    "status": "AR-F2-C PRE-INTEGRATION VALIDATION; AR-F3-E ISOLATED PREPARATION",
+    "status": "AR-F2-C PRE-INTEGRATION VALIDATION; AR-F3-F ISOLATED PREPARATION",
     "documentation": "docs/architecture/refactor-frontend-results.md",
     "scope_note": "Backend completion and existing per-item state are unchanged. These stages track frontend consumers independently. AR-F1 product remains preserved.",
     "items": {
@@ -14985,6 +14999,11 @@
         "status": "IMPLEMENTED - isolated validation",
         "source_map": "security/refactor_path_map.json#details.AR-F3-E",
         "scope": "Social feature ownership"
+      },
+      "AR-F3-F": {
+        "status": "IMPLEMENTED - isolated validation",
+        "source_map": "security/refactor_path_map.json#details.AR-F3-F",
+        "scope": "Relationship graph ownership"
       }
     }
   }

@@ -39,10 +39,10 @@ def test_phone_shell_is_the_only_main_landmark_owner_for_nested_routes() -> None
 
 def test_wide_product_shells_own_their_main_landmark() -> None:
     relationship_frame = _read(
-        "frontend/src/features/relationships/ui/relationship-graph-frame.tsx"
+        "frontend/src/features/relationships/components/relationship-graph-frame.tsx"
     )
     relationship_client = _read(
-        "frontend/src/features/relationships/ui/relationship-graph-client.tsx"
+        "frontend/src/features/relationships/components/relationship-graph-client.tsx"
     )
     creator_shell = _read(
         "frontend/src/composition/shells/creator-studio-shell.tsx"

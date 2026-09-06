@@ -155,7 +155,7 @@
       "registration.update()",
       "updateViaCache: \"none\""
     ],
-    "frontend/src/features/relationships/ui/relationship-graph-frame.tsx": [
+    "frontend/src/features/relationships/components/relationship-graph-frame.tsx": [
       "RelationshipGraphFrame",
       "data-product-shell=\"relationship-graph\""
     ],
@@ -293,11 +293,10 @@
     "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
     "frontend/src/features/pwa-shell/public.ts",
     "frontend/src/features/relationships/api/relationship-graph.ts",
-    "frontend/src/features/relationships/model/relationship-graph.ts",
-    "frontend/src/features/relationships/public.ts",
-    "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
-    "frontend/src/features/relationships/ui/relationship-graph-frame.module.css",
-    "frontend/src/features/relationships/ui/relationship-graph-frame.tsx",
+    "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+    "frontend/src/features/relationships/components/relationship-graph-frame.module.css",
+    "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
+    "frontend/src/features/relationships/types/relationship-graph.ts",
     "frontend/src/features/runtime-status/public.ts",
     "frontend/src/features/runtime-status/types/runtime-status.ts",
     "frontend/src/features/social/api/social-feed-client.ts",
@@ -339,6 +338,7 @@
       "creator-studio",
       "device-home",
       "identity",
+      "relationships",
       "runtime-status",
       "social",
       "world-packages",

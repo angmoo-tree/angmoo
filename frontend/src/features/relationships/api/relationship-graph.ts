@@ -1,8 +1,5 @@
-import {
-  RuntimeFetchError,
-  runtimeFetch,
-} from "@/shared/runtime/public";
-import type { RelationshipGraphRead } from "@/features/relationships/model/relationship-graph";
+import { RuntimeFetchError, runtimeFetch } from "@/lib/runtime/runtime-config";
+import type { RelationshipGraphRead } from "@/features/relationships/types/relationship-graph";
 
 export class RelationshipGraphApiError extends Error {
   constructor(

@@ -109,8 +109,8 @@
       "classifications": [
         "LOCAL"
       ],
-      "path": "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
-      "sha256": "3904f11140882dae52e4b3bc63c2a84278a798f601b170b254f57877b42e5cb7"
+      "path": "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+      "sha256": "da7af0942fc6ca99c70cb7f0b131c7e42c1b49ce758cfa0235951fe7dfecba61"
     },
     {
       "classifications": [
@@ -282,7 +282,7 @@
       "frontend/src/features/memory/ui/memory-workspace.module.css",
       "frontend/src/features/memory/ui/memory-workspace.tsx",
       "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
-      "frontend/src/features/relationships/ui/relationship-graph-frame.tsx",
+      "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
       "frontend/src/features/social/api/social-feed-client.ts",
       "frontend/src/features/social/api/social-write-client.ts",
       "frontend/src/features/social/types/social-feed-contract.ts",
@@ -1190,7 +1190,7 @@
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
     "next_static_inventory_route_count": 44,
-    "next_static_inventory_sha256": "0118c4e4d553059d3e65ba29d5d9e531e699ee60fcc354583bfa56418ac0fc9c",
+    "next_static_inventory_sha256": "e25cdce64e959c8acb6e3bd1bf9681371221c8a90ce59259ad46023ef438ab1c",
     "reviewed_surface_count": 18
   },
   "schema_version": 1,
@@ -1276,7 +1276,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "477a60726f13630a7208605a20fa3b31da5773c3de6b9423914c65f6f51ede40"
+        "sha256": "c03ad7aa69aeea3c27af269a42a8dc43475790a53b75c10641626960428cfd9f"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",

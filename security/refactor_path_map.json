@@ -792,7 +792,12 @@
     "frontend/src/components/profile-list-row.tsx": "frontend/src/features/social/components/profile-list-row.tsx",
     "frontend/src/components/nest-search-form.tsx": "frontend/src/features/social/components/nest-search-form.tsx",
     "frontend/src/components/post-detail-client.tsx": "frontend/src/composition/screens/post-detail-screen.tsx",
-    "frontend/src/features/social/public.ts": "frontend/src/features/social/components/social-post-row.tsx"
+    "frontend/src/features/social/public.ts": "frontend/src/features/social/components/social-post-row.tsx",
+    "frontend/src/features/relationships/ui/relationship-graph-client.tsx": "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+    "frontend/src/features/relationships/ui/relationship-graph-frame.tsx": "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
+    "frontend/src/features/relationships/ui/relationship-graph-frame.module.css": "frontend/src/features/relationships/components/relationship-graph-frame.module.css",
+    "frontend/src/features/relationships/model/relationship-graph.ts": "frontend/src/features/relationships/types/relationship-graph.ts",
+    "frontend/src/features/relationships/public.ts": "frontend/src/features/relationships/components/relationship-graph-client.tsx"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -135888,6 +135893,49 @@
           "screen": "frontend/src/composition/screens/post-detail-screen.tsx",
           "social": "frontend/src/features/social/components/post-detail-parts.tsx",
           "preserved": "Original thread tree, menus, mutations, cancellation and scope checks"
+        }
+      }
+    },
+    "AR-F3-F": {
+      "scope": "Relationship graph component, typed responses and presentation utility ownership",
+      "files": {
+        "frontend/src/features/relationships/ui/relationship-graph-client.tsx": "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+        "frontend/src/features/relationships/ui/relationship-graph-frame.tsx": "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
+        "frontend/src/features/relationships/ui/relationship-graph-frame.module.css": "frontend/src/features/relationships/components/relationship-graph-frame.module.css",
+        "frontend/src/features/relationships/model/relationship-graph.ts": "frontend/src/features/relationships/types/relationship-graph.ts"
+      },
+      "status": "IMPLEMENTED - isolated validation",
+      "source_contract_consumers": [
+        "backend/tests/test_l4_5_ui_c_landmark_contract.py"
+      ],
+      "frontend_retirements": {
+        "frontend/src/features/relationships/public.ts": {
+          "reason": "Next and static consumers use actual graph components; no external published frontend module contract.",
+          "export_destinations": {
+            "getRelationshipGraph": "frontend/src/features/relationships/api/relationship-graph.ts",
+            "RelationshipGraphApiError": "frontend/src/features/relationships/api/relationship-graph.ts",
+            "RelationshipGraphEdge": "frontend/src/features/relationships/types/relationship-graph.ts",
+            "RelationshipGraphEvidence": "frontend/src/features/relationships/types/relationship-graph.ts",
+            "RelationshipGraphNode": "frontend/src/features/relationships/types/relationship-graph.ts",
+            "RelationshipGraphPresentationState": "frontend/src/features/relationships/types/relationship-graph.ts",
+            "RelationshipGraphRead": "frontend/src/features/relationships/types/relationship-graph.ts",
+            "RelationshipGraphStatus": "frontend/src/features/relationships/types/relationship-graph.ts",
+            "RelationshipGraphClient": "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+            "RelationshipGraphFrame": "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
+            "relationshipGraphPresentationState": "frontend/src/features/relationships/utils/relationship-graph.ts"
+          },
+          "verification": [
+            "All original facade exports retained",
+            "Same graph DOM, states, directed evidence and owner route",
+            "Web/static graph scenarios"
+          ]
+        }
+      },
+      "frontend_extractions": {
+        "frontend/src/features/relationships/model/relationship-graph.ts": {
+          "types": "frontend/src/features/relationships/types/relationship-graph.ts",
+          "presentation": "frontend/src/features/relationships/utils/relationship-graph.ts",
+          "preserved": "Same status precedence and canonical fallback interpretation"
         }
       }
     }
