@@ -106,8 +106,8 @@ jobs:
         working-directory: frontend
       - name: Verify Identity request and session parity
         run: node scripts/test-identity-session.mjs
-      - name: Character request and session preservation
         working-directory: frontend
+      - name: Character request and session preservation
         run: node scripts/test-character-session.mjs
         working-directory: frontend
       - name: Install Chromium for product-shell smoke

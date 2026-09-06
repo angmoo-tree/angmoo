@@ -75,14 +75,14 @@
         "ADAPTED"
       ],
       "path": "frontend/src/features/characters/components/agents-dashboard-client.tsx",
-      "sha256": "761b48f129242697e5ca8c012f7667ebd3fe460c1e657ee670fa4d5708bc9f8b"
+      "sha256": "23a08c5168563214e8b2538fbabd1a09bdb813e24ff3fa5949c03944e42a94d1"
     },
     {
       "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/characters/utils/character-recent-activity-presentation.ts",
-      "sha256": "10156f28f462af622f31d6472a08883ab54a9064576156a7258a548a8c2ba0fd"
+      "sha256": "42d611d7a725f971974c4c498a5d981483d577682243f8ba6fd7550130035a5b"
     },
     {
       "classifications": [
