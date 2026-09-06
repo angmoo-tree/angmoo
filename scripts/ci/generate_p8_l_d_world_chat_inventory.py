@@ -256,9 +256,9 @@ def _transport_contract() -> dict[str, Any]:
         (
             "WorldChatThreadRead",
             "WorldChatThreadCreate",
-            "resolvedLegacyWorldChatRouteParts",
         ),
     )
+    _require_text("frontend/src/features/chat/utils/legacy-world-route.ts", ("resolvedLegacyWorldChatRouteParts",))
     _require_text(
         "frontend/src/features/chat/api/world-chat-client.ts",
         (

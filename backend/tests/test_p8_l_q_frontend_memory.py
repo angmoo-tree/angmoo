@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import subprocess
+from tempfile import TemporaryDirectory
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -44,10 +45,20 @@ def test_memory_feature_is_feature_first_and_shared_by_next_and_static() -> None
     assert "MemoryWorkspace" in public
     assert "MemoryScopeSummary" in public
     assert "WorldChatEvidenceInspector" in public
-    # Original topology disallowed shared components aliases; current role checks
-    # allow generic components while preventing feature-to-feature dependencies.
+    # Materialize only the real historical Memory source for the original
+    # public-only assertion; current role ownership was asserted above.
     paths = subprocess.check_output(["git", "ls-tree", "-r", "--name-only", "33f213b4217cd8511908586d9fd5f66f3a3104b0", "frontend/src/features/memory"], cwd=ROOT, text=True).splitlines()
-    assert "@/components" not in "\n".join(original(path) for path in paths if path.endswith((".ts", ".tsx")))
+    with TemporaryDirectory() as directory:
+        FRONTEND = Path(directory)
+        for relative in paths:
+            destination = FRONTEND / relative.removeprefix("frontend/src/")
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            destination.write_text(original(relative), encoding="utf-8")
+        assert "@/components" not in "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in (FRONTEND / "features/memory").rglob("*.ts*")
+        )
+
 
 
 def test_memory_surface_preserves_q_reads_and_adds_r_owner_control() -> None:
