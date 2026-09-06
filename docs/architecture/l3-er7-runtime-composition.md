@@ -47,7 +47,7 @@ SQLite-only release. Historical Alembic revisions remain provenance evidence,
 not an executable import chain. Neo4j remains only in static ER3 parity
 fixtures; no live server, driver, or JVM is required.
 
-The module-level `app.public_main:app` and old environment-shaped settings are
+The module-level `app.main:public_app` and old environment-shaped settings are
 test and rollback compatibility surfaces. Product and contributor entrypoints
 must pass a typed `RuntimeConfig` directly and must not use those surfaces to
 select a provider or persistence backend.
