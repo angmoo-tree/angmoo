@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import importlib
 
-from app.domains.chat import public as chat
+from app.domains.chat import schemas as chat
 from app.domains.chat import policies
 from app.domains.chat import models as sqlalchemy_models
 from app.runtime.chat import sqlalchemy_service

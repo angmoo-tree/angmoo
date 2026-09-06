@@ -1,7 +1,7 @@
 {
-  "edge_count": 4060,
+  "edge_count": 4054,
   "external_import_count": 3109,
-  "module_count": 1087,
+  "module_count": 1081,
   "modules": [
     {
       "external_imports": [],
@@ -259,27 +259,6 @@
       ],
       "module": "app.api.world_errors",
       "path": "backend/app/api/world_errors.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.compatibility",
-      "path": "backend/app/compatibility/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.compatibility.routine_posts",
-      "path": "backend/app/compatibility/routine_posts/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.compatibility.runtime",
-      "path": "backend/app/compatibility/runtime/__init__.py",
       "wildcard_imports": []
     },
     {
@@ -1434,13 +1413,6 @@
     },
     {
       "external_imports": [],
-      "imports": [],
-      "module": "app.domains.chat.api",
-      "path": "backend/app/domains/chat/api/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
       "imports": [
         "app.domains.chat.contracts.call_tracker",
         "app.domains.chat.contracts.character_response_generator",
@@ -1854,20 +1826,6 @@
       "imports": [],
       "module": "app.domains.chat.policies",
       "path": "backend/app/domains/chat/policies.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.chat.contracts",
-        "app.domains.chat.exceptions",
-        "app.domains.chat.schemas",
-        "app.domains.chat.service",
-        "app.domains.memory.contracts.retrieval_plan",
-        "app.domains.relationships.contracts.graph_plan"
-      ],
-      "module": "app.domains.chat.public",
-      "path": "backend/app/domains/chat/public.py",
       "wildcard_imports": []
     },
     {
@@ -10617,13 +10575,6 @@
       "imports": [],
       "module": "app.domains.world_characters.contracts.studio_surface",
       "path": "backend/app/domains/world_characters/contracts/studio_surface.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.domains.world_characters.domain",
-      "path": "backend/app/domains/world_characters/domain/__init__.py",
       "wildcard_imports": []
     },
     {

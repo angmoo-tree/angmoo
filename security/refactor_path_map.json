@@ -640,7 +640,13 @@
     "backend/app/schemas/worlds.py": "backend/app/domains/worlds/schemas.py",
     "backend/app/schemas/world_activity_runtime.py": "backend/app/domains/routines/schemas/plans.py",
     "backend/app/schemas/world_character_setup.py": "backend/app/domains/world_characters/schemas/setup.py",
-    "backend/tests/test_langgraph_resident_engine.py": "backend/tests/integrations/test_direct_llm.py"
+    "backend/tests/test_langgraph_resident_engine.py": "backend/tests/integrations/test_direct_llm.py",
+    "backend/app/domains/chat/api/__init__.py": "backend/app/domains/chat/__init__.py",
+    "backend/app/domains/world_characters/domain/__init__.py": "backend/app/domains/world_characters/__init__.py",
+    "backend/app/compatibility/__init__.py": "backend/app/runtime/__init__.py",
+    "backend/app/compatibility/runtime/__init__.py": "backend/app/runtime/__init__.py",
+    "backend/app/compatibility/routine_posts/__init__.py": "backend/app/domains/routine_posts/__init__.py",
+    "backend/app/domains/chat/public.py": "backend/app/domains/chat/service/__init__.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -133086,6 +133092,703 @@
         "Original seven read-only diagnostics all0; protected2313/current2598; signed869 original two paths and signed49c0f1f4 original two test introductions only, no frozen/ledger write.",
         "Architecture1086modules/4055edges/5exactlegacyedges cycle0; actual generation advertised7exports verified across original3owner definitions unchanged."
       ]
+    },
+    "AR-B8-final-chat-public-retirement": {
+      "base_commit": "3d95e22115b715f60f57835cca7553d90e37e13e",
+      "old_path": "backend/app/domains/chat/public.py",
+      "old_blob": "870af79f1aae969829cab69aa00abcaf6ec46433",
+      "disposition": "Removed import-only aggregate after its four test consumers use the identical existing role owners. No product consumers remained; all test function and class bodies are unchanged. Historical P8 inventories remain frozen.",
+      "export_bindings": {
+        "AnswerRequestContractValidator": [
+          "app.domains.chat.service",
+          "AnswerRequestContractValidator"
+        ],
+        "BoundedFakeAnswerRequestExecutor": [
+          "app.domains.chat.service",
+          "BoundedFakeAnswerRequestExecutor"
+        ],
+        "BothRetrievalCommand": [
+          "app.domains.chat.service",
+          "BothRetrievalCommand"
+        ],
+        "BothRetrievalResult": [
+          "app.domains.chat.service",
+          "BothRetrievalResult"
+        ],
+        "BothRetrievalWorkflowCoordinator": [
+          "app.domains.chat.service",
+          "BothRetrievalWorkflowCoordinator"
+        ],
+        "CANONICAL_PLAN_VERSION": [
+          "app.domains.memory.contracts.retrieval_plan",
+          "CANONICAL_PLAN_VERSION"
+        ],
+        "CHAT_GENERATION_STREAM_VERSION": [
+          "app.domains.chat.contracts",
+          "CHAT_GENERATION_STREAM_VERSION"
+        ],
+        "CanonicalRetrievalScope": [
+          "app.domains.chat.contracts",
+          "CanonicalRetrievalScope"
+        ],
+        "CharacterMessageSettingRead": [
+          "app.domains.chat.schemas",
+          "CharacterMessageSettingRead"
+        ],
+        "CharacterMessageSettingUpdate": [
+          "app.domains.chat.schemas",
+          "CharacterMessageSettingUpdate"
+        ],
+        "ClarificationCandidate": [
+          "app.domains.chat.service",
+          "ClarificationCandidate"
+        ],
+        "ClarificationResolution": [
+          "app.domains.chat.service",
+          "ClarificationResolution"
+        ],
+        "CoordinatedRetrievalReference": [
+          "app.domains.chat.service",
+          "CoordinatedRetrievalReference"
+        ],
+        "CreateResponseRequest": [
+          "app.domains.chat.contracts",
+          "CreateResponseRequest"
+        ],
+        "DegradedReason": [
+          "app.domains.chat.contracts",
+          "DegradedReason"
+        ],
+        "EvidenceCapability": [
+          "app.domains.chat.contracts",
+          "EvidenceCapability"
+        ],
+        "GRAPH_PLAN_VERSION": [
+          "app.domains.relationships.contracts.graph_plan",
+          "GRAPH_PLAN_VERSION"
+        ],
+        "GenerationEvent": [
+          "app.domains.chat.contracts",
+          "GenerationEvent"
+        ],
+        "GenerationEventType": [
+          "app.domains.chat.contracts",
+          "GenerationEventType"
+        ],
+        "GenerationFence": [
+          "app.domains.chat.contracts",
+          "GenerationFence"
+        ],
+        "GraphPlanningMetrics": [
+          "app.domains.chat.service",
+          "GraphPlanningMetrics"
+        ],
+        "GraphPlanningResult": [
+          "app.domains.chat.service",
+          "GraphPlanningResult"
+        ],
+        "GraphRetrievalCommand": [
+          "app.domains.chat.service",
+          "GraphRetrievalCommand"
+        ],
+        "GraphRetrievalPlanningService": [
+          "app.domains.chat.service",
+          "GraphRetrievalPlanningService"
+        ],
+        "GraphRetrievalPlan": [
+          "app.domains.relationships.contracts.graph_plan",
+          "GraphRetrievalPlan"
+        ],
+        "LlmNode": [
+          "app.domains.chat.contracts",
+          "LlmNode"
+        ],
+        "MessageModelBindingMode": [
+          "app.domains.chat.contracts",
+          "MessageModelBindingMode"
+        ],
+        "MessageCredentialInvalidError": [
+          "app.domains.chat.exceptions",
+          "MessageCredentialInvalidError"
+        ],
+        "MessageCredentialRequiredError": [
+          "app.domains.chat.exceptions",
+          "MessageCredentialRequiredError"
+        ],
+        "MessageForbiddenError": [
+          "app.domains.chat.exceptions",
+          "MessageForbiddenError"
+        ],
+        "MessageInFlightError": [
+          "app.domains.chat.exceptions",
+          "MessageInFlightError"
+        ],
+        "MessageMessageCreate": [
+          "app.domains.chat.schemas",
+          "MessageMessageCreate"
+        ],
+        "MessageMessageRead": [
+          "app.domains.chat.schemas",
+          "MessageMessageRead"
+        ],
+        "MessageModelBusyError": [
+          "app.domains.chat.exceptions",
+          "MessageModelBusyError"
+        ],
+        "MessageNotFoundError": [
+          "app.domains.chat.exceptions",
+          "MessageNotFoundError"
+        ],
+        "MessageSendRead": [
+          "app.domains.chat.schemas",
+          "MessageSendRead"
+        ],
+        "MessageServiceError": [
+          "app.domains.chat.exceptions",
+          "MessageServiceError"
+        ],
+        "MessageSettingsRead": [
+          "app.domains.chat.schemas",
+          "MessageSettingsRead"
+        ],
+        "MessageSettingsUpdate": [
+          "app.domains.chat.schemas",
+          "MessageSettingsUpdate"
+        ],
+        "MessageThreadCreate": [
+          "app.domains.chat.schemas",
+          "MessageThreadCreate"
+        ],
+        "MessageThreadLimitError": [
+          "app.domains.chat.exceptions",
+          "MessageThreadLimitError"
+        ],
+        "MessageThreadListRead": [
+          "app.domains.chat.schemas",
+          "MessageThreadListRead"
+        ],
+        "MessageThreadRead": [
+          "app.domains.chat.schemas",
+          "MessageThreadRead"
+        ],
+        "MessageThreadUpdate": [
+          "app.domains.chat.schemas",
+          "MessageThreadUpdate"
+        ],
+        "MessageValidationError": [
+          "app.domains.chat.exceptions",
+          "MessageValidationError"
+        ],
+        "ProfileRef": [
+          "app.domains.chat.schemas",
+          "ProfileRef"
+        ],
+        "RESOLVED_RETRIEVAL_VERSION": [
+          "app.domains.chat.contracts",
+          "RESOLVED_RETRIEVAL_VERSION"
+        ],
+        "RETRIEVAL_INTENT_VERSION": [
+          "app.domains.chat.contracts",
+          "RETRIEVAL_INTENT_VERSION"
+        ],
+        "RETRIEVAL_WORKFLOW_VERSION": [
+          "app.domains.chat.contracts",
+          "RETRIEVAL_WORKFLOW_VERSION"
+        ],
+        "CanonicalRetrievalPlan": [
+          "app.domains.memory.contracts.retrieval_plan",
+          "CanonicalRetrievalPlan"
+        ],
+        "CanonicalPlanStep": [
+          "app.domains.memory.contracts.retrieval_plan",
+          "CanonicalPlanStep"
+        ],
+        "CanonicalPlanningMetrics": [
+          "app.domains.chat.service",
+          "CanonicalPlanningMetrics"
+        ],
+        "CanonicalPlanningResult": [
+          "app.domains.chat.service",
+          "CanonicalPlanningResult"
+        ],
+        "CanonicalRetrievalCommand": [
+          "app.domains.chat.service",
+          "CanonicalRetrievalCommand"
+        ],
+        "CanonicalRetrievalPlanningService": [
+          "app.domains.chat.service",
+          "CanonicalRetrievalPlanningService"
+        ],
+        "ResolvedEntityBinding": [
+          "app.domains.chat.contracts",
+          "ResolvedEntityBinding"
+        ],
+        "ResolvedRetrievalEnvelope": [
+          "app.domains.chat.contracts",
+          "ResolvedRetrievalEnvelope"
+        ],
+        "ResponseCommitPayload": [
+          "app.domains.chat.contracts",
+          "ResponseCommitPayload"
+        ],
+        "ResponseMetadata": [
+          "app.domains.chat.contracts",
+          "ResponseMetadata"
+        ],
+        "ResponseRequestRecord": [
+          "app.domains.chat.contracts",
+          "ResponseRequestRecord"
+        ],
+        "ResponseRequestState": [
+          "app.domains.chat.contracts",
+          "ResponseRequestState"
+        ],
+        "ResponseTerminalReason": [
+          "app.domains.chat.contracts",
+          "ResponseTerminalReason"
+        ],
+        "RetrievalContractError": [
+          "app.domains.chat.contracts",
+          "RetrievalContractError"
+        ],
+        "RetrievalDecision": [
+          "app.domains.chat.contracts",
+          "RetrievalDecision"
+        ],
+        "RetrievalEntityCandidate": [
+          "app.domains.chat.contracts",
+          "RetrievalEntityCandidate"
+        ],
+        "RetrievalEntityResolution": [
+          "app.domains.chat.contracts",
+          "RetrievalEntityResolution"
+        ],
+        "RetrievalAggregationKind": [
+          "app.domains.chat.contracts",
+          "RetrievalAggregationKind"
+        ],
+        "RetrievalAggregationMeaning": [
+          "app.domains.chat.contracts",
+          "RetrievalAggregationMeaning"
+        ],
+        "RetrievalAxis": [
+          "app.domains.chat.contracts",
+          "RetrievalAxis"
+        ],
+        "RetrievalEntityMention": [
+          "app.domains.chat.contracts",
+          "RetrievalEntityMention"
+        ],
+        "RetrievalHardCaps": [
+          "app.domains.chat.contracts",
+          "RetrievalHardCaps"
+        ],
+        "RetrievalIntentEnvelope": [
+          "app.domains.chat.contracts",
+          "RetrievalIntentEnvelope"
+        ],
+        "GraphPlanStep": [
+          "app.domains.relationships.contracts.graph_plan",
+          "GraphPlanStep"
+        ],
+        "RetrievalRelationshipMeaning": [
+          "app.domains.chat.contracts",
+          "RetrievalRelationshipMeaning"
+        ],
+        "RetrievalRoute": [
+          "app.domains.chat.contracts",
+          "RetrievalRoute"
+        ],
+        "RetrievalTimeKind": [
+          "app.domains.chat.contracts",
+          "RetrievalTimeKind"
+        ],
+        "RetrievalTimeMeaning": [
+          "app.domains.chat.contracts",
+          "RetrievalTimeMeaning"
+        ],
+        "RetrievalOutcome": [
+          "app.domains.chat.contracts",
+          "RetrievalOutcome"
+        ],
+        "RetrievalPolicyResolverPort": [
+          "app.domains.chat.contracts",
+          "RetrievalPolicyResolverPort"
+        ],
+        "RetrievalPreflightCommand": [
+          "app.domains.chat.contracts",
+          "RetrievalPreflightCommand"
+        ],
+        "RetrievalRouterContextMessage": [
+          "app.domains.chat.contracts",
+          "RetrievalRouterContextMessage"
+        ],
+        "RetrievalRouterOutputError": [
+          "app.domains.chat.contracts",
+          "RetrievalRouterOutputError"
+        ],
+        "RetrievalRouterProviderPort": [
+          "app.domains.chat.contracts",
+          "RetrievalRouterProviderPort"
+        ],
+        "RetrievalRouterProviderResult": [
+          "app.domains.chat.contracts",
+          "RetrievalRouterProviderResult"
+        ],
+        "RetrievalRouterRequest": [
+          "app.domains.chat.contracts",
+          "RetrievalRouterRequest"
+        ],
+        "RetrievalRoutingMetrics": [
+          "app.domains.chat.service",
+          "RetrievalRoutingMetrics"
+        ],
+        "RetrievalRoutingResult": [
+          "app.domains.chat.service",
+          "RetrievalRoutingResult"
+        ],
+        "RetrievalRoutingService": [
+          "app.domains.chat.service",
+          "RetrievalRoutingService"
+        ],
+        "RetrievalWorkflow": [
+          "app.domains.chat.contracts",
+          "RetrievalWorkflow"
+        ],
+        "RouteAwareCallTracker": [
+          "app.domains.chat.contracts",
+          "RouteAwareCallTracker"
+        ],
+        "WORKFLOW_RECIPE_REGISTRY": [
+          "app.domains.chat.contracts",
+          "WORKFLOW_RECIPE_REGISTRY"
+        ],
+        "WorkflowAxis": [
+          "app.domains.chat.contracts",
+          "WorkflowAxis"
+        ],
+        "WorkflowCoordinatorMetrics": [
+          "app.domains.chat.service",
+          "WorkflowCoordinatorMetrics"
+        ],
+        "WorkflowDependencyBinding": [
+          "app.domains.chat.contracts",
+          "WorkflowDependencyBinding"
+        ],
+        "WorkflowDependencyKind": [
+          "app.domains.chat.contracts",
+          "WorkflowDependencyKind"
+        ],
+        "WorkflowMergeMode": [
+          "app.domains.chat.contracts",
+          "WorkflowMergeMode"
+        ],
+        "WorkflowRecipe": [
+          "app.domains.chat.contracts",
+          "WorkflowRecipe"
+        ],
+        "WorkflowRecipeSelection": [
+          "app.domains.chat.contracts",
+          "WorkflowRecipeSelection"
+        ],
+        "WorkflowRecipeSpec": [
+          "app.domains.chat.contracts",
+          "WorkflowRecipeSpec"
+        ],
+        "WorldChatRoleRead": [
+          "app.domains.chat.schemas",
+          "WorldChatRoleRead"
+        ],
+        "WorldChatEvidenceItemRead": [
+          "app.domains.chat.schemas",
+          "WorldChatEvidenceItemRead"
+        ],
+        "WorldChatEvidenceRead": [
+          "app.domains.chat.schemas",
+          "WorldChatEvidenceRead"
+        ],
+        "WorldChatEvidenceSummaryRead": [
+          "app.domains.chat.schemas",
+          "WorldChatEvidenceSummaryRead"
+        ],
+        "WorldChatGenerationRequestRead": [
+          "app.domains.chat.schemas",
+          "WorldChatGenerationRequestRead"
+        ],
+        "WorldChatLatestRequestRead": [
+          "app.domains.chat.schemas",
+          "WorldChatLatestRequestRead"
+        ],
+        "WorldChatMessageAcceptRead": [
+          "app.domains.chat.schemas",
+          "WorldChatMessageAcceptRead"
+        ],
+        "WorldChatMessageCreate": [
+          "app.domains.chat.schemas",
+          "WorldChatMessageCreate"
+        ],
+        "WorldChatRetryCreate": [
+          "app.domains.chat.schemas",
+          "WorldChatRetryCreate"
+        ],
+        "WorldChatEntryRead": [
+          "app.domains.chat.schemas",
+          "WorldChatEntryRead"
+        ],
+        "WorldChatThreadCreate": [
+          "app.domains.chat.schemas",
+          "WorldChatThreadCreate"
+        ],
+        "WorldChatThreadCreateRead": [
+          "app.domains.chat.schemas",
+          "WorldChatThreadCreateRead"
+        ],
+        "WorldChatThreadListRead": [
+          "app.domains.chat.schemas",
+          "WorldChatThreadListRead"
+        ],
+        "WorldChatThreadModelUpdate": [
+          "app.domains.chat.schemas",
+          "WorldChatThreadModelUpdate"
+        ],
+        "WorldChatThreadRead": [
+          "app.domains.chat.schemas",
+          "WorldChatThreadRead"
+        ],
+        "build_request_scope_hash": [
+          "app.domains.chat.contracts",
+          "build_request_scope_hash"
+        ],
+        "parse_retrieval_intent_payload": [
+          "app.domains.chat.contracts",
+          "parse_retrieval_intent_payload"
+        ],
+        "retrieval_router_response_schema": [
+          "app.domains.chat.contracts",
+          "retrieval_router_response_schema"
+        ],
+        "select_workflow_recipe": [
+          "app.domains.chat.contracts",
+          "select_workflow_recipe"
+        ]
+      },
+      "consumer_changes": [
+        {
+          "path": "backend/tests/chat/test_p8_l_b_chat_domain.py",
+          "bindings": [
+            {
+              "local": "chat",
+              "module": "app.domains.chat.schemas",
+              "used": [
+                "MessageSendRead",
+                "MessageThreadRead",
+                "ProfileRef"
+              ]
+            }
+          ],
+          "unchanged_definitions": 4
+        },
+        {
+          "path": "backend/tests/chat/test_p8_l_l_canonical_retrieval_planner.py",
+          "bindings": [
+            {
+              "local": "CanonicalRetrievalCommand",
+              "module": "app.domains.chat.service",
+              "name": "CanonicalRetrievalCommand"
+            },
+            {
+              "local": "CanonicalRetrievalPlanningService",
+              "module": "app.domains.chat.service",
+              "name": "CanonicalRetrievalPlanningService"
+            },
+            {
+              "local": "LlmNode",
+              "module": "app.domains.chat.contracts",
+              "name": "LlmNode"
+            },
+            {
+              "local": "ResolvedEntityBinding",
+              "module": "app.domains.chat.contracts",
+              "name": "ResolvedEntityBinding"
+            },
+            {
+              "local": "ResolvedRetrievalEnvelope",
+              "module": "app.domains.chat.contracts",
+              "name": "ResolvedRetrievalEnvelope"
+            },
+            {
+              "local": "RetrievalHardCaps",
+              "module": "app.domains.chat.contracts",
+              "name": "RetrievalHardCaps"
+            },
+            {
+              "local": "RetrievalRoute",
+              "module": "app.domains.chat.contracts",
+              "name": "RetrievalRoute"
+            },
+            {
+              "local": "RouteAwareCallTracker",
+              "module": "app.domains.chat.contracts",
+              "name": "RouteAwareCallTracker"
+            },
+            {
+              "local": "parse_retrieval_intent_payload",
+              "module": "app.domains.chat.contracts",
+              "name": "parse_retrieval_intent_payload"
+            }
+          ],
+          "unchanged_definitions": 18
+        },
+        {
+          "path": "backend/tests/chat/test_p8_l_m_graph_retrieval_planner.py",
+          "bindings": [
+            {
+              "local": "GraphRetrievalCommand",
+              "module": "app.domains.chat.service",
+              "name": "GraphRetrievalCommand"
+            },
+            {
+              "local": "GraphRetrievalPlanningService",
+              "module": "app.domains.chat.service",
+              "name": "GraphRetrievalPlanningService"
+            },
+            {
+              "local": "LlmNode",
+              "module": "app.domains.chat.contracts",
+              "name": "LlmNode"
+            },
+            {
+              "local": "ResolvedEntityBinding",
+              "module": "app.domains.chat.contracts",
+              "name": "ResolvedEntityBinding"
+            },
+            {
+              "local": "ResolvedRetrievalEnvelope",
+              "module": "app.domains.chat.contracts",
+              "name": "ResolvedRetrievalEnvelope"
+            },
+            {
+              "local": "RetrievalHardCaps",
+              "module": "app.domains.chat.contracts",
+              "name": "RetrievalHardCaps"
+            },
+            {
+              "local": "RetrievalRoute",
+              "module": "app.domains.chat.contracts",
+              "name": "RetrievalRoute"
+            },
+            {
+              "local": "RouteAwareCallTracker",
+              "module": "app.domains.chat.contracts",
+              "name": "RouteAwareCallTracker"
+            },
+            {
+              "local": "parse_retrieval_intent_payload",
+              "module": "app.domains.chat.contracts",
+              "name": "parse_retrieval_intent_payload"
+            }
+          ],
+          "unchanged_definitions": 19
+        },
+        {
+          "path": "backend/tests/chat/test_p8_l_n_both_workflow_coordinator.py",
+          "bindings": [
+            {
+              "local": "BothRetrievalCommand",
+              "module": "app.domains.chat.service",
+              "name": "BothRetrievalCommand"
+            },
+            {
+              "local": "BothRetrievalWorkflowCoordinator",
+              "module": "app.domains.chat.service",
+              "name": "BothRetrievalWorkflowCoordinator"
+            },
+            {
+              "local": "CanonicalRetrievalCommand",
+              "module": "app.domains.chat.service",
+              "name": "CanonicalRetrievalCommand"
+            },
+            {
+              "local": "CanonicalRetrievalPlanningService",
+              "module": "app.domains.chat.service",
+              "name": "CanonicalRetrievalPlanningService"
+            },
+            {
+              "local": "GraphRetrievalPlanningService",
+              "module": "app.domains.chat.service",
+              "name": "GraphRetrievalPlanningService"
+            },
+            {
+              "local": "LlmNode",
+              "module": "app.domains.chat.contracts",
+              "name": "LlmNode"
+            },
+            {
+              "local": "ResolvedEntityBinding",
+              "module": "app.domains.chat.contracts",
+              "name": "ResolvedEntityBinding"
+            },
+            {
+              "local": "ResolvedRetrievalEnvelope",
+              "module": "app.domains.chat.contracts",
+              "name": "ResolvedRetrievalEnvelope"
+            },
+            {
+              "local": "RetrievalContractError",
+              "module": "app.domains.chat.contracts",
+              "name": "RetrievalContractError"
+            },
+            {
+              "local": "RetrievalHardCaps",
+              "module": "app.domains.chat.contracts",
+              "name": "RetrievalHardCaps"
+            },
+            {
+              "local": "RetrievalRoute",
+              "module": "app.domains.chat.contracts",
+              "name": "RetrievalRoute"
+            },
+            {
+              "local": "RouteAwareCallTracker",
+              "module": "app.domains.chat.contracts",
+              "name": "RouteAwareCallTracker"
+            },
+            {
+              "local": "WorkflowAxis",
+              "module": "app.domains.chat.contracts",
+              "name": "WorkflowAxis"
+            },
+            {
+              "local": "WorkflowDependencyKind",
+              "module": "app.domains.chat.contracts",
+              "name": "WorkflowDependencyKind"
+            },
+            {
+              "local": "WorkflowRecipe",
+              "module": "app.domains.chat.contracts",
+              "name": "WorkflowRecipe"
+            },
+            {
+              "local": "parse_retrieval_intent_payload",
+              "module": "app.domains.chat.contracts",
+              "name": "parse_retrieval_intent_payload"
+            },
+            {
+              "local": "select_workflow_recipe",
+              "module": "app.domains.chat.contracts",
+              "name": "select_workflow_recipe"
+            }
+          ],
+          "unchanged_definitions": 23
+        }
+      ],
+      "empty_package_markers": {
+        "backend/app/domains/chat/api/__init__.py": "backend/app/domains/chat/__init__.py",
+        "backend/app/domains/world_characters/domain/__init__.py": "backend/app/domains/world_characters/__init__.py",
+        "backend/app/compatibility/__init__.py": "backend/app/runtime/__init__.py",
+        "backend/app/compatibility/runtime/__init__.py": "backend/app/runtime/__init__.py",
+        "backend/app/compatibility/routine_posts/__init__.py": "backend/app/domains/routine_posts/__init__.py"
+      }
     }
   },
   "asgi_exports": {

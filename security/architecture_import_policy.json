@@ -1984,22 +1984,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.domains.chat.public",
-        "target": "app.domains.chat.exceptions",
-        "owner_stage": "AR-B6 / AR-G5 / AR-B8-A",
-        "removal_condition": "Move the recorded actual Chat service or aggregate consumer to its supported role, then remove the obsolete typed export. No new legacy consumers.",
-        "reason": "Existing Chat consumer now uses the identical schema/error/model-choice object from its canonical owner; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.chat.public",
-        "target": "app.domains.chat.schemas",
-        "owner_stage": "AR-B6 / AR-G5 / AR-B8-A",
-        "removal_condition": "Move the recorded actual Chat service or aggregate consumer to its supported role, then remove the obsolete typed export. No new legacy consumers.",
-        "reason": "Existing Chat consumer now uses the identical schema/error/model-choice object from its canonical owner; no duplicate implementation.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.schemas",
         "target": "app.domains.chat.schemas",
         "owner_stage": "AR-B6 / AR-G5 / AR-B8-A",
@@ -2021,22 +2005,6 @@
         "owner_stage": "AR-B6 / AR-G5 / AR-B8-A",
         "removal_condition": "Move the exact remaining Chat workflow or aggregate consumer; retain only the same-module frozen migration alias until final compatibility retirement.",
         "reason": "Existing consumer of the same Chat contract/model at the canonical role while its actual workflow moves in the next Chat slice.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.chat.public",
-        "target": "app.domains.chat.contracts",
-        "owner_stage": "AR-B6 / AR-G5 / AR-B8-A",
-        "removal_condition": "Move the exact remaining Chat workflow or aggregate consumer; retain only the same-module frozen migration alias until final compatibility retirement.",
-        "reason": "Existing consumer of the same Chat contract/model at the canonical role while its actual workflow moves in the next Chat slice.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.chat.public",
-        "target": "app.domains.chat.service",
-        "owner_stage": "AR-B6 / AR-B8-A",
-        "removal_condition": "Migrate the recorded public aggregate consumers to the actual supported service or contract, then retire the historical export. No new public aggregate consumers.",
-        "reason": "Original Chat public class exports now refer to the same canonical service implementations; the compatibility-only forwarding classes remain separately named.",
         "review_date": "2026-09-05"
       },
       {

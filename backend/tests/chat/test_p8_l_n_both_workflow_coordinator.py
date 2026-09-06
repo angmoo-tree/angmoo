@@ -6,12 +6,14 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 
-from app.domains.chat.public import (
+from app.domains.chat.service import (
     BothRetrievalCommand,
     BothRetrievalWorkflowCoordinator,
     CanonicalRetrievalCommand,
     CanonicalRetrievalPlanningService,
     GraphRetrievalPlanningService,
+)
+from app.domains.chat.contracts import (
     LlmNode,
     ResolvedEntityBinding,
     ResolvedRetrievalEnvelope,
