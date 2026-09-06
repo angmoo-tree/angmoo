@@ -1,6 +1,6 @@
-import type { CharacterExecutionMode, CharacterAutonomyMutationState, CharacterDashboardItem, CharacterAutonomyState, CharacterAutonomyPresentation } from "@/features/characters/types/character";
+import type { CharacterAutonomyMutationState,CharacterAutonomyPresentation,CharacterDashboardItem } from "@/features/characters/types/character";
 // Temporary type-only entry for the frozen browser consumer; retired with final consumer cleanup.
-export type { CharacterExecutionMode, CharacterAutonomyMutationState, CharacterDashboardItem, CharacterAutonomyState, CharacterAutonomyPresentation } from "../types/character";
+export type { CharacterAutonomyMutationState,CharacterAutonomyPresentation,CharacterAutonomyState,CharacterDashboardItem,CharacterExecutionMode } from "../types/character";
 
 
 
