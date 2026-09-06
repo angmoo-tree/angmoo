@@ -2675,3 +2675,8 @@ G5 원장 추가 전 검사는 inherited `tests/chat/__init__.py`의 최초 도�
 namespace 표시 파일 제외 후에도 이전과 이후의 **2,507개 수집 node ID 및 순서가 정확히 같고**, 실제 full/public196·ORM102·frozen ASGI 차이0을 재확인했다. 제품과 기존 test 함수·fixture·단언의 수정은 없다.
 
 원래 G5 committed snapshot의 실제 최초 도입 **4 files / 29 nodes**를 원장에 연결했다. 원래 checkpoint/addition 검사를 쓰기 전후 그대로 실행하여 Git blob·최초 도입·기존 단언·suppression·node·ancestor 오류0을 확인했고, 선행184개 기록은 깊은 동일성을 유지한 채 **184 → 185**로 append했다. source/checker/frozen 계약은 이 기록에서 변경하지 않았다. 공식 stock과 동일 후보 전체 backend 결과는 후속으로 기록한다.
+
+
+G5의 고정 후보 `e46f6e4c` 전체 backend는 **2,485 PASS / 22 SKIP / 28 warnings / 1,188.91초**다. 같은 후보의 첫 공식 보존 검사는 **PR #258 1,867 / PR #263 1,907 / protected 2,507 = current 2,507**을 확인했고 원본 source·API·ORM·단언·suppression·node 오류는 없었다. 실패는 K01/K03/K04/K05/K14/G02의 현재 기능 지도에 남은 삭제된 모델 경로20개였다.
+
+원래 `576d3119`의 각 alias가 제공하던 실제 class와 현재 `register_models()`의23개 소유 모듈을 대조해 이20개 경로만 실제 소유 위치로 연결했다. 옛 agent_runs 모델 묶음의 Memory/Relationships 두 소유와 worlds 모델 묶음의 Worlds/WorldCharacter 두 소유를 모두 유지했다. G02는 단일 Base·DB 함수·명시적 등록·각 도메인 ORM을 구분하고 `MOVED`로 기록한다. frozen 자료·원장185·제품·테스트·검사기 변경0이며, metadata 보정 뒤 원래 공식 stock을 다시 실행한다. 위 전체 통과를 Hosted CI·installer·병합 또는 B8-B 완료로 승격하지 않는다.
