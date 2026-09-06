@@ -12,7 +12,8 @@ from app.domains.characters.service import drafts
 from app.domains.media import contracts as media_contracts
 from app.domains.runtime import exceptions as runtime_contracts
 from app.runtime.characters import management
-from app.services import agent_runs, profile_media, runtime_boundary
+from app.services import profile_media, runtime_boundary
+from app.domains.routines import exceptions as agent_runs
 
 
 @pytest.mark.parametrize("operation,error,status,detail", [

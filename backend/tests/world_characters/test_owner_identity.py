@@ -1,34 +1,73 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import UTC, datetime, timedelta
+
+from datetime import UTC
+
+from datetime import datetime
+
+from datetime import timedelta
+
 import importlib.util
+
 from pathlib import Path
+
 import sys
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI
+
+from fastapi import HTTPException
+
+from fastapi import status
+
 from fastapi.testclient import TestClient
+
 import pytest
-from sqlalchemy import create_engine, event
+
+from sqlalchemy import create_engine
+
+from sqlalchemy import event
+
 from sqlalchemy.orm import Session
+
 from sqlalchemy.pool import StaticPool
 
 from model_fixture_support import models
+
 from app.domains.identity.dependencies import get_current_user
+
 from app.models import Base
+
 from app.database import get_db
-from app.cruds import agent_runs as agent_run_crud
+
+from app.domains.routines import constants as agent_run_crud
+
 from app.domains.world_characters.router.profile import router
-from app.services import agent_runs as agent_run_service
+
+from app.runtime.resident import execution as agent_run_service
+
 from app.runtime.characters import management as agent_service
 
+from app.domains.routines.service import activity_management
+
+from app.domains.routines.service import autonomy_management
+
+from app.domains.routines.service import manual_activity
+
+from app.domains.routines.service import feed_cues
+
+from app.domains.routines.service import first_greeting as first_greeting_service
+
+from app.runtime.resident import tendency_analysis
+
+from app.runtime.resident import slots as resident_slots
 
 FRONTEND_HEADERS = {"Origin": "http://127.0.0.1:3000"}
+
 MIGRATION_PATH = (
     Path(__file__).resolve().parents[2]
     / "alembic/versions/20260818_0081_owner_controlled_world_character.py"
 )
-
 
 def _user(user_id: str) -> models.User:
     return models.User(
@@ -40,7 +79,6 @@ def _user(user_id: str) -> models.User:
         terms_version="test",
         profile_setup_completed=True,
     )
-
 
 def _fixture():
     engine = create_engine(
@@ -73,7 +111,6 @@ def _fixture():
     app.dependency_overrides[get_db] = db_dependency
     app.dependency_overrides[get_current_user] = user_dependency
     return TestClient(app, base_url="http://127.0.0.1:3000"), engine, principal
-
 
 def _seed_world(engine, principal):
     owner = _user("owner-a")
@@ -142,7 +179,6 @@ def _seed_world(engine, principal):
     principal["user"] = owner
     return owner, outsider
 
-
 def _payload(**overrides):
     payload = {
         "display_name": "구름",
@@ -155,7 +191,6 @@ def _payload(**overrides):
     }
     payload.update(overrides)
     return payload
-
 
 def test_owner_identity_create_update_reentry_is_private_and_write_bounded() -> None:
     client, engine, principal = _fixture()
@@ -209,7 +244,6 @@ def test_owner_identity_create_update_reentry_is_private_and_write_bounded() -> 
         assert db.query(models.Comment).count() == 0
         assert db.query(models.AgentRun).count() == 0
 
-
 def test_owner_identity_rejects_cross_owner_and_cross_world_role() -> None:
     client, engine, principal = _fixture()
     owner, outsider = _seed_world(engine, principal)
@@ -231,7 +265,6 @@ def test_owner_identity_rejects_cross_owner_and_cross_world_role() -> None:
     )
     assert invalid_role.status_code == 422
     assert invalid_role.json() == {"detail": "owner_controlled_role_invalid"}
-
 
 def test_creator_studio_lists_existing_world_characters_without_writes() -> None:
     client, engine, principal = _fixture()
@@ -370,7 +403,6 @@ def test_creator_studio_lists_existing_world_characters_without_writes() -> None
     )
     assert forbidden.status_code == 403
 
-
 def test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous() -> None:
     client, engine, principal = _fixture()
     owner, _ = _seed_world(engine, principal)
@@ -457,7 +489,7 @@ def test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous() -> Non
         )
         db.commit()
 
-        claimed = agent_run_crud.claim_due_resident_slots(
+        claimed = resident_slots.claim_due_resident_slots(
             db,
             now=now,
             max_count=5,
@@ -467,7 +499,6 @@ def test_scheduler_claim_excludes_owner_controlled_but_keeps_autonomous() -> Non
         assert db.get(models.AgentSlot, "slot-owner").status == (
             agent_run_crud.SLOT_STATUS_ASSIGNED_IDLE
         )
-
 
 def test_owner_controlled_execution_preflight_blocks_run_now_and_provider(
     monkeypatch,
@@ -497,7 +528,7 @@ def test_owner_controlled_execution_preflight_blocks_run_now_and_provider(
             agent_service.AgentExecutionModeError,
             match="owner_controlled_manual_write_not_available",
         ):
-            asyncio.run(agent_service.run_agent_now(db, owner, character.id))
+            asyncio.run(manual_activity.run_agent_now(db, owner, character.id, workflows=agent_service.build_manual_activity_workflows()))
 
         credential = models.LlmCredential(
             id="credential-owner-preflight",
@@ -550,7 +581,6 @@ def test_owner_controlled_execution_preflight_blocks_run_now_and_provider(
         assert db.query(models.AgentRun).count() == 0
         assert db.query(models.Post).count() == 0
         assert db.query(models.Comment).count() == 0
-
 
 def test_owner_controlled_migration_refuses_provenance_losing_downgrade(
     monkeypatch,

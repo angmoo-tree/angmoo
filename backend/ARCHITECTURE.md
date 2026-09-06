@@ -928,3 +928,220 @@ Social Agent Tool의 Run·캐릭터·사용자 범위와 거절 메시지는 `so
 
 
 활동 계획용 feed 관심/이력 정제 note의 실제 정책과 로그는 `routines/service/feed_history_notes.py`가 소유한다. 입력/메모 응답 DTO는 `routines/schemas/feed_history.py`에 두며 Social 응답·기존 HTTP도 같은 class를 사용한다. 숨겨진 Post 판단과 도구 권한은 `runtime/social/feed_history_notes.py`의 지연 협력으로 연결하고, 서버 skeleton metadata를 클라이언트 요약이 덮어쓰지 못하게 하는 기존 판단과 로그 privacy를 유지한다.
+
+### 활동 허용 판단과 횟수 조회
+
+`routines/service/activity_policy.py`가 실제 활동 시간·허용 행동·일일 제한·cooldown·수동 세션의 예외를 판단하고, `repository/activity_counts.py`가 같은 Session에서 자기 ActivityLog의 횟수와 최근 시각을 조회합니다. `ActivityTimezoneReader`는 설정 확보 뒤 원래 위치에서 현재 World 시간을 읽는 협력입니다. 시간을 먼저 읽거나 새로운 Session을 만들지 않습니다.
+
+기존 설정이 없으면 ensure_setting의 원래 commit/refresh가 유지되고, 이미 있는 설정을 caller가 수정한 경우에는 정책 조회가 새 commit을 만들지 않습니다. World 선택에 따른 시간대와 가져온 World의 활성화 여부는 `routines/service/activity_scope.py`가 판단합니다. `runtime/resident/activity_scope.py`는 동일 Session에서 실제 World/Character/Package 조회만 수행하며, `runtime/resident/activity_policy.py`가 두 역할을 연결합니다. Inspector도 첫 table check에 만들어 활동이 허용된 캐릭터의 조회 이전 반환을 유지합니다. 예전 `services/agent_activity_policy.py`는 직접 소비자 전환 후 제거했습니다.
+
+
+### 실행 기록과 FeedCue의 저장 시점
+
+`routines/service/runs.py`와 `service/feed_cues.py`는 기존 실행 생성·종료 및 FeedCue 소비의 commit/refresh를 소유합니다. 각 조회 SQL은 `repository/runs.py`, `repository/feed_cues.py`에 있습니다. `service/public_action_executions.py`는 공개 행동의 생성·완료를 기록하고 `repository/public_action_executions.py`는 중복 signature를 조회합니다. 공개 행동의 finish_write는 deferred UoW 안에서 flush/refresh만 수행하므로 호출자의 Social 변경과 함께 rollback할 수 있습니다. 이 차이를 동일한 저장 방식으로 합치지 않습니다.
+
+FeedCue 입력의 identity 계약은 user/character의 id만 읽으며 호출자는 원래 attached 객체를 전달합니다. Slot 배정·lease·복구와 여러 업무를 잇는 실행 그래프는 별도 책임입니다. 저장 함수만 옮겼다는 이유로 실행 전체가 전환됐다고 보지 않습니다.
+
+
+### 슬롯 pool·복구·lease의 구분
+
+`routines/service/slot_pool.py`는 빈 슬롯 확보, `slot_recovery.py`는 만료된 실행 복구, `slot_assignments.py`는 임시·상시 배정 반납, `slot_leases.py`는 실행 연결·연장·완료를 소유합니다. `slot_state.py`의 한정된 clear는 같은 attached Slot의 배정 필드만 지웁니다. 조회는 `repository/slots.py`에서 찾습니다. 임시 수동 실행의 종료를 상시 자율활동 배정으로 바꾸거나, 자율활동이 받아들인 배정을 임시 슬롯처럼 지우지 않습니다.
+
+Character row lock과 owner-controlled WorldCharacter 제외를 사용하는 배정/선점 판단도 `slot_assignments.py`와 `slot_claims.py`가 소유합니다. `contracts/slots.py`의 협력은 caller와 같은 Session에서 원래 Character 잠금·조회와 WC correlated predicate만 제공합니다. `runtime/resident/slot_references.py`가 실제 조회를, `runtime/resident/slots.py`가 원래 호출 signature와 조립을 담당합니다. Predicate를 미리 조회한 ID 목록으로 바꾸거나, commit/rollback을 adapter로 옮기지 않습니다. 현재 테스트의 혼합 `agent_crud.get_assigned_slot` 이름은 실제 repository 함수의 동일 객체 export만 사용하며, 기존 assertion을 그대로 보존하는 정확한 임시 소비자입니다. 이를 전체 전환 완료로 간주하지 않으며 B8-A 이전에 정리합니다.
+
+
+### 실행 실패 후 대기 정책
+
+`routines/service/run_backoff.py`는 사용량 제한·과부하·응답 시간 초과를 구분해 원래 재시도 시각과 표시 메시지를 결정합니다. 최근 실행 이력은 자기 `repository/run_backoff.py`에서 같은 Session으로 읽고, 결과 값은 immutable `contracts/backoff.py`에 둡니다. Provider 요청이나 sleep은 이 정책의 책임이 아닙니다. Character 또는 credential의 최근 실패를 읽는 OR 조건, 시각 범위와 30행 제한을 유지하며, 정책을 조회하기 위해 별도 Session이나 commit을 만들지 않습니다.
+
+
+### 읽기 전용 실행 단계의 재시도
+
+`runtime/resident/read_only_lanes.py`는 읽기 전용 provider 호출의 한정된 재시도와 대기, 오류 분류·진단 payload를 수행합니다. 실제 공개 행동을 실행하거나 재실행하는 역할은 맡지 않습니다. 취소와 재시도 대상이 아닌 오류는 원래 객체로 전파하고, 진단 정보의 합성 순서와 비밀 가림을 유지합니다. Run/slot/retry의 오류 클래스는 `routines/exceptions.py`가 실제로 소유합니다. 현재 runtime contract의 두 Run 오류 export는 기존 Character 오류 동일성 테스트가 소비하는 같은 객체이며, 복제 클래스가 아닙니다. 이 정확한 임시 계약의 종료는 B8 전환에 포함됩니다.
+
+교차 도메인의 HTTP 오류 처리는 `routines/contracts/execution_errors.py`의 명시적 두 오류 계약을 사용한다. 실제 정의는 `routines/exceptions.py`의 한 객체이며, Character router와 현재 runtime 계약만 이 지원 표면을 통해 사용한다. 기존 service/schema/contract 경계 검사에 예외를 추가하지 않는다.
+
+
+### 실행 결과의 저장과 진단
+
+`routines/service/run_results.py`는 Run 결과에 남길 필드, 비밀 가림, 단계별 오류와 사용량 집계, snapshot 저장을 소유합니다. 원래의 redaction 뒤 허용 필드 선택과 오류 길이 제한을 유지하며 원본 요청 payload를 변경하지 않습니다. 자기 Run은 `repository/runs.py::get_run`으로 caller Session에서 읽습니다. Snapshot 갱신은 원래의 commit을 수행하고, 쓰기 단계 조회나 없는 Run을 처리할 때 별도 commit을 추가하지 않습니다. Provider 호출이나 Daypart 기억 저장은 이 서비스의 책임이 아닙니다.
+
+
+### 활동 로그를 통한 실행 근거 확인
+
+`routines/service/activity_evidence.py`는 실제 ActivityLog에서 상태 저장·tick 완료·스레드 조회를 확인하고, 관찰 결과와 공개 행동 근거를 표현합니다. 원래 JSON의 실패 기본값과 조회 전 expire_all 호출을 보존합니다. `repository/activity_evidence.py`는 이벤트 종류·시각 범위·정렬·제한이 다른 아홉 조회를 각각 소유하며 같은 Session을 사용합니다. 관찰 문장에서 공개 행동을 했다고 잘못 주장하면 그 문장을 근거로 사용하지 않습니다. `utils/context_text.py`는 원래의 공백 압축만 담당하며, 의미가 다른 Memory 문맥의 정제 함수를 대신하지 않습니다.
+
+
+### Resident 프롬프트와 쓰기 지시
+
+Routines 서비스의 `prompt_context.py`는 전달받은 값의 공통 문맥을 표현하고, `perception_prompts.py`·`action_prompts.py`·`state_prompts.py`·`execution_prompts.py`는 각각 읽기·행동 선택·상태 저장·실행 지시를 구성합니다. 이 함수들은 DB나 provider를 호출하지 않습니다. Character와 saved state는 이미 사용하던 속성만 읽는 `contracts/prompt_context.py`의 입력 계약이며, 새 객체를 복제하거나 다른 도메인의 ORM을 조회하지 않습니다. Post와 Comment도 기존 객체의 값만 읽는 입력 계약을 사용하여 Social과 역방향 의존을 만들지 않습니다. 원래 글감 선별과 owner cue/자기 근황 지시의 실제 판단은 `service/action_briefs.py`가 소유합니다. 문구·분기·컨텍스트의 신뢰 경계·시각 읽기 순서는 위치 변경과 함께 바꾸지 않습니다.
+
+
+### Resident 응답 판단과 실제 호출
+
+`routines/service/decision_results.py`는 받은 JSON의 범위와 fallback을, `execution_results.py`는 성공 상태와 실제 공개 행동의 근거 선택을 소유합니다. `perception_diagnostics.py`는 같은 Session의 원래 ActivityLog 저장을 호출하여 caller의 deferred commit을 존중합니다. `runtime/resident/decision_lanes.py`는 기존 client의 읽기 전용 요청 두 개와 프롬프트·응답 규칙을 연결하며, `gateway_results.py`는 외부 응답의 텍스트와 추적 문맥을 다룹니다. provider 호출 순서·키·건너뜀 조건·오류 전달을 유지하며, 외부 응답을 해석하는 것만으로 공개 행동의 성공을 만들어내지 않습니다.
+
+
+### Resident 후보·도구·세션 정책
+
+`routines/service/action_candidates.py`는 읽은 후보값을 식별하고 설명하며, `tool_policy.py`는 허용 행동을 실제 도구명으로 연결합니다. `session_keys.py`는 실행/시간대 세션의 식별 및 flag·character allowlist의 원래 조건을 다룹니다. 새 SQL·provider 호출 없이 기존 전달값을 사용합니다. 원래 실행 오류8개는 `routines/exceptions.py`의 실제 클래스이며 기존 HTTP와 runtime에서 같은 객체로 처리됩니다. SDK 요청 형식은 `runtime/resident/request_options.py`에 있습니다.
+
+
+### Resident가 사용하는 Social 조회
+
+`social/repository/resident_context.py`는 좋아요·리포스트·팔로우 여부와 보이는 스레드 답글의 실제 조회를 소유합니다. 조회는 caller의 Session을 그대로 사용하며 visibility 조건·후속 조회 순서·미커밋 변경의 자동 반영·rollback 의미를 유지합니다. Routines는 이 결과를 활동 후보와 도구 허용 판단에 사용하며 Social ORM의 조회를 별도의 Routines repository에 복제하지 않습니다. 현재 남은 AgentRun 소비자는 C6b의 실행 협력 전환 대상으로 명시합니다.
+
+
+### Resident 행동 후보의 허용과 표현
+
+`routines/service/action_admission.py`는 자기 글·기존 반응·답글·팔로우 상태에 따라 허용 도구와 차단 이유를 정합니다. `action_menu.py`는 실제 후보 표를, `action_candidates.py`는 읽은 작성자 이름을 표현합니다. `contracts/action_context.py`의 제한된 읽기 협력을 `runtime/resident/context_references.py`가 같은 Session으로 연결합니다. 조건을 판단하기 전 모든 자료를 미리 읽지 않고, 원래 분기에서 필요한 조회만 수행하며 받은 ORM 객체를 복제하지 않습니다. Social SQL과 숨김 판단은 Social 소유 함수를 사용합니다.
+
+
+Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 SQL은 같은 `social/repository/resident_context.py`가 소유합니다. 읽지 않은 알림의30/20개 제한, 최근 자기 글8개·대상 글5개·답글200개와 원래 정렬을 각각 호출 목적에 맞게 유지합니다. Routines 자기 활동 로그의 최근 관계 검토 시각만 `routines/repository/resident_context.py`에서 읽습니다. 스레드 루트 추적은 원래 cycle·없는 부모의 처리만 수행하며, 별도의 공개 여부 검사와 합치지 않습니다.
+
+
+### Resident의 피드·알림·관계 문맥
+
+`routines/service/feed_context.py`는 읽을 피드와 알림 후보를 선택하고 설명하며, `social_context.py`는 팔로우·상호 답글·관계 검토 후보를 판단합니다. 이 코드에서 다른 도메인의 ORM을 조회하지 않습니다. `contracts/context_reads.py`는 실제로 읽는 값과 조회 협력을 정의하고 `runtime/resident/feed_context_references.py`가 기존 Session에 연결합니다. 원래 Post class 확인은 runtime이 같은 class로 수행하여 정책의 strict assertion을 유지합니다. Feed/행동 가능 알림/결과 문장의 기존 Social workflow는 caller가 명시 전달하며, 같은 코드를 runtime 안에 다시 구현하지 않습니다.
+
+
+### 슬롯 상태와 실행 준비 확인
+
+`routines/service/slot_status.py`는 슬롯 목록의 공개 응답·소유자 필터와 UTC 실행시각 비교를 담당합니다. AgentRun의 기존 성향 helper는 제품 호출 없이 원래 테스트만 소비하므로 B8-A 검토 대상으로 보존하며, 실제 관리 흐름의 readiness 업무는 C7에서 별도로 이전합니다. `retry_schedule.py`는 수동 실행 시각과 재시도 시각의 우선순위를 정하고, 필요한 경우에만 기존 ActivityTimezoneReader로 World 시간을 읽습니다. 설정이 이미 주어졌을 때의 no-commit과 설정을 처음 만드는 ensure 경로의 원래 commit을 구분합니다. 슬롯 목록 HTTP도 이 실제 서비스와 같은 기존 응답 모델을 사용합니다.
+
+
+### Resident 실행 권한과 슬롯 인증 연결
+
+`routines/service/run_identity.py`는 캐릭터 삭제·소유자와 자격 증명 소유자·배정·활성 상태를 원래 순서로 판단합니다. `runtime/resident/identity_references.py`는 동일 Session의 소유 도메인 조회를 연결하며, 캐릭터 오류가 나면 자격 증명을 미리 읽지 않습니다. `runtime/resident/credential_profiles.py`는 등록된 인증 어댑터를 통해 검사·키 해석·연결·새로고침을 수행합니다. 이미 일치하면 키를 해석하지 않으며, 실패는 기존 오류 유형과 비밀 정제를 유지합니다. 이 런타임 연결에 SDK나 다른 업무의 권한 판단을 다시 작성하지 않습니다.
+
+
+### 실행 대상 선택과 상태 조회
+
+`routines/service/post_selection.py`는 명시된 대상 우선, 자기 글 제외 조회, 마지막 공개 루트 글 fallback 순서를 담당합니다. Scoped routine이 연결된 경우에는 전역 피드 대상을 만들지 않습니다. 실제 두 SQL은 Social의 `repository/resident_context.py`에 있고 runtime이 같은 Session을 연결합니다. 캐릭터 상태는 `characters/service/state.py::get_character_state`, 슬롯은 `routines/repository/slots.py::get_agent_slot`, 활동 설정은 기존 `activity_settings.get_setting`에서 읽습니다. 이 nullable 조회는 원래 attached 객체를 반환하며 별도 flush/commit을 추가하지 않습니다.
+
+
+### 실행 요청의 진입 판단
+
+`routines/service/execution_admission.py`는 사용 가능한 캐릭터, 요청 소유자, 명시 또는 기본 자격 증명을 판단합니다. 명시 자격 증명과 기본 선택은 기존 검증 조건이 다르므로 두 흐름을 그대로 구분합니다. 런타임은 게시물 조회 뒤 소유자를 정하는 원래 순서를 유지합니다. `identity/service/credential_cooldown.py`는 이미 붙어 있는 credential의 대기 시각만 변경하며, 대기 여부와 저장 시점은 해당 실행 흐름이 결정합니다. 설정 변경을 이유로 먼저 commit하거나 자격 증명을 다시 읽지 않습니다.
+
+
+### Resident 실행과 슬롯 요청
+
+`routines/service/slot_requests.py`는 슬롯 요청의 실제 유지보수 제한, 캐릭터·자격 증명 판단, 활동 설정, 최초 시각과 배정 순서를 소유합니다. 같은 Session의 조회 협력은 `runtime/resident/slots.py`에서 연결하며, 필요한 시점에 평가합니다.
+
+`runtime/resident/execution.py`는 수동 실행, 슬롯별 실행, 전체 tick의 실제 비동기 실행을 조립합니다. provider 호출, lease 수명, 실행 기록 생성 시점과 실패 보상이 이곳에서 연결됩니다. 오류 처리에서 사용하는 `run_created` 같은 상태는 원래 저장 성공 직후에 바뀌어야 하므로 별도 전달 계층으로 감추지 않습니다. Scheduler는 만료 루틴을 정리하는 실제 lifecycle 서비스를 직접 호출한 뒤 실행을 시작합니다.
+
+현재 원래 `services/agent_runs.py`에는 B7 소유 Memory 함수와 별도 정리 대상인 원래 미호출 함수만 남습니다. 순차 통합 전까지 실행이 참조하는 Memory 함수는 기존 구현 자체입니다. 같은 함수를 새 파일에 복사하지 않으며, Memory 소유 전환이 합류할 때 실제 서비스로 연결합니다.
+
+
+### 활동 설정과 성향 분석
+
+`routines/service/activity_management.py`는 활동 시간 입력과 활동 설정 저장, 슬롯의 다음 실행 시각 변경을 담당합니다. Character 소유권과 Identity의 demo 변경 제한은 같은 Session에서 기존 소유 기능을 호출합니다. 최초 설정의 commit 시점과 설정 변경 후 slot 갱신 순서를 유지하며, 외부 값을 미리 읽지 않습니다.
+
+성향 분석의 provider 출력 형식은 `schemas/tendency.py`, 프롬프트·문자열 정제·범위와 주제 검증은 `service/tendency.py`, 저장된 성향의 준비 상태와 변경은 `service/tendency_settings.py`에 있습니다. provider 통신과 슬롯 해제는 runtime이 조립합니다. Character와 Routines에서 기존에 함께 사용하던 `AgentServiceError` 기반은 `app/exceptions.py`의 하나의 클래스이며, 기존 Character 이름도 같은 객체를 가리킵니다.
+
+### Resident 계획 응답의 구조와 검증
+
+`routines/schemas/resident_planning.py`는 LangGraph planner·writer의 실제 Pydantic 응답 모델을 소유합니다. 모델의 기존 private 이름은 provider JSON schema의 title에도 쓰이므로 유지합니다. Topic Arc의 단계 수와 setup/development/conclusion 순서는 `policies/topic_arc_roles.py`가 판단하며, 읽기 전용 역할 계약은 `contracts/topic_arcs.py`에 있습니다. 이 검증 경계는 DB나 provider를 호출하지 않습니다. 실제 토픽·행동 판단과 graph 실행 조립은 LG-B/LG-C에서 이어서 분리하며, 이전을 마친 Memory Daypart/공통 clipping은 최종 통합에서 기존 소유 구현을 연결합니다.
+
+계획과 Social이 함께 사용하는 동기·감정 enum 두 개의 실제 정의는 `app/contracts/action_subjective_context.py`에 있습니다. Social의 subjective DTO·출처·텍스트 검증·저장 규칙은 Social에 유지하며, 값 enum의 같은 객체를 import합니다. 따라서 enum 값·identity·provider schema를 바꾸지 않고 두 업무의 공유 값만 연결합니다.
+
+
+### Resident 계획과 결과를 판단하는 위치
+
+`routines/policies/topic_dates.py`는 상대 날짜의 기준과 이월 상태를, `handoff_coverage.py`는 이미 작성한 내용으로 전날 문맥이 충족됐는지를 판단합니다. `action_matching.py`는 관찰한 항목에 맞는 행동과 허용된 관계 행동을 고르고, `writing_contract.py`는 필수 글과 응답 형식을 결정합니다. `writer_outputs.py`는 task id로 writer 결과를 대응시키고 누락·출처 복사·잘못된 멘션을 검사하며 실제 결과를 조립합니다. 이 파일들은 받은 값만 사용하고 DB나 provider를 호출하지 않습니다. 활동 허용 입력은 기존 context의 `activity_policy` 속성만 읽는 계약이며 복제된 상태를 만들지 않습니다.
+
+
+### Topic Arc의 진행과 복구
+
+`routines/service/topic_arcs.py`가 토픽 단계 정제·시각 기준·다음 단계·진행 의도·복구 허용·시간 연속성을 판단합니다. `policies/resident_clock.py`는 원래 KST 표현과 UTC 보정만 담당합니다. 서비스에 전달되는 `TopicArcWorkflows`는 기존 텍스트 정제 함수, 마지막 게시 시각, 최근 기억 이벤트의 nullable 조회를 연결합니다. 조회는 기존 분기에서 같은 context/Session으로 호출하며, 날짜만으로 결론을 낼 수 있으면 조회하지 않습니다. 실행부의 `partial`은 실제 서비스 함수에 이 협력을 묶는 구성 코드입니다. 서비스 본문을 전달 함수로 다시 구현하거나 context·ORM 객체를 복제하지 않습니다. 공통 clipping과 Memory 이벤트 조회의 이미 구현된 소유 이전은 부모의 B7 통합에서 연결합니다.
+
+
+### 자율 글쓰기의 주제와 확률
+
+`routines/service/independent_topics.py`는 저장된 persona의 관심 기준·주제 목록·자율 글쓰기 확률을 읽어, 오늘 사용한 주제를 제외하고 같은 실행 id에 같은 선택을 만듭니다. 최근 성공 글의 주제와 오늘 성공 글의 주제를 읽는 실제 SQL은 `repository/independent_topics.py`가 소유합니다. 조회는 원래 caller의 Session으로 수행하며 Character 범위, 성공 상태, 정렬, 개수, 오늘의 시각 경계를 유지합니다. 시각 경계 계산은 `policies/resident_clock.py`, 공통 텍스트 정제는 실행 시 연결되는 같은 함수가 담당합니다.
+
+
+### 행동 계획과 실행 전 예산
+
+`routines/service/action_plans.py`는 관찰한 항목에 맞게 feed·inbox·관계 행동을 정규화하고 하나의 계획으로 묶습니다. `writing_plans.py`는 유효한 글감과 필수 독립 글의 의도를 유지하고, `action_budgets.py`는 하루 한도·답글 묶음 한도·멘션/알림 우선순위와 unfollow 충돌을 적용합니다. 이곳에 실제 판단 본문이 있으며 실행부는 서비스를 호출할 협력만 구성합니다.
+
+설정은 기존 `activity_settings.ensure_setting`을 사용하며 그 함수의 원래 저장 계약을 바꾸지 않습니다. World 시각을 사용하는 실제 사용량 계산, nullable 게시자 조회, 기억의 unfollow 관찰은 원래 Session과 호출 순서로 연결합니다. 도메인은 외부 업무 ORM을 조회하지 않고 필요한 값만 받습니다. 설정이 무제한이면 해당 count를 호출하지 않는 조건, 전체 글쓰기 제한과 답글 bucket의 우선순위를 새 구조를 이유로 통합하거나 바꾸지 않습니다.
+
+
+### 작성 결과와 상태 기록의 복구
+
+`routines/policies/writer_tasks.py`는 실행·글감에서 같은 writer task id를 만듭니다. `service/post_writer_results.py`는 필수 작성 제약과 기본 계획을 유지하며, task id와 실제 제목·본문이 일치한 결과만 적용합니다. Lore id와 조회 방식은 원래 허용된 개수와 길이로 남깁니다.
+
+`service/state_outputs.py`는 성공·재사용된 공개 행동으로 기억 근거를 만들고, 글자 수 제한만 어긴 상태 응답을 정제한 뒤 전체 Pydantic 응답 검증을 다시 수행합니다. 오류 종류에 따른 provider 예외 해석은 runtime의 같은 분기로 연결합니다. 상태 정책 안에서 provider를 다시 호출하거나 가짜 성공 근거를 만들지 않습니다. 입력은 기존 saved state와 graph state를 그대로 사용하며 ORM 복제나 새 DB 접근을 추가하지 않습니다.
+
+
+### Resident 프롬프트와 실제 writer 작업
+
+`service/resident_prompts.py`는 persona·writer·상태 기록·Lore 검색 질의의 실제 프롬프트를 만듭니다. 글감과 persona가 시스템 규칙을 덮어쓸 수 없다는 원래 문맥 경계를 유지하며 입력은 이미 읽은 값입니다. `service/writing_tasks.py`는 선택된 행동을 reply/post 작업으로 만들고, 같은 TopicArc 서비스에서 단계·날짜·이전 실행 근거를 읽습니다. 실제 읽기는 기존 협력과 같은 Session으로 필요한 분기에서만 수행합니다. `service/planner_results.py`는 관찰 입력과 각 planner의 결과를 실제 실행 진단에 맞게 표현합니다.
+
+실행 코드는 이 서비스에 기존 공통 텍스트 정제와 TopicArc 협력을 연결합니다. 도메인 내부의 task id·TopicArc·응답 조립은 실제 소유 서비스를 직접 호출하며 같은 기능을 다른 전달 서비스로 중복 구현하지 않습니다. 프롬프트 문구나 토큰 예산은 위치 변경과 함께 바꾸지 않습니다.
+
+
+### 관계·대화·기억을 활동 입력으로 고르는 기준
+
+`service/relationship_context.py`는 현재 follow 상태와 관찰한 기억을 바탕으로 허용된 관계 행동 후보를 고릅니다. 이미 답한 글의 reply 항목을 제외할 때도 원래 읽기 조건을 유지합니다. `service/conversation_context.py`는 같은 Session의 nullable 게시글 조회로 대화의 root를 찾고, 기존 여섯 turn 한도와 작성자 범위로 문맥을 만듭니다. 끊어진 부모·순환·조회 실패는 원래 규칙으로 처리합니다.
+
+`service/writing_context.py`는 현재 Daypart와 전날 이월 문맥을 선택하고 이미 게시된 글이 그 문맥을 충족했는지 표현합니다. 실제 Memory·Social 읽기는 `contracts/context_reads.py`의 필요한 협력으로 연결하며, 현재 실행이 가진 Session·값·조회 순서를 사용합니다. 자기 ActivityLog와 독립 주제는 실제 Routines 서비스가 소유합니다. Point 저장·관계 변경·Memory 이벤트 저장을 이 입력 선택 서비스에 복제하지 않습니다.
+
+
+### Graph 실행과 다른 업무의 읽기 협력
+
+`runtime/resident/langgraph.py`는 실제 graph 구성, provider 호출, 공개 행동·기억·상태 저장을 연결하는 실행 조립입니다. Routines의 실제 service/policies를 사용하고, 여러 업무의 commit·rollback·완료 후 처리 순서를 유지합니다. `runtime/resident/langgraph_queries.py`는 Social·Character를 같은 Session에서 읽어 활동에 필요한 문맥을 제공합니다. 원래 조회마다 다른 공개 범위·작성자·시간 경계·정렬·개수 제한을 하나의 느슨한 공통 조회로 합치지 않습니다.
+
+`policies/execution_results.py`는 원래 실행 식별자와 답글 결과 대응, 성공한 행동의 근거 선택을 담당합니다. 실제 provider 호출과 저장은 하지 않습니다. Graph의 규모 자체를 기준으로 전달 파일을 추가하지 않으며, 업무 판단과 실행을 연결하는 역할을 기준으로 나눕니다. 남은 Memory·Point·Lore의 원래 호출은 이미 구현된 별도 소유 source와 순차 통합하는 항목이며, 해당 구현을 다시 만들지 않습니다.
+
+실제 graph 테스트는 `tests/routines/test_resident_graph.py`에 있습니다. 과거 파일에 함께 있던 DirectLlm·AgentWriting·AgentRun 검사는 원본과 fixture를 보존하여 해당 소유 전환에서 정리합니다. 전체 API/ORM 계약과 원본 source·assertion·node 보존은 별도의 통합 검증에서 확인합니다.
+
+
+### 자율활동 활성화와 비활성화
+
+`routines/service/autonomy_management.py`는 활성화·비활성화의 권한, 준비 상태, 정원, 슬롯 배정과 보상 순서를 소유합니다. 전역 잠금을 먼저 얻고 해당 World 잠금을 얻는 순서를 유지합니다. SQLite에서는 기존 immediate transaction과 지연 commit 구간을 사용하며, 정원 실패는 원래 rollback 뒤 거절 기록을 저장합니다.
+
+다른 도메인의 User·Character·credential·WorldCharacter는 같은 Session으로 연결합니다. 상태를 바꿀 때는 Character의 실제 대입 함수를 사용하고, provider profile의 bind/release/reload는 런타임 협력으로 실행합니다. `runtime/resident/autonomy_reads.py`는 기존 Character/활동 설정/배정 슬롯의 두 집합 SQL을 그대로 소유하며, 도메인 간 join을 개별 조회로 쪼개지 않습니다.
+
+
+### 사용자가 요청하는 한 번의 활동과 모이
+
+`routines/service/manual_activity.py`는 수동 실행의 권한·준비 상태·사용자별 쿨다운·슬롯 여유와 예약 임박 조건을 판단합니다. 기존 배정 슬롯을 실행하는 경로와 임시 슬롯을 얻어 실행하는 경로는 서로 다른 계약을 유지합니다. 임시 실행의 원래 오류가 있으면 정리 오류가 그것을 덮지 않으며, 원래 오류가 없을 때만 정리 오류를 전달합니다. 런타임 협력은 같은 Session의 외부 소유 조회와 profile bind/release/reload 및 실제 실행기를 연결합니다.
+
+모이의 조회·입력 조건·프롬프트 안전성은 `routines/service/feed_cues.py`의 실제 기능입니다. 성향 분석 확인, 자율활동/manual 허용 확인, 게시글 한도, 미소비 모이 중복 확인의 순서를 유지합니다. 새로운 조회·저장·검증을 runtime entry 함수에 중복 구현하지 않습니다.
+
+
+### 첫 인사
+
+`routines/service/first_greeting.py`는 첫 게시글의 자격, 별도 사용자 쿨다운, 중복 확인, 실행 기록 확정과 결과 상태를 소유합니다. PostgreSQL의 원래 사용자별 잠금은 같은 Session의 repository에서 얻고, 잠금 뒤 게시글과 쿨다운을 다시 확인합니다. 실행 기록의 원래 commit은 글 생성 호출보다 먼저 끝납니다.
+
+첫 인사의 입력과 writer JSON은 `routines/schemas/first_greeting.py`에 있습니다. Routines 실행 결과와 Social 게시글을 함께 담는 HTTP 응답은 `api/schemas/first_greeting.py`에 실제 정의합니다. 서비스에는 원래 PostCreate와 응답 생성자를 연결하므로 도메인 간 역방향 schema 의존 없이 같은 응답 클래스·필드가 유지됩니다. runtime의 실제 writer와 이미지 IO는 해당 DTO를 사용하고, 키 해석은 `runtime/resident/first_greeting.py`의 한정 함수에서 수행합니다. Social 게시글의 저장·조회는 같은 Session의 Social 기능을 연결합니다. 이미지 실패와 글 생성 실패, provider 지연은 기존의 서로 다른 결과 처리를 유지합니다.
+
+
+### 성향 분석 결과 저장
+
+`routines/service/tendency_analysis.py`는 성향 분석의 준비 조건과 결과 저장을 소유하고, `runtime/resident/tendency_analysis.py`는 Direct/OpenClaw provider 호출과 profile·슬롯 정리를 수행합니다. Direct와 OpenClaw의 원래 오류 처리 및 마지막 정리 규칙은 각각 유지합니다. 결과 필드 저장·commit·refresh가 끝난 뒤 기존 객체의 ID를 읽고 사용량 요약을 계산하며 활동 로그를 저장합니다. 호출자가 ID나 요약 문자열을 미리 평가하여 ORM 조회 또는 provider 사용량 평가 순서를 바꾸지 않습니다.
+
+
+### 캐릭터의 자격 증명 관리
+
+키·모델 변경, metadata 조회와 삭제의 실제 규칙은 `identity/service/credential_management.py`가 담당합니다. `/agents/{id}/credential`은 Character 리소스 HTTP이며 이 서비스를 typed workflow와 함께 직접 호출합니다. World membership과 WorldCharacter 범위 조회는 각 소유 repository가, 활동 슬롯과 설정은 Routines가 담당합니다. 모든 협력은 기존 Session과 붙어 있는 객체를 사용합니다. 슬롯 실행 중 거절, profile 연결/해제, commit=False와 최종 commit/rollback의 순서는 해당 서비스의 계약입니다. 성공 응답에는 기존 CredentialRead만 포함합니다.
+### Brief 기반 작성의 정책과 실행
+
+`domains/routines/service/writing_prompts.py`는 캐릭터 말투·현재 시간·활동 문맥·최종 brief를 조합하는 실제 작성 규칙을 담습니다. 다른 업무의 답글 문맥과 Lore는 `contracts/writing.py`의 명시적인 읽기 협력으로 전달합니다. 문맥은 기존 조건과 순서에서 읽으며, 사용하지 않는 Lore나 최근 활동을 미리 조회하지 않습니다.
+
+`service/writing_results.py`는 준비된 brief 해석, 생성 결과와 사용량 정제, 같은 Session에서 Run의 작성 사용량을 저장하는 업무를 담당합니다. `runtime/resident/writing.py`는 Social 권한 확인과 실제 게시·답글 저장, provider 호출, Lore 사용 기록과 Memory 저장을 연결합니다. 원래의 생성기 호출 횟수, 사용량 기록 후 JSON 검증 순서와 게시 완료 후 Memory 저장 순서를 유지합니다.
+
+현재 B4 source에서 옛 `services/agent_writing.py`에 남은 실제 함수는 Daypart 이벤트 저장 하나입니다. 이미 별도 B7 source에 구현된 Memory 서비스가 통합되면 이 기존 구현을 그 서비스로 연결하고 제거합니다. Identity credential, Social 및 Lore의 기존 협력도 해당 소유 source와 순차 통합하며, 새 작성 정책을 옛 서비스로 추가하지 않습니다. 두 legacy 작성 진입 함수는 이 source에서 활성 제품 호출자가 없지만 기존 구현과 계약을 보존합니다.
+
+
+### 활동 HTTP의 연결
+
+`/agents/{id}` 아래의 설정·모이·활성화·수동 실행·첫인사·성향 분석은 Character 리소스 HTTP로 배치합니다. 실제 판단과 저장은 Routines 서비스가 수행하고, 긴 provider 실행은 typed runner로 연결합니다. 앱 생성에서 workflow factory를 등록하며 HTTP dependency는 원래 request Session과 인증 이후에 이를 전달합니다. HTTP 오류 처리를 공유할 때는 검토한 정확한 exceptions 모듈만 공개 entry에 등록할 수 있습니다. 다른 파일·하위 모듈·repository·HTTP 접근을 함께 허용하지 않으며 예외 모듈의 framework/DB 접근도 계속 금지합니다.
+
+
+### 활동 요약과 로그 표현
+
+`routines/service/activity_presentation.py`는 활동 요약과 팔로우 로그의 대상 표현을 담당합니다. 프로필은 Character/Identity의 기존 nullable 조회를 같은 Session으로 연결합니다. 상세 화면의 여러 기능 조립은 runtime에 남으며 활동 설정과 로그는 실제 Routines 소유 서비스에서 읽습니다. 시간대와 오늘 행동 수를 먼저 계산하지 않고 기존 응답 필드 평가 위치에서 읽습니다. 가져온 World의 명시적 활성화 제한은 `service/runtime_guards.py`의 실제 판단이며 런타임이 현재 World의 잠금 조회와 원래 오류 클래스를 전달합니다. 일반 캐릭터의 수동 실행과 가져온 World의 활성화 조건을 합치지 않습니다.

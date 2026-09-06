@@ -173,14 +173,28 @@ def test_llm_draft_create_and_complete_work_beyond_the_old_cap(
 
 
 def test_public_runtime_source_has_no_hosted_saved_count_quota_contract() -> None:
-    sources = {
-        relative: (REPO_ROOT / relative).read_text(encoding="utf-8")
-        for relative in (
+    # The former management module's activity admission is now owned by
+    # Routines. Inspect both actual source files for the same logical surface.
+    source_groups = {
+        "backend/app/runtime/characters/management.py": (
             "backend/app/runtime/characters/management.py",
-            "backend/app/runtime/characters/creator.py",
-            "backend/app/api/v1/routes/agents.py",
-            "backend/app/cruds/community.py",
+            "backend/app/domains/routines/service/autonomy_management.py",
+        ),
+        **{
+            relative: (relative,)
+            for relative in (
+                "backend/app/runtime/characters/creator.py",
+                "backend/app/api/v1/routes/agents.py",
+                "backend/app/cruds/community.py",
+            )
+        },
+    }
+    sources = {
+        surface: "\n".join(
+            (REPO_ROOT / relative).read_text(encoding="utf-8")
+            for relative in paths
         )
+        for surface, paths in source_groups.items()
     }
     combined = "\n".join(sources.values())
 

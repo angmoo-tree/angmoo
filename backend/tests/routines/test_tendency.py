@@ -1,30 +1,71 @@
+from app.domains.routines.repository import runs as routine_run_queries
 from app.domains.character_lore import contracts as character_lore
 
-
 from app.domains.routines.service import feed_history_notes as note_service
+
 from app.runtime.social import feed_history_notes as note_runtime
+
 from app.domains.social.service import agent_tool_reads as tool_read_service
+
 from app.domains.social.service import agent_tool_actions as tool_action_service
+
 from app.runtime.social import agent_tools as tool_action_runtime
+
 from app.runtime.social import feed_history as history_runtime
 
 from app.domains.routines.service import feed_history as history_policy
+
 from app.domains.social.service import topic_metadata as topic_policy
+
 from app.domains.social.repository import posts as post_repository
+
 import asyncio
+
 import json
+
 import inspect
-from datetime import UTC, datetime, timedelta
+
+from datetime import UTC
+
+from datetime import datetime
+
+from datetime import timedelta
+
 from types import SimpleNamespace
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException
+
+from fastapi import status
+
 import pytest
 
 from app import schemas
-from app.api.v1.routes import agents as agent_routes
-from app.services import (agent_activity_policy, agent_briefs, agent_runs, agent_writing, community as community_service, direct_llm)
+
+from app.domains.characters import router as agent_routes
+
+from app.domains.routines.contracts import activity_policy as agent_activity_policy
+
+from app.domains.routines.service import action_briefs as agent_briefs
+
+from app.runtime.resident import execution as agent_runs
+
+from app.domains.routines.service import writing_prompts as agent_writing
+
+from app.services import community as community_service
+
+from app.integrations import direct_llm as direct_llm
+
 from app.runtime.characters import management as agent_service
 
+from app.domains.routines.service import autonomy_management
+
+from app.domains.routines.service import manual_activity
+
+from app.domains.routines.service import feed_cues
+
+from app.domains.routines.service import first_greeting
+
+from app.runtime.resident import writing as writing_runtime
 
 def _activity_policy() -> agent_activity_policy.ActivityPolicy:
     return agent_activity_policy.ActivityPolicy(
@@ -62,7 +103,6 @@ def _activity_policy() -> agent_activity_policy.ActivityPolicy:
         },
     )
 
-
 def test_activity_policy_prompt_uses_notes_without_ranges_or_observe_tendency():
     prompt = _activity_policy().to_prompt()
 
@@ -73,11 +113,9 @@ def test_activity_policy_prompt_uses_notes_without_ranges_or_observe_tendency():
     assert "Post only when there is a character-owned topic worth opening." in prompt
     assert "Like when quiet agreement is enough." in prompt
 
-
 def test_activity_setting_read_excludes_internal_planner_tendency_profile():
     assert "planner_tendency_profile" not in schemas.AgentActivitySettingRead.model_fields
     assert "tendency_analysis_ready" in schemas.AgentActivitySettingRead.model_fields
-
 
 def _tendency_setting_with_profile(profile: dict[str, object]) -> SimpleNamespace:
     return SimpleNamespace(
@@ -94,7 +132,6 @@ def _tendency_setting_with_profile(profile: dict[str, object]) -> SimpleNamespac
         planner_tendency_profile=profile,
     )
 
-
 def test_agent_service_tendency_readiness_requires_hidden_feed_seed_criteria():
     assert not agent_service._has_tendency_analysis(_tendency_setting_with_profile({}))
     assert not agent_service._has_tendency_analysis(
@@ -107,8 +144,16 @@ def test_agent_service_tendency_readiness_requires_hidden_feed_seed_criteria():
         )
     )
 
-
 def test_public_activity_entrypoints_use_lane_specific_profile_readiness():
+    from app.runtime.characters import management
+
+    # Inspect the real owner functions under the original assertion namespace.
+    agent_service = SimpleNamespace(
+        give_feed_cue=feed_cues.give_feed_cue,
+        run_first_greeting=first_greeting.run_first_greeting,
+        _activate_agent_uow=autonomy_management._activate_agent_uow,
+        run_agent_now=manual_activity.run_agent_now,
+    )
     feed_cue_source = inspect.getsource(agent_service.give_feed_cue)
     assert feed_cue_source.index("if not _has_tendency_analysis(setting):") < (
         feed_cue_source.index("if not setting.auto_enabled:")
@@ -123,9 +168,14 @@ def test_public_activity_entrypoints_use_lane_specific_profile_readiness():
         agent_service.run_agent_now
     )
 
-
 def test_public_activity_entrypoints_require_tendency_readiness():
     """Keep the approved legacy readiness boundary while World lanes migrate."""
+    from app.runtime.characters import management
+
+    agent_service = SimpleNamespace(
+        give_feed_cue=feed_cues.give_feed_cue,
+        run_first_greeting=first_greeting.run_first_greeting,
+    )
 
     feed_cue_source = inspect.getsource(agent_service.give_feed_cue)
     assert feed_cue_source.index("if not _has_tendency_analysis(setting):") < (
@@ -134,7 +184,6 @@ def test_public_activity_entrypoints_require_tendency_readiness():
     assert "_ensure_tendency_analysis_ready(setting)" in inspect.getsource(
         agent_service.run_first_greeting
     )
-
 
 def test_tendency_payload_normalizes_internal_independent_post_profile():
     topics = [
@@ -181,7 +230,6 @@ def test_tendency_payload_normalizes_internal_independent_post_profile():
     assert profile["independent_post_topics"][0] == topics[0]
     assert "단순 유행어" in str(profile["feed_seed_interest_criteria"])
 
-
 @pytest.mark.parametrize("topic_count", [29, 31])
 def test_tendency_payload_requires_30_internal_independent_post_topics(
     topic_count: int,
@@ -213,13 +261,11 @@ def test_tendency_payload_requires_30_internal_independent_post_topics(
             }
         )
 
-
 def test_tendency_payload_requires_internal_planner_tendency_profile():
     with pytest.raises(agent_service.TendencyAnalysisParseError):
         agent_service._normalize_tendency_payload(
             {"summary": "공개 요약", "action_ranges": {}}
         )
-
 
 def test_tendency_payload_requires_hidden_feed_seed_interest_criteria():
     topics = [
@@ -245,7 +291,6 @@ def test_tendency_payload_requires_hidden_feed_seed_interest_criteria():
                 },
             }
         )
-
 
 def test_tendency_payload_rejects_prompt_injection_before_save():
     topics = [
@@ -278,7 +323,6 @@ def test_tendency_payload_rejects_prompt_injection_before_save():
             }
         )
 
-
 def test_tendency_payload_rejects_hidden_feed_seed_interest_injection():
     topics = [
         {
@@ -310,7 +354,6 @@ def test_tendency_payload_rejects_hidden_feed_seed_interest_injection():
             }
         )
 
-
 def test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term():
     prompt = agent_service._build_tendency_analysis_prompt(
         character=SimpleNamespace(
@@ -338,10 +381,11 @@ def test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term():
     assert 'call this Angmoo persona "앵무" instead of "캐릭터"' not in prompt
     assert 'use "앵무" when referring to the Angmoo persona' not in prompt
 
-
 def test_tendency_analysis_uses_medium_thinking_and_larger_output_budget(
     monkeypatch,
 ) -> None:
+    from app.runtime.resident import tendency_analysis as agent_service
+
     monkeypatch.setattr(
         agent_service.settings, "TENDENCY_ANALYSIS_THINKING_LEVEL", "Medium"
     )
@@ -361,12 +405,10 @@ def test_tendency_analysis_uses_medium_thinking_and_larger_output_budget(
     )
     assert agent_service.settings.tendency_analysis_thinking_level is None
 
-
 def _run_tendency_analysis_route_with_error(monkeypatch, exc: Exception) -> HTTPException:
     async def _raise_error(*_: object, **__: object) -> object:
         raise exc
 
-    monkeypatch.setattr(agent_routes.agent_service, "analyze_tendency", _raise_error)
 
     with pytest.raises(HTTPException) as exc_info:
         asyncio.run(
@@ -374,10 +416,10 @@ def _run_tendency_analysis_route_with_error(monkeypatch, exc: Exception) -> HTTP
                 "char-1",
                 db=object(),  # type: ignore[arg-type]
                 user=object(),  # type: ignore[arg-type]
+                analysis=_raise_error,
             )
         )
     return exc_info.value
-
 
 @pytest.mark.parametrize(
     "exc",
@@ -402,7 +444,6 @@ def test_tendency_analysis_route_hides_json_parse_details(monkeypatch, exc):
     assert http_exc.status_code == status.HTTP_502_BAD_GATEWAY
     assert http_exc.detail == agent_routes.TENDENCY_ANALYSIS_RETRY_DETAIL
 
-
 def test_tendency_analysis_route_maps_prompt_injection_to_422(monkeypatch):
     http_exc = _run_tendency_analysis_route_with_error(
         monkeypatch,
@@ -413,7 +454,6 @@ def test_tendency_analysis_route_maps_prompt_injection_to_422(monkeypatch):
 
     assert http_exc.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert http_exc.detail == "tendency_prompt_injection_detected"
-
 
 @pytest.mark.parametrize(
     ("exc", "expected_status", "expected_detail"),
@@ -443,7 +483,6 @@ def test_tendency_analysis_route_keeps_non_json_errors(
     assert http_exc.status_code == expected_status
     assert http_exc.detail == expected_detail
 
-
 def test_normalize_angmoo_terms_in_tendency_text_changes_persona_only():
     normalize = agent_service.normalize_angmoo_terms_in_tendency_text
 
@@ -453,7 +492,6 @@ def test_normalize_angmoo_terms_in_tendency_text_changes_persona_only():
     assert normalize("캐릭터 성향을 보여줍니다.") == "앵무 성향을 보여줍니다."
     assert normalize("최애 캐릭터 정보를 공유합니다.") == "최애 캐릭터 정보를 공유합니다."
     assert normalize("게임 캐릭터 이야기를 합니다.") == "게임 캐릭터 이야기를 합니다."
-
 
 def test_feed_scan_create_post_brief_requires_seed_or_owner_cue():
     no_seed = agent_briefs.build_feed_scan_create_post_brief({})
@@ -503,249 +541,10 @@ def test_feed_scan_create_post_brief_requires_seed_or_owner_cue():
     assert missing_intent == ""
     assert "source: owner_feed_cue" in owner_cue
 
-
-def test_v6_prepared_create_post_brief_uses_self_update_when_seed_missing():
-    no_seed = agent_runs._build_v6_prepared_create_post_brief(
-        {},
-        allowed_actions=("post", "observe"),
-    )
-    with_seed = agent_runs._build_v6_prepared_create_post_brief(
-        {
-            "interests": [{"post_id": "post-1", "summary": "summary", "reason": "reason"}],
-            "post_seed": "A feed-inspired thought.",
-            "post_seed_intent": "own_thought",
-        },
-        allowed_actions=("post", "observe"),
-    )
-    owner_cue = agent_runs._build_v6_prepared_create_post_brief(
-        {},
-        feed_cue_topic="Say hello.",
-        allowed_actions=("post", "observe"),
-    )
-    post_blocked = agent_runs._build_v6_prepared_create_post_brief(
-        {},
-        allowed_actions=("like", "observe"),
-    )
-
-    assert "source: self_update" in no_seed
-    assert "writing_mode: self_update_post" in no_seed
-    assert "source: feed_scan" in with_seed
-    assert "source: self_update" not in with_seed
-    assert "source: owner_feed_cue" in owner_cue
-    assert "source: self_update" not in owner_cue
-    assert post_blocked == ""
-
-
-def test_feed_scan_prompt_uses_own_thought_only_for_post_seed():
-    prompt = agent_runs._build_v6_feed_scan_lane_prompt(
-        character=SimpleNamespace(
-            id="char-1",
-            name="seed tester",
-            persona_summary="notices small warm signals",
-            speech_style="quiet",
-        ),
-        state=None,
-        activity_policy=None,
-        recent_activity_summary="- none",
-        consumed_seed_sources="- none",
-        recent_feed_interest_history="- none",
-        recent_own_root_topic_history="- none",
-    )
-
-    assert 'post_seed_intent="own_thought"' in prompt
-    assert 'set post_seed_intent="public_reaction"' not in prompt
-    assert "A nickname mention, gratitude, encouragement, or impression may appear only as supporting context" in prompt
-    assert "speaking to, thanking, encouraging, or praising a specific author" in prompt
-    assert 'Do not output post_seed_intent="public_reaction" or "direct_address"' in prompt
-    assert "Source-owned concrete scenes in feed cards" in prompt
-    assert "Do not write post_seed as if the current character personally saw, did, or felt" in prompt
-    assert "Convert source-owned scenes into this character's reaction, question, value judgment, or worldview extension" in prompt
-    assert "Context boundary rules" in prompt
-    assert "neutral inputs for facts, relationships, emotions, topics, repetition checks, and source tracking only" in prompt
-    assert "Do not copy their surface style" in prompt
-    assert "created_at, title, and body_preview show the source author's past context" in prompt
-    assert "Judge current time only from the Current time value" in prompt
-    assert "post_seed is a meaning-centered memo for writing_composition, not a final title/body draft" in prompt
-    assert "과거 출력이나 다른 캐릭터의 고유 추임새" in prompt
-    assert "post_seed에는 캐릭터의 표면 말투를 넣지 마세요." in prompt
-    assert "laughter, interjections, sentence-ending habits, unique catchphrases" in prompt
-    assert "Reflect character through interests, judgment criteria, viewpoint, and value judgment only" in prompt
-    assert "Final title/body voice is applied only in writing_composition" in prompt
-    assert "Call angmoo_list_feed with limit=30" in prompt
-    assert "Call angmoo_note_feed_interests with interests, post_seed, post_seed_intent, topic_signature, novelty_basis, no_relevant_signal, and review_reason" in prompt
-    assert "Do not run public actions in this lane" in prompt
-    assert "Input duplicate gate" in prompt
-    assert "Output duplicate gate" in prompt
-
-
-def test_feed_history_sanitize_prompt_is_scoped_to_history_only():
-    prompt = agent_runs._build_v6_feed_history_sanitize_lane_prompt(
-        character=SimpleNamespace(id="char-1", name="frog"),
-        consumed_seed_sources=(
-            "- post_id: post-old\n"
-            "  prior_post_seed: nya-ha-ha copied catchphrase"
-        ),
-        recent_feed_interest_history=(
-            "- post_id: post-interest\n"
-            "  prior_feed_scan:\n"
-            "    post_seed: copied old seed"
-        ),
-        recent_own_root_topic_history=(
-            "- post_id: post-own\n"
-            "  body_preview: copied old own post body"
-        ),
-    )
-
-    assert "angmoo_note_feed_history_sanitize" in prompt
-    assert "Do not call angmoo_list_feed" in prompt
-    assert "Do not read the current feed" in prompt
-    assert "Do not select current candidates" in prompt
-    assert "Do not write any final title, body, reply, or post_seed" in prompt
-    assert "Do not rewrite topic_signature, novelty_basis, or source_title" in prompt
-    assert "Fill only the semantic summary field and warnings" in prompt
-    assert "post_id" in prompt
-    assert "style_marker_removed" in prompt
-    assert "consumed_sources" in prompt
-    assert "recent_feed_interests" in prompt
-    assert "recent_own_root_topics" in prompt
-
-
-def test_read_only_lane_retry_success_after_timeout(monkeypatch):
-    monkeypatch.setattr(agent_runs, "READ_ONLY_LANE_RETRY_DELAY_MIN_SECONDS", 0)
-    monkeypatch.setattr(agent_runs, "READ_ONLY_LANE_RETRY_DELAY_MAX_SECONDS", 0)
-    attempts: list[int] = []
-
-    async def operation(attempt: int):
-        attempts.append(attempt)
-        if attempt == 1:
-            raise agent_runs.OpenClawGatewayError(
-                "UNAVAILABLE: FailoverError: LLM request timed out."
-            )
-        return {"status": "ok", "runId": "retry-success"}
-
-    result = asyncio.run(
-        agent_runs._run_read_only_lane_with_retry(
-            lane_name="feed_scan_lane",
-            operation=operation,
-            attempt_metadata=lambda attempt: {
-                "agent_run_id": "run-1",
-                "lane": "feed_scan",
-                "openclaw_run_id": f"run-1-v6-feed-scan-attempt-{attempt}",
-                "provider": "google",
-                "model": "gemini-3.1-flash-lite",
-                "auth_profile_id": "google:char-1",
-                "timeout_seconds": 180,
-            },
-        )
-    )
-
-    assert attempts == [1, 2]
-    assert result["status"] == "ok"
-    assert result["attempts"] == 2
-    assert result["first_error_class"] == "openclaw_failover_timeout"
-    assert result["retry_delay_seconds"] == 0
-    assert "LLM request timed out" in result["first_error"]
-    assert result["attempt_errors"][0] == {
-        "agent_run_id": "run-1",
-        "lane": "feed_scan",
-        "openclaw_run_id": "run-1-v6-feed-scan-attempt-1",
-        "provider": "google",
-        "model": "gemini-3.1-flash-lite",
-        "auth_profile_id": "google:char-1",
-        "timeout_seconds": 180,
-        "attempt": 1,
-        "error_class": "openclaw_failover_timeout",
-        "timeout_source": "openclaw_embedded_run_timeout",
-        "error": "UNAVAILABLE: FailoverError: LLM request timed out.",
-    }
-
-
-def test_feed_history_sanitize_retry_success_after_timeout(monkeypatch):
-    monkeypatch.setattr(agent_runs, "READ_ONLY_LANE_RETRY_DELAY_MIN_SECONDS", 0)
-    monkeypatch.setattr(agent_runs, "READ_ONLY_LANE_RETRY_DELAY_MAX_SECONDS", 0)
-    attempts: list[int] = []
-
-    async def operation(attempt: int):
-        attempts.append(attempt)
-        if attempt == 1:
-            raise agent_runs.OpenClawGatewayError(
-                "UNAVAILABLE: FailoverError: LLM request timed out."
-            )
-        return {"status": "ok", "runId": "sanitize-retry-success"}
-
-    result = asyncio.run(
-        agent_runs._run_read_only_lane_with_retry(
-            lane_name="feed_history_sanitize_lane",
-            operation=operation,
-            attempt_metadata=lambda attempt: {
-                "agent_run_id": "run-1",
-                "lane": "feed_history_sanitize",
-                "openclaw_run_id": (
-                    f"run-1-v6-feed-history-sanitize-attempt-{attempt}"
-                ),
-                "provider": "google",
-                "model": "gemini-3.1-flash-lite",
-                "auth_profile_id": "google:char-1",
-                "timeout_seconds": agent_runs.FEED_HISTORY_SANITIZE_TIMEOUT_SECONDS,
-            },
-            max_attempts=agent_runs.FEED_HISTORY_SANITIZE_MAX_ATTEMPTS,
-        )
-    )
-
-    assert attempts == [1, 2]
-    assert result["status"] == "ok"
-    assert result["attempts"] == 2
-    assert result["runId"] == "sanitize-retry-success"
-    assert "feed_history_sanitize_fallback" not in result
-    assert result["attempt_errors"][0]["timeout_seconds"] == 60
-    assert result["attempt_errors"][0]["attempt"] == 1
-
-
-def test_feed_history_sanitize_retry_exhaustion_uses_two_60s_attempts(monkeypatch):
-    monkeypatch.setattr(agent_runs, "READ_ONLY_LANE_RETRY_DELAY_MIN_SECONDS", 0)
-    monkeypatch.setattr(agent_runs, "READ_ONLY_LANE_RETRY_DELAY_MAX_SECONDS", 0)
-    attempts: list[int] = []
-
-    async def operation(attempt: int):
-        attempts.append(attempt)
-        raise agent_runs.OpenClawGatewayError(
-            "UNAVAILABLE: FailoverError: LLM request timed out."
-        )
-
-    with pytest.raises(agent_runs.ReadOnlyLaneRetryExhausted) as exc_info:
-        asyncio.run(
-            agent_runs._run_read_only_lane_with_retry(
-                lane_name="feed_history_sanitize_lane",
-                operation=operation,
-                attempt_metadata=lambda attempt: {
-                    "agent_run_id": "run-1",
-                    "lane": "feed_history_sanitize",
-                    "openclaw_run_id": (
-                        f"run-1-v6-feed-history-sanitize-attempt-{attempt}"
-                    ),
-                    "provider": "google",
-                    "model": "gemini-3.1-flash-lite",
-                    "auth_profile_id": "google:char-1",
-                    "timeout_seconds": agent_runs.FEED_HISTORY_SANITIZE_TIMEOUT_SECONDS,
-                },
-                max_attempts=agent_runs.FEED_HISTORY_SANITIZE_MAX_ATTEMPTS,
-            )
-        )
-
-    lane_result = exc_info.value.lane_result
-    assert attempts == [1, 2]
-    assert lane_result["attempts"] == 2
-    assert lane_result["attempt_errors"][0]["timeout_seconds"] == 60
-    assert lane_result["attempt_errors"][1]["timeout_seconds"] == 60
-    assert lane_result["attempt_errors"][0]["attempt"] == 1
-    assert lane_result["attempt_errors"][1]["attempt"] == 2
-
-
 def test_feed_history_sanitize_uses_google_non_streaming_stream_params():
     assert agent_runs._feed_history_sanitize_stream_params() == {
         "googleResponseMode": "non_streaming"
     }
-
 
 def test_feed_scan_uses_google_non_streaming_stream_params():
     assert agent_runs._feed_scan_stream_params() == {
@@ -754,319 +553,10 @@ def test_feed_scan_uses_google_non_streaming_stream_params():
     source = inspect.getsource(agent_runs._run_resident_individual_tool_flow)
     assert "stream_params=_feed_scan_stream_params()" in source
 
-
-def test_feed_scan_retry_exhaustion_defers_without_final_action(monkeypatch):
-    monkeypatch.setattr(agent_runs, "READ_ONLY_LANE_RETRY_DELAY_MIN_SECONDS", 0)
-    monkeypatch.setattr(agent_runs, "READ_ONLY_LANE_RETRY_DELAY_MAX_SECONDS", 0)
-    attempts: list[int] = []
-
-    async def operation(attempt: int):
-        attempts.append(attempt)
-        raise agent_runs.OpenClawGatewayError(
-            "UNAVAILABLE: FailoverError: LLM request timed out."
-        )
-
-    with pytest.raises(agent_runs.ReadOnlyLaneRetryExhausted) as exc_info:
-        asyncio.run(
-            agent_runs._run_read_only_lane_with_retry(
-                lane_name="feed_scan_lane",
-                operation=operation,
-                attempt_metadata=lambda attempt: {
-                    "agent_run_id": "run-1",
-                    "lane": "feed_scan",
-                    "openclaw_run_id": f"run-1-v6-feed-scan-attempt-{attempt}",
-                    "provider": "google",
-                    "model": "gemini-3.1-flash-lite",
-                    "auth_profile_id": "google:char-1",
-                    "timeout_seconds": 180,
-                },
-            )
-        )
-
-    retry_at = datetime(2026, 6, 6, 9, 30, tzinfo=UTC)
-    gateway_result = agent_runs._build_read_only_lane_deferred_gateway_result(
-        result={"flow": "resident_v6_individual_tools"},
-        lane_name=exc_info.value.lane_name,
-        lane_result=exc_info.value.lane_result,
-        retry_at=retry_at,
-    )
-
-    assert attempts == [1, 2]
-    assert gateway_result["status"] == "deferred"
-    assert gateway_result["reason"] == "read_only_lane_retry_exhausted"
-    assert gateway_result["retry_at"] == "2026-06-06T09:30:00+00:00"
-    assert gateway_result["feed_scan_lane"]["attempts"] == 2
-    assert gateway_result["feed_scan_lane"]["failure_class"] == (
-        "openclaw_failover_timeout"
-    )
-    assert "first_error" in gateway_result["feed_scan_lane"]
-    assert gateway_result["feed_scan_lane"]["attempt_errors"][1]["attempt"] == 2
-    assert gateway_result["feed_scan_lane"]["attempt_errors"][1]["timeout_source"] == (
-        "openclaw_embedded_run_timeout"
-    )
-    assert "final_action_lane" not in gateway_result
-
-
-def test_read_only_lane_retry_records_gateway_timing_diagnostics(monkeypatch):
-    monkeypatch.setattr(agent_runs, "READ_ONLY_LANE_RETRY_DELAY_MIN_SECONDS", 0)
-    monkeypatch.setattr(agent_runs, "READ_ONLY_LANE_RETRY_DELAY_MAX_SECONDS", 0)
-
-    async def operation(attempt: int):
-        raise agent_runs.OpenClawGatewayError(
-            "OpenClaw Gateway request timed out after 225s",
-            diagnostics={
-                "backend_request_started_at": "2026-06-06T09:00:00+00:00",
-                "backend_request_finished_at": "2026-06-06T09:03:45+00:00",
-                "backend_duration_ms": 225000,
-                "timeout_source": "backend_gateway_timeout",
-                "call_order_in_run": attempt,
-                "idempotency_key": f"run-1-attempt-{attempt}",
-            },
-        )
-
-    with pytest.raises(agent_runs.ReadOnlyLaneRetryExhausted) as exc_info:
-        asyncio.run(
-            agent_runs._run_read_only_lane_with_retry(
-                lane_name="feed_scan_lane",
-                operation=operation,
-                attempt_metadata=lambda attempt: {
-                    "agent_run_id": "run-1",
-                    "lane": "feed_scan",
-                    "openclaw_run_id": f"run-1-attempt-{attempt}",
-                    "provider": "google",
-                    "model": "gemini-3.1-flash-lite",
-                    "auth_profile_id": "google:char-1",
-                    "timeout_seconds": 180,
-                },
-            )
-        )
-
-    attempt_error = exc_info.value.lane_result["attempt_errors"][0]
-    assert attempt_error["backend_duration_ms"] == 225000
-    assert attempt_error["timeout_source"] == "backend_gateway_timeout"
-    assert attempt_error["call_order_in_run"] == 1
-    assert attempt_error["idempotency_key"] == "run-1-attempt-1"
-
-
-def test_read_only_lane_error_classifier_distinguishes_timeout_sources():
-    assert agent_runs._classify_read_only_lane_error(
-        "Google Generative AI API error (503): high demand [code=UNAVAILABLE]"
-    ) == "google_503_high_demand"
-    assert agent_runs._classify_read_only_lane_error(
-        "UNAVAILABLE: FailoverError: LLM request timed out."
-    ) == "openclaw_failover_timeout"
-    assert agent_runs._classify_read_only_lane_error(
-        "OpenClaw Gateway request timed out after 225s"
-    ) == "backend_gateway_timeout"
-    assert agent_runs._classify_read_only_lane_error(
-        "UNAVAILABLE: The AI service is temporarily overloaded."
-    ) == "google_unavailable_unknown"
-    assert agent_runs._classify_read_only_lane_timeout_source(
-        "LLM idle timeout (180s): no response from model"
-    ) == "openclaw_llm_idle_timeout"
-
-
-def test_feed_history_sanitize_retry_exhaustion_uses_metadata_fallback_reason():
-    assert agent_runs._feed_history_sanitize_metadata_fallback_reason(
-        retry_exhausted=True
-    ) == "feed_history_sanitize_retry_exhausted_metadata_fallback"
-    assert agent_runs._feed_history_sanitize_metadata_fallback_reason(
-        retry_exhausted=False
-    ) == "feed_history_sanitize_metadata_fallback"
-
-
-def test_compact_stored_lane_result_keeps_read_only_attempt_diagnostics():
-    compact = agent_runs._compact_stored_lane_result(
-        {
-            "status": "failed",
-            "reason": "read_only_lane_retry_exhausted",
-            "attempts": 2,
-            "first_error_class": "google_503_high_demand",
-            "failure_class": "openclaw_failover_timeout",
-            "first_error": "Google 503",
-            "error": "UNAVAILABLE: FailoverError: LLM request timed out.",
-            "attempt_errors": [
-                {
-                    "attempt": 1,
-                    "lane": "feed_scan",
-                    "agent_run_id": "run-1",
-                    "openclaw_run_id": "run-1-v6-feed-scan-attempt-1",
-                    "provider": "google",
-                    "model": "gemini-3.1-flash-lite",
-                    "auth_profile_id": "google:char-1",
-                    "timeout_seconds": 180,
-                    "backend_request_started_at": "2026-06-06T09:00:00+00:00",
-                    "backend_request_finished_at": "2026-06-06T09:03:00+00:00",
-                    "backend_duration_ms": 180000,
-                    "timeout_source": "provider_error",
-                    "call_order_in_run": 3,
-                    "error_class": "google_503_high_demand",
-                    "error": "Google 503",
-                    "prompt": "must not be kept",
-                }
-            ],
-        }
-    )
-
-    assert compact["first_error_class"] == "google_503_high_demand"
-    assert compact["failure_class"] == "openclaw_failover_timeout"
-    assert compact["attempt_errors"][0] == {
-        "attempt": 1,
-        "lane": "feed_scan",
-        "agent_run_id": "run-1",
-        "openclaw_run_id": "run-1-v6-feed-scan-attempt-1",
-        "provider": "google",
-        "model": "gemini-3.1-flash-lite",
-        "auth_profile_id": "google:char-1",
-        "timeout_seconds": 180,
-        "backend_request_started_at": "2026-06-06T09:00:00+00:00",
-        "backend_request_finished_at": "2026-06-06T09:03:00+00:00",
-        "backend_duration_ms": 180000,
-        "timeout_source": "provider_error",
-        "call_order_in_run": 3,
-        "error_class": "google_503_high_demand",
-        "error": "Google 503",
-    }
-
-
-def test_compact_stored_lane_result_keeps_inbox_decision_evidence():
-    compact = agent_runs._compact_stored_lane_result(
-        {
-            "status": "observed",
-            "outcome": "LLM_DECIDED_NO_ACTION",
-            "decision_source": "llm",
-            "candidate_count": 1,
-            "planner_invoked": True,
-            "provider_call_count": 1,
-            "public_action_count": 0,
-            "handled_notification_count": 1,
-            "prompt": "must not be kept",
-        }
-    )
-
-    assert compact == {
-        "status": "observed",
-        "outcome": "LLM_DECIDED_NO_ACTION",
-        "decision_source": "llm",
-        "candidate_count": 1,
-        "planner_invoked": True,
-        "provider_call_count": 1,
-        "public_action_count": 0,
-        "handled_notification_count": 1,
-    }
-
-
-def test_stored_gateway_result_keeps_sanitize_fallback_reason():
-    stored = agent_runs._stored_gateway_result(
-        {
-            "status": "completed",
-            "feed_history_sanitize_fallback": "metadata_only",
-            "feed_history_sanitize_fallback_reason": "retry_exhausted",
-            "unsafe_prompt": "must not be kept",
-        }
-    )
-
-    assert stored["status"] == "completed"
-    assert stored["feed_history_sanitize_fallback"] == "metadata_only"
-    assert stored["feed_history_sanitize_fallback_reason"] == "retry_exhausted"
-    assert "unsafe_prompt" not in stored
-
-
-def test_stored_gateway_result_keeps_langgraph_v2_observability():
-    stored = agent_runs._stored_gateway_result(
-        {
-            "status": "completed",
-            "planner_results": {"feed": {"action_count": 1}},
-            "independent_post_decision": {
-                "available": True,
-                "tick_probability": 0.28,
-                "roll": 0.11,
-                "roll_passed": True,
-                "planner_decision": "write",
-                "topic_key": "cosplay_preparation",
-            },
-            "independent_post_roll": 0.11,
-            "independent_post_probability": 0.28,
-            "independent_post_roll_passed": True,
-            "independent_post_topic_key": "cosplay_preparation",
-            "independent_post_topic_pool_size": 30,
-            "independent_post_topic_prompt_count": 10,
-            "action_budget_trim_summary": {"actions": {"reply": {"trimmed": 1}}},
-            "write_task_summary": {"reply_task_count": 2, "reply_written_count": 1},
-            "writer_results": {"reply_writer": {"missing_task_ids": ["reply-2"]}},
-            "unsafe_prompt": "must not be kept",
-        }
-    )
-
-    assert stored["planner_results"] == {"feed": {"action_count": 1}}
-    assert stored["independent_post_decision"]["roll_passed"] is True
-    assert stored["independent_post_roll"] == 0.11
-    assert stored["independent_post_probability"] == 0.28
-    assert stored["independent_post_roll_passed"] is True
-    assert stored["independent_post_topic_key"] == "cosplay_preparation"
-    assert stored["independent_post_topic_pool_size"] == 30
-    assert stored["independent_post_topic_prompt_count"] == 10
-    assert stored["action_budget_trim_summary"]["actions"]["reply"]["trimmed"] == 1
-    assert stored["write_task_summary"]["reply_task_count"] == 2
-    assert stored["writer_results"]["reply_writer"]["missing_task_ids"] == ["reply-2"]
-    assert "unsafe_prompt" not in stored
-
-
-def test_read_only_lane_deferred_retry_at_uses_30_minutes(monkeypatch):
-    monkeypatch.setattr(agent_runs, "READ_ONLY_LANE_DEFERRED_RETRY_MINUTES", 30)
-    now = datetime(2026, 6, 6, 9, 0, tzinfo=UTC)
-
-    assert agent_runs._read_only_lane_deferred_retry_at(now) == now + timedelta(
-        minutes=30
-    )
-
-
-def test_feed_scan_prompt_uses_sanitized_history_without_raw_seed_text():
-    prompt = agent_runs._build_v6_feed_scan_lane_prompt(
-        character=SimpleNamespace(
-            id="char-1",
-            name="seed tester",
-            persona_summary="notices small warm signals",
-            speech_style="quiet",
-        ),
-        state=None,
-        activity_policy=None,
-        recent_activity_summary="- none",
-        consumed_seed_sources=(
-            "- post_id: post-old\n"
-            "  topic_signature: weekend lunch strategy\n"
-            "  semantic_summary: the source topic was lunch planning, not a voice sample\n"
-            "  warnings: style_marker_removed"
-        ),
-        recent_feed_interest_history=(
-            "- topic_signature: frog lunch loop\n"
-            "  source_title: lunch note\n"
-            "  semantic_summary: cared about lunch planning\n"
-            "  warnings: style_marker_removed"
-        ),
-        recent_own_root_topic_history=(
-            "- topic_signature: already posted lunch thought\n"
-            "  semantic_summary: already wrote about lunch strategy\n"
-            "  warnings: -"
-        ),
-    )
-
-    assert "Sanitized consumed feed writing source records" in prompt
-    assert "Sanitized recent feed interests by this character" in prompt
-    assert "Sanitized recent own root post topics by this character" in prompt
-    assert "semantic_summary" in prompt
-    assert "style_marker_removed" in prompt
-    assert "prior_post_seed" not in prompt
-    assert "prior_feed_scan" not in prompt
-    assert "nya-ha-ha" not in prompt
-    assert "copied old own post body" not in prompt
-    assert "Input duplicate gate" in prompt
-    assert "topic_signature, source_title, semantic_summary, and novelty_basis" in prompt
-
-
 def test_writing_composition_prompt_has_input_voice_boundary():
     prompt = agent_writing._build_composition_prompt(
         None,
+        workflows=writing_runtime.prompt_workflows(),
         character=SimpleNamespace(
             id="char-1",
             name="voice tester",
@@ -1090,83 +580,6 @@ def test_writing_composition_prompt_has_input_voice_boundary():
     assert "제공된 Final action brief, saved_state, recent_activity_summary, target/thread context" in prompt
     assert "title, body, reply를 쓸 때는 위 입력에 남아 있던 웃음소리" in prompt
     assert "현재 Character의 persona와 speech_style에 명시된 말투만 기준" in prompt
-
-
-def test_state_lane_prompt_has_input_voice_boundary():
-    prompt = agent_runs._build_v6_state_lane_prompt(
-        character=SimpleNamespace(
-            id="char-1",
-            name="state tester",
-            handle="state_tester",
-            persona_summary="quiet observer",
-            speech_style="calm",
-        ),
-        state=None,
-        activity_policy=None,
-        public_action_ledger="- none",
-        tick_activity="- none",
-        observation_context="- none",
-    )
-
-    assert "입력 말투 경계 규칙" in prompt
-    assert "Current tick successful public action ledger, Previous saved state" in prompt
-    assert "mood, summary, memory_note를 저장할 때는 위 입력에 남아 있던 웃음소리" in prompt
-    assert "새 state의 말투는 현재 Character의 persona와 speech_style에 명시된 말투만 기준" in prompt
-
-
-def test_memory_note_refine_prompt_has_input_voice_boundary():
-    prompt = agent_runs._build_memory_note_refine_prompt(
-        character=SimpleNamespace(
-            id="char-1",
-            name="refine tester",
-            handle="refine_tester",
-            persona_summary="quiet observer",
-            speech_style="calm",
-        ),
-        state=None,
-        activity_policy=None,
-        tick_activity="- none",
-    )
-
-    assert "입력 말투 경계 규칙" in prompt
-    assert "Actual activity from this tick, First-pass saved state에 적힌 말투" in prompt
-    assert "mood, summary, memory_note를 다듬을 때는 위 입력에 남아 있던 웃음소리" in prompt
-    assert "다듬은 state의 말투는 현재 Character의 persona와 speech_style에 명시된 말투만 기준" in prompt
-
-
-def test_feed_scan_prompt_suppresses_similar_recent_interests():
-    prompt = agent_runs._build_v6_feed_scan_lane_prompt(
-        character=SimpleNamespace(
-            id="char-1",
-            name="seed tester",
-            persona_summary="notices small warm signals",
-            speech_style="quiet",
-        ),
-        state=None,
-        activity_policy=None,
-        recent_activity_summary="- none",
-        consumed_seed_sources="- none",
-        recent_feed_interest_history=(
-            "- source_title: old note\n"
-            "  topic_signature: same loop\n"
-            "  semantic_summary: same loop"
-        ),
-        recent_own_root_topic_history=(
-            "- topic_signature: same loop\n"
-            "  semantic_summary: same own thought"
-        ),
-    )
-
-    assert "Sanitized recent feed interests by this character" in prompt
-    assert "Sanitized recent own root post topics by this character" in prompt
-    assert "Input duplicate gate" in prompt
-    assert "Output duplicate gate" in prompt
-    assert "topic_signature" in prompt
-    assert "keep interests[0] only when a low-cost existing-post reaction may still fit" in prompt
-    assert "Do not block a post just because it has the same author" in prompt
-    assert "new event, new progress, new viewpoint" in prompt
-    assert 'interests=[], post_seed="", no_relevant_signal=true' in prompt
-
 
 def test_recent_feed_interest_history_formatter_limits_and_filters(monkeypatch):
     now = datetime(2026, 6, 2, 12, 0, tzinfo=UTC)
@@ -1267,7 +680,6 @@ def test_recent_feed_interest_history_formatter_limits_and_filters(monkeypatch):
     assert "novelty post-1" in result
     assert "body_preview:" in result
 
-
 def test_agent_feed_post_summary_uses_topic_and_preview(monkeypatch):
     monkeypatch.setattr(
         topic_policy,
@@ -1303,7 +715,6 @@ def test_agent_feed_post_summary_uses_topic_and_preview(monkeypatch):
     assert len(card.body_preview) == 300
     assert card.body_preview.endswith("...")
 
-
 def test_agent_feed_post_summary_prefers_post_topic_columns(monkeypatch):
     monkeypatch.setattr(
         topic_policy,
@@ -1336,7 +747,6 @@ def test_agent_feed_post_summary_prefers_post_topic_columns(monkeypatch):
 
     assert card.topic_signature == "column topic wins"
 
-
 def test_post_topic_signature_falls_back_to_activity_log_metadata(monkeypatch):
     monkeypatch.setattr(
         topic_policy,
@@ -1359,7 +769,6 @@ def test_post_topic_signature_falls_back_to_activity_log_metadata(monkeypatch):
         community_service.post_topic_signature_for_prompt(None, post)
         == "log fallback topic"
     )
-
 
 def test_note_agent_tool_feed_interests_stores_topic_metadata(monkeypatch):
     run = SimpleNamespace(
@@ -1418,7 +827,6 @@ def test_note_agent_tool_feed_interests_stores_topic_metadata(monkeypatch):
     assert payload["novelty_basis"] == "새로운 진행이 있음"
     assert stored_payload["topic_signature"] == "큰 주제: 응원 루프"
     assert captured["action_type"] == "feed_interests_noted"
-
 
 def test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable(monkeypatch):
     monkeypatch.setattr(
@@ -1479,7 +887,6 @@ def test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable(
     assert "legacy_reaction_seed_not_writable" in payload["warnings"]
     assert json.loads(str(captured["result"]))["post_seed_intent"] == "public_reaction"
 
-
 def test_note_agent_tool_feed_interests_drops_seed_without_interest(monkeypatch):
     monkeypatch.setattr(
         note_runtime,
@@ -1516,7 +923,6 @@ def test_note_agent_tool_feed_interests_drops_seed_without_interest(monkeypatch)
     assert payload["no_relevant_signal"] is True
     assert "post_seed_dropped_without_feed_interest" in payload["warnings"]
     assert stored_payload["post_seed"] == ""
-
 
 def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch):
     monkeypatch.setattr(
@@ -1572,7 +978,6 @@ def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch)
     assert payload["post_seed"] == ""
     assert payload["no_relevant_signal"] is False
     assert captured["target_post_id"] == "post-1"
-
 
 def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch):
     monkeypatch.setattr(
@@ -1630,7 +1035,6 @@ def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch)
     assert stored_payload["consumed_sources"][0]["seed_semantic_summary"] == (
         "copied lunch strategy voice"
     )
-
 
 def test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton(monkeypatch):
     style_marker = community_service.FEED_HISTORY_STYLE_MARKER_RE.pattern[
@@ -1693,7 +1097,6 @@ def test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton(monkeypat
     assert "wrong topic" not in result.result
     assert "raw old source text" not in result.result
 
-
 def test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_metadata(
     monkeypatch,
 ):
@@ -1740,7 +1143,6 @@ def test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_meta
         "locked topic / locked novelty / locked title"
     )
     assert "raw omitted source" not in result.result
-
 
 def test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_payload(
     monkeypatch,
@@ -1795,7 +1197,6 @@ def test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_
     assert "secret raw summary text" not in joined
     assert "post-secret" not in joined
 
-
 def test_note_agent_tool_feed_history_sanitize_logs_authorization_error(
     monkeypatch,
     caplog,
@@ -1818,7 +1219,6 @@ def test_note_agent_tool_feed_history_sanitize_logs_authorization_error(
     assert "failureKind=authorization_error" in joined
     assert "errorCategory=AgentRunAuthorizationError" in joined
     assert "session-secret-value" not in joined
-
 
 def test_feed_history_metadata_fallback_excludes_raw_seed(monkeypatch):
     now = datetime(2026, 6, 6, 12, 0, tzinfo=UTC)
@@ -1868,7 +1268,6 @@ def test_feed_history_metadata_fallback_excludes_raw_seed(monkeypatch):
     assert "post_seed" not in consumed
     assert "raw old seed text" not in consumed
     assert "냐하하" not in consumed
-
 
 def test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic(
     monkeypatch,
@@ -1939,7 +1338,6 @@ def test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic(
     assert payload["no_relevant_signal"] is False
     assert "post_seed_topic_repeated_recent_own_root" in payload["warnings"]
 
-
 def test_post_created_activity_result_stores_topic_metadata():
     result = community_service.build_post_created_activity_result(
         post_id="post-1",
@@ -1958,7 +1356,6 @@ def test_post_created_activity_result_stores_topic_metadata():
     assert payload["lore_chunk_ids"] == ["lore-chunk-1", "lore-chunk-2"]
     assert payload["retrieval_mode"] == "pgvector"
 
-
 def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
     run = SimpleNamespace(
         id="run-1", user_id="user-1", character_id="char-1", post_id=None
@@ -1970,7 +1367,7 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
             return SimpleNamespace(id="user-1")
 
     monkeypatch.setattr(
-        community_service.agent_run_crud,
+        routine_run_queries,
         "get_active_run_for_session",
         lambda *args, **kwargs: run,
     )
@@ -2004,7 +1401,7 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
         lambda *args, **kwargs: None,
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        tool_action_runtime.feed_cues,
         "mark_pending_feed_cue_used",
         lambda *args, **kwargs: None,
     )
@@ -2025,7 +1422,6 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
     assert stored["topic_signature"] == "큰 주제: 자기 생각"
     assert stored["novelty_basis"] == "새 관점"
 
-
 def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatch):
     run = SimpleNamespace(
         id="run-1", user_id="user-1", character_id="char-1", post_id=None
@@ -2037,7 +1433,7 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
             return SimpleNamespace(id="user-1")
 
     monkeypatch.setattr(
-        community_service.agent_run_crud,
+        routine_run_queries,
         "get_active_run_for_session",
         lambda *args, **kwargs: run,
     )
@@ -2071,12 +1467,12 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
         lambda *args, **kwargs: None,
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        tool_action_runtime.feed_cue_queries,
         "get_pending_feed_cue",
         lambda *args, **kwargs: SimpleNamespace(id=77),
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        tool_action_runtime.feed_cues,
         "mark_pending_feed_cue_used",
         lambda *args, **kwargs: consumed.append(kwargs),
     )
@@ -2098,7 +1494,6 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
     assert consumed == [
         {"character_id": "char-1", "run_id": "run-1", "post_id": "post-1"}
     ]
-
 
 def test_recent_own_root_topic_exists_uses_post_topic_columns(monkeypatch):
     post = SimpleNamespace(
@@ -2140,121 +1535,6 @@ def test_recent_own_root_topic_exists_uses_post_topic_columns(monkeypatch):
         topic_signature="이미 쓴 큰 주제",
     )
 
-
-def test_v6_action_menu_exposes_create_post_only_with_prepared_brief():
-    without_brief = agent_runs._format_v6_action_menu_table(
-        None,
-        character_id="char-1",
-        allowed_actions=("post", "observe"),
-        inbox_candidates=[],
-        feed_interest_payload={},
-        prepared_create_post_brief="",
-    )
-    with_owner_cue = agent_runs._format_v6_action_menu_table(
-        None,
-        character_id="char-1",
-        allowed_actions=("post", "observe"),
-        inbox_candidates=[],
-        feed_interest_payload={},
-        feed_cue=SimpleNamespace(topic="Say hello."),
-        prepared_create_post_brief="source: owner_feed_cue\nprimary_intent: Say hello.",
-    )
-    with_self_update = agent_runs._format_v6_action_menu_table(
-        None,
-        character_id="char-1",
-        allowed_actions=("post", "observe"),
-        inbox_candidates=[],
-        feed_interest_payload={},
-        prepared_create_post_brief=(
-            "source: self_update\n"
-            "writing_mode: self_update_post\n"
-            "basis: current_time_and_persona"
-        ),
-    )
-    with_post_seed_without_interest = agent_runs._format_v6_action_menu_table(
-        None,
-        character_id="char-1",
-        allowed_actions=("post", "observe"),
-        inbox_candidates=[],
-        feed_interest_payload={
-            "interests": [],
-            "post_seed": "A warm public reaction.",
-            "post_seed_intent": "public_reaction",
-            "topic_signature": "warm public reaction topic",
-            "novelty_basis": "new concrete detail",
-        },
-        prepared_create_post_brief=(
-            "source: feed_scan\n"
-            "writing_mode: community_theme_post\n"
-            "primary_intent: A warm public reaction.\n"
-            "primary_intent_type: public_reaction"
-        ),
-    )
-
-    assert "angmoo_create_post_from_brief" not in without_brief
-    assert "angmoo_create_post_from_brief" in with_owner_cue
-    assert "angmoo_create_post_from_brief" in with_self_update
-    assert agent_briefs.PREPARED_CREATE_POST_BRIEF_SENTINEL in with_self_update
-    assert "source: self_update" in with_self_update
-    assert "writing_mode: self_update_post" in with_self_update
-    assert "angmoo_create_post_from_brief" not in with_post_seed_without_interest
-
-
-def test_v6_action_menu_keeps_feed_actions_without_post_seed(monkeypatch):
-    post = SimpleNamespace(
-        id="post-1",
-        author_user_id=None,
-        author_character_id="char-2",
-        title="quiet agreement",
-        body="a post worth liking",
-    )
-    monkeypatch.setattr(agent_runs.community_crud, "get_post", lambda *args, **kwargs: post)
-    monkeypatch.setattr(
-        agent_runs.community_service,
-        "is_post_public_context_visible",
-        lambda *args, **kwargs: True,
-    )
-    monkeypatch.setattr(agent_runs, "_has_character_like", lambda *args, **kwargs: False)
-    monkeypatch.setattr(agent_runs, "_has_character_repost", lambda *args, **kwargs: False)
-    monkeypatch.setattr(
-        agent_runs, "_has_character_replied_to_thread", lambda *args, **kwargs: False
-    )
-    monkeypatch.setattr(
-        agent_runs,
-        "_is_direct_reply_to_character_post_for_action_gate",
-        lambda *args, **kwargs: False,
-    )
-    monkeypatch.setattr(
-        agent_runs,
-        "_profile_display_name_for_action_menu",
-        lambda *args, **kwargs: "other bird",
-    )
-
-    menu = agent_runs._format_v6_action_menu_table(
-        None,
-        character_id="char-1",
-        allowed_actions=("like", "reply", "repost", "post"),
-        inbox_candidates=[],
-        feed_interest_payload={
-            "interests": [
-                {
-                    "post_id": "post-1",
-                    "summary": "quiet agreement",
-                    "reason": "like and reply can fit",
-                }
-            ],
-            "post_seed": "",
-            "no_relevant_signal": False,
-        },
-        prepared_create_post_brief="",
-    )
-
-    assert "Feed candidate 1" in menu
-    assert "angmoo_like_post" in menu
-    assert "angmoo_reply_to_post_from_brief" in menu
-    assert "angmoo_create_post_from_brief" not in menu
-
-
 def test_v6_final_action_prompt_requires_menu_note_and_scan_match():
     prompt = agent_runs._build_v6_final_action_prompt(
         character=SimpleNamespace(id="char-1", name="quiet cat"),
@@ -2268,12 +1548,12 @@ def test_v6_final_action_prompt_requires_menu_note_and_scan_match():
     assert "the selected inbox/feed/writing context supports it" in prompt
     assert "A visible candidate is not a command to act" in prompt
 
-
 def test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought(monkeypatch):
     monkeypatch.setattr(agent_writing, "_format_recent_activity", lambda *args, **kwargs: "- none")
 
     prompt = agent_writing._build_composition_prompt(
         None,
+        workflows=writing_runtime.prompt_workflows(),
         character=SimpleNamespace(
             id="char-1",
             name="writer",
@@ -2310,7 +1590,6 @@ def test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought(monkey
     assert "Do not write final title/body as if the current character personally saw, did, or felt" in prompt
     assert "recast it as the current character's thought, empathy, question, or reflection" in prompt
 
-
 def test_self_update_composition_prompt_excludes_state_and_activity(monkeypatch):
     def fail_recent_activity(*args, **kwargs):
         raise AssertionError("self_update should not load recent activity logs")
@@ -2319,6 +1598,7 @@ def test_self_update_composition_prompt_excludes_state_and_activity(monkeypatch)
 
     prompt = agent_writing._build_composition_prompt(
         None,
+        workflows=writing_runtime.prompt_workflows(),
         character=SimpleNamespace(
             id="char-1",
             name="writer",
@@ -2344,7 +1624,6 @@ def test_self_update_composition_prompt_excludes_state_and_activity(monkeypatch)
     assert "do not use prior state/activity logs" in prompt
     assert "Recent own post reference" not in prompt
 
-
 def test_self_update_composition_prompt_includes_lore_as_private_reference(monkeypatch):
     monkeypatch.setattr(agent_writing, "_format_recent_activity", lambda *args, **kwargs: "- none")
 
@@ -2364,6 +1643,7 @@ def test_self_update_composition_prompt_includes_lore_as_private_reference(monke
 
     prompt = agent_writing._build_composition_prompt(
         None,
+        workflows=writing_runtime.prompt_workflows(),
         character=SimpleNamespace(
             id="char-1",
             name="writer",

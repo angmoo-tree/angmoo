@@ -22,6 +22,7 @@ from app.domains.identity.exceptions import CredentialResolutionError
 from app.domains.identity.service.credential_resolution import CredentialResolver
 from app.domains.identity.contracts import CredentialPurpose
 from app.runtime.characters import management as agent_service
+from app.domains.identity.service import credential_management
 
 
 def _app_and_engine(owner: models.User):
@@ -32,6 +33,7 @@ def _app_and_engine(owner: models.User):
     )
     Base.metadata.create_all(engine)
     app = FastAPI()
+    app.state.character_credential_workflows = agent_service.build_character_credential_workflows
     app.include_router(router, prefix="/api/v1")
     principal = {"user": owner}
 
@@ -251,11 +253,12 @@ def test_failed_replace_preserves_old_local_v2_material(
         )
         db.add_all([owner, character])
         db.commit()
-        original = agent_service.update_credential(
+        original = credential_management.update_credential(
             db,
             owner,
             character.id,
             schemas.CredentialUpsert(api_key="synthetic-first-key"),
+            workflows=agent_service.build_character_credential_workflows(),
         )
         stored = db.get(models.LlmCredential, original.id)
         old_envelope = stored.encrypted_api_key
@@ -266,11 +269,12 @@ def test_failed_replace_preserves_old_local_v2_material(
 
         monkeypatch.setattr(security, "encrypt_secret", fail_encrypt)
         with pytest.raises(ValueError, match="synthetic encryption failure"):
-            agent_service.update_credential(
+            credential_management.update_credential(
                 db,
                 owner,
                 character.id,
                 schemas.CredentialUpsert(api_key="synthetic-replacement-key"),
+                workflows=agent_service.build_character_credential_workflows(),
             )
         db.expire_all()
         preserved = db.get(models.LlmCredential, original.id)

@@ -1,22 +1,25 @@
 from __future__ import annotations
 
 import importlib.util
+
 import json
+
 from pathlib import Path
+
 import subprocess
+
 import sys
 
 import pytest
 
-
 ROOT = Path(__file__).resolve().parents[2]
-ARCHITECTURE = ROOT / "docs" / "architecture"
-BASELINE = "db1c32510f66cee20a3e64a01e85c5ea8753d77e"
 
+ARCHITECTURE = ROOT / "docs" / "architecture"
+
+BASELINE = "db1c32510f66cee20a3e64a01e85c5ea8753d77e"
 
 def _load(name: str) -> dict[str, object]:
     return json.loads((ARCHITECTURE / name).read_text(encoding="utf-8"))
-
 
 def _checkpoint_postgres_inventory() -> dict[str, object]:
     """Keep the pre-refactor physical-file threshold tied to its Git snapshot."""
@@ -29,7 +32,6 @@ def _checkpoint_postgres_inventory() -> dict[str, object]:
     )
     return json.loads(source)
 
-
 def _postgres_generator(source_root: Path = ROOT):
     spec = importlib.util.spec_from_file_location(
         "angmoo_er0_current_postgres_inventory",
@@ -40,7 +42,6 @@ def _postgres_generator(source_root: Path = ROOT):
     spec.loader.exec_module(generator)
     generator.ROOT = source_root
     return generator
-
 
 def _assert_current_postgres_inventory(inventory: dict, *, source_root: Path = ROOT) -> None:
     """Every live marker, path, line and hash must match an unfiltered source scan."""
@@ -55,7 +56,6 @@ def _assert_current_postgres_inventory(inventory: dict, *, source_root: Path = R
         for entry in inventory["entries"]
     )
 
-
 def test_generated_embedded_runtime_inventory_is_current() -> None:
     result = subprocess.run(
         [sys.executable, "scripts/verify_embedded_runtime_inventory.py", "--check"],
@@ -65,7 +65,6 @@ def test_generated_embedded_runtime_inventory_is_current() -> None:
         text=True,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-
 
 def test_all_migrations_are_owned_exactly_once() -> None:
     inventory = _load("migration-conversion-inventory.json")
@@ -80,7 +79,6 @@ def test_all_migrations_are_owned_exactly_once() -> None:
         and entry["removal_condition"]
         for entry in entries
     )
-
 
 def test_storage_frontend_runtime_and_parity_corpora_are_complete() -> None:
     # Splitting one original file into owned SQL and runtime queries changes
@@ -112,7 +110,6 @@ def test_storage_frontend_runtime_and_parity_corpora_are_complete() -> None:
         for item in runtime["runtime_coupling"]
     )
 
-
 def test_er0_records_behavior_zero_and_privacy_safe_resource_evidence() -> None:
     adr = (ARCHITECTURE / "embedded-runtime-adr.md").read_text(encoding="utf-8")
     summary = (ARCHITECTURE / "embedded-runtime-inventory.md").read_text(encoding="utf-8")
@@ -125,7 +122,6 @@ def test_er0_records_behavior_zero_and_privacy_safe_resource_evidence() -> None:
     serialized = json.dumps(resources, ensure_ascii=False).lower()
     assert "app_secret" not in serialized
     assert "d:\\" not in serialized
-
 
 @pytest.mark.parametrize("change", ["count", "omission", "hash", "new_source"])
 def test_live_postgres_inventory_rejects_stale_or_incomplete_scan(tmp_path: Path, change: str) -> None:

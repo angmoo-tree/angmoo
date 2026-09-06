@@ -13,7 +13,7 @@ from app.domains.social.repository import (
 from app.domains.social.service import topic_metadata as topic_policy, activity_results
 from app.domains.social.service.visibility import _is_post_public_context_visible
 from app.runtime.social.topic_metadata import RuntimeTopicHistoryReferences
-from app.services import agent_briefs
+from app.domains.routines.service import action_briefs as agent_briefs
 
 
 class RuntimeFeedHistoryReferences:

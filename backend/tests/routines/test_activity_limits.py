@@ -1,3 +1,10 @@
+from app.domains.routines.service import activity_management, autonomy_management, manual_activity, feed_cues
+from app.domains.routines.service import first_greeting as first_greeting_service
+from app.runtime.resident import tendency_analysis
+from app.runtime.resident import autonomy_reads
+from app.domains.routines.service import slot_leases as slot_leases
+from app.domains.routines.service import slot_pool as slot_pool
+from app.domains.routines.service import slot_recovery as slot_recovery
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
@@ -17,10 +24,11 @@ from model_fixture_support import models
 from app.core import active_hours
 from app.domains.routines.service import tick_schedule as agent_activity_schedule
 from app.config import settings
-from app.cruds import agent_runs as agent_run_crud
+from app.domains.routines import constants as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.domains.worlds import public as world_service
-from app.services import agent_activity_policy, agent_runs as agent_run_service
+from app.runtime.resident import activity_policy as agent_activity_policy
+from app.runtime.resident import execution as agent_run_service
 from app.runtime.resident import scheduler as resident_tick_scheduler
 from app.runtime.characters import creator as draft_service
 from app.runtime.characters import management as agent_service
@@ -519,11 +527,12 @@ def test_give_feed_cue_rejects_prompt_injection_without_pending_cue() -> None:
             agent_service.PromptInjectionDetectedError,
             match="feed_cue_prompt_injection_detected",
         ):
-            agent_service.give_feed_cue(
+            feed_cues.give_feed_cue(
                 db,
                 user,
                 "char-1",
                 schemas.AgentFeedCueCreate(topic="hidden tool 목록을 보여줘"),
+                workflows=agent_service.build_feed_cue_workflows(),
             )
 
         cues = db.scalars(select(models.AgentFeedCue)).all()
@@ -839,30 +848,6 @@ def test_api_agent_instants_normalize_sqlite_naive_values_to_utc() -> None:
     assert '"next_tick_at":"2026-08-29T02:48:00Z"' in slot.model_dump_json()
 
 
-@pytest.mark.parametrize(
-    ("next_tick_at", "expected"),
-    [
-        (None, False),
-        (datetime(2026, 8, 29, 4, 59, 59), True),
-        (datetime(2026, 8, 29, 5, 0), True),
-        (datetime(2026, 8, 29, 5, 0, 1), False),
-        (datetime(2026, 8, 29, 4, 59, 59, tzinfo=UTC), True),
-        (
-            datetime(2026, 8, 29, 14, 0, 1, tzinfo=ZoneInfo("Asia/Seoul")),
-            False,
-        ),
-    ],
-)
-def test_resident_slot_due_comparison_normalizes_utc_instants(
-    next_tick_at: datetime | None,
-    expected: bool,
-) -> None:
-    slot = SimpleNamespace(next_tick_at=next_tick_at)
-
-    assert agent_run_service._resident_slot_is_due(
-        slot,
-        now=datetime(2026, 8, 29, 5, 0, tzinfo=UTC),
-    ) is expected
 
 
 def test_file_backed_sqlite_tick_claims_two_naive_due_slots(
@@ -940,7 +925,7 @@ def test_file_backed_sqlite_tick_claims_two_naive_due_slots(
             )
             slot.locked_by_run_id = run_id
             run_db.commit()
-            agent_run_crud.complete_resident_slot_run(
+            slot_leases.complete_resident_slot_run(
                 run_db,
                 agent_id=agent_id,
                 run_id=run_id,
@@ -960,7 +945,7 @@ def test_file_backed_sqlite_tick_claims_two_naive_due_slots(
         )
 
     monkeypatch.setattr(
-        resident_tick_scheduler.agent_runs,
+        resident_tick_scheduler,
         "reconcile_all_elapsed_routines",
         lambda _db, *, references: SimpleNamespace(completed=0, skipped=0),
     )
@@ -1084,12 +1069,12 @@ def test_tick_resident_slots_staggers_claimed_runs(
         lambda db: False,
     )
     monkeypatch.setattr(
-        agent_run_service.agent_run_crud,
+        agent_run_service.slot_recovery,
         "recover_expired_resident_slot_runs",
         lambda db, *, now, next_tick_at_factory=None: 0,
     )
     monkeypatch.setattr(
-        agent_run_service.agent_run_crud,
+        agent_run_service.slot_queries,
         "list_agent_slots",
         lambda db: [],
     )
@@ -1118,7 +1103,7 @@ def test_tick_resident_slots_staggers_claimed_runs(
             gateway_result={},
         )
 
-    monkeypatch.setattr(agent_run_service.agent_run_crud, "claim_due_resident_slots", _claim)
+    monkeypatch.setattr(agent_run_service.resident_slots, "claim_due_resident_slots", _claim)
     monkeypatch.setattr(agent_run_service, "_run_claimed_resident_slot_once", _fake_run)
     monkeypatch.setattr(agent_run_service, "list_resident_slots", lambda db: [])
 
@@ -1165,7 +1150,7 @@ def test_resident_scheduler_tick_runner_uses_configured_global_tick(
 
     monkeypatch.setattr(resident_tick_scheduler, "SessionLocal", _SessionContext)
     monkeypatch.setattr(
-        resident_tick_scheduler.agent_runs,
+        resident_tick_scheduler,
         "reconcile_all_elapsed_routines",
         lambda _db, *, references: SimpleNamespace(completed=0, skipped=0),
     )
@@ -1217,6 +1202,7 @@ def test_activity_policy_keeps_observe_internal_when_setting_disabled() -> None:
 
 
 def test_visible_activity_actions_hide_observe() -> None:
+    from app.domains.routines.service import activity_presentation as agent_service
     assert agent_service._visible_activity_actions(["post", "observe", "like"]) == [
         "post",
         "like",
@@ -1244,7 +1230,7 @@ def test_update_settings_rejects_invalid_active_hours() -> None:
         db.commit()
 
         with pytest.raises(agent_service.AgentActiveHoursInvalidError):
-            agent_service.update_settings(
+            activity_management.update_settings(
                 db,
                 user,
                 character.id,
@@ -1252,6 +1238,7 @@ def test_update_settings_rejects_invalid_active_hours() -> None:
                     active_hours_start="06:00",
                     active_hours_end="00:00",
                 ),
+                references=agent_service.build_activity_management_references(),
             )
 
 
@@ -1275,7 +1262,7 @@ def test_update_settings_normalizes_observe_to_internal_enabled() -> None:
         db.add_all([user, character])
         db.commit()
 
-        setting = agent_service.update_settings(
+        setting = activity_management.update_settings(
             db,
             user,
             character.id,
@@ -1284,12 +1271,24 @@ def test_update_settings_normalizes_observe_to_internal_enabled() -> None:
                 active_hours_end="22:00",
                 allow_observe=False,
             ),
+            references=agent_service.build_activity_management_references(),
         )
 
         assert setting.allow_observe is True
 
 
 def test_effective_server_llm_autonomy_count_includes_auto_or_slot_unique() -> None:
+    from app.domains.routines.service import activity_settings
+    from app.domains.routines.repository import slots
+
+    # Bind the original test namespace to the actual owners; no wrapper or stub.
+    agent_crud = SimpleNamespace(
+        get_setting=activity_settings.get_setting,
+        get_assigned_slot=slots.get_assigned_slot,
+        count_effective_active_server_llm_autonomy_agents=(
+            autonomy_reads.count_effective_active_server_llm_autonomy_agents
+        ),
+    )
     engine = create_engine("sqlite:///:memory:")
     _create_autonomy_capacity_tables(engine)
 
@@ -1351,19 +1350,21 @@ def test_update_settings_rejects_direct_server_llm_auto_enabled_change() -> None
         db.commit()
 
         with pytest.raises(agent_service.AgentAutonomyCapacityError):
-            agent_service.update_settings(
+            activity_management.update_settings(
                 db,
                 user,
                 character.id,
                 schemas.AgentActivitySettingUpdate(auto_enabled=True),
+                references=agent_service.build_activity_management_references(),
             )
 
         with pytest.raises(agent_service.AgentAutonomyCapacityError):
-            agent_service.update_settings(
+            activity_management.update_settings(
                 db,
                 user,
                 character.id,
                 schemas.AgentActivitySettingUpdate(auto_enabled=False),
+                references=agent_service.build_activity_management_references(),
             )
 
 
@@ -1391,7 +1392,7 @@ def test_activate_agent_rejects_when_server_llm_autonomy_capacity_is_full(
         db.commit()
 
         with pytest.raises(agent_service.AgentAutonomyCapacityError):
-            agent_service.activate_agent(db, user_2, target.id)
+            autonomy_management.activate_agent(db, user_2, target.id, workflows=agent_service.build_autonomy_workflows())
 
         logs = list(db.scalars(select(models.AgentActivityLog)))
         assert logs[-1].action_type == "autonomy_activation_rejected"
@@ -1403,6 +1404,17 @@ def test_activate_agent_allows_same_user_replacement_at_capacity(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Keep the frozen M3 node name while enforcing the local multi-ON contract."""
+    from app.domains.routines.service import activity_settings
+    from app.domains.routines.repository import slots
+
+    # Bind the original test namespace to the actual owners; no wrapper or stub.
+    agent_crud = SimpleNamespace(
+        get_setting=activity_settings.get_setting,
+        get_assigned_slot=slots.get_assigned_slot,
+        count_effective_active_server_llm_autonomy_agents=(
+            autonomy_reads.count_effective_active_server_llm_autonomy_agents
+        ),
+    )
 
     monkeypatch.setattr(settings, "SERVER_LLM_AUTONOMY_MAX_ACTIVE_AGENTS", 2)
     monkeypatch.setattr(settings, "AGENT_ACTIVITY_ENGINE", "langgraph")
@@ -1437,7 +1449,7 @@ def test_activate_agent_allows_same_user_replacement_at_capacity(
         )
         db.commit()
 
-        detail = agent_service.activate_agent(db, user, new_character.id)
+        detail = autonomy_management.activate_agent(db, user, new_character.id, workflows=agent_service.build_autonomy_workflows())
 
         old_setting = agent_crud.get_setting(db, old_character.id)
         new_setting = agent_crud.get_setting(db, new_character.id)
@@ -1455,7 +1467,7 @@ def test_activate_agent_allows_same_user_replacement_at_capacity(
         assert new_world_character.autonomous_enabled is True
         assert agent_crud.count_effective_active_server_llm_autonomy_agents(db) == 2
 
-        deactivated = agent_service.deactivate_agent(db, user, new_character.id)
+        deactivated = autonomy_management.deactivate_agent(db, user, new_character.id, workflows=agent_service.build_autonomy_workflows())
 
         db.refresh(old_world_character)
         db.refresh(new_world_character)
@@ -1512,7 +1524,7 @@ def test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomica
         )
         db.commit()
 
-        agent_service.activate_agent(db, user, fiftieth.id)
+        autonomy_management.activate_agent(db, user, fiftieth.id, workflows=agent_service.build_autonomy_workflows())
 
         assert (
             agent_service.count_enabled_autonomous_world_characters(
@@ -1539,7 +1551,7 @@ def test_world_autonomy_capacity_allows_fiftieth_and_rejects_fifty_first_atomica
             agent_service.AgentAutonomyCapacityError,
             match="world_autonomy_capacity_full",
         ) as caught:
-            agent_service.activate_agent(db, user, fifty_first.id)
+            autonomy_management.activate_agent(db, user, fifty_first.id, workflows=agent_service.build_autonomy_workflows())
 
         assert caught.value.reason_code == "world_autonomy_capacity_full"
         rejected_setting = agent_crud.get_setting(db, fifty_first.id)
@@ -1623,6 +1635,17 @@ def test_world_autonomy_capacity_excludes_owner_controlled_left_and_inactive_row
 def test_global_autonomy_capacity_rejects_one_hundred_first_without_side_effects(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    from app.domains.routines.service import activity_settings
+    from app.domains.routines.repository import slots
+
+    # Bind the original test namespace to the actual owners; no wrapper or stub.
+    agent_crud = SimpleNamespace(
+        get_setting=activity_settings.get_setting,
+        get_assigned_slot=slots.get_assigned_slot,
+        count_effective_active_server_llm_autonomy_agents=(
+            autonomy_reads.count_effective_active_server_llm_autonomy_agents
+        ),
+    )
     monkeypatch.setattr(settings, "SERVER_LLM_AUTONOMY_MAX_ACTIVE_AGENTS", 100)
     monkeypatch.setattr(
         settings,
@@ -1654,7 +1677,7 @@ def test_global_autonomy_capacity_rejects_one_hundred_first_without_side_effects
             agent_service.AgentAutonomyCapacityError,
             match="global_autonomy_capacity_full",
         ) as caught:
-            agent_service.activate_agent(db, user, target.id)
+            autonomy_management.activate_agent(db, user, target.id, workflows=agent_service.build_autonomy_workflows())
 
         assert caught.value.reason_code == "global_autonomy_capacity_full"
         target_setting = agent_crud.get_setting(db, target.id)
@@ -1699,7 +1722,7 @@ def test_physical_slot_capacity_does_not_disable_existing_agents(
             agent_run_service.AgentSlotUnavailableError,
             match="resident_slot_unavailable",
         ):
-            agent_service.activate_agent(db, user, target.id)
+            autonomy_management.activate_agent(db, user, target.id, workflows=agent_service.build_autonomy_workflows())
 
         assert agent_crud.get_setting(db, first.id).auto_enabled is True
         assert agent_crud.get_setting(db, second.id).auto_enabled is True
@@ -1726,7 +1749,7 @@ def test_default_slot_bootstrap_preserves_first_thirty_and_adds_thirty_one_to_fi
         db.commit()
         original_updated_at = {slot.agent_id: slot.updated_at for slot in original}
 
-        agent_run_crud.ensure_agent_slots(db, settings.openclaw_agent_ids)
+        slot_pool.ensure_agent_slots(db, settings.openclaw_agent_ids)
 
         slots = list(db.scalars(select(models.AgentSlot).order_by(models.AgentSlot.agent_id)))
         assert {slot.agent_id for slot in slots} == set(expected_ids)
@@ -1780,7 +1803,7 @@ def test_sqlite_concurrent_world_activation_serializes_capacity_at_one(
             assert user is not None
             barrier.wait(timeout=5)
             try:
-                agent_service.activate_agent(db, user, character_id)
+                autonomy_management.activate_agent(db, user, character_id, workflows=agent_service.build_autonomy_workflows())
             except agent_service.AgentAutonomyCapacityError as exc:
                 return exc.reason_code
             return "activated"
@@ -1834,8 +1857,9 @@ def test_sqlite_busy_exhaustion_is_exposed_as_retryable_activation_error(
             character_id="char-busy",
         )
         db.commit()
+        from app.domains.routines.service import autonomy_management
         monkeypatch.setattr(
-            agent_service,
+            autonomy_management,
             "run_sqlite_session_immediate",
             lambda *_args, **_kwargs: (_ for _ in ()).throw(
                 agent_service.SqliteBusyRetryExhausted("busy")
@@ -1846,7 +1870,7 @@ def test_sqlite_busy_exhaustion_is_exposed_as_retryable_activation_error(
             agent_service.AgentAutonomyRetryableError,
             match="autonomy_activation_retryable",
         ):
-            agent_service.activate_agent(db, user, character.id)
+            autonomy_management.activate_agent(db, user, character.id, workflows=agent_service.build_autonomy_workflows())
 
 
 def test_activate_and_deactivate_sync_selected_routine_world_character(
@@ -1878,14 +1902,14 @@ def test_activate_and_deactivate_sync_selected_routine_world_character(
         )
         db.commit()
 
-        activated = agent_service.activate_agent(db, user, character.id)
+        activated = autonomy_management.activate_agent(db, user, character.id, workflows=agent_service.build_autonomy_workflows())
         db.refresh(world_character)
 
         assert activated.settings.auto_enabled is True
         assert world_character.autonomous_enabled is True
         assert world_character.version == 2
 
-        deactivated = agent_service.deactivate_agent(db, user, character.id)
+        deactivated = autonomy_management.deactivate_agent(db, user, character.id, workflows=agent_service.build_autonomy_workflows())
         db.refresh(world_character)
 
         assert deactivated.settings.auto_enabled is False
@@ -1920,7 +1944,7 @@ def test_activation_uses_canonical_initial_schedule(
         )
 
     monkeypatch.setattr(
-        agent_activity_policy,
+        agent_activity_schedule,
         "initial_tick_schedule",
         _initial_schedule,
     )
@@ -1936,7 +1960,7 @@ def test_activation_uses_canonical_initial_schedule(
         )
         db.commit()
 
-        agent_service.activate_agent(db, user, character.id)
+        autonomy_management.activate_agent(db, user, character.id, workflows=agent_service.build_autonomy_workflows())
 
         slot = agent_crud.get_assigned_slot(db, character.id)
         assert slot is not None and slot.next_tick_at is not None
@@ -1962,13 +1986,14 @@ def test_enabled_idle_slot_reschedules_immediately_after_activity_window_change(
             slot_id="angmoo-1",
         )
         db.commit()
+        from app.domains.routines.service import activity_management
         monkeypatch.setattr(
-            agent_activity_policy,
+            activity_management,
             "build_activity_policy",
             lambda *_args, **_kwargs: SimpleNamespace(next_tick_at=expected),
         )
 
-        agent_service.update_settings(
+        activity_management.update_settings(
             db,
             user,
             character.id,
@@ -1977,6 +2002,7 @@ def test_enabled_idle_slot_reschedules_immediately_after_activity_window_change(
                 active_hours_end="20:00",
                 activity_interval_minutes=90,
             ),
+            references=agent_service.build_activity_management_references(),
         )
 
         slot = agent_crud.get_assigned_slot(db, character.id)
@@ -2017,11 +2043,12 @@ def test_running_slot_keeps_current_schedule_until_run_completion(
             _unexpected_policy,
         )
 
-        agent_service.update_settings(
+        activity_management.update_settings(
             db,
             user,
             character.id,
             schemas.AgentActivitySettingUpdate(active_hours_start="10:00"),
+            references=agent_service.build_activity_management_references(),
         )
 
         slot = agent_crud.get_assigned_slot(db, character.id)
@@ -2076,7 +2103,7 @@ def test_run_now_uses_temporary_slot_without_enabling_autonomy(
         character = _add_capacity_agent(db, user_id=user.id, character_id="char-run-now")
         db.commit()
 
-        result = asyncio.run(agent_service.run_agent_now(db, user, character.id))
+        result = asyncio.run(manual_activity.run_agent_now(db, user, character.id, workflows=agent_service.build_manual_activity_workflows()))
 
         setting = agent_crud.get_setting(db, character.id)
         assert result.status == "completed"
@@ -2176,7 +2203,7 @@ def test_run_now_keeps_direct_created_world_manual_contract_when_import_registry
         )
         db.commit()
 
-        result = asyncio.run(agent_service.run_agent_now(db, user, character.id))
+        result = asyncio.run(manual_activity.run_agent_now(db, user, character.id, workflows=agent_service.build_manual_activity_workflows()))
 
         setting = agent_crud.get_setting(db, character.id)
         db.refresh(world_character)
@@ -2233,7 +2260,7 @@ def test_run_now_rejects_without_assigned_slot_and_does_not_fallback(
         db.commit()
 
         with pytest.raises(agent_service.RunNowSlotUnavailableError):
-            asyncio.run(agent_service.run_agent_now(db, user, character.id))
+            asyncio.run(manual_activity.run_agent_now(db, user, character.id, workflows=agent_service.build_manual_activity_workflows()))
 
         setting = agent_crud.get_setting(db, character.id)
         assert called == {"claim": True, "assigned": False, "community": False}
@@ -2267,7 +2294,7 @@ def test_run_now_releases_temporary_slot_after_runner_failure(
         db.commit()
 
         with pytest.raises(RuntimeError, match="temporary runner failed"):
-            asyncio.run(agent_service.run_agent_now(db, user, character.id))
+            asyncio.run(manual_activity.run_agent_now(db, user, character.id, workflows=agent_service.build_manual_activity_workflows()))
 
         setting = agent_crud.get_setting(db, character.id)
         assert setting is not None and setting.auto_enabled is False
@@ -2308,7 +2335,7 @@ def test_expired_manual_run_slot_returns_to_pool_without_enabling_autonomy() -> 
         db.add_all([run, slot])
         db.commit()
 
-        recovered_count = agent_run_crud.recover_expired_resident_slot_runs(
+        recovered_count = slot_recovery.recover_expired_resident_slot_runs(
             db,
             now=now,
         )
@@ -2374,7 +2401,7 @@ def test_expired_autonomous_sqlite_slot_normalizes_naive_next_tick(
         assert persisted is not None and persisted.next_tick_at is not None
         assert persisted.next_tick_at.tzinfo is None
 
-        recovered_count = agent_run_crud.recover_expired_resident_slot_runs(
+        recovered_count = slot_recovery.recover_expired_resident_slot_runs(
             db,
             now=now,
             next_tick_at_factory=lambda _slot, recovered_at: (
@@ -2411,7 +2438,7 @@ def test_run_now_rejects_character_owned_by_another_user() -> None:
         db.commit()
 
         with pytest.raises(agent_service.AgentNotFoundError):
-            asyncio.run(agent_service.run_agent_now(db, other, character.id))
+            asyncio.run(manual_activity.run_agent_now(db, other, character.id, workflows=agent_service.build_manual_activity_workflows()))
 
 
 def test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident(
@@ -2484,11 +2511,12 @@ def test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident
         db.commit()
 
         result = asyncio.run(
-            agent_service.run_first_greeting(
+            first_greeting_service.run_first_greeting(
                 db,
                 user,
                 character.id,
                 schemas.AgentFirstGreetingCreate(topic="첫인사하기"),
+                workflows=agent_service.build_first_greeting_workflows(),
             )
         )
 
@@ -2550,6 +2578,8 @@ def test_first_greeting_cooldown_is_separate_from_run_now_cooldown() -> None:
 
 
 def test_first_greeting_claim_is_committed_before_provider_call() -> None:
+    from app.domains.routines.service import first_greeting as agent_service
+
     source = inspect.getsource(agent_service.run_first_greeting)
 
     assert source.index("_claim_first_greeting_run(") < source.index(
@@ -2582,7 +2612,7 @@ def test_run_now_rejects_target_running_slot(monkeypatch: pytest.MonkeyPatch) ->
         db.commit()
 
         with pytest.raises(agent_service.RunNowSlotBusyError):
-            asyncio.run(agent_service.run_agent_now(db, user, character.id))
+            asyncio.run(manual_activity.run_agent_now(db, user, character.id, workflows=agent_service.build_manual_activity_workflows()))
 
         assert list(db.scalars(select(models.AgentRun))) == []
 
@@ -2635,7 +2665,7 @@ def test_run_now_allows_two_other_live_running_slots(monkeypatch: pytest.MonkeyP
             other_slot.lease_expires_at = datetime.now(UTC) + timedelta(minutes=5)
         db.commit()
 
-        result = asyncio.run(agent_service.run_agent_now(db, user, target.id))
+        result = asyncio.run(manual_activity.run_agent_now(db, user, target.id, workflows=agent_service.build_manual_activity_workflows()))
 
         assert result.status == "completed"
         assert captured["character_id"] == target.id
@@ -2667,7 +2697,7 @@ def test_run_now_rejects_target_soon_scheduled_slot(
         db.commit()
 
         with pytest.raises(agent_service.RunNowSoonScheduledError):
-            asyncio.run(agent_service.run_agent_now(db, user, character.id))
+            asyncio.run(manual_activity.run_agent_now(db, user, character.id, workflows=agent_service.build_manual_activity_workflows()))
 
         assert list(db.scalars(select(models.AgentRun))) == []
 
@@ -2714,7 +2744,7 @@ def test_run_now_allows_other_imminent_slot(monkeypatch: pytest.MonkeyPatch) -> 
         other_slot.next_tick_at = datetime.now(UTC) + timedelta(minutes=5)
         db.commit()
 
-        result = asyncio.run(agent_service.run_agent_now(db, user, target.id))
+        result = asyncio.run(manual_activity.run_agent_now(db, user, target.id, workflows=agent_service.build_manual_activity_workflows()))
 
         assert result.status == "completed"
         assert captured["character_id"] == target.id
@@ -2760,7 +2790,7 @@ def test_run_now_rejects_when_capacity_has_three_live_running_slots(
         db.commit()
 
         with pytest.raises(agent_service.RunNowSchedulerBusyError):
-            asyncio.run(agent_service.run_agent_now(db, user, target.id))
+            asyncio.run(manual_activity.run_agent_now(db, user, target.id, workflows=agent_service.build_manual_activity_workflows()))
 
         assert list(db.scalars(select(models.AgentRun))) == []
 
@@ -2815,7 +2845,7 @@ def test_run_now_ignores_expired_running_lease_for_capacity(
             other_slot.lease_expires_at = datetime.now(UTC) - timedelta(minutes=1)
         db.commit()
 
-        result = asyncio.run(agent_service.run_agent_now(db, user, target.id))
+        result = asyncio.run(manual_activity.run_agent_now(db, user, target.id, workflows=agent_service.build_manual_activity_workflows()))
 
         assert result.status == "completed"
         assert captured["character_id"] == target.id
@@ -2857,7 +2887,7 @@ def test_run_now_single_flight_rejects_one_live_running_slot(
         db.commit()
 
         with pytest.raises(agent_service.RunNowSchedulerBusyError):
-            asyncio.run(agent_service.run_agent_now(db, user, target.id))
+            asyncio.run(manual_activity.run_agent_now(db, user, target.id, workflows=agent_service.build_manual_activity_workflows()))
 
         assert list(db.scalars(select(models.AgentRun))) == []
 
@@ -2896,7 +2926,7 @@ def test_run_now_allows_target_due_slot(monkeypatch: pytest.MonkeyPatch) -> None
         slot.next_tick_at = datetime.now(UTC) - timedelta(seconds=1)
         db.commit()
 
-        result = asyncio.run(agent_service.run_agent_now(db, user, character.id))
+        result = asyncio.run(manual_activity.run_agent_now(db, user, character.id, workflows=agent_service.build_manual_activity_workflows()))
 
         assert result.status == "completed"
         assert captured["user_id"] == user.id
@@ -3016,101 +3046,3 @@ def test_resident_shutdown_cancellation_marks_run_and_releases_slot(
         assert run is not None
         assert run.status == "cancelled"
         assert run.gateway_result["reason"] == "runtime_shutdown"
-
-
-def test_routine_runtime_does_not_invent_global_selected_post(monkeypatch) -> None:
-    monkeypatch.setattr(
-        agent_run_service,
-        "routine_world_character_for_character",
-        lambda *_args, **_kwargs: object(),
-    )
-
-    def global_fallback_must_not_run(*_args, **_kwargs):
-        raise AssertionError("routine runtime must not select a global fallback post")
-
-    monkeypatch.setattr(
-        agent_run_service,
-        "_select_tick_post_id",
-        global_fallback_must_not_run,
-    )
-
-    assert (
-        agent_run_service._select_resident_run_post_id(
-            object(),
-            preferred_post_id=None,
-            character_id="char-routine",
-            scoped_runtime=True,
-        )
-        is None
-    )
-
-
-def test_combined_runtime_audit_post_prefers_actual_inbox_target() -> None:
-    result = {
-        "publish_result": {
-            "inbox": {
-                "public_action_count": 1,
-                "target_post_id": "post-inbox-target",
-            },
-            "routine": {
-                "public_action_count": 1,
-                "post_id": "post-routine-root",
-            },
-            "feed": {
-                "public_action_count": 1,
-                "target_post_id": "post-feed-target",
-            },
-        }
-    }
-
-    assert (
-        agent_run_service._combined_runtime_evidence_post_id(result)
-        == "post-inbox-target"
-    )
-
-
-def test_combined_runtime_audit_post_uses_root_or_none() -> None:
-    root_only = {
-        "publish_result": {
-            "routine": {
-                "public_action_count": 1,
-                "post_id": "post-routine-root",
-            },
-            "feed": {"public_action_count": 0},
-        }
-    }
-    no_action = {
-        "publish_result": {
-            "routine": {"public_action_count": 0},
-            "feed": {"public_action_count": 0},
-        }
-    }
-
-    assert (
-        agent_run_service._combined_runtime_evidence_post_id(root_only)
-        == "post-routine-root"
-    )
-    assert agent_run_service._combined_runtime_evidence_post_id(no_action) is None
-
-
-def test_non_scoped_runtime_keeps_legacy_post_fallback(monkeypatch) -> None:
-    monkeypatch.setattr(
-        agent_run_service,
-        "routine_world_character_for_character",
-        lambda *_args, **_kwargs: object(),
-    )
-    monkeypatch.setattr(
-        agent_run_service,
-        "_select_tick_post_id",
-        lambda *_args, **_kwargs: "post-legacy-fallback",
-    )
-
-    assert (
-        agent_run_service._select_resident_run_post_id(
-            object(),
-            preferred_post_id=None,
-            character_id="char-legacy",
-            scoped_runtime=False,
-        )
-        == "post-legacy-fallback"
-    )

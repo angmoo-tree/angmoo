@@ -1,68 +1,101 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import AsyncIterator, Awaitable, Callable
-from contextlib import AbstractAsyncContextManager, asynccontextmanager
+
+from collections.abc import AsyncIterator
+
+from collections.abc import Awaitable
+
+from collections.abc import Callable
+
+from contextlib import AbstractAsyncContextManager
+
+from contextlib import asynccontextmanager
+
 from dataclasses import dataclass
+
 from functools import partial
-from typing import Any, Literal
+
+from typing import Any
+
+from typing import Literal
 
 import uvicorn
-from fastapi import APIRouter, FastAPI, HTTPException, Request, status
+
+from fastapi import APIRouter
+
+from fastapi import FastAPI
+
+from fastapi import HTTPException
+
+from fastapi import Request
+
+from fastapi import status
+
 from sqlalchemy import text
 
 from app.runtime.persistence.model_registration import register_models
 
+from app.api.v1.public import create_public_api_router
+
+from app.config import Settings
+
+from app.config import settings
+
+from app.database import SessionLocal
+
+from app.database import get_db
+
+from app.core.public_media import mount_public_media
+
+from app.core.request_limits import RequestBodyLimitMiddleware
+
+from app.cruds.community import seed_demo_data
+
+from app.runtime.configuration import RuntimeComposition
+
+from app.runtime.configuration import RuntimeConfig
+
+from app.runtime.configuration import compose_runtime
+
+from app.runtime.logging_config import configure_application_logging
+
+from app.runtime.logging_config import uvicorn_logging_config
+
+from app.runtime.single_backend_components import SingleBackendRuntimeComponents
+
+from app.runtime.single_backend_components import create_single_backend_runtime_components
+
+from app.runtime.startup_security import validate_startup_security
+
+from app.runtime.world_characters.recovery import reconcile_local_autonomous_runtime_modes
+
+from app.services.hosted_configuration import HostedConfigurationRegistrationError
+
+from app.services.hosted_configuration import HostedPromptProvider
+
+from app.services.hosted_configuration import HostedSettingsProvider
+
+from app.services.hosted_configuration import register_hosted_configuration
+
+from app.services.hosted_configuration import unregister_hosted_configuration
+
 register_models()
 
-from app.api.v1.public import create_public_api_router
-from app.config import Settings, settings
-from app.database import SessionLocal, get_db
-from app.core.public_media import mount_public_media
-from app.core.request_limits import RequestBodyLimitMiddleware
-from app.cruds.community import seed_demo_data
-from app.runtime.configuration import (
-    RuntimeComposition,
-    RuntimeConfig,
-    compose_runtime,
-)
-from app.runtime.logging_config import (
-    configure_application_logging,
-    uvicorn_logging_config,
-)
-from app.runtime.single_backend_components import (
-    SingleBackendRuntimeComponents,
-    create_single_backend_runtime_components,
-)
-from app.runtime.startup_security import validate_startup_security
-from app.runtime.world_characters.recovery import (
-    reconcile_local_autonomous_runtime_modes,
-)
-from app.services.hosted_configuration import (
-    HostedConfigurationRegistrationError,
-    HostedPromptProvider,
-    HostedSettingsProvider,
-    register_hosted_configuration,
-    unregister_hosted_configuration,
-)
-
 logger = logging.getLogger("app.public_main")
-
 
 class PublicRuntimeConfigurationError(RuntimeError):
     pass
 
-
 class HostedExtensionConfigurationError(RuntimeError):
     pass
 
-
 HostedLifecycleHook = Callable[[], Awaitable[None]]
+
 LifespanHandler = Callable[
     [FastAPI],
     AbstractAsyncContextManager[None],
 ]
-
 
 @dataclass(frozen=True)
 class HostedBackendExtension:
@@ -84,11 +117,9 @@ class HostedBackendExtension:
                 "hosted settings and prompt providers must be configured together"
             )
 
-
 def _reject_duplicates(label: str, values: tuple[object, ...]) -> None:
     if len({id(value) for value in values}) != len(values):
         raise HostedExtensionConfigurationError(f"duplicate hosted {label}")
-
 
 def validate_public_runtime_settings(config=settings) -> None:
     invalid: list[str] = []
@@ -106,7 +137,6 @@ def validate_public_runtime_settings(config=settings) -> None:
         invalid.append("SIGNUP_ENABLED must be false")
     if invalid:
         raise PublicRuntimeConfigurationError("; ".join(invalid))
-
 
 def create_lifespan(
     extension: HostedBackendExtension | None = None,
@@ -208,15 +238,13 @@ def create_lifespan(
 
     return runtime_lifespan
 
-
-# The former module contracts have different unconfigured component defaults.
-# Both names construct the same lifecycle implementation; no worker starts here.
 create_public_lifespan = partial(
     create_lifespan, component_manager_factory=lambda: None
 )
-lifespan = create_lifespan()
-public_lifespan = create_public_lifespan()
 
+lifespan = create_lifespan()
+
+public_lifespan = create_public_lifespan()
 
 def create_app(
     extension: HostedBackendExtension | None = None,
@@ -348,6 +376,10 @@ def create_app(
     configure_runtime_diagnostics(runtime_app)
     from app.runtime.characters.management import build_character_management_workflows
     runtime_app.state.character_management_workflows = build_character_management_workflows
+    from app.runtime.characters.management import build_character_credential_workflows
+    runtime_app.state.character_credential_workflows = build_character_credential_workflows
+    from app.runtime.characters.management import configure_character_activity_http
+    configure_character_activity_http(runtime_app)
     from app.runtime.tree import build_tree_references
     runtime_app.state.tree_references = build_tree_references
     from app.runtime.character_lore import build_lore_workflows
@@ -419,10 +451,8 @@ def create_app(
     )
     return runtime_app
 
-
 def health() -> dict[str, str]:
     return {"status": "ok"}
-
 
 def runtime_health(request: Request) -> dict[str, object]:
     """Bounded, privacy-safe readiness for the composed embedded runtime."""
@@ -473,19 +503,14 @@ def runtime_health(request: Request) -> dict[str, object]:
         },
     }
 
-
-# These adapters select the previous call contracts, not a second factory body.
 create_public_app = partial(create_app, profile="public")
 
-# Importing either compatibility name must not create media directories, a DB
-# engine, scheduler, or Memory runtime. Explicit factory calls keep their prior
-# prepare_media_directories=True default.
 app = create_app(lifespan_handler=lifespan, prepare_media_directories=False)
+
 public_app = create_public_app(
     lifespan_handler=public_lifespan,
     prepare_media_directories=False,
 )
-
 
 def main() -> None:
     uvicorn.run(
@@ -495,7 +520,6 @@ def main() -> None:
         reload=True,
         log_config=uvicorn_logging_config(),
     )
-
 
 if __name__ == "__main__":
     main()

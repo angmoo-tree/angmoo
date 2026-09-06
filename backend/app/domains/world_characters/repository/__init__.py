@@ -1,0 +1,1 @@
+"""WorldCharacter-owned persistence queries."""

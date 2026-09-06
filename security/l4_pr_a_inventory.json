@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2740,
-      "internal_edge_count": 3530,
+      "external_import_count": 3122,
+      "internal_edge_count": 4154,
       "legacy_import_exception_count": 0,
-      "module_count": 959,
+      "module_count": 1095,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -755,7 +755,9 @@
             "path": "backend/app/domains/social/contracts/source_writes.py"
           },
           {
-            "imports": [],
+            "imports": [
+              "app.contracts.action_subjective_context"
+            ],
             "module": "app.domains.social.contracts.subjective_context",
             "path": "backend/app/domains/social/contracts/subjective_context.py"
           },
@@ -1006,6 +1008,14 @@
             ],
             "module": "app.domains.social.repository.resident_affordances",
             "path": "backend/app/domains/social/repository/resident_affordances.py"
+          },
+          {
+            "imports": [
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.posts"
+            ],
+            "module": "app.domains.social.repository.resident_context",
+            "path": "backend/app/domains/social/repository/resident_context.py"
           },
           {
             "imports": [
@@ -1907,10 +1917,12 @@
               "app.domains.routine_posts.service.generation",
               "app.domains.routines.exceptions",
               "app.domains.routines.models.plans",
+              "app.domains.routines.repository.public_action_executions",
               "app.domains.routines.service.execution.claims",
               "app.domains.routines.service.execution.lifecycle",
               "app.domains.routines.service.joint_activity",
               "app.domains.routines.service.lifecycle",
+              "app.domains.routines.service.public_action_executions",
               "app.domains.social.contracts.subjective_context",
               "app.domains.social.models.posts",
               "app.domains.social.public",
@@ -1946,11 +1958,11 @@
           },
           {
             "imports": [
-              "app.cruds.agent_runs",
               "app.domains.identity.models",
               "app.domains.routines.models",
+              "app.domains.routines.repository.runs",
               "app.domains.social.service.agent_tool_authorization",
-              "app.services.agent_activity_policy"
+              "app.runtime.resident.activity_policy"
             ],
             "module": "app.runtime.social.agent_tool_authorization",
             "path": "backend/app/runtime/social/agent_tool_authorization.py"
@@ -1962,18 +1974,19 @@
               "app.domains.routines.repository.feed_history",
               "app.domains.routines.service.activity_logs",
               "app.domains.social.service.agent_tool_reads",
+              "app.runtime.resident.activity_policy",
               "app.runtime.social.agent_tool_authorization",
-              "app.runtime.social.topic_metadata",
-              "app.services.agent_activity_policy"
+              "app.runtime.social.topic_metadata"
             ],
             "module": "app.runtime.social.agent_tool_reads",
             "path": "backend/app/runtime/social/agent_tool_reads.py"
           },
           {
             "imports": [
-              "app.cruds.agents",
               "app.domains.routines.models",
+              "app.domains.routines.repository.feed_cues",
               "app.domains.routines.service.activity_logs",
+              "app.domains.routines.service.feed_cues",
               "app.domains.social.service.agent_tool_actions",
               "app.runtime.social.agent_tool_authorization",
               "app.runtime.social.feed_history",
@@ -2011,7 +2024,8 @@
           },
           {
             "imports": [
-              "app.cruds.agent_runs",
+              "app.domains.routines.repository.public_action_executions",
+              "app.domains.routines.service.public_action_executions",
               "app.domains.social.contracts.feed_execution",
               "app.domains.social.service.feed_cycle",
               "app.domains.world_characters.models",
@@ -2031,6 +2045,7 @@
           {
             "imports": [
               "app.domains.routines.models",
+              "app.domains.routines.service.action_briefs",
               "app.domains.routines.service.feed_history",
               "app.domains.social.models.posts",
               "app.domains.social.repository.posts",
@@ -2038,8 +2053,7 @@
               "app.domains.social.service.activity_results",
               "app.domains.social.service.topic_metadata",
               "app.domains.social.service.visibility",
-              "app.runtime.social.topic_metadata",
-              "app.services.agent_briefs"
+              "app.runtime.social.topic_metadata"
             ],
             "module": "app.runtime.social.feed_history",
             "path": "backend/app/runtime/social/feed_history.py"
@@ -2048,14 +2062,14 @@
             "imports": [
               "app.domains.routines.models",
               "app.domains.routines.schemas.feed_history",
+              "app.domains.routines.service.action_briefs",
               "app.domains.routines.service.feed_history_notes",
               "app.domains.social.exceptions",
               "app.domains.social.models.posts",
               "app.domains.social.repository.posts",
               "app.domains.social.service.visibility",
               "app.runtime.social.agent_tool_authorization",
-              "app.runtime.social.feed_history",
-              "app.services.agent_briefs"
+              "app.runtime.social.feed_history"
             ],
             "module": "app.runtime.social.feed_history_notes",
             "path": "backend/app/runtime/social/feed_history_notes.py"
@@ -2810,7 +2824,7 @@
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
-        "sha256": "32b6e908f0dd45b3924810a48280ae0a8d9f739e441ff7485912c46ff213dfb8"
+        "sha256": "1e7d4f129800a1b3e87674c560d584c0e56364821917f1f3611121feeee47177"
       },
       {
         "path": "backend/tests/relationships/test_projection_replay.py",
@@ -2826,7 +2840,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "a1e1550a22701a54dd19a22e00a00b2761cf4a947723ca3fa9fe3eba3c81b082"
+        "sha256": "f8edb70ef5c728e77105e64e21ed8a97a89635878f83309f56b18df52970f178"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",

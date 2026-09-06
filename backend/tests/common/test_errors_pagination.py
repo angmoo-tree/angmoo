@@ -1,40 +1,55 @@
 """Shared extraction preserves error identity and the two existing cursor formats."""
+
 from __future__ import annotations
 
 import asyncio
+
 from dataclasses import replace
+
 from datetime import datetime
+
 import json
+
 from types import SimpleNamespace
 
 from fastapi import HTTPException
+
 import pytest
+
 from starlette.responses import JSONResponse
 
-from app import exceptions, pagination
-from app.core import request_limits, sqlite_concurrency
+from app import exceptions
+
+from app import pagination
+
+from app.core import request_limits
+
+from app.core import sqlite_concurrency
+
 from app.domains.device_home import repository as home
+
 from app.domains.device_home.exceptions import InvalidWorldSurfaceCursorError
-from app.domains.social.public import (
-    SocialWriteRetryableError,
-    WorldCharacterSocialProfileQuery,
-    WorldCharacterSocialProfileValidationError,
-)
+
+from app.domains.social.public import SocialWriteRetryableError
+
+from app.domains.social.public import WorldCharacterSocialProfileQuery
+
+from app.domains.social.public import WorldCharacterSocialProfileValidationError
+
 from app.runtime import persistence
+
 from app.domains.social.service import profile_cursor as social
 
-
-# Compatibility vectors from de83dae's cursor functions, using only the public
-# synthetic secret below, nonce bytes(range(12)), and these synthetic IDs.
 SOCIAL_CURSOR = (
     "AAECAwQFBgcICQoL8C5f5MftBwB-uaN0iC44VmTefYJ9vCnShWUriR9T-uh8jb03bQ0avtVZ"
     "jalQ2f1f55ljuFZT5kEBkANjCP9y_O5_9WGmcJT_sNiLs9_74bp_Ztm1rwnaEwl66EDPeeL6J"
     "HHZkUMKBW458tlkV1OB7D8d4L8jfYRwq9nj-GEf0dRM6UYWdf2-YhtS7ruyXySOFBlh4epGM"
     "8NovaQStnCzNLTMPFW33NdTZhkNAs8I2U-P7-0EItkyo-zMQJCRVA"
 )
-HOME_CURSOR = "eyJ1cGRhdGVkX2F0IjoiMjAyNi0wOS0wNVQwMTowMjowMyIsIndvcmxkX2lkIjoid29ybGQtZzIifQ"
-NOW = datetime(2026, 9, 5, 1, 2, 3)
 
+HOME_CURSOR = "eyJ1cGRhdGVkX2F0IjoiMjAyNi0wOS0wNVQwMTowMjowMyIsIndvcmxkX2lkIjoid29ybGQtZzIifQ"
+
+NOW = datetime(2026, 9, 5, 1, 2, 3)
 
 @pytest.mark.parametrize("name,reason", [
     ("SqliteConcurrencyError", "sqlite_concurrency_error"),
@@ -52,7 +67,6 @@ def test_shared_sqlite_errors_preserve_existing_catch_identity(name, reason):
     assert error.args == ("existing detail",)
     with pytest.raises(sqlite_concurrency.SqliteConcurrencyError):
         raise error
-
 
 @pytest.mark.parametrize("excess", [0, 1])
 def test_request_body_limit_catches_the_shared_error_for_streamed_chunks(excess):
@@ -88,9 +102,12 @@ def test_request_body_limit_catches_the_shared_error_for_streamed_chunks(excess)
     assert response == ({"detail": "Request body exceeds the allowed limit."} if excess else {"bytes": limit})
     assert completed == ([] if excess else [limit])
 
-
 def test_shared_busy_error_keeps_different_social_and_autonomy_http_contracts(monkeypatch):
-    from app.api.v1.routes import agents
+    from app.domains.characters import router as character_http
+    from app.domains.routines.service import activity_management
+    from app.runtime.characters import management as character_workflows
+    from types import SimpleNamespace
+    agents = SimpleNamespace(update_settings=character_http.update_settings, agent_service=character_workflows)
     from app.domains.social import router as manual_social
 
     with pytest.raises(HTTPException) as social_error:
@@ -103,19 +120,17 @@ def test_shared_busy_error_keeps_different_social_and_autonomy_http_contracts(mo
     def busy(*args, **kwargs):
         raise agents.agent_service.AgentAutonomyRetryableError(detail)
 
-    monkeypatch.setattr(agents.agent_service, "update_settings", busy)
+    monkeypatch.setattr(activity_management, "update_settings", busy)
     with pytest.raises(HTTPException) as autonomy_error:
-        agents.update_settings("synthetic-character", None, db=None, user=None)
+        agents.update_settings("synthetic-character", None, db=None, user=None, references=None)
     assert autonomy_error.value.status_code == 409
     assert autonomy_error.value.detail == detail
     assert agents.agent_service.SqliteBusyRetryExhausted is exceptions.SqliteBusyRetryExhausted
-
 
 def test_device_home_decodes_existing_cursor_and_emits_identical_bytes():
     assert home._decode_cursor(HOME_CURSOR) == (NOW.isoformat(), "world-g2")
     assert home._encode_cursor(NOW, "world-g2") == HOME_CURSOR
     assert home._decode_cursor(None) == (None, None)
-
 
 @pytest.mark.parametrize("payload", [
     b"not-json", b'{"updated_at":"invalid","world_id":"world-g2"}',
@@ -126,13 +141,11 @@ def test_device_home_cursor_payload_errors_remain_owned_by_device_home(payload):
         home._decode_cursor(pagination.encode_cursor_bytes(payload))
     assert error.value.reason_code == "invalid_world_surface_cursor"
 
-
 def social_query():
     return WorldCharacterSocialProfileQuery(
         world_id="world-g2", world_character_id="wc-g2", current_user_id="viewer-g2",
         tab="posts", cursor=SOCIAL_CURSOR,
     )
-
 
 def test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque(monkeypatch):
     monkeypatch.setattr(social, "settings", SimpleNamespace(app_secret="g2-synthetic-cursor-secret"))
@@ -145,7 +158,6 @@ def test_social_cursor_accepts_prior_authenticated_format_and_remains_opaque(mon
     assert b"wc-g2" not in encrypted
     assert b"post-g2" not in encrypted
 
-
 @pytest.mark.parametrize("changes", [
     {"world_id": "other-world"}, {"world_character_id": "other-character"}, {"tab": "replies"},
 ])
@@ -154,7 +166,6 @@ def test_social_cursor_scope_remains_domain_specific(monkeypatch, changes):
     with pytest.raises(WorldCharacterSocialProfileValidationError) as error:
         social._decode_cursor(replace(social_query(), **changes))
     assert error.value.reason_code == "world_character_social_profile_invalid_request"
-
 
 def test_social_cursor_rejects_changed_ciphertext_and_wrong_secret(monkeypatch):
     monkeypatch.setattr(social, "settings", SimpleNamespace(app_secret="g2-synthetic-cursor-secret"))
@@ -165,7 +176,6 @@ def test_social_cursor_rejects_changed_ciphertext_and_wrong_secret(monkeypatch):
     monkeypatch.setattr(social.settings, "app_secret", "g2-other-synthetic-secret")
     with pytest.raises(WorldCharacterSocialProfileValidationError):
         social._decode_cursor(social_query())
-
 
 @pytest.mark.parametrize("payload,encoded", [
     (b"", ""), (b"a", "YQ"), (b"ab", "YWI"), (b"abc", "YWJj"), (b"\xff\x00\xfe", "_wD-"),

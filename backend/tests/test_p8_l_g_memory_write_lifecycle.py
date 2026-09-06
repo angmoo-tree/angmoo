@@ -1,41 +1,66 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC
+
+from datetime import datetime
+
+from datetime import timedelta
+
 import hashlib
+
 import json
+
 from pathlib import Path
 
 import pytest
-from sqlalchemy import create_engine, event
+
+from sqlalchemy import create_engine
+
+from sqlalchemy import event
+
 from sqlalchemy.exc import IntegrityError
+
 from sqlalchemy.orm import Session
 
 from model_fixture_support import models
+
 from app.models import Base
+
 from app.domains.memory.repository.queue import SqlAlchemyMemoryMaintenanceQueue
-from app.runtime.memory.composition import (
-    memory_repository as SqlAlchemyMemoryRepository,
-)
+
+from app.runtime.memory.composition import memory_repository as SqlAlchemyMemoryRepository
+
 from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
+
 from app.domains.memory.contracts.source_evidence import CanonicalMemoryEvidence
+
 from app.domains.memory.contracts.provenance import MemoryCandidateStatus
+
 from app.domains.memory.exceptions import MemoryConflictError
+
 from app.domains.memory.contracts.provenance import MemoryItemStatus
+
 from app.domains.memory.contracts.provenance import MemoryKindV1
+
 from app.domains.memory.exceptions import MemoryNotFoundError
+
 from app.domains.memory.contracts.scope import MemoryScope
+
 from app.domains.memory.service.scope import MemoryScopeService
+
 from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+
 from app.domains.memory.exceptions import MemoryValidationError
+
 from app.domains.memory.service.items import MemoryWriteLifecycleService
+
 from app.domains.memory.contracts.items import MemoryWriteOutcome
 
-
 NOW = datetime(2026, 9, 1, 12, tzinfo=UTC)
+
 FIXTURE_ROOT = (
     Path(__file__).parent / "fixtures" / "core_experience" / "p0-contract-v1"
 )
-
 
 class FakeSourceReader:
     def __init__(self) -> None:
@@ -52,7 +77,6 @@ class FakeSourceReader:
     ) -> CanonicalMemoryEvidence | None:
         del scope
         return self.values.get((source_type, source_id))
-
 
 @pytest.fixture
 def memory_session() -> Session:
@@ -72,7 +96,6 @@ def memory_session() -> Session:
     finally:
         session.close()
         engine.dispose()
-
 
 def _seed_world(session: Session) -> tuple[MemoryScope, str]:
     owner = models.User(
@@ -138,7 +161,6 @@ def _seed_world(session: Session) -> tuple[MemoryScope, str]:
         counterpart.id,
     )
 
-
 def _character(identifier: str, owner_id: str, handle: str) -> models.Character:
     return models.Character(
         id=identifier,
@@ -156,7 +178,6 @@ def _character(identifier: str, owner_id: str, handle: str) -> models.Character:
         execution_mode="local",
         persona_summary="fixture",
     )
-
 
 def _world_character(
     identifier: str,
@@ -177,7 +198,6 @@ def _world_character(
         world_contract_hash="a" * 64,
         version=1,
     )
-
 
 def _evidence(
     *,
@@ -215,7 +235,6 @@ def _evidence(
         thread_id=thread_id,
     )
 
-
 def _enabled_service(
     session: Session,
     scope: MemoryScope,
@@ -232,7 +251,6 @@ def _enabled_service(
     )
     session.commit()
     return MemoryWriteLifecycleService(repository, reader), repository, enabled.version
-
 
 def _propose_and_accept(
     *,
@@ -268,7 +286,6 @@ def _propose_and_accept(
         now=NOW,
     )
 
-
 def test_memory_opt_out_fixture_is_an_executable_zero_write_gate(
     memory_session: Session,
 ) -> None:
@@ -299,7 +316,6 @@ def test_memory_opt_out_fixture_is_an_executable_zero_write_gate(
     assert memory_session.query(models.MemoryCandidate).count() == 0
     assert memory_session.query(models.MemoryItem).count() == 0
     assert memory_session.query(models.MemoryMaintenanceJob).count() == 0
-
 
 def test_candidate_is_idempotent_and_atomic_acceptance_has_provenance(
     memory_session: Session,
@@ -358,7 +374,6 @@ def test_candidate_is_idempotent_and_atomic_acceptance_has_provenance(
     assert replay_accept.item.id == accepted.item.id
     assert memory_session.query(models.MemoryItem).count() == 1
 
-
 def test_item_and_evidence_rollback_together_on_provenance_failure(
     memory_session: Session,
 ) -> None:
@@ -393,7 +408,6 @@ def test_item_and_evidence_rollback_together_on_provenance_failure(
     assert memory_session.query(models.MemoryItem).count() == 0
     assert memory_session.query(models.MemoryItemEvidence).count() == 0
     assert memory_session.query(models.MemoryMaintenanceJob).count() == 0
-
 
 def test_correction_supersedes_old_item_and_delete_fixture_blocks_retrieval(
     memory_session: Session,
@@ -466,7 +480,6 @@ def test_correction_supersedes_old_item_and_delete_fixture_blocks_retrieval(
             now=NOW,
         )
 
-
 def test_pin_bypasses_retention_then_unpin_enqueues_expiry_once(
     memory_session: Session,
 ) -> None:
@@ -526,7 +539,6 @@ def test_pin_bypasses_retention_then_unpin_enqueues_expiry_once(
             now=future,
         )
 
-
 def test_expired_item_cannot_be_pinned_and_resurrected(
     memory_session: Session,
 ) -> None:
@@ -561,7 +573,6 @@ def test_expired_item_cannot_be_pinned_and_resurrected(
             item_id=accepted.item.id,
             now=future,
         )
-
 
 @pytest.mark.parametrize(
     ("field", "value", "code"),
@@ -600,7 +611,6 @@ def test_eligibility_failures_leave_no_candidate_or_provider_call(
     assert result.provider_call_count == 0
     assert memory_session.query(models.MemoryCandidate).count() == 0
 
-
 def test_empty_canonical_summary_fails_closed_without_candidate(
     memory_session: Session,
 ) -> None:
@@ -622,7 +632,6 @@ def test_empty_canonical_summary_fails_closed_without_candidate(
         )
 
     assert memory_session.query(models.MemoryCandidate).count() == 0
-
 
 def test_stale_item_version_fails_without_mutation(memory_session: Session) -> None:
     scope, _ = _seed_world(memory_session)
@@ -647,7 +656,6 @@ def test_stale_item_version_fails_without_mutation(memory_session: Session) -> N
     unchanged = repository.get_item(scope=scope, item_id=accepted.item.id)
     assert unchanged.version == accepted.item.version
     assert unchanged.pinned_at is None
-
 
 def test_source_invalidation_tombstones_item_and_pending_candidate(
     memory_session: Session,
@@ -721,7 +729,6 @@ def test_source_invalidation_tombstones_item_and_pending_candidate(
     assert rejected.status is MemoryCandidateStatus.REJECTED
     assert rejected.reason_code == "memory_source_invalidated"
 
-
 def test_maintenance_queue_serializes_same_scope_and_fences_completion(
     memory_session: Session,
 ) -> None:
@@ -778,7 +785,6 @@ def test_maintenance_queue_serializes_same_scope_and_fences_completion(
     )
     assert second is not None and second.job_id == remaining_id
 
-
 def test_expired_maintenance_lease_is_fenced_before_reclaim(
     memory_session: Session,
 ) -> None:
@@ -821,7 +827,6 @@ def test_expired_maintenance_lease_is_fenced_before_reclaim(
         lease_token="new-lease",
         now=expired_at + timedelta(seconds=1),
     )
-
 
 def test_owner_memory_request_requires_successful_user_message(
     memory_session: Session,
@@ -876,7 +881,6 @@ def test_owner_memory_request_requires_successful_user_message(
     )
     assert assistant is not None
     assert assistant.successful is False
-
 
 def test_sqlalchemy_source_reader_requires_observation_visibility_and_no_block(
     memory_session: Session,

@@ -25,7 +25,9 @@ def _function_names(path: Path) -> set[str]:
     }
 
 
-def _imports(path: Path) -> set[str]:
+def _imports(path: Path | tuple[Path, ...]) -> set[str]:
+    if isinstance(path, tuple):
+        return set().union(*(_imports(member) for member in path))
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     imported: set[str] = set()
     for node in ast.walk(tree):
@@ -115,8 +117,12 @@ def test_autonomous_setup_routes_use_world_characters_public_boundary() -> None:
 
 def test_activity_plan_route_and_scheduler_use_routines_public_boundary() -> None:
     route = APP_ROOT / "api" / "v1" / "routes" / "world_activity_runtime.py"
-    agent_runs = APP_ROOT / "services" / "agent_runs.py"
-    resident = APP_ROOT / "services" / "langgraph_resident.py"
+    agent_runs = (
+        APP_ROOT / "runtime" / "resident" / "execution.py",
+        APP_ROOT / "runtime" / "resident" / "post_selection.py",
+        APP_ROOT / "runtime" / "resident" / "scheduler.py",
+    )
+    resident = APP_ROOT / "runtime" / "resident" / "langgraph.py"
 
     assert "app.domains.routines" in _imports(route)
     assert "app.services.daily_activity_plans" not in _imports(route)

@@ -18,15 +18,19 @@ from app.main import (
     settings,
     validate_public_runtime_settings,
 )
+
 from app.main import (
     create_public_app as create_app,
 )
+
 from app.main import (
     create_public_lifespan as create_lifespan,
 )
+
 from app.main import (
     public_app as app,
 )
+
 from app.main import (
     public_lifespan as lifespan,
 )

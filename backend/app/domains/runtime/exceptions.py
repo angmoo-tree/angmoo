@@ -4,6 +4,11 @@ Execution/adapters/lease policy stay outside this contract.
 """
 from typing import Any
 
+from app.domains.routines.contracts.execution_errors import (
+    AgentRunServiceError,
+    AgentSlotUnavailableError,
+)
+
 
 class ResidentRuntimeError(Exception):
     def __init__(
@@ -24,13 +29,6 @@ class ResidentRuntimeUnavailableError(ResidentRuntimeError):
 class ResidentRuntimeRegistrationError(ResidentRuntimeError):
     pass
 
-
-class AgentRunServiceError(Exception):
-    pass
-
-
-class AgentSlotUnavailableError(AgentRunServiceError):
-    pass
 
 # Historical API names identify the exact same runtime-neutral classes.
 OpenClawGatewayError = ResidentRuntimeError

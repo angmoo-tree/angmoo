@@ -20,11 +20,10 @@ from app.runtime.relationships import (
 )
 from app.domains.social.contracts.search_state import SocialSearchState
 from app.runtime.search import CallbackSearchIndexAdapter
-from app.services import (
-    agent_activity_policy,
-    world_character_contracts,
-)
-from app.services.direct_llm import DirectLlmError, RunLlmTracker
+from app.domains.routines.contracts import activity_policy as agent_activity_policy
+from app.services import world_character_contracts
+from app.integrations.direct_llm import DirectLlmError
+from app.integrations.direct_llm import RunLlmTracker
 from app.domains.social.service.feed_reaction_validation import validate_reaction_decision
 from app.runtime.resident.context import LangGraphResidentContext
 from app.runtime.social.feed_cycle import run_world_keyword_feed

@@ -1,7 +1,8 @@
 """Bind tool writes to actual Social timeline and same-Session Routines operations."""
 
 from sqlalchemy.orm import Session
-from app.cruds import agents as agent_crud
+from app.domains.routines.repository import feed_cues as feed_cue_queries
+from app.domains.routines.service import feed_cues
 from app.domains.routines.models import AgentRun, AgentFeedCue
 from app.domains.routines.service import activity_logs
 from app.domains.social.service.agent_tool_actions import AgentToolActionService
@@ -35,12 +36,12 @@ class RuntimeAgentToolActionWorkflows(RuntimeAgentToolReferences):
     def get_pending_feed_cue(
         self, db: Session, character_id: str
     ) -> AgentFeedCue | None:
-        return agent_crud.get_pending_feed_cue(db, character_id)
+        return feed_cue_queries.get_pending_feed_cue(db, character_id)
 
     def mark_pending_feed_cue_used(
         self, db: Session, *, character_id: str, run_id: str, post_id: str
     ) -> None:
-        return agent_crud.mark_pending_feed_cue_used(
+        return feed_cues.mark_pending_feed_cue_used(
             db, character_id=character_id, run_id=run_id, post_id=post_id
         )
 

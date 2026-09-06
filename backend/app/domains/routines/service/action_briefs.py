@@ -1,3 +1,8 @@
+from __future__ import annotations
+
+
+
+
 from typing import Any
 
 from app.core.context_text import neutralize_context_text
@@ -101,3 +106,20 @@ def _brief_field(value: Any, limit: int) -> str:
     if len(text) <= limit:
         return text
     return f"{text[: max(0, limit - 3)]}..."
+
+
+def _build_v6_prepared_create_post_brief(
+    feed_interest_payload: dict[str, Any],
+    *,
+    feed_cue_topic: Any = None,
+    allowed_actions: tuple[str, ...] = (),
+) -> str:
+    if "post" not in allowed_actions:
+        return ""
+    prepared_brief = build_feed_scan_create_post_brief(
+        feed_interest_payload,
+        feed_cue_topic=feed_cue_topic,
+    )
+    if prepared_brief:
+        return prepared_brief
+    return build_self_update_create_post_brief()

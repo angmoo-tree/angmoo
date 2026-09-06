@@ -229,7 +229,7 @@
     ".github/PULL_REQUEST_TEMPLATE.md",
     ".github/workflows/security.yml",
     "CONTRIBUTING.md",
-    "backend/app/domains/social/api/schemas.py",
+    "backend/app/domains/social/schemas/manual.py",
     "backend/app/runtime/social/sqlalchemy_read_repository.py",
     "backend/tests/test_l3_owner_manual_social_inbox.py",
     "browser-tests/fixtures/visual-corpus.json",

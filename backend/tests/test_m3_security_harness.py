@@ -10,7 +10,7 @@ import pytest
 from fastapi.routing import APIRoute, _iter_routes_with_context
 
 from app.main import app
-from app.services import agent_runs as agent_run_service
+from app.runtime.resident import execution as agent_run_service
 from conftest import ExternalNetworkBlocked
 
 

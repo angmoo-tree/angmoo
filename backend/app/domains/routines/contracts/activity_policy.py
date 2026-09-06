@@ -1,6 +1,8 @@
 """Immutable activity permission result and its original prompt representation."""
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any, Protocol
+from zoneinfo import ZoneInfo
 from app.domains.routines.constants import TENDENCY_PUBLIC_ACTION_NAMES
 
 
@@ -76,3 +78,9 @@ def _format_tendency_prompt(
                 lines.append(f"  - {action}: {note.strip()}")
     return "\n".join(lines) if lines else "  - none saved yet"
 
+
+
+class ActivityTimezoneReader(Protocol):
+    """Resolve the selected World clock at the caller's original read point."""
+
+    def __call__(self, db: Any, *, character_id: str) -> ZoneInfo: ...

@@ -3,38 +3,45 @@
 from __future__ import annotations
 
 import hashlib
+
 import json
+
 from pathlib import Path
+
 import sys
 
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
-BACKEND_ROOT = REPO_ROOT / "backend"
-sys.path.insert(0, str(BACKEND_ROOT))
-
 from app.main import app as private_app  # noqa: E402
+
 from app.main import public_app  # noqa: E402
+
 from app.services.langgraph_resident import _ResidentGraphState  # noqa: E402
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+BACKEND_ROOT = REPO_ROOT / "backend"
+
+sys.path.insert(0, str(BACKEND_ROOT))
 
 HTTP_METHODS = {"get", "post", "put", "patch", "delete", "options", "head", "trace"}
+
 EXPECTED_PRIVATE_OPENAPI_SHA256 = (
     "86A727172D133F4AAC680F8C4ECA514E5FE0CABD15F9FDF47614B5FB308B4BF4"
 )
+
 EXPECTED_PUBLIC_OPENAPI_SHA256 = (
     "E2C6D0F8EC8E8C2EC5E4D9B41E04D88DB7BCA5413FD0E41991BBB61ABDF60CCD"
 )
+
 EXPECTED_CREDENTIAL_SHA256 = (
     "E3CDE9603CA664FC59C285B3401A53A569E6AE4A1C2E778E03E37D71ADBE69C9"
 )
+
 EXPECTED_LANGGRAPH_SHA256 = (
     "3146AF30208394C7A8CDBD1CEFF9C8AFFFA1FD1954AD5B33EDC52FD64F1C7300"
 )
 
-
 class ContractVerificationError(RuntimeError):
     pass
-
 
 def _canonical_sha256(value: object) -> str:
     encoded = json.dumps(
@@ -45,7 +52,6 @@ def _canonical_sha256(value: object) -> str:
     ).encode("utf-8")
     return hashlib.sha256(encoded).hexdigest().upper()
 
-
 def _operations(document: dict) -> dict[tuple[str, str], dict]:
     return {
         (path, method): operation
@@ -53,7 +59,6 @@ def _operations(document: dict) -> dict[tuple[str, str], dict]:
         for method, operation in item.items()
         if method in HTTP_METHODS
     }
-
 
 def verify() -> dict[str, object]:
     private_source = (
@@ -178,7 +183,6 @@ def verify() -> dict[str, object]:
         )
     return facts
 
-
 def main() -> int:
     try:
         facts = verify()
@@ -187,7 +191,6 @@ def main() -> int:
         return 1
     print(json.dumps(facts, ensure_ascii=False, sort_keys=True))
     return 0
-
 
 if __name__ == "__main__":
     raise SystemExit(main())

@@ -1,19 +1,26 @@
 from __future__ import annotations
 
 import asyncio
+
 import inspect
 
 import httpx
+
 import pytest
+
 from sqlalchemy import create_engine
+
 from sqlalchemy.orm import Session
 
 from model_fixture_support import models
-from app.main import app as private_app
-from app.main import public_app
-from app.services import agent_runs as agent_run_service
-from chat_service_support import messages as message_service
 
+from app.main import app as private_app
+
+from app.main import public_app
+
+from app.runtime.resident import execution as agent_run_service
+
+from chat_service_support import messages as message_service
 
 @pytest.mark.parametrize("app", [private_app, public_app])
 def test_resident_slot_assignment_is_not_exposed_over_http(
@@ -54,14 +61,12 @@ def test_resident_slot_assignment_is_not_exposed_over_http(
     assert response.status_code in {404, 405}
     assert called is False
 
-
 def test_internal_assignment_does_not_accept_caller_selected_agent_id() -> None:
     parameters = inspect.signature(agent_run_service.assign_resident_slot).parameters
 
     assert "data" not in parameters
     assert "agent_id" not in parameters
     assert "agent_ids" not in parameters
-
 
 def test_agent_slot_has_one_non_null_assignment_per_character() -> None:
     indexes = {index.name: index for index in models.AgentSlot.__table__.indexes}
@@ -73,7 +78,6 @@ def test_agent_slot_has_one_non_null_assignment_per_character() -> None:
         index.dialect_options["postgresql"]["where"]
     )
 
-
 def test_message_thread_response_lease_contract() -> None:
     columns = models.MessageThread.__table__.columns
     constraints = {
@@ -83,7 +87,6 @@ def test_message_thread_response_lease_contract() -> None:
     assert "response_lease_token" in columns
     assert "response_lease_expires_at" in columns
     assert "ck_message_threads_response_lease_pair" in constraints
-
 
 def test_message_response_lease_rejects_second_session_and_is_token_scoped(
     tmp_path,

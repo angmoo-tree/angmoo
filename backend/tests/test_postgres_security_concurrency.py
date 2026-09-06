@@ -1,3 +1,9 @@
+from app.domains.routines.service import activity_management, autonomy_management, manual_activity, feed_cues
+from app.domains.routines.service import first_greeting as first_greeting_service
+from app.runtime.resident import tendency_analysis
+from app.runtime.resident import slots as resident_slots
+from app.domains.routines.service import slot_assignments as slot_assignments
+from app.domains.routines.service import slot_pool as slot_pool
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
@@ -17,7 +23,7 @@ from model_fixture_support import models
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.domains.chat import schemas as chat_schemas
 from app.config import settings
-from app.cruds import agent_runs as agent_run_crud
+from app.domains.routines import constants as agent_run_crud
 from app.cruds import community as community_crud
 from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
@@ -30,7 +36,7 @@ from chat_service_support import messages as message_service
 from app.services import daily_activity_plans
 from app.domains.worlds import service as world_service
 from app.services import world_character_contracts
-from app.services.direct_llm import DirectLlmResponse
+from app.integrations.direct_llm import DirectLlmResponse
 
 
 DATABASE_URL = os.getenv("SECURITY_CONCURRENCY_DATABASE_URL")
@@ -600,7 +606,7 @@ def test_resident_character_assignment_is_unique_across_postgres_sessions() -> N
     def attempt() -> str:
         with Session(engine) as db:
             barrier.wait()
-            slot = agent_run_crud.assign_resident_slot(
+            slot = resident_slots.assign_resident_slot(
                 db,
                 agent_ids=agent_ids,
                 user_id=user_id,
@@ -695,12 +701,12 @@ def test_temporary_manual_slot_claim_is_single_flight_across_postgres_sessions()
             )
         )
         db.commit()
-        agent_run_crud.ensure_agent_slots(db, agent_ids)
+        slot_pool.ensure_agent_slots(db, agent_ids)
 
     def attempt() -> str | None:
         with Session(engine) as db:
             barrier.wait()
-            slot = agent_run_crud.claim_temporary_resident_slot_assignment(
+            slot = resident_slots.claim_temporary_resident_slot_assignment(
                 db,
                 agent_ids=agent_ids,
                 user_id=user_id,
@@ -736,7 +742,7 @@ def test_temporary_manual_slot_claim_is_single_flight_across_postgres_sessions()
                 "pending:temporary:"
             )
 
-            released = agent_run_crud.release_temporary_resident_slot_assignment(
+            released = slot_assignments.release_temporary_resident_slot_assignment(
                 db,
                 agent_id=claimed_slot.agent_id,
                 user_id=user_id,
@@ -1490,6 +1496,9 @@ def test_agent_creation_allows_concurrent_local_characters_without_a_saved_count
 
 
 def test_first_greeting_claim_is_single_flight_across_postgres_sessions() -> None:
+    from app.domains.routines.service import first_greeting as agent_service
+    from app.domains.social.repository.posts import character_has_authored_post
+
     engine = _engine()
     suffix = uuid4().hex
     user_id = f"user-greeting-{suffix}"
@@ -1558,6 +1567,7 @@ def test_first_greeting_claim_is_single_flight_across_postgres_sessions() -> Non
                         f"{user_id}:{character_id}:{run_id}"
                     ),
                     now=now,
+                    has_authored_post=character_has_authored_post,
                 )
             except (
                 agent_service.FirstGreetingCooldownError,
@@ -2089,7 +2099,7 @@ def test_world_autonomy_capacity_is_atomic_across_postgres_sessions(
             assert user is not None
             barrier.wait(timeout=10)
             try:
-                agent_service.activate_agent(db, user, character_id)
+                autonomy_management.activate_agent(db, user, character_id, workflows=agent_service.build_autonomy_workflows())
             except agent_service.AgentAutonomyCapacityError as exc:
                 return exc.reason_code
             return "activated"

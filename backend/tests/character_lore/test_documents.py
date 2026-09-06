@@ -10,7 +10,7 @@ from app.domains.character_lore import constants as lore_constants
 from app.domains.character_lore.policies import chunking
 from app.domains.character_lore.service import presentation
 from app.runtime import character_lore as lore_runtime
-from app.services import direct_llm
+from app.integrations import direct_llm as direct_llm
 
 
 class _FakeLoreDb:

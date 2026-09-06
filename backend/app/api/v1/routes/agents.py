@@ -1,110 +1,157 @@
-from app.domains.local_bot.router.keys import get_local_connection, issue_local_key, revoke_local_key
-from app.domains.local_bot.router.keys import router as local_key_router
-from app.domains.characters.router import delete_image_seed, delete_image_settings_key, get_image_settings, update_image_settings, upload_image_seed
-from app.domains.characters.router import generate_agent_draft_media, generate_profile_media
-from app.domains.characters.router import (
-    get_agent_draft_media,
-    upload_agent_draft_media,
-    get_agent_draft_media_usage,
-    get_agent_draft_media_candidate_content,
-    apply_agent_draft_media_candidate,
-    discard_agent_draft_media_candidate,
-    upload_profile_media,
-    get_profile_media_usage,
-    get_agent_profile_media_candidate_content,
-    apply_profile_media_candidate,
-    discard_profile_media_candidate,
-)
-from app.domains.characters.router import (
-    create_agent_draft,
-    enhance_agent_draft_persona,
-    complete_agent_draft,
+from app.domains.local_bot.router.keys import get_local_connection
 
-    get_agent_draft,
-    update_agent_draft,
-    list_agents,
-    create_agent,
-    get_agent,
-    update_profile,
-    update_persona,
-    update_promotion_usage,
-    router as character_router,
-)
-from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
+from app.domains.local_bot.router.keys import issue_local_key
+
+from app.domains.local_bot.router.keys import revoke_local_key
+
+from app.domains.local_bot.router.keys import router as local_key_router
+
+from app.domains.characters.router import delete_image_seed
+
+from app.domains.characters.router import delete_image_settings_key
+
+from app.domains.characters.router import get_image_settings
+
+from app.domains.characters.router import update_image_settings
+
+from app.domains.characters.router import upload_image_seed
+
+from app.domains.characters.router import generate_agent_draft_media
+
+from app.domains.characters.router import generate_profile_media
+
+from app.domains.characters.router import get_agent_draft_media
+
+from app.domains.characters.router import upload_agent_draft_media
+
+from app.domains.characters.router import get_agent_draft_media_usage
+
+from app.domains.characters.router import get_agent_draft_media_candidate_content
+
+from app.domains.characters.router import apply_agent_draft_media_candidate
+
+from app.domains.characters.router import discard_agent_draft_media_candidate
+
+from app.domains.characters.router import upload_profile_media
+
+from app.domains.characters.router import get_profile_media_usage
+
+from app.domains.characters.router import get_agent_profile_media_candidate_content
+
+from app.domains.characters.router import apply_profile_media_candidate
+
+from app.domains.characters.router import discard_profile_media_candidate
+
+from app.domains.characters.router import create_agent_draft
+
+from app.domains.characters.router import enhance_agent_draft_persona
+
+from app.domains.characters.router import complete_agent_draft
+
+from app.domains.characters.router import get_agent_draft
+
+from app.domains.characters.router import update_agent_draft
+
+from app.domains.characters.router import list_agents
+
+from app.domains.characters.router import create_agent
+
+from app.domains.characters.router import get_agent
+
+from app.domains.characters.router import update_profile
+
+from app.domains.characters.router import update_persona
+
+from app.domains.characters.router import update_promotion_usage
+
+from app.domains.characters.router import router as character_router
+
+from fastapi import APIRouter
+
+from fastapi import Body
+
+from fastapi import Depends
+
+from fastapi import HTTPException
+
+from fastapi import Response
+
+from fastapi import status
+
 from fastapi.responses import FileResponse
+
 from sqlalchemy.orm import Session
 
 from app import schemas
-from app.domains.identity.models import User as _model_User
-from app.runtime.persistence.model_registration import register_models
-register_models()
-from app.domains.identity.dependencies import get_current_user
-from app.database import get_db
-from app.runtime.characters import creator as draft_service
-from app.runtime.characters import management as agent_service
-from app.services import agent_runs as agent_run_service
-from app.services import community as community_service
-from app.domains.operations.service import maintenance as maintenance_service
-from app.services.direct_llm import DirectLlmDeferred, DirectLlmError, DirectLlmJsonError
-from app.services.runtime_boundary import OpenClawGatewayAuthError, OpenClawGatewayError
 
+from app.domains.identity.models import User as _model_User
+
+from app.runtime.persistence.model_registration import register_models
+
+from app.domains.identity.dependencies import get_current_user
+
+from app.database import get_db
+
+from app.runtime.characters import creator as draft_service
+
+from app.runtime.characters import management as agent_service
+
+from app.domains.routines import exceptions as agent_run_service
+
+from app.services import community as community_service
+
+from app.domains.operations.service import maintenance as maintenance_service
+
+from app.integrations.direct_llm import DirectLlmDeferred
+
+from app.integrations.direct_llm import DirectLlmError
+
+from app.integrations.direct_llm import DirectLlmJsonError
+
+from app.services.runtime_boundary import OpenClawGatewayAuthError
+
+from app.services.runtime_boundary import OpenClawGatewayError
+
+register_models()
 
 router = APIRouter(prefix="/agents", tags=["agents"])
-_character_routes = {route.name: route for route in character_router.routes}
-_local_key_routes = {route.name: route for route in local_key_router.routes}
-TENDENCY_ANALYSIS_RETRY_DETAIL = (
-    "성향 분석 결과를 정리하지 못했습니다. 잠시 후 다시 시도해주세요."
-)
 
+_character_routes = {route.name: route for route in character_router.routes}
+
+_local_key_routes = {route.name: route for route in local_key_router.routes}
 
 def _raise_demo_account_locked(exc: Exception) -> None:
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
 
-
 router.routes.append(_character_routes["list_agents"])
-
 
 router.routes.append(_character_routes["create_agent"])
 
-
 router.routes.append(_character_routes["create_agent_draft"])
-
 
 router.routes.append(_character_routes["get_agent_draft"])
 
-
 router.routes.append(_character_routes["get_agent_draft_media"])
-
 
 router.routes.append(_character_routes["update_agent_draft"])
 
-
 router.routes.append(_character_routes["enhance_agent_draft_persona"])
-
 
 router.routes.append(_character_routes["upload_agent_draft_media"])
 
-
 router.routes.append(_character_routes["generate_agent_draft_media"])
-
 
 router.routes.append(_character_routes["get_agent_draft_media_usage"])
 
-
 router.routes.append(_character_routes["get_agent_draft_media_candidate_content"])
-
 
 router.routes.append(_character_routes["apply_agent_draft_media_candidate"])
 
-
 router.routes.append(_character_routes["discard_agent_draft_media_candidate"])
-
 
 router.routes.append(_character_routes["complete_agent_draft"])
 
-
 router.routes.append(_character_routes["get_agent"])
-
 
 @router.delete("/{character_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_agent(
@@ -141,439 +188,60 @@ def delete_agent(
         ) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-
 router.routes.append(_local_key_routes["get_local_connection"])
-
 
 router.routes.append(_local_key_routes["issue_local_key"])
 
-
 router.routes.append(_local_key_routes["revoke_local_key"])
-
-
-@router.get("/{character_id}/feed-cue", response_model=schemas.AgentFeedCueRead | None)
-def get_feed_cue(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: _model_User = Depends(get_current_user),
-) -> schemas.AgentFeedCueRead | None:
-    try:
-        return agent_service.get_feed_cue(db, user, character_id)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-
-
-@router.post(
-    "/{character_id}/feed-cue",
-    response_model=schemas.AgentFeedCueRead,
-    status_code=status.HTTP_201_CREATED,
-)
-def give_feed_cue(
-    character_id: str,
-    data: schemas.AgentFeedCueCreate,
-    db: Session = Depends(get_db),
-    user: _model_User = Depends(get_current_user),
-) -> schemas.AgentFeedCueRead:
-    try:
-        return agent_service.give_feed_cue(db, user, character_id, data)
-    except maintenance_service.AgentActivityMaintenanceError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
-        ) from exc
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.AgentSuspendedError as exc:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
-    except (
-        agent_service.AgentFeedCueConflictError,
-        agent_service.AgentFeedCueUnavailableError,
-        agent_service.AgentExecutionModeError,
-    ) as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.PromptInjectionDetectedError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-
 
 router.routes.append(_character_routes["update_profile"])
 
-
 router.routes.append(_character_routes["update_persona"])
-
 
 router.routes.append(_character_routes["update_promotion_usage"])
 
-
 router.routes.append(_character_routes["upload_profile_media"])
-
 
 router.routes.append(_character_routes["get_image_settings"])
 
-
 router.routes.append(_character_routes["update_image_settings"])
-
 
 router.routes.append(_character_routes["delete_image_settings_key"])
 
-
 router.routes.append(_character_routes["upload_image_seed"])
-
 
 router.routes.append(_character_routes["delete_image_seed"])
 
-
 router.routes.append(_character_routes["generate_profile_media"])
-
 
 router.routes.append(_character_routes["get_profile_media_usage"])
 
-
 router.routes.append(_character_routes["get_agent_profile_media_candidate_content"])
-
 
 router.routes.append(_character_routes["apply_profile_media_candidate"])
 
-
 router.routes.append(_character_routes["discard_profile_media_candidate"])
 
+router.routes.append(_character_routes["get_feed_cue"])
 
-@router.put("/{character_id}/credential", response_model=schemas.CredentialRead)
-def update_credential(
-    character_id: str,
-    data: schemas.CredentialUpsert,
-    db: Session = Depends(get_db),
-    user: _model_User = Depends(get_current_user),
-) -> schemas.CredentialRead:
-    try:
-        return agent_service.update_credential(db, user, character_id, data)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except agent_service.ActiveSlotBusyError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.CredentialRequiredError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.CredentialSyncError as exc:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+router.routes.append(_character_routes["give_feed_cue"])
 
+router.routes.append(_character_routes["update_credential"])
 
-@router.get(
-    "/{character_id}/credential",
-    response_model=schemas.CredentialRead | None,
-)
-def get_credential_metadata(
-    character_id: str,
-    world_id: str | None = None,
-    db: Session = Depends(get_db),
-    user: _model_User = Depends(get_current_user),
-) -> schemas.CredentialRead | None:
-    try:
-        return agent_service.get_credential_metadata(
-            db,
-            user,
-            character_id,
-            world_id=world_id,
-        )
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+router.routes.append(_character_routes["get_credential_metadata"])
 
+router.routes.append(_character_routes["delete_credential"])
 
-@router.delete(
-    "/{character_id}/credential",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
-def delete_credential(
-    character_id: str,
-    world_id: str | None = None,
-    db: Session = Depends(get_db),
-    user: _model_User = Depends(get_current_user),
-) -> Response:
-    try:
-        agent_service.delete_credential(
-            db,
-            user,
-            character_id,
-            world_id=world_id,
-        )
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except (agent_service.ActiveSlotBusyError, agent_service.AgentExecutionModeError) as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.CredentialSyncError as exc:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+router.routes.append(_character_routes["get_settings"])
 
+router.routes.append(_character_routes["update_settings"])
 
-@router.get("/{character_id}/settings", response_model=schemas.AgentActivitySettingRead)
-def get_settings(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: _model_User = Depends(get_current_user),
-) -> schemas.AgentActivitySettingRead:
-    try:
-        return agent_service.get_settings(db, user, character_id)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+router.routes.append(_character_routes["analyze_tendency"])
 
+router.routes.append(_character_routes["activate_agent"])
 
-@router.put("/{character_id}/settings", response_model=schemas.AgentActivitySettingRead)
-def update_settings(
-    character_id: str,
-    data: schemas.AgentActivitySettingUpdate,
-    db: Session = Depends(get_db),
-    user: _model_User = Depends(get_current_user),
-) -> schemas.AgentActivitySettingRead:
-    try:
-        return agent_service.update_settings(db, user, character_id, data)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except agent_service.AgentActiveHoursInvalidError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=str(exc),
-        ) from exc
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.AgentAutonomyCapacityError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.AgentAutonomyRetryableError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+router.routes.append(_character_routes["deactivate_agent"])
 
+router.routes.append(_character_routes["run_now"])
 
-@router.post("/{character_id}/tendency/analyze", response_model=schemas.AgentDetailRead)
-async def analyze_tendency(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: _model_User = Depends(get_current_user),
-) -> schemas.AgentDetailRead:
-    try:
-        return await agent_service.analyze_tendency(db, user, character_id)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except agent_service.AgentSuspendedError as exc:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
-    except agent_service.CredentialRequiredError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.LlmCredentialInvalidError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
-    except agent_run_service.OpenClawNotConfiguredError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
-        ) from exc
-    except agent_run_service.AgentSlotUnavailableError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.CredentialSyncError as exc:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
-    except DirectLlmJsonError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=TENDENCY_ANALYSIS_RETRY_DETAIL,
-        ) from exc
-    except agent_service.TendencyPromptInjectionDetectedError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-    except agent_service.TendencyAnalysisParseError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=TENDENCY_ANALYSIS_RETRY_DETAIL,
-        ) from exc
-    except OpenClawGatewayAuthError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="OpenClaw Gateway authentication failed",
-        ) from exc
-    except OpenClawGatewayError as exc:
-        credential_error = agent_service.llm_credential_error_message(exc)
-        if credential_error is not None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=credential_error,
-            ) from exc
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
-
-
-@router.post("/{character_id}/activate", response_model=schemas.AgentDetailRead)
-def activate_agent(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: _model_User = Depends(get_current_user),
-) -> schemas.AgentDetailRead:
-    try:
-        return agent_service.activate_agent(db, user, character_id)
-    except maintenance_service.AgentActivityMaintenanceError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
-        ) from exc
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.AgentSuspendedError as exc:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
-    except agent_service.CredentialRequiredError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.AgentAutonomyCapacityError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.AgentAutonomyRetryableError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except (
-        agent_service.TendencyAnalysisRequiredError,
-        agent_service.ActivityProfileRequiredError,
-    ) as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except (
-        agent_service.ActiveSlotBusyError,
-        agent_run_service.AgentSlotUnavailableError,
-    ) as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.CredentialSyncError as exc:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
-    except (
-        agent_run_service.CharacterOwnershipError,
-        agent_run_service.CredentialOwnershipError,
-        agent_run_service.CredentialDisabledError,
-    ) as exc:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
-    except community_service.CharacterNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-
-
-@router.post("/{character_id}/deactivate", response_model=schemas.AgentDetailRead)
-def deactivate_agent(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: _model_User = Depends(get_current_user),
-) -> schemas.AgentDetailRead:
-    try:
-        return agent_service.deactivate_agent(db, user, character_id)
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.ActiveSlotBusyError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.CredentialSyncError as exc:
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
-
-
-@router.post("/{character_id}/run-now", response_model=schemas.OpenClawAgentRunRead)
-async def run_now(
-    character_id: str,
-    db: Session = Depends(get_db),
-    user: _model_User = Depends(get_current_user),
-) -> schemas.OpenClawAgentRunRead:
-    try:
-        return await agent_service.run_agent_now(db, user, character_id)
-    except maintenance_service.AgentActivityMaintenanceError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
-        ) from exc
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.CredentialRequiredError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except (
-        agent_service.TendencyAnalysisRequiredError,
-        agent_service.ActivityProfileRequiredError,
-    ) as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except (
-        agent_service.RunNowSlotUnavailableError,
-        agent_service.RunNowSlotBusyError,
-        agent_service.RunNowSchedulerBusyError,
-        agent_service.RunNowSoonScheduledError,
-    ) as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.RunNowCooldownError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=str(exc),
-        ) from exc
-    except agent_run_service.OpenClawNotConfiguredError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
-        ) from exc
-    except (
-        agent_run_service.AgentSlotUnavailableError,
-        agent_run_service.AgentSessionBusyError,
-    ) as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except (
-        agent_run_service.CharacterOwnershipError,
-        agent_run_service.CredentialOwnershipError,
-        agent_run_service.CredentialDisabledError,
-    ) as exc:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
-    except OpenClawGatewayAuthError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="OpenClaw Gateway authentication failed",
-        ) from exc
-    except OpenClawGatewayError as exc:
-        credential_error = agent_service.llm_credential_error_message(exc)
-        if credential_error is not None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=credential_error,
-            ) from exc
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
-
-
-@router.post(
-    "/{character_id}/first-greeting",
-    response_model=schemas.AgentFirstGreetingRead,
-)
-async def first_greeting(
-    character_id: str,
-    data: schemas.AgentFirstGreetingCreate,
-    db: Session = Depends(get_db),
-    user: _model_User = Depends(get_current_user),
-) -> schemas.AgentFirstGreetingRead:
-    try:
-        return await agent_service.run_first_greeting(db, user, character_id, data)
-    except maintenance_service.AgentActivityMaintenanceError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
-        ) from exc
-    except agent_service.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-    except agent_service.AgentSuspendedError as exc:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
-    except agent_service.CredentialRequiredError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.TendencyAnalysisRequiredError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.FirstGreetingUnavailableError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except agent_service.FirstGreetingCooldownError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"{str(exc)} {exc.available_at.isoformat()} 이후 다시 시도할 수 있습니다.",
-        ) from exc
-    except DirectLlmDeferred as exc:
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"첫인사는 {exc.retry_at.isoformat()} 이후 다시 시도할 수 있습니다.",
-        ) from exc
-    except DirectLlmError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail="첫인사를 만들지 못했습니다. 잠시 후 다시 시도해주세요.",
-        ) from exc
-    except community_service.CommunityServiceError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+router.routes.append(_character_routes["first_greeting"])

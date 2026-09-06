@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 from app.domains.identity.models import User
 from app.domains.routines.models import AgentRun
 from app.domains.social.service import agent_tool_authorization as service
-from app.cruds import agent_runs as agent_run_crud
-from app.services import agent_activity_policy
+from app.domains.routines.repository import runs as agent_run_crud
+from app.runtime.resident import activity_policy as agent_activity_policy
 
 
 class RuntimeAgentToolReferences:

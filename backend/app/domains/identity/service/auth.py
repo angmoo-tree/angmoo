@@ -1,6 +1,5 @@
 import base64
 import binascii
-import hashlib
 import hmac
 import json
 import math
@@ -501,11 +500,12 @@ def _set_policy_agreements(user: models.User, agreed_at: datetime) -> None:
 
 
 def _pending_signup_key() -> bytes:
-    return hmac.new(
+    # Context-specific token MAC key; password storage uses core.security's KDF.
+    return hmac.digest(
         settings.app_secret.encode("utf-8"),
         b"angmoo-google-signup-pending-key-v1",
-        hashlib.sha256,
-    ).digest()
+        "sha256",
+    )
 
 
 def _b64url_encode(value: bytes) -> str:
@@ -535,11 +535,11 @@ def _create_pending_google_signup_token(
         json.dumps(payload, separators=(",", ":"), sort_keys=True).encode("utf-8")
     )
     signed = f"{GOOGLE_SIGNUP_PENDING_VERSION}.{payload_raw}"
-    signature = hmac.new(
+    signature = hmac.digest(
         _pending_signup_key(),
         signed.encode("ascii"),
-        hashlib.sha256,
-    ).digest()
+        "sha256",
+    )
     now = _utcnow()
     db.execute(
         delete(models.AuthGoogleSignupGrant).where(
@@ -567,11 +567,11 @@ def _read_pending_google_signup_token(token: str) -> dict[str, str]:
         raise InvalidGoogleSignupTokenError("Invalid pending signup token")
 
     signed = f"{version}.{payload_raw}"
-    expected = hmac.new(
+    expected = hmac.digest(
         _pending_signup_key(),
         signed.encode("ascii"),
-        hashlib.sha256,
-    ).digest()
+        "sha256",
+    )
     try:
         actual = _b64url_decode(signature_raw)
     except (binascii.Error, ValueError) as exc:
@@ -611,11 +611,11 @@ def _read_pending_google_signup_token(token: str) -> dict[str, str]:
 
 
 def _pending_signup_jti_hash(jti: str) -> str:
-    return hmac.new(
+    return hmac.digest(
         _pending_signup_key(),
         f"google-signup-jti-v1:{jti}".encode("utf-8"),
-        hashlib.sha256,
-    ).hexdigest()
+        "sha256",
+    ).hex()
 
 
 def _lock_pending_google_signup_grant(

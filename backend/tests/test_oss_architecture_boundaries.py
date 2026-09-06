@@ -1,25 +1,28 @@
 from __future__ import annotations
 
 import ast
+
 from pathlib import Path
 
-
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
+
 APP_ROOT = BACKEND_ROOT / "app"
+
 PUBLIC_RUNTIME_FILES = (
     APP_ROOT / "api" / "v1" / "routes" / "agent_runs.py",
     APP_ROOT / "api" / "v1" / "routes" / "agents.py",
     APP_ROOT / "runtime" / "characters" / "creator.py",
     APP_ROOT / "services" / "agent_runs.py",
+    APP_ROOT / "runtime" / "resident" / "execution.py",
     APP_ROOT / "services" / "agent_writing.py",
+    APP_ROOT / "runtime" / "resident" / "writing.py",
     APP_ROOT / "runtime" / "characters" / "management.py",
     APP_ROOT / "domains" / "identity" / "service" / "auth.py",
     APP_ROOT / "runtime" / "account_deletion.py",
-    APP_ROOT / "services" / "langgraph_resident.py",
+    APP_ROOT / "runtime" / "resident" / "langgraph.py",
     APP_ROOT / "runtime" / "resident" / "context.py",
     APP_ROOT / "domains" / "routines" / "contracts" / "resident.py",
 )
-
 
 def _imports(path: Path) -> set[str]:
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
@@ -31,13 +34,11 @@ def _imports(path: Path) -> set[str]:
             imported.add(node.module)
     return imported
 
-
 def test_public_langgraph_entrypoint_has_no_openclaw_or_provider_sdk_imports():
-    imports = _imports(APP_ROOT / "services" / "langgraph_resident.py")
+    imports = _imports(APP_ROOT / "runtime" / "resident" / "langgraph.py")
 
     assert not {name for name in imports if "openclaw" in name.lower()}
     assert not {name for name in imports if name == "google" or name.startswith("google.")}
-
 
 def test_public_runtime_modules_do_not_import_private_openclaw_modules():
     violations: dict[str, list[str]] = {}
@@ -49,7 +50,6 @@ def test_public_runtime_modules_do_not_import_private_openclaw_modules():
             violations[str(path.relative_to(APP_ROOT))] = private_imports
 
     assert violations == {}
-
 
 def test_public_runtime_modules_do_not_import_subprocess_launchers():
     violations: dict[str, list[str]] = {}
@@ -66,7 +66,6 @@ def test_public_runtime_modules_do_not_import_subprocess_launchers():
 
     assert violations == {}
 
-
 def test_crud_modules_do_not_import_services():
     violations: dict[str, list[str]] = {}
     for path in sorted((APP_ROOT / "cruds").glob("*.py")):
@@ -77,7 +76,6 @@ def test_crud_modules_do_not_import_services():
             violations[path.name] = service_imports
 
     assert violations == {}
-
 
 def test_provider_sdk_imports_are_confined_to_provider_adapters_and_oauth():
     allowed = {
@@ -97,7 +95,6 @@ def test_provider_sdk_imports_are_confined_to_provider_adapters_and_oauth():
 
     assert violations == {}
 
-
 def test_secret_decryption_is_confined_to_credential_resolver():
     allowed = {
         "core/security.py",
@@ -114,14 +111,13 @@ def test_secret_decryption_is_confined_to_credential_resolver():
 
     assert violations == []
 
-
 def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
     allowed: dict[str, set[str]] = {
         "runtime/characters/creator.py": {"_decrypt_draft_api_key"},
-        "services/agent_runs.py": {"_ensure_slot_auth_profile"},
+        "runtime/resident/credential_profiles.py": {"_ensure_slot_auth_profile"},
+        "runtime/resident/first_greeting.py": {"resolve_first_greeting_key"},
+        "runtime/resident/tendency_analysis.py": {"analyze_tendency"},
         "runtime/characters/management.py": {
-            "run_first_greeting",
-            "analyze_tendency",
             "_bind_slot_auth_profile",
         },
         "runtime/character_lore.py": {
@@ -129,7 +125,7 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
             "_google_api_key_for_character",
         },
         "runtime/social/feed_reaction_provider.py": {"_api_key"},
-        "services/langgraph_resident.py": {"_decrypt_api_key"},
+        "runtime/resident/langgraph.py": {"_decrypt_api_key"},
         "domains/chat/service/settings.py": {"_resolve_message_credential"},
         "runtime/social/image_generation.py": {
             "_generate_visual_identity_payload",
@@ -182,7 +178,6 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         RevealVisitor().visit(tree)
 
     assert observed == allowed
-
 
 def test_public_read_schemas_do_not_expose_secret_storage_fields():
     forbidden = {"encrypted_api_key", "ciphertext", "raw_key", "api_key"}

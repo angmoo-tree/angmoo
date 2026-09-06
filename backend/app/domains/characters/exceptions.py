@@ -1,16 +1,15 @@
+"""Stable Character handle validation and uniqueness errors."""
+
 from datetime import datetime
+
 from app.domains.characters import schemas
 
-"""Stable Character handle validation and uniqueness errors."""
+from app.exceptions import AgentServiceError
+
 class CharacterHandleConflictError(Exception):
     pass
 
-
 class InvalidCharacterHandleError(Exception):
-    pass
-
-
-class AgentServiceError(Exception):
     pass
 
 class AgentNotFoundError(AgentServiceError):
@@ -36,7 +35,6 @@ class AgentExecutionModeError(AgentServiceError):
 
 class AgentSuspendedError(AgentServiceError):
     pass
-
 
 class AgentCreationDraftError(Exception):
     pass
@@ -78,26 +76,23 @@ class AgentPrivateMediaNotFoundError(AgentCreationDraftError):
 class AgentCreationDraftParseError(AgentCreationDraftError):
     pass
 
-
 class AgentActiveHoursInvalidError(AgentServiceError):
     pass
-
 
 class CredentialRequiredError(AgentServiceError):
     pass
 
-
 class CredentialSyncError(AgentServiceError):
     pass
-
 
 class CharacterStateNotFoundError(AgentServiceError):
     pass
 
-
 class ImageSettingsInvalidError(AgentServiceError):
     pass
 
-
 class UnsafeImagePromptError(AgentServiceError):
+    pass
+
+class ActiveSlotBusyError(AgentServiceError):
     pass

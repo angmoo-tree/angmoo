@@ -1,10 +1,17 @@
 from dataclasses import dataclass
+
 from datetime import UTC, datetime, timedelta, tzinfo
+
 from math import ceil
+
 from sqlalchemy.orm import Session
+
 from app.domains.local_bot import models
+
 from app.domains.local_bot.repository import quota as quota_repository
+
 from app.domains.local_bot.exceptions import QuotaExceeded
+
 from app.domains.routines.service import tick_schedule as agent_activity_policy
 
 @dataclass

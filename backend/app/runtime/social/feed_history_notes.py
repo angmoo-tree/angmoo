@@ -11,7 +11,7 @@ from app.domains.social.repository import posts as post_repository
 from app.domains.social.service.visibility import _is_post_public_context_visible
 from app.runtime.social.agent_tool_authorization import _get_agent_tool_run
 from app.runtime.social.feed_history import RuntimeFeedHistoryReferences
-from app.services import agent_briefs
+from app.domains.routines.service import action_briefs as agent_briefs
 
 
 class RuntimeFeedHistoryNoteReferences:

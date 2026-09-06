@@ -1,72 +1,116 @@
 from __future__ import annotations
+
 from app.runtime.social.agent_tools import agent_tool_actions
 
 from app.runtime.routines.joint_references import SqlAlchemyJointReferences
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC
+
+from datetime import datetime
+
+from datetime import timedelta
+
 from hashlib import sha256
+
 import json
+
 import logging
 
 from sqlalchemy import select
+
 from sqlalchemy.exc import IntegrityError
+
 from sqlalchemy.orm import Session
 
 from app.compatibility.routine_posts import legacy
-from app.core import unit_of_work
-from app.domains.routine_posts.constants import ROUTINE_CONTRACT_VERSION
-from app.domains.routine_posts.contracts.generation import RoutineGeneration, RoutinePostProvider
-from app.domains.routine_posts.service.evidence import validate_routine_generation
-from app.domains.routine_posts.service.generation import DirectRoutinePostProvider
-from app.domains.routine_posts.exceptions import RoutineContextUnavailable
-from app.domains.routine_posts.contracts.context import RoutineInteractionSource
-from app.domains.routine_posts.service.context import assemble_routine_post_context
-from app.runtime.routine_posts.context_references import SqlAlchemyRoutineContextReferences
-from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routines
-from app.domains.routines.service.execution import claims as activity_claims
-from app.domains.routines.service.execution import lifecycle as activity_lifecycle
-from app.domains.routines import exceptions as activity_errors
-from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
-from app.runtime.social.sqlalchemy_inbox import (
-    ManualInboxRuntimeError,
-    claimed_observation_post_id,
-    is_manual_inbox_source,
-)
-from app.runtime.social.sqlalchemy_inbox import claim as claim_manual_inbox
-from app.runtime.social.sqlalchemy_inbox import (
-    consume_claims as consume_manual_inbox_claims,
-)
-from app.runtime.social.sqlalchemy_inbox import (
-    release_claims as release_manual_inbox_claims,
-)
-from app.runtime.social.observations import observe_source
-from app.domains.social.public import SocialObservationError
-from app.domains.social.contracts.subjective_context import ActionSubjectiveContextV1
-from app.runtime.social.subjective_composition import record_declared_subjective_context
-from app.integrations.direct_llm import (
-    DirectLlmDeferred,
-    DirectLlmError,
-    DirectLlmJsonError,
-    RunLlmTracker,
-)
 
+from app.core import unit_of_work
+
+from app.domains.routine_posts.constants import ROUTINE_CONTRACT_VERSION
+
+from app.domains.routine_posts.contracts.generation import RoutineGeneration
+
+from app.domains.routine_posts.contracts.generation import RoutinePostProvider
+
+from app.domains.routine_posts.service.evidence import validate_routine_generation
+
+from app.domains.routine_posts.service.generation import DirectRoutinePostProvider
+
+from app.domains.routine_posts.exceptions import RoutineContextUnavailable
+
+from app.domains.routine_posts.contracts.context import RoutineInteractionSource
+
+from app.domains.routine_posts.service.context import assemble_routine_post_context
+
+from app.runtime.routine_posts.context_references import SqlAlchemyRoutineContextReferences
+
+from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routines
+
+from app.domains.routines.service.execution import claims as activity_claims
+
+from app.domains.routines.service.execution import lifecycle as activity_lifecycle
+
+from app.domains.routines import exceptions as activity_errors
+
+from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
+
+from app.runtime.social.sqlalchemy_inbox import ManualInboxRuntimeError
+
+from app.runtime.social.sqlalchemy_inbox import claimed_observation_post_id
+
+from app.runtime.social.sqlalchemy_inbox import is_manual_inbox_source
+
+from app.runtime.social.sqlalchemy_inbox import claim as claim_manual_inbox
+
+from app.runtime.social.sqlalchemy_inbox import consume_claims as consume_manual_inbox_claims
+
+from app.runtime.social.sqlalchemy_inbox import release_claims as release_manual_inbox_claims
+
+from app.runtime.social.observations import observe_source
+
+from app.domains.social.public import SocialObservationError
+
+from app.domains.social.contracts.subjective_context import ActionSubjectiveContextV1
+
+from app.runtime.social.subjective_composition import record_declared_subjective_context
+
+from app.integrations.direct_llm import DirectLlmDeferred
+
+from app.integrations.direct_llm import DirectLlmError
+
+from app.integrations.direct_llm import DirectLlmJsonError
+
+from app.integrations.direct_llm import RunLlmTracker
 
 from app.domains.routines.models.plans import ActivityBeat as _model_ActivityBeat
+
 from app.domains.world_characters.models import CharacterActiveWorld as _model_CharacterActiveWorld
+
 from app.domains.routines.models.plans import JointActivity as _model_JointActivity
+
 from app.domains.social.models.posts import Post as _model_Post
+
 from app.domains.world_characters.models import WorldCharacter as _model_WorldCharacter
-agent_run_crud = legacy.agent_run_crud
-agent_activity_policy = legacy.agent_activity_policy
+
 from app.domains.routines.service import joint_activity as joint_activity_runtime
+
+from app.domains.routines.repository import public_action_executions as public_action_queries
+
+from app.domains.routines.service import public_action_executions as public_action_executions
+
+agent_run_crud = legacy.agent_run_crud
+
+agent_activity_policy = legacy.agent_activity_policy
+
 social_event_runtime = legacy.social_event_runtime
+
 community_service = legacy.community_service
+
 LangGraphResidentContext = legacy.LangGraphResidentContext
 
-
 logger = logging.getLogger(__name__)
-CLAIM_LEASE = timedelta(minutes=10)
 
+CLAIM_LEASE = timedelta(minutes=10)
 
 def routine_world_character_for_character(
     db: Session, *, character_id: str
@@ -83,7 +127,6 @@ def routine_world_character_for_character(
     ):
         return None
     return world_character
-
 
 def _safe_result(
     *,
@@ -102,7 +145,6 @@ def _safe_result(
         "llm_usage_summary": (tracker or RunLlmTracker(max_calls=3)).summary(),
     }
 
-
 def _beat_idempotency_key(
     *, world_character_id: str, episode_id: str, scheduled_for: datetime
 ) -> str:
@@ -116,7 +158,6 @@ def _beat_idempotency_key(
     )
     return sha256(value.encode("utf-8")).hexdigest()
 
-
 def _execution_signature(*, world_character_id: str, beat_id: str) -> str:
     value = "|".join(
         (
@@ -128,13 +169,11 @@ def _execution_signature(*, world_character_id: str, beat_id: str) -> str:
     )
     return sha256(value.encode("utf-8")).hexdigest()
 
-
 def _planner_hash(generation: RoutineGeneration) -> str:
     payload = generation.plan.model_dump(mode="json")
     return sha256(
         json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
     ).hexdigest()
-
 
 def _retryable_provider_error(exc: BaseException) -> bool:
     if isinstance(exc, DirectLlmDeferred):
@@ -144,7 +183,6 @@ def _retryable_provider_error(exc: BaseException) -> bool:
         marker in value
         for marker in ("timeout", "temporar", "rate", "429", "500", "502", "503", "504")
     )
-
 
 def _failure_code(exc: BaseException) -> str:
     if isinstance(exc, DirectLlmJsonError):
@@ -157,11 +195,9 @@ def _failure_code(exc: BaseException) -> str:
         return "provider_failed"
     return "routine_generation_failed"
 
-
 def _runtime_error_code(exc: activity_errors.ActivityRuntimeError) -> str:
     value = str(exc).strip()
     return value.upper() if value else "ROUTINE_RUNTIME_CONFLICT"
-
 
 def _finish_failed_beat(
     db: Session,
@@ -199,7 +235,6 @@ def _finish_failed_beat(
             beat.id,
             claim_run_id,
         )
-
 
 async def run_routine_post_runtime(
     resident_context: LangGraphResidentContext,
@@ -422,7 +457,7 @@ async def run_routine_post_runtime(
     execution_signature = _execution_signature(
         world_character_id=world_character.id, beat_id=beat.id
     )
-    existing_execution = agent_run_crud.get_public_action_execution_by_signature(
+    existing_execution = public_action_queries.get_public_action_execution_by_signature(
         db, execution_signature
     )
     if existing_execution is not None and existing_execution.status == "succeeded":
@@ -540,7 +575,7 @@ async def run_routine_post_runtime(
 
     try:
         with unit_of_work.deferred_commits():
-            execution = agent_run_crud.create_public_action_execution(
+            execution = public_action_executions.create_public_action_execution(
                 db,
                 run_id=resident_context.run_id,
                 character_id=resident_context.character.id,
@@ -638,7 +673,7 @@ async def run_routine_post_runtime(
                 commit=False,
             )
             execution.target_post_id = post.id
-            agent_run_crud.mark_public_action_execution_finished(
+            public_action_executions.mark_public_action_execution_finished(
                 db,
                 execution,
                 status="succeeded",

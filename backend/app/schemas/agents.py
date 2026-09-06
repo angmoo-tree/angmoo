@@ -1,125 +1,129 @@
-from app.domains.local_bot.schemas import AgentLocalConnectionRead, AgentLocalKeyCreateRead, BotCharacterRead, BotMeRead
-from app.domains.characters.schemas import AgentImageGenerationSettingUpdate, AgentImageSeedUpload, PollinationsImageModel
-from app.domains.characters.schemas import (
-    AgentImageGenerationSettingRead,
-    AgentDetailRead,
-)
+from app.domains.local_bot.schemas import AgentLocalConnectionRead
 
-from app.domains.routines.schemas import (
-    AgentActionRangeRead,
-    AgentActivitySettingRead,
-    AgentActivitySummaryRead,
-)
+from app.domains.local_bot.schemas import AgentLocalKeyCreateRead
 
-from app.domains.identity.schemas import (
-    CredentialRead,
-)
+from app.domains.local_bot.schemas import BotCharacterRead
+
+from app.domains.local_bot.schemas import BotMeRead
+
+from app.domains.characters.schemas import AgentImageGenerationSettingUpdate
+
+from app.domains.characters.schemas import AgentImageSeedUpload
+
+from app.domains.characters.schemas import PollinationsImageModel
+
+from app.domains.characters.schemas import AgentImageGenerationSettingRead
+
+from app.domains.characters.schemas import AgentDetailRead
+
+from app.domains.routines.schemas import AgentActionRangeRead
+
+from app.domains.routines.schemas import AgentActivitySettingRead
+
+from app.domains.routines.schemas import AgentActivitySummaryRead
+
+from app.domains.identity.schemas import CredentialRead
 
 from datetime import datetime
+
 from typing import Literal
 
-from app.domains.characters.schemas import (
-    AgentDraftImageStyle,
-    AgentDraftMediaKind,
-    AgentDraftMediaDelivery,
-    AgentProfileImageBucket,
-    AgentCreationDraftCreate,
-    AgentCreationDraftUpdate,
-    AgentCreationDraftMediaUpload,
-    AgentCreationDraftGenerateMediaCreate,
-    AgentCreationDraftComplete,
-    AgentProfileMediaGenerateCreate,
-    AgentProfileImageUsageStatusRead,
-    AgentProfileImageUsageRead,
-    AgentCreationDraftMediaResult,
-    AgentCreationDraftMediaGenerationRead,
-    AgentProfileMediaGenerationRead,
-    AgentCreationDraftRead,
-    AgentPromotionUsageRead,
-)
+from app.domains.characters.schemas import AgentDraftImageStyle
+
+from app.domains.characters.schemas import AgentDraftMediaKind
+
+from app.domains.characters.schemas import AgentDraftMediaDelivery
+
+from app.domains.characters.schemas import AgentProfileImageBucket
+
+from app.domains.characters.schemas import AgentCreationDraftCreate
+
+from app.domains.characters.schemas import AgentCreationDraftUpdate
+
+from app.domains.characters.schemas import AgentCreationDraftMediaUpload
+
+from app.domains.characters.schemas import AgentCreationDraftGenerateMediaCreate
+
+from app.domains.characters.schemas import AgentCreationDraftComplete
+
+from app.domains.characters.schemas import AgentProfileMediaGenerateCreate
+
+from app.domains.characters.schemas import AgentProfileImageUsageStatusRead
+
+from app.domains.characters.schemas import AgentProfileImageUsageRead
+
+from app.domains.characters.schemas import AgentCreationDraftMediaResult
+
+from app.domains.characters.schemas import AgentCreationDraftMediaGenerationRead
+
+from app.domains.characters.schemas import AgentProfileMediaGenerationRead
+
+from app.domains.characters.schemas import AgentCreationDraftRead
+
+from app.domains.characters.schemas import AgentPromotionUsageRead
 
 from app.domains.characters.schemas import AgentActivityProfileReadinessRead
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel
 
-from app.core.image_generation import IMAGE_MODEL_OPTIONS, MAX_IMAGES_PER_DAY
+from pydantic import ConfigDict
+
+from pydantic import Field
+
+from pydantic import field_validator
+
+from pydantic import model_validator
+
+from app.core.image_generation import IMAGE_MODEL_OPTIONS
+
+from app.core.image_generation import MAX_IMAGES_PER_DAY
+
 from app.providers.registry import AGENT_GOOGLE_MODELS
-from app.domains.routines.schemas.runs import (
-    AgentActivityLogRead,
-    AgentSlotRead,
-    UtcInstantResponseModel,
-)
-from app.schemas.characters import CharacterRead, CharacterStateRead
-from app.domains.characters.schemas import (
-    AgentCreate,
-    AgentDeleteCreate,
-    AgentProfileUpdate,
-    AgentPersonaUpdate,
-    AgentProfileMediaUpload,
-    AgentPromotionUsageUpdate,
-)
+
+from app.domains.routines.schemas.runs import AgentActivityLogRead
+
+from app.domains.routines.schemas.runs import AgentSlotRead
+
+from app.domains.routines.schemas.runs import UtcInstantResponseModel
+
+from app.schemas.characters import CharacterRead
+
+from app.schemas.characters import CharacterStateRead
+
+from app.domains.characters.schemas import AgentCreate
+
+from app.domains.characters.schemas import AgentDeleteCreate
+
+from app.domains.characters.schemas import AgentProfileUpdate
+
+from app.domains.characters.schemas import AgentPersonaUpdate
+
+from app.domains.characters.schemas import AgentProfileMediaUpload
+
+from app.domains.characters.schemas import AgentPromotionUsageUpdate
+
 from app.domains.social.schemas.community import PostDetail
+
 from app.schemas.media_security import validate_profile_media_reference
 
+from app.domains.routines.schemas import AgentActivitySettingUpdate
+
+from app.domains.routines.schemas import AgentFeedCueCreate
+
+from app.domains.routines.schemas import AgentFeedCueRead
+
+from app.domains.routines.schemas.first_greeting import AgentFirstGreetingCreate
+
+from app.api.schemas.first_greeting import AgentFirstGreetingRead
+
+from app.domains.identity.schemas import CredentialUpsert
 
 AgentGoogleModel = Literal[*AGENT_GOOGLE_MODELS]
+
 GoogleGeminiModel = AgentGoogleModel
+
 ImageKeyMode = Literal["service", "user", "disabled"]
+
 WritingRepetitionLevel = Literal["off", "light", "normal", "strong"]
+
 AgentExecutionMode = Literal["llm", "local"]
-
-
-class AgentFirstGreetingCreate(BaseModel):
-    topic: str = Field(min_length=2, max_length=500)
-
-
-class AgentFirstGreetingRead(UtcInstantResponseModel):
-    run_id: str
-    status: str
-    summary: str | None = None
-    character_id: str
-    post_id: str | None = None
-    post: PostDetail | None = None
-    image_attempt: dict | None = None
-    first_greeting_available_at: datetime | None = None
-    gateway_result: dict
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class CredentialUpsert(BaseModel):
-    provider: str = Field(default="google", max_length=40)
-    model: AgentGoogleModel = "gemini-3.1-flash-lite"
-    api_key: str | None = Field(default=None, min_length=1, max_length=4000)
-    auth_profile_id: str | None = Field(default=None, max_length=120)
-    label: str | None = Field(default=None, max_length=80)
-    world_id: str | None = Field(default=None, min_length=1, max_length=64)
-
-from app.domains.routines.schemas import AgentActivitySettingUpdate, AgentFeedCueCreate, AgentFeedCueRead

@@ -20,7 +20,7 @@ from app.providers.contracts import (
 )
 from app.providers.fake import FakeProviderAdapter
 from app.providers.gemini import GeminiAdapter
-from app.services import (direct_llm)
+from app.integrations import direct_llm as direct_llm
 from app.runtime.characters import creator as agent_creation_drafts
 from app.main import app
 

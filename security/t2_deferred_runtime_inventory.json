@@ -29,24 +29,6 @@
     },
     {
       "markers": [
-        "hosted-extension-type"
-      ],
-      "owner_phases": [
-        "L0-L4 hosted extension compatibility audit"
-      ],
-      "path": "backend/app/public_main.py"
-    },
-    {
-      "markers": [
-        "hosted-extension-type"
-      ],
-      "owner_phases": [
-        "L0-L4 hosted extension compatibility audit"
-      ],
-      "path": "backend/app/public_main.py"
-    },
-    {
-      "markers": [
         "privacy-contact",
         "product-host"
       ],
@@ -120,24 +102,6 @@
         "L0-L4 hosted extension compatibility audit"
       ],
       "path": "backend/tests/test_m4_public_runtime.py"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "backend/tests/test_post_image_generation.py"
-    },
-    {
-      "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "backend/tests/test_post_image_generation.py"
     },
     {
       "markers": [
@@ -241,24 +205,6 @@
         "L0-L4 product URL, privacy UX, provider referer"
       ],
       "path": "security/refactor_backend_checkpoint.json"
-    },
-    {
-      "markers": [
-        "hosted-extension-type"
-      ],
-      "owner_phases": [
-        "L0-L4 hosted extension compatibility audit"
-      ],
-      "path": "security/refactor_feature_inventory.json"
-    },
-    {
-      "markers": [
-        "hosted-extension-type"
-      ],
-      "owner_phases": [
-        "L0-L4 hosted extension compatibility audit"
-      ],
-      "path": "security/refactor_feature_inventory.json"
     },
     {
       "markers": [

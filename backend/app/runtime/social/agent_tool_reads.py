@@ -8,7 +8,7 @@ from app.domains.routines.service import activity_logs
 from app.domains.social.service.agent_tool_reads import AgentToolReadService
 from app.runtime.social.agent_tool_authorization import RuntimeAgentToolReferences
 from app.runtime.social.topic_metadata import RuntimeTopicHistoryReferences
-from app.services import agent_activity_policy
+from app.runtime.resident import activity_policy as agent_activity_policy
 
 
 class RuntimeAgentToolReadWorkflows(RuntimeAgentToolReferences):

@@ -6,26 +6,38 @@ is supplied lazily; the service owns all transaction and result decisions.
 """
 
 from __future__ import annotations
+
 import logging
+
 from time import perf_counter
+
 from typing import Any
+
 from pydantic import ValidationError
+
 from app.core import unit_of_work
+
 from app.domains.social.schemas import feed as schemas
+
 from app.domains.social.contracts.feed_execution import (
     WorldFeedContext,
     WorldFeedWorkflows,
     FeedReactionProvider,
 )
+
 from app.domains.social.contracts.observations import SocialObservationError
+
 from app.domains.social.contracts.search_state import SocialSearchUnavailable
+
 from app.domains.social.exceptions import (
     WorldFeedReadinessError,
     FeedReactionValidationError,
 )
+
 from app.domains.social.service.feed_reaction_validation import (
     validate_reaction_decision,
 )
+
 from app.domains.social.service.feed_cycle_values import (
     _cycle_key,
     _execution_signature,
@@ -34,7 +46,9 @@ from app.domains.social.service.feed_cycle_values import (
     _safe_result,
     _summary,
 )
+
 from app.domains.social.service.feed_cycle_publishing import _publish_action
+
 from app.domains.social.service.world_feed import (
     claim_cycle_keywords,
     claim_feed_observations,
@@ -44,10 +58,10 @@ from app.domains.social.service.world_feed import (
     search_world_feed_candidates,
     revalidate_candidate_actions,
 )
+
 from app.domains.social.repository.world_feed import get_feed_observation
 
 logger = logging.getLogger("app.services.world_feed_runtime")
-
 
 async def run_world_keyword_feed(
     ctx: WorldFeedContext,
