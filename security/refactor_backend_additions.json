@@ -8045,6 +8045,296 @@
         "tests/local_bot/test_http_workflows.py": {},
         "tests/test_refactor_error_entries.py": {}
       }
+    },
+    {
+      "commit": "849d65968ec815353febdd50b6e975940ab81a8f",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: refactor(runtime): own status contracts and component observation policy",
+      "tracked_files": {
+        "backend/app/domains/runtime/contracts/__init__.py": "c3533278d6bffd4cade526fb389343b04da65227",
+        "backend/app/domains/runtime/contracts/components.py": "28b5131accf66463576a43d542397d4ac628f8ac",
+        "backend/app/domains/runtime/contracts/execution_errors.py": "56b4310db43e16690ff361b9817bb6bacd50b322",
+        "backend/app/domains/runtime/policies/lease.py": "a12f3cbd3598892949efb22d980220466a09c9d5",
+        "backend/app/domains/runtime/constants.py": "56af751c1fb6aefc1500d63bcfd08f4c151bb38e",
+        "backend/app/domains/runtime/contracts/data_paths.py": "93a61b98ef440dc1822ba46434d99cf857aa7264",
+        "backend/app/domains/runtime/contracts/lease.py": "e039afc72c0310848b77543642caa29d7831cfa4",
+        "backend/app/domains/runtime/contracts/lease_store.py": "3cad13455475e86e3ea27063bd0c11ecb280c1eb",
+        "backend/app/domains/runtime/contracts/release.py": "73c42d6c99d1b70e3cc27ee5163c397a074e0e39",
+        "backend/app/domains/runtime/contracts/search.py": "42f39b0fe91d0a16ab20d4fdb5b3ec10f6bc05c2",
+        "backend/app/domains/runtime/contracts/status.py": "c58fdcafb819d3de82b5de65a2ff359727206098",
+        "backend/app/domains/runtime/contracts/status_reader.py": "f999c24c0cf91f1a6f7197b00c83604f8a6be194",
+        "backend/app/domains/runtime/contracts/transaction.py": "c147a06dd09772848f94f760c396ff5161cb4495",
+        "backend/app/domains/runtime/contracts/vector_recall.py": "0706d8cc4276f9e2d13143f1c973302ebf21b291",
+        "backend/app/domains/runtime/exceptions.py": "a20ec744f2c568c1a7c3c34103a9dbe5f4668390",
+        "backend/app/domains/runtime/service/components.py": "f71a1d368bbf563a1af3805bef5094ddf37d5cc0"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "7f27efcf4c22dfcaa748d1708774ab54592bf564",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: refactor(runtime): own diagnostic decisions and canonical query composition",
+      "tracked_files": {
+        "backend/app/domains/runtime/contracts/status_queries.py": "b0f5a8cc720aa03a9731bf27011792c94f51741a",
+        "backend/app/domains/runtime/repository/status.py": "eb8f88556748548157c84023eacd205353c16442",
+        "backend/app/runtime/diagnostics/status_composition.py": "781f4cee79b118e025c863e1911494f68f42ac92",
+        "backend/app/runtime/diagnostics/status_queries.py": "3c9e8718ee6dff6d3ca8626fb0ea123e3bb0ade9",
+        "backend/tests/runtime/test_status_query_transaction.py": "b430276c449667fa41bedaf46bd307040a07fff2",
+        "backend/app/domains/runtime/service/status.py": "c576c158564b2ca105b42cee1e4c0e97db5a09dc"
+      },
+      "test_nodes": [
+        "tests/runtime/test_status_query_transaction.py::test_diagnostics_share_uncommitted_foreign_facts_and_original_rollback[caller]",
+        "tests/runtime/test_status_query_transaction.py::test_diagnostics_share_uncommitted_foreign_facts_and_original_rollback[missing_migration]"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_status_query_transaction.py": {
+          "test_diagnostics_share_uncommitted_foreign_facts_and_original_rollback": [
+            "assert session.in_transaction() is False",
+            "assert status.bootstrap_state == 'claimed'",
+            "assert status.owner_user_id == 'owner'",
+            "assert status.registered_world_count == 1",
+            "assert status.active_world_count == 1",
+            "assert status.active_world_character_count == 1",
+            "assert session.in_transaction() is True",
+            "assert session.in_transaction() is False",
+            "assert empty.bootstrap_state == 'unclaimed'",
+            "assert empty.owner_user_id is None",
+            "assert empty.registered_world_count == 0",
+            "assert session.execute(text('SELECT COUNT(*) FROM worlds')).scalar_one() == 0",
+            "assert migration.state is RuntimeComponentState.DEGRADED",
+            "assert migration.current_revision is None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_status_query_transaction.py": {}
+      }
+    },
+    {
+      "commit": "904be5193f671590c51c061e0206cb312ed05459",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: refactor(runtime): own scheduler lease workflow and transactional queries",
+      "tracked_files": {
+        "backend/app/domains/runtime/models.py": "87695766a291ed4e21b2549c380bae75b3fe616f",
+        "backend/app/domains/runtime/repository/scheduler_lease.py": "0397b7b4f6b0787272b4cae4eebc192255b2ea6a",
+        "backend/app/runtime/persistence/scheduler_fence.py": "0a2be58a30845bff53c29207f0b51a84111845e3",
+        "backend/app/runtime/persistence/scheduler_lease.py": "7a43e4e1058e9825bc359a932466b37ad363f903",
+        "backend/app/domains/runtime/service/scheduler_lease.py": "4c1d20a34238e8d8f2ad3c0a320b62d29cca41b9"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "fcf14e8e50d21a467bb74c6db78db46263682fa1",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: test(architecture): distinguish historical marker totals from live source coverage",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_l3_er0_embedded_runtime_inventory.py::test_live_postgres_inventory_rejects_stale_or_incomplete_scan[count]",
+        "tests/test_l3_er0_embedded_runtime_inventory.py::test_live_postgres_inventory_rejects_stale_or_incomplete_scan[hash]",
+        "tests/test_l3_er0_embedded_runtime_inventory.py::test_live_postgres_inventory_rejects_stale_or_incomplete_scan[new_source]",
+        "tests/test_l3_er0_embedded_runtime_inventory.py::test_live_postgres_inventory_rejects_stale_or_incomplete_scan[omission]"
+      ],
+      "test_assertions": {
+        "tests/test_l3_er0_embedded_runtime_inventory.py": {
+          "_load": [],
+          "_checkpoint_postgres_inventory": [],
+          "_postgres_generator": [
+            "assert spec is not None and spec.loader is not None"
+          ],
+          "_assert_current_postgres_inventory": [
+            "assert inventory == source",
+            "assert inventory['entry_count'] == len(inventory['entries'])",
+            "assert len({entry['path'] for entry in inventory['entries']}) == inventory['entry_count']",
+            "assert 'historical schema evidence' in inventory['purpose']",
+            "assert 'reintroduction guards' in inventory['purpose']",
+            "assert all((entry['markers'] and entry['owner'] and entry['transition_pr'] and entry['removal_condition'] for entry in inventory['entries']))"
+          ],
+          "test_generated_embedded_runtime_inventory_is_current": [
+            "assert result.returncode == 0, result.stdout + result.stderr"
+          ],
+          "test_all_migrations_are_owned_exactly_once": [
+            "assert inventory['baseline_commit'] == BASELINE",
+            "assert inventory['migration_count'] == 87",
+            "assert len(entries) == len({entry['path'] for entry in entries}) == 87",
+            "assert len(entries) == len({entry['revision'] for entry in entries}) == 87",
+            "assert all((entry['owner'] == 'ER2' and entry['transition_pr'] == 'ER2 PR G' and entry['removal_condition'] for entry in entries))"
+          ],
+          "test_storage_frontend_runtime_and_parity_corpora_are_complete": [
+            "assert 0 < postgres['entry_count'] < 82",
+            "assert 'historical schema evidence' in postgres['purpose']",
+            "assert 'reintroduction guards' in postgres['purpose']",
+            "assert graph['query_count'] == 24",
+            "assert frontend['route_count'] == 44",
+            "assert {item['phase'] for item in runtime['parity']['workloads']} == {'P1', 'P2', 'P3', 'P4', 'P5', 'P6', 'P7'}",
+            "assert all((not item['missing_tests'] for item in runtime['parity']['workloads']))",
+            "assert len(runtime['runtime_coupling']) == 9",
+            "assert all((item['owner'] and item['transition_pr'] and item['removal_condition'] for item in runtime['runtime_coupling']))"
+          ],
+          "test_er0_records_behavior_zero_and_privacy_safe_resource_evidence": [
+            "assert 'ER0 does not add SQLite, LadybugDB' in adr",
+            "assert 'ER0 baseline behavior change: **zero**' in summary",
+            "assert resources['services']['healthy'] == 6",
+            "assert resources['volumes']['canonical_count'] == 5",
+            "assert 'app_secret' not in serialized",
+            "assert 'd:\\\\' not in serialized"
+          ],
+          "test_live_postgres_inventory_rejects_stale_or_incomplete_scan": [
+            "pytest.raises(AssertionError)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_l3_er0_embedded_runtime_inventory.py": {}
+      }
+    },
+    {
+      "commit": "763375b69e10810743dc9bbad1f76d5d3bf340d6",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: refactor(runtime): separate SQLite lease decisions from connection SQL",
+      "tracked_files": {
+        "backend/app/domains/runtime/repository/sqlite_lease.py": "a28ac3174a5c66177642e1d8b8148bd421a96235",
+        "backend/app/domains/runtime/service/sqlite_lease.py": "1b237e6e13108b6dbc9090e045012cd323826a8d"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "d1d70b99ec38d0e34bcd35446a78b94b90addd0f",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: refactor(runtime): own diagnostics HTTP and canonical Identity access",
+      "tracked_files": {
+        "backend/app/domains/identity/repository/runtime_access.py": "e3742dabf3a5751622c6da6baf04bfb529eb469a",
+        "backend/app/domains/identity/service/runtime_access.py": "20ce8cb7076f65aecfb3b30a68af1e0a250c44fb",
+        "backend/app/domains/runtime/contracts/http.py": "cefa90065fe1ce0511930989f4c29363e8eae83c",
+        "backend/app/domains/runtime/dependencies.py": "ac3659c9c3bf9ba0efc506141e5a9f214bd4f283",
+        "backend/app/runtime/diagnostics/http.py": "83f706fa27e2523707a8118ed2bc8aa0df45dc4a",
+        "backend/app/domains/runtime/router.py": "d8d7cf526439ed96b1a0919c41ba04ee6feb6622",
+        "backend/app/domains/runtime/service/lease_coordinator.py": "13a6df50ea4fa721e2feb764422bac185f686649"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "90d7fd7f2332b2b27cf2f1bd92ed0e206427e6f7",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: refactor(runtime): unify application factory and preserve public profile",
+      "tracked_files": {
+        "backend/tests/runtime/test_app_factory_ownership.py": "23a682b493cc63a8e2c44ffe7611cd6bb8202cc4"
+      },
+      "test_nodes": [
+        "tests/runtime/test_app_factory_ownership.py::test_both_module_imports_are_lazy_and_explicit_factory_still_prepares_media",
+        "tests/runtime/test_app_factory_ownership.py::test_public_lifespan_keeps_no_component_default_while_full_uses_its_default",
+        "tests/runtime/test_app_factory_ownership.py::test_shared_lifespan_preserves_recovery_hooks_memory_cleanup_order[False]",
+        "tests/runtime/test_app_factory_ownership.py::test_shared_lifespan_preserves_recovery_hooks_memory_cleanup_order[True]",
+        "tests/runtime/test_app_factory_ownership.py::test_single_factory_keeps_both_health_contracts_and_shared_types[full]",
+        "tests/runtime/test_app_factory_ownership.py::test_single_factory_keeps_both_health_contracts_and_shared_types[public]"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_app_factory_ownership.py": {
+          "test_single_factory_keeps_both_health_contracts_and_shared_types": [
+            "assert app.openapi() == compatibility.openapi()",
+            "assert operation['operationId'] == ('health_health_get' if profile == 'full' else 'runtime_health_health_get')",
+            "assert operation['responses']['200']['content']['application/json']['schema']['additionalProperties'] == ({'type': 'string'} if profile == 'full' else True)",
+            "assert public_main.HostedBackendExtension is main.HostedBackendExtension",
+            "assert public_main.PublicRuntimeConfigurationError is main.PublicRuntimeConfigurationError",
+            "assert public_main.HostedExtensionConfigurationError is main.HostedExtensionConfigurationError",
+            "assert public_main.create_app is main.create_public_app",
+            "assert public_main.create_lifespan is main.create_public_lifespan",
+            "assert main.create_public_app.func is main.create_app",
+            "assert main.create_public_lifespan.func is main.create_lifespan"
+          ],
+          "test_public_lifespan_keeps_no_component_default_while_full_uses_its_default": [
+            "assert original['component_manager_factory'] is main.create_single_backend_runtime_components",
+            "assert calls == ['construct', 'start', 'stop']",
+            "assert calls == ['construct', 'start']",
+            "assert calls == ['construct', 'start', 'stop']"
+          ],
+          "test_shared_lifespan_preserves_recovery_hooks_memory_cleanup_order": [
+            "assert coordinator.quiesce == components.quiesce_scheduler",
+            "assert calls == ['security', 'recovery', 'extension:start', 'components:start', 'memory:start', *([] if fail_memory_start else ['request']), 'memory:stop', 'components:stop', 'extension:stop', 'dispose']",
+            "pytest.raises(RuntimeError, match='memory startup failed')",
+            "assert not fail_memory_start"
+          ],
+          "test_both_module_imports_are_lazy_and_explicit_factory_still_prepares_media": [
+            "assert result.returncode == 0, result.stderr"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_app_factory_ownership.py": {}
+      }
+    },
+    {
+      "commit": "cc513f4bc078f0547d626d97bbf2210e424b27cb",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: refactor(runtime): migrate bootstrap consumers to canonical application exports",
+      "tracked_files": {
+        "backend/tests/runtime/test_asgi_preservation.py": "dc3d33803a50e6b7026a5204a065162d660489a6",
+        "backend/tests/runtime/test_canonical_bootstrap.py": "6e4bc9c1407eb567522d084d06a6c151f9e56550"
+      },
+      "test_nodes": [
+        "tests/runtime/test_asgi_preservation.py::test_exact_protected_asgi_move_resolves_to_the_same_factory",
+        "tests/runtime/test_asgi_preservation.py::test_qualified_path_does_not_replace_other_strings_or_behavior_assertions",
+        "tests/runtime/test_asgi_preservation.py::test_same_factory_wrong_profile_does_not_pass_frozen_api_contract",
+        "tests/runtime/test_asgi_preservation.py::test_unknown_module_export_and_non_import_literals_are_rejected[app.public_main:app-../main:public_app]",
+        "tests/runtime/test_asgi_preservation.py::test_unknown_module_export_and_non_import_literals_are_rejected[app.public_main:app-app.main:missing]",
+        "tests/runtime/test_asgi_preservation.py::test_unknown_module_export_and_non_import_literals_are_rejected[app.public_main:app-app.main:public_app()]",
+        "tests/runtime/test_asgi_preservation.py::test_unknown_module_export_and_non_import_literals_are_rejected[app.public_main:missing-app.main:public_app]",
+        "tests/runtime/test_asgi_preservation.py::test_unknown_module_export_and_non_import_literals_are_rejected[app.unknown:app-app.main:public_app]",
+        "tests/runtime/test_asgi_preservation.py::test_unknown_module_export_and_non_import_literals_are_rejected[secret-value-app.main:public_app]",
+        "tests/runtime/test_asgi_preservation.py::test_unprotected_origin_or_source_owner_mismatch_is_rejected",
+        "tests/runtime/test_asgi_preservation.py::test_unrelated_missing_duplicate_or_cyclic_factory_is_rejected[create_app = create_public_app\\ncreate_public_app = create_app\\npublic_app = create_public_app()\\n]",
+        "tests/runtime/test_asgi_preservation.py::test_unrelated_missing_duplicate_or_cyclic_factory_is_rejected[def other_factory(): return FastAPI()\\npublic_app = other_factory()\\n]",
+        "tests/runtime/test_asgi_preservation.py::test_unrelated_missing_duplicate_or_cyclic_factory_is_rejected[from functools import partial\\ndef create_app(*, profile='full'): return FastAPI()\\ncreate_public_app = partial(create_app, profile='public')\\napp = create_app()\\npublic_app = create_public_app()\\npublic_app = object()\\n]",
+        "tests/runtime/test_asgi_preservation.py::test_unrelated_missing_duplicate_or_cyclic_factory_is_rejected[public_app = object()\\n]",
+        "tests/runtime/test_canonical_bootstrap.py::test_contributor_and_sidecar_register_models_without_the_compatibility_module"
+      ],
+      "test_assertions": {
+        "tests/runtime/test_asgi_preservation.py": {
+          "sources": [],
+          "test_exact_protected_asgi_move_resolves_to_the_same_factory": [
+            "assert p.validated_asgi_moves({OLD: NEW}, {OLD_PATH: NEW_PATH}, snapshots, root) == {OLD: NEW}",
+            "assert p.normalized_assertion(before, [], {OLD: NEW}) == p.normalized_assertion(after, [], {OLD: NEW})"
+          ],
+          "test_unknown_module_export_and_non_import_literals_are_rejected": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_unrelated_missing_duplicate_or_cyclic_factory_is_rejected": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_unprotected_origin_or_source_owner_mismatch_is_rejected": [
+            "pytest.raises(ValueError, match='protected Python source')",
+            "pytest.raises(ValueError, match='protected Python source')"
+          ],
+          "test_qualified_path_does_not_replace_other_strings_or_behavior_assertions": [
+            "assert p.normalized_assertion('assert text == \"prefix app.public_main:app\"', [], accepted) != p.normalized_assertion('assert text == \"prefix app.main:public_app\"', [], accepted)",
+            "assert p.normalized_assertion('assert text == \"prefix app.public_main:app\"', file_literals, accepted) == p.normalized_assertion('assert text == \"prefix app.main:app\"', [], accepted)",
+            "assert p.normalized_assertion('assert text == \"prefix app.public_main:app\"', file_literals, accepted) != p.normalized_assertion('assert text == \"prefix app.main:public_app\"', file_literals, accepted)",
+            "assert p.check_assertions([snapshot], targets, {}, root, asgi_moves=accepted) == []",
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([snapshot], targets, {}, root, asgi_moves=accepted)))"
+          ],
+          "test_same_factory_wrong_profile_does_not_pass_frozen_api_contract": [
+            "assert p.asgi_contract_errors(accepted, {'asgi:' + OLD: {'health': 'basic'}}, frozen)",
+            "assert p.asgi_contract_errors(accepted, {'asgi:' + OLD: {'health': 'runtime'}}, frozen) == []"
+          ]
+        },
+        "tests/runtime/test_canonical_bootstrap.py": {
+          "test_contributor_and_sidecar_register_models_without_the_compatibility_module": [
+            "assert result.returncode == 0, result.stderr",
+            "assert result.stdout == ''"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/runtime/test_asgi_preservation.py": {},
+        "tests/runtime/test_canonical_bootstrap.py": {}
+      }
     }
   ]
 }

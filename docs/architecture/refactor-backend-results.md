@@ -2624,3 +2624,8 @@ Tree/Lore의 원래 signed source 네 개를 기존 committed snapshot으로 연
 Tree/Lore signed `ac8829f1cfa3f7b92ab9f80d020c449f7e14f299`의 기존166개 원장을 불변 prefix로 유지하고, 실제 순차 후보 `57a3c8bf6a6b863bac9b0ca273bfce842edae03b`에 포함된 원본10개 signed source의 파일46개·test node14개를 append했다. 원래 committed_snapshot cache는 commit/tree가 같은지 검증했고, 누락된 LocalBot 중간3단계만 같은 production collector로 isolated Git archive에서 수집했다. 각 source의 최초 도입·blob·단언·suppression·node 및 원장 과거 prefix를 쓰기 전/후 원래 checker로 확인한 결과는 오류0이며 최종176개다.
 
 `runtime/local_bot/composition.py`는 원래 `55d1c2f9e373a5b42b1ddafc0ac04ee12fd3e8b0`와 Git bytes가 같고, 파일 자체의 최초 도입은 `1565688ffa8095b37ec8fb843f5547c6c87705ae`다. 미래G06을 포함한55d 전체 ancestry를 이번 후보에 합류하지 않았다. Visual identity 원본734492bf는 기존파일 수정만 있으며 새로운 test/file 도입이 없어 추가record로 중복 등록하지 않는다. 제품·테스트·frozen 기준·검사 변경0이며 현재 navigation/stock·전체backend·CI/PR Gate는 다음 metadata 후보에서 별도로 확인한다.
+
+
+### AR-B8-A Runtime·G06 원본 도입 기록
+
+선행 residual 원장 `e485608e`의176개 기록을 정확한 불변 prefix로 유지하고 Runtime의 원본6개 source와 G06의 원래90d/cc 두 source를 추가했다. 새로 보호하는 원본 파일39개와 node27개는 각각 실제 signed commit의 immutable archive snapshot에서 파생한 값이다. Runtime 소비자 경로만 전환한e18f5e5e는 신규 파일/테스트 함수 도입0을 확인해 중복 record를 만들지 않았다. 원래 helper 및 production checkpoint/addition 검사를 쓰기 전후 그대로 실행하여 source 최초 도입·blob·단언·suppression·node·현재 ancestry 및 과거 원장 prefix 오류0, 최종184개를 확인했다. 제품·테스트·frozen 기준·검사기는 이 기록에서 변경하지 않았다. 전체 stock/current navigation·전체 backend·Hosted·installer·순차 PR/병합 Gate는 계속 후속이다.
