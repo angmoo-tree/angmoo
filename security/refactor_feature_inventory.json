@@ -1423,13 +1423,29 @@
         "frontend/src/features/social/ui/world-character-social-profile-activity.module.css",
         "frontend/src/features/social/ui/world-character-social-profile-activity.tsx",
         "frontend/src/features/characters/api/world-character-setup.ts",
-        "backend/app/domains/identity/contracts.py"
+        "backend/app/domains/identity/contracts.py",
+        "frontend/src/features/world-packages/public.ts",
+        "frontend/src/features/world-packages/api/native-delivery.ts",
+        "frontend/src/features/world-packages/api/world-package-client.ts",
+        "frontend/src/features/world-packages/components/world-package-export-panel.tsx",
+        "frontend/src/features/world-packages/components/world-package-import-client.tsx",
+        "frontend/src/features/world-packages/config/world-package.ts",
+        "frontend/src/features/world-packages/types/world-package.ts",
+        "frontend/src/features/world-packages/utils/browser-delivery.ts"
       ],
       "target_paths": [
         "backend/app/domains/world_characters/service",
         "backend/app/domains/world_characters/models.py",
         "backend/app/domains/world_characters/router",
-        "backend/app/domains/routines/service/plans.py"
+        "backend/app/domains/routines/service/plans.py",
+        "frontend/src/features/world-packages/public.ts",
+        "frontend/src/features/world-packages/api/native-delivery.ts",
+        "frontend/src/features/world-packages/api/world-package-client.ts",
+        "frontend/src/features/world-packages/components/world-package-export-panel.tsx",
+        "frontend/src/features/world-packages/components/world-package-import-client.tsx",
+        "frontend/src/features/world-packages/config/world-package.ts",
+        "frontend/src/features/world-packages/types/world-package.ts",
+        "frontend/src/features/world-packages/utils/browser-delivery.ts"
       ],
       "entrypoints": [
         "backend/app/api/v1/routes/world_character_setup.py::get_world_feed_status",
@@ -4293,10 +4309,10 @@
         "frontend/src/composition/shells/world-app-shell.tsx",
         "frontend/src/composition/screens/world-app.module.css",
         "frontend/src/features/world-packages/api/world-package-client.ts",
-        "frontend/src/features/world-packages/native-delivery.ts",
+        "frontend/src/features/world-packages/api/native-delivery.ts",
         "frontend/src/features/world-packages/public.ts",
-        "frontend/src/features/world-packages/world-package-export-panel.tsx",
-        "frontend/src/features/world-packages/world-package-import-client.tsx"
+        "frontend/src/features/world-packages/components/world-package-export-panel.tsx",
+        "frontend/src/features/world-packages/components/world-package-import-client.tsx"
       ],
       "target_paths": [
         "backend/app/domains/world_packages/service",
@@ -14689,7 +14705,7 @@
   },
   "frontend_transition": {
     "checkpoint_commit": "33e9df8593272f6c81236c477ae73ef057d0d3dd",
-    "status": "AR-F2-C PRE-INTEGRATION VALIDATION; AR-F3-C ISOLATED PREPARATION",
+    "status": "AR-F2-C PRE-INTEGRATION VALIDATION; AR-F3-D ISOLATED PREPARATION",
     "documentation": "docs/architecture/refactor-frontend-results.md",
     "scope_note": "Backend completion and existing per-item state are unchanged. These stages track frontend consumers independently. AR-F1 product remains preserved.",
     "items": {
@@ -14883,6 +14899,11 @@
       "AR-F3-C": {
         "status": "IMPLEMENTED - isolated validation",
         "source_map": "security/refactor_path_map.json#details.AR-F3-C",
+        "scope": "World definition and Creator Studio ownership"
+      },
+      "AR-F3-D": {
+        "status": "IMPLEMENTED - isolated validation",
+        "source_map": "security/refactor_path_map.json#details.AR-F3-D",
         "scope": "World definition and Creator Studio ownership"
       }
     }

@@ -33,7 +33,7 @@ def test_world_package_import_is_available_from_home_studio_and_static_router() 
 
 def test_import_ui_uses_file_selection_digest_approval_and_atomic_navigation() -> None:
     source = _frontend(
-        "features/world-packages/world-package-import-client.tsx"
+        "features/world-packages/components/world-package-import-client.tsx"
     )
     assert 'type="file"' in source
     assert "WORLD_PACKAGE_EXTENSION" in source
@@ -50,9 +50,9 @@ def test_import_ui_uses_file_selection_digest_approval_and_atomic_navigation() -
 def test_export_ui_has_preview_browser_delivery_and_opaque_native_save_as() -> None:
     creator = _frontend("features/worlds/components/world-creator-client.tsx") + _frontend("composition/screens/world-creator-screen.tsx")
     panel = _frontend(
-        "features/world-packages/world-package-export-panel.tsx"
+        "features/world-packages/components/world-package-export-panel.tsx"
     )
-    native = _frontend("features/world-packages/native-delivery.ts")
+    native = _frontend("features/world-packages/api/native-delivery.ts")
     host = _desktop("src/world_package_delivery.rs")
     capability = _desktop("capabilities/product-shell.json")
 

@@ -520,13 +520,17 @@
       "onSelect={setActiveNavigation}",
       "src=\"/icon.svg\""
     ],
-    "frontend/src/features/world-packages/world-package-export-panel.tsx": [
-      "Button, Card, InlineError, Input, Select",
-      "from \"@/shared/ui/public\""
+    "frontend/src/features/world-packages/components/world-package-export-panel.tsx": [
+      "import { Button } from \"@/components/ui/button\"",
+      "import { Card } from \"@/components/ui/surfaces\"",
+      "import { InlineError } from \"@/components/ui/feedback\"",
+      "import { Input, Select } from \"@/components/ui/form-controls\""
     ],
-    "frontend/src/features/world-packages/world-package-import-client.tsx": [
-      "Button, Card, InlineError, Select",
-      "from \"@/shared/ui/public\""
+    "frontend/src/features/world-packages/components/world-package-import-client.tsx": [
+      "import { Button } from \"@/components/ui/button\"",
+      "import { Card } from \"@/components/ui/surfaces\"",
+      "import { InlineError } from \"@/components/ui/feedback\"",
+      "import { Select } from \"@/components/ui/form-controls\""
     ],
     "frontend/src/shared/ui/public.ts": [
       "export { Avatar } from \"../../components/ui/avatar\";",
@@ -876,8 +880,8 @@
     ],
     "public_export": "frontend/src/shared/ui/public.ts",
     "direct_product_consumers": [
-      "frontend/src/features/world-packages/world-package-export-panel.tsx",
-      "frontend/src/features/world-packages/world-package-import-client.tsx"
+      "frontend/src/features/world-packages/components/world-package-export-panel.tsx",
+      "frontend/src/features/world-packages/components/world-package-import-client.tsx"
     ],
     "schema": "ui-b-semantic-primitives-v1",
     "token_source": "frontend/src/styles/semantic-tokens.css"

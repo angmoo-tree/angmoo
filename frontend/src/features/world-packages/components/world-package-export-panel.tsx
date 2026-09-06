@@ -3,26 +3,16 @@
 import { CheckCircle2, Download, PackageOpen, ShieldCheck } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { Button, Card, InlineError, Input, Select } from "@/shared/ui/public";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/surfaces";
+import { InlineError } from "@/components/ui/feedback";
+import { Input, Select } from "@/components/ui/form-controls";
 
-import {
-  acknowledgeNativeWorldPackageDelivery,
-  discardPreparedWorldPackageExport,
-  downloadPreparedWorldPackage,
-  prepareWorldPackageExport,
-  previewWorldPackageExport,
-  triggerBrowserWorldPackageDownload,
-  type PreparedWorldPackageExport,
-  type WorldPackageExportPreview,
-  type WorldPackageExportRequest,
-} from "./api/world-package-client";
+import { acknowledgeNativeWorldPackageDelivery, discardPreparedWorldPackageExport, downloadPreparedWorldPackage, prepareWorldPackageExport, previewWorldPackageExport } from "@/features/world-packages/api/world-package-client";
+import { triggerBrowserWorldPackageDownload } from "@/features/world-packages/utils/browser-delivery";
+import { type PreparedWorldPackageExport, type WorldPackageExportPreview, type WorldPackageExportRequest } from "@/features/world-packages/types/world-package";
 
-import {
-  discardNativeWorldPackageDestination,
-  selectNativeWorldPackageDestination,
-  supportsNativeWorldPackageSaveAs,
-  writeNativeWorldPackageDestination,
-} from "./native-delivery";
+import { discardNativeWorldPackageDestination, selectNativeWorldPackageDestination, supportsNativeWorldPackageSaveAs, writeNativeWorldPackageDestination } from "@/features/world-packages/api/native-delivery";
 
 type ConfirmationKey = "rights" | "license" | "exclusions";
 
