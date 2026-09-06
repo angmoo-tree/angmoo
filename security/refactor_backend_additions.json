@@ -4894,6 +4894,50 @@
       "test_suppressions": {
         "tests/routines/test_activity_http.py": {}
       }
+    },
+    {
+      "commit": "c2ceac3614c21061b9b0239dab99e059f755ddba",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): own activity presentation and imported runtime admission",
+      "tracked_files": {
+        "backend/app/domains/routines/contracts/activity_presentation.py": "da2f6c3c08bd93c9c65fad4faff04a90ad0e6d31",
+        "backend/app/domains/routines/service/activity_presentation.py": "5eccc06148b4fa6f8f99cc0b7f676fe5b28fe2a3",
+        "backend/app/domains/routines/service/runtime_guards.py": "901f0c4a803e38c4a87cbb45f5d94eaea4b9942b",
+        "backend/tests/routines/test_activity_presentation.py": "6634d20cd752b816abf6d6a3adac4a7d6c05fde7"
+      },
+      "test_nodes": [
+        "tests/routines/test_activity_presentation.py::test_activity_summary_resolves_lazy_counts_in_original_field_order",
+        "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[character]",
+        "tests/routines/test_activity_presentation.py::test_activity_target_uses_same_attached_profile_and_preserves_rollback[user]",
+        "tests/routines/test_activity_presentation.py::test_execution_readiness_rejects_missing_setting"
+      ],
+      "test_assertions": {
+        "tests/routines/test_activity_presentation.py": {
+          "test_activity_target_uses_same_attached_profile_and_preserves_rollback": [
+            "assert result['target_profile_name'] == 'pending'",
+            "assert result['target_profile_type'] == profile_type",
+            "assert getattr(row, field) == 'original'",
+            "assert current is db",
+            "assert result is row",
+            "assert getattr(observer.get(type(row), row.id), field) == 'original'"
+          ],
+          "test_activity_summary_resolves_lazy_counts_in_original_field_order": [
+            "assert calls == ['timezone', 'comment', 'post', 'like']",
+            "assert summary.next_activity_at is None",
+            "assert summary.allowed_actions == ['post', 'like']",
+            "assert summary.max_comments_per_day == 9",
+            "assert summary.max_posts_per_day == 11",
+            "assert current is db and character_id == 'character'",
+            "assert current is db and character_id == 'character'"
+          ],
+          "test_execution_readiness_rejects_missing_setting": [
+            "assert slot_status._has_tendency_analysis(None) is False"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_activity_presentation.py": {}
+      }
     }
   ]
 }
