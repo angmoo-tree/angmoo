@@ -2387,3 +2387,5 @@ B7 실제 업무 source `274f90e7` 이후 원본 signed `f52dbdbc`→`f7f303d9`�
 관련 검사 첫 실행은 **292 PASS / 기존 PG18 SKIP / 2 FAIL / 59.76초**였다. 실패는 Lore workflows 인자가 추가됐는데 이전된 Resident 테스트의 두 fake가 옛 함수 인자를 유지하던 부분이다. fake의 같은 실제 인자를 명시하고 원래 query·fallback·provider 호출·결과 단언을 유지한 재검증은 해당3개 모두 **PASS / 9.31초**다. 현재 Tree/Lore의 옛 source 활성 import0, 경계 **1056 modules / 3925 edges / legacy103 PASS**를 확인했다. 이미 사라진3개 legacy edge와8개 임시 bridge만 제거했고 신규 예외를 추가하지 않았다.
 
 현재 L4·ER0·Memory batch 자료는 실제 소스와 맞췄다. 원래 first-introduction과 B7의 원장 prefix는 변경하지 않았다. 순차 후보의 원장4개 원본 연결, 전체 backend, stock/API/ORM/node, Hosted·installer·post-merge는 별도로 진행한다. 최종 AR-B8-B·G01~G13 및 후속 frontend/제품 단계가 끝났다는 의미는 아니다.
+
+원래 signed9개 source의 파일35개·노드13개는 변경 없는 원장 검증을 통과해 **153개 불변 prefix → 162개**로 append했다. 각 Git blob·첫 도입 SHA·원래 assertion/suppression을 검증했으며 source `274f90e7`의 제품 코드는 이 metadata append에서 변경하지 않았다. 공식 stock/API/ORM/node 및 backend 전체 검사는 이 후보에서 이어간다.
