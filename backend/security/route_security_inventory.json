@@ -139,7 +139,7 @@
     },
     "GET /api/v1/agents/{character_id}/feed-cue": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "get_feed_cue"
     },
     "GET /api/v1/agents/{character_id}/image-settings": {
@@ -174,7 +174,7 @@
     },
     "GET /api/v1/agents/{character_id}/settings": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "get_settings"
     },
     "GET /api/v1/auth/local/bootstrap": {
@@ -634,22 +634,22 @@
     },
     "POST /api/v1/agents/{character_id}/activate": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "activate_agent"
     },
     "POST /api/v1/agents/{character_id}/deactivate": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "deactivate_agent"
     },
     "POST /api/v1/agents/{character_id}/feed-cue": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "give_feed_cue"
     },
     "POST /api/v1/agents/{character_id}/first-greeting": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "first_greeting"
     },
     "POST /api/v1/agents/{character_id}/generate-media": {
@@ -689,12 +689,12 @@
     },
     "POST /api/v1/agents/{character_id}/run-now": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "run_now"
     },
     "POST /api/v1/agents/{character_id}/tendency/analyze": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "analyze_tendency"
     },
     "POST /api/v1/auth/google": {
@@ -959,17 +959,17 @@
     },
     "GET /api/v1/agents/{character_id}/credential": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "get_credential_metadata"
     },
     "DELETE /api/v1/agents/{character_id}/credential": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "delete_credential"
     },
     "PUT /api/v1/agents/{character_id}/credential": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "update_credential"
     },
     "PUT /api/v1/agents/{character_id}/image-settings": {
@@ -994,7 +994,7 @@
     },
     "PUT /api/v1/agents/{character_id}/settings": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.agents",
+      "module": "app.domains.characters.router",
       "endpoint": "update_settings"
     },
     "PUT /api/v1/worlds/{world_id}/world-characters/{subject_id}/memories/{memory_id}/pin": {

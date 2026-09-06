@@ -15,7 +15,7 @@
 | AR-G4 | PR #269 CI 진행 | Alembic 물리 경로·역사 본문 보존; G5 최종 모델 등록 연결 대기 |
 | AR-B2 | #270~#276 순차 PR CI · WC workflow LOCAL VERIFIED | Identity·Characters·Worlds·WC 기반 후 profile/setup/lifecycle 통합 및 기존 Package race 수정 |
 | AR-B3 | NOT STARTED | World Package→media |
-| AR-B4 | CORE PR #281 MERGED · RESIDENT/C7/WRITER FOLLOWUP LOCAL VERIFIED · FINAL INTEGRATION GATES PENDING | 실제 AgentRun·LangGraph·작성·C7-H 활동 HTTP/상세 응답 소유까지 합류; 전체 backend/stock/PR 검증 준비 |
+| AR-B4 | CORE PR #281 MERGED · RESIDENT/C7/WRITER FOLLOWUP SOURCE COMPLETE · PR FULL CI PENDING | C7-H까지 실제 소유 합류; local full의 route inventory 1실패를 metadata만 수정하고 focused78 PASS; stock2311 PASS, 최종 PR 전체 CI 대기 |
 | AR-B5 | NOT STARTED | social→relationships→projection |
 | AR-B6 | NOT STARTED | Chat transport→generation→retrieval/response |
 | AR-B7 | NOT STARTED | Memory read/write→owner→batch→runtime |
@@ -2471,3 +2471,17 @@ B4 source `71493c5eac9222660e70f282d7a85ca958483da8` is connected to the prepare
 The current tree collects **2492 tests**. Initial focused activity validation passed539 and exposed5 obsolete test bindings; correcting those actual owners without changing assertions yielded233 passing related tests and the final Lore DTO case passed separately. Daypart authorization/Memory owner tests passed **8** after their original run-query mocks were connected to the actual repository. All seven original read-only preservation diagnostics report **0 errors**, protected2311/current2492. Split symbol, consumer and test references follow the final implementations rather than intermediate paths; frozen baseline/checkpoint/addition records are unchanged.
 
 This is a preparation integration, not a sequential B5/B6/B7/B8 PR gate. Current inventory has1095modules/4154edges and L4parity99. Architecture still rejects22 remaining legacy ORM imports and the Social-to-resident package cycle; the pending owner closure must remove them without new exceptions. Final source-introduction ledger, stock gate, full backend, CI, installer and post-merge remain required.
+
+### B4 후속 최종 전체 검사와 HTTP 보안 목록 보정
+
+고정 `71493c5`의 전체 backend 검사는 **1 failed / 2288 passed / 22 skipped / 27 warnings / 726.47초**다. 유일한 실패는 `test_m3_security_harness.py::test_security_inventory_explicitly_covers_every_openapi_operation`에서 C7의 실제 HTTP 소유 이동 뒤 보안 목록의 module이 이전 `app.api.v1.routes.agents`로 남은 불일치였다. 같은 커밋의 stock `--contracts --nodes`는 **PASS: items37, 보호2311 / 현재2311**이며 원래 #258의1867 / #263의1907 및 모든 원래 최초 도입을 보존했다.
+
+실제 route 객체를 대조해 정확한 12개 module 필드만 `app.domains.characters.router`로 변경했다. URL·method·endpoint·access와 다른 필드는 모두 동일하며, public inventory196개도 기존 생성기로 갱신했다. 제품 코드·테스트 source·원래 assertion/suppression·동결자료·92개 원장 기록은 바꾸지 않았다. 원래 실패 M3/M4와 활동 HTTP·관리·성향·credential transaction6파일은 **78 passed / 3 warnings / 15.29초**다.
+
+이 보정은 metadata만 변경하므로 이미 실행한 전체 검사의 실패 이력은 그대로 보존하고, 최종 전체 gate는 PR exact head의 Core backend CI에서 확인한다. local 전체 PASS로 바꾸어 기록하지 않는다. 원래 stock와 inventory를 보정 head에서 다시 확인한 뒤 PR을 생성하며, PR checks·merge·post Actions·Installer gate는 각각 별도 상태다.
+
+### PR #282 — Gitleaks의 원본 Git fingerprint 오탐과 한정 보정
+
+PR #282의 `e20c9d9`에서 Core backend, frontend, architecture-boundary, dependency-license, DCO, embedded migration 검사는 통과했다. `oss-boundary`는 Gitleaks directory 검사에서10개를 감지해 실패했다. 원문 검사기를 재현한 결과 전부 `security/refactor_backend_additions.json`의 실제 파일 Git blob SHA-1이었다. 원래 signed `526a939c`, `f34de9bd`, `2a89dc80`, `0299586c`의 해당 파일 object와10개를 각각 대조해 실제 런타임 비밀이 아님을 확인했다.
+
+기존 방식과 같은 `generic-api-key` 규칙 AND 정확한 additions 경로 AND 전체 key/hash 행 일치만 적용했다. 다른 key/hash·접두/접미 문자열은40개 음성 검증에서 모두 거절되며 원래10개/공백·쉼표 변형20개만 일치한다. 동결·원장·제품·테스트 source·기존 custom scanner25 tuple은 바꾸지 않았다. 동일 Gitleaks8.30.1의 tracked tree 및 HEAD 조상459commits 재검사 모두0 findings이며 기존 scanner/allowlist 회귀는 **23 passed / 2.01초**다. 최종 push head에서 모든 PR checks를 다시 확인한다.
