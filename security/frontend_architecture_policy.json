@@ -6,6 +6,7 @@
     "creator-studio",
     "device-home",
     "device-shell",
+    "identity",
     "memory",
     "pwa-shell",
     "relationships",
@@ -280,6 +281,7 @@
     "frontend/src/features/device-home/public.ts",
     "frontend/src/features/device-home/utils/device-home-presentation.ts",
     "frontend/src/features/device-shell/public.ts",
+    "frontend/src/features/identity/api/session.ts",
     "frontend/src/features/memory/api/memory-client.ts",
     "frontend/src/features/memory/model/memory-contract.ts",
     "frontend/src/features/memory/public.ts",
@@ -328,7 +330,6 @@
     "frontend/src/lib/navigation/device-navigation.ts",
     "frontend/src/lib/server/backend.ts",
     "frontend/src/shared/api/public.ts",
-    "frontend/src/shared/auth/auth-session.ts",
     "frontend/src/shared/auth/public.ts",
     "frontend/src/shared/interaction/public.ts",
     "frontend/src/shared/navigation/public.ts",
@@ -342,6 +343,7 @@
   "refactor": {
     "features": [
       "device-home",
+      "identity",
       "runtime-status",
       "worlds"
     ],
@@ -365,6 +367,7 @@
       "components/ui/status",
       "components/ui/status-badge",
       "components/ui/surfaces",
+      "config/policy-links",
       "config/pwa",
       "hooks/use-auth",
       "hooks/use-mobile-pull-to-refresh",
@@ -373,6 +376,7 @@
       "lib/auth/auth-context",
       "lib/auth/browser-session",
       "lib/desktop/product-window",
+      "lib/http/api-request",
       "lib/media/safe-media-url",
       "lib/navigation/device-navigation",
       "lib/navigation/product-routes",
@@ -382,194 +386,195 @@
       "styles/semantic-tokens.css",
       "utils/class-names",
       "utils/profile-presentation",
+      "utils/safe-navigation",
       "utils/scroll-viewport"
     ],
     "bridges": [
       {
         "importer": "features/creator-studio/ui/creator-studio-dashboard",
         "target": "features/device-home/public",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "features/device-shell/public",
         "target": "components/layout/device-shell",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "features/device-shell/public",
         "target": "components/navigation/local-product-link",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "features/device-shell/public",
         "target": "lib/navigation/device-navigation",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "features/memory/ui/memory-workspace",
         "target": "features/device-home/public",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "features/social/api/social-feed-server",
         "target": "lib/server/backend",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/api/public",
         "target": "lib/server/backend",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
-      },
-      {
-        "importer": "shared/auth/auth-session",
-        "target": "lib/auth/browser-session",
-        "owner_stage": "AR-F3-A",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/auth/public",
         "target": "hooks/use-auth",
-        "owner_stage": "AR-F3-A",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
+      },
+      {
+        "importer": "shared/auth/public",
+        "target": "lib/auth/browser-session",
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/desktop/public",
         "target": "lib/desktop/product-window",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/interaction/public",
         "target": "hooks/use-mobile-pull-to-refresh",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/interaction/public",
         "target": "utils/scroll-viewport",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/media/safe-media-url",
         "target": "lib/media/safe-media-url",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/media/use-runtime-media-url",
         "target": "hooks/use-runtime-media-url",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/navigation/product-routes",
         "target": "lib/navigation/product-routes",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/navigation/public",
         "target": "hooks/use-runtime-navigation",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/runtime/runtime-config",
         "target": "lib/runtime/runtime-config",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/ui/app-icon",
         "target": "components/ui/app-icon",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/ui/button",
         "target": "components/ui/button",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/ui/class-names",
         "target": "utils/class-names",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/avatar",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/device-frame",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/dialog",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/feedback",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/form-controls",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/navigation",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/profile-avatar",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/status",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/status-badge",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/ui/public",
         "target": "components/ui/surfaces",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },
       {
         "importer": "shared/ui/public",
         "target": "utils/profile-presentation",
-        "owner_stage": "AR-F4-C",
-        "removal_condition": "Observed one-way canonical dependency of an unmigrated caller. Replace or retire the caller at its owning feature/provider stage; no reverse edge or duplicated implementation."
+        "owner_stage": "AR-F5-A",
+        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       }
     ]
   }

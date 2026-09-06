@@ -1,28 +1,21 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
+import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 
-import { useAuth } from "@/components/auth-provider";
-import { TurnstileWidget } from "@/components/turnstile-widget";
-import {
-  clearPendingGoogleSignup,
-  completeGoogleSignup,
-  getPendingGoogleSignup,
-  isAuthError,
-  markFirstAgentWelcomePromptPending,
-  storeAuth,
-  storeUser,
-  updateMe,
-  type PendingGoogleSignup,
-} from "@/lib/agents";
-import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from "@/lib/policy-links";
+import { useAuth } from "@/hooks/use-auth";
+import { TurnstileWidget } from "@/features/identity/components/turnstile-widget";
+import { clearPendingGoogleSignup, getPendingGoogleSignup } from "@/features/identity/utils/pending-signup";
+import { completeGoogleSignup, updateMe } from "@/features/identity/api/identity";
+import { isAuthError, storeAuth, storeUser } from "@/lib/auth/browser-session";
+import { type PendingGoogleSignup } from "@/features/identity/types/identity";
+import { PRIVACY_POLICY_URL, TERMS_OF_SERVICE_URL } from "@/config/policy-links";
 
 const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "";
 
-export function ProfileSetupClient() {
+export function ProfileSetupClient({ onProfileReady }: { onProfileReady: () => void }) {
   const router = useRouter();
   const { status: authStatus, user } = useAuth();
   const [displayName, setDisplayName] = useState("");
@@ -77,7 +70,7 @@ export function ProfileSetupClient() {
         });
         clearPendingGoogleSignup();
         storeAuth(auth);
-        markFirstAgentWelcomePromptPending();
+        onProfileReady();
         router.push("/agents");
         return;
       }
@@ -87,7 +80,7 @@ export function ProfileSetupClient() {
         terms_agreed: termsAgreed,
       });
       storeUser(user);
-      markFirstAgentWelcomePromptPending();
+      onProfileReady();
       router.push("/agents");
     } catch (err) {
       if (pendingSignup && isAuthError(err)) {

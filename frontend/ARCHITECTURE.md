@@ -13,9 +13,17 @@ Angmoo의 프론트엔드는 **기능별 코드와 공용 코드를 구분하고
 
 서버 프록시는 `lib/server/backend.ts`, 네이티브 명령은 `lib/desktop/product-window.ts`,
 실행 환경별 React 탐색은 `hooks/use-runtime-navigation.ts`가 담당한다. 공통 세션 DTO·사용자
-캐시·인증된 JSON 전송은 `lib/auth/browser-session.ts`에 있고, 사용자 조회·로컬 세션 발급·
-프로필 설정 endpoint는 Identity 업무 코드로 이전할 대상이다. 전환 중의
-`shared/auth/auth-session.ts`에는 그 endpoint와 공용 세션 export만 남는다.
+캐시·인증된 JSON 전송은 `lib/auth/browser-session.ts`에 있다. 사용자 조회·세션 발급·
+로컬 owner 연결·프로필 설정 endpoint와 화면은 `features/identity`가 소유한다.
+`lib/http/api-request.ts`는 기존 JSON/FormData 전송과 backend 검증 오류의 표시 계약을
+보존하는 공용 도구다. endpoint·owner 판단을 추가하는 곳은 아니다.
+
+설정 화면은 설치 정보·세션과 Chat API key를 함께 보여주므로
+`composition/screens/settings-screen.tsx`에서 두 기능의 API와 화면 상태를 연결한다.
+피드의 사용자 표시 설정 저장도 `post-feed-screen.tsx`가 Identity API를 Social에 callback으로
+전달한다. Social이 Identity 내부를 import하지 않는다. 프로필 설정 성공 후 Character
+온보딩 연결은 `profile-setup-screen.tsx`에서 수행한다. 기존 `lib/agents.ts`의 인증 관련
+export는 미전환 소비자를 위한 전달 코드이며, 새로운 Identity 구현을 복제하지 않는다.
 
 Social의 서버 초기 조회는 `features/social/api/social-feed-server.ts`를 웹 서버 화면에서
 직접 사용한다. 브라우저 요청 파일이나 공용 feature export를 통해 서버 초기 조회를 가져오지

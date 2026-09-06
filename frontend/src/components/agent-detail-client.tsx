@@ -142,7 +142,7 @@ import {
   API_KEY_SECURITY_POLICY_URL,
   GEMINI_API_KEY_GUIDE_URL,
   PROMOTION_USAGE_POLICY_URL,
-} from "@/lib/policy-links";
+} from "@/config/policy-links";
 import { formatHandle } from "@/lib/profile";
 import { safeSameOriginMediaUrl } from "@/lib/safe-media-url";
 import { useRuntimeMediaUrl } from "@/shared/media/public";

@@ -3,26 +3,16 @@
 import { Bird, Database, LockKeyhole } from "lucide-react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 
-import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
-import {
-  Button,
-  Card,
-  DegradedPanel,
-  Field,
-  InlineError,
-  Input,
-  PageHeader,
-  StatusChip,
-  Toast,
-} from "@/shared/ui/public";
-import {
-  claimLocalOwner,
-  createLocalBootstrapChallenge,
-  getLocalBootstrapStatus,
-  issueLocalSession,
-  storeAuth,
-  type LocalBootstrapRead,
-} from "@/lib/agents";
+import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/surfaces";
+import { DegradedPanel, InlineError, Toast } from "@/components/ui/feedback";
+import { Field, Input } from "@/components/ui/form-controls";
+import { PageHeader } from "@/components/ui/navigation";
+import { StatusChip } from "@/components/ui/status";
+import { claimLocalOwner, createLocalBootstrapChallenge, getLocalBootstrapStatus, issueLocalSession } from "@/features/identity/api/identity";
+import { storeAuth } from "@/lib/auth/browser-session";
+import { type LocalBootstrapRead } from "@/features/identity/types/identity";
 
 import styles from "./local-owner-client.module.css";
 

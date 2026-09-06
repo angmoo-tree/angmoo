@@ -58,16 +58,16 @@
         "frontend/src/app/profiles/users/[userId]/page.tsx",
         "frontend/src/components/auth-provider.tsx",
         "frontend/src/components/character-profile-client.tsx",
-        "frontend/src/components/local-owner-client.module.css",
-        "frontend/src/components/local-owner-client.tsx",
-        "frontend/src/components/login-client.tsx",
+        "frontend/src/features/identity/components/local-owner-client.module.css",
+        "frontend/src/features/identity/components/local-owner-client.tsx",
+        "frontend/src/features/identity/components/login-client.tsx",
         "frontend/src/components/profile-avatar.tsx",
         "frontend/src/components/profile-connections-client.tsx",
         "frontend/src/components/profile-list-row.tsx",
         "frontend/src/components/profile-media-uploader.tsx",
-        "frontend/src/components/profile-setup-client.tsx",
-        "frontend/src/components/turnstile-widget.tsx",
-        "frontend/src/components/user-profile-client.tsx",
+        "frontend/src/features/identity/components/profile-setup-client.tsx",
+        "frontend/src/features/identity/components/turnstile-widget.tsx",
+        "frontend/src/features/identity/components/user-profile-client.tsx",
         "frontend/src/features/characters/api/world-character-profile-client.ts",
         "frontend/src/features/characters/model/world-character-profile-contract.ts",
         "frontend/src/features/characters/ui/world-character-profile.module.css",
@@ -94,7 +94,14 @@
         "backend/app/domains/routines/service/activity_settings.py",
         "backend/app/domains/world_characters/repository/credential_scope.py",
         "backend/app/domains/worlds/repository/credential_scope.py",
-        "frontend/src/lib/auth/browser-session.ts"
+        "frontend/src/lib/auth/browser-session.ts",
+        "frontend/src/features/identity/api/identity.ts",
+        "frontend/src/features/identity/types/identity.ts",
+        "frontend/src/features/identity/utils/pending-signup.ts",
+        "frontend/src/lib/http/api-request.ts",
+        "frontend/src/composition/screens/profile-setup-screen.tsx",
+        "frontend/src/composition/screens/post-feed-screen.tsx",
+        "frontend/scripts/test-identity-session.mjs"
       ],
       "target_paths": [
         "backend/app/domains/identity/router",
@@ -103,7 +110,14 @@
         "backend/app/domains/identity/models.py",
         "backend/app/credentials",
         "backend/app/runtime/account_deletion.py",
-        "frontend/src/lib/auth/browser-session.ts"
+        "frontend/src/lib/auth/browser-session.ts",
+        "frontend/src/features/identity/api/identity.ts",
+        "frontend/src/features/identity/types/identity.ts",
+        "frontend/src/features/identity/utils/pending-signup.ts",
+        "frontend/src/lib/http/api-request.ts",
+        "frontend/src/composition/screens/profile-setup-screen.tsx",
+        "frontend/src/composition/screens/post-feed-screen.tsx",
+        "frontend/scripts/test-identity-session.mjs"
       ],
       "entrypoints": [
         "backend/alembic/versions/20260514_0008_character_profile_identity.py::upgrade",
@@ -5538,8 +5552,8 @@
         "frontend/src/app/robots.ts",
         "frontend/src/app/settings/page.tsx",
         "frontend/src/app/sitemap.ts",
-        "frontend/src/components/settings-client.module.css",
-        "frontend/src/components/settings-client.tsx",
+        "frontend/src/composition/screens/settings-client.module.css",
+        "frontend/src/composition/screens/settings-screen.tsx",
         "frontend/src/composition/static-product-router.tsx",
         "frontend/src/lib/navigation/device-navigation.ts",
         "frontend/src/features/device-shell/public.ts",
@@ -5561,7 +5575,7 @@
         "frontend/src/lib/angmoo-api-docs.ts",
         "frontend/src/lib/features.ts",
         "frontend/src/lib/navigation/product-routes.ts",
-        "frontend/src/lib/policy-links.ts",
+        "frontend/src/config/policy-links.ts",
         "frontend/src/lib/seo.ts",
         "frontend/src/composition/providers/desktop-window-bridge.tsx",
         "frontend/src/composition/providers/desktop-window-controls.module.css",
@@ -13783,14 +13797,14 @@
         "frontend/src/components/ui/button.tsx",
         "frontend/src/components/ui/semantic-foundation.module.css",
         "frontend/src/lib/backend.ts",
-        "frontend/src/lib/safe-navigation.ts",
+        "frontend/src/utils/safe-navigation.ts",
         "frontend/src/lib/tree.ts",
         "frontend/src/lib/use-mobile-pull-to-refresh.ts",
         "frontend/src/lib/world-activity-runtime.ts",
         "frontend/src/lib/worlds.ts",
         "frontend/src/lib/server/backend.ts",
         "frontend/src/shared/api/public.ts",
-        "frontend/src/shared/auth/auth-session.ts",
+        "frontend/src/features/identity/api/session.ts",
         "frontend/src/shared/auth/public.ts",
         "frontend/src/shared/interaction/public.ts",
         "frontend/src/utils/scroll-viewport.ts",
@@ -14606,7 +14620,7 @@
   },
   "frontend_transition": {
     "checkpoint_commit": "33e9df8593272f6c81236c477ae73ef057d0d3dd",
-    "status": "AR-F2-A #292 MERGED / POST-MERGE PENDING; AR-F2-B #293 CI; AR-F2-C ISOLATED VALIDATION",
+    "status": "AR-F2-C PRE-INTEGRATION VALIDATION; AR-F3-A ISOLATED PREPARATION",
     "documentation": "docs/architecture/refactor-frontend-results.md",
     "scope_note": "Backend completion and existing per-item state are unchanged. These stages track frontend consumers independently. AR-F1 product remains preserved.",
     "items": {
@@ -14786,6 +14800,11 @@
         "status": "IMPLEMENTED - isolated validation",
         "source_map": "security/refactor_path_map.json#details.AR-F2-C",
         "scope": "Next/static common screens, providers, World/Studio/Device shells"
+      },
+      "AR-F3-A": {
+        "status": "IMPLEMENTED - isolated validation",
+        "source_map": "security/refactor_path_map.json#details.AR-F3-A",
+        "scope": "Identity and settings ownership"
       }
     }
   }

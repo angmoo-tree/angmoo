@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import { AUTH_CHANGED_EVENT, cacheUser, clearLegacyAuthStorage, clearStoredUser, isAuthError, type UserRead } from "@/lib/auth/browser-session";
-import { getCurrentUser, issueLocalSession } from "../../shared/auth/auth-session";
+import { getCurrentUser, issueLocalSession } from "@/features/identity/api/session";
 import { DESKTOP_RUNTIME_CONFIG_CHANGED_EVENT, RuntimeFetchError } from "@/lib/runtime/runtime-config";
 
 import { AuthContext, type AuthStatus } from "@/lib/auth/auth-context";

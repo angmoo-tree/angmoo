@@ -1,16 +1,13 @@
 "use client";
 
 import { LogIn } from "lucide-react";
-import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
+import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 
-import {
-  googleLogin,
-  login,
-  storeAuth,
-  storePendingGoogleSignup,
-} from "@/lib/agents";
+import { googleLogin, login } from "@/features/identity/api/identity";
+import { storeAuth } from "@/lib/auth/browser-session";
+import { storePendingGoogleSignup } from "@/features/identity/utils/pending-signup";
 
 const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? "";
 const GOOGLE_SCRIPT_SRC = "https://accounts.google.com/gsi/client";

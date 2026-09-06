@@ -31,20 +31,20 @@ def test_profile_media_inputs_allow_managed_media_paths() -> None:
 
 def test_frontend_uses_allowlisted_return_and_profile_media_helpers() -> None:
     root = Path(__file__).parents[2] / "frontend" / "src"
-    navigation = (root / "lib" / "safe-navigation.ts").read_text(encoding="utf-8")
+    navigation = (root / "utils" / "safe-navigation.ts").read_text(encoding="utf-8")
     media = (root / "lib" / "media" / "safe-media-url.ts").read_text(
         encoding="utf-8"
     )
     compatibility_media = (root / "shared" / "media" / "safe-media-url.ts").read_text(
         encoding="utf-8"
     )
-    settings = (root / "components" / "settings-client.tsx").read_text(
+    settings = (root / "composition" / "screens" / "settings-screen.tsx").read_text(
         encoding="utf-8"
     )
     login_page = (root / "app" / "login" / "page.tsx").read_text(
         encoding="utf-8"
     )
-    login_client = (root / "components" / "login-client.tsx").read_text(
+    login_client = (root / "features" / "identity" / "components" / "login-client.tsx").read_text(
         encoding="utf-8"
     )
     avatar = (root / "components" / "ui" / "profile-avatar.tsx").read_text(

@@ -117,7 +117,7 @@
         "DIRECT"
       ],
       "path": "frontend/src/features/social/ui/post-list-client.tsx",
-      "sha256": "53798a02038ad48894920f027d4135ff436f69d49af71b6c2de7fad3a026c6ed"
+      "sha256": "1a451b2f93f380fe417edb3dc581ea17f19efc0d499b90d5b204a2cf1bce17b3"
     },
     {
       "classifications": [
@@ -536,29 +536,6 @@
         }
       },
       {
-        "occurrences": 28,
-        "path": "frontend/src/components/login-client.tsx",
-        "values": {
-          "#101828": 5,
-          "#344054": 1,
-          "#667085": 2,
-          "#8a5a00": 1,
-          "#98a2b3": 1,
-          "#c24141": 1,
-          "#e1e5eb": 3,
-          "#eaedf2": 1,
-          "#eef1f5": 2,
-          "#f9df9b": 1,
-          "#f9fafb": 1,
-          "#ff5252": 1,
-          "#ff6b6b": 3,
-          "#ffd7d7": 1,
-          "#ffe2e2": 2,
-          "#fff5f5": 1,
-          "#fffaf0": 1
-        }
-      },
-      {
         "occurrences": 5,
         "path": "frontend/src/components/nest-search-form.tsx",
         "values": {
@@ -662,26 +639,6 @@
         }
       },
       {
-        "occurrences": 21,
-        "path": "frontend/src/components/profile-setup-client.tsx",
-        "values": {
-          "#101828": 3,
-          "#344054": 2,
-          "#667085": 1,
-          "#c24141": 1,
-          "#d0d5dd": 1,
-          "#e1e5eb": 1,
-          "#eaedf2": 1,
-          "#eef1f5": 2,
-          "#f9fafb": 1,
-          "#ff5252": 1,
-          "#ff6b6b": 4,
-          "#ffd7d7": 1,
-          "#ffe2e2": 1,
-          "#fff5f5": 1
-        }
-      },
-      {
         "occurrences": 34,
         "path": "frontend/src/components/right-rail-insights.tsx",
         "values": {
@@ -753,35 +710,6 @@
         }
       },
       {
-        "occurrences": 1,
-        "path": "frontend/src/components/turnstile-widget.tsx",
-        "values": {
-          "#c24141": 1
-        }
-      },
-      {
-        "occurrences": 37,
-        "path": "frontend/src/components/user-profile-client.tsx",
-        "values": {
-          "#101828": 8,
-          "#344054": 2,
-          "#667085": 3,
-          "#98a2b3": 1,
-          "#b45309": 1,
-          "#c24141": 2,
-          "#e1e5eb": 1,
-          "#eaedf2": 5,
-          "#f2f4f7": 4,
-          "#f9fafb": 1,
-          "#ff6b6b": 2,
-          "#ffd7d7": 2,
-          "#ffe2e2": 1,
-          "#ffe5c2": 1,
-          "#fff5f5": 2,
-          "#fff8ed": 1
-        }
-      },
-      {
         "occurrences": 73,
         "path": "frontend/src/components/world-creator-client.tsx",
         "values": {
@@ -849,6 +777,78 @@
           "#ff6b6b": 2,
           "#ffd7d7": 1,
           "#fff5f5": 2
+        }
+      },
+      {
+        "occurrences": 28,
+        "path": "frontend/src/features/identity/components/login-client.tsx",
+        "values": {
+          "#101828": 5,
+          "#344054": 1,
+          "#667085": 2,
+          "#8a5a00": 1,
+          "#98a2b3": 1,
+          "#c24141": 1,
+          "#e1e5eb": 3,
+          "#eaedf2": 1,
+          "#eef1f5": 2,
+          "#f9df9b": 1,
+          "#f9fafb": 1,
+          "#ff5252": 1,
+          "#ff6b6b": 3,
+          "#ffd7d7": 1,
+          "#ffe2e2": 2,
+          "#fff5f5": 1,
+          "#fffaf0": 1
+        }
+      },
+      {
+        "occurrences": 21,
+        "path": "frontend/src/features/identity/components/profile-setup-client.tsx",
+        "values": {
+          "#101828": 3,
+          "#344054": 2,
+          "#667085": 1,
+          "#c24141": 1,
+          "#d0d5dd": 1,
+          "#e1e5eb": 1,
+          "#eaedf2": 1,
+          "#eef1f5": 2,
+          "#f9fafb": 1,
+          "#ff5252": 1,
+          "#ff6b6b": 4,
+          "#ffd7d7": 1,
+          "#ffe2e2": 1,
+          "#fff5f5": 1
+        }
+      },
+      {
+        "occurrences": 1,
+        "path": "frontend/src/features/identity/components/turnstile-widget.tsx",
+        "values": {
+          "#c24141": 1
+        }
+      },
+      {
+        "occurrences": 37,
+        "path": "frontend/src/features/identity/components/user-profile-client.tsx",
+        "values": {
+          "#101828": 8,
+          "#344054": 2,
+          "#667085": 3,
+          "#98a2b3": 1,
+          "#b45309": 1,
+          "#c24141": 2,
+          "#e1e5eb": 1,
+          "#eaedf2": 5,
+          "#f2f4f7": 4,
+          "#f9fafb": 1,
+          "#ff6b6b": 2,
+          "#ffd7d7": 2,
+          "#ffe2e2": 1,
+          "#ffe5c2": 1,
+          "#fff5f5": 2,
+          "#fff8ed": 1
         }
       },
       {
@@ -1125,7 +1125,7 @@
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
     "next_static_inventory_route_count": 44,
-    "next_static_inventory_sha256": "4d0d00e2661d74192b205643d054ef6130f87591ce0514679ac9f3a5f6cb7dd3",
+    "next_static_inventory_sha256": "9b1219c0d62f4c7131d14e801d4889a25da61888a5b8bd2f54d6fca2c213cae0",
     "reviewed_surface_count": 18
   },
   "schema_version": 1,
@@ -1211,7 +1211,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "c599107d8e25e7e06896bb07cb8013175fd42dc66db62f9196944e8235e939e7"
+        "sha256": "eb055b7a8d7da96cd21bf9ffc42f1fd89babb01cc73a8a89a6bb95f61730d423"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",

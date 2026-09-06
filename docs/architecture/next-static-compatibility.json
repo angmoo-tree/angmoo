@@ -180,7 +180,7 @@
       "path": "frontend/src/app/login/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/login",
-      "source_sha256": "16bfdffd04ae26b877c5ff8cb1165d487ef7fdd4f3c0c4daf561dcbc1b99c5bd",
+      "source_sha256": "9d213e0e4ee34f99306437499315b0a6a9574e8289a0684a5aeead2d6707abdd",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -272,7 +272,7 @@
       "path": "frontend/src/app/profile/setup/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/profile/setup",
-      "source_sha256": "1d1b796c79def54de82871c2664ffa2ac44646f52fb10645dfb84a469d33af5e",
+      "source_sha256": "dac6c16e88edb19b68294169ae8d04cde9eb6749a989f2e930d30614c7981b5e",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -312,7 +312,7 @@
       "path": "frontend/src/app/profiles/users/[userId]/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/profiles/users/[userId]",
-      "source_sha256": "a91a724ed3bab1bee2f266166e15de958581a0e95268d3325b9c897214e3919f",
+      "source_sha256": "8524f07d0e0fd710987408de32ae77ca2fd35658a054ac906ea4c87246a06236",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -332,7 +332,7 @@
       "path": "frontend/src/app/settings/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/settings",
-      "source_sha256": "d9f192dfb726532838a8ed38536cfd1eb8a59665ec8a8aa338f81d13de23db2f",
+      "source_sha256": "1c4363ba648ae8460e87596465a050f51f54d27ef8b1761d30a93425009d5529",
       "transition_pr": "ER5 PR K"
     },
     {

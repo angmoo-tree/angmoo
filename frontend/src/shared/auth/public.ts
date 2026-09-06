@@ -5,16 +5,13 @@ export {
   cacheUser,
   clearLegacyAuthStorage,
   clearStoredUser,
-  getCurrentUser,
   getStoredUser,
   isAuthError,
-  issueLocalSession,
   notifyAuthChanged,
   storeUser,
-  updateUserFeedPreferences,
-} from "./auth-session";
+} from "@/lib/auth/browser-session";
 export type {
   AuthRead,
   UserFeedContentFilter,
   UserRead,
-} from "./auth-session";
+} from "@/lib/auth/browser-session";

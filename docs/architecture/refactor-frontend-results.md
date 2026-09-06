@@ -211,3 +211,34 @@ committed history were deleted.
   still contained 13 pre-move route hashes. Regenerate with the existing embedded
   inventory tool: only those current hashes change, with 44 routes and all
   capability classifications retained. This is not a frozen-oracle refresh.
+
+
+## AR-F3-A isolated Identity and Settings preparation
+
+- Identity owns login, Local owner bootstrap/claim, profile setup, user-profile
+  editing, Turnstile and their session/API/type/pending-signup modules.
+- Extract Identity endpoints from the mixed agents client, retaining all request
+  bodies, cookies, status handling and storage/event ordering. Existing callers
+  use forwarding exports until their own feature migration.
+- Settings is an upper composition of installation/session and Chat key APIs.
+  Feed preference saving and successful profile onboarding use callbacks wired
+  by common screens, avoiding new Identity-to-Character or Social-to-Identity
+  feature imports. The same screens remain in Next/static entry paths.
+- A new Node differential test executes the pinned pre-extraction implementation
+  and the current modules with identical fixture transport/storage: 14 request
+  contracts, 5 failure cases and 4 storage/event transitions match. CI runs it
+  with full Git history so the immutable comparison source is available.
+- Local Identity/source contracts: 48 passed, 14 existing warnings. Web 21 PASS
+  (1.3m), Settings 2 PASS (11.9s), static 68 PASS (47.7s), Next/static builds,
+  TypeScript/ESLint and both Node contract scripts PASS. The wider frontend-related
+  backend suite passed 485 cases and found one duplicated test-path segment in
+  migration preparation; correct that exact path and all six tests in its file
+  pass. Product calls and runtime behavior were unaffected.
+- Seven source files were introduced at `d5fda64809532eaf2a211ee4c97c4375abf56ffa`,
+  with zero new backend nodes. Preserve the source record and all earlier
+  introduction commits. Full preservation/CI/sequential integration are pending.
+- Predecessor AR-F2-B #293 passed 23/23 checks at
+  `812128d3888a3e56139904505331139acfd4479e` and merged as
+  `e67e0385fd77f1d3a62f3e877ca41f71a0102920` at 2026-09-07 04:05:46 KST.
+  Its post-merge workflows and AR-F2-C #294 remain separate integration gates.
+

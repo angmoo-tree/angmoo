@@ -39,7 +39,7 @@ def test_backend_proxy_preserves_allowlisted_set_cookie_on_all_statuses() -> Non
 
 
 def test_browser_auth_storage_contains_no_session_or_pending_token() -> None:
-    auth_session = _read("shared/auth/auth-session.ts") + _read("lib/auth/browser-session.ts")
+    auth_session = _read("features/identity/api/session.ts") + _read("lib/auth/browser-session.ts")
 
     assert "angmoo.authToken" not in auth_session
     assert "pending_token" not in auth_session
@@ -53,7 +53,7 @@ def test_browser_auth_provider_bootstraps_from_auth_me() -> None:
     provider = _read("composition/providers/auth-provider.tsx")
     # One implementation was split into provider, context and consumer hook.
     provider += _read("lib/auth/auth-context.ts") + _read("hooks/use-auth.ts")
-    session = _read("shared/auth/auth-session.ts")
+    session = _read("features/identity/api/session.ts")
     layout = _read("app/layout.tsx")
 
     assert 'type AuthStatus = "checking" | "authenticated" | "unauthenticated"' in provider

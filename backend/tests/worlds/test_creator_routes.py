@@ -301,7 +301,7 @@ def test_api_rejects_unknown_fields_and_frontend_uses_new_creator_routes() -> No
     client = (frontend_root / "components" / "world-creator-client.tsx").read_text(
         encoding="utf-8"
     )
-    navigation = (frontend_root / "lib" / "safe-navigation.ts").read_text(
+    navigation = (frontend_root / "utils" / "safe-navigation.ts").read_text(
         encoding="utf-8"
     )
     assert "World Creator · P1" in client

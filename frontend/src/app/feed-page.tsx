@@ -1,9 +1,9 @@
 import { getInitialSocialFeed } from "@/features/social/api/social-feed-server";
 import { AppShell } from "@/composition/shells/app-shell";
 import {
-  PostListClient,
   type FeedPage as FeedPageData,
 } from "@/features/social/public";
+import { PostFeedScreen as PostListClient } from "@/composition/screens/post-feed-screen";
 
 type FeedPageProps = {
   suppressFeedSnippet?: boolean;

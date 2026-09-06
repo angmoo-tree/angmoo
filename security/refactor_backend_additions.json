@@ -9555,6 +9555,23 @@
       "test_suppressions": {
         "tests/test_refactor_frontend_foundation.py": {}
       }
+    },
+    {
+      "commit": "d5fda64809532eaf2a211ee4c97c4375abf56ffa",
+      "feature_id": "K01",
+      "reason": "AR-F3-A Identity API and DTO ownership, pending signup state, transport extraction, composition callbacks and differential Node regression",
+      "tracked_files": {
+        "frontend/scripts/test-identity-session.mjs": "e5a1c62edbdda875eecbf765fdbbbd8c3890ecf3",
+        "frontend/src/composition/screens/post-feed-screen.tsx": "06903f6130cdd97d1e3bafbd0fb7e10b61830b03",
+        "frontend/src/composition/screens/profile-setup-screen.tsx": "1c1d69f7aaf133be0aade0ddc59aa70fce97b59f",
+        "frontend/src/features/identity/api/identity.ts": "175cff94a37f2acab459e1efc33040b8bd78426e",
+        "frontend/src/features/identity/types/identity.ts": "f4a9fea225be1f0922ba77f1b1480f00b46c4d12",
+        "frontend/src/features/identity/utils/pending-signup.ts": "973aadb25e9a175e25ec4a70bd243f5f75fbf0eb",
+        "frontend/src/lib/http/api-request.ts": "94715b4b529af7408bdb1f8948725779e787ef88"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }
