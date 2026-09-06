@@ -2505,3 +2505,10 @@ The first architecture check rejected the new Identity service as an undeclared 
 ### G5 preparation: retained transactions and utilities
 
 Original quota source331094f and retained utilities b013974 are integrated after the final B4 owner connection. Quota file-backed transaction tests passed2;18 existing PostgreSQL-only tests remain conditional skips. Seven retained utility definitions use their original actual owners, including the Character operation that commits the caller transaction. Test model imports now use the existing canonical fixture support. No dormant caller was activated. The source captures and original whole-AST proofs remain associated with their original signed commits; final sequential ledger and backend closeout are still pending.
+
+
+### Shared activity composition
+
+`runtime/routines/activity_policy.py` and `activity_scope.py` own the existing shared activity policy assembly and same-Session World/Package reads. Resident execution, Character setup and Social authorization use this shared assembly. Original function/class bodies, lookup timing, exceptions and transactions are unchanged; no reverse dependency from this assembly to Resident or Social is introduced.
+
+Activity composition verification: original non-import ASTs of both moved modules and12 updated consumers are identical. Same-Session scope/policy/activity tests passed **71 / 2 warnings /31.11s**. All seven read-only original preservation diagnostics passed0errors, protected2311/current2497. This source intentionally retains the base's unresolved legacy consumers and two Social context type backedges, already owned by Social C29; it does not introduce an exception or claim complete architecture closeout.

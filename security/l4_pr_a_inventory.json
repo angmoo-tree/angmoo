@@ -1970,7 +1970,7 @@
               "app.domains.routines.models",
               "app.domains.routines.repository.runs",
               "app.domains.social.service.agent_tool_authorization",
-              "app.runtime.resident.activity_policy"
+              "app.runtime.routines.activity_policy"
             ],
             "module": "app.runtime.social.agent_tool_authorization",
             "path": "backend/app/runtime/social/agent_tool_authorization.py"
@@ -1982,7 +1982,7 @@
               "app.domains.routines.repository.feed_history",
               "app.domains.routines.service.activity_logs",
               "app.domains.social.service.agent_tool_reads",
-              "app.runtime.resident.activity_policy",
+              "app.runtime.routines.activity_policy",
               "app.runtime.social.agent_tool_authorization",
               "app.runtime.social.topic_metadata"
             ],

@@ -11,7 +11,7 @@ from app.domains.routines import models
 from app.domains.routines.service import tick_schedule as agent_activity_schedule
 from app.domains.routines.service import activity_scope
 from app.domains.routines.contracts.activity_scope import WorldCharacterRead
-from app.runtime.resident.activity_scope import SqlAlchemyActivityScopeReads
+from app.runtime.routines.activity_scope import SqlAlchemyActivityScopeReads
 from app.domains.routines.service import activity_policy as canonical_activity_policy
 from app.domains.routines.repository.activity_counts import count_public_actions_since, _count_action_today, _latest_action_at
 from app.domains.routines.utils.activity_actions import _normalize_action_types, _public_action_log_types

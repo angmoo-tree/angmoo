@@ -1154,3 +1154,8 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 ### 보존된 활동 보조 기능
 
 기존 text 메뉴와 tool 복구 문구는 각각 `routines/service/action_menu.py`와 `state_prompts.py`에 보존합니다. 현재 실행기는 기존 table 메뉴를 사용하며 이 이전으로 과거 메뉴를 활성화하지 않습니다. 같은 Character 상태 대입도 `characters/service/mutations.py::set_character_status`는 원래 commit까지 수행하고 `set_activity_status`는 호출자의 transaction에 참여하는 대입만 하므로 서로 합치지 않습니다. 다른 캐릭터의 활성 설정 조회는 기존 `runtime/resident/autonomy_reads.py`의 정확한 join을 사용한 뒤 그 같은 Session과 결과 list를 `activity_settings.disable_other_active_settings`에 즉시 전달합니다. 서비스는 원래 UTC timestamp·대입·조건부 commit/flush를 소유합니다.
+
+
+### Shared activity composition
+
+`runtime/routines/activity_policy.py` and `activity_scope.py` own the existing shared activity policy assembly and same-Session World/Package reads. Resident execution, Character setup and Social authorization use this shared assembly. Original function/class bodies, lookup timing, exceptions and transactions are unchanged; no reverse dependency from this assembly to Resident or Social is introduced.

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.domains.world_characters.models import CharacterActiveWorld, WorldCharacter
 from app.domains.world_packages.models import WorldPackageImport
-from app.runtime.resident import activity_policy
+from app.runtime.routines import activity_policy
 from routines.test_activity_persistence import _file_engine
 from routine_posts.test_runtime import _seed
 

@@ -208,7 +208,7 @@ from app.cruds import community as community_crud
 
 from app.policies import name_policy
 
-from app.runtime.resident import activity_policy as agent_activity_policy
+from app.runtime.routines import activity_policy as agent_activity_policy
 
 from app.domains.world_characters.service import readiness as activity_profile_readiness
 

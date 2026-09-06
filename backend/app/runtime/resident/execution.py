@@ -121,7 +121,7 @@ from app.runtime.search.binding import current_social_search
 from app.domains.world_characters.public import is_owner_controlled_character
 from app.domains.world_characters.public import owner_controlled_character_ids
 from app.domains.world_characters.service import readiness as activity_profile_readiness
-from app.runtime.resident import activity_policy as agent_activity_policy
+from app.runtime.routines import activity_policy as agent_activity_policy
 from app.runtime.resident import slots as resident_slots
 from app.runtime.resident.context_references import SqlAlchemyResidentActionReferences
 from app.runtime.resident.credential_profiles import _ensure_slot_auth_profile
