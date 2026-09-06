@@ -268,3 +268,14 @@ committed history were deleted.
   324 frozen frontend files and browser/fixture/asset/lock protection PASS.
 - Next/static builds, static browser, source-introduction capture, full preservation,
   CI, installer/visual checks and sequential merge remain required for completion.
+
+- AR-F3-B Next/static builds and static browser 68 PASS (42.3s). New source
+  introduction `342e7ae4877b0ee23caea513174a5694e2d78f55` adds 16 files and one
+  backend guard node. Dashboard DTOs were then placed in the already introduced
+  Character type module; presentation functions retain a temporary type-only
+  export for the frozen browser import until final consumer cleanup.
+- AR-F2-B post-merge seven workflows PASS, including all five Windows Installer
+  jobs. AR-F2-C #294 passed all 23 checks and merged as
+  `6ca211869dfb7e32c7a6689544e18137e0ecdfe5` at 2026-09-07 04:40:30 KST.
+  Its seven post workflows are running. GitHub automatically retargeted stacked
+  Identity PR #295 to main when C merged; no early product merge was performed.
