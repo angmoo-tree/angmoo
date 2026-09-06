@@ -126,3 +126,24 @@ def latest_post_created_log(
         .limit(1)
     )
     return log
+
+
+def list_inbox_delivery_logs(
+    db: Session, *, user_id: str, character_id: str, created_at: datetime
+) -> list[models.AgentActivityLog]:
+    return list(
+        db.scalars(
+            select(models.AgentActivityLog)
+            .where(
+                models.AgentActivityLog.user_id == user_id,
+                models.AgentActivityLog.character_id == character_id,
+                models.AgentActivityLog.action_type == "inbox_notifications_provided",
+                models.AgentActivityLog.created_at >= created_at,
+            )
+            .order_by(
+                models.AgentActivityLog.created_at.desc(),
+                models.AgentActivityLog.id.desc(),
+            )
+            .limit(5)
+        )
+    )

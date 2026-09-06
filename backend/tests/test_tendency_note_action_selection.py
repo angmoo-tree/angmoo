@@ -1,3 +1,4 @@
+from app.domains.social.service import agent_tool_reads as tool_read_service
 from app.domains.social.service import agent_tool_actions as tool_action_service
 from app.runtime.social import agent_tools as tool_action_runtime
 from app.runtime.social import feed_history as history_runtime
@@ -1272,7 +1273,7 @@ def test_agent_feed_post_summary_uses_topic_and_preview(monkeypatch):
         },
     )
     monkeypatch.setattr(
-        community_service,
+        tool_read_service,
         "_post_author_identity",
         lambda *args, **kwargs: {
             "name": "source author",
@@ -1308,7 +1309,7 @@ def test_agent_feed_post_summary_prefers_post_topic_columns(monkeypatch):
         },
     )
     monkeypatch.setattr(
-        community_service,
+        tool_read_service,
         "_post_author_identity",
         lambda *args, **kwargs: {
             "name": "source author",

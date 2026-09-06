@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.runtime.social.agent_tool_reads import agent_tool_reads
 from app.runtime.social.agent_tools import agent_tool_actions
 
 from app.domains.social.service import resident_affordances
@@ -6640,7 +6641,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
 
     async def feed_observer(state: _ResidentGraphState) -> dict[str, Any]:
         session_key = f"{ctx.session_key}:scratch:feed-scan:langgraph"
-        feed_page = community_service.list_agent_tool_feed(ctx.db, session_key, limit=30)
+        feed_page = agent_tool_reads.list_agent_tool_feed(ctx.db, session_key, limit=30)
         seen_post_ids = _seen_daypart_feed_post_ids(ctx)
         items: list[dict[str, Any]] = []
         seed_candidates: list[dict[str, Any]] = []
@@ -6854,7 +6855,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
 
     async def inbox_observer(state: _ResidentGraphState) -> dict[str, Any]:
         session_key = f"{ctx.session_key}:scratch:inbox:langgraph"
-        notifications = community_service.list_agent_tool_notifications(
+        notifications = agent_tool_reads.list_agent_tool_notifications(
             ctx.db, session_key, limit=10
         )
         inbox_lane_only = bool(state.get("inbox_lane_only"))

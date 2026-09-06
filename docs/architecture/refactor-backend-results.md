@@ -1315,3 +1315,12 @@ Community 실제10개 행동은 AgentToolActionService로 옮겼다. 같은 Soci
 첫 수집은 RoutinePost의 future import보다 새 import가 앞에 놓여1오류였으며 올바른 import 위치로 수정했다. 이후 기존88개 중86 PASS/2 FAIL은 옛 Community monkeypatch 대상이어서 실제 함수/연결 대상으로10개 receiver만 변경했다. 기존 assertion은 유지했고 **88 PASS / 8.12초**, 새 SQLite/권한/반응/Search 집중은 **20 PASS / 6.84초**다. 새 회귀는 실제 World 게시/주제/성공 로그를 원래 deferred_commits 아래에서 실행하고 caller rollback으로 함께 취소함을 검증한다. Community40 및 G07/full B5/capture/Hosted는 계속한다.
 
 C22 확대 첫 실행은386 PASS/7 FAIL/기존 PostgreSQL 전용 skip1이었다. LangGraph7개 mock receiver와 RoutinePost의 실제 실패 주입2개 참조를 새 실행 instance로 연결했고 원래 assertion·skip은 유지했다. 최종 확대는 **393 PASS / 1 기존 skip / 59.32초 / warning3개**다. PR #258/#263 API/schema/ORM·보호 변경3파일 assertion·전체 split evidence와 경계 **838 module / 2987 edge / legacy180**, L4 parity99·ER0가 통과했다. split 지도는 기존 형식대로 실제 top-level class와 destination_member를 함께 명시해10개 원래 함수의 정확한 메서드 소유를 기록했으며 검사 코드는 변경하지 않았다.
+
+
+## AR-B5-C23 — Social 도구 피드·Inbox·관찰 읽기 소유
+
+실제15개 읽기/Inbox/관찰 함수는 AgentToolReadService로 옮기고 Routines 활동로그 SQL1개는 해당 repository로 분리했다. 원래15개/잔여25개 전체 함수와 SQL이 정확한 self/타입/협력 복원 후 동일하다. 공개/캐릭터·Run 범위, scan500/페이지100/Inbox10 제한, neutral 응답, 전달기록 fingerprint/ID 처리 및 로그·읽음 쓰기 순서를 유지했다.
+
+최초 기존81개 중79 PASS/2 FAIL은 Post author mock의 옛 대상이었다. 실제 service의2개 receiver만 연결했고 기존 assertion은 그대로다. 새 SQLite 및 관련 소유 회귀 포함 **83 PASS / 6.71초 / 기존 warning2개**다. 새 테스트는 attached 로그·created/id 정렬·다른 Character/이전 Run 제외, malformed/boolean ID 처리, 일치한 잘못된 최신 payload에서 fallback 금지, pending autoflush와 caller rollback을 확인한다. Community25/G07/full B5/capture/Hosted는 계속한다.
+
+C23 최종 확대 Social·Relationships·Tendency·LangGraph·Feed·RoutinePost 검증은 **394 PASS / 기존 PostgreSQL skip1 / 59.10초 / warning3개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence가 통과했고, 경계 **840 module / 3017 edge / legacy181**, L4 parity99·ER0도 통과했다. 실제15개 메서드와 Routines 조회1의 소유 경로/직접 소비자/동작 검증을 현재 지도에 기록했으며 기존 저장 모델·SQL 정렬·상한·오류 계약을 변경하지 않았다.

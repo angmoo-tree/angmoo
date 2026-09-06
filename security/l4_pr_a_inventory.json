@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2476,
-      "internal_edge_count": 2987,
+      "external_import_count": 2480,
+      "internal_edge_count": 3017,
       "legacy_import_exception_count": 0,
-      "module_count": 838,
+      "module_count": 840,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -647,7 +647,9 @@
             "path": "backend/app/domains/social/contracts/actors.py"
           },
           {
-            "imports": [],
+            "imports": [
+              "app.domains.social.contracts.topic_history"
+            ],
             "module": "app.domains.social.contracts.agent_tools",
             "path": "backend/app/domains/social/contracts/agent_tools.py"
           },
@@ -1195,6 +1197,31 @@
             ],
             "module": "app.domains.social.service.agent_tool_authorization",
             "path": "backend/app/domains/social/service/agent_tool_authorization.py"
+          },
+          {
+            "imports": [
+              "app.core.context_text",
+              "app.domains.social.contracts.agent_tools",
+              "app.domains.social.exceptions",
+              "app.domains.social.models.posts",
+              "app.domains.social.repository.inbox",
+              "app.domains.social.repository.posts",
+              "app.domains.social.repository.profiles",
+              "app.domains.social.schemas.community",
+              "app.domains.social.service.activity_results",
+              "app.domains.social.service.agent_presentation",
+              "app.domains.social.service.agent_tool_authorization",
+              "app.domains.social.service.notifications",
+              "app.domains.social.service.posts",
+              "app.domains.social.service.presentation",
+              "app.domains.social.service.profiles",
+              "app.domains.social.service.resident_affordances",
+              "app.domains.social.service.topic_metadata",
+              "app.domains.social.service.visibility",
+              "app.domains.social.utils.limits"
+            ],
+            "module": "app.domains.social.service.agent_tool_reads",
+            "path": "backend/app/domains/social/service/agent_tool_reads.py"
           },
           {
             "imports": [
@@ -1917,6 +1944,20 @@
             ],
             "module": "app.runtime.social.agent_tool_authorization",
             "path": "backend/app/runtime/social/agent_tool_authorization.py"
+          },
+          {
+            "imports": [
+              "app.domains.routines.contracts.activity_policy",
+              "app.domains.routines.models",
+              "app.domains.routines.repository.feed_history",
+              "app.domains.routines.service.activity_logs",
+              "app.domains.social.service.agent_tool_reads",
+              "app.runtime.social.agent_tool_authorization",
+              "app.runtime.social.topic_metadata",
+              "app.services.agent_activity_policy"
+            ],
+            "module": "app.runtime.social.agent_tool_reads",
+            "path": "backend/app/runtime/social/agent_tool_reads.py"
           },
           {
             "imports": [

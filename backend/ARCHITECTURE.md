@@ -756,3 +756,6 @@ Social Agent Tool의 Run·캐릭터·사용자 범위와 거절 메시지는 `so
 
 
 실제 Social 도구 게시/답글/반응/팔로우는 `social/service/agent_tool_actions.py`의 `AgentToolActionService`가 소유한다. 원래 권한/자기 글/중복/공개 검증 후 같은 Social timeline을 호출하고, 주제 메타데이터·성공 활동 로그·선택적 feed cue 소비를 원래 순서로 처리한다. `runtime/social/agent_tools.py`는 기존 Session의 타 업무 협력만 연결하며, provider를 호출하거나 새 commit 경계를 만들지 않는다. 기존 호출자는 구성된 `agent_tool_actions`의 원래 이름/인자를 사용한다.
+
+
+도구의 피드/Inbox/관찰 읽기는 `social/service/agent_tool_reads.py`가 공개·행동 가능 조건, 원래 커서/스캔 상한과 중립 응답을 소유한다. 이미 전달한 알림의 session fingerprint·읽음 처리 판단도 Social에서 수행한다. Routines 활동로그 SQL은 `routines/repository/feed_history.py`가 소유하며 runtime은 같은 Session의 원래 attached 행을 제공한다. malformed 기록을 건너뛰는 경우와 일치한 잘못된 payload에서 종료하는 경우를 바꾸지 않고, 조회를 앞당기거나 별도 commit을 만들지 않는다.

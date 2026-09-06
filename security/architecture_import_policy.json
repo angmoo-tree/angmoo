@@ -829,6 +829,19 @@
           "imported": "app.cruds.agents"
         }
       ]
+    },
+    {
+      "id": "ar-b5-agent-tool-read-admission-binding",
+      "owner_stage": "L6",
+      "reason": "AR-B5-C23 preserves original Routines build_activity_policy in runtime until prepared B4 owner source integration; no Social domain legacy or foreign-ORM import.",
+      "removal_condition": "Parent binds runtime.resident.activity_policy.build_activity_policy and removes exact old runtime import.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.social.agent_tool_reads",
+          "imported": "app.services.agent_activity_policy"
+        }
+      ]
     }
   ],
   "legacy_module_cycles": [],
@@ -1129,6 +1142,7 @@
       "app.domains.social.service.agent_presentation",
       "app.domains.social.service.agent_tool_actions",
       "app.domains.social.service.agent_tool_authorization",
+      "app.domains.social.service.agent_tool_reads",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
       "app.domains.social.service.feed_cycle",
@@ -1381,6 +1395,7 @@
       "app.domains.social.service.agent_presentation",
       "app.domains.social.service.agent_tool_actions",
       "app.domains.social.service.agent_tool_authorization",
+      "app.domains.social.service.agent_tool_reads",
       "app.domains.social.service.discovery",
       "app.domains.social.service.feed",
       "app.domains.social.service.feed_cycle",
