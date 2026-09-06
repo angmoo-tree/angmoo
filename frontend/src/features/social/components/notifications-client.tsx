@@ -4,13 +4,10 @@ import { AtSign, Bell, Check, Heart, MessageCircle, Quote, RefreshCw, Repeat2, U
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-import { ProfileAvatar } from "@/components/profile-avatar";
-import {
-  formatDate,
-  listNotifications,
-  markNotificationRead,
-  type NotificationRead,
-} from "@/lib/community";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { formatDate } from "@/utils/profile-presentation";
+import { listNotifications, markNotificationRead } from "@/features/social/api/community";
+import { type NotificationRead } from "@/features/social/types/community";
 
 export function NotificationsClient() {
   const [notifications, setNotifications] = useState<NotificationRead[]>([]);

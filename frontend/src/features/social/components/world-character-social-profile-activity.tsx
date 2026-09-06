@@ -3,26 +3,13 @@
 import { RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  worldCharacterProfileRoute,
-  worldPostDetailRoute,
-} from "@/shared/navigation/public";
-import { formatDate } from "@/shared/ui/public";
+import { worldCharacterProfileRoute, worldPostDetailRoute } from "@/lib/navigation/product-routes";
+import { formatDate } from "@/utils/profile-presentation";
 
-import {
-  getWorldCharacterSocialProfile,
-  WorldCharacterSocialProfileApiError,
-} from "../api/world-character-social-profile-client";
-import type {
-  WorldCharacterSocialProfileCounts,
-  WorldCharacterSocialProfilePost,
-  WorldCharacterSocialProfileTab,
-} from "../model/world-character-social-profile-contract";
-import type {
-  SocialPostActionPresentation,
-  SocialPostPresentation,
-} from "../model/social-presentation-contract";
-import { SocialPostRow } from "./social-post-row";
+import { getWorldCharacterSocialProfile, WorldCharacterSocialProfileApiError } from "@/features/social/api/world-character-social-profile-client";
+import type { WorldCharacterSocialProfileCounts, WorldCharacterSocialProfilePost, WorldCharacterSocialProfileTab } from "@/features/social/types/world-character-social-profile-contract";
+import type { SocialPostActionPresentation, SocialPostPresentation } from "@/features/social/types/social-presentation-contract";
+import { SocialPostRow } from "@/features/social/components/social-post-row";
 import styles from "./world-character-social-profile-activity.module.css";
 
 type Props = {

@@ -770,7 +770,29 @@
     "frontend/src/features/world-packages/world-package-import-client.tsx": "frontend/src/features/world-packages/components/world-package-import-client.tsx",
     "frontend/src/features/world-packages/world-package-export-panel.tsx": "frontend/src/features/world-packages/components/world-package-export-panel.tsx",
     "frontend/src/features/world-packages/native-delivery.ts": "frontend/src/features/world-packages/api/native-delivery.ts",
-    "frontend/src/features/world-packages/public.ts": "frontend/src/features/world-packages/components/world-package-export-panel.tsx"
+    "frontend/src/features/world-packages/public.ts": "frontend/src/features/world-packages/components/world-package-export-panel.tsx",
+    "frontend/src/features/social/ui/active-agent-summary.tsx": "frontend/src/features/characters/components/active-agent-summary.tsx",
+    "frontend/src/features/social/ui/post-list-client.tsx": "frontend/src/composition/screens/post-list-screen.tsx",
+    "frontend/src/features/social/ui/social-post-row.tsx": "frontend/src/features/social/components/social-post-row.tsx",
+    "frontend/src/features/social/ui/social-presentation.module.css": "frontend/src/features/social/components/social-presentation.module.css",
+    "frontend/src/features/social/ui/world-character-social-profile-activity.module.css": "frontend/src/features/social/components/world-character-social-profile-activity.module.css",
+    "frontend/src/features/social/ui/world-character-social-profile-activity.tsx": "frontend/src/features/social/components/world-character-social-profile-activity.tsx",
+    "frontend/src/features/social/ui/world-social-feed.module.css": "frontend/src/features/social/components/world-social-feed.module.css",
+    "frontend/src/features/social/ui/world-social-feed.tsx": "frontend/src/features/social/components/world-social-feed.tsx",
+    "frontend/src/features/social/model/causality-presentation.ts": "frontend/src/features/social/utils/causality-presentation.ts",
+    "frontend/src/features/social/model/social-agent-contract.ts": "frontend/src/features/characters/types/feed-actor.ts",
+    "frontend/src/features/social/model/social-feed-contract.ts": "frontend/src/features/social/types/social-feed-contract.ts",
+    "frontend/src/features/social/model/social-presentation-contract.ts": "frontend/src/features/social/types/social-presentation-contract.ts",
+    "frontend/src/features/social/model/social-write-contract.ts": "frontend/src/features/social/types/social-write-contract.ts",
+    "frontend/src/features/social/model/world-character-social-profile-contract.ts": "frontend/src/features/social/types/world-character-social-profile-contract.ts",
+    "frontend/src/features/social/api/social-agent-client.ts": "frontend/src/features/characters/api/feed-actor.ts",
+    "frontend/src/components/notifications-client.tsx": "frontend/src/features/social/components/notifications-client.tsx",
+    "frontend/src/components/search-results-client.tsx": "frontend/src/features/social/components/search-results-client.tsx",
+    "frontend/src/components/profile-connections-client.tsx": "frontend/src/features/social/components/profile-connections-client.tsx",
+    "frontend/src/components/profile-list-row.tsx": "frontend/src/features/social/components/profile-list-row.tsx",
+    "frontend/src/components/nest-search-form.tsx": "frontend/src/features/social/components/nest-search-form.tsx",
+    "frontend/src/components/post-detail-client.tsx": "frontend/src/composition/screens/post-detail-screen.tsx",
+    "frontend/src/features/social/public.ts": "frontend/src/features/social/components/social-post-row.tsx"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -135730,6 +135752,142 @@
           "constants": "frontend/src/features/world-packages/config/world-package.ts",
           "browser_delivery": "frontend/src/features/world-packages/utils/browser-delivery.ts",
           "preserved": "Original bodies and commands, typed preview/import/export contracts, browser URL revocation and request ordering."
+        }
+      }
+    },
+    "AR-F3-E": {
+      "scope": "Social components, response contracts, API ownership and upper Character/feed composition",
+      "files": {
+        "frontend/src/features/social/ui/active-agent-summary.tsx": "frontend/src/features/characters/components/active-agent-summary.tsx",
+        "frontend/src/features/social/ui/post-list-client.tsx": "frontend/src/composition/screens/post-list-screen.tsx",
+        "frontend/src/features/social/ui/social-post-row.tsx": "frontend/src/features/social/components/social-post-row.tsx",
+        "frontend/src/features/social/ui/social-presentation.module.css": "frontend/src/features/social/components/social-presentation.module.css",
+        "frontend/src/features/social/ui/world-character-social-profile-activity.module.css": "frontend/src/features/social/components/world-character-social-profile-activity.module.css",
+        "frontend/src/features/social/ui/world-character-social-profile-activity.tsx": "frontend/src/features/social/components/world-character-social-profile-activity.tsx",
+        "frontend/src/features/social/ui/world-social-feed.module.css": "frontend/src/features/social/components/world-social-feed.module.css",
+        "frontend/src/features/social/ui/world-social-feed.tsx": "frontend/src/features/social/components/world-social-feed.tsx",
+        "frontend/src/features/social/model/causality-presentation.ts": "frontend/src/features/social/utils/causality-presentation.ts",
+        "frontend/src/features/social/model/social-agent-contract.ts": "frontend/src/features/characters/types/feed-actor.ts",
+        "frontend/src/features/social/model/social-feed-contract.ts": "frontend/src/features/social/types/social-feed-contract.ts",
+        "frontend/src/features/social/model/social-presentation-contract.ts": "frontend/src/features/social/types/social-presentation-contract.ts",
+        "frontend/src/features/social/model/social-write-contract.ts": "frontend/src/features/social/types/social-write-contract.ts",
+        "frontend/src/features/social/model/world-character-social-profile-contract.ts": "frontend/src/features/social/types/world-character-social-profile-contract.ts",
+        "frontend/src/features/social/api/social-agent-client.ts": "frontend/src/features/characters/api/feed-actor.ts",
+        "frontend/src/components/notifications-client.tsx": "frontend/src/features/social/components/notifications-client.tsx",
+        "frontend/src/components/search-results-client.tsx": "frontend/src/features/social/components/search-results-client.tsx",
+        "frontend/src/components/profile-connections-client.tsx": "frontend/src/features/social/components/profile-connections-client.tsx",
+        "frontend/src/components/profile-list-row.tsx": "frontend/src/features/social/components/profile-list-row.tsx",
+        "frontend/src/components/nest-search-form.tsx": "frontend/src/features/social/components/nest-search-form.tsx",
+        "frontend/src/components/post-detail-client.tsx": "frontend/src/composition/screens/post-detail-screen.tsx"
+      },
+      "status": "IMPLEMENTED - isolated validation",
+      "source_contract_consumers": [
+        "backend/tests/test_l2_5_creator_studio_shell_contract.py",
+        "backend/tests/test_l3_er5_tauri_product_shell_contract.py",
+        "scripts/ci/generate_p8_l_e_world_social_chat_entry_inventory.py"
+      ],
+      "frontend_retirements": {
+        "frontend/src/features/social/public.ts": {
+          "reason": "All actual consumers now resolve to feature implementation or upper screen. No external published module contract.",
+          "export_destinations": {
+            "deleteSocialPost": "frontend/src/features/social/api/social-feed-client.ts",
+            "getSocialPostThread": "frontend/src/features/social/api/social-feed-client.ts",
+            "listCharacterFollowingSocialFeed": "frontend/src/features/social/api/social-feed-client.ts",
+            "listFollowingSocialFeed": "frontend/src/features/social/api/social-feed-client.ts",
+            "listSocialFeed": "frontend/src/features/social/api/social-feed-client.ts",
+            "reportSocialPost": "frontend/src/features/social/api/social-feed-client.ts",
+            "getAgentActivityMaintenance": "frontend/src/features/characters/api/feed-actor.ts",
+            "getAgentFeedCue": "frontend/src/features/characters/api/feed-actor.ts",
+            "giveAgentFeedCue": "frontend/src/features/characters/api/feed-actor.ts",
+            "listAgents": "frontend/src/features/characters/api/feed-actor.ts",
+            "createOwnerManualPost": "frontend/src/features/social/api/social-write-client.ts",
+            "createOwnerManualReply": "frontend/src/features/social/api/social-write-client.ts",
+            "getManualSocialFeed": "frontend/src/features/social/api/social-write-client.ts",
+            "getManualSocialPostThread": "frontend/src/features/social/api/social-write-client.ts",
+            "SocialWriteApiError": "frontend/src/features/social/api/social-write-client.ts",
+            "getWorldCharacterSocialProfile": "frontend/src/features/social/api/world-character-social-profile-client.ts",
+            "WorldCharacterSocialProfileApiError": "frontend/src/features/social/api/world-character-social-profile-client.ts",
+            "FeedContentFilter": "frontend/src/features/social/types/social-feed-contract.ts",
+            "FeedPage": "frontend/src/features/social/types/social-feed-contract.ts",
+            "MentionedCharacterRef": "frontend/src/features/social/types/social-feed-contract.ts",
+            "PostDetail": "frontend/src/features/social/types/social-feed-contract.ts",
+            "PostMediaRead": "frontend/src/features/social/types/social-feed-contract.ts",
+            "PostReference": "frontend/src/features/social/types/social-feed-contract.ts",
+            "PostReportRead": "frontend/src/features/social/types/social-feed-contract.ts",
+            "PostReportReason": "frontend/src/features/social/types/social-feed-contract.ts",
+            "PostSummary": "frontend/src/features/social/types/social-feed-contract.ts",
+            "PostThreadRead": "frontend/src/features/social/types/social-feed-contract.ts",
+            "AgentActivityMaintenanceRead": "frontend/src/features/characters/types/feed-actor.ts",
+            "AgentDetailRead": "frontend/src/features/characters/types/feed-actor.ts",
+            "AgentFeedCueRead": "frontend/src/features/characters/types/feed-actor.ts",
+            "ManualSocialFeedRead": "frontend/src/features/social/types/social-write-contract.ts",
+            "ManualSocialPostRead": "frontend/src/features/social/types/social-write-contract.ts",
+            "ManualSocialWriteRead": "frontend/src/features/social/types/social-write-contract.ts",
+            "SocialOwnerActor": "frontend/src/features/social/types/social-write-contract.ts",
+            "parseWorldCharacterSocialProfileTab": "frontend/src/features/social/utils/world-character-social-profile.ts",
+            "WorldCharacterSocialProfileCounts": "frontend/src/features/social/types/world-character-social-profile-contract.ts",
+            "WorldCharacterSocialProfilePost": "frontend/src/features/social/types/world-character-social-profile-contract.ts",
+            "WorldCharacterSocialProfileRead": "frontend/src/features/social/types/world-character-social-profile-contract.ts",
+            "WorldCharacterSocialProfileTab": "frontend/src/features/social/types/world-character-social-profile-contract.ts",
+            "SocialPostActionKind": "frontend/src/features/social/types/social-presentation-contract.ts",
+            "SocialPostActionPresentation": "frontend/src/features/social/types/social-presentation-contract.ts",
+            "SocialPostPresentation": "frontend/src/features/social/types/social-presentation-contract.ts",
+            "presentSocialCausality": "frontend/src/features/social/utils/causality-presentation.ts",
+            "SocialCausalityPhase": "frontend/src/features/social/utils/causality-presentation.ts",
+            "SocialCausalityPresentation": "frontend/src/features/social/utils/causality-presentation.ts",
+            "PostListClient": "frontend/src/composition/screens/post-list-screen.tsx",
+            "ActiveAgentSummary": "frontend/src/features/characters/components/active-agent-summary.tsx",
+            "formatAgentStatus": "frontend/src/features/characters/components/active-agent-summary.tsx",
+            "getActiveAgentAvatarRingClassName": "frontend/src/features/characters/components/active-agent-summary.tsx",
+            "getActiveAgentProgressClassName": "frontend/src/features/characters/components/active-agent-summary.tsx",
+            "getActiveAgentStatusClassName": "frontend/src/features/characters/components/active-agent-summary.tsx",
+            "getRuntimeNotice": "frontend/src/features/characters/components/active-agent-summary.tsx",
+            "isActiveAgentResting": "frontend/src/features/characters/components/active-agent-summary.tsx",
+            "selectActiveAgent": "frontend/src/features/characters/components/active-agent-summary.tsx",
+            "ExpandablePostText": "frontend/src/components/content/expandable-post-text.tsx",
+            "MentionedText": "frontend/src/components/content/mentioned-text.tsx",
+            "PostMediaGrid": "frontend/src/components/media/post-media-grid.tsx",
+            "SocialPostActionStrip": "frontend/src/features/social/components/social-post-row.tsx",
+            "SocialPostRow": "frontend/src/features/social/components/social-post-row.tsx",
+            "SocialPostRowProps": "frontend/src/features/social/components/social-post-row.tsx",
+            "SocialPostRowVariant": "frontend/src/features/social/components/social-post-row.tsx",
+            "shouldOpenPostFromCardClick": "frontend/src/utils/post-card-navigation.ts",
+            "shouldOpenPostFromCardKeyDown": "frontend/src/utils/post-card-navigation.ts",
+            "WorldSocialFeed": "frontend/src/features/social/components/world-social-feed.tsx",
+            "WorldCharacterSocialProfileActivity": "frontend/src/features/social/components/world-character-social-profile-activity.tsx",
+            "getInitialSocialFeed": "frontend/src/features/social/api/social-feed-server.ts"
+          },
+          "verification": [
+            "All original named exports resolve to current declarations",
+            "No remaining active facade consumers",
+            "Unchanged web and static social scenarios"
+          ]
+        }
+      },
+      "frontend_extractions": {
+        "frontend/src/lib/community.ts": {
+          "api": "frontend/src/features/social/api/community.ts",
+          "types": "frontend/src/features/social/types/community.ts",
+          "preserved": "27 endpoint functions and 27 response/options shapes; original request bodies unchanged"
+        },
+        "frontend/src/features/social/api/social-feed-client.ts": {
+          "transport": "frontend/src/lib/http/social-request.ts",
+          "preserved": "Same auth clearing, malformed JSON success errors, string detail and HTTP fallback behavior; reused by Character feed actor requests"
+        },
+        "frontend/src/features/social/model/world-character-social-profile-contract.ts": {
+          "types": "frontend/src/features/social/types/world-character-social-profile-contract.ts",
+          "parser": "frontend/src/features/social/utils/world-character-social-profile.ts"
+        },
+        "frontend/src/features/social/ui/post-list-client.tsx": {
+          "screen": "frontend/src/composition/screens/post-list-screen.tsx",
+          "social": "frontend/src/features/social/components/post-feed-parts.tsx",
+          "character": "frontend/src/features/characters/components/feed-activity-parts.tsx",
+          "preserved": "Original function bodies, state/effect ordering, callbacks, scope and DOM"
+        },
+        "frontend/src/components/post-detail-client.tsx": {
+          "screen": "frontend/src/composition/screens/post-detail-screen.tsx",
+          "social": "frontend/src/features/social/components/post-detail-parts.tsx",
+          "preserved": "Original thread tree, menus, mutations, cancellation and scope checks"
         }
       }
     }

@@ -1,13 +1,9 @@
 import Link from "next/link";
 
-import {
-  apiInstantTimestamp,
-  formatDate,
-  formatHandle,
-  ProfileAvatar,
-} from "@/shared/ui/public";
+import { apiInstantTimestamp, formatDate, formatHandle } from "@/utils/profile-presentation";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 
-import type { AgentDetailRead } from "../model/social-agent-contract";
+import type { AgentDetailRead } from "@/features/characters/types/feed-actor";
 
 export function ActiveAgentSummary({ agent }: { agent: AgentDetailRead }) {
   const runtimeNotice = getRuntimeNotice(agent);

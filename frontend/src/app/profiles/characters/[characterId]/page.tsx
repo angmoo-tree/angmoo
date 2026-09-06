@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { AppShell } from "@/composition/shells/app-shell";
 import { CharacterProfileClient } from "@/composition/screens/character-profile-screen";
 import { fetchBackendJson } from "@/lib/server/backend";
-import type { FeedPage, ProfileFeedTab, ProfileRead } from "@/lib/community";
+import type { FeedPage, ProfileFeedTab, ProfileRead } from "@/features/social/types/community";
 import { NO_INDEX_FOLLOW_ROBOTS } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";

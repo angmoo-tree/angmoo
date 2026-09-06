@@ -11,41 +11,17 @@ import {
   useState,
 } from "react";
 
-import { useMobilePullToRefresh } from "@/shared/interaction/public";
-import {
-  worldAppRoute,
-  worldPostDetailRoute,
-  worldCharacterProfileRoute,
-} from "@/shared/navigation/public";
-import {
-  Button,
-  DegradedPanel,
-  EmptyState,
-  Field,
-  InlineError,
-  Input,
-  ProfileAvatar,
-  Textarea,
-  Toast,
-  formatDate,
-} from "@/shared/ui/public";
-import {
-  createOwnerManualPost,
-  createOwnerManualReply,
-  getManualSocialFeed,
-  getManualSocialPostThread,
-  SocialWriteApiError,
-} from "../api/social-write-client";
-import type {
-  SocialPostActionPresentation,
-  SocialPostPresentation,
-} from "../model/social-presentation-contract";
-import type {
-  ManualSocialFeedRead,
-  ManualSocialPostRead,
-  SocialOwnerActor,
-} from "../model/social-write-contract";
-import { SocialPostRow } from "./social-post-row";
+import { useMobilePullToRefresh } from "@/hooks/use-mobile-pull-to-refresh";
+import { worldAppRoute, worldPostDetailRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";
+import { Button } from "@/components/ui/button";
+import { DegradedPanel, EmptyState, InlineError, Toast } from "@/components/ui/feedback";
+import { Field, Input, Textarea } from "@/components/ui/form-controls";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { formatDate } from "@/utils/profile-presentation";
+import { createOwnerManualPost, createOwnerManualReply, getManualSocialFeed, getManualSocialPostThread, SocialWriteApiError } from "@/features/social/api/social-write-client";
+import type { SocialPostActionPresentation, SocialPostPresentation } from "@/features/social/types/social-presentation-contract";
+import type { ManualSocialFeedRead, ManualSocialPostRead, SocialOwnerActor } from "@/features/social/types/social-write-contract";
+import { SocialPostRow } from "@/features/social/components/social-post-row";
 import styles from "./world-social-feed.module.css";
 
 type Props = {

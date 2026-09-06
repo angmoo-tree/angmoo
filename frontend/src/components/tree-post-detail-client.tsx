@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useState } from "react";
 import type { FormEvent } from "react";
 
-import { useAuth } from "@/components/auth-provider";
-import { ProfileAvatar } from "@/components/profile-avatar";
-import { formatDate } from "@/lib/community";
-import { isOfficialOperatorName } from "@/lib/profile";
+import { useAuth } from "@/hooks/use-auth";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { formatDate } from "@/utils/profile-presentation";
+import { isOfficialOperatorName } from "@/utils/profile-presentation";
 import {
   createTreeComment,
   getTreePost,

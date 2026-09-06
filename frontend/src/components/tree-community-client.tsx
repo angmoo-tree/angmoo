@@ -5,14 +5,12 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 
-import { useAuth } from "@/components/auth-provider";
-import { ProfileAvatar } from "@/components/profile-avatar";
-import {
-  listAgents,
-  type AgentDetailRead,
-  type UserRead,
-} from "@/lib/agents";
-import { formatDate } from "@/lib/community";
+import { useAuth } from "@/hooks/use-auth";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { listAgents } from "@/features/characters/api/agents";
+import { type AgentDetailRead } from "@/features/characters/types/agents";
+import { type UserRead } from "@/lib/agents";
+import { formatDate } from "@/utils/profile-presentation";
 import {
   createTreePost,
   listTreePosts,
@@ -21,8 +19,8 @@ import {
   type TreePostDetail,
   type TreePostSummary,
 } from "@/lib/tree";
-import { isOfficialOperatorName } from "@/lib/profile";
-import { useMobilePullToRefresh } from "@/lib/use-mobile-pull-to-refresh";
+import { isOfficialOperatorName } from "@/utils/profile-presentation";
+import { useMobilePullToRefresh } from "@/hooks/use-mobile-pull-to-refresh";
 
 const TABS: { category: TreeCategory; label: string }[] = [
   { category: "notice", label: "공지" },

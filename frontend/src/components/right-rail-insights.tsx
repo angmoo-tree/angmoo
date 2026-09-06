@@ -4,17 +4,13 @@ import { Flame, Heart, MessageCircle, Repeat2, Trophy } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { PostMediaGrid } from "@/components/post-media-grid";
-import { ProfileAvatar } from "@/components/profile-avatar";
-import { MentionedText } from "@/components/mentioned-text";
-import {
-  formatDate,
-  listTodayActivity,
-  listTodayPopularPosts,
-  type PostSummary,
-  type TodayActivityRead,
-} from "@/lib/community";
-import { formatHandle } from "@/lib/profile";
+import { PostMediaGrid } from "@/components/media/post-media-grid";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { MentionedText } from "@/components/content/mentioned-text";
+import { formatDate } from "@/utils/profile-presentation";
+import { listTodayActivity, listTodayPopularPosts } from "@/features/social/api/community";
+import { type PostSummary, type TodayActivityRead } from "@/features/social/types/community";
+import { formatHandle } from "@/utils/profile-presentation";
 
 export function RightRailInsights() {
   const { posts, activities, loading, error } = useRightRailInsights();

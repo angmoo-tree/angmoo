@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useState } from "react";
 
-import { ProfileAvatar } from "@/components/profile-avatar";
-import { followProfile, type ProfileListItem } from "@/lib/community";
-import { formatHandle } from "@/lib/profile";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { followProfile } from "@/features/social/api/community";
+import { type ProfileListItem } from "@/features/social/types/community";
+import { formatHandle } from "@/utils/profile-presentation";
 
 type ProfileListRowProps = {
   item: ProfileListItem;

@@ -71,13 +71,13 @@
     "current_candidates": [
       "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx",
       "frontend/src/app/feed-page.tsx",
-      "frontend/src/components/post-detail-client.tsx",
+      "frontend/src/composition/screens/post-detail-screen.tsx",
       "frontend/src/features/relationships/api/relationship-graph.ts",
       "frontend/src/features/relationships/model/relationship-graph.ts",
       "frontend/src/features/relationships/public.ts",
       "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
-      "frontend/src/features/social/ui/post-list-client.tsx",
-      "frontend/src/features/social/ui/world-social-feed.tsx",
+      "frontend/src/composition/screens/post-list-screen.tsx",
+      "frontend/src/features/social/components/world-social-feed.tsx",
       "frontend/src/lib/community.ts"
     ],
     "current_route_globs": [
@@ -93,7 +93,7 @@
         "relationship_query_failed",
         "rebuilding"
       ],
-      "frontend/src/features/social/ui/world-social-feed.tsx": [
+      "frontend/src/features/social/components/world-social-feed.tsx": [
         "post_not_in_world",
         "reply_target_unavailable",
         "sqlite_busy_retry_exhausted"

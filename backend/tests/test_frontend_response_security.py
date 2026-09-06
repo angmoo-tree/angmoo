@@ -45,7 +45,7 @@ def test_legacy_unbounded_character_state_proxy_is_absent() -> None:
         / "route.ts"
     )
     community_client = (
-        REPO_ROOT / "frontend" / "src" / "lib" / "community.ts"
+        REPO_ROOT / "frontend/src/features/social/api/community.ts"
     ).read_text(encoding="utf-8")
 
     community_client += (REPO_ROOT / "frontend/src/lib/http/community-request.ts").read_text(encoding="utf-8")

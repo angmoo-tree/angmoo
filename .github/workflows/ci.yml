@@ -110,6 +110,9 @@ jobs:
       - name: Character request and session preservation
         run: node scripts/test-character-session.mjs
         working-directory: frontend
+      - name: Social endpoint and transport preservation
+        run: node scripts/test-social-requests.mjs
+        working-directory: frontend
       - name: Install Chromium for product-shell smoke
         shell: bash
         env:

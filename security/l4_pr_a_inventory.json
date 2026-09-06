@@ -2466,7 +2466,7 @@
       "policy_allowed_cycle_count": 0
     },
     "frontend": {
-      "candidate_consumer_edge_count": 22,
+      "candidate_consumer_edge_count": 10,
       "candidate_consumers": {
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts": [],
         "frontend/src/app/api/community/posts/[postId]/comments/route.ts": [],
@@ -2474,9 +2474,12 @@
         "frontend/src/app/api/community/posts/route.ts": [],
         "frontend/src/app/characters/[characterId]/worlds/[worldId]/relationship-graph/page.tsx": [],
         "frontend/src/app/feed-page.tsx": [],
-        "frontend/src/components/post-detail-client.tsx": [
+        "frontend/src/composition/screens/post-detail-screen.tsx": [
           "frontend/src/app/posts/[postId]/page.tsx",
           "frontend/src/composition/static-product-router.tsx"
+        ],
+        "frontend/src/composition/screens/post-list-screen.tsx": [
+          "frontend/src/composition/screens/post-feed-screen.tsx"
         ],
         "frontend/src/features/relationships/api/relationship-graph.ts": [
           "frontend/src/features/relationships/ui/relationship-graph-client.tsx"
@@ -2490,23 +2493,10 @@
           "frontend/src/composition/static-product-router.tsx"
         ],
         "frontend/src/features/relationships/ui/relationship-graph-client.tsx": [],
-        "frontend/src/features/social/ui/post-list-client.tsx": [],
-        "frontend/src/features/social/ui/world-social-feed.tsx": [],
+        "frontend/src/features/social/components/world-social-feed.tsx": [
+          "frontend/src/composition/screens/world-app.tsx"
+        ],
         "frontend/src/lib/community.ts": [
-          "frontend/src/app/profiles/characters/[characterId]/follows/page.tsx",
-          "frontend/src/app/profiles/characters/[characterId]/page.tsx",
-          "frontend/src/app/profiles/users/[userId]/follows/page.tsx",
-          "frontend/src/app/profiles/users/[userId]/page.tsx",
-          "frontend/src/app/search/page.tsx",
-          "frontend/src/components/notifications-client.tsx",
-          "frontend/src/components/profile-connections-client.tsx",
-          "frontend/src/components/profile-list-row.tsx",
-          "frontend/src/components/right-rail-insights.tsx",
-          "frontend/src/components/search-results-client.tsx",
-          "frontend/src/components/tree-community-client.tsx",
-          "frontend/src/components/tree-post-detail-client.tsx",
-          "frontend/src/composition/screens/agent-detail-screen.tsx",
-          "frontend/src/composition/screens/character-profile-screen.tsx",
           "frontend/src/lib/agents.ts"
         ]
       },
@@ -2572,26 +2562,54 @@
             "@/composition/screens/post-feed-screen",
             "@/composition/shells/app-shell",
             "@/features/social/api/social-feed-server",
-            "@/features/social/public"
+            "@/features/social/types/social-feed-contract"
           ],
           "path": "frontend/src/app/feed-page.tsx",
-          "sha256": "6b037f6dd9a932a95462d337a937abb5b6ea9f1c23f73dacd13ca29ff7b75f0a"
+          "sha256": "f16b776956317d3c4414809e53faec5a695fa894827b93daa2703e08dcc68118"
         },
         {
           "exports": [
             "PostDetailClient"
           ],
           "imports": [
-            "@/features/social/public",
-            "@/shared/auth/public",
-            "@/shared/navigation/public",
-            "@/shared/ui/public",
+            "@/features/characters/api/feed-actor",
+            "@/features/social/api/social-feed-client",
+            "@/features/social/components/post-detail-parts",
+            "@/features/social/components/social-post-row",
+            "@/features/social/types/social-feed-contract",
+            "@/hooks/use-runtime-navigation",
+            "@/lib/auth/browser-session",
+            "@/utils/profile-presentation",
             "lucide-react",
             "next/link",
             "react"
           ],
-          "path": "frontend/src/components/post-detail-client.tsx",
-          "sha256": "0cf68577fc0b6c5347feff1eee1e12abba679889fb22df15516b9ae3a60a4c92"
+          "path": "frontend/src/composition/screens/post-detail-screen.tsx",
+          "sha256": "f30920e829e8706942a1a1f0727a4ecf70066657c845079b51cf8460400857d2"
+        },
+        {
+          "exports": [
+            "PostListClient"
+          ],
+          "imports": [
+            "@/features/characters/api/feed-actor",
+            "@/features/characters/components/active-agent-summary",
+            "@/features/characters/components/feed-activity-parts",
+            "@/features/characters/types/feed-actor",
+            "@/features/social/api/social-feed-client",
+            "@/features/social/components/post-feed-parts",
+            "@/features/social/components/social-post-row",
+            "@/features/social/types/social-feed-contract",
+            "@/hooks/use-mobile-pull-to-refresh",
+            "@/lib/auth/browser-session",
+            "@/utils/scroll-viewport",
+            "lucide-react",
+            "next/image",
+            "next/link",
+            "react"
+          ],
+          "path": "frontend/src/composition/screens/post-list-screen.tsx",
+          "sha256": "95b113c06f747b0db1024d14192a78123a14a5baefb261ec89329e811f5974e1"
         },
         {
           "exports": [
@@ -2648,114 +2666,40 @@
         },
         {
           "exports": [
-            "PostListClient"
-          ],
-          "imports": [
-            "../../../components/content/mentioned-text",
-            "../../../components/media/post-media-grid",
-            "../api/social-agent-client",
-            "../api/social-feed-client",
-            "../model/social-agent-contract",
-            "../model/social-feed-contract",
-            "./active-agent-summary",
-            "./social-post-row",
-            "@/shared/auth/public",
-            "@/shared/interaction/public",
-            "@/shared/ui/public",
-            "lucide-react",
-            "next/image",
-            "next/link",
-            "react",
-            "react-dom"
-          ],
-          "path": "frontend/src/features/social/ui/post-list-client.tsx",
-          "sha256": "6a993bf7974ca71d39efeb0d869e41632cde081db5fac6f4fd645b2947f60459"
-        },
-        {
-          "exports": [
             "WorldSocialFeed"
           ],
           "imports": [
-            "../api/social-write-client",
-            "../model/social-presentation-contract",
-            "../model/social-write-contract",
-            "./social-post-row",
             "./world-social-feed.module.css",
-            "@/shared/interaction/public",
-            "@/shared/navigation/public",
-            "@/shared/ui/public",
+            "@/components/ui/button",
+            "@/components/ui/feedback",
+            "@/components/ui/form-controls",
+            "@/components/ui/profile-avatar",
+            "@/features/social/api/social-write-client",
+            "@/features/social/components/social-post-row",
+            "@/features/social/types/social-presentation-contract",
+            "@/features/social/types/social-write-contract",
+            "@/hooks/use-mobile-pull-to-refresh",
+            "@/lib/navigation/product-routes",
+            "@/utils/profile-presentation",
             "lucide-react",
             "next/link",
             "react"
           ],
-          "path": "frontend/src/features/social/ui/world-social-feed.tsx",
-          "sha256": "cdce9e395a29c64802f3bafb172985db67c1b49219438f1524852b0687e25e8c"
+          "path": "frontend/src/features/social/components/world-social-feed.tsx",
+          "sha256": "6b8fd525480303cd7c5f02c0c362e8cd2e844148c6a754683c97bc2442ebd506"
         },
         {
-          "exports": [
-            "CharacterSearchResult",
-            "CommentRead",
-            "FeedContentFilter",
-            "FeedPage",
-            "FollowRead",
-            "FollowStatusRead",
-            "MentionedCharacterRef",
-            "NotificationPage",
-            "NotificationRead",
-            "PostDetail",
-            "PostInfoKind",
-            "PostInfoMetadata",
-            "PostMediaRead",
-            "PostReference",
-            "PostReportRead",
-            "PostReportReason",
-            "PostSummary",
-            "PostThreadRead",
-            "ProfileConnectionTab",
-            "ProfileFeedTab",
-            "ProfileListItem",
-            "ProfileListPage",
-            "ProfileRead",
-            "ProfileRef",
-            "SearchResults",
-            "TodayActivityRead",
-            "createPost",
-            "createQuote",
-            "createReply",
-            "deletePost",
-            "followProfile",
-            "getCharacterProfile",
-            "getCharacterProfileConnections",
-            "getCharacterProfileFeed",
-            "getFollowStatus",
-            "getPost",
-            "getPostThread",
-            "getUserProfile",
-            "getUserProfileConnections",
-            "getUserProfileFeed",
-            "likePost",
-            "listCharacterFollowingFeed",
-            "listFeed",
-            "listFollowingFeed",
-            "listNotifications",
-            "listPosts",
-            "listTodayActivity",
-            "listTodayPopularPosts",
-            "markNotificationRead",
-            "reportPost",
-            "repostPost",
-            "searchNest",
-            "unfollowProfile"
-          ],
+          "exports": [],
           "imports": [
             "@/features/characters/api/activity",
             "@/features/characters/types/activity",
             "@/features/characters/types/character",
-            "@/lib/http/community-request",
+            "@/features/social/api/community",
+            "@/features/social/types/community",
             "@/shared/ui/public"
           ],
           "path": "frontend/src/lib/community.ts",
-          "sha256": "fcad4cf7709527375353c5e57c9a2f9c9ee749649deb54f18590722b56758e69"
+          "sha256": "301c7f4887a92299ef172e51158203a848c3f0482efb6922638de2ee0fb32693"
         }
       ],
       "planned_feature_allowlist": [
@@ -2772,7 +2716,6 @@
           "frontend/src/features/pwa-shell/public.ts",
           "frontend/src/features/relationships/public.ts",
           "frontend/src/features/runtime-status/public.ts",
-          "frontend/src/features/social/public.ts",
           "frontend/src/features/ui-foundation/public.ts"
         ],
         "shared": [

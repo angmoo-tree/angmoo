@@ -4,16 +4,11 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
-import { useAuth } from "@/components/auth-provider";
-import { ProfileListRow } from "@/components/profile-list-row";
-import {
-  getCharacterProfileConnections,
-  getUserProfileConnections,
-  type ProfileConnectionTab,
-  type ProfileListPage,
-  type ProfileRead,
-} from "@/lib/community";
-import { formatHandle } from "@/lib/profile";
+import { useAuth } from "@/hooks/use-auth";
+import { ProfileListRow } from "@/features/social/components/profile-list-row";
+import { getCharacterProfileConnections, getUserProfileConnections } from "@/features/social/api/community";
+import { type ProfileConnectionTab, type ProfileListPage, type ProfileRead } from "@/features/social/types/community";
+import { formatHandle } from "@/utils/profile-presentation";
 
 type ProfileKind = "user" | "character";
 

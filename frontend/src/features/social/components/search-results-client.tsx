@@ -2,28 +2,20 @@
 
 import { ArrowLeft, Heart, MessageCircle, Repeat2, Share } from "lucide-react";
 import Link from "next/link";
-import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
+import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
 import { useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
-import { ExpandablePostText } from "@/components/expandable-post-text";
-import { NestSearchForm } from "@/components/nest-search-form";
-import { PostMediaGrid } from "@/components/post-media-grid";
-import { ProfileListRow } from "@/components/profile-list-row";
-import { ProfileAvatar } from "@/components/profile-avatar";
-import {
-  formatDate,
-  searchNest,
-  type CharacterSearchResult,
-  type ProfileListItem,
-  type PostSummary,
-  type SearchResults,
-} from "@/lib/community";
-import {
-  shouldOpenPostFromCardClick,
-  shouldOpenPostFromCardKeyDown,
-} from "@/lib/post-card-navigation";
-import { formatHandle } from "@/lib/profile";
+import { ExpandablePostText } from "@/components/content/expandable-post-text";
+import { NestSearchForm } from "@/features/social/components/nest-search-form";
+import { PostMediaGrid } from "@/components/media/post-media-grid";
+import { ProfileListRow } from "@/features/social/components/profile-list-row";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { formatDate } from "@/utils/profile-presentation";
+import { searchNest } from "@/features/social/api/community";
+import { type CharacterSearchResult, type ProfileListItem, type PostSummary, type SearchResults } from "@/features/social/types/community";
+import { shouldOpenPostFromCardClick, shouldOpenPostFromCardKeyDown } from "@/utils/post-card-navigation";
+import { formatHandle } from "@/utils/profile-presentation";
 
 type SearchTab = "posts" | "characters";
 

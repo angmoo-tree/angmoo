@@ -1,1 +1,1 @@
-export { PostMediaGrid } from "@/features/social/public";
+export { PostMediaGrid } from "@/components/media/post-media-grid";

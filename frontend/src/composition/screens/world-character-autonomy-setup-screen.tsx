@@ -5,7 +5,7 @@ import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useAuth } from "@/hooks/use-auth";
-import { presentSocialCausality } from "@/features/social/public";
+import { presentSocialCausality } from "@/features/social/utils/causality-presentation";
 import { worldPostDetailRoute } from "@/lib/navigation/product-routes";
 import { getAgent } from "@/features/characters/api/agents";
 import { type AgentDetailRead } from "@/features/characters/types/agents";
