@@ -150,7 +150,12 @@ protects files/consumer oracles; actual browser/native runs prove behavior.
   current product behavior tests or replace their fixtures.
 - Source introduction `322130952465bbe350e0a6b63dbb21d0c57eed2f` adds four source
   files and ten retirement regression nodes; its append-only record is retained.
-  Full preservation gate and CI must pass before marking this stage complete.
+  Full preservation gate PASS: 2752 protected/current nodes and 37 contracts.
+  CI and sequential integration remain required before stage completion.
+- PR #294 security scanning identified two generic-key matches in the append-only
+  source ledger. Both are exact Git blob IDs for `use-auth.ts` and `auth-context.ts`,
+  independently matched to source commit `322130952465bbe350e0a6b63dbb21d0c57eed2f`.
+  Allow only those exact lines in that ledger path; retain all other scanning.
 
 ## Temporary-file cleanup
 
