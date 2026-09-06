@@ -24,20 +24,11 @@ from app.domains.chat.domain.workflow_recipe import (
     WorkflowAxis,
     WorkflowDependencyBinding,
 )
-from app.domains.relationships.public import (
-    GraphPlanContractError,
-    GraphPlanExecutionContext,
-    GraphPlanExecutionResult,
-    GraphPlannerEntity,
-    GraphPlannerOutputError,
-    GraphPlannerProviderPort,
-    GraphPlannerRelationship,
-    GraphPlannerRequest,
-    GraphRecallScope,
-    GraphRetrievalPlan,
-    GraphRetrievalPlanExecutor,
-    GraphRetrievalPlanValidator,
-)
+from app.domains.relationships.contracts.graph_plan import GraphPlanContractError, GraphRetrievalPlan
+from app.domains.relationships.contracts.graph_execution import GraphPlanExecutionContext, GraphPlanExecutionResult
+from app.domains.relationships.contracts.graph_planner import GraphPlannerEntity, GraphPlannerOutputError, GraphPlannerProviderPort, GraphPlannerRelationship, GraphPlannerRequest
+from app.domains.relationships.contracts.graph_recall import GraphRecallScope
+from app.domains.relationships.service.graph_planning import GraphRetrievalPlanExecutor, GraphRetrievalPlanValidator
 
 
 @dataclass(frozen=True, slots=True)

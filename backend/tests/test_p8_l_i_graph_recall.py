@@ -1,4 +1,7 @@
 from __future__ import annotations
+import app.domains.relationships.contracts.graph_read as relationships_contracts_graph_read
+import app.domains.relationships.contracts.graph_recall as relationships_contracts_graph_recall
+import app.domains.relationships.service.graph_recall as relationships_service_graph_recall
 
 from dataclasses import replace
 from datetime import UTC, datetime
@@ -7,7 +10,7 @@ import pytest
 from sqlalchemy.orm import Session
 
 from app.config import Settings
-from app.domains.relationships import public as relationships
+
 from app.domains.relationships.exceptions import (GraphReadBackendError)
 from app.domains.relationships.contracts.graph_query import (
     EvidencePostFacts,
@@ -33,8 +36,8 @@ COUNTERPART_ID = "wc-counterpart"
 NEIGHBOR_ID = "wc-neighbor"
 
 
-def _scope() -> relationships.GraphRecallScope:
-    return relationships.GraphRecallScope(
+def _scope() -> relationships_contracts_graph_recall.GraphRecallScope:
+    return relationships_contracts_graph_recall.GraphRecallScope(
         owner_id=OWNER_ID,
         world_id=WORLD_ID,
         subject_world_character_id=SUBJECT_ID,
@@ -124,7 +127,7 @@ class FakeGraphRecallGateway:
         self.evidence_by_id: dict[str, GraphEvidenceCandidate] = {}
         self.invalid_nodes: set[str] = set()
         self.blocked_nodes: set[str] = set()
-        self.counts = relationships.GraphProjectionCounts(
+        self.counts = relationships_contracts_graph_read.GraphProjectionCounts(
             pending=0,
             processing=0,
             oldest_pending_at=None,
@@ -137,7 +140,7 @@ class FakeGraphRecallGateway:
         self.close_count = 0
 
     def graph_recall_scope_access(self, *, scope):
-        return relationships.GraphRecallScopeAccess(
+        return relationships_contracts_graph_recall.GraphRecallScopeAccess(
             subject_exists=True,
             subject_world_id=scope.world_id,
             character_deleted=False,
@@ -291,44 +294,49 @@ def _evidence(event_id: str) -> GraphEvidenceCandidate:
 
 
 def test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps() -> None:
+    import app.domains.relationships.contracts.graph_recall_gateway as relationships
     assert set(relationships.GRAPH_RECALL_PRIMITIVE_REGISTRY) == set(
         relationships.GraphRecallOperation
     )
+    import app.domains.relationships.contracts.graph_recall_gateway as relationships
     assert len(relationships.GRAPH_RECALL_PRIMITIVE_REGISTRY) == 6
-    validator = relationships.GraphRecallValidator()
+    validator = relationships_service_graph_recall.GraphRecallValidator()
+    import app.domains.relationships.exceptions as relationships
     with pytest.raises(
         relationships.RelationshipGraphRequestError,
         match="counterpart_world_character_required",
     ):
         validator.validate(
-            relationships.GraphRecallQuery(
+            relationships_contracts_graph_recall.GraphRecallQuery(
                 operation=(
-                    relationships.GraphRecallOperation.DIRECT_RELATIONSHIP
+                    relationships_contracts_graph_recall.GraphRecallOperation.DIRECT_RELATIONSHIP
                 ),
                 scope=_scope(),
             )
         )
+    import app.domains.relationships.exceptions as relationships
     with pytest.raises(
         relationships.RelationshipGraphRequestError,
         match="limit_invalid",
     ):
         validator.validate(
-            relationships.GraphRecallQuery(
+            relationships_contracts_graph_recall.GraphRecallQuery(
                 operation=(
-                    relationships.GraphRecallOperation.SHARED_NEIGHBORS
+                    relationships_contracts_graph_recall.GraphRecallOperation.SHARED_NEIGHBORS
                 ),
                 scope=_scope(),
                 counterpart_world_character_id=COUNTERPART_ID,
                 limit=21,
             )
         )
+    import app.domains.relationships.exceptions as relationships
     with pytest.raises(
         relationships.RelationshipGraphRequestError,
         match="hops_invalid",
     ):
         validator.validate(
-            relationships.GraphRecallQuery(
-                operation=relationships.GraphRecallOperation.SHORTEST_PATH,
+            relationships_contracts_graph_recall.GraphRecallQuery(
+                operation=relationships_contracts_graph_recall.GraphRecallOperation.SHORTEST_PATH,
                 scope=_scope(),
                 counterpart_world_character_id=COUNTERPART_ID,
                 max_hops=4,
@@ -353,25 +361,27 @@ def test_direct_and_evidence_replace_stale_projection_and_filter_unobserved() ->
     gateway.evidence_by_id[canonical.last_event_id or ""] = _evidence(
         canonical.last_event_id or ""
     )
-    service = relationships.GraphRecallService(gateway)
+    service = relationships_service_graph_recall.GraphRecallService(gateway)
 
     direct = service.execute(
-        relationships.GraphRecallQuery(
-            operation=relationships.GraphRecallOperation.DIRECT_RELATIONSHIP,
+        relationships_contracts_graph_recall.GraphRecallQuery(
+            operation=relationships_contracts_graph_recall.GraphRecallOperation.DIRECT_RELATIONSHIP,
             scope=_scope(),
             counterpart_world_character_id=COUNTERPART_ID,
         ),
         repository=graph,
     )
+    import app.domains.relationships.contracts.graph_recall as relationships
     assert direct.status is relationships.GraphRecallStatus.READY
+    import app.domains.relationships.contracts.graph_recall as relationships
     assert direct.source is relationships.GraphRecallSource.GRAPH
     assert direct.relationships[0].relationship_version == 2
     assert direct.relationships[0].affinity == 9
     assert gateway.stale_edges == 1
 
     evidence = service.execute(
-        relationships.GraphRecallQuery(
-            operation=relationships.GraphRecallOperation.RELATIONSHIP_EVIDENCE,
+        relationships_contracts_graph_recall.GraphRecallQuery(
+            operation=relationships_contracts_graph_recall.GraphRecallOperation.RELATIONSHIP_EVIDENCE,
             scope=_scope(),
             counterpart_world_character_id=COUNTERPART_ID,
             limit=5,
@@ -387,8 +397,8 @@ def test_direct_and_evidence_replace_stale_projection_and_filter_unobserved() ->
         observed_by_subject=False,
     )
     unobserved = service.execute(
-        relationships.GraphRecallQuery(
-            operation=relationships.GraphRecallOperation.RELATIONSHIP_EVIDENCE,
+        relationships_contracts_graph_recall.GraphRecallQuery(
+            operation=relationships_contracts_graph_recall.GraphRecallOperation.RELATIONSHIP_EVIDENCE,
             scope=_scope(),
             counterpart_world_character_id=COUNTERPART_ID,
             limit=5,
@@ -436,14 +446,14 @@ def test_shared_path_rank_and_neighborhood_are_canonically_revalidated() -> None
         edges=(subject_neighbor, subject_counterpart),
         truncated=False,
     )
-    service = relationships.GraphRecallService(gateway)
+    service = relationships_service_graph_recall.GraphRecallService(gateway)
 
     shared = service.execute(
-        relationships.GraphRecallQuery(
-            operation=relationships.GraphRecallOperation.SHARED_NEIGHBORS,
+        relationships_contracts_graph_recall.GraphRecallQuery(
+            operation=relationships_contracts_graph_recall.GraphRecallOperation.SHARED_NEIGHBORS,
             scope=_scope(),
             counterpart_world_character_id=COUNTERPART_ID,
-            direction=relationships.GraphRecallDirection.OUTGOING,
+            direction=relationships_contracts_graph_recall.GraphRecallDirection.OUTGOING,
         ),
         repository=graph,
     )
@@ -451,11 +461,11 @@ def test_shared_path_rank_and_neighborhood_are_canonically_revalidated() -> None
     assert shared.excluded_count == 1
 
     path = service.execute(
-        relationships.GraphRecallQuery(
-            operation=relationships.GraphRecallOperation.SHORTEST_PATH,
+        relationships_contracts_graph_recall.GraphRecallQuery(
+            operation=relationships_contracts_graph_recall.GraphRecallOperation.SHORTEST_PATH,
             scope=_scope(),
             counterpart_world_character_id=COUNTERPART_ID,
-            direction=relationships.GraphRecallDirection.EITHER,
+            direction=relationships_contracts_graph_recall.GraphRecallDirection.EITHER,
             max_hops=2,
         ),
         repository=graph,
@@ -468,21 +478,21 @@ def test_shared_path_rank_and_neighborhood_are_canonically_revalidated() -> None
     )
 
     ranked = service.execute(
-        relationships.GraphRecallQuery(
+        relationships_contracts_graph_recall.GraphRecallQuery(
             operation=(
-                relationships.GraphRecallOperation.RANK_RELATED_CHARACTERS
+                relationships_contracts_graph_recall.GraphRecallOperation.RANK_RELATED_CHARACTERS
             ),
             scope=_scope(),
-            ranking=relationships.GraphRecallRanking.POSITIVE,
+            ranking=relationships_contracts_graph_recall.GraphRecallRanking.POSITIVE,
         ),
         repository=graph,
     )
     assert ranked.world_character_ids == (COUNTERPART_ID,)
 
     neighborhood = service.execute(
-        relationships.GraphRecallQuery(
+        relationships_contracts_graph_recall.GraphRecallQuery(
             operation=(
-                relationships.GraphRecallOperation.RELATIONSHIP_NEIGHBORHOOD
+                relationships_contracts_graph_recall.GraphRecallOperation.RELATIONSHIP_NEIGHBORHOOD
             ),
             scope=_scope(),
         ),
@@ -499,18 +509,18 @@ def test_shared_path_rank_and_neighborhood_are_canonically_revalidated() -> None
     ("operation", "expected_source", "expected_count"),
     (
         (
-            relationships.GraphRecallOperation.DIRECT_RELATIONSHIP,
-            relationships.GraphRecallSource.CANONICAL_FALLBACK,
+            relationships_contracts_graph_recall.GraphRecallOperation.DIRECT_RELATIONSHIP,
+            relationships_contracts_graph_recall.GraphRecallSource.CANONICAL_FALLBACK,
             1,
         ),
         (
-            relationships.GraphRecallOperation.RELATIONSHIP_EVIDENCE,
-            relationships.GraphRecallSource.CANONICAL_FALLBACK,
+            relationships_contracts_graph_recall.GraphRecallOperation.RELATIONSHIP_EVIDENCE,
+            relationships_contracts_graph_recall.GraphRecallSource.CANONICAL_FALLBACK,
             1,
         ),
         (
-            relationships.GraphRecallOperation.SHORTEST_PATH,
-            relationships.GraphRecallSource.NONE,
+            relationships_contracts_graph_recall.GraphRecallOperation.SHORTEST_PATH,
+            relationships_contracts_graph_recall.GraphRecallSource.NONE,
             0,
         ),
     ),
@@ -525,20 +535,21 @@ def test_graph_outage_has_bounded_fallback_without_raising(
     gateway.evidence_by_id[canonical.last_event_id or ""] = _evidence(
         canonical.last_event_id or ""
     )
-    result = relationships.GraphRecallService(gateway).execute(
-        relationships.GraphRecallQuery(
+    result = relationships_service_graph_recall.GraphRecallService(gateway).execute(
+        relationships_contracts_graph_recall.GraphRecallQuery(
             operation=operation,
             scope=_scope(),
             counterpart_world_character_id=COUNTERPART_ID,
             limit=(
                 5
                 if operation
-                is relationships.GraphRecallOperation.RELATIONSHIP_EVIDENCE
+                is relationships_contracts_graph_recall.GraphRecallOperation.RELATIONSHIP_EVIDENCE
                 else 10
             ),
         ),
         graph_projection_enabled=False,
     )
+    import app.domains.relationships.contracts.graph_recall as relationships
     assert result.status is relationships.GraphRecallStatus.DEGRADED
     assert result.source is expected_source
     assert result.reason_code == "graph_disabled"
@@ -559,27 +570,29 @@ def test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts() -> None
         counterpart_neighbor,
         subject_counterpart,
     )
-    service = relationships.GraphRecallService(gateway)
+    service = relationships_service_graph_recall.GraphRecallService(gateway)
     shared = service.execute(
-        relationships.GraphRecallQuery(
-            operation=relationships.GraphRecallOperation.SHARED_NEIGHBORS,
+        relationships_contracts_graph_recall.GraphRecallQuery(
+            operation=relationships_contracts_graph_recall.GraphRecallOperation.SHARED_NEIGHBORS,
             scope=_scope(),
             counterpart_world_character_id=COUNTERPART_ID,
         ),
         graph_projection_enabled=False,
     )
     ranked = service.execute(
-        relationships.GraphRecallQuery(
+        relationships_contracts_graph_recall.GraphRecallQuery(
             operation=(
-                relationships.GraphRecallOperation.RANK_RELATED_CHARACTERS
+                relationships_contracts_graph_recall.GraphRecallOperation.RANK_RELATED_CHARACTERS
             ),
             scope=_scope(),
         ),
         graph_projection_enabled=False,
     )
     assert shared.world_character_ids == (NEIGHBOR_ID,)
+    import app.domains.relationships.contracts.graph_recall as relationships
     assert shared.source is relationships.GraphRecallSource.CANONICAL_FALLBACK
     assert COUNTERPART_ID in ranked.world_character_ids
+    import app.domains.relationships.contracts.graph_recall as relationships
     assert ranked.source is relationships.GraphRecallSource.CANONICAL_FALLBACK
     assert graph.calls == []
 
@@ -587,14 +600,15 @@ def test_graph_outage_shared_and_rank_use_only_bounded_canonical_facts() -> None
 def test_scope_validation_rejects_blocked_counterpart_before_graph_query() -> None:
     graph, gateway = _gateway_with(_hit(SUBJECT_ID, COUNTERPART_ID))
     gateway.blocked_nodes.add(COUNTERPART_ID)
+    import app.domains.relationships.exceptions as relationships
     with pytest.raises(
         relationships.RelationshipGraphRequestError,
         match="counterpart_unavailable",
     ):
-        relationships.GraphRecallService(gateway).execute(
-            relationships.GraphRecallQuery(
+        relationships_service_graph_recall.GraphRecallService(gateway).execute(
+            relationships_contracts_graph_recall.GraphRecallQuery(
                 operation=(
-                    relationships.GraphRecallOperation.DIRECT_RELATIONSHIP
+                    relationships_contracts_graph_recall.GraphRecallOperation.DIRECT_RELATIONSHIP
                 ),
                 scope=_scope(),
                 counterpart_world_character_id=COUNTERPART_ID,
@@ -608,11 +622,11 @@ def test_provider_results_cannot_escape_pair_direction_or_path_shape() -> None:
     direct = _hit(SUBJECT_ID, COUNTERPART_ID)
     unrelated = _hit(NEIGHBOR_ID, "wc-other")
     graph, gateway = _gateway_with(direct, unrelated)
-    service = relationships.GraphRecallService(gateway)
+    service = relationships_service_graph_recall.GraphRecallService(gateway)
     graph.direct = [unrelated]
     escaped = service.execute(
-        relationships.GraphRecallQuery(
-            operation=relationships.GraphRecallOperation.DIRECT_RELATIONSHIP,
+        relationships_contracts_graph_recall.GraphRecallQuery(
+            operation=relationships_contracts_graph_recall.GraphRecallOperation.DIRECT_RELATIONSHIP,
             scope=_scope(),
             counterpart_world_character_id=COUNTERPART_ID,
         ),
@@ -635,8 +649,8 @@ def test_provider_results_cannot_escape_pair_direction_or_path_shape() -> None:
         direct.last_event_id or ""
     )
     wrong_state = service.execute(
-        relationships.GraphRecallQuery(
-            operation=relationships.GraphRecallOperation.RELATIONSHIP_EVIDENCE,
+        relationships_contracts_graph_recall.GraphRecallQuery(
+            operation=relationships_contracts_graph_recall.GraphRecallOperation.RELATIONSHIP_EVIDENCE,
             scope=_scope(),
             counterpart_world_character_id=COUNTERPART_ID,
             limit=5,
@@ -652,11 +666,11 @@ def test_provider_results_cannot_escape_pair_direction_or_path_shape() -> None:
         hop_count=2,
     )
     malformed_path = service.execute(
-        relationships.GraphRecallQuery(
-            operation=relationships.GraphRecallOperation.SHORTEST_PATH,
+        relationships_contracts_graph_recall.GraphRecallQuery(
+            operation=relationships_contracts_graph_recall.GraphRecallOperation.SHORTEST_PATH,
             scope=_scope(),
             counterpart_world_character_id=COUNTERPART_ID,
-            direction=relationships.GraphRecallDirection.EITHER,
+            direction=relationships_contracts_graph_recall.GraphRecallDirection.EITHER,
             max_hops=2,
         ),
         repository=graph,
@@ -670,16 +684,16 @@ def test_runtime_facade_preserves_direction_evidence_and_owner_scope() -> None:
     config = Settings(GRAPH_PROJECTION_ENABLED=False)
     with Session(engine, expire_on_commit=False) as db:
         fixture = seed_projection_fixture(db, suffix="p8-l-i-runtime")
-        scope = relationships.GraphRecallScope(
+        scope = relationships_contracts_graph_recall.GraphRecallScope(
             owner_id=fixture.owner.id,
             world_id=fixture.world.id,
             subject_world_character_id=fixture.actor_world_character.id,
         )
         direct = execute_graph_recall(
             db,
-            query=relationships.GraphRecallQuery(
+            query=relationships_contracts_graph_recall.GraphRecallQuery(
                 operation=(
-                    relationships.GraphRecallOperation.DIRECT_RELATIONSHIP
+                    relationships_contracts_graph_recall.GraphRecallOperation.DIRECT_RELATIONSHIP
                 ),
                 scope=scope,
                 counterpart_world_character_id=(
@@ -690,9 +704,9 @@ def test_runtime_facade_preserves_direction_evidence_and_owner_scope() -> None:
         )
         evidence = execute_graph_recall(
             db,
-            query=relationships.GraphRecallQuery(
+            query=relationships_contracts_graph_recall.GraphRecallQuery(
                 operation=(
-                    relationships.GraphRecallOperation.RELATIONSHIP_EVIDENCE
+                    relationships_contracts_graph_recall.GraphRecallOperation.RELATIONSHIP_EVIDENCE
                 ),
                 scope=scope,
                 counterpart_world_character_id=(
@@ -706,9 +720,9 @@ def test_runtime_facade_preserves_direction_evidence_and_owner_scope() -> None:
         db.flush()
         hidden_evidence = execute_graph_recall(
             db,
-            query=relationships.GraphRecallQuery(
+            query=relationships_contracts_graph_recall.GraphRecallQuery(
                 operation=(
-                    relationships.GraphRecallOperation.RELATIONSHIP_EVIDENCE
+                    relationships_contracts_graph_recall.GraphRecallOperation.RELATIONSHIP_EVIDENCE
                 ),
                 scope=scope,
                 counterpart_world_character_id=(
@@ -718,12 +732,13 @@ def test_runtime_facade_preserves_direction_evidence_and_owner_scope() -> None:
             ),
             config=config,
         )
+        import app.domains.relationships.exceptions as relationships
         with pytest.raises(relationships.RelationshipGraphForbiddenError):
             execute_graph_recall(
                 db,
-                query=relationships.GraphRecallQuery(
+                query=relationships_contracts_graph_recall.GraphRecallQuery(
                     operation=(
-                        relationships.GraphRecallOperation.DIRECT_RELATIONSHIP
+                        relationships_contracts_graph_recall.GraphRecallOperation.DIRECT_RELATIONSHIP
                     ),
                     scope=replace(scope, owner_id=fixture.other_owner.id),
                     counterpart_world_character_id=(
@@ -733,6 +748,7 @@ def test_runtime_facade_preserves_direction_evidence_and_owner_scope() -> None:
                 config=config,
             )
 
+    import app.domains.relationships.contracts.graph_recall as relationships
     assert direct.source is relationships.GraphRecallSource.CANONICAL_FALLBACK
     assert [value.actor_world_character_id for value in direct.relationships] == [
         fixture.actor_world_character.id

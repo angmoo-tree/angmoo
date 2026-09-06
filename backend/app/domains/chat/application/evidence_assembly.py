@@ -35,7 +35,7 @@ from app.domains.memory.public import (
     MemorySourceTypeV1,
     SOURCE_KIND_BY_TYPE,
 )
-from app.domains.relationships.public import GraphRecallStatus
+from app.domains.relationships.contracts.graph_recall import GraphRecallStatus
 
 
 class EvidenceBundleAssembler:

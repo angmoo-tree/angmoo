@@ -17,6 +17,9 @@
 | AR-B3 | NOT STARTED | World Package→media |
 | AR-B4 | CORE PR #281 MERGED · RESIDENT/C7/WRITER FOLLOWUP SOURCE COMPLETE · PR FULL CI PENDING | C7-H까지 실제 소유 합류; local full의 route inventory 1실패를 metadata만 수정하고 focused78 PASS; stock2311 PASS, 최종 PR 전체 CI 대기 |
 | AR-B5 | NOT STARTED | social→relationships→projection |
+
+| AR-B4 | ROUTINES A1/A2/A3a/b LOCAL VERIFIED · INTEGRATION/PR PENDING | 실제 계획·guarded lifecycle·실행 claim 이전; joint·routine_posts·resident 후속 |
+| AR-B5 | SOURCE PREPARED · INTEGRATION PENDING | Social→Relationships→projection 실제 소유·Community/public 집합 제거 및 G07 18파일 준비. 전체 통합/Hosted는 부모 단계에서 검증 |
 | AR-B6 | NOT STARTED | Chat transport→generation→retrieval/response |
 | AR-B7 | NOT STARTED | Memory read/write→owner→batch→runtime |
 | AR-B8-A | NOT STARTED | 잔여 업무·G06 단일 앱 생성·호환·소비자 전환 |
@@ -1992,3 +1995,18 @@ Social11·Relationships7개 파일의 원래92개 노드와 fixture import/CI �
 기존 `behavior["parity_test_node_count"] == 97` 단언은 #263 immutable inventory의 원래 behavior에 그대로 적용한다. 현재 behavior는 policy가 가리키는 모든 파일의 SHA256·무필터 top-level test AST 목록·전체 수량과 직접 비교하고, 원래97개가 명시적 이동 후 모두 포함되는지 확인한다. Counter의 이름/값/노드도 원래 frozen 계약을 실제 경로로 연결한 결과와 전체 비교한다. 최신99를 새 고정 숫자로 쓰거나 검사에서 테스트를 제외하지 않는다.
 
 기존 검사와 stale 수량·누락 node·counter 변조 음성3개를 포함한 검증은 **10 PASS /15.93초**다. 이 후속의 신규3개 노드는 `tests/test_l4_parity_current_source.py`에 실제 최초 source 커밋으로 기록하며, 원장 append와 stock 검증을 이어서 수행한다. 앞선201 PASS/1 FAIL 이력은 그대로 유지한다.
+
+## AR-B5-C34 — Relationships public 집합 제거
+
+원래 public 이름70개 모두가 실제 계약·오류·schema·service 객체와 동일함을 제거 전에 대조했다. 18개 소비자의163참조를 실제 소유 모듈로 연결했고 제품61개 전체 정의는 정확 import 해석 후 동일하다. 순수 import 집합만 제거했으며 모든 실제 정의와 Graph 방향·권한·근거·fallback 처리는 유지한다. 구조 membership 단언은 `public.py`→`service/graph_read.py`의 정확 file/module 지도에 따라 바뀌며 기존 normalizer로 통과한다. 검사 변경이나 범용 예외는 없고 기존 public bridge18개를 제거했다.
+
+Relationships·Graph recall/planner/Both·경계·동결 I/K/M inventory 집중은 **123 PASS /기존 PostgreSQL skip1 /48.36초 /기존 warning1개**다. PR #258/#263 API/schema/ORM, 보호 변경8파일 assertion 및 전체 split evidence는0오류, 경계847 module/3027 edge/legacy154와 현재 L4/ER0 generator도 통과했다. frozen JSON과 역사적 정책 설명 문자열은 다시 쓰지 않았다.
+
+B5 준비 branch의 실제 업무 이전·옛 Social/Relationships 계층·Community service/CRUD/public 집합 제거와 G07 18파일은 source로 준비됐다. 부모 통합은 이미 별도로 전환된 Resident·Chat·LocalBot·Character image·공통 DB/모델 등록 소비자를 합류하고 전체 gate 및 Hosted/설치를 검증한다. 복합 Chat/Today/image 테스트의 최종 소유 위치와 앞선 G07 고정 수치 검사는 부모의 정확 통합 검증 대상으로 남는다.
+
+
+## AR-B5 C34 순차 통합 검증
+
+Relationships 공개 집합의 실제 정의70개·원래 실제 소비자 전환을 현재 B4 실행과 합쳤다. C34 제품61개 AST 동일 근거와 정확 public→graph_read 경로 대응을 유지하고, 기존 Graph Recall·Planner·Both·response streaming 및 경계/L4 검사는 **156 PASS /기존 skip1 /65.47초**다. 현재 경계 **985 modules /3,657 edges /legacy126 /cycle0**, ER0 및 L4 현재 inventory도 통과했다. 전역 facade를 다시 만들거나 호출 순서·provider·Session을 바꾸지 않았다.
+
+B5 source 통합이 준비되었으며 원래 signed source 증거 append, stock 전체 보존과 전체 backend, PR required CI·설치 Gate를 이어서 실행한다. 이후 B6/B7/B8 및 G5/G06 완료를 이 결과로 앞당겨 선언하지 않는다.

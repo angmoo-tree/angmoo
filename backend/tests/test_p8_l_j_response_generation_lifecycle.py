@@ -41,11 +41,8 @@ from app.domains.memory.public import (
     CanonicalPlanStep,
     CanonicalRetrievalPlan,
 )
-from app.domains.relationships.public import (
-    GRAPH_RECALL_PRIMITIVE_REGISTRY,
-    GraphPlanStep,
-    GraphRetrievalPlan,
-)
+from app.domains.relationships.contracts.graph_recall_gateway import GRAPH_RECALL_PRIMITIVE_REGISTRY
+from app.domains.relationships.contracts.graph_plan import GraphPlanStep, GraphRetrievalPlan
 
 
 def _intent(route: RetrievalRoute) -> RetrievalIntentEnvelope:

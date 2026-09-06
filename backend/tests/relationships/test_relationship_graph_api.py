@@ -6,7 +6,7 @@ import pytest
 from sqlalchemy.orm import Session
 
 from app.config import Settings
-from app.domains.relationships import public as relationships
+
 from app.runtime.graph_projection.relationship_graph_read import (
     get_owner_relationship_graph,
 )
@@ -47,6 +47,7 @@ def test_other_owner_cannot_read_character_graph() -> None:
     engine = sqlite_engine()
     with Session(engine, expire_on_commit=False) as db:
         fixture = seed_projection_fixture(db, suffix="forbidden")
+        import app.domains.relationships.exceptions as relationships
         with pytest.raises(relationships.RelationshipGraphForbiddenError):
             get_owner_relationship_graph(
                 db,

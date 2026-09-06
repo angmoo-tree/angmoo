@@ -26,12 +26,9 @@ L_INVENTORY_SHA256 = (
 CORPUS_PATH = ROOT / "backend/tests/fixtures/p8_l/graph_planner_v1/held_out_ko.jsonl"
 
 from app.domains.chat.domain import RetrievalRoute  # noqa: E402
-from app.domains.relationships.public import (  # noqa: E402
-    GRAPH_PLAN_VERSION,
-    GRAPH_RECALL_PRIMITIVE_REGISTRY,
-    MAX_GRAPH_PLAN_STEPS,
-    graph_retrieval_plan_response_schema,
-)
+from app.domains.relationships.contracts.graph_plan import GRAPH_PLAN_VERSION, MAX_GRAPH_PLAN_STEPS
+from app.domains.relationships.contracts.graph_recall_gateway import GRAPH_RECALL_PRIMITIVE_REGISTRY
+from app.domains.relationships.policies.graph_plan_schema import graph_retrieval_plan_response_schema
 from app.runtime.migrations.sqlite_versions.registry import (  # noqa: E402
     load_sqlite_manifest,
 )

@@ -13,7 +13,7 @@ from app.domains.chat.domain.retrieval_intent import (
 )
 from app.domains.chat.domain.workflow_recipe import RetrievalWorkflow
 from app.domains.memory.public import CANONICAL_PRIMITIVE_REGISTRY
-from app.domains.relationships.public import GRAPH_RECALL_PRIMITIVE_REGISTRY
+from app.domains.relationships.contracts.graph_recall_gateway import GRAPH_RECALL_PRIMITIVE_REGISTRY
 
 
 @dataclass(frozen=True, slots=True)

@@ -434,6 +434,7 @@
     "backend/tests/test_relationship_graph_domain_public.py": "backend/tests/relationships/test_relationship_graph_domain_public.py",
     "backend/tests/test_relationship_graph_repository.py": "backend/tests/relationships/test_relationship_graph_repository.py",
     "backend/tests/test_social_event_runtime.py": "backend/tests/relationships/test_social_event_runtime.py",
+    "backend/app/domains/relationships/public.py": "backend/app/domains/relationships/service/graph_read.py",
     "backend/app/services/agent_activity_policy.py": "backend/app/domains/routines/service/activity_policy.py",
     "backend/app/services/agent_briefs.py": "backend/app/domains/routines/service/action_briefs.py",
     "backend/app/services/langgraph_resident.py": "backend/app/runtime/resident/langgraph.py",
@@ -31237,7 +31238,9 @@
           "old": "backend/app/domains/relationships/graph_read/use_case.py::get_owner_relationship_graph",
           "new": "backend/app/domains/relationships/service/graph_read.py::get_owner_relationship_graph",
           "direct_consumers": [
-            "backend/app/domains/relationships/public.py"
+            "backend/app/domains/relationships/router.py",
+            "backend/app/domains/relationships/service/diagnostics.py",
+            "backend/app/runtime/graph_projection/relationship_graph_read.py"
           ],
           "test_nodes": [
             "tests/relationships/test_relationship_graph_api.py::test_owner_read_falls_back_to_directional_canonical_when_graph_disabled",
@@ -31332,7 +31335,8 @@
           "old": "backend/app/domains/relationships/application/graph_planning.py::GraphRetrievalPlanValidator",
           "new": "backend/app/domains/relationships/service/graph_planning.py::GraphRetrievalPlanValidator",
           "direct_consumers": [
-            "backend/app/domains/relationships/public.py"
+            "backend/app/domains/chat/application/graph_retrieval.py",
+            "backend/app/runtime/chat/world_generation.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
@@ -31352,7 +31356,8 @@
           "old": "backend/app/domains/relationships/application/graph_planning.py::GraphRetrievalPlanExecutor",
           "new": "backend/app/domains/relationships/service/graph_planning.py::GraphRetrievalPlanExecutor",
           "direct_consumers": [
-            "backend/app/domains/relationships/public.py"
+            "backend/app/domains/chat/application/graph_retrieval.py",
+            "backend/app/runtime/chat/world_generation.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_m_graph_retrieval_planner.py::test_provider_schema_is_graph_only_and_strict_parser_normalizes",
@@ -31480,7 +31485,9 @@
           "old": "backend/app/domains/relationships/graph_recall/service.py::GraphRecallValidator",
           "new": "backend/app/domains/relationships/service/graph_recall.py::GraphRecallValidator",
           "direct_consumers": [
-            "backend/app/domains/relationships/public.py"
+            "backend/app/domains/relationships/service/graph_planning.py",
+            "backend/app/runtime/chat/world_generation.py",
+            "backend/app/runtime/graph_projection/relationship_graph_read.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
@@ -31497,7 +31504,9 @@
           "old": "backend/app/domains/relationships/graph_recall/service.py::GraphRecallService",
           "new": "backend/app/domains/relationships/service/graph_recall.py::GraphRecallService",
           "direct_consumers": [
-            "backend/app/domains/relationships/public.py"
+            "backend/app/domains/relationships/service/graph_planning.py",
+            "backend/app/runtime/chat/world_generation.py",
+            "backend/app/runtime/graph_projection/relationship_graph_read.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_i_graph_recall.py::test_graph_recall_registry_is_closed_and_validator_enforces_hard_caps",
@@ -87225,6 +87234,1651 @@
           "failure": "Current parity99 fails historical97 assertion. Signed C32 pre-move inventory already99 (original97 plus Search2 new regressions); no original parity node lost. Parent final provenance-aware frozen/live check owns resolution; assertion unchanged."
         }
       ]
+    },
+    "AR-B5-C34": {
+      "status": "IMPLEMENTED source; capture/integration pending",
+      "scope": "Remove Relationships zero-body public aggregate; select actual graph policy/service, query/recall contracts, schemas and errors. All70 original exported objects remain the same actual definitions.",
+      "removed_files": [
+        "backend/app/domains/relationships/public.py"
+      ],
+      "file_moves": {
+        "backend/app/domains/relationships/public.py": "backend/app/domains/relationships/service/graph_read.py"
+      },
+      "export_symbols": [
+        {
+          "old": "backend/app/domains/relationships/public.py::GRAPH_PLAN_VERSION",
+          "new": "backend/app/domains/relationships/contracts/graph_plan.py::GRAPH_PLAN_VERSION",
+          "direct_consumers": [
+            "backend/app/domains/chat/public.py",
+            "scripts/ci/generate_p8_l_m_graph_retrieval_planner_inventory.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GRAPH_RECALL_CONTRACT_VERSION",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::GRAPH_RECALL_CONTRACT_VERSION",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GRAPH_RECALL_PRIMITIVE_REGISTRY",
+          "new": "backend/app/domains/relationships/contracts/graph_recall_gateway.py::GRAPH_RECALL_PRIMITIVE_REGISTRY",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_i_graph_recall.py",
+            "backend/tests/test_p8_l_j_response_generation_lifecycle.py",
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/tests/test_p8_l_n_both_workflow_coordinator.py",
+            "backend/tests/test_p8_l_p_evidence_response_streaming.py",
+            "backend/app/domains/chat/application/answer_request.py",
+            "backend/app/domains/chat/application/retrieval_routing.py",
+            "scripts/ci/generate_p8_l_k_retrieval_router_inventory.py",
+            "scripts/ci/generate_p8_l_m_graph_retrieval_planner_inventory.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphStatus",
+          "new": "backend/app/domains/relationships/schemas.py::GraphStatus",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/relationship_graph_read.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphPlanContractError",
+          "new": "backend/app/domains/relationships/contracts/graph_plan.py::GraphPlanContractError",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/app/domains/chat/application/graph_retrieval.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphPlanExecutionContext",
+          "new": "backend/app/domains/relationships/contracts/graph_execution.py::GraphPlanExecutionContext",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/app/domains/chat/application/graph_retrieval.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphPlanExecutionResult",
+          "new": "backend/app/domains/relationships/contracts/graph_execution.py::GraphPlanExecutionResult",
+          "direct_consumers": [
+            "backend/app/domains/chat/application/graph_retrieval.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphPlanStep",
+          "new": "backend/app/domains/relationships/contracts/graph_plan.py::GraphPlanStep",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_j_response_generation_lifecycle.py",
+            "backend/app/domains/chat/public.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphPlanStepExecution",
+          "new": "backend/app/domains/relationships/contracts/graph_execution.py::GraphPlanStepExecution",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphPlanValidationResult",
+          "new": "backend/app/domains/relationships/contracts/graph_execution.py::GraphPlanValidationResult",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphPlannerEntity",
+          "new": "backend/app/domains/relationships/contracts/graph_planner.py::GraphPlannerEntity",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/app/domains/chat/application/graph_retrieval.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphPlannerOutputError",
+          "new": "backend/app/domains/relationships/contracts/graph_planner.py::GraphPlannerOutputError",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/tests/test_p8_l_n_both_workflow_coordinator.py",
+            "backend/app/integrations/llm/graph_retrieval_planner.py",
+            "backend/app/domains/chat/application/graph_retrieval.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphPlannerProviderPort",
+          "new": "backend/app/domains/relationships/contracts/graph_planner.py::GraphPlannerProviderPort",
+          "direct_consumers": [
+            "backend/app/domains/chat/application/graph_retrieval.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphPlannerProviderResult",
+          "new": "backend/app/domains/relationships/contracts/graph_planner.py::GraphPlannerProviderResult",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/tests/test_p8_l_n_both_workflow_coordinator.py",
+            "backend/app/integrations/llm/graph_retrieval_planner.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphPlannerRelationship",
+          "new": "backend/app/domains/relationships/contracts/graph_planner.py::GraphPlannerRelationship",
+          "direct_consumers": [
+            "backend/app/domains/chat/application/graph_retrieval.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphPlannerRequest",
+          "new": "backend/app/domains/relationships/contracts/graph_planner.py::GraphPlannerRequest",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/app/integrations/llm/graph_retrieval_planner.py",
+            "backend/app/domains/chat/application/graph_retrieval.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRetrievalPlan",
+          "new": "backend/app/domains/relationships/contracts/graph_plan.py::GraphRetrievalPlan",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_j_response_generation_lifecycle.py",
+            "backend/app/domains/chat/public.py",
+            "backend/app/domains/chat/application/graph_retrieval.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRetrievalPlanExecutor",
+          "new": "backend/app/domains/relationships/service/graph_planning.py::GraphRetrievalPlanExecutor",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/tests/test_p8_l_n_both_workflow_coordinator.py",
+            "backend/app/runtime/chat/world_generation.py",
+            "backend/app/domains/chat/application/graph_retrieval.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRetrievalPlanValidator",
+          "new": "backend/app/domains/relationships/service/graph_planning.py::GraphRetrievalPlanValidator",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/app/domains/chat/application/graph_retrieval.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphProvider",
+          "new": "backend/app/domains/relationships/contracts/graph_read.py::GraphProvider",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/relationship_graph_read.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphProjectionCounts",
+          "new": "backend/app/domains/relationships/contracts/graph_read.py::GraphProjectionCounts",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_i_graph_recall.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallDirection",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::GraphRecallDirection",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_i_graph_recall.py",
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallEvidence",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::GraphRecallEvidence",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_n_both_workflow_coordinator.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallGateway",
+          "new": "backend/app/domains/relationships/contracts/graph_recall_gateway.py::GraphRecallGateway",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallOperation",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::GraphRecallOperation",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_i_graph_recall.py",
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/tests/test_p8_l_n_both_workflow_coordinator.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallPath",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::GraphRecallPath",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallPrimitiveSpec",
+          "new": "backend/app/domains/relationships/contracts/graph_recall_gateway.py::GraphRecallPrimitiveSpec",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallQuery",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::GraphRecallQuery",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_i_graph_recall.py",
+            "backend/app/runtime/graph_projection/relationship_graph_read.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallRanking",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::GraphRecallRanking",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_i_graph_recall.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallRelationship",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::GraphRecallRelationship",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallResult",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::GraphRecallResult",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/tests/test_p8_l_n_both_workflow_coordinator.py",
+            "backend/app/runtime/graph_projection/relationship_graph_read.py",
+            "backend/app/domains/chat/application/both_retrieval.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallScope",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::GraphRecallScope",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_i_graph_recall.py",
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/app/runtime/graph_projection/relationship_graph_read.py",
+            "backend/app/domains/chat/application/graph_retrieval.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallScopeAccess",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::GraphRecallScopeAccess",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_i_graph_recall.py",
+            "backend/app/runtime/graph_projection/relationship_graph_read.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallService",
+          "new": "backend/app/domains/relationships/service/graph_recall.py::GraphRecallService",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_i_graph_recall.py",
+            "backend/app/runtime/chat/world_generation.py",
+            "backend/app/runtime/graph_projection/relationship_graph_read.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallSource",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::GraphRecallSource",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_i_graph_recall.py",
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/tests/test_p8_l_n_both_workflow_coordinator.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallStatus",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::GraphRecallStatus",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_i_graph_recall.py",
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/tests/test_p8_l_n_both_workflow_coordinator.py",
+            "backend/app/domains/chat/application/evidence_assembly.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphRecallValidator",
+          "new": "backend/app/domains/relationships/service/graph_recall.py::GraphRecallValidator",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_i_graph_recall.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::GraphView",
+          "new": "backend/app/domains/relationships/contracts/graph_read.py::GraphView",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/relationship_graph_read.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::MAX_GRAPH_RECALL_EDGES",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::MAX_GRAPH_RECALL_EDGES",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::MAX_GRAPH_RECALL_EVIDENCE",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::MAX_GRAPH_RECALL_EVIDENCE",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::MAX_GRAPH_RECALL_HOPS",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::MAX_GRAPH_RECALL_HOPS",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::MAX_GRAPH_RECALL_RESULTS",
+          "new": "backend/app/domains/relationships/contracts/graph_recall.py::MAX_GRAPH_RECALL_RESULTS",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::MAX_GRAPH_PLANNER_MESSAGE_CHARACTERS",
+          "new": "backend/app/domains/relationships/contracts/graph_planner.py::MAX_GRAPH_PLANNER_MESSAGE_CHARACTERS",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::MAX_GRAPH_PLAN_STEPS",
+          "new": "backend/app/domains/relationships/contracts/graph_plan.py::MAX_GRAPH_PLAN_STEPS",
+          "direct_consumers": [
+            "scripts/ci/generate_p8_l_m_graph_retrieval_planner_inventory.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::NoGraphMutationCommand",
+          "new": "backend/app/domains/relationships/contracts/projection_commands.py::NoGraphMutationCommand",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::OutboxFinalizeStatus",
+          "new": "backend/app/domains/relationships/contracts/outbox.py::OutboxFinalizeStatus",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::OutboxPort",
+          "new": "backend/app/domains/relationships/contracts/outbox.py::OutboxPort",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::ProjectionCommand",
+          "new": "backend/app/domains/relationships/contracts/projection_commands.py::ProjectionCommand",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::ProjectionCommandError",
+          "new": "backend/app/domains/relationships/contracts/projection_commands.py::ProjectionCommandError",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::ProjectionWorkItem",
+          "new": "backend/app/domains/relationships/contracts/outbox.py::ProjectionWorkItem",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::ProjectionReplaySource",
+          "new": "backend/app/domains/relationships/contracts/replay.py::ProjectionReplaySource",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::RelationshipGraphEdgeRead",
+          "new": "backend/app/domains/relationships/schemas.py::RelationshipGraphEdgeRead",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::RelationshipGraphEvidenceRead",
+          "new": "backend/app/domains/relationships/schemas.py::RelationshipGraphEvidenceRead",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::RelationshipGraphForbiddenError",
+          "new": "backend/app/domains/relationships/exceptions.py::RelationshipGraphForbiddenError",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_i_graph_recall.py",
+            "backend/tests/relationships/test_relationship_graph_api.py",
+            "backend/app/runtime/graph_projection/relationship_graph_read.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::RelationshipGraphNodeRead",
+          "new": "backend/app/domains/relationships/schemas.py::RelationshipGraphNodeRead",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::RelationshipGraphNotFoundError",
+          "new": "backend/app/domains/relationships/exceptions.py::RelationshipGraphNotFoundError",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/relationship_graph_read.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::RelationshipGraphQueryMetaRead",
+          "new": "backend/app/domains/relationships/schemas.py::RelationshipGraphQueryMetaRead",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::RelationshipGraphRead",
+          "new": "backend/app/domains/relationships/schemas.py::RelationshipGraphRead",
+          "direct_consumers": [
+            "backend/tests/relationships/test_relationship_graph_domain_public.py",
+            "backend/app/runtime/graph_projection/relationship_graph_read.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::RelationshipGraphReadError",
+          "new": "backend/app/domains/relationships/exceptions.py::RelationshipGraphReadError",
+          "direct_consumers": [
+            "backend/app/runtime/graph_projection/relationship_graph_read.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::RelationshipGraphReadGateway",
+          "new": "backend/app/domains/relationships/contracts/graph_read.py::RelationshipGraphReadGateway",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::RelationshipGraphRequestError",
+          "new": "backend/app/domains/relationships/exceptions.py::RelationshipGraphRequestError",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_i_graph_recall.py",
+            "backend/app/runtime/graph_projection/relationship_graph_read.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::RelationshipProjectionPort",
+          "new": "backend/app/domains/relationships/contracts/projection.py::RelationshipProjectionPort",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::RelationshipQueryPort",
+          "new": "backend/app/domains/relationships/contracts/query.py::RelationshipQueryPort",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::RelationshipStateProjectionCommand",
+          "new": "backend/app/domains/relationships/contracts/projection_commands.py::RelationshipStateProjectionCommand",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::SocialEventProjectionCommand",
+          "new": "backend/app/domains/relationships/contracts/projection_commands.py::SocialEventProjectionCommand",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::SourceExclusionProjectionCommand",
+          "new": "backend/app/domains/relationships/contracts/projection_commands.py::SourceExclusionProjectionCommand",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::projection_digest",
+          "new": "backend/app/domains/relationships/utils/projection_digest.py::projection_digest",
+          "direct_consumers": [],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::graph_retrieval_plan_response_schema",
+          "new": "backend/app/domains/relationships/policies/graph_plan_schema.py::graph_retrieval_plan_response_schema",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/app/integrations/llm/graph_retrieval_planner.py",
+            "scripts/ci/generate_p8_l_m_graph_retrieval_planner_inventory.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::get_owner_relationship_graph",
+          "new": "backend/app/domains/relationships/service/graph_read.py::get_owner_relationship_graph",
+          "direct_consumers": [
+            "backend/tests/relationships/test_relationship_graph_domain_public.py",
+            "backend/app/runtime/graph_projection/relationship_graph_read.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        },
+        {
+          "old": "backend/app/domains/relationships/public.py::parse_graph_retrieval_plan_payload",
+          "new": "backend/app/domains/relationships/policies/graph_plan_schema.py::parse_graph_retrieval_plan_payload",
+          "direct_consumers": [
+            "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+            "backend/tests/test_p8_l_n_both_workflow_coordinator.py",
+            "backend/app/integrations/llm/graph_retrieval_planner.py"
+          ],
+          "preservation": "Original exported object is identical to this actual definition before facade removal. Existing import consumers were reconnected; unused public names retain their actual definitions."
+        }
+      ],
+      "direct_consumers": [
+        {
+          "path": "backend/tests/test_p8_l_i_graph_recall.py",
+          "bindings": [
+            {
+              "line": 36,
+              "old": "relationships.GraphRecallScope",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallScope",
+              "preserved_assertion": false
+            },
+            {
+              "line": 37,
+              "old": "relationships.GraphRecallScope",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallScope",
+              "preserved_assertion": false
+            },
+            {
+              "line": 298,
+              "old": "relationships.GraphRecallValidator",
+              "new": "app.domains.relationships.service.graph_recall.GraphRecallValidator",
+              "preserved_assertion": false
+            },
+            {
+              "line": 356,
+              "old": "relationships.GraphRecallService",
+              "new": "app.domains.relationships.service.graph_recall.GraphRecallService",
+              "preserved_assertion": false
+            },
+            {
+              "line": 439,
+              "old": "relationships.GraphRecallService",
+              "new": "app.domains.relationships.service.graph_recall.GraphRecallService",
+              "preserved_assertion": false
+            },
+            {
+              "line": 562,
+              "old": "relationships.GraphRecallService",
+              "new": "app.domains.relationships.service.graph_recall.GraphRecallService",
+              "preserved_assertion": false
+            },
+            {
+              "line": 611,
+              "old": "relationships.GraphRecallService",
+              "new": "app.domains.relationships.service.graph_recall.GraphRecallService",
+              "preserved_assertion": false
+            },
+            {
+              "line": 127,
+              "old": "relationships.GraphProjectionCounts",
+              "new": "app.domains.relationships.contracts.graph_read.GraphProjectionCounts",
+              "preserved_assertion": false
+            },
+            {
+              "line": 140,
+              "old": "relationships.GraphRecallScopeAccess",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallScopeAccess",
+              "preserved_assertion": false
+            },
+            {
+              "line": 294,
+              "old": "relationships.GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "new": "app.domains.relationships.contracts.graph_recall_gateway.GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "preserved_assertion": true
+            },
+            {
+              "line": 295,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": true
+            },
+            {
+              "line": 297,
+              "old": "relationships.GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "new": "app.domains.relationships.contracts.graph_recall_gateway.GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "preserved_assertion": true
+            },
+            {
+              "line": 300,
+              "old": "relationships.RelationshipGraphRequestError",
+              "new": "app.domains.relationships.exceptions.RelationshipGraphRequestError",
+              "preserved_assertion": true
+            },
+            {
+              "line": 312,
+              "old": "relationships.RelationshipGraphRequestError",
+              "new": "app.domains.relationships.exceptions.RelationshipGraphRequestError",
+              "preserved_assertion": true
+            },
+            {
+              "line": 326,
+              "old": "relationships.RelationshipGraphRequestError",
+              "new": "app.domains.relationships.exceptions.RelationshipGraphRequestError",
+              "preserved_assertion": true
+            },
+            {
+              "line": 359,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 366,
+              "old": "relationships.GraphRecallStatus",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallStatus",
+              "preserved_assertion": true
+            },
+            {
+              "line": 367,
+              "old": "relationships.GraphRecallSource",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallSource",
+              "preserved_assertion": true
+            },
+            {
+              "line": 373,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 390,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 442,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 454,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 471,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 483,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 529,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 542,
+              "old": "relationships.GraphRecallStatus",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallStatus",
+              "preserved_assertion": true
+            },
+            {
+              "line": 564,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 572,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 581,
+              "old": "relationships.GraphRecallSource",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallSource",
+              "preserved_assertion": true
+            },
+            {
+              "line": 583,
+              "old": "relationships.GraphRecallSource",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallSource",
+              "preserved_assertion": true
+            },
+            {
+              "line": 591,
+              "old": "relationships.RelationshipGraphRequestError",
+              "new": "app.domains.relationships.exceptions.RelationshipGraphRequestError",
+              "preserved_assertion": true
+            },
+            {
+              "line": 614,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 638,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 655,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 673,
+              "old": "relationships.GraphRecallScope",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallScope",
+              "preserved_assertion": false
+            },
+            {
+              "line": 736,
+              "old": "relationships.GraphRecallSource",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallSource",
+              "preserved_assertion": true
+            },
+            {
+              "line": 304,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 316,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 330,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 528,
+              "old": "relationships.GraphRecallService",
+              "new": "app.domains.relationships.service.graph_recall.GraphRecallService",
+              "preserved_assertion": false
+            },
+            {
+              "line": 502,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 503,
+              "old": "relationships.GraphRecallSource",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallSource",
+              "preserved_assertion": false
+            },
+            {
+              "line": 507,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 508,
+              "old": "relationships.GraphRecallSource",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallSource",
+              "preserved_assertion": false
+            },
+            {
+              "line": 512,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 513,
+              "old": "relationships.GraphRecallSource",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallSource",
+              "preserved_assertion": false
+            },
+            {
+              "line": 595,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 721,
+              "old": "relationships.RelationshipGraphForbiddenError",
+              "new": "app.domains.relationships.exceptions.RelationshipGraphForbiddenError",
+              "preserved_assertion": true
+            },
+            {
+              "line": 360,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 374,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 391,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 443,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 446,
+              "old": "relationships.GraphRecallDirection",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallDirection",
+              "preserved_assertion": false
+            },
+            {
+              "line": 455,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 458,
+              "old": "relationships.GraphRecallDirection",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallDirection",
+              "preserved_assertion": false
+            },
+            {
+              "line": 473,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 476,
+              "old": "relationships.GraphRecallRanking",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallRanking",
+              "preserved_assertion": false
+            },
+            {
+              "line": 485,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 565,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 574,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 594,
+              "old": "relationships.GraphRecallService",
+              "new": "app.domains.relationships.service.graph_recall.GraphRecallService",
+              "preserved_assertion": false
+            },
+            {
+              "line": 615,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 639,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 656,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 659,
+              "old": "relationships.GraphRecallDirection",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallDirection",
+              "preserved_assertion": false
+            },
+            {
+              "line": 680,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 693,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 709,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 306,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 318,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 331,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 597,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 724,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 536,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 682,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 695,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 711,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            },
+            {
+              "line": 726,
+              "old": "relationships.GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": false
+            }
+          ]
+        },
+        {
+          "path": "backend/tests/test_p8_l_j_response_generation_lifecycle.py",
+          "bindings": [
+            {
+              "line": 44,
+              "old": "GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "new": "app.domains.relationships.contracts.graph_recall_gateway.GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "preserved_assertion": true
+            },
+            {
+              "line": 44,
+              "old": "GraphPlanStep",
+              "new": "app.domains.relationships.contracts.graph_plan.GraphPlanStep",
+              "preserved_assertion": true
+            },
+            {
+              "line": 44,
+              "old": "GraphRetrievalPlan",
+              "new": "app.domains.relationships.contracts.graph_plan.GraphRetrievalPlan",
+              "preserved_assertion": true
+            }
+          ]
+        },
+        {
+          "path": "backend/tests/test_p8_l_m_graph_retrieval_planner.py",
+          "bindings": [
+            {
+              "line": 24,
+              "old": "GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "new": "app.domains.relationships.contracts.graph_recall_gateway.GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "GraphPlanContractError",
+              "new": "app.domains.relationships.contracts.graph_plan.GraphPlanContractError",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "GraphPlanExecutionContext",
+              "new": "app.domains.relationships.contracts.graph_execution.GraphPlanExecutionContext",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "GraphPlannerEntity",
+              "new": "app.domains.relationships.contracts.graph_planner.GraphPlannerEntity",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "GraphPlannerOutputError",
+              "new": "app.domains.relationships.contracts.graph_planner.GraphPlannerOutputError",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "GraphPlannerProviderResult",
+              "new": "app.domains.relationships.contracts.graph_planner.GraphPlannerProviderResult",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "GraphPlannerRequest",
+              "new": "app.domains.relationships.contracts.graph_planner.GraphPlannerRequest",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "GraphRecallDirection",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallDirection",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "GraphRecallResult",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallResult",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "GraphRecallScope",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallScope",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "GraphRecallSource",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallSource",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "GraphRecallStatus",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallStatus",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "GraphRetrievalPlanExecutor",
+              "new": "app.domains.relationships.service.graph_planning.GraphRetrievalPlanExecutor",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "GraphRetrievalPlanValidator",
+              "new": "app.domains.relationships.service.graph_planning.GraphRetrievalPlanValidator",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "graph_retrieval_plan_response_schema",
+              "new": "app.domains.relationships.policies.graph_plan_schema.graph_retrieval_plan_response_schema",
+              "preserved_assertion": true
+            },
+            {
+              "line": 24,
+              "old": "parse_graph_retrieval_plan_payload",
+              "new": "app.domains.relationships.policies.graph_plan_schema.parse_graph_retrieval_plan_payload",
+              "preserved_assertion": true
+            }
+          ]
+        },
+        {
+          "path": "backend/tests/test_p8_l_n_both_workflow_coordinator.py",
+          "bindings": [
+            {
+              "line": 40,
+              "old": "GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "new": "app.domains.relationships.contracts.graph_recall_gateway.GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "preserved_assertion": true
+            },
+            {
+              "line": 40,
+              "old": "GraphPlannerOutputError",
+              "new": "app.domains.relationships.contracts.graph_planner.GraphPlannerOutputError",
+              "preserved_assertion": true
+            },
+            {
+              "line": 40,
+              "old": "GraphPlannerProviderResult",
+              "new": "app.domains.relationships.contracts.graph_planner.GraphPlannerProviderResult",
+              "preserved_assertion": true
+            },
+            {
+              "line": 40,
+              "old": "GraphRecallEvidence",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallEvidence",
+              "preserved_assertion": true
+            },
+            {
+              "line": 40,
+              "old": "GraphRecallOperation",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallOperation",
+              "preserved_assertion": true
+            },
+            {
+              "line": 40,
+              "old": "GraphRecallResult",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallResult",
+              "preserved_assertion": true
+            },
+            {
+              "line": 40,
+              "old": "GraphRecallSource",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallSource",
+              "preserved_assertion": true
+            },
+            {
+              "line": 40,
+              "old": "GraphRecallStatus",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallStatus",
+              "preserved_assertion": true
+            },
+            {
+              "line": 40,
+              "old": "GraphRetrievalPlanExecutor",
+              "new": "app.domains.relationships.service.graph_planning.GraphRetrievalPlanExecutor",
+              "preserved_assertion": true
+            },
+            {
+              "line": 40,
+              "old": "parse_graph_retrieval_plan_payload",
+              "new": "app.domains.relationships.policies.graph_plan_schema.parse_graph_retrieval_plan_payload",
+              "preserved_assertion": true
+            }
+          ]
+        },
+        {
+          "path": "backend/tests/test_p8_l_p_evidence_response_streaming.py",
+          "bindings": [
+            {
+              "line": 103,
+              "old": "GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "new": "app.domains.relationships.contracts.graph_recall_gateway.GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "preserved_assertion": true
+            }
+          ]
+        },
+        {
+          "path": "backend/tests/relationships/test_relationship_graph_api.py",
+          "bindings": [
+            {
+              "line": 50,
+              "old": "relationships.RelationshipGraphForbiddenError",
+              "new": "app.domains.relationships.exceptions.RelationshipGraphForbiddenError",
+              "preserved_assertion": true
+            }
+          ]
+        },
+        {
+          "path": "backend/tests/relationships/test_relationship_graph_domain_public.py",
+          "bindings": [
+            {
+              "line": 27,
+              "old": "relationships.RelationshipGraphRead",
+              "new": "app.domains.relationships.schemas.RelationshipGraphRead",
+              "preserved_assertion": true
+            },
+            {
+              "line": 19,
+              "old": "relationships.get_owner_relationship_graph",
+              "new": "app.domains.relationships.service.graph_read.get_owner_relationship_graph",
+              "preserved_assertion": false
+            },
+            {
+              "line": 47,
+              "old": "relationships.get_owner_relationship_graph",
+              "new": "app.domains.relationships.service.graph_read.get_owner_relationship_graph",
+              "preserved_assertion": false
+            }
+          ]
+        },
+        {
+          "path": "backend/app/runtime/chat/world_generation.py",
+          "bindings": [
+            {
+              "line": 68,
+              "old": "GraphRecallService",
+              "new": "app.domains.relationships.service.graph_recall.GraphRecallService",
+              "preserved_assertion": true
+            },
+            {
+              "line": 68,
+              "old": "GraphRetrievalPlanExecutor",
+              "new": "app.domains.relationships.service.graph_planning.GraphRetrievalPlanExecutor",
+              "preserved_assertion": true
+            }
+          ]
+        },
+        {
+          "path": "backend/app/runtime/graph_projection/relationship_graph_read.py",
+          "bindings": [
+            {
+              "line": 712,
+              "old": "relationships.RelationshipGraphRead",
+              "new": "app.domains.relationships.schemas.RelationshipGraphRead",
+              "preserved_assertion": false
+            },
+            {
+              "line": 747,
+              "old": "relationships.GraphRecallResult",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallResult",
+              "preserved_assertion": false
+            },
+            {
+              "line": 768,
+              "old": "relationships.GraphStatus",
+              "new": "app.domains.relationships.schemas.GraphStatus",
+              "preserved_assertion": false
+            },
+            {
+              "line": 769,
+              "old": "relationships.GraphView",
+              "new": "app.domains.relationships.contracts.graph_read.GraphView",
+              "preserved_assertion": false
+            },
+            {
+              "line": 770,
+              "old": "relationships.RelationshipGraphForbiddenError",
+              "new": "app.domains.relationships.exceptions.RelationshipGraphForbiddenError",
+              "preserved_assertion": false
+            },
+            {
+              "line": 771,
+              "old": "relationships.RelationshipGraphNotFoundError",
+              "new": "app.domains.relationships.exceptions.RelationshipGraphNotFoundError",
+              "preserved_assertion": false
+            },
+            {
+              "line": 772,
+              "old": "relationships.RelationshipGraphRead",
+              "new": "app.domains.relationships.schemas.RelationshipGraphRead",
+              "preserved_assertion": false
+            },
+            {
+              "line": 773,
+              "old": "relationships.RelationshipGraphReadError",
+              "new": "app.domains.relationships.exceptions.RelationshipGraphReadError",
+              "preserved_assertion": false
+            },
+            {
+              "line": 774,
+              "old": "relationships.RelationshipGraphRequestError",
+              "new": "app.domains.relationships.exceptions.RelationshipGraphRequestError",
+              "preserved_assertion": false
+            },
+            {
+              "line": 138,
+              "old": "relationships.GraphRecallScopeAccess",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallScopeAccess",
+              "preserved_assertion": false
+            },
+            {
+              "line": 705,
+              "old": "relationships.GraphView",
+              "new": "app.domains.relationships.contracts.graph_read.GraphView",
+              "preserved_assertion": false
+            },
+            {
+              "line": 711,
+              "old": "relationships.GraphProvider",
+              "new": "app.domains.relationships.contracts.graph_read.GraphProvider",
+              "preserved_assertion": false
+            },
+            {
+              "line": 725,
+              "old": "relationships.get_owner_relationship_graph",
+              "new": "app.domains.relationships.service.graph_read.get_owner_relationship_graph",
+              "preserved_assertion": false
+            },
+            {
+              "line": 743,
+              "old": "relationships.GraphRecallQuery",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallQuery",
+              "preserved_assertion": false
+            },
+            {
+              "line": 746,
+              "old": "relationships.GraphProvider",
+              "new": "app.domains.relationships.contracts.graph_read.GraphProvider",
+              "preserved_assertion": false
+            },
+            {
+              "line": 80,
+              "old": "relationships.GraphProvider",
+              "new": "app.domains.relationships.contracts.graph_read.GraphProvider",
+              "preserved_assertion": false
+            },
+            {
+              "line": 137,
+              "old": "relationships.GraphRecallScope",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallScope",
+              "preserved_assertion": false
+            },
+            {
+              "line": 153,
+              "old": "relationships.GraphRecallScopeAccess",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallScopeAccess",
+              "preserved_assertion": false
+            },
+            {
+              "line": 760,
+              "old": "relationships.GraphRecallService",
+              "new": "app.domains.relationships.service.graph_recall.GraphRecallService",
+              "preserved_assertion": false
+            }
+          ]
+        },
+        {
+          "path": "backend/app/integrations/llm/graph_retrieval_planner.py",
+          "bindings": [
+            {
+              "line": 12,
+              "old": "GraphPlannerOutputError",
+              "new": "app.domains.relationships.contracts.graph_planner.GraphPlannerOutputError",
+              "preserved_assertion": true
+            },
+            {
+              "line": 12,
+              "old": "GraphPlannerProviderResult",
+              "new": "app.domains.relationships.contracts.graph_planner.GraphPlannerProviderResult",
+              "preserved_assertion": true
+            },
+            {
+              "line": 12,
+              "old": "GraphPlannerRequest",
+              "new": "app.domains.relationships.contracts.graph_planner.GraphPlannerRequest",
+              "preserved_assertion": true
+            },
+            {
+              "line": 12,
+              "old": "graph_retrieval_plan_response_schema",
+              "new": "app.domains.relationships.policies.graph_plan_schema.graph_retrieval_plan_response_schema",
+              "preserved_assertion": true
+            },
+            {
+              "line": 12,
+              "old": "parse_graph_retrieval_plan_payload",
+              "new": "app.domains.relationships.policies.graph_plan_schema.parse_graph_retrieval_plan_payload",
+              "preserved_assertion": true
+            }
+          ]
+        },
+        {
+          "path": "backend/app/domains/chat/public.py",
+          "bindings": [
+            {
+              "line": 121,
+              "old": "GRAPH_PLAN_VERSION",
+              "new": "app.domains.relationships.contracts.graph_plan.GRAPH_PLAN_VERSION",
+              "preserved_assertion": true
+            },
+            {
+              "line": 121,
+              "old": "GraphPlanStep",
+              "new": "app.domains.relationships.contracts.graph_plan.GraphPlanStep",
+              "preserved_assertion": true
+            },
+            {
+              "line": 121,
+              "old": "GraphRetrievalPlan",
+              "new": "app.domains.relationships.contracts.graph_plan.GraphRetrievalPlan",
+              "preserved_assertion": true
+            }
+          ]
+        },
+        {
+          "path": "backend/app/domains/chat/application/answer_request.py",
+          "bindings": [
+            {
+              "line": 16,
+              "old": "GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "new": "app.domains.relationships.contracts.graph_recall_gateway.GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "preserved_assertion": true
+            }
+          ]
+        },
+        {
+          "path": "backend/app/domains/chat/application/both_retrieval.py",
+          "bindings": [
+            {
+              "line": 43,
+              "old": "GraphRecallResult",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallResult",
+              "preserved_assertion": true
+            }
+          ]
+        },
+        {
+          "path": "backend/app/domains/chat/application/evidence_assembly.py",
+          "bindings": [
+            {
+              "line": 38,
+              "old": "GraphRecallStatus",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallStatus",
+              "preserved_assertion": true
+            }
+          ]
+        },
+        {
+          "path": "backend/app/domains/chat/application/graph_retrieval.py",
+          "bindings": [
+            {
+              "line": 27,
+              "old": "GraphPlanContractError",
+              "new": "app.domains.relationships.contracts.graph_plan.GraphPlanContractError",
+              "preserved_assertion": true
+            },
+            {
+              "line": 27,
+              "old": "GraphPlanExecutionContext",
+              "new": "app.domains.relationships.contracts.graph_execution.GraphPlanExecutionContext",
+              "preserved_assertion": true
+            },
+            {
+              "line": 27,
+              "old": "GraphPlanExecutionResult",
+              "new": "app.domains.relationships.contracts.graph_execution.GraphPlanExecutionResult",
+              "preserved_assertion": true
+            },
+            {
+              "line": 27,
+              "old": "GraphPlannerEntity",
+              "new": "app.domains.relationships.contracts.graph_planner.GraphPlannerEntity",
+              "preserved_assertion": true
+            },
+            {
+              "line": 27,
+              "old": "GraphPlannerOutputError",
+              "new": "app.domains.relationships.contracts.graph_planner.GraphPlannerOutputError",
+              "preserved_assertion": true
+            },
+            {
+              "line": 27,
+              "old": "GraphPlannerProviderPort",
+              "new": "app.domains.relationships.contracts.graph_planner.GraphPlannerProviderPort",
+              "preserved_assertion": true
+            },
+            {
+              "line": 27,
+              "old": "GraphPlannerRelationship",
+              "new": "app.domains.relationships.contracts.graph_planner.GraphPlannerRelationship",
+              "preserved_assertion": true
+            },
+            {
+              "line": 27,
+              "old": "GraphPlannerRequest",
+              "new": "app.domains.relationships.contracts.graph_planner.GraphPlannerRequest",
+              "preserved_assertion": true
+            },
+            {
+              "line": 27,
+              "old": "GraphRecallScope",
+              "new": "app.domains.relationships.contracts.graph_recall.GraphRecallScope",
+              "preserved_assertion": true
+            },
+            {
+              "line": 27,
+              "old": "GraphRetrievalPlan",
+              "new": "app.domains.relationships.contracts.graph_plan.GraphRetrievalPlan",
+              "preserved_assertion": true
+            },
+            {
+              "line": 27,
+              "old": "GraphRetrievalPlanExecutor",
+              "new": "app.domains.relationships.service.graph_planning.GraphRetrievalPlanExecutor",
+              "preserved_assertion": true
+            },
+            {
+              "line": 27,
+              "old": "GraphRetrievalPlanValidator",
+              "new": "app.domains.relationships.service.graph_planning.GraphRetrievalPlanValidator",
+              "preserved_assertion": true
+            }
+          ]
+        },
+        {
+          "path": "backend/app/domains/chat/application/retrieval_routing.py",
+          "bindings": [
+            {
+              "line": 43,
+              "old": "GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "new": "app.domains.relationships.contracts.graph_recall_gateway.GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "preserved_assertion": true
+            }
+          ]
+        },
+        {
+          "path": "scripts/ci/generate_p8_l_k_retrieval_router_inventory.py",
+          "bindings": [
+            {
+              "line": 46,
+              "old": "GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "new": "app.domains.relationships.contracts.graph_recall_gateway.GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "preserved_assertion": true
+            }
+          ]
+        },
+        {
+          "path": "scripts/ci/generate_p8_l_m_graph_retrieval_planner_inventory.py",
+          "bindings": [
+            {
+              "line": 29,
+              "old": "GRAPH_PLAN_VERSION",
+              "new": "app.domains.relationships.contracts.graph_plan.GRAPH_PLAN_VERSION",
+              "preserved_assertion": true
+            },
+            {
+              "line": 29,
+              "old": "GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "new": "app.domains.relationships.contracts.graph_recall_gateway.GRAPH_RECALL_PRIMITIVE_REGISTRY",
+              "preserved_assertion": true
+            },
+            {
+              "line": 29,
+              "old": "MAX_GRAPH_PLAN_STEPS",
+              "new": "app.domains.relationships.contracts.graph_plan.MAX_GRAPH_PLAN_STEPS",
+              "preserved_assertion": true
+            },
+            {
+              "line": 29,
+              "old": "graph_retrieval_plan_response_schema",
+              "new": "app.domains.relationships.policies.graph_plan_schema.graph_retrieval_plan_response_schema",
+              "preserved_assertion": true
+            }
+          ]
+        }
+      ],
+      "evidence": "All70 original __all__ exports proved identical to canonical objects before removal. 61 whole product functions/classes unchanged after resolving exact imports;18 consumers163 references reconnected. One structural membership assertion follows the exact public.py→service/graph_read.py file/module map using the existing normalizer; no checker modifications.",
+      "remaining": "Final parent integration and complete-domain scope/live docs; mixed Chat/Today/image test ownership audit.",
+      "validation": {
+        "focused": "123 PASS /1existing PostgreSQLskip /48.36sec /1existing warning",
+        "contracts": "PR258/263 API/schema/ORM unchanged",
+        "assertions": "All8 changed protected test files PASS, including exact structural module literal",
+        "split_evidence": "Full existing split evidence PASS",
+        "boundaries": "847modules/3027edges/154legacy exact edges;18old public bridges removed;no new exceptions",
+        "inventories": "Current L4/ER0 generator PASS; frozen I/K/M inventory tests PASS; no frozen JSON rewrite"
+      }
     },
     "AR-B4-C3b-activity-policy-counts": {
       "status": "IMPLEMENTED — 467 focused passed, existing PG skip1; original10 actual function ASTs preserved after exact collaborator substitution; boundary697/2332/221; readonly source/split/assertion/suppression/API/ORM/node diagnostics errors0; root linear introductions and stock integration gate pending",

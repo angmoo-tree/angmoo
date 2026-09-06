@@ -1,5 +1,5 @@
-"""Relationship domain.
+"""Relationships owns directional state, evidence, recall and projection policy.
 
-Consumers should import :mod:`app.domains.relationships.public` instead of
-reaching into the internal ``graph_read`` package.
+Consumers select actual contracts, schemas, errors or service functions;
+runtime composition supplies canonical reads and replayable graph transport.
 """
