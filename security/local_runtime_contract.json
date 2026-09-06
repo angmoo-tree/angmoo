@@ -31,6 +31,12 @@
       "removal_condition": "Move active-hour policy behind the activities domain public API."
     },
     {
+      "module": "app.core.bounded_text",
+      "disposition": "keep",
+      "owner_stage": "AR-B5",
+      "removal_condition": null
+    },
+    {
       "disposition": "keep",
       "module": "app.core.context_clipping",
       "owner_stage": "AR-B4",
@@ -70,6 +76,12 @@
       "disposition": "keep",
       "module": "app.core.image_prompt_safety",
       "owner_stage": "AR-B8-A",
+      "removal_condition": null
+    },
+    {
+      "module": "app.core.json_objects",
+      "disposition": "keep",
+      "owner_stage": "AR-B5",
       "removal_condition": null
     },
     {

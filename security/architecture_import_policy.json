@@ -2230,6 +2230,14 @@
         "reason": "The original five Literal assignments now live once in their actual owner constants. Historical agents exports import these identical objects while final old schema compatibility retirement is reviewed.",
         "removal_condition": "Remove the original agents facade and this exact alias after the recorded old-path identity checks are retired with original Git binding evidence.",
         "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+        "target": "app.domains.social.models.subjective_context",
+        "owner_stage": "AR-B8-A",
+        "reason": "Immutable Alembic 0088 imports the exact two schema-builder functions from this historical path; no ORM classes or duplicate implementations are exported.",
+        "removal_condition": "Keep while immutable supported Alembic revision 0088 imports this path; product consumers use the actual model owner directly.",
+        "review_date": "2026-09-06"
       }
     ]
   }

@@ -64,22 +64,22 @@
     },
     "DELETE /api/v1/posts/{post_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "delete_post"
     },
     "DELETE /api/v1/posts/{post_id}/likes": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "unlike_post"
     },
     "DELETE /api/v1/posts/{post_id}/reposts": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "unrepost_post"
     },
     "DELETE /api/v1/profiles/follows": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "unfollow_profile"
     },
     "DELETE /api/v1/world-package-exports/{operation_id}": {
@@ -229,7 +229,7 @@
     },
     "GET /api/v1/characters/{character_id}/activity": {
       "access": "public",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "get_character_activity"
     },
     "GET /api/v1/characters/{character_id}/message-settings": {
@@ -244,12 +244,12 @@
     },
     "GET /api/v1/characters/{character_id}/worlds/{world_id}/relationship-graph": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_activity_runtime",
+      "module": "app.domains.relationships.router",
       "endpoint": "get_world_character_relationship_graph"
     },
     "GET /api/v1/characters/{character_id}/worlds/{world_id}/social-memory": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.world_activity_runtime",
+      "module": "app.domains.relationships.router",
       "endpoint": "get_world_character_social_memory"
     },
     "GET /api/v1/world-package-exports/{operation_id}/download": {
@@ -264,27 +264,27 @@
     },
     "GET /api/v1/feed": {
       "access": "public",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "list_feed"
     },
     "GET /api/v1/feed/following": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "list_following_feed"
     },
     "GET /api/v1/feed/following/characters/{character_id}": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "list_character_following_feed"
     },
     "GET /api/v1/insights/today-activity": {
       "access": "public",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "list_today_activity"
     },
     "GET /api/v1/insights/today-popular-posts": {
       "access": "public",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "list_today_popular_posts"
     },
     "GET /api/v1/messages/settings": {
@@ -304,57 +304,57 @@
     },
     "GET /api/v1/notifications": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "list_notifications"
     },
     "GET /api/v1/posts": {
       "access": "public",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "list_posts"
     },
     "GET /api/v1/posts/{post_id}": {
       "access": "public",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "get_post"
     },
     "GET /api/v1/posts/{post_id}/thread": {
       "access": "public",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "get_post_thread"
     },
     "GET /api/v1/profiles/characters/{character_id}": {
       "access": "public",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "get_character_profile"
     },
     "GET /api/v1/profiles/characters/{character_id}/connections": {
       "access": "public",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "get_character_profile_connections"
     },
     "GET /api/v1/profiles/characters/{character_id}/feed": {
       "access": "public",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "get_character_profile_feed"
     },
     "GET /api/v1/profiles/follows/status": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "get_follow_status"
     },
     "GET /api/v1/profiles/users/{user_id}": {
       "access": "public",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "get_user_profile"
     },
     "GET /api/v1/profiles/users/{user_id}/connections": {
       "access": "public",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "get_user_profile_connections"
     },
     "GET /api/v1/profiles/users/{user_id}/feed": {
       "access": "public",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "get_user_profile_feed"
     },
     "GET /api/v1/runtime/status": {
@@ -364,7 +364,7 @@
     },
     "GET /api/v1/search": {
       "access": "public",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "search_nest"
     },
     "GET /api/v1/tree/posts": {
@@ -459,12 +459,12 @@
     },
     "GET /api/v1/worlds/{world_id}/manual-social/feed": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.manual_social",
+      "module": "app.domains.social.router",
       "endpoint": "read_manual_social_feed"
     },
     "GET /api/v1/worlds/{world_id}/manual-social/posts/{post_id}": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.manual_social",
+      "module": "app.domains.social.router",
       "endpoint": "read_manual_social_post_thread"
     },
     "GET /api/v1/worlds/{world_id}/owner-character": {
@@ -519,7 +519,7 @@
     },
     "GET /api/v1/worlds/{world_id}/world-characters/{world_character_id}/social-profile": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.manual_social",
+      "module": "app.domains.social.router",
       "endpoint": "read_world_character_social_activity"
     },
     "GET /health": {
@@ -574,7 +574,7 @@
     },
     "PATCH /api/v1/notifications/{notification_id}/read": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "mark_notification_read"
     },
     "PATCH /api/v1/worlds/{world_id}": {
@@ -789,42 +789,42 @@
     },
     "POST /api/v1/posts": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "create_post"
     },
     "POST /api/v1/posts/{post_id}/comments": {
       "access": "public",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "create_comment"
     },
     "POST /api/v1/posts/{post_id}/likes": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "like_post"
     },
     "POST /api/v1/posts/{post_id}/quotes": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "create_quote"
     },
     "POST /api/v1/posts/{post_id}/replies": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "create_reply"
     },
     "POST /api/v1/posts/{post_id}/reports": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "report_post"
     },
     "POST /api/v1/posts/{post_id}/reposts": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "repost_post"
     },
     "POST /api/v1/profiles/follows": {
       "access": "authenticated-shared",
-      "module": "app.api.v1.routes.community",
+      "module": "app.domains.social.router",
       "endpoint": "follow_profile"
     },
     "POST /api/v1/tree/posts": {
@@ -934,12 +934,12 @@
     },
     "POST /api/v1/worlds/{world_id}/manual-social/posts": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.manual_social",
+      "module": "app.domains.social.router",
       "endpoint": "write_owner_post"
     },
     "POST /api/v1/worlds/{world_id}/manual-social/posts/{post_id}/replies": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.manual_social",
+      "module": "app.domains.social.router",
       "endpoint": "write_owner_reply"
     },
     "POST /api/v1/worlds/{world_id}/owner-character": {

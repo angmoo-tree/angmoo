@@ -1,7 +1,7 @@
 {
-  "edge_count": 4076,
+  "edge_count": 4077,
   "external_import_count": 3115,
-  "module_count": 1090,
+  "module_count": 1091,
   "modules": [
     {
       "external_imports": [],
@@ -8931,6 +8931,15 @@
       "imports": [],
       "module": "app.domains.social.exceptions",
       "path": "backend/app/domains/social/exceptions.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [
+        "app.domains.social.models.subjective_context"
+      ],
+      "module": "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
+      "path": "backend/app/domains/social/infrastructure/sqlalchemy_subjective_context_models.py",
       "wildcard_imports": []
     },
     {
