@@ -8335,6 +8335,99 @@
         "tests/runtime/test_asgi_preservation.py": {},
         "tests/runtime/test_canonical_bootstrap.py": {}
       }
+    },
+    {
+      "commit": "924a8361867bd0228943082227221d78507f9027",
+      "feature_id": "AR-B8-G5",
+      "reason": "Original signed source integration: refactor: establish sole ORM Base and explicit model registration",
+      "tracked_files": {
+        "backend/app/models.py": "f2bf887cf6a64b8aa6bbe066b69f332abfc8175f",
+        "backend/tests/model_fixture_support.py": "f4b3caf2541be0a113ca5250c113191b8c3b5b9e",
+        "backend/tests/persistence/test_model_registration.py": "fcdec89d2e1d810386f0239fb0d46557886fc58b",
+        "backend/tests/test_refactor_model_facade_retirement.py": "fdddde4c85967d57a3672e4ca274b9b8c5553b6e"
+      },
+      "test_nodes": [
+        "tests/persistence/test_model_registration.py::test_base_import_does_not_load_domain_models_database_or_runtime",
+        "tests/persistence/test_model_registration.py::test_canonical_database_opens_without_importing_an_app",
+        "tests/persistence/test_model_registration.py::test_default_engine_cache_and_request_session_cleanup",
+        "tests/persistence/test_model_registration.py::test_registration_is_idempotent_and_keeps_102_canonical_classes",
+        "tests/persistence/test_model_registration.py::test_sqlite_connection_pragmas_and_explicit_session_rollback",
+        "tests/test_refactor_model_facade_retirement.py::test_frozen_pure_model_alias_can_retire_only_with_actual_registered_classes",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[base_rebinding]",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[changed_class]",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[class_rebinding]",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[conditional_registration]",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[duplicate_base]",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[frozen_implementation]",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[missing_class]",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[missing_registration]",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[registration_argument]",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[registration_decorator]",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[registration_rebinding]",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[relative_import]",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[remaining_facade]",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[remaining_import]",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[wrong_base]",
+        "tests/test_refactor_model_facade_retirement.py::test_incomplete_or_behavior_changing_model_retirement_is_rejected[wrong_export]",
+        "tests/test_refactor_model_facade_retirement.py::test_non_model_module_and_unmapped_facade_are_rejected",
+        "tests/test_refactor_model_facade_retirement.py::test_retirement_does_not_authorize_other_assertion_changes[assert allowed is True]",
+        "tests/test_refactor_model_facade_retirement.py::test_retirement_does_not_authorize_other_assertion_changes[assert imports['app.models.auth'] == {'app.domains.identity.models', 'extra'}]",
+        "tests/test_refactor_model_facade_retirement.py::test_retirement_does_not_authorize_other_assertion_changes[assert imports['app.models.auth'] == {'wrong.owner'}]",
+        "tests/test_refactor_model_facade_retirement.py::test_retirement_does_not_authorize_other_assertion_changes[assert imports['app.models.auth'] >= {'app.domains.identity.models'}]",
+        "tests/test_refactor_model_facade_retirement.py::test_retirement_does_not_authorize_other_assertion_changes[assert imports['app.models.other'] == {'app.domains.identity.models'}]",
+        "tests/test_refactor_model_facade_retirement.py::test_retirement_does_not_authorize_other_assertion_changes[assert len(users) == 1]"
+      ],
+      "test_assertions": {
+        "tests/persistence/test_model_registration.py": {
+          "run_cold": [
+            "assert result.returncode == 0, result.stderr"
+          ],
+          "test_base_import_does_not_load_domain_models_database_or_runtime": [
+            "assert result == ''"
+          ],
+          "test_registration_is_idempotent_and_keeps_102_canonical_classes": [
+            "assert result == ''"
+          ],
+          "test_canonical_database_opens_without_importing_an_app": [
+            "assert result == ''"
+          ],
+          "test_default_engine_cache_and_request_session_cleanup": [
+            "assert database.get_default_engine() is engine",
+            "assert database.get_default_engine() is engine",
+            "assert database.get_default_session_factory() is Session",
+            "assert calls == [('engine', database.settings.database_url), 'factory']",
+            "assert isinstance(next(request), Session)",
+            "assert calls[-1] == 'close'",
+            "assert value is engine"
+          ],
+          "test_sqlite_connection_pragmas_and_explicit_session_rollback": [
+            "assert actual == {'foreign_keys': 1, 'busy_timeout': 5000, 'journal_mode': 'wal', 'synchronous': 2, 'wal_autocheckpoint': 1000}",
+            "assert session.autoflush is False",
+            "assert observer.execute(text('SELECT count(*) FROM rollback_probe')).scalar_one() == 0"
+          ]
+        },
+        "tests/test_refactor_model_facade_retirement.py": {
+          "candidate": [],
+          "test_frozen_pure_model_alias_can_retire_only_with_actual_registered_classes": [
+            "assert p.validated_model_facade_retirements({OLD: OWNER}, files, snapshots, root) == {OLD: OWNER}",
+            "assert p.retired_model_assertion(before, {OLD: OWNER}) == f'assert {OLD!r} not in imports'"
+          ],
+          "test_incomplete_or_behavior_changing_model_retirement_is_rejected": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_retirement_does_not_authorize_other_assertion_changes": [
+            "assert p.retired_model_assertion(fragment, {OLD: OWNER}) == fragment"
+          ],
+          "test_non_model_module_and_unmapped_facade_are_rejected": [
+            "pytest.raises(ValueError)",
+            "pytest.raises(ValueError)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/persistence/test_model_registration.py": {},
+        "tests/test_refactor_model_facade_retirement.py": {}
+      }
     }
   ]
 }

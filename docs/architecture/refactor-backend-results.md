@@ -3601,6 +3601,15 @@ Tree/Lore 순차 후보의 첫 공식 보존 검사는 보호 대상과 현재 *
 
 현재 feature 경로는 기존 exact file map을 따라 LocalBot·Character Image·Identity credential·Operations로 연결했다. K13은 Activity와 Image 모델의 실제 두 소유자를 함께 유지하며 Maintenance 값은 Operations로 분류한다. **원래 production current inventory/split 검사 오류0**, 기존166 prefix 동일/현재176, 제품·테스트·검사·CI·frozen 변경0을 확인했다. 이 metadata를 고정한 뒤 공식 전체 stock 및 전체 pytest를 이어가며, 이 국소 통과를 전체 backend/Hosted/installer/병합 완료로 기록하지 않는다.
 
+### AR-B8-A Runtime·G06 순차 통합 전체 검증
+
+고정 `ec72adaa1fb7e1fd6ea43864f749c9871b503e73`의 전체 backend는 **2456 PASS / 기존22 SKIP /28 warnings /912.53초**다. 실제 Runtime 진단·lease·같은 Session의 Identity 접근과 `main.py` 단일 factory 및 임시 public export를 합친 후보이며, 기존 40개 초기화 연결과 factory/lifespan/health 본문, full/public 각각196개 HTTP operation 및102 ORM 계약을 유지한다. G5와 `public_main.py` 삭제 전 검증으로 기록하며 최종 제거 완료를 뜻하지 않는다.
+
+선행 Residual의 검토된 현재 지도를 합친 `d9f9fac6`에서 제품·테스트·검사기·원장184개는 달라지지 않았다. 첫 공식 stock의 보호2478=현재2478과 원본 계약·단언·suppression 보존은 일치했으나, Runtime 오류의 현재 경로7개와 해당 split 목적지 집합1개가 아직 이전 `contracts.py`를 가리켰다. 실제 동일 오류 정의를 소유한 Runtime/Routines의 `exceptions.py`로 현재 목적지만 연결하고 원본 source·symbol·행위 검증을 유지했다.
+
+같은 후보의 CI·OSS·launcher·desktop installer·Host Tauri 계약과 DCO·구조 경계 검사가 통과했고 custom 현재 보안 검사는2226files/치명0이다. Gitleaks가 원장의 Git blob14개를 generic key로 분류한 첫 실패를 보존한다. 각각 원래 signed commit의 정확한 경로와 실제 Git blob 일치를 확인한 뒤 Residual12개와 Runtime2개를 exact 경로·행·값 조합으로만 구분했다. 실제 Gitleaks8.30.1에서 검토 값은 통과하고 값 변경 및 다른 파일은 각각 검출되는 것을 확인했다. 원장 내용과 비밀 탐지 규칙은 그대로이며 이 보정 후 전체 stock·보안·순차 PR/Hosted/설치/병합 Gate를 이어간다.
+
+
 
 ## AR-B8-G5 순차 통합 — 단일 Base·DB 연결·명시적 모델 등록
 
@@ -3688,3 +3697,11 @@ AR-B7 및 G5에서 이미 검증한 실제 Memory 소유 구현과 앱 생성 �
 현재 지도에서 Daypart 8개 행의 목적지는 import alias가 아니라 실제 Memory 정의를 가리킨다. Python source 1431개 AST parse와 경계 1064 modules/3967 edges/legacy0를 확인했다. 역사적 Chat world_scope migration은 원래 Git blob 20595바이트와 같은 SHA256을 보존한다. 원래 도입 기록 184개와 동결 계약은 유지했다. G5 원래 작업과 무관한 docstring-only Chat test namespace는 원본 최초 도입 증거를 조작하지 않고 실제 후보에서 제외한다. 기존 Chat 테스트 수집에는 영향이 없다.
 
 이 항목은 충돌 해결과 정적 검토의 증거다. 순차 원본 추가 원장, 공식 stock, 현재 후보의 집중/전체 테스트, Hosted/설치 및 post-merge 완료는 별도 결과로 기록한다.
+
+선행 Runtime 현재 경로 보정 `d82db1cc`도 합류했다. 충돌 합류로 두 번 등록됐던 `app.core.context_clipping`은 실제 Daypart source 소유의 `AR-B7-DAYPART / keep` 한 항목을 유지했다. 제품·테스트·검사기는 바꾸지 않았으며, 실제 DB import 이동에 따른 현재 SQL/실행 inventory를 다시 수집해 **ER0 92/87/24/44/7**, deferred **24 files**를 확인했다. 이 현재 목록 갱신은 frozen migration 본문이나 predecessor 계약의 재생성이 아니다.
+
+G5 원장 추가 전 검사는 inherited `tests/chat/__init__.py`의 최초 도입 귀속 오류를 잡았으며 원장은 저장하지 않았다. 이 파일은 원래 signed merge `8a4bb308`의 양 부모 모두에 없었던 설명 docstring 한 줄이다. 함수·class·import·docstring 이외 실행문·현재 module consumer가 각각 0이고, G5의 실제 source `924a836`이 처음 추가한 파일도 아니다. 선행 `576d3119` 역시 이 파일 없이 같은 Chat 검사들을 수집·실행했다. 따라서 G5와 무관한 namespace 표시 파일의 합류만 제외하고, 원문 blob·두 부모·AST·현재 참조0 증거는 `g5-unrelated-test-namespace-proof.json`에 남긴다. 기존 Chat test 함수·fixture·단언은 삭제하거나 바꾸지 않는다. 원래 snapshot과 checker는 유지하고, 원장에는 실제 G5 도입 파일 4개와 기존 새 test 29개만 귀속한다. 설명 파일을 현재 커밋의 새 기능이나 잘못된 최초 source로 재등록하지 않는다.
+
+namespace 표시 파일 제외 후에도 이전과 이후의 **2,507개 수집 node ID 및 순서가 정확히 같고**, 실제 full/public196·ORM102·frozen ASGI 차이0을 재확인했다. 제품과 기존 test 함수·fixture·단언의 수정은 없다.
+
+원래 G5 committed snapshot의 실제 최초 도입 **4 files / 29 nodes**를 원장에 연결했다. 원래 checkpoint/addition 검사를 쓰기 전후 그대로 실행하여 Git blob·최초 도입·기존 단언·suppression·node·ancestor 오류0을 확인했고, 선행184개 기록은 깊은 동일성을 유지한 채 **184 → 185**로 append했다. source/checker/frozen 계약은 이 기록에서 변경하지 않았다. 공식 stock과 동일 후보 전체 backend 결과는 후속으로 기록한다.
