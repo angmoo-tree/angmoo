@@ -24,9 +24,13 @@ def validate_scope(policy: dict, *, frontend: bool) -> list[str]:
     fields = ("features", "common", "bridges") if frontend else (
         "domains", "globals", "modules", "entries", "bridges",
     )
-    optional = set() if frontend else {"complete", "retained_modules"}
+    optional = {"complete"} if frontend else {"complete", "retained_modules"}
     if not isinstance(policy, dict) or set(policy) - set(fields) - optional:
         return ["[refactor_invalid_scope] unknown scope fields"]
+    if frontend and "complete" in policy and not isinstance(policy["complete"], bool):
+        return ["[refactor_invalid_scope] frontend complete must be a boolean"]
+    if frontend and policy.get("complete") and policy.get("bridges"):
+        return ["[refactor_invalid_scope] complete frontend cannot retain transition bridges"]
     if not frontend:
         if "complete" in policy and not isinstance(policy["complete"], bool):
             return ["[refactor_invalid_scope] complete must be a boolean"]

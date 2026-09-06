@@ -16,6 +16,7 @@ DEFAULT_POLICY = ROOT / "security/frontend_architecture_policy.json"
 DEFAULT_SOURCE_ROOT = ROOT / "frontend/src"
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from refactor_boundaries import check_frontend_edges, validate_scope  # noqa: E402
+from frontend_completed_boundaries import check_completed_frontend  # noqa: E402
 
 IMPORT_PATTERN = re.compile(
     r"(?:from\s+|import\s*\(|require\s*\(|import\s+)\s*['\"]([^'\"]+)['\"]"
@@ -128,6 +129,23 @@ def check_frontend(source_root: Path, policy: dict[str, Any]) -> list[str]:
     errors.extend(validate_scope(policy.get("refactor", {}), frontend=True))
     if errors:
         return sorted(errors)
+
+    if policy.get("refactor", {}).get("complete"):
+        # Final coverage derives from the filesystem, including unreferenced new
+        # features/common files. A stale hand-maintained list cannot opt out.
+        completed = check_completed_frontend(source_root)
+        for relative in policy["required_paths"]:
+            if not (source_root.parent.parent / relative).is_file():
+                completed.append(f"[missing_contract_file] {relative}")
+        for relative, markers in policy["required_markers"].items():
+            path = source_root.parent.parent / relative
+            if not path.is_file():
+                completed.append(f"[missing_contract_file] {relative}")
+            else:
+                for marker in markers:
+                    if marker not in path.read_text(encoding="utf-8"):
+                        completed.append(f"[missing_contract_marker] {relative}: {marker}")
+        return sorted(set(completed))
 
     repository_root = source_root.parent.parent
     documentation = policy["documentation"]

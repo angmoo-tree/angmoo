@@ -9305,6 +9305,160 @@
       "test_suppressions": {
         "tests/test_chat_forwarder_retirement.py": {}
       }
+    },
+    {
+      "commit": "74ce61a2269bf48b9d084af587597199574345e3",
+      "feature_id": "K24",
+      "reason": "Frontend AR-F2-0 preservation and final boundary gate regressions",
+      "tracked_files": {
+        "backend/tests/test_refactor_frontend_foundation.py": "9631745207446795010b8cacc1b7316d7c2cbb44",
+        "docs/architecture/refactor-frontend-results.md": "ce3f51ccfbd0fbcb50fab842264c3d85961818ce",
+        "scripts/ci/check_refactor_frontend_preservation.py": "7083bbb198d72f322c53b45bb2769c96dc883a41",
+        "scripts/ci/frontend_completed_boundaries.py": "4c6fd46461688f10f7fc9b3a070b519d6016fe45",
+        "security/refactor_frontend_checkpoint.json": "f5496a4c4f7a7ed282518b3cabb036063f7e8fdc"
+      },
+      "test_nodes": [
+        "tests/test_refactor_frontend_foundation.py::test_browser_oracle_cannot_be_skipped_weakened_or_deleted[test('works', () => expect(1).toBe(0));]",
+        "tests/test_refactor_frontend_foundation.py::test_browser_oracle_cannot_be_skipped_weakened_or_deleted[test('works', () => {});]",
+        "tests/test_refactor_frontend_foundation.py::test_browser_oracle_cannot_be_skipped_weakened_or_deleted[test.skip('works', () => expect(1).toBe(1));]",
+        "tests/test_refactor_frontend_foundation.py::test_calculated_dynamic_import_fails_closed",
+        "tests/test_refactor_frontend_foundation.py::test_complete_scope_rejects_transition_bridges",
+        "tests/test_refactor_frontend_foundation.py::test_final_reverse_edges_are_rejected[components/ui/new.tsx-@/features/chat/components/chat-refactor_common_imports_application]",
+        "tests/test_refactor_frontend_foundation.py::test_final_reverse_edges_are_rejected[composition/screens/a.tsx-@/app/a-frontend_composition_imports_app]",
+        "tests/test_refactor_frontend_foundation.py::test_final_reverse_edges_are_rejected[features/chat/components/chat.tsx-@/composition/a-refactor_feature_imports_composition]",
+        "tests/test_refactor_frontend_foundation.py::test_final_reverse_edges_are_rejected[lib/new.ts-@/testing-refactor_production_imports_test]",
+        "tests/test_refactor_frontend_foundation.py::test_final_valid_actual_files_and_server_route_are_allowed",
+        "tests/test_refactor_frontend_foundation.py::test_frontend_only_change_reaches_each_host_event[browser-tests/**-pull_request]",
+        "tests/test_refactor_frontend_foundation.py::test_frontend_only_change_reaches_each_host_event[browser-tests/**-push]",
+        "tests/test_refactor_frontend_foundation.py::test_frontend_only_change_reaches_each_host_event[frontend/**-pull_request]",
+        "tests/test_refactor_frontend_foundation.py::test_frontend_only_change_reaches_each_host_event[frontend/**-push]",
+        "tests/test_refactor_frontend_foundation.py::test_frontend_only_change_reaches_each_host_event[security/frontend*-pull_request]",
+        "tests/test_refactor_frontend_foundation.py::test_frontend_only_change_reaches_each_host_event[security/frontend*-push]",
+        "tests/test_refactor_frontend_foundation.py::test_missing_source_fails_and_exact_source_move_passes",
+        "tests/test_refactor_frontend_foundation.py::test_path_moves_preserve_entire_browser_assertion",
+        "tests/test_refactor_frontend_foundation.py::test_preservation_moves_stay_inside_repository[../outside.ts]",
+        "tests/test_refactor_frontend_foundation.py::test_preservation_moves_stay_inside_repository[/absolute.ts]",
+        "tests/test_refactor_frontend_foundation.py::test_preservation_moves_stay_inside_repository[frontend/../outside.ts]",
+        "tests/test_refactor_frontend_foundation.py::test_static_shell_is_checked_outside_src",
+        "tests/test_refactor_frontend_foundation.py::test_transitive_server_dependency_cannot_enter_shared_screen",
+        "tests/test_refactor_frontend_foundation.py::test_unknown_feature_cannot_hide_cross_feature_import[const x = import(\"@/features/new/types/x\");]",
+        "tests/test_refactor_frontend_foundation.py::test_unknown_feature_cannot_hide_cross_feature_import[const x = require(\"../../new/types/x\");]",
+        "tests/test_refactor_frontend_foundation.py::test_unknown_feature_cannot_hide_cross_feature_import[export { X } from \"../../new/types/x\";]",
+        "tests/test_refactor_frontend_foundation.py::test_unknown_feature_cannot_hide_cross_feature_import[import type { X } from \"@/features/new/types/x\";]",
+        "tests/test_refactor_frontend_foundation.py::test_unreferenced_legacy_file_is_not_invisible[features/unlisted/model/x.ts]",
+        "tests/test_refactor_frontend_foundation.py::test_unreferenced_legacy_file_is_not_invisible[features/unlisted/public.ts]",
+        "tests/test_refactor_frontend_foundation.py::test_unreferenced_legacy_file_is_not_invisible[features/unlisted/ui/x.tsx]",
+        "tests/test_refactor_frontend_foundation.py::test_unreferenced_legacy_file_is_not_invisible[shared/ui/orphan.tsx]"
+      ],
+      "test_assertions": {
+        "tests/test_refactor_frontend_foundation.py": {
+          "write": [],
+          "test_unknown_feature_cannot_hide_cross_feature_import": [
+            "assert any(('refactor_cross_feature' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_final_reverse_edges_are_rejected": [
+            "assert any((expected in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_final_valid_actual_files_and_server_route_are_allowed": [
+            "assert check_completed_frontend(tmp_path) == []"
+          ],
+          "test_transitive_server_dependency_cannot_enter_shared_screen": [
+            "assert any(('frontend_client_imports_server' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_static_shell_is_checked_outside_src": [
+            "assert any(('frontend_composition_imports_app' in e for e in check_completed_frontend(tmp_path / 'frontend/src')))"
+          ],
+          "test_unreferenced_legacy_file_is_not_invisible": [
+            "assert any(('frontend_completed_legacy_file' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_calculated_dynamic_import_fails_closed": [
+            "assert any(('frontend_computed_import' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_complete_scope_rejects_transition_bridges": [
+            "assert validate_scope({'complete': True, 'bridges': [{}]}, frontend=True)"
+          ],
+          "test_browser_oracle_cannot_be_skipped_weakened_or_deleted": [
+            "assert any(('frontend_oracle_changed' in e for e in verify(tmp_path, {path: original}, {})))"
+          ],
+          "test_missing_source_fails_and_exact_source_move_passes": [
+            "assert verify(tmp_path, frozen, {})",
+            "assert verify(tmp_path, frozen, {old: new}) == []"
+          ],
+          "test_path_moves_preserve_entire_browser_assertion": [
+            "assert verify(tmp_path, {path: original}, {old: new}) == []"
+          ],
+          "test_preservation_moves_stay_inside_repository": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_frontend_only_change_reaches_each_host_event": [
+            "assert f'Hosted Windows {event} paths must include {missing}' in errors"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_refactor_frontend_foundation.py": {}
+      }
+    },
+    {
+      "commit": "b9a17940fc236a9aa0e8d39603016b44b7f711ea",
+      "feature_id": "K24",
+      "reason": "Frontend pinned Git bytes must match on Windows and Linux with either autocrlf configuration",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_refactor_frontend_foundation.py::test_committed_frontend_bytes_ignore_host_line_endings[false]",
+        "tests/test_refactor_frontend_foundation.py::test_committed_frontend_bytes_ignore_host_line_endings[true]"
+      ],
+      "test_assertions": {
+        "tests/test_refactor_frontend_foundation.py": {
+          "write": [],
+          "test_committed_frontend_bytes_ignore_host_line_endings": [
+            "assert frontend_stock.committed_files(ROOT)[source] == canonical"
+          ],
+          "test_unknown_feature_cannot_hide_cross_feature_import": [
+            "assert any(('refactor_cross_feature' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_final_reverse_edges_are_rejected": [
+            "assert any((expected in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_final_valid_actual_files_and_server_route_are_allowed": [
+            "assert check_completed_frontend(tmp_path) == []"
+          ],
+          "test_transitive_server_dependency_cannot_enter_shared_screen": [
+            "assert any(('frontend_client_imports_server' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_static_shell_is_checked_outside_src": [
+            "assert any(('frontend_composition_imports_app' in e for e in check_completed_frontend(tmp_path / 'frontend/src')))"
+          ],
+          "test_unreferenced_legacy_file_is_not_invisible": [
+            "assert any(('frontend_completed_legacy_file' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_calculated_dynamic_import_fails_closed": [
+            "assert any(('frontend_computed_import' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_complete_scope_rejects_transition_bridges": [
+            "assert validate_scope({'complete': True, 'bridges': [{}]}, frontend=True)"
+          ],
+          "test_browser_oracle_cannot_be_skipped_weakened_or_deleted": [
+            "assert any(('frontend_oracle_changed' in e for e in verify(tmp_path, {path: original}, {})))"
+          ],
+          "test_missing_source_fails_and_exact_source_move_passes": [
+            "assert verify(tmp_path, frozen, {})",
+            "assert verify(tmp_path, frozen, {old: new}) == []"
+          ],
+          "test_path_moves_preserve_entire_browser_assertion": [
+            "assert verify(tmp_path, {path: original}, {old: new}) == []"
+          ],
+          "test_preservation_moves_stay_inside_repository": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_frontend_only_change_reaches_each_host_event": [
+            "assert f'Hosted Windows {event} paths must include {missing}' in errors"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_refactor_frontend_foundation.py": {}
+      }
     }
   ]
 }
