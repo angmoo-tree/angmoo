@@ -9398,6 +9398,67 @@
       "test_suppressions": {
         "tests/test_refactor_frontend_foundation.py": {}
       }
+    },
+    {
+      "commit": "b9a17940fc236a9aa0e8d39603016b44b7f711ea",
+      "feature_id": "K24",
+      "reason": "Frontend pinned Git bytes must match on Windows and Linux with either autocrlf configuration",
+      "tracked_files": {},
+      "test_nodes": [
+        "tests/test_refactor_frontend_foundation.py::test_committed_frontend_bytes_ignore_host_line_endings[false]",
+        "tests/test_refactor_frontend_foundation.py::test_committed_frontend_bytes_ignore_host_line_endings[true]"
+      ],
+      "test_assertions": {
+        "tests/test_refactor_frontend_foundation.py": {
+          "write": [],
+          "test_committed_frontend_bytes_ignore_host_line_endings": [
+            "assert frontend_stock.committed_files(ROOT)[source] == canonical"
+          ],
+          "test_unknown_feature_cannot_hide_cross_feature_import": [
+            "assert any(('refactor_cross_feature' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_final_reverse_edges_are_rejected": [
+            "assert any((expected in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_final_valid_actual_files_and_server_route_are_allowed": [
+            "assert check_completed_frontend(tmp_path) == []"
+          ],
+          "test_transitive_server_dependency_cannot_enter_shared_screen": [
+            "assert any(('frontend_client_imports_server' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_static_shell_is_checked_outside_src": [
+            "assert any(('frontend_composition_imports_app' in e for e in check_completed_frontend(tmp_path / 'frontend/src')))"
+          ],
+          "test_unreferenced_legacy_file_is_not_invisible": [
+            "assert any(('frontend_completed_legacy_file' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_calculated_dynamic_import_fails_closed": [
+            "assert any(('frontend_computed_import' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_complete_scope_rejects_transition_bridges": [
+            "assert validate_scope({'complete': True, 'bridges': [{}]}, frontend=True)"
+          ],
+          "test_browser_oracle_cannot_be_skipped_weakened_or_deleted": [
+            "assert any(('frontend_oracle_changed' in e for e in verify(tmp_path, {path: original}, {})))"
+          ],
+          "test_missing_source_fails_and_exact_source_move_passes": [
+            "assert verify(tmp_path, frozen, {})",
+            "assert verify(tmp_path, frozen, {old: new}) == []"
+          ],
+          "test_path_moves_preserve_entire_browser_assertion": [
+            "assert verify(tmp_path, {path: original}, {old: new}) == []"
+          ],
+          "test_preservation_moves_stay_inside_repository": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_frontend_only_change_reaches_each_host_event": [
+            "assert f'Hosted Windows {event} paths must include {missing}' in errors"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_refactor_frontend_foundation.py": {}
+      }
     }
   ]
 }

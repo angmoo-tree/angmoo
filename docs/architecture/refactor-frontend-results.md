@@ -58,6 +58,9 @@ real-provider product verification, Release and Production remain separate.
   unchanged. This does not recapture current product code after migration.
   Both host configurations are now tested against `git show` bytes:
   **33 preparation tests passed**. Tauri static build also PASS locally.
+- Corrected frontend preservation also PASS in a Linux container. Static browser
+  regression: **68 passed in 41.7s**; fixture-based native bootstrap, shutdown,
+  scoped Chat/Memory, media authentication and direct-open routes are preserved.
 
 ## How to run the added guard
 
@@ -83,5 +86,10 @@ protects files/consumer oracles; actual browser/native runs prove behavior.
 User authorized cleanup of obsolete backend-refactor temporary files. Check
 actual worktree/process consumers and document/evidence links first. Preserve
 supported migration/extension code, user data, backups and referenced evidence.
-Record exact removed paths and reasons when cleanup is performed; no deletions
-have been performed in this preparation change.
+Removed workspace `.task-output/ar-b8b-pr-preparation` using `git worktree remove`
+without force. Its HEAD `b20c09c986f1b4eaf0b3db558f7353735405e878` is an ancestor
+of origin/main; tracked/untracked source is clean, ignored files are exclusively
+Python/pytest caches, no process or exact plan/architecture-document path consumer
+was found. Its Git history remains available. The cleanup receipt is in workspace
+`.task-output/angmoo-refactor-8-3/backend-temp-cleanup.json`. Other worktrees and
+referenced installer/runtime evidence remain until individually assessed.
