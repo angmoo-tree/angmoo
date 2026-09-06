@@ -6,12 +6,57 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import yaml
+
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 def _read(root: Path, relative: str) -> str:
     return (root / relative).read_text(encoding="utf-8")
+
+
+def check_workflow_triggers(workflow: str) -> list[str]:
+    """Keep both automatic Windows checks reachable for every backend path."""
+    try:
+        document = yaml.safe_load(workflow)
+    except yaml.YAMLError as exc:
+        return [f"Hosted Windows workflow YAML cannot be read: {exc}"]
+    if not isinstance(document, dict):
+        return ["Hosted Windows workflow must be a YAML mapping"]
+    # PyYAML's YAML 1.1 loader reads an unquoted GitHub Actions `on` as True.
+    events = document.get("on", document.get(True))
+    if not isinstance(events, dict):
+        return ["Hosted Windows workflow events must be a mapping"]
+
+    errors: list[str] = []
+    for name in ("push", "pull_request"):
+        event = events.get(name)
+        if not isinstance(event, dict):
+            errors.append(f"Hosted Windows {name} must declare backend path coverage")
+            continue
+        paths = event.get("paths")
+        if not isinstance(paths, list) or any(not isinstance(path, str) for path in paths):
+            errors.append(f"Hosted Windows {name} paths must be a list of strings")
+            continue
+        if "backend/**" not in paths:
+            errors.append(f"Hosted Windows {name} paths must include backend/**")
+        # GitHub does not permit paths and paths-ignore in the same event.
+        if "paths-ignore" in event:
+            errors.append(f"Hosted Windows {name} must not use paths-ignore")
+        for path in paths:
+            if not path.startswith("!"):
+                continue
+            top_level = path[1:].split("/", 1)[0]
+            # A literal different root (e.g. !docs/**) cannot exclude backend.
+            # Wildcard/escaped roots could: fail closed without approximating
+            # GitHub's ordered glob matching with Python filesystem matching.
+            if (
+                top_level in ("", ".", "..", "backend")
+                or any(char in top_level for char in "*?[]{}()+!@\\")
+            ):
+                errors.append(f"Hosted Windows {name} paths must not exclude backend: {path}")
+    return errors
 
 
 def check_repo(*, root: Path = ROOT) -> list[str]:
@@ -46,6 +91,8 @@ def check_repo(*, root: Path = ROOT) -> list[str]:
         contributing = _read(root, "CONTRIBUTING.md")
     except (OSError, json.JSONDecodeError) as exc:
         return [f"windows host Tauri dev contract cannot be read: {exc}"]
+
+    errors.extend(check_workflow_triggers(workflow))
 
     if contract.get("contract_id") != "angmoo-windows-host-tauri-dev-v1":
         errors.append("host Tauri support contract id mismatch")

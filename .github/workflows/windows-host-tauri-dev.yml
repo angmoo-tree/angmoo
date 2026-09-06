@@ -14,17 +14,7 @@ on:
       - "scripts/ci/windows_host_tauri_utf8_smoke.ps1"
       - "scripts/ci/windows_host_tauri_watch_smoke.ps1"
       - "scripts/ci/check_windows_host_tauri_dev_contract.py"
-      - "backend/tests/test_l3_er7_windows_host_tauri_dev_contract.py"
-      - "backend/app/runtime/migrations/**"
-      - "backend/app/runtime/contributor_backend.py"
-      - "backend/tests/test_embedded_data_migration.py"
-      - "backend/tests/test_embedded_data_migration_contract.py"
-      - "backend/app/core/sqlite_concurrency.py"
-      - "backend/app/domains/social/**"
-      - "backend/app/runtime/social/**"
-      - "backend/app/runtime/routine_posts/**"
-      - "backend/tests/world_packages/test_import_commit.py"
-      - "backend/tests/test_l4_pr_f_closeout_contract.py"
+      - "backend/**"
       - ".github/CODEOWNERS"
       - ".github/workflows/windows-host-tauri-dev.yml"
       - "README.md"
@@ -44,17 +34,7 @@ on:
       - "scripts/ci/windows_host_tauri_utf8_smoke.ps1"
       - "scripts/ci/windows_host_tauri_watch_smoke.ps1"
       - "scripts/ci/check_windows_host_tauri_dev_contract.py"
-      - "backend/tests/test_l3_er7_windows_host_tauri_dev_contract.py"
-      - "backend/app/runtime/migrations/**"
-      - "backend/app/runtime/contributor_backend.py"
-      - "backend/tests/test_embedded_data_migration.py"
-      - "backend/tests/test_embedded_data_migration_contract.py"
-      - "backend/app/core/sqlite_concurrency.py"
-      - "backend/app/domains/social/**"
-      - "backend/app/runtime/social/**"
-      - "backend/app/runtime/routine_posts/**"
-      - "backend/tests/world_packages/test_import_commit.py"
-      - "backend/tests/test_l4_pr_f_closeout_contract.py"
+      - "backend/**"
       - ".github/CODEOWNERS"
       - ".github/workflows/windows-host-tauri-dev.yml"
       - "README.md"
@@ -111,7 +91,7 @@ jobs:
       - name: Verify repository and fail-closed preflight contracts
         shell: pwsh
         run: |
-          python scripts\ci\check_windows_host_tauri_dev_contract.py
+          .\backend\.venv\Scripts\python.exe scripts\ci\check_windows_host_tauri_dev_contract.py
           .\scripts\ci\windows_host_tauri_dev_smoke.ps1
           .\scripts\ci\windows_host_tauri_utf8_smoke.ps1
           .\scripts\ci\windows_host_tauri_watch_smoke.ps1

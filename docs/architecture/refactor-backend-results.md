@@ -3705,3 +3705,9 @@ G5 원장 추가 전 검사는 inherited `tests/chat/__init__.py`의 최초 도�
 namespace 표시 파일 제외 후에도 이전과 이후의 **2,507개 수집 node ID 및 순서가 정확히 같고**, 실제 full/public196·ORM102·frozen ASGI 차이0을 재확인했다. 제품과 기존 test 함수·fixture·단언의 수정은 없다.
 
 원래 G5 committed snapshot의 실제 최초 도입 **4 files / 29 nodes**를 원장에 연결했다. 원래 checkpoint/addition 검사를 쓰기 전후 그대로 실행하여 Git blob·최초 도입·기존 단언·suppression·node·ancestor 오류0을 확인했고, 선행184개 기록은 깊은 동일성을 유지한 채 **184 → 185**로 append했다. source/checker/frozen 계약은 이 기록에서 변경하지 않았다. 공식 stock과 동일 후보 전체 backend 결과는 후속으로 기록한다.
+
+### AR-B8-B Windows Host Tauri 자동 실행 조건 보완
+
+순차 Tree/Lore PR에서 backend의 새 도메인만 변경하면 Host Tauri workflow의 제한된 경로 목록에 걸리지 않아 자동 검사가 생성되지 않는 공백을 확인했다. 진행 중인 해당 PR은 정확 head를 지정한 공식 workflow_dispatch 결과를 별도 확인한다. 최종 후보는 push(main)와 pull_request 모두 backend/**를 포함하도록 수정했다. Desktop, script, docs 경로·SHA 고정·권한·실제 Windows 실행 job은 유지하고, YAML을 읽는 기존 검사 실행만 이미 설치한 backend locked venv로 연결했다.
+
+원래 계약 테스트는 그대로 유지하며 각 event의 경로 누락, backend 제외 패턴, paths-ignore를 검출하는 회귀 11개를 추가했다. 수정 전 실제 workflow에서 새 검사 2 FAIL/10 PASS로 공백을 재현했으며, 수정 후 관련 28 PASS/기존 warning1/112.25초와 Host CLI·CI 정책·DCO를 확인했다. Signed 원본은 c9969dbd1866872f1338520a08bfe801c9b14766이고, 이 원본의 새 test node 도입을 다음 보존 원장에 기록한다. 필수 job이 생성되지 않은 상태를 PASS로 세지 않는다.
