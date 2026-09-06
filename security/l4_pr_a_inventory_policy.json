@@ -73,9 +73,9 @@
       "frontend/src/app/feed-page.tsx",
       "frontend/src/composition/screens/post-detail-screen.tsx",
       "frontend/src/features/relationships/api/relationship-graph.ts",
-      "frontend/src/features/relationships/model/relationship-graph.ts",
-      "frontend/src/features/relationships/public.ts",
-      "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
+      "frontend/src/features/relationships/types/relationship-graph.ts",
+      "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+      "frontend/src/features/relationships/components/relationship-graph-client.tsx",
       "frontend/src/composition/screens/post-list-screen.tsx",
       "frontend/src/features/social/components/world-social-feed.tsx",
       "frontend/src/lib/community.ts"
@@ -88,7 +88,7 @@
       "social"
     ],
     "required_ui_markers": {
-      "frontend/src/features/relationships/ui/relationship-graph-client.tsx": [
+      "frontend/src/features/relationships/components/relationship-graph-client.tsx": [
         "graph_projection_rebuilding",
         "relationship_query_failed",
         "rebuilding"
@@ -107,10 +107,13 @@
         "RelationshipGraphApiError",
         "getRelationshipGraph"
       ],
-      "frontend/src/features/relationships/model/relationship-graph.ts": [
+      "frontend/src/features/relationships/types/relationship-graph.ts": [
         "RelationshipGraphPresentationState",
-        "fallback_reason",
-        "relationshipGraphPresentationState"
+        "fallback_reason"
+      ],
+      "frontend/src/features/relationships/utils/relationship-graph.ts": [
+        "relationshipGraphPresentationState",
+        "canonical_fallback"
       ]
     }
   },

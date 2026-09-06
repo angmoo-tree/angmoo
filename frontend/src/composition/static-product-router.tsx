@@ -12,10 +12,8 @@ import { PostDetailClient } from "@/composition/screens/post-detail-screen";
 import { getSocialPostThread, listSocialFeed } from "@/features/social/api/social-feed-client";
 import { type FeedPage, type PostThreadRead } from "@/features/social/types/social-feed-contract";
 import { PostFeedScreen as PostListClient } from "@/composition/screens/post-feed-screen";
-import {
-  RelationshipGraphClient,
-  RelationshipGraphFrame,
-} from "@/features/relationships/public";
+import { RelationshipGraphClient } from "@/features/relationships/components/relationship-graph-client";
+import { RelationshipGraphFrame } from "@/features/relationships/components/relationship-graph-frame";
 import { SettingsClient } from "@/composition/screens/settings-screen";
 import { WorldCharacterAutonomySetupClient } from "@/composition/screens/world-character-autonomy-setup-screen";
 import { WorldCreatorClient } from "@/composition/screens/world-creator-screen";

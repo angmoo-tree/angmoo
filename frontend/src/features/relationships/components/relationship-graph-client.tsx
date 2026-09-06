@@ -1,29 +1,22 @@
 "use client";
+import { relationshipGraphPresentationState } from "@/features/relationships/utils/relationship-graph";
 
 import Link from "next/link";
-import {
-  useRuntimeRouter as useRouter,
-  worldPostDetailRoute,
-} from "@/shared/navigation/public";
+import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
+import { worldPostDetailRoute } from "@/lib/navigation/product-routes";
 import { useEffect, useMemo, useState } from "react";
 
-import { useAuth } from "@/shared/auth/public";
+import { useAuth } from "@/hooks/use-auth";
 import {
   getRelationshipGraph,
 } from "@/features/relationships/api/relationship-graph";
 import {
-  relationshipGraphPresentationState,
   type RelationshipGraphRead,
   type RelationshipGraphStatus,
-} from "@/features/relationships/model/relationship-graph";
-import {
-  Button,
-  DegradedPanel,
-  EmptyState,
-  InlineError,
-  StatusChip,
-  type StatusChipTone,
-} from "@/shared/ui/public";
+} from "@/features/relationships/types/relationship-graph";
+import { Button } from "@/components/ui/button";
+import { DegradedPanel, EmptyState, InlineError } from "@/components/ui/feedback";
+import { StatusChip, type StatusChipTone } from "@/components/ui/status";
 
 const STATUS_PRESENTATION: Record<
   RelationshipGraphStatus,

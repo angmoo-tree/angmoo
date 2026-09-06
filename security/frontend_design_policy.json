@@ -144,7 +144,7 @@
       "classification": "LOCAL",
       "hosted_blob_oid": null,
       "hosted_source": null,
-      "local_target": "frontend/src/features/relationships/ui/relationship-graph-client.tsx",
+      "local_target": "frontend/src/features/relationships/components/relationship-graph-client.tsx",
       "scope": "wide World relationship graph workspace"
     },
     {
@@ -270,7 +270,7 @@
     "frontend/src/features/memory/ui/memory-workspace.module.css",
     "frontend/src/features/memory/ui/memory-workspace.tsx",
     "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
-    "frontend/src/features/relationships/ui/relationship-graph-frame.tsx",
+    "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
     "frontend/src/features/social/api/social-feed-client.ts",
     "frontend/src/features/social/api/social-write-client.ts",
     "frontend/src/features/social/types/social-feed-contract.ts",

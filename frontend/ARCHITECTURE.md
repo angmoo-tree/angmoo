@@ -80,6 +80,12 @@ Social의 게시물·댓글·신고·검색·알림·프로필 활동 API는 `fe
 각 기능에 남는다. `lib/community.ts`는 미전환 소비자의 임시 export만 제공한다.
 이미 이전된 화면은 제거된 Social public 대신 실제 API·component·type을 사용한다.
 
+관계망 화면은 `features/relationships/components`, 응답 형식은 `types`,
+현재 상태의 표시 판단은 `utils/relationship-graph.ts`, 조회는 `api`가 담당한다.
+`canonical_fallback`은 정상 그래프와 구분하고, 재구성·지연·조회 불가·실패의 우선순위를
+유지한다. Next route와 static router가 동일한 frame/client를 연결하며, World와 owner
+route 및 원본 사건 근거를 바꾸지 않는다. 네이티브 창 생성은 공용 desktop 구현을 사용한다.
+
 Social의 서버 초기 조회는 `features/social/api/social-feed-server.ts`를 웹 서버 화면에서
 직접 사용한다. 브라우저 요청 파일이나 공용 feature export를 통해 서버 초기 조회를 가져오지
 않는다. 파일 위치만 구분하지 않고 client·정적 화면의 전이 의존도 확인한다.
