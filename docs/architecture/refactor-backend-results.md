@@ -1957,3 +1957,18 @@ B4가 이미 소유한 실제 Resident 실행·graph·작성 본문을 유지하
 실행 context의 세 Social 협력은 `runtime/resident/feed_context_references.py`의 `ResidentSocialContextBindings`가 호출 시 실제 함수를 선택한다. 원래 같은 Session과 지연 호출을 유지하며, 부모의 독립 `55d1c2f9` 구현과 해당 파일이 정확히 같다. 이 연결 뒤 context·daypart·실행 검사는 **12 PASS /28.45초**다. 사라진 정확 legacy edge 10개만 제거했고 현재 경계 **987 modules /3,695 edges /legacy134 /cycle0**, ER0 및 deferred inventory 검사를 통과했다.
 
 원장 main의 92 records와 PR #258/#263 동결 자료는 그대로다. C32의 CRUD 별칭 제거와 G07 테스트 소유권 이전, 원래 최초 도입 증거 append, stock 보존·전체 backend·PR/설치 검증은 이어서 수행한다.
+
+## AR-B5-C32 — Community CRUD 집합 제거
+
+실제 함수/class0인 CRUD 집합을 삭제하고11개 소비자의68참조를 실제 소유 서비스·조회에 연결했다. 제품660개 전체 정의는 import 해석 후 동일하며, Post의 원래 공개 필터/댓글 eager-load 조회를 다른 내부 조회로 바꾸지 않았다. 기존 assertion 표현은 실제 owner import로 유지하고 LG/Resident mock2개도 실제 Post repository를 향한다.
+
+집중 회귀는 **342 PASS /기존 PostgreSQL skip18 /29.97초 /기존 warning3개**다. 신규 테스트 노드는 없고 부모의 이미 전환한 Resident/Tree/Lore 실제 소비자에 연결할 정확한 지도와 임시 bridge 종료 조건을 남겼다. Relationships 집합/G07/full B5/capture/Hosted는 후속이다.
+
+C32 최종 보존은 PR #258/#263 API/schema/ORM·보호 변경7파일 assertion·전체 split evidence0, 경계848 module/3037 edge/legacy154 및 L4 parity99·ER0 PASS다. 실제 도입 원본과 역사 pilot 기록은 유지했으며 새 테스트 노드를 추가하지 않았다.
+
+
+## AR-B5 C32 순차 통합 검증
+
+삭제된 `cruds/community.py`의 원래 실제 소유 함수들을 B4의 현재 Resident graph·작성·미전환 Daypart 소비자에 연결했다. 이미 옮긴 실행 본문을 복원하지 않았으며, monkeypatch 두 receiver도 실제 조회 모듈을 선택한다. 기존 CRUD 조회가 수행하던 필터·eager-load·동일 Session 의미를 바꾸지 않고 같은 실제 함수를 호출한다.
+
+현재 집중은 **244 PASS /기존 PostgreSQL skip18 /9.44초**, 경계 **986 modules /3,667 edges /legacy126 /cycle0**다. ER0 및 L4 현재 inventory를 갱신했고 사라진 exact 예외 10개만 제거했다. 새 테스트 노드나 원본 assertion 변경은 없으며 G07·원래 source 증거 append·stock 전체 검증은 후속이다.

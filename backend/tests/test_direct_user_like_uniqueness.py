@@ -1,9 +1,10 @@
+import app.domains.social.repository.reactions as social_reactions_repository
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app import models
-from app.cruds import community
+
 
 
 def _session() -> Session:
@@ -40,13 +41,13 @@ def test_direct_user_like_is_idempotent_with_database_unique_boundary() -> None:
     db.add_all((user, post))
     db.commit()
 
-    first, first_created = community.like_post(
+    first, first_created = social_reactions_repository.like_post(
         db,
         post=post,
         user=user,
         character=None,
     )
-    second, second_created = community.like_post(
+    second, second_created = social_reactions_repository.like_post(
         db,
         post=post,
         user=user,

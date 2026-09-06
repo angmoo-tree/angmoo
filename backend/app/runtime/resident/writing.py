@@ -1,6 +1,7 @@
 """Same-session Social/Lore collaboration and actual gateway writer execution."""
 
 from __future__ import annotations
+from app.domains.social.repository import posts as social_post_queries
 from app.domains.social import exceptions as social_exceptions
 from app.domains.social.service import agent_tool_authorization as social_agent_tool_authorization
 from app.runtime.social import agent_tool_authorization as runtime_agent_tool_authorization
@@ -20,7 +21,6 @@ from sqlalchemy.orm import Session
 from app.config import settings
 from app.core.context_text import neutralize_context_text
 from app.cruds import agent_runs as agent_run_crud
-from app.cruds import community as community_crud
 from app.domains.characters.service import profile as character_profile
 from app.domains.characters.service import state as character_state
 from app.domains.identity.models import LlmCredential
@@ -188,7 +188,7 @@ def reply_agent_tool_post_from_brief(
     runtime_agent_tool_authorization._ensure_tick_action_allowed(
         db, session_key=session_key, run=run, action="reply"
     )
-    target_post = community_crud.get_post(db, post_id)
+    target_post = social_post_queries.get_post(db, post_id)
     if target_post is None:
         raise social_exceptions.PostNotFoundError(post_id)
     if target_post.author_character_id == character_id:
@@ -387,7 +387,7 @@ def _writing_scratch_base_session_key(
 
 
 def _format_reply_context(db: Session, post_id: str) -> str:
-    target = community_crud.get_post(db, post_id)
+    target = social_post_queries.get_post(db, post_id)
     if target is None:
         raise social_exceptions.PostNotFoundError(post_id)
     root_id = social_resident_affordances._thread_root_post_id(db, post_id)
@@ -402,7 +402,7 @@ def _format_reply_context(db: Session, post_id: str) -> str:
         f"target_body: {neutralize_context_text(target.body)[:1000]}",
     ]
     if target.reply_to_post_id:
-        parent = community_crud.get_post(db, target.reply_to_post_id)
+        parent = social_post_queries.get_post(db, target.reply_to_post_id)
         if parent is not None:
             lines.extend(
                 [

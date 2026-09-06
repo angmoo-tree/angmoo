@@ -262,7 +262,7 @@ def test_writer_admits_before_composition_and_records_memory_after_social_write(
     monkeypatch.setattr(writing.runtime_agent_tool_authorization, "_agent_tool_user", step("user"))
     monkeypatch.setattr(writing.runtime_agent_tool_authorization, "_ensure_tick_action_allowed", step("gate"))
     monkeypatch.setattr(
-        writing.community_crud,
+        writing.social_post_queries,
         "get_post",
         step("target", SimpleNamespace(author_character_id="other")),
     )

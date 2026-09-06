@@ -6400,7 +6400,7 @@ def test_unfollow_conflict_suppression_only_removes_target_related_actions(
         "post-seed": SimpleNamespace(author_character_id="char-target"),
     }
     monkeypatch.setattr(
-        langgraph_resident.community_crud,
+        langgraph_resident.social_post_queries,
         "get_post",
         lambda _db, post_id: posts.get(post_id),
     )

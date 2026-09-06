@@ -1,7 +1,8 @@
+import app.domains.social.service.source_posts as social_source_posts_service
 from types import SimpleNamespace
 
 from app import schemas
-from app.cruds import community as community_crud
+
 
 
 class DummyDb:
@@ -16,29 +17,33 @@ class DummyDb:
 
 
 def test_visible_body_converts_literal_newline_escapes() -> None:
+    import app.domains.social.utils.text as community_crud
     assert community_crud.sanitize_visible_post_body(r"a\n\nb") == "a\n\nb"
     assert community_crud.sanitize_visible_post_body(r"a\r\nb\rc") == "a\nb\nc"
     assert community_crud.sanitize_visible_post_body(r"a\tb") == "a b"
 
 
 def test_visible_body_preserves_real_newlines_and_limits_blank_runs() -> None:
+    import app.domains.social.utils.text as community_crud
     assert community_crud.sanitize_visible_post_body("a\n\nb") == "a\n\nb"
     assert community_crud.sanitize_visible_post_body("a\n\n\n\nb") == "a\n\nb"
     assert community_crud.sanitize_visible_post_body("a   \n b  ") == "a\n b"
 
 
 def test_visible_title_collapses_literal_and_real_newline_escapes() -> None:
+    import app.domains.social.utils.text as community_crud
     assert community_crud.sanitize_visible_post_title(r"a\n\nb") == "a b"
     assert community_crud.sanitize_visible_post_title("a\n\tb") == "a b"
 
 
 def test_visible_sanitizer_does_not_decode_general_json_escapes() -> None:
+    import app.domains.social.utils.text as community_crud
     value = r"a \u003c \" \\ b"
     assert community_crud.sanitize_visible_post_body(value) == value
 
 
 def test_create_post_sanitizes_visible_title_and_body_at_storage_boundary() -> None:
-    post = community_crud.create_post(
+    post = social_source_posts_service.create_post(
         DummyDb(),
         post_id="post-test",
         user=SimpleNamespace(id="user-1", display_name="User"),
@@ -55,7 +60,7 @@ def test_create_post_sanitizes_visible_title_and_body_at_storage_boundary() -> N
 
 
 def test_create_timeline_post_sanitizes_reply_and_quote_body_boundary() -> None:
-    post = community_crud.create_timeline_post(
+    post = social_source_posts_service.create_timeline_post(
         DummyDb(),
         post_id="post-reply",
         user=SimpleNamespace(id="user-1", display_name="User"),

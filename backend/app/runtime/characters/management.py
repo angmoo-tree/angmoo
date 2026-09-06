@@ -171,7 +171,7 @@ from app.credentials import (
     CredentialResolver,
 )
 from app.cruds import agents as agent_crud
-from app.cruds import community as community_crud
+
 from app.policies import name_policy
 from app.runtime.routines import activity_policy as agent_activity_policy
 from app.domains.world_characters.service import readiness as activity_profile_readiness
@@ -1297,7 +1297,7 @@ def _service_image_quota_read(db: Session, character_id: str) -> dict[str, int |
     limit = settings.pollinations_service_free_images_per_user_day
     character = db.get(character_models.Character, character_id)
     used = (
-        community_crud.count_service_image_quota_used(
+        social_media_repository.count_service_image_quota_used(
             db,
             user_id=character.owner_id,
             quota_date=quota_date,
