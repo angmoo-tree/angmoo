@@ -20,7 +20,7 @@ function harness(historical, kind) {
     const source = historical
       ? execFileSync("git", ["show", `${baseline}:${name}`], {cwd: root, encoding: "utf8"})
       : fs.readFileSync(path.join(root, name), "utf8");
-    const module = {exports: {}}; cache.set(name, module);
+    const loadedModule = {exports: {}}; cache.set(name, loadedModule);
     const require = spec => {
       if (["@/shared/runtime/public", "@/lib/runtime/runtime-config"].includes(spec)) return {runtimeFetch};
       if (["@/shared/auth/public", "@/lib/auth/browser-session"].includes(spec)) return {
@@ -32,8 +32,8 @@ function harness(historical, kind) {
       return load(target + ".ts");
     };
     const code = ts.transpileModule(source, {compilerOptions: {module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022}}).outputText;
-    vm.runInNewContext(code, {module, exports: module.exports, require, URLSearchParams}, {filename: name});
-    return module.exports;
+    vm.runInNewContext(code, {module: loadedModule, exports: loadedModule.exports, require, URLSearchParams}, {filename: name});
+    return loadedModule.exports;
   }
   const entries = {
     community: historical ? "lib/community" : "features/social/api/community",
