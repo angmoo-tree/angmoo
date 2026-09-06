@@ -11,11 +11,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from app.domains.media.schemas import validate_profile_media_reference
 from app.core.response_schemas import UtcInstantResponseModel
-from app.providers.registry import AGENT_GOOGLE_MODELS
-
-AgentGoogleModel = Literal[*AGENT_GOOGLE_MODELS]
-AgentExecutionMode = Literal["llm", "local"]
-ImageKeyMode = Literal["service", "user", "disabled"]
+from app.domains.characters.constants import AgentGoogleModel, AgentExecutionMode, ImageKeyMode
 
 class CharacterRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)

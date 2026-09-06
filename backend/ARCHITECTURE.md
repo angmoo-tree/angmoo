@@ -1228,4 +1228,4 @@ from app.domains.social.schemas.community import PostCreate
 
 `app/schemas`에 남은 `__init__`, `agents`, `characters`, `auth`, `messages`, `media_security`는 과거 import 경로의 객체 동일성 및 구조를 직접 확인하는 테스트 때문에 유지되는 호환 파일이다. 이 테스트에서 옛 import를 새 import로 바꾼 뒤 같은 객체를 자기 자신과 비교하는 방식으로 호환성 종료를 처리하지 않는다. 앱 소비자가 없는 Worlds·SocialMemory·WorldActivityRuntime·WorldCharacterSetup 호환 파일 네 개는 제거했다.
 
-`agents.py`의 원래 Literal 별칭 다섯 개는 현재 직접 소비자가 없지만 아직 원문을 보존한다. 값이 같은 `Literal` 두 개가 같은 객체라는 보장은 없으므로, 최종 호환 경로 종료 때 실제 타입 보존 위치 또는 미사용 export 종료를 따로 판단한다. 남은 범위와 검증 근거는 [스키마 소비자 전환 기록](../docs/architecture/ar-b8-schema-consumers.md)에 정리한다.
+Character의 모델·이미지 키 모드·실행 모드 타입은 `characters/constants.py`, 활동 글쓰기 반복 수준은 `routines/constants.py`가 소유한다. 원래 Literal 별칭 다섯 개의 대입 본문과 값 순서를 이곳에 보존하고, 스키마와 임시 `agents.py` export는 그 같은 객체를 import한다. 값이 같은 `Literal`을 여러 번 정의한 뒤 typing 내부 캐시의 객체 동일성에 의존하지 않는다. 남은 호환 검사와 검증 근거는 [스키마 소비자 전환 기록](../docs/architecture/ar-b8-schema-consumers.md)에 정리한다.

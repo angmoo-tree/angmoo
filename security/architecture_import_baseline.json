@@ -1,6 +1,6 @@
 {
-  "edge_count": 4072,
-  "external_import_count": 3114,
+  "edge_count": 4075,
+  "external_import_count": 3116,
   "module_count": 1091,
   "modules": [
     {
@@ -967,8 +967,12 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
-      "imports": [],
+      "external_imports": [
+        "typing"
+      ],
+      "imports": [
+        "app.providers.registry"
+      ],
       "module": "app.domains.characters.constants",
       "path": "backend/app/domains/characters/constants.py",
       "wildcard_imports": []
@@ -1124,10 +1128,10 @@
       "imports": [
         "app.core.image_generation",
         "app.core.response_schemas",
+        "app.domains.characters.constants",
         "app.domains.identity.schemas",
         "app.domains.media.schemas",
-        "app.domains.routines.schemas",
-        "app.providers.registry"
+        "app.domains.routines.schemas"
       ],
       "module": "app.domains.characters.schemas",
       "path": "backend/app/domains/characters/schemas.py",
@@ -5732,6 +5736,7 @@
       "external_imports": [
         "datetime",
         "re",
+        "typing",
         "zoneinfo"
       ],
       "imports": [
@@ -16429,10 +16434,12 @@
       "imports": [
         "app.api.schemas.first_greeting",
         "app.core.image_generation",
+        "app.domains.characters.constants",
         "app.domains.characters.schemas",
         "app.domains.identity.schemas",
         "app.domains.local_bot.schemas",
         "app.domains.media.schemas",
+        "app.domains.routines.constants",
         "app.domains.routines.schemas",
         "app.domains.routines.schemas.first_greeting",
         "app.domains.routines.schemas.runs",

@@ -6460,8 +6460,9 @@
           "backend/app/domains/social/schemas/activity.py"
         ],
         "backend/app/schemas/agents.py": [
-          "backend/app/schemas/agents.py",
+          "backend/app/domains/characters/constants.py",
           "backend/app/domains/characters/schemas.py",
+          "backend/app/domains/routines/constants.py",
           "backend/app/domains/routines/schemas/first_greeting.py",
           "backend/app/domains/identity/schemas.py",
           "backend/app/domains/local_bot/schemas.py",
@@ -8258,9 +8259,10 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentGoogleModel",
-          "new": "backend/app/schemas/agents.py::AgentGoogleModel",
+          "new": "backend/app/domains/characters/constants.py::AgentGoogleModel",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/characters/schemas.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
@@ -8270,9 +8272,9 @@
         },
         {
           "old": "backend/app/schemas/agents.py::GoogleGeminiModel",
-          "new": "backend/app/schemas/agents.py::GoogleGeminiModel",
+          "new": "backend/app/domains/characters/constants.py::GoogleGeminiModel",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/schemas/agents.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -8292,9 +8294,10 @@
         },
         {
           "old": "backend/app/schemas/agents.py::ImageKeyMode",
-          "new": "backend/app/schemas/agents.py::ImageKeyMode",
+          "new": "backend/app/domains/characters/constants.py::ImageKeyMode",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/characters/schemas.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
@@ -8304,9 +8307,10 @@
         },
         {
           "old": "backend/app/schemas/agents.py::WritingRepetitionLevel",
-          "new": "backend/app/schemas/agents.py::WritingRepetitionLevel",
+          "new": "backend/app/domains/routines/constants.py::WritingRepetitionLevel",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/routines/schemas/resident.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
@@ -8316,9 +8320,10 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentExecutionMode",
-          "new": "backend/app/schemas/agents.py::AgentExecutionMode",
+          "new": "backend/app/domains/characters/constants.py::AgentExecutionMode",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/characters/schemas.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
@@ -29111,8 +29116,9 @@
           "backend/app/domains/characters/service/mutations.py"
         ],
         "backend/app/schemas/agents.py": [
-          "backend/app/schemas/agents.py",
+          "backend/app/domains/characters/constants.py",
           "backend/app/domains/characters/schemas.py",
+          "backend/app/domains/routines/constants.py",
           "backend/app/domains/identity/schemas.py",
           "backend/app/domains/local_bot/schemas.py",
           "backend/app/domains/routines/schemas/resident.py",
@@ -29635,9 +29641,10 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentGoogleModel",
-          "new": "backend/app/schemas/agents.py::AgentGoogleModel",
+          "new": "backend/app/domains/characters/constants.py::AgentGoogleModel",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/characters/schemas.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
@@ -29647,9 +29654,9 @@
         },
         {
           "old": "backend/app/schemas/agents.py::GoogleGeminiModel",
-          "new": "backend/app/schemas/agents.py::GoogleGeminiModel",
+          "new": "backend/app/domains/characters/constants.py::GoogleGeminiModel",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/schemas/agents.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity"
@@ -29669,9 +29676,10 @@
         },
         {
           "old": "backend/app/schemas/agents.py::ImageKeyMode",
-          "new": "backend/app/schemas/agents.py::ImageKeyMode",
+          "new": "backend/app/domains/characters/constants.py::ImageKeyMode",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/characters/schemas.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
@@ -29681,9 +29689,10 @@
         },
         {
           "old": "backend/app/schemas/agents.py::WritingRepetitionLevel",
-          "new": "backend/app/schemas/agents.py::WritingRepetitionLevel",
+          "new": "backend/app/domains/routines/constants.py::WritingRepetitionLevel",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/routines/schemas/resident.py"
           ],
           "test_nodes": [
             "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds",
@@ -29693,9 +29702,10 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentExecutionMode",
-          "new": "backend/app/schemas/agents.py::AgentExecutionMode",
+          "new": "backend/app/domains/characters/constants.py::AgentExecutionMode",
           "direct_consumers": [
-            "backend/app/schemas/__init__.py"
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/characters/schemas.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media",
@@ -41873,8 +41883,9 @@
           "backend/app/domains/routines/service/activity_logs.py"
         ],
         "backend/app/schemas/agents.py": [
-          "backend/app/schemas/agents.py",
+          "backend/app/domains/characters/constants.py",
           "backend/app/domains/characters/schemas.py",
+          "backend/app/domains/routines/constants.py",
           "backend/app/domains/routines/schemas/first_greeting.py",
           "backend/app/api/schemas/first_greeting.py",
           "backend/app/domains/local_bot/schemas.py",
@@ -42171,10 +42182,10 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentGoogleModel",
-          "new": "backend/app/schemas/agents.py::AgentGoogleModel",
+          "new": "backend/app/domains/characters/constants.py::AgentGoogleModel",
           "direct_consumers": [
-            "backend/app/domains/characters/schemas.py",
-            "backend/app/schemas/agents.py"
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/characters/schemas.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
@@ -42184,7 +42195,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::GoogleGeminiModel",
-          "new": "backend/app/schemas/agents.py::GoogleGeminiModel",
+          "new": "backend/app/domains/characters/constants.py::GoogleGeminiModel",
           "direct_consumers": [
             "backend/app/schemas/agents.py"
           ],
@@ -42209,8 +42220,9 @@
         },
         {
           "old": "backend/app/schemas/agents.py::ImageKeyMode",
-          "new": "backend/app/schemas/agents.py::ImageKeyMode",
+          "new": "backend/app/domains/characters/constants.py::ImageKeyMode",
           "direct_consumers": [
+            "backend/app/schemas/agents.py",
             "backend/app/domains/characters/schemas.py"
           ],
           "test_nodes": [
@@ -42221,9 +42233,10 @@
         },
         {
           "old": "backend/app/schemas/agents.py::WritingRepetitionLevel",
-          "new": "backend/app/schemas/agents.py::WritingRepetitionLevel",
+          "new": "backend/app/domains/routines/constants.py::WritingRepetitionLevel",
           "direct_consumers": [
-            "backend/app/schemas/agents.py"
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/routines/schemas/resident.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
@@ -42233,10 +42246,10 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentExecutionMode",
-          "new": "backend/app/schemas/agents.py::AgentExecutionMode",
+          "new": "backend/app/domains/characters/constants.py::AgentExecutionMode",
           "direct_consumers": [
-            "backend/app/domains/characters/schemas.py",
-            "backend/app/schemas/agents.py"
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/characters/schemas.py"
           ],
           "test_nodes": [
             "tests/test_post_image_generation.py::test_image_generation_setting_encrypts_key",
@@ -42925,7 +42938,8 @@
           "backend/app/domains/local_bot/policies/rate_limit_clock.py"
         ],
         "backend/app/schemas/agents.py": [
-          "backend/app/schemas/agents.py",
+          "backend/app/domains/characters/constants.py",
+          "backend/app/domains/routines/constants.py",
           "backend/app/domains/routines/schemas/first_greeting.py",
           "backend/app/api/schemas/first_greeting.py",
           "backend/app/domains/local_bot/schemas.py",
@@ -43797,10 +43811,10 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentGoogleModel",
-          "new": "backend/app/schemas/agents.py::AgentGoogleModel",
+          "new": "backend/app/domains/characters/constants.py::AgentGoogleModel",
           "direct_consumers": [
-            "backend/app/domains/characters/schemas.py",
-            "backend/app/schemas/agents.py"
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/characters/schemas.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -43809,7 +43823,7 @@
         },
         {
           "old": "backend/app/schemas/agents.py::GoogleGeminiModel",
-          "new": "backend/app/schemas/agents.py::GoogleGeminiModel",
+          "new": "backend/app/domains/characters/constants.py::GoogleGeminiModel",
           "direct_consumers": [
             "backend/app/schemas/agents.py"
           ],
@@ -43820,8 +43834,9 @@
         },
         {
           "old": "backend/app/schemas/agents.py::ImageKeyMode",
-          "new": "backend/app/schemas/agents.py::ImageKeyMode",
+          "new": "backend/app/domains/characters/constants.py::ImageKeyMode",
           "direct_consumers": [
+            "backend/app/schemas/agents.py",
             "backend/app/domains/characters/schemas.py"
           ],
           "test_nodes": [
@@ -43831,8 +43846,9 @@
         },
         {
           "old": "backend/app/schemas/agents.py::WritingRepetitionLevel",
-          "new": "backend/app/schemas/agents.py::WritingRepetitionLevel",
+          "new": "backend/app/domains/routines/constants.py::WritingRepetitionLevel",
           "direct_consumers": [
+            "backend/app/schemas/agents.py",
             "backend/app/domains/routines/schemas/resident.py"
           ],
           "test_nodes": [
@@ -43842,10 +43858,10 @@
         },
         {
           "old": "backend/app/schemas/agents.py::AgentExecutionMode",
-          "new": "backend/app/schemas/agents.py::AgentExecutionMode",
+          "new": "backend/app/domains/characters/constants.py::AgentExecutionMode",
           "direct_consumers": [
-            "backend/app/domains/characters/schemas.py",
-            "backend/app/domains/local_bot/schemas.py"
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/characters/schemas.py"
           ],
           "test_nodes": [
             "tests/test_local_bot_atomic_quota.py::test_action_quota_resets_daily_count_and_keeps_cooldown",
@@ -132872,6 +132888,89 @@
           ]
         },
         "rule": "Use every original Community source split destination; keep all original forbidden strings and assertion expressions unchanged."
+      }
+    },
+    "AR-B8-SCHEMA-LITERAL-VALUES": {
+      "status": "IMPLEMENTED source; final old schema facade retirement pending",
+      "source_base": "03afe4f49d1435ae22fe8636ea0ca9db0a55c32a",
+      "literal_assignment_moves": [
+        {
+          "old": "backend/app/schemas/agents.py::AgentGoogleModel",
+          "new": "backend/app/domains/characters/constants.py::AgentGoogleModel",
+          "whole_assignment_ast": "SAME",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/characters/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_google_model_selection.py::test_agent_google_models_are_allowed_in_agent_model_schemas",
+            "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::GoogleGeminiModel",
+          "new": "backend/app/domains/characters/constants.py::GoogleGeminiModel",
+          "whole_assignment_ast": "SAME",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py"
+          ],
+          "test_nodes": [
+            "tests/test_google_model_selection.py::test_agent_google_models_are_allowed_in_agent_model_schemas",
+            "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::ImageKeyMode",
+          "new": "backend/app/domains/characters/constants.py::ImageKeyMode",
+          "whole_assignment_ast": "SAME",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/characters/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_google_model_selection.py::test_agent_google_models_are_allowed_in_agent_model_schemas",
+            "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::WritingRepetitionLevel",
+          "new": "backend/app/domains/routines/constants.py::WritingRepetitionLevel",
+          "whole_assignment_ast": "SAME",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/routines/schemas/resident.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_agent_activity_setting_update_daily_limit_bounds"
+          ]
+        },
+        {
+          "old": "backend/app/schemas/agents.py::AgentExecutionMode",
+          "new": "backend/app/domains/characters/constants.py::AgentExecutionMode",
+          "whole_assignment_ast": "SAME",
+          "direct_consumers": [
+            "backend/app/schemas/agents.py",
+            "backend/app/domains/characters/schemas.py"
+          ],
+          "test_nodes": [
+            "tests/test_google_model_selection.py::test_agent_google_models_are_allowed_in_agent_model_schemas",
+            "tests/characters/test_character_foundation.py::test_creation_schema_still_rejects_invalid_mode_and_unmanaged_media"
+          ]
+        }
+      ],
+      "whole_assignment_ast_differences": 0,
+      "canonical_duplicate_assignments_removed": 4,
+      "unchanged_dto_class_bodies": 36,
+      "historical_split_targets_updated": 20,
+      "same_object_rule": "The original old exports and actual Character/Routines schemas now explicitly import each exact actual constants object. Do not rely on typing cache identity.",
+      "identity_credential_schema": "Identity keeps its own original AgentGoogleModel from the same provider values. Character already consumes Identity response schemas; do not introduce reverse domain dependency.",
+      "new_test_nodes": 0,
+      "validation": {
+        "focused": "195 passed, 10.68 seconds",
+        "api_schema_orm": "unchanged against PR258 and PR263",
+        "full_split_evidence": "PASS",
+        "old_agents_canonical_constants_identity": "5 aliases identical; Character, Routines resident and LocalBot imports use the same actual object",
+        "new_test_nodes": 0
       }
     }
   },
