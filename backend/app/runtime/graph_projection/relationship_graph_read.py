@@ -6,17 +6,23 @@ the replayable graph projection.
 """
 
 from __future__ import annotations
+import app.domains.relationships.contracts.graph_read as relationships_contracts_graph_read
+import app.domains.relationships.contracts.graph_recall as relationships_contracts_graph_recall
+import app.domains.relationships.exceptions as relationships_exceptions
+import app.domains.relationships.schemas as relationships_schemas
+import app.domains.relationships.service.graph_read as relationships_service_graph_read
+import app.domains.relationships.service.graph_recall as relationships_service_graph_recall
 
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app import models
 from app.config import Settings, settings
-from app.runtime.graph_projection import sqlalchemy_state as graph_projection_crud
-from app.domains.relationships import public as relationships
-from app.domains.relationships.graph_read import schemas
-from app.domains.relationships.graph_read.errors import GraphReadBackendError
-from app.domains.relationships.graph_read.repository import (
+from app.domains.relationships.repository import projection_state as graph_projection_crud
+
+from app.domains.relationships import (schemas)
+from app.domains.relationships.exceptions import (GraphReadBackendError)
+from app.domains.relationships.contracts.graph_query import (
     EvidencePostFacts,
     GraphEvidenceCandidate,
     GraphEvidenceHit,
@@ -28,11 +34,9 @@ from app.domains.relationships.graph_read.repository import (
     RelationshipGraphQueryPort,
     RelationshipRevalidationFacts,
 )
-from app.domains.relationships.graph_read.use_case import GraphProjectionCounts
+from app.domains.relationships.contracts.graph_read import (GraphProjectionCounts)
 from app.integrations.ladybug_projection import LadybugRelationshipProjection
-from app.domains.relationships.ports.projection import (
-    RelationshipProjectionBackendError,
-)
+from app.domains.relationships.contracts.projection import (RelationshipProjectionBackendError)
 from app.integrations.relationship_graph_read import RelationshipGraphRepository
 from app.runtime.graph_projection.metrics import graph_metrics
 from app.runtime.graph_projection.process_client import (
@@ -79,7 +83,7 @@ class SqlAlchemyRelationshipGraphReadGateway:
         db: Session,
         *,
         config: Settings = settings,
-        graph_provider: relationships.GraphProvider = "ladybug",
+        graph_provider: relationships_contracts_graph_read.GraphProvider = "ladybug",
     ) -> None:
         self._db = db
         self._config = config
@@ -136,8 +140,8 @@ class SqlAlchemyRelationshipGraphReadGateway:
     def graph_recall_scope_access(
         self,
         *,
-        scope: relationships.GraphRecallScope,
-    ) -> relationships.GraphRecallScopeAccess:
+        scope: relationships_contracts_graph_recall.GraphRecallScope,
+    ) -> relationships_contracts_graph_recall.GraphRecallScopeAccess:
         world_character = self._db.get(
             models.WorldCharacter,
             scope.subject_world_character_id,
@@ -152,7 +156,7 @@ class SqlAlchemyRelationshipGraphReadGateway:
             if world_character is not None
             else None
         )
-        return relationships.GraphRecallScopeAccess(
+        return relationships_contracts_graph_recall.GraphRecallScopeAccess(
             subject_exists=world_character is not None and character is not None,
             subject_world_id=(
                 world_character.world_id
@@ -704,14 +708,14 @@ def get_owner_relationship_graph(
     character_id: str,
     world_id: str,
     user: models.User,
-    view: relationships.GraphView = "neighborhood",
+    view: relationships_contracts_graph_read.GraphView = "neighborhood",
     target_world_character_id: str | None = None,
     depth: int = 1,
     limit: int = 20,
     config: Settings = settings,
     repository: RelationshipGraphQueryPort | None = None,
-    graph_provider: relationships.GraphProvider = "ladybug",
-) -> relationships.RelationshipGraphRead:
+    graph_provider: relationships_contracts_graph_read.GraphProvider = "ladybug",
+) -> relationships_schemas.RelationshipGraphRead:
     """Compose the SQLAlchemy adapter with the domain-owned read use case."""
 
     gateway = SqlAlchemyRelationshipGraphReadGateway(
@@ -724,7 +728,7 @@ def get_owner_relationship_graph(
         if repository is not None
         else None
     )
-    return relationships.get_owner_relationship_graph(
+    return relationships_service_graph_read.get_owner_relationship_graph(
         gateway,
         character_id=character_id,
         world_id=world_id,
@@ -742,11 +746,11 @@ def get_owner_relationship_graph(
 def execute_graph_recall(
     db: Session,
     *,
-    query: relationships.GraphRecallQuery,
+    query: relationships_contracts_graph_recall.GraphRecallQuery,
     config: Settings = settings,
     repository: RelationshipGraphQueryPort | None = None,
-    graph_provider: relationships.GraphProvider = "ladybug",
-) -> relationships.GraphRecallResult:
+    graph_provider: relationships_contracts_graph_read.GraphProvider = "ladybug",
+) -> relationships_contracts_graph_recall.GraphRecallResult:
     """Compose runtime adapters behind the relationships public facade."""
 
     gateway = SqlAlchemyRelationshipGraphReadGateway(
@@ -759,7 +763,7 @@ def execute_graph_recall(
         if repository is not None
         else None
     )
-    return relationships.GraphRecallService(gateway).execute(
+    return relationships_service_graph_recall.GraphRecallService(gateway).execute(
         query,
         graph_projection_enabled=config.graph_projection_enabled,
         repository=mapped_repository,
@@ -767,10 +771,10 @@ def execute_graph_recall(
 
 
 # Infrastructure consumers use the exact domain-owned contract types.
-GraphStatus = relationships.GraphStatus
-GraphView = relationships.GraphView
-RelationshipGraphForbiddenError = relationships.RelationshipGraphForbiddenError
-RelationshipGraphNotFoundError = relationships.RelationshipGraphNotFoundError
-RelationshipGraphRead = relationships.RelationshipGraphRead
-RelationshipGraphReadError = relationships.RelationshipGraphReadError
-RelationshipGraphRequestError = relationships.RelationshipGraphRequestError
+GraphStatus = relationships_schemas.GraphStatus
+GraphView = relationships_contracts_graph_read.GraphView
+RelationshipGraphForbiddenError = relationships_exceptions.RelationshipGraphForbiddenError
+RelationshipGraphNotFoundError = relationships_exceptions.RelationshipGraphNotFoundError
+RelationshipGraphRead = relationships_schemas.RelationshipGraphRead
+RelationshipGraphReadError = relationships_exceptions.RelationshipGraphReadError
+RelationshipGraphRequestError = relationships_exceptions.RelationshipGraphRequestError

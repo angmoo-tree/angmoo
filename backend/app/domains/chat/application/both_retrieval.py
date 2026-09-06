@@ -40,7 +40,7 @@ from app.domains.chat.domain.workflow_recipe import (
     select_workflow_recipe,
 )
 from app.domains.memory.public import RecallDocumentKind
-from app.domains.relationships.public import GraphRecallResult
+from app.domains.relationships.contracts.graph_recall import GraphRecallResult
 
 
 @dataclass(frozen=True, slots=True)

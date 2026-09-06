@@ -1,9 +1,10 @@
+import app.domains.social.exceptions as social_errors
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app import schemas
 from app.api.v1.deps import get_current_local_bot, get_db
-from app.services import community as community_service
+
 from app.services import local_bot as local_bot_service
 
 router = APIRouter(prefix="/bot", tags=["bot"])
@@ -39,7 +40,7 @@ def save_state(
 ) -> schemas.BotStateRead:
     try:
         return local_bot_service.save_state(db, context, data)
-    except community_service.CharacterNotFoundError:
+    except social_errors.CharacterNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Character not found")
     except local_bot_service.LocalBotRateLimitError as exc:
         raise _rate_limit_http_exception(exc) from exc
@@ -99,9 +100,9 @@ def list_following_feed(
         return local_bot_service.list_following_feed(
             db, context, limit=limit, cursor=cursor, content=content
         )
-    except community_service.CharacterNotFoundError:
+    except social_errors.CharacterNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Character not found")
-    except community_service.CharacterOwnershipError as exc:
+    except social_errors.CharacterOwnershipError as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
     except local_bot_service.LocalBotRateLimitError as exc:
         raise _rate_limit_http_exception(exc) from exc
@@ -115,7 +116,7 @@ def get_post_thread(
 ) -> schemas.BotPostThreadRead:
     try:
         return local_bot_service.get_post_thread(db, context, post_id)
-    except community_service.PostNotFoundError:
+    except social_errors.PostNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     except local_bot_service.LocalBotRateLimitError as exc:
         raise _rate_limit_http_exception(exc) from exc
@@ -134,7 +135,7 @@ def create_reply(
 ) -> schemas.BotPostDetail:
     try:
         return local_bot_service.create_reply(db, context, post_id, data)
-    except community_service.PostNotFoundError:
+    except social_errors.PostNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     except local_bot_service.LocalBotRateLimitError as exc:
         raise _rate_limit_http_exception(exc) from exc
@@ -148,7 +149,7 @@ def like_post(
 ) -> schemas.BotPostDetail:
     try:
         return local_bot_service.like_post(db, context, post_id)
-    except community_service.PostNotFoundError:
+    except social_errors.PostNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     except local_bot_service.LocalBotRateLimitError as exc:
         raise _rate_limit_http_exception(exc) from exc
@@ -162,7 +163,7 @@ def unlike_post(
 ) -> schemas.BotPostDetail:
     try:
         return local_bot_service.unlike_post(db, context, post_id)
-    except community_service.PostNotFoundError:
+    except social_errors.PostNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     except local_bot_service.LocalBotRateLimitError as exc:
         raise _rate_limit_http_exception(exc) from exc
@@ -176,7 +177,7 @@ def repost_post(
 ) -> schemas.BotPostDetail:
     try:
         return local_bot_service.repost_post(db, context, post_id)
-    except community_service.PostNotFoundError:
+    except social_errors.PostNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     except local_bot_service.LocalBotRateLimitError as exc:
         raise _rate_limit_http_exception(exc) from exc
@@ -190,7 +191,7 @@ def unrepost_post(
 ) -> schemas.BotPostDetail:
     try:
         return local_bot_service.unrepost_post(db, context, post_id)
-    except community_service.PostNotFoundError:
+    except social_errors.PostNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not found")
     except local_bot_service.LocalBotRateLimitError as exc:
         raise _rate_limit_http_exception(exc) from exc
@@ -204,7 +205,7 @@ def get_character_profile(
 ) -> schemas.BotProfileRead:
     try:
         return local_bot_service.get_character_profile(db, context, character_id)
-    except community_service.ProfileNotFoundError:
+    except social_errors.ProfileNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found")
     except local_bot_service.LocalBotRateLimitError as exc:
         raise _rate_limit_http_exception(exc) from exc
@@ -222,9 +223,9 @@ def follow_profile(
 ) -> schemas.BotFollowRead:
     try:
         return local_bot_service.follow_profile(db, context, data)
-    except community_service.ProfileNotFoundError:
+    except social_errors.ProfileNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found")
-    except community_service.FollowSelfError as exc:
+    except social_errors.FollowSelfError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except local_bot_service.LocalBotRateLimitError as exc:
         raise _rate_limit_http_exception(exc) from exc
@@ -238,7 +239,7 @@ def unfollow_profile(
 ) -> None:
     try:
         local_bot_service.unfollow_profile(db, context, data)
-    except community_service.ProfileNotFoundError:
+    except social_errors.ProfileNotFoundError:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Profile not found")
     except local_bot_service.LocalBotRateLimitError as exc:
         raise _rate_limit_http_exception(exc) from exc
@@ -270,7 +271,7 @@ def mark_notification_read(
 ) -> schemas.BotNotificationRead:
     try:
         return local_bot_service.mark_notification_read(db, context, notification_id)
-    except community_service.NotificationNotFoundError:
+    except social_errors.NotificationNotFoundError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Notification not found"
         )

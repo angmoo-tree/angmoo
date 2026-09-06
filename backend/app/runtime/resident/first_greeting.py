@@ -18,7 +18,8 @@ from app.domains.social.schemas import community as schemas
 from app.domains.routines.service.first_greeting import _build_first_greeting_writer_prompt
 from app.domains.routines.constants import FIRST_GREETING_WRITER_OUTPUT_TOKENS
 from app.integrations.direct_llm import RunLlmTracker, DirectLlmCallContext, generate_json
-from app.services import post_image_generation
+from app.runtime.social import image_generation as post_image_generation
+from app.domains.social.service import image_attachment
 
 def resolve_first_greeting_key(
     credential: identity_models.LlmCredential | None, *, user: identity_models.User, character: character_models.Character
@@ -114,7 +115,7 @@ async def _attach_first_greeting_image(
             current_time_text=run_started_at.isoformat(),
             run_started_at=run_started_at,
         )
-        return post_image_generation.attach_prepared_post_image(
+        return image_attachment.attach_prepared_post_image(
             db=db,
             post_id=post.id,
             prepared=prepared,

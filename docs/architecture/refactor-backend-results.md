@@ -17,6 +17,9 @@
 | AR-B3 | NOT STARTED | World Package→media |
 | AR-B4 | CORE PR #281 MERGED · RESIDENT/C7/WRITER FOLLOWUP SOURCE COMPLETE · PR FULL CI PENDING | C7-H까지 실제 소유 합류; local full의 route inventory 1실패를 metadata만 수정하고 focused78 PASS; stock2311 PASS, 최종 PR 전체 CI 대기 |
 | AR-B5 | NOT STARTED | social→relationships→projection |
+
+| AR-B4 | ROUTINES A1/A2/A3a/b LOCAL VERIFIED · INTEGRATION/PR PENDING | 실제 계획·guarded lifecycle·실행 claim 이전; joint·routine_posts·resident 후속 |
+| AR-B5 | SOURCE PREPARED · INTEGRATION PENDING | Social→Relationships→projection 실제 소유·Community/public 집합 제거 및 G07 18파일 준비. 전체 통합/Hosted는 부모 단계에서 검증 |
 | AR-B6 | NOT STARTED | Chat transport→generation→retrieval/response |
 | AR-B7 | NOT STARTED | Memory read/write→owner→batch→runtime |
 | AR-B8-A | NOT STARTED | 잔여 업무·G06 단일 앱 생성·호환·소비자 전환 |
@@ -894,6 +897,87 @@ Root와 합의한 잔여가 있다. `CommunityMutationQuotaBucket` 실제 정의
 
 B5-B5 최종 보존 검사: #258/#263 API/schema/ORM 차이 0, 변경 기존 테스트 3개 파일 assertion/raises/warns PASS, 전체 split evidence PASS. 기존 검사 형식의 top-level class 매핑에 각 destination_member를 함께 기록했고 실제 nested method 12개가 존재하는지 별도 AST 확인했다. L4 667 modules/parity97, ER0 Postgres78/migration subset87/Neo4j24/Next44/parity7도 통과했다.
 
+
+## AR-B5-B6 — 프로필·팔로우 업무 흐름
+
+기존 Community의 실제 프로필 함수 17개와 페이지 크기 helper 1개를 `social/service/profiles.py`·`utils/limits.py`로 이전했다. 소유 Character 조회와 User 조회는 기존 nullable 결과를 반환하는 각 소유 서비스로 연결하고, Post·follow SQL은 이미 이전한 Social repository를 사용한다. 원래 함수 18개의 AST 본문은 import 대상과 읽기 계약의 타입 표기만 정규화했을 때 모두 같았다. 분기·조회·권한 확인·알림 생성·응답 순서는 변경하지 않았다.
+
+새 `tests/social/test_profile_workflows.py`의 **2 nodes**는 실제 SQLite에서 팔로우 중복 요청의 동일 결과/알림 1개, 해제 상태와 caller rollback, 소유하지 않은 follower와 self-follow의 쓰기 전 거절, 없는 User 오류, 삭제된 Character의 기존 표시 가림과 신규 팔로우 거절을 검증한다. 기존 관련 회귀와 함께 **44 passed / 1 existing warning / 7.55s**다. 같은 Session과 deferred commit 동작을 유지하며 추가 provider 요청은 없다.
+
+#258/#263 API·schema·ORM 차이 0, 기존 보호 테스트 변경 0, 전체 split evidence PASS다. 원래 AR-B2-B6의 전체 Community symbol 지도를 유지하면서 정확히 18개의 목적지를 갱신했다. 경계 검사는 **669 modules / 2,189 edges / 241 exact legacy edges**로 통과했다. 신규 source 도입 capture와 통합 Actions/PR/merge는 root의 후속 검증이며 전체 B5 완료를 의미하지 않는다.
+
+
+## AR-B5-B7 — Feed 목록·Inbox 조회와 읽음 처리
+
+Feed 목록·following의 실제 함수 4개, Inbox 업무 함수 4개를 Social service로 이전했다. 사용자 Inbox의 Character 소유 subquery와 Notification 조회 2개는 `runtime/social/inbox.py`에서 같은 Session·한 번의 SQL로 연결한다. 읽음 상태의 실제 대입·commit·refresh는 `service/notifications.py`가 소유한다. 원본 11개 함수의 본문은 소유 import/collaborator 이름을 정규화했을 때 동일하며 조건·정렬·cursor·오류·commit 순서도 같다.
+
+신규 `tests/social/test_inbox_workflows.py`의 **3 nodes**는 한 번의 owner subquery·삭제/다른 owner 제외·cursor/잘못된 cursor의 기존 처리, 없는 대상의 쓰기 전 차단, 원래 명시적 read commit이 같은 Session의 미저장 변경까지 확정하는 계약, Character inbox의 명시적 recipient OR 범위를 검증한다. 첫 집중 실행은 **56 passed / 1 failed**였다. 실패는 Feed helper의 monkeypatch가 옛 module을 대상으로 한 경우였으며 실제 새 소유 함수로 옮겼고 assertion은 변경하지 않았다.
+
+수정 후 **57 passed / 1 existing warning / 13.63s**, #258/#263 API·schema·ORM 차이 0, 변경 보호 테스트 1개 파일의 assertion PASS, 전체 split evidence PASS다. 원래 Community CRUD/서비스 전체 symbol 지도를 갱신하고 새로운 source/test capture는 root가 순차 수행한다. Today·검색·agent/resident·미디어 job, Relationships/projection과 최종 HTTP·호환 소비자 종료는 아직 B5 잔여다.
+
+
+## AR-B5-B8 — 기본 검색·Today 집계와 순위
+
+검색 입력/공개 응답·Today 점수와 정렬은 Social discovery service로, Character 자체 검색 SQL은 Character service로 이전했다. Post/Character 검색과 Character/AgentActivityLog 집계는 기존 SQL 그대로 runtime query가 소유한다. 인기 root Post의 SQL은 Social repository로 추출하고 공통 LIKE helper 2개는 core/search_text.py로 옮겼다. 새 공유 정의를 만드는 과정에서 같은 함수를 도메인마다 복제하지 않았다.
+
+원본문과 추출 SQL의 AST **11 checks PASS**이며 SQL 수·조건·outer join·순서·cursor/offset·자정 범위·점수/동점 규칙이 같다. 신규 `tests/social/test_discovery_workflows.py`의 **3 nodes**는 빈 검색 0쿼리, literal `%`/`@handle` 검색·삭제 Character/비공개/숨김 Post 제외, KST 경계 직전 제외·당일 포함·원래 점수/동점 순서·단일 집계 SQL/commit 0, 인기 root의 경계·삭제·대꾸·숨김·동점 ID 순서를 검증한다.
+
+집중 검증 **33 passed / 5.35s**, #258/#263 API/schema/ORM 차이 0, 기존 보호 테스트 변경 0, 전체 split evidence PASS다. 경계는 **677 modules / 2,239 edges / 243 exact legacy edges**다. 두 legacy edge 증가는 기존 활동 로그/hidden-action 읽기가 명명된 runtime으로 이동한 사실만 기록하며 AR-B4-C가 소유 이전 후 종료한다. B4 담당자가 timezone은 아직 core.agent_activity_schedule의 같은 객체임을 확인했다.
+
+전역 Today 순위와 World 범위 Chat Today SNS snapshot은 구분한다. 후자의 source/관찰/World/coverage와 Relationships/projection, agent/resident, media job·HTTP 전환은 여전히 B5 잔여다. Source introduction capture·통합 Actions·PR/merge는 root가 진행하며 이 source의 집중 PASS를 전체 B5 완료로 확대하지 않는다.
+
+
+## AR-B5-B9 — 공개 활동 projection과 비공개 필드 경계
+
+공개 활동 schema 정의 5개, action/요약/숨김 상수 4개, admission·응답·event 변환의 실제 함수 3개와 댓글/활동 조회를 해당 역할로 이전했다. 원본 schema/constants·함수 본문·추출 SQL의 AST **14 checks PASS**이며 원래 댓글 → state → 활동 조회 순서와 limit/dedupe를 그대로 사용한다. `app/schemas/characters.py`는 관련 정의가 없는 동일 객체 alias이며 full split의 실제 목적지에서는 제거하고 호환 소비자로만 추적한다.
+
+신규 `tests/social/test_profile_activity_workflows.py` **2 nodes**는 실제 SQLite의 댓글20개·동점순서, lazy state를 포함한 쿼리 순서, hidden activity 제외·state_saved 중복 제거, private field와 로그 원문 마스킹, 없는/삭제 대상의 활동 조회 전 차단을 검증한다. 신규 fixture의 Comment 필드 이름과 identity-map 조건을 수정한 뒤 **25 passed / 4.49s**다. 제품 로직 수정 없이 fixture만 실제 모델·lazy read 조건에 맞췄다.
+
+#258/#263 API·schema·ORM 차이 0, 기존 보호 테스트 변경 0, full split PASS, architecture **682 modules / 2,257 edges / 244 exact legacy edges**다. 원래 로그 읽기 두 의존이 runtime으로 옮겨지고 사용하지 않는 이전 CRUD→agent import 하나를 제거했으며 AR-B4-C의 정확한 후속 소비자를 공유했다. 일반 HTTP·agent/resident·World Feed·media job 및 Relationships/projection 전환은 아직 남아 있고 source capture·Actions·PR/merge는 root가 진행한다.
+
+
+## AR-B5-B10 — Social HTTP 실제 소유와 실행 연결
+
+기본 Social HTTP 31개의 실제 handler는 `social/router.py`로 옮겼다. 입력·오류 변환·응답은 HTTP가, 업무 판단은 기존에 이전한 service가 소유한다. 요청 dependencies는 공통 인증의 동일 함수 객체와 앱에 연결된 서비스를 사용하며 runtime을 import하지 않는다. 두 앱 생성 경로의 `runtime/social/composition.py`는 원래 네 service 인스턴스를 연결한다. 옛 Community API는 Social과 Character state 경로를 원래 순서로 조립하는 공통 HTTP 책임만 남는다.
+
+원본 31개 함수 body/decorator AST는 실제 서비스 소유 이름을 정규화했을 때 동일하다. #258/#263 API/schema/ORM 차이 0이며 변경 보호 테스트 1개 파일의 assertion도 같다. 신규 `tests/social/test_http_ownership.py`의 3 nodes는 두 factory의 정확 서비스 연결·route 순서·동일 인증 함수, 미구성 요청의 명시적 실패, PATCH 입력/404/422/동일 Session 전달을 검증한다. 초기 신규 fixture의 중첩 라우터 순회와 POST/PATCH 불일치를 수정한 뒤 집중 **40 passed / 1 existing warning / 7.75s**다. 제품 동작이나 기존 assertion은 바꾸지 않았다.
+
+전체 split evidence PASS, architecture **685 modules / 2,277 edges / 241 exact legacy edges**, L4 **685 modules / parity97**, ER0 **Postgres78 / migration subset87 / Neo4j24 / Next44 / parity7**다. Agent/resident·World Feed·media job 및 Relationships/projection의 실제 전환은 아직 남아 있다. 신규 source/tests 첫 도입 capture와 통합 Actions/PR/merge는 root가 순차 수행한다.
+
+
+## AR-B5-C1 — Relationships 모델·응답 후보의 실제 저장과 상태 변경
+
+8개 ORM class와 13개 candidate 함수·7개 상수의 실제 소유를 Relationships models/service/repository/utils/constants로 이전했다. SocialEvent/Evidence/State/Change/Proposal/Outbox와 replay의 두 원본 모델 파일은 whole-file 이동하며 실제 runtime reader와 등록 소비자를 전환했다. AgentRelationshipPoint는 기존 AgentRun 모델에서 실제 class만 추출하고 동일 객체 alias를 남겼다. B4-C의 AgentRun/로그 등 소유와 구분하며 해당 원문은 수정하지 않았다.
+
+후보 입력 판단·상태 변경은 service, signature/expiry/pending/count SQL은 repository, ID/payload 변환은 utils가 소유한다. 원래 explicit commit/refresh, 충돌 rollback 후 winner 조회, expiry의 전체 활성 후보 범위와 pending recipient/order/limit은 같다. 13개 함수·7개 상수·8개 ORM의 본문 및 추출 query AST를 확인해 차이가 없었다.
+
+신규 `tests/relationships/test_point_write_boundaries.py` **2 nodes**는 잘못된 입력의 SQL0, 기존 duplicate SELECT1/commit0/선택 상태 보존, 첫 조회 뒤 외부 Session이 저장한 경쟁 winner를 실제 UNIQUE 실패→rollback→재조회로 복구하는 흐름을 검증한다. 기존 Resident 전체·SocialEvent·projection commands/replay·삭제와 함께 **230 passed / 13.83s**다. #258/#263 API/schema/ORM 차이0, 보호 구조 테스트1파일의 경로 전환 assertion PASS, 전체 split PASS다. 경계는 **694 modules / 2,292 edges / 241 exact legacy edges**, L4 694/parity97, ER0 Postgres78/migration subset87/Neo4j24/Next44/parity7이다.
+
+B4-C의 실제 residual 소비자 연결과 G5 공통 model 등록에서 정확 legacy alias를 종료한다. Graph service/계약, event/proposal/projection의 나머지 실제 정책과 Social agent/media/World Feed 작업은 이어지는 B5 범위다. 이 source의 capture/통합 Actions/PR/merge는 root가 별도로 진행한다.
+
+
+## AR-B5-C2 — Graph 계약·규칙과 실제 읽기·회상·계획 실행
+
+기존 Graph read/recall/plan의 실제 실행 본문을 `relationships/service/graph_read.py`, `graph_recall.py`, `graph_planning.py`로 이전했다. 응답 schema와 오류는 `schemas.py`·`exceptions.py`, immutable 값/조회 callback/실행 결과는 `contracts/`가 소유한다. GraphRecall의 방향·근거·공개·bounded 결과 함수와 provider-plan strict 파서는 IO 없는 `policies/`로 분리했다. 서비스마다 전달 전용 중간 클래스를 추가하지 않았으며 graph storage/provider와의 실제 typed callback 계약은 유지한다.
+
+원래 정의 **144개**의 AST 본문·상수·class 메서드가 같음을 확인했다. 기존 공통 schema와 public 소비자는 같은 클래스/함수 객체를 사용하고, `application/domain/graph_read/graph_recall/ports/projection/infrastructure`의 사용하지 않는 old package 모듈7개는 import 소비자0과 기존 공개 이름의 보존을 확인한 뒤 제거했다. `public.py`는 기존 Chat/Memory/runtime/test의 정확한 호환 표면으로만 남으며 각 import별 bridge에 최종 전환·종료 조건을 명시했다.
+
+Graph 읽기·six primitives recall·strict planner·commands/replay/worker/metrics 검증은 **58 passed / 12.29s**, 기존 inventory/port/architecture 회귀는 **24 passed / 3.28s**다. 새로운 test node는 없으며 기존 permission/World/방향/누락 근거/관찰 여부/차단/삭제/실패 fallback/provider 한도 assertion을 유지한다. #258/#263 API/schema/ORM 차이0, 변경 보호 테스트7파일 assertion PASS, 전체 split evidence PASS다. 최초 한 차례 root cwd의 collection은 app import를 찾지 못했으며 이후 모든 실제 검증은 backend cwd에서 수행했다.
+
+Architecture **693 modules / 2,304 edges / 241 exact legacy edges**, L4 693/parity97, ER0 Postgres78/migration subset87/Neo4j24/Next44/parity7이다. 역사 frozen JSON은 수정하지 않았다. 관계 event 생성·proposal과 projection runtime의 SQL/상태 변경 소유, Social agent·World Feed·media jobs는 B5 잔여로 남는다. Source 도입 capture·통합 Actions·PR/merge는 root가 진행한다.
+
+
+## AR-B5-C3-A — 성공 source의 변화량·상태 상한·outbox와 원본 제외
+
+기존 runtime의 실제 정의20개를 Relationships의 오류/constants/contracts/policies/service로 이전했다. EvidenceInput/EventApplyResult는 같은 값/attached ORM을 유지하고, 시간대와 snapshot은 원래 객체의 값이 읽히는 시점을 유지하는 protocol을 사용한다. Social event type tuple은 constraints와 admission이 같은 constants 객체를 사용한다. 실제 방향별 상태 생성·하루/원본별 변화량 상한·projection payload 선택/서명/중복·원본 삭제 제외를 service가 소유하며 query6개는 repository가 원문 그대로 실행한다.
+
+원본문과 추출 query를 결합한 **20 AST checks PASS**다. `FOR UPDATE`, 조건/정렬/순서·same Session·flush-only source 원자성, 명시적 caller commit 책임을 바꾸지 않았다. Delta cap이 적용돼도 event/evidence/interaction count가 남는 의미, 방향·World 격리, source exclusion의 dedupe와 감사 row도 그대로다.
+
+기존 SocialEvent·manual/observation UoW·owner 수동 작성·proposal·projection·삭제 검증은 **57 passed / 1 existing warning / 26.37s**다. 새 test node나 보호 assertion 변경은 없으며 #258/#263 API/schema/ORM·전체 split evidence PASS다. Architecture **700 modules / 2,329 edges / 241 exact legacy edges**, L4 700/parity97, ER0 **Postgres80 / migration subset87 / Neo4j24 / Next44 / parity7**다. Postgres 분류 파일 수 증가는 실제 query 소유 파일2개의 추출로 생겼으며 schema 변경은 없다.
+
+최종 record_successful_social_event와 외부 source/WC 검증·실행기록 연결은 다음 C3-B 실제 이전 범위로 남겼다. Source capture·통합 Actions·PR/merge는 root가 순차 진행한다.
+
+
 ### AR-B4-B 준비 — 공통 context text와 Social timeline 선행 연결
 
 A3d `7ca4e38` 뒤 B5 `c0f3be2` 전체 계보를 합쳤다. `services/llm_context.py`의 동일 함수가 `core/context_text.py`로 이전한 경로를 유지하고, Social timeline의 활동 기록은 현재 AgentActivityLog 구현을 같은 Session callback으로 연결한다. Joint UoW·기존 Proposal·RoutinePost·Social 소유 회귀는 **39 passed / 1 기존 PostgreSQL skip / 16.44초**다. 경계 **682 modules / 2,265 edges / legacy exact 235 PASS**, ER0 **81/87/24/44/7**, L4 parity **97**을 확인했다. `test_timeline_writes.py`라는 존재하지 않는 파일명으로 첫 테스트 수집이 거부되어 실제 `tests/social`의 소유 검증을 포함해 다시 실행했으며 제품 코드는 그 사이 수정하지 않았다. B4-B의 schema·이벤트 제한·context·provider 역할 이전은 이 통합 뒤에 진행한다.
@@ -1456,3 +1540,498 @@ C7-H 원본 archive2297nodes는 준비됐고, source3파일/testfile1/4노드의
 PR #282의 `e20c9d9`에서 Core backend, frontend, architecture-boundary, dependency-license, DCO, embedded migration 검사는 통과했다. `oss-boundary`는 Gitleaks directory 검사에서10개를 감지해 실패했다. 원문 검사기를 재현한 결과 전부 `security/refactor_backend_additions.json`의 실제 파일 Git blob SHA-1이었다. 원래 signed `526a939c`, `f34de9bd`, `2a89dc80`, `0299586c`의 해당 파일 object와10개를 각각 대조해 실제 런타임 비밀이 아님을 확인했다.
 
 기존 방식과 같은 `generic-api-key` 규칙 AND 정확한 additions 경로 AND 전체 key/hash 행 일치만 적용했다. 다른 key/hash·접두/접미 문자열은40개 음성 검증에서 모두 거절되며 원래10개/공백·쉼표 변형20개만 일치한다. 동결·원장·제품·테스트 source·기존 custom scanner25 tuple은 바꾸지 않았다. 동일 Gitleaks8.30.1의 tracked tree 및 HEAD 조상459commits 재검사 모두0 findings이며 기존 scanner/allowlist 회귀는 **23 passed / 2.01초**다. 최종 push head에서 모든 PR checks를 다시 확인한다.
+## AR-B5 준비 — Routines C3a 소유 코드 합류
+
+Signed Social `2761e35`에 Routines `6beec5d`를 합쳤다. 활동 로그·기록 모델과 tick timezone의 실제 Routines 소유를 Social의 검색·프로필 활동·Feed에서 소비하도록 연결하고, joint runtime의 RelationshipState를 실제 Relationships 모델로 연결했다. 같은 Session의 호출 순서와 factory의 각 configure 호출 1회를 유지한다. 원본 `agent_runs.py`의 Daypart 모델 본문은 그대로 두고 Point는 Relationships의 동일 class를, 나머지 실행 모델은 Routines의 동일 class를 등록한다.
+
+집중 검증 **232 passed / 기존 warning 1 / 106.03초**. 첫 collection은 새 joint adapter의 옛 모델 경로 1건을 발견했으며 실제 소유 import만 수정한 뒤 같은 검증을 통과했다. API·응답 스키마·ORM는 PR258/263과 동일하며 변경된 보호 테스트 14개 파일의 assertion과 전체 기존 split evidence가 모두 통과했다. 구조 검사는 **727 modules / 2,472 edges / exact legacy 218**로 통과했다. 현재 L4(727/97)·ER0(Postgres83/migration87/Neo4j24/Next44/parity7) inventory를 재생성했으며 frozen baseline/checkpoint/additions는 변경하지 않았다. Source capture·Hosted CI·installer 및 전체 B5 완료는 부모의 후속 선형 통합에서 검증한다.
+
+
+## AR-B5-C3-A1 — 활동 실행의 동일 Session 연결 협력
+
+`routines/service/public_action_executions.py`가 기존 nullable `Session.get`와 `social_event_id` 한 필드 대입을 실제 소유한다. Relationships runtime은 기존 오류 판정과 마지막 flush를 계속 담당한다. 추가 검증·commit·flush·값 복사 없이 원래 attached 객체를 전달하며 이후 이벤트 workflow 이전에서 이 계약을 재사용한다. 기존 signature/create/finish는 B4-C4 소유로 별도 전환한다.
+
+집중 검증 **14 passed / 13.15초**. 신규 2개 parameter node는 실제 SQLite와 두 Session으로 정상/조회 실패 주입을 검사한다. 기존 성공 실행 ID를 FK evidence로 유지하고 reader가 없는 레코드를 읽도록 제한적으로 주입하여 원래 `execution_evidence_invalid` 분기를 검증한다. 대입 함수는 SQL을 추가하지 않고, 외부 Session에서는 미커밋 event/link를 볼 수 없으며 caller rollback 뒤 event/evidence/outbox/link가 전부 되돌아간다. 기존 12개 SocialEvent 회귀의 assertion은 변경하지 않았다. Source 도입 capture는 부모의 선형 통합 단계에서 진행한다.
+
+
+## AR-B5-C3-B — 성공 이벤트의 실제 업무 흐름과 소유별 근거 조회
+
+`relationships/service/events.py`가 event admission·idempotency replay·evidence·상태 변화·outbox·실행 연결의 원래 순서를 소유한다. 재실행 3개 SQL은 자체 repository, 근거의 존재/범위 조회 흐름은 service/evidence, 순수 공개 판단은 policies/events로 분리했다. WorldCharacter 서비스는 기존 active/member 검사와 actor FOR UPDATE를 소유하며, World의 기존 nullable 조회와 Social의 unfiltered Post/숫자 source/상호 차단 및 Routines의 Joint/Execution 조회를 runtime의 같은 Session collaborator가 연결한다. 기존 runtime entry는 이 Session 조립만 담당한다.
+
+기존 event 함수와 replay SQL 3개·상호 차단 SQL·WC 검증/잠금·공개 근거 판단·source 분기 등 **8개 AST 계약**은 정확한 소유 함수 호출만 원래 표현으로 확장했을 때 동일하다. 기존 성공 source/관찰/NO_ACTION·delta 상한·원본 삭제·projection replay·수동 요청·공동 활동의 집중 검증은 **57 passed / 기존 warning 1 / 34.76초**다. 신규 owner 협력 2개 node는 재실행도 현재 membership을 먼저 검사하며 actor만 잠그고, 이후 동일 idempotency가 확인된 경우에만 evidence 읽기를 생략한다는 순서를 실제 SQLite에서 검증한다. 첫 collection의 타입 import 누락을 수정했고, 테스트 경로 오타로 1회 no-tests 종료 후 확인한 실제 파일 목록으로 실행했다.
+
+API·응답 스키마·ORM는 PR258/263과 동일하고 기존 보호 테스트의 assertion은 변경하지 않았다. 실제 composition wrapper를 유지한 두 이전 split 기록의 목적지를 보완했다. Root가 별도로 발견한 Memory fixture의 Post+관찰 동시 add 문제도 production constructor를 감사했다. 현재 유일한 `claim_feed_observations`는 기존 관찰 SELECT 다음 `begin_nested()`의 선행 flush 뒤 observation을 add/flush하며, Post+observation 동시 add_all을 하지 않는다. 모델/FK/transaction 의미를 변경하지 않고 fixture가 이 선행 조건을 표현하도록 root에서 검증한다. Source capture·Hosted CI·전체 B5 종료는 후속 통합에서 수행한다.
+
+C3-B 최종 구조 검사는 **734 modules / 2,500 edges / exact legacy 217**, 변경된 event split 기록 3개와 L4·ER0 current inventory가 통과했다. 다른 full split 기록은 직전 검사에서 오류가 없었고 이번 정정은 이 3개 기록에 한정된다.
+
+
+## AR-B5-C4-A — 활동 제안 값·오류·자체 조회·문구 규칙
+
+원래 activity_proposal_runtime의 상수 7개·오류·결과 dataclass 3개·자체 조회 3개·daypart marker/문구 판단과 기존 동일 UTC 함수를 실제 Relationships 역할 경로로 연결했다. **17개 정의 AST 동일**이며 외부 Joint ORM 반환 타입만 attached 값의 read-only 구조 계약으로 표현한다(객체를 변환하거나 복사하지 않는다). 나머지 제안 생성·응답·일정 workflow는 C4B에서 소유 이전하며, 원래 서비스의 6개 정확한 임시 import만 다음 단계 제거 조건과 함께 기록했다.
+
+집중 검증 **19 passed / 14.61초**. 기존 Proposal·SocialEvent·공동 실행의 assertion은 변경하지 않았고 신규 node는 없다. Source capture/Hosted CI와 전체 B5 종료는 후속 단계다.
+
+
+## AR-B5-C4-B — 제안 생성·응답·예약의 실제 업무 소유
+
+Relationships `service/proposals.py`가 제안 한도·cooldown·preview·발행·일정 탐색·수락·거절·역제안의 원래 흐름과 상태 변경을 소유한다. 자체 Proposal/evidence 조회는 repository로 분리하고, Joint 조회는 Routines repository에 두었다. World/Social/Routines의 실제 함수는 `runtime/activity_proposals`가 같은 Session으로 연결하며, 각 Routines 호출의 기존 JointReferences 생성 시점도 유지한다. 기존 `services/activity_proposal_runtime.py`는 제거했고 caller 5개를 실제 runtime 구성에 연결했다. C4-A의 정확한 임시 bridge 6개도 모두 종료했다. 기존 Proposal 테스트 5개는 `tests/relationships/test_activity_proposals.py`로 옮겨 실제 소유와 일치시켰다.
+
+기존 업무 흐름 **6개와 SQL 5개 AST**는 정확한 소유 함수 호출만 원문으로 확장하면 동일하다. 최초 새 transaction test는 datetime fixture의 인자 타입 오류 2개를 수정했고 제품 코드나 기존 assertion은 바꾸지 않았다. 수정 후 신규 정상/예약 직후 실패 주입 2개를 포함한 집중 **21 passed / 21.13초**, 수동 요청·삭제·projection까지 **47 passed / 기존 warning 1 / 31.39초**를 확인했다. 실제 2개 Session에서 같은 attached Proposal을 예약에 전달하고, 예약을 만든 직후 실패해도 caller rollback으로 제안·Joint·참가자·근거를 함께 되돌린다.
+
+구조 검사가 `runtime.relationships`와 `runtime.routines`의 역방향 조립 의존을 발견했다. 제안+예약 상위 조립을 독립 `runtime/activity_proposals`로 분리하여 각 runtime에 대한 의존을 단방향으로 만들었다. 검사 예외를 추가하지 않았으며 최종 **740 modules / 2,517 edges / exact legacy 214 / cycle 0**으로 통과했다. 경로 정정 뒤 같은 집중 **21 passed / 24.32초**, 변경된 Proposal split 2개도 통과했다. API·응답 스키마·ORM는 PR258/263과 동일하고, 이동한 보호 test assertion과 full split 역시 정정 전 검증에서 오류 0이었다. 최종 source 도입/전체보존/Hosted CI/installer는 부모 선형 통합에서 별도로 검증한다.
+
+
+## AR-B5-C5-A — Outbox 상태 전이와 World readiness 조회
+
+기존 SQLAlchemy outbox의 claim/finalize 실제 업무는 Relationships `service/projection_state.py`, claim 후보/World 집계/nullable row 조회는 repository, GraphOutboxCounts는 contracts가 소유한다. 원래 runtime/sqlalchemy_state.py는 제거하고 실제 consumer 5개를 역할별 구현에 연결했다. 같은 Session·claim flush·finalize의 caller commit·rebuild 제외·정렬·batch bound·skip_locked·owner 검사·retry/dead 전이 순서를 유지한다. canonical SQLite CAS 구현은 이 source에서 바꾸지 않고 다음 책임 전환 대상으로 둔다.
+
+원문 **6개 실제 body/query 계약 AST 동일**, 집중 **37 passed / 기존 PostgreSQL 연결 gate 1 skip / 21.94초**. 새 transaction node는 SQLite에서 이 Session 기반 구현의 claim/재시도 rollback과 stale owner 차단을 검사한다. 이 테스트를 PostgreSQL skip_locked 동시성 검증으로 표시하지 않는다. canonical SQLite의 기존 10-worker claim/reclaim 회귀도 함께 통과했다. 기존 테스트 assertion은 바꾸지 않았고 source capture/Hosted PostgreSQL gate/전체 B5 종료는 부모 통합에서 수행한다.
+
+C5-A 최종 경계는 **741 modules / 2,520 edges / exact legacy 213**으로 통과했고 API·응답 스키마·ORM는 PR258/263과 동일하다. 변경된 보호 테스트 2개 파일의 assertion과 전체 기존 split evidence도 오류 0이며 L4·ER0 current inventory를 갱신했다.
+
+
+## AR-B5-C5-B — canonical SQLite lease 정책과 CAS의 실제 소유
+
+Relationships service가 원래 worker/batch/시간 검증·lease·retry/dead/cancel 정책을, repository가 원래 candidate SELECT·rebuild 제외·정렬·UPDATE CAS를 소유한다. Runtime은 기존 engine·retry policy와 `run_sqlite_immediate` executor를 그대로 가진다. 동일 callback 안에서 조회→판단→CAS가 진행되며 BEGIN IMMEDIATE/commit/rollback/재시도 범위는 바꾸지 않았다. 기존 TTL 60초와 UTC 함수는 동일 canonical 정의를 사용한다.
+
+기존 class의 constructor·load_command·_write를 포함한 **10개 policy/SQL/executor AST 계약이 동일**하다. 실제 10-worker claim/reclaim 및 scheduler/projector 경쟁·worker 실패/종료·명령/replay 집중 회귀는 **37 passed / 19.31초**다. 기존 assertion이나 신규 test node는 변경하지 않았다. B5의 mutable feature navigation도 실제 이동 경로에 맞췄으며 frozen baseline/checkpoint/additions와 기능 완료 상태는 유지한다. Source capture/Hosted CI/installer 및 잔여 command/replay/observation·Social agent/media 전환은 후속 통합과 slice에서 진행한다.
+
+최종 canonical TTL 연결과 실제 트리의 같은 회귀도 **37 passed / 17.82초**이며, 경계 **743 modules / 2,529 edges / exact legacy 213**, API·응답 스키마·ORM 및 전체 split evidence 오류 0을 확인했다. L4·ER0 current inventory도 통과했다.
+
+
+## AR-B5-C5-C — canonical source 기반 명령·서명·범위 판단
+
+Relationships가 payload 버전/서명/형식, source 적격성·삭제/숨김, 관계 방향과 replay snapshot의 실제 판단을 소유한다. 자체 event/relationship/evidence 조회는 repository, WorldCharacter의 원래 nullable 조회와 membership World 확인은 해당 서비스, Social Post는 기존 unfiltered owner query에 연결했다. Runtime은 caller Session을 전달하며 별도 Session·flush·commit을 만들지 않는다. 비활성 membership도 과거 관계 복구에 사용할 수 있었던 기존 의미를 active-author 정책과 합치지 않았다.
+
+원래 **11개 정의와 nullable 조회 2개 AST 계약이 동일**하며, 집중 **47 passed / 14.94초**다. 기존 Command 테스트 7개 node를 `tests/relationships/test_projection_commands.py`로 이동하고 workflow/ER0 실제 소비자와 정확 node 지도를 갱신했다. 새 3개 node는 같은 Session·attached identity·숨김 pending write 감지·caller rollback·inactive 과거 membership 허용 및 missing/다른 World membership을 target 조회 전에 차단하는 오류를 검증한다. 첫 추출 실행은 이미 존재하는 동일 source-exclusion 상수를 확인해 정지했고, 중복 정의 대신 기존 같은 값에 연결한 뒤 진행했다. 기존 assertion/DDL/frozen 승인 범위는 변경하지 않았다. Source capture와 전체 B5/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C5-C 최종 경계는 **748 modules / 2,545 edges / exact legacy 212**이며 더 이상 필요 없는 runtime→global models 예외 1개를 종료했다. PR258/263 API·응답·ORM와 full split evidence가 통과했고, 옮긴 기존 7개 node의 assertion/parametrize 계약도 직접 동일 비교했다. L4·ER0 current inventory가 통과했다.
+
+
+## AR-B5-C5-D — replay lease·high-water·완료 감사와 source 조회
+
+Relationships의 service가 생성/시작/lease 갱신/실패/성공 다섯 실제 상태 흐름을, repository가 active-run·source·잠금·high-water·정렬·dead·nullable 조회를 소유한다. 기존 ReplayStore는 canonical projection parent를 참조하는 같은 계약, GraphReplayError는 같은 오류 본문이다. World의 정렬된 식별자와 Relationships의 정렬된 outbox ID도 각각 실제 소유에 두었다. runtime의 Session 생성·clock 호출 위치·sidecar 실행·metrics 및 예외 순서는 그대로 유지한다. 생성은 flush-only, start/renew/finalize의 명시 commit/refresh 의미도 원래와 같다.
+
+원문 replay **5개 정의와 SQL 10개 및 outbox class 3개 AST 계약이 동일**하다. 집중 **39 passed / 18.74초**이며 기존 high-water 재개·delta tail 보존·삭제 원본 관계 복구·parity fail-closed·10-worker claim 경쟁을 유지한다. 새 node 없이 기존 replay 6개를 업무별 tests 경로로 옮겼으며 workflow/ER0 소비자와 full split 지도를 같이 갱신했다. 소유 코드에서 전역 model aggregate를 읽던 정확한 임시 edge 2개를 종료했다. Source capture/Hosted CI/installer와 잔여 Social/Relationship read·observation 전환은 부모 통합 및 다음 slice에서 진행한다.
+
+C5-D 최종 경계 **751 modules / 2,558 edges / exact legacy 210**, API·응답·ORM 및 full split evidence 오류 0을 확인했다. 이동한 기존 replay 6개 assertion도 직접 동일 비교했으며 최종 경로의 replay·구조 집중 **18 passed / 2.59초**다. L4 current inventory에서 옛 테스트 경로 한 건을 발견해 실제 policy 경로만 전환한 뒤 parity 97개를 유지하여 통과했다. ER0 current inventory도 통과했다.
+
+
+## AR-B5-C6-A — 진단 응답·오류와 실제 소유별 조회
+
+기존 canonical 진단 조회 다섯 개를 Relationships repository, Joint/participant 조회 하나를 Routines repository로 이전했다. join/행배수·방향·정렬·limit·참가자별 후속 조회를 그대로 보존하고 옛 혼합 repository 모듈을 제거했다. 진단 응답 여덟 class와 오류 세 class도 Relationships가 실제 소유한다. JointActivityRead는 진단 화면의 기존 투영 응답이며 실행 ORM/쓰기 소유는 Routines에 남는다. 전역 schema는 같은 class를 내보내는 정확한 임시 alias로 추적하며 runtime의 나머지 진단 workflow는 다음 C6-B에서 옮긴다.
+
+원문 **17개 정의/조회 AST 동일**, 기존 사건/World격리·현재 source 공개·소유 진단/그래프/replay 집중 **24 passed / 12.23초**다. 새 node나 기존 assertion 변경은 없다. Routines 담당과 실제 새 query 경로가 겹치지 않음을 확인했다. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C6-A 최종 경계 **752 modules / 2,562 edges / exact legacy 208**과 API·응답·ORM 및 full split evidence 오류 0을 확인했다. 단일 목적지 schema 이동은 full split 대신 실제 파일 이동 map으로 명시했다. 임시 bridge의 정확 target 필드도 검사 규약에 맞췄으며 검사 예외를 넓히지 않았다. L4·ER0 current inventory가 통과했다.
+
+
+## AR-B5-C6-B — 소유 진단 workflow와 Relationships HTTP
+
+Relationships가 진단 소유권·현재 evidence source 상태·공개 응답·graph 비교 순서를 실제로 소유한다. Character nullable get, WC의 같은 next(query)/membership 확인, Social block/Post, Routines Joint 조회와 runtime graph gateway를 같은 Session collaborator로 연결했다. 기존 nullable/read 순서·반응 없는 source·World 격리·차단·삭제/숨김 의미와 clock 위치를 유지하며 별도 commit을 만들지 않는다. 진단/관계 그래프 HTTP 두 개도 실제 Relationships router로 옮겼고 옛 world_activity_runtime는 Routines와 Relationships router의 prefix/tags/등록 순서 조립만 남는다. main/public_main에는 reader factory 구성을 각각 한 번 연결했다.
+
+원문 진단 **4개 및 HTTP 4개 정의 AST 계약이 동일**하다. 첫 검증은 새 test가 hosted factory의 startup 전 runtime_settings를 항상 존재한다고 가정한 1건 때문에 28 PASS/1 FAIL이었다. 제품의 기존 fallback을 그대로 두고 새 test가 실제 전역 fallback과 요청 설정 교체를 확인하도록 고친 뒤 **29 passed / 기존 warning 1 / 17.01초**를 확인했다. 새 HTTP 두 node는 두 factory 등록/같은 객체 설정과 Session, 실제 200 응답/403·404 오류/깊이 422/disabled graph fallback을 검증한다. 기존 assertion은 바꾸지 않았다. Source capture/Hosted CI/installer와 잔여 Social·observation 전환은 후속 통합에서 수행한다.
+
+C6-B 최종 경계 **758 modules / 2,586 edges / exact legacy 205**와 PR258/263 API·응답·ORM 및 전체 split evidence 오류 0을 확인했다. 외부 공개 entry에는 service/schema/contract만 등록하고 router/dependencies는 실제 검사 module과 정확한 기존 API 조립 bridge로 구분했으며 경계 검사를 완화하지 않았다. L4·ER0 current inventory도 통과했다.
+
+
+## AR-B5-C7 — 실제 관찰 receipt·관계 상태·outbox 소유
+
+Relationships가 관찰 원본 적격성·방향·중복 receipt·친숙도 1 증가·outbox 저장을 실제로 소유하고 자체 SQL을 repository로 분리했다. 기존 성공 source를 또 만들거나 affinity/trust/tension을 추론하지 않는다. WC의 실제 active scope 서비스와 Social의 nullable Post/원래 LIMIT 1 양방향 block query를 같은 Session으로 연결했다. 잠금·읽기 순서·flush·caller commit/rollback을 보존하며 동일한 시간/snapshot/clamp/outbox 중복 query는 기존 canonical 구현을 공유한다.
+
+기존 관찰·SQL·공유 정책·WC 검증 12개와 남은 source writer 13개 AST 계약이 동일하다. 첫 범위 회귀는 관찰 추출 중 남은 source 작성이 사용하는 UTC import를 제거한 오류로 30 PASS/10 FAIL이었으며 원래 import를 복원했다. 기존 assertion을 바꾸지 않고 최종 **44 passed / 기존 warning 1 / 22.74초**를 확인했다. 추가 네 node는 같은 Session/attached 객체/lock→Post→target→block 순서와 실제 caller rollback, 비활성 observer·membership 및 역방향 block을 관계 저장 전에 차단하는 동작을 검증한다. Source capture/전체 B5/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C7 최종 경계 **762 modules / 2,607 edges / exact legacy 205**, PR258/263 API·응답·ORM 및 전체 split evidence 오류 0을 확인했다. 전체 원문 분할 지도에는 임시 runtime export의 `__all__`도 포함했고 검사 규칙을 완화하지 않았다. L4·ER0 current inventory도 통과했다.
+
+
+## AR-B5-C8-A — 성공 source·evidence와 Social 중복 쓰기 기반
+
+Relationships가 source 성공 기록과 evidence digest/저장 두 flush를 실제로 소유한다. `audit_only`와 stage failure injection 순서를 그대로 유지하며 관찰·관계 delta·projection을 추가하지 않았다. Social의 입력 digest·기존 ledger 검증·공개 root 정책 및 candidate 조회도 실제 역할로 이전했다. 기존 runtime UoW는 원래 함수 객체를 직접 호출하며 다음 단계에서 남은 전체 쓰기 정책을 이전한다. 원문의 실제 source 본문/SQL과 기존 runtime 나머지 정의를 비교하고 기존 동시성·중복·실패 롤백·provider-free 회귀를 검증했다. 새 test node나 보호 assertion 변경은 없다. Source capture/전체 B5/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C8-A 집중 **31 passed / 기존 warning 1 / 16.80초**다. 이전한 다섯 함수 본문(ledger SQL 복원 비교 포함)과 남은 runtime 아홉 정의를 원문과 동일 비교했다. 최종 경계 **767 modules / 2,620 edges / exact legacy 205**, API·응답·ORM·전체 split evidence와 L4·ER0 current inventory도 통과했다.
+
+
+## AR-B5-C8-B — Social 실제 source 작성 정책과 runtime 트랜잭션 분리
+
+SocialSourceWriteService가 수동/자율 actor·target 허용, idempotency replay, 실제 Timeline 호출, source/evidence·inbox 후보 순서, 최종 응답을 소유한다. Runtime은 기존 BEGIN IMMEDIATE/timeout 복원/재시도·최종 commit을 그대로 유지한다. WC nullable query와 Character/Identity/membership 및 Relationships source 쓰기는 같은 caller Session의 typed references에서 연결한다. 각 조회의 원래 시점과 nullable 결과, 객체 identity를 유지하며 불필요한 조회/사전검증/commit을 추가하지 않았다.
+
+실제 정책·helper·executor 15개 AST와 기존 관찰 composition class 본문이 동일하다. 먼저 기존 집중 **34 passed / 17.58초**를 확인했다. 추가 source ownership 회귀는 생성 시 조회 없음, BEGIN 이후 같은 Session/attached row, source evidence의 audit_only·관계/graph 없음, 요청당 최종 commit 1회와 replay 중 source 재생성 없음을 검증한다. 기존 assertion은 유지했다. Source capture/전체 B5/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C8-B 최종 집중 **35 passed / 기존 warning 1 / 19.61초**, 경계 **771 modules / 2,638 edges / exact legacy 203**다. Runtime executor의 전역 ORM/옛 Community 서비스 임시 edge 두 개를 종료했다. PR258/263 API·응답·ORM와 전체 split evidence, L4·ER0 current inventory도 통과했다.
+
+
+## AR-B5-C9-A — 임시 Social ORM aggregate 종료와 실제 소비자 연결
+
+행동이 없는 `_SocialPersistenceModels`와 instance export를 제거하고 실제 다섯 runtime 소비자가 각 소유 도메인의 같은 ORM 클래스를 직접 import하도록 전환했다. 프로필/Today/선언된 자기 설명/Memory 근거의 SQL·암호화 cursor·bounded query·공개 범위 로직은 바꾸지 않았다. 다섯 소비자와 남은 read adapter의 31개 완전한 정의를 import 이름 정규화 후 원문과 동일 비교했다. Memory의 이 branch `sqlalchemy_source_reader.py` import 수정은 root A10/A12 통합 시 실제 `source_queries.py`로 연결하며 Memory 실제 service에는 ORM을 추가하지 않는다.
+
+처음 집중은 **43 PASS/1 FAIL**이었다. 실패는 root가 이미 확인한 기존 Memory fixture의 Post+observation add_all 시 observation INSERT가 먼저 실행된 FK 오류로, 실제 reader 호출 전이었다. 원래 FK/DDL/assertion을 유지하고 fixture만 Post add→flush→observation add 순서로 명시했다. Production은 기존 source 조회 및 begin_nested pre-flush 후 observation을 저장하며 정책을 변경하지 않았다. 신규 node는 없고 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C9-A 최종 집중 **44 passed / 기존 warning 1 / 9.36초**, 경계 **771 modules / 2,651 edges / exact legacy 203**다. 변경한 기존 fixture의 보호 assertion은 모두 동일했고 PR258/263 API·응답·ORM·전체 split evidence 및 L4·ER0 current inventory가 통과했다.
+
+
+## AR-B5-C9-B — 수동 World 피드·스레드 실제 조회 책임
+
+원래 6개 읽기 정책은 Social service, 원래 4개 Social SQL은 repository, active WC/Character/membership의 동일 join은 runtime references로 나누었다. 같은 Session에서 owner→WC→Character→membership 조회 순서와 profile capability 판단, 공개 root/reply 정렬·한도·오류를 유지한다. 원래 읽기는 User를 별도로 읽지 않으며 `owner_membership_inactive`를 사용하므로 작성 정책의 추가 검증/다른 오류를 재사용하지 않는다. Runtime의 기존 두 entry는 실제 service와 구체 references를 조립한다.
+
+SQL·협력 호출을 원문으로 확장한 **6개 정책 AST 동일**. 기존 집중 **13 PASS/7.03초**, 새 동일 Session/조회 순서/변경 관찰/commit 없음 회귀 포함 **14 PASS/8.83초**. 신규 1개 node는 호출자의 미commit Character moderation 변경이 profile capability에 반영되지만 기존 feed 결과를 새로 필터하지 않고 rollback으로 복원됨을 검증한다. 모든 기존 assertion은 유지했다. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
+
+
+## AR-B5-C10-A — 이미지 프롬프트·결과·quota 실제 정책
+
+원래 35개 정의/상수를 Social의 실제 contracts/schema/프롬프트 service/quota service/오류/결과 정책으로 나누었다. Character 모델 import 대신 읽는 prompt 사실만 정의한 구조적 계약을 사용한다. 날짜별 사용량과 service 무료 quota 정책은 원래 Social media SQL과 같은 settings·APP_TIMEZONE 객체를 쓰고 lock/count/예약/commit/refresh/종료 순서를 유지한다. 원래 provider 호출·Character 설정 저장은 다음 실제 workflow 단계에서 연결하며 전역 Operations 설정을 Social로 옮기지 않는다.
+
+기존 이미지/provider/Local Bot 집중 **72 PASS/5.67초**. 신규 실제 SQLite quota 회귀는 KST 자정·naive UTC 입력·한도 초과 시 추가 commit 없음·release 후 미사용·attached는 사용량 유지와 기존 commit 횟수를 검증한다. 최종 **73 PASS/6.06초**, 기존 assertion 수정 없음. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C10-A 최종 확인: 원래 57개 모든 함수/class 본문 동일, API/schema/ORM·기존 assertion·전체 split evidence PASS. 경계 780 modules / 2690 edges / legacy 202, L4/ER0 PASS.
+
+
+## AR-B5-C10-B — 이미지 queue 상태·처리 정책과 워커 연결
+
+claim/stale/완료 3개 원래 상태 정책을 Social service로 이동하고 기존 PostgreSQL skip_locked·정렬·limit 및 stale cutoff query는 repository로 나누었다. 워커의 실제 Character/Post 검사→prepare→attach→finish 정책도 같은 service에 두며 원래 Session 생성/시각 계산/취소/실패 로그/대기 loop는 worker에 유지한다. Character는 같은 Session의 nullable 실제 소유 조회를 callback으로 연결하며 Social은 외부 ORM에 의존하지 않는다.
+
+원래 query를 확장한 상태3·처리1 AST 동일. 신규4 node는 실제 worker를 통해 claim commit 이후 attached Character/Session/처리 시각, 제거된 Character/Post에서 provider0, 최종 commit·실패, stale cutoff의 strict < 및 조건부 commit을 검증한다. 기존 이미지/quota/provider/Local Bot 포함 **77 PASS/9.23초**. 기존 assertion 변경 없음. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
+
+
+## AR-B5-C10-C — 이미지 첨부·reference·실패 결과 책임
+
+실제 첨부2/reference6/provider 실패 결과2 정의 본문을 그대로 Social 서비스에 이전했다. 저장 기술은 기존 Social media storage가 처리하고, 수락된 결과를 PostMedia와 quota에 어떤 순서로 기록하는가는 attachment service가 판단한다. 미디어 참조 판단은 공개 URL만 읽는 구조적 계약을 사용하며 외부 ORM을 import하지 않는다.
+
+최종 집중 **79 PASS/22.03초**. 신규2 parameter node는 실제 DB에서 저장 성공 시 media commit→quota attached commit, 저장 실패 시 media 없음·quota failed commit과 원래 변환 크기/품질 전달을 확인한다. 기존 assertion과10개 원래 함수 본문 동일. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
+
+
+## AR-B5-C10-D — 실제 이미지 요청·생성 준비 정책
+
+원래 request/prepare/model·mode/허용 7개 정의를 Social service로 옮겼다. Character 설정/비밀/운영 설정/LLM/활동 로그는 기존 구현을 같은 Session의 명시적 협력으로 제공한다. Service는 기존 provider integration을 호출하지만 외부 ORM과 옛 services/CRUD 모듈을 직접 사용하지 않는다. 동일 BotImageRequestRead class와 provider 실패/작업량/processing 시각/참조 fallback 의미를 유지한다.
+
+원래7 정책의 협력 호출을 확장한 AST 및 남은11 정의 본문 동일. 첫 생성 코드의 keyword 배치 문법 오류를 compile 단계에서 수정했다. 집중에서 원래 positional fake callback을 keyword로 바꾼 차이와 이전 quota monkeypatch 대상을 확인해 호출 형식과 실제 새 대상만 바로잡았다. 신규 request fixture는 Post당 job unique 제약을 유지하며 서로 다른 두 Post에 요청해 queued가 다음 요청 한도에 반영되는지를 검증한다. 기존 assert·DB 제약을 변경하지 않았다. 신규1 node는 실제 same-Session 설정·동일 응답 class·요청 AI0·queued job 집계와 commit을 확인한다. 전체 B5/source capture/Hosted CI/installer는 후속 통합에서 검증한다.
+
+C10-D 최종 집중 **80 PASS / 28.12초**. 원래7 실제 정책 확장 및 남은11 본문 AST 동일, API/schema/ORM·기존 test1 assertion·전체 split evidence PASS. 경계 787 modules / 2727 edges / legacy 200, L4/ER0 PASS.
+
+
+## AR-B5-C10-E — 시각 정체성 캐시·응답 검증·참조 선택
+
+원래4 정책을 Social 실제 service로 이전했다. Credential 해석과 raw LLM 요청2는 concrete runtime binding에 남고 Social은 동일 출력 schema로 검증한다. Character 저장은 원래 strip→hash 대입→commit→refresh→return5문장과 같은 attached Session을 유지한다. 별도 Character owner source의 실제 repository 함수에 선형 통합할 callback을 준비했으며 ORM/동일경로를 복제하지 않았다.
+
+원래4 정책을 협력 호출로 확장한 AST, raw LLM2 본문, owner write5문장, 남은 정의 본문 동일 PASS. 새 SQLite3node는 정상 저장/observer 가시성·cache provider0·unusable/empty/invalid 응답의 저장0/추가 commit0을 검증한다. 기존 image 및 OSS 경계 집중 **68 PASS / 33.75초**. 기존 테스트의 monkeypatch 실제 대상 및 plaintext reveal의 정확 client 함수명만 바꿨으며 assertion과 strict allowlist 비교는 보존했다. 전체 B5/source capture/Hosted/installer 완료를 뜻하지 않는다.
+
+API/schema/ORM·기존 protected test2 assertion·전체 split evidence PASS. 경계 **788 modules / 2733 edges / legacy 200**, L4/ER0 PASS. 별도 Character owner source `734492bf6551fdb5dea24d2b9140e4ac2d97ef18`의 `repository/image_settings.store_image_visual_identity`에 같은 callback을 연결하는 선형 통합이 남아 있다.
+
+
+## AR-B5-C10-F — 이미지 실행 조립·워커의 실제 runtime 소유
+
+업무 판단을 앞선 C10-A~E에서 분리한 뒤 남은 concrete runtime15 정의와 worker2 정의를 `runtime/social`로 옮겼다. 각 본문 AST는 원문과 동일하다. 사용하지 않는 private wrapper4와 정책/상수/모델을 모아 재수출하던 import를 제거했다. LocalBot/Character/LangGraph는 동일 이미지 workflow를, 첨부·quota 종료는 실제 Social image_attachment를 호출한다. 기존 테스트 역시 실제 prompt/reference/constants/credential/provider 소유자를 사용하고 plaintext reveal의 정확 파일 경로를 전환했다.
+
+기존 image/LocalBot/provider 보안/OSS 및 실제 SQLite 회귀 **91 PASS / 26.26초**. 새 테스트 노드는 없으며 기존 assertion을 유지한다. Character 설정·visual write, Operations, DirectLlm 및 공통 이미지 문구 정책의 독립 선행 source는 최종 선형 통합에서 canonical import로 연결한다. 현재 혼합 image 테스트는 Character 설정/외부 provider/공통 키/Social 사례가 섞여 있어 전체를 Social로 잘못 분류하지 않고 G07 실제 소유별 분리 대상으로 기록했다. 전체 B5/source capture/Hosted/installer 종료는 아니다.
+
+보존 검사는 기존 assertion의 receiver 이름도 보호하므로 5개 기존 테스트에서 그 이름을 현재의 실제 정책/상수 모듈에 대한 local import alias로 유지했다. 제품 재수출을 되살리지 않았고 assertion을 삭제·완화하지 않았다. 이동 지도 갱신 중 무관한 역사 split 설명을 재계산한 변경은 검사에서 발견해 원본으로 복구했다. 최종 집중 **91 PASS / 31.19초**, API/schema/ORM·protected test3 assertion·전체 split evidence PASS. 경계 **788 modules / 2726 edges / legacy 197**, L4/ER0 PASS.
+
+
+## AR-B5-C11-A — 프로필의 암호화 커서 소유
+
+원래 runtime profile reader에서 cursor3함수·상수3을 실제 Social service로 이전했다. 전체 함수/상수 AST와 나머지 reader 본문이 동일하다. G2의 동결 AESGCM ciphertext 및 잘못된 key/tag/scope, World별 프로필 탭·count 회귀 **24 PASS / 7.61초**, 기존 Starlette 경고1. 새 node는 없고 기존 테스트는 동일 alias로 실제 cursor 모듈을 import한다. 이 단계는 커서의 실제 소유만 전환했으며 profile 조회 정책·SQL 분리는 다음 단계다.
+
+API/schema/ORM·기존 protected test1 assertion·전체 split evidence PASS. 경계 **789 modules / 2728 edges / legacy 197**, L4/ER0 PASS.
+
+
+## AR-B5-C11-B — World 프로필의 실제 정책·조회 소유
+
+Social 실제 service는 원래 입력4검증·프로필/차단/탭/페이지 판단 및 snapshot/mention 정책3을 소유한다. 원래 own-query4와 분리한 reply/like/media SQL3은 Social repository가, mixed Character/WC/World query5는 runtime이 소유한다. 같은 Session·attached 행·query 실행 순서와 tuple/nullable/cardinality를 보존했다. 별도 application/reader port와 옛 runtime reader를 제거하고 유일한 HTTP caller를 실제 service로 연결했다.
+
+확장 AST 전부 동일. 원문 reader와 현 실제 서비스의 실행 SQL·bound parameter·순서는 posts16/replies15/likes15 각각 동일하며 동일 snapshot/cursor를 반환했다. 신규 SQLite1node는 입력 오류 SQL0, pending WC 로컬 프로필의 즉시 반영, commit0 및 rollback을 검증한다. 기존 프로필/Chat entry/cursor/역사 inventory와 함께 **33 PASS / 9.36초**(기존 Starlette 경고1). P8-L-E 현재 source 검사만 실제 역할 경로로 연결했으며 frozen JSON은 변경하지 않았다. 전체 B5 및 source capture/Hosted/installer 종료는 후속 단계다.
+
+API/schema/ORM·기존 protected assertion·전체 split evidence PASS. 경계 **791 modules / 2733 edges / legacy 197**, L4/ER0 PASS. 새6 파일의 읽기 편의를 위해 임시 도구 환경의 Ruff 0.12.0으로 포맷했으며 저장소 의존성 파일은 바꾸지 않았다.
+
+
+## AR-B5-C12 — 수동 Social HTTP·요청 세션 연결
+
+기존 World profile/feed/thread/post/reply HTTP5 및 오류 매핑6개 본문을 Social router의 실제 책임으로 이전했다. 요청 factory3은 같은 Session으로 기존 프로필·read references·BEGIN IMMEDIATE executor를 연결하며 생성 IO0을 유지한다. 원래 API 조립 위치·URL·query/header·상태·오류·응답·멱등성 및 provider0은 그대로다. 실행 계약3method는 같은 class 본문으로 contracts에 이동했고 옛 API와 ports 파일을 제거했다.
+
+선언한 collaborator 주입만 확장하면 기존6본문/5decorator/request 인자 AST가 동일하며 기존 Social HTTP31과 transaction protocol3은 AST 그대로다. 신규 SQLite2node는 두 앱 factory의 요청 Session 동일성·constructor SQL0·manual route5 순서 및 외부 frontend 요청5의 업무 IO 전 차단을 검증했다. 최초 신규 fixture는 read가 Origin만 검사한다고 잘못 가정하여42PASS/1FAIL이었고, 원래 host 기반 읽기 규칙에 맞춰 Host도 외부 값으로 고정했다(제품 변경 없음). 최종 기존 HTTP/멱등성/provider0/프로필/Chat entry/cursor/history inventory 포함 **43 PASS / 14.49초**, 기존 Starlette 경고1. 전체 B5 및 source capture/Hosted/installer 종료는 후속 단계다.
+
+최종 Worlds 오류 계약을 기존 승인된 `worlds.service`의 같은 클래스 객체로 연결한 뒤 요청/HTTP/공통 오류 **25 PASS / 8.36초**를 확인했다. 구조 경계790 modules/2739 edges/legacy197, API·schema·ORM, 보호된4 test파일 assertion 및 전체 split evidence가 통과했고 L4/ER0 현재 inventory도 갱신했다.
+
+
+## AR-B5-C13 — 성공 행동의 명시적 동기·감정 저장 소유
+
+원래 subjective-context policy2/error1의 실제 소유를 Social service/exception으로 옮겼다. own SQL2는 Social repository, World/WC/Relationship 사실 query3은 runtime의 같은 Session collaborator에 두었다. readonly 계약은 원래 attached row를 그대로 사용하며 생성 IO·추가 commit/flush가 없다. 기존 Run/WorldFeed/RoutinePost 행동 호출과 Today digest 소비자의 비-import 본문은 전부 동일하고 옛 adapter 파일은 제거했다.
+
+확장 policy2/error1 AST, 실제 ownSQL2/foreignSQL3 AST가 모두 동일하다. 신규 SQLite2node는 attached row flush/commit0/caller rollback과 naive UTC normalization, declaration 없음 no-op 및 실패/다른 event 실행의 SQL 이전 거절을 검증한다. 최초 신규 마지막 비교에서 빈 SQLAlchemy IdentitySet을 Python set과 비교해215PASS/1FAIL이었으며 빈 크기0으로 올바르게 확인하도록 고쳤다(제품 변경 없음). 최종 Today·원래 SNS/Chat 근거·LangGraph·World Feed·RoutinePost 포함 **245 PASS / 1 기존 PostgreSQL skip / 23.56초**. 전체 B5 및 source capture/Hosted/installer 종료는 후속 단계다.
+
+API·schema·ORM, 보호된 기존 Today assertion, 전체 split evidence를 통과했다. 구조 경계794 modules/2750 edges/legacy197 및 L4/ER0 현재 inventory PASS. Frozen source/checkpoint/additions/승인 nodes는 변경하지 않았다.
+
+
+## AR-B5-C14-A — Today SNS 값·조회 제한의 실제 소유
+
+활동 종류·성공 실행 일치·source/chain revision·digest/watermark·UTC helper8, 상수6 및 오류1을 실제 Social service/constants/exceptions로 이전했다. 각각 원문 AST가 동일하며 현재 reader class 전체와 runtime의 원래 export도 변경하지 않았다. 역사 generator는 상수의 실제 소유 경로만 import한다. 기존 batch/scan/branch/record 상한과 public/unlisted, event type, digest field는 같다. 새로운 테스트나 판단 규칙은 추가하지 않았다. 실제 reader orchestration·scope·SQL의 역할 전환은 다음 slice로 남는다.
+
+Today·기존 응답 streaming·명시적 저장 focused37 PASS/14.38초. API·schema·ORM와 전체 split evidence, 경계795 modules/2754 edges/legacy197 및 L4/ER0 현재 inventory PASS. Frozen baseline/additions/승인 nodes는 유지했다.
+
+
+## AR-B5-C14-B — Today SNS 조회의 실제 책임 전환
+
+범위·owner·활성 scope·차단·조상/근거·명시적 context 검증 및 레거시 fallback 제외·종류·count/coverage/revision 조립은 Social 실제 service에, Social bounded batching/post/block/declaration SQL은 repository에 두었다. mixed World/WC/membership/event/execution 사실은 같은 Session runtime callback이며 ORM을 service나 응답 계약으로 우회 재수출하지 않는다. 앱/Chat/Memory 소비자는 원래 read 호출 그대로 실제 factory에 연결했고 옛 reader 파일을 제거했다.
+
+확장 read/scope/subjective policy3과 query execution/block3·active query1 AST가 원문과 동일하다. 원래 reader와 새 서비스의 **실행 SQL13개·bound parameters·순서 및 전체 records/count/coverage/watermark 값이 동일**하다. 신규 SQLite1node는 factory/range reject SQL0·sameSession, 다른 Session에서 숨긴 원본을 기존 캐시 대신 다시 확인하여 원본/자손 제외, commit0을 검증했다. 기존 Today·응답 streaming·declared context와 함께 **38 PASS / 12.41초**다. 전체 B5·원본 최초도입 capture·Hosted/installer·G07 최종 종료는 후속 단계다.
+
+고정 후보의 전체 Social 역할 회귀와 Today/streaming/수동 게시·프로필을 함께 실행해 **95 PASS / 33.62초 / 기존 Starlette 경고1**를 확인했다. API·schema·ORM, 보호된2개 원래 테스트 파일 assertion, 전체 split evidence, 경계799 modules/2763 edges/legacy197 및 L4/ER0 현재 inventory PASS.
+
+
+## AR-B5-C15 — 성공 행동의 원본·알림·범위·제안 응답 소유 전환
+
+Social의 source/notification 정책과 자기 ORM query/mutation, WC의 활성/current/target scope 확인, Relationships의 제안 응답 허용, Routines의 실행 scope/intent 실제 대입을 소유 서비스로 분리했다. 같은 Session의 event/evidence/idempotency·proposal·attached result와 flush 순서는 runtime 조립이 연결하며 기존 services 두 파일을 제거했다. 전환은 정책을 통째 runtime으로 이름만 옮기는 방식이 아니다.
+
+원문 정책·조회·오류·전체 트랜잭션 **19개 AST 확장 비교가 동일**하다. 기존 event/WorldFeed/LangGraph/RoutinePost와 새 SQLite2 회귀가 **239 PASS / 기존 PostgreSQL 전용 1 SKIP / 27.85초**다. 신규 검증은 잘못된 NO_ACTION 입력의 SQL0·sameSession·관계/event0·rollback 및 attached 반응의 caller flush/rollback을 확인한다. 최초 실행의 새 reaction fixture가 필수 user_id를 빠뜨려 **238 PASS / 신규 fixture 1 FAIL / 1 SKIP**였고, fixture에 원래 owner_id만 채운 뒤 위 결과를 얻었다. 제품 DDL·nullable·기존 assertion을 바꾸지 않았다. 전체 B5·G07·원본 도입 capture·Hosted/installer 종료는 후속 범위다.
+
+최종 C15 소유 계약과 canonical ORM import 기준 확대 검증은 **255 PASS / 기존 PostgreSQL 전용 1 SKIP / 26.74초**다. PR #258/#263 API·schema·ORM 계약 동일, 변경된 보호 테스트 1개 파일 assertion과 전체 split evidence 검사가 통과했다. 경계 검사는 **807 module / 2810 edge / legacy exact edge 189**로 통과했고 L4/ER0 현재 inventory도 통과했다. Event 이름 판단은 읽기 전용 응답 값 계약을 소비하여 Social↔Relationships package cycle을 만들지 않는다. 검색 profile 역시 실제 attached 객체의 읽는 속성만 계약으로 표현하므로 옛 Search module 예외를 추가하지 않았다.
+
+
+## AR-B5-C16 — Resident Feed·Inbox 가능 행동과 응답 정제 소유
+
+Community 원래 함수 23개를 Social repository/service로 이전했다. 반응 존재·visible reply BFS, self-author·target·대꾸 중복 및 actionable Inbox 정렬/상한, 원본을 바꾸지 않는 agent 응답 복사와 정제가 실제 소유 대상이다. 동일 Character profile 조회와 Social nullable/visible SQL을 직접 연결하며, 활동 정책 자체는 이미 Routines가 결정한 allowed_actions를 그대로 받는다. 외부 LangGraph/AgentRun/writing 소비자도 실제 Social service로 연결했다.
+
+직접 관련 기존 회귀와 새 SQLite 1개는 **228 PASS / 12.27초**다. 신규 검증은 allowed_actions 비활성 SQL0, 같은 Session의 pending like가 원래 autoflush를 거쳐 already_liked에 반영됨, 새 commit 없음, rollback 후 원래 행동 가능 상태 회복을 확인한다. Community 나머지 102개 actual 함수와 G07·full B5·capture/Hosted 통합은 후속 범위로 남는다.
+
+C16 확대 Social·Relationships·LangGraph·WorldFeed·follow/public activity 검증은 **298 PASS / 67.60초 / 기존 Starlette warning 1개**다. 원래 23개 body와 남은 102개 정의의 AST는 동일하고 PR #258/#263 API/schema/ORM 및 전체 split evidence도 통과했다. 최초 split 검사에서는 기존 Community의 retained/이전 소유 정의 행이 빠져 1개 metadata 오류가 발생했고, 원래 AR-B2-B6의 236개 추적 행을 동일하게 승계해 전체 원본을 포함했다. 구조/검사/보호 assertion을 완화하지 않았고 최종 경계는 **810 module / 2828 edge / legacy189**, L4/ER0도 통과했다.
+
+
+## AR-B5-C17 — Resident Feed 이력 값 정책·입력 소유 전환
+
+원래 history 정제/metadata merge/경고/길이·개수 제한/format15 함수와4 상수·regex는 Routines에, 원래 입력2 class는 Routines schemas에 두었다. Social와 공유하는 bounded neutral text2 함수는 core의 같은 함수로 연결해 package cycle 없이 재사용한다. DB·provider 호출은 추가하지 않았고 기존 Community/AgentRun caller는 실제 함수를 호출한다.
+
+직접 관련 기존 history/tendency/LangGraph/daypart/WorldFeed 회귀는 **281 PASS / 6.14초 / 기존 Starlette 422 warning 2개**다. 신규 assertion/node를 만들거나 기존 assertion을 바꾸지 않았고, 입력 schema class identity와 API 계약을 별도 확인한다. Parent Search 감사가 찾은 옛 `runtime/relationships/sqlalchemy_social_read_repository.py` source map 누락은 실제 `domains/relationships/repository/diagnostics.py`로 정확히 연결했다. Community의 나머지87 actual 함수, G07, full B5·Hosted·capture 종료는 후속 범위다.
+
+C17의 원래 history15/input2/common2/constant4 AST가 동일하며, 입력2 class의 Routines·Social·기존 aggregate import가 같은 객체임을 확인했다. PR #258/#263 API/schema/ORM·보호 assertion·전체 split evidence가 통과했고, 경계 **813 module / 2838 edge / legacy189** 및 L4/ER0 현재 inventory가 통과했다.
+
+## AR-B5-WORLD-SEARCH — 키워드 검색·관찰·공개 재검증의 실제 소유
+
+`e83f320` 기반에서 WorldFeed 검색의 실제 업무 판단·자기 업무 SQL·다른 업무 조회를 나눴다. 기존 예외4·결과 dataclass4·함수17의 **25개 전체 AST**가 정확한 조회 협력과 타입 이름만 복원하면 원문과 같다. SQL, 조건 순서, FTS 이후 canonical 검증, 순위·상한·중복 방지, row lock·savepoint·flush·rollback과 트랜잭션 종료 주체를 보존했다. 검색 인덱스 capability는 실제 사용하는 hit 속성3개만 읽고 기존 Runtime hit 객체를 변환하지 않는다. 실제 단일 RLock과 process binding은 runtime/search로 이동했다.
+
+첫 집중 실행은 readiness 함수 한 개의 협력 인자가 누락되어12FAIL/6PASS였다. 실제 함수 서명을 수정한 뒤 기존 **18 PASS**를 확인했고, 추가2회귀를 포함해20PASS, World Package import의 실제 호출까지 확대하여 **30 PASS / 1 warning / 29.38초**다. 새 회귀는 생성 시 SQL0·같은 attached 객체·커서 변경의 호출자 rollback, 숨겨진 후보에서 foreign read 전에 행동 재검증 중단과 원래 값 복원을 검사한다. 기존 assertion·skip 조건은 유지했다.
+
+기존 source 보존 진단에서 선행 Relationships reader의 실제 이동 경로 누락1건을 발견해 `runtime/relationships/sqlalchemy_social_read_repository.py → domains/relationships/repository/diagnostics.py`를 명시했다. 같은 원래 source 검사 재실행은0오류다. 다른 원래 split/assertion/suppression/API·ORM/기존 node 검사는0오류, 보호 **2,139 / 현재 2,285**다. 현재 경계 **804 modules / 2,801 edges / exact legacy190 PASS**, L4 parity99, ER0 **84/87/24/44/7**을 확인했다. 원래 signed source의 append-only capture 및 전체 stock/Hosted/Installer Gate와 구분한다.
+
+옛 world_feed_search 구현·keyword_feed application·search_runtime application·search_index port 네 파일은 실제 소비자를 전환한 뒤 제거했다. 남은 Community/WorldFeed 실행·G07 전체 소유권 정리·B5 최종 종료는 계속 진행한다. 현재 aggregate/옛 실행 소비자의 제한된 연결은 제거 조건을 명시했고, 새로운 범용 우회 예외를 만들지 않았다.
+
+C17과 Search source 49c0f1f의 실제 합류 검증은 **303 PASS / 31.36초 / 기존 warning 3개**다. 경계 **818 module / 2876 edge / legacy183**, L4 99 parity와 ER0 84/87/24/44/7, PR #258/#263 API/schema/ORM·변경 보호 테스트4파일 assertion·전체 split evidence 모두 통과했다. 삭제된 WorldFeed apply의 stale bridge와 직접 소비자 항목만 제거했고, 원래 Search 신규2개 회귀와 각 소유 역할을 함께 보존했다. 본 합류는 source 준비이며 parent의 capture·Hosted·전체 통합 Gate와 구분한다.
+
+
+## AR-B5-C18 — World Feed 실행 판단·반응 검증의 실제 소유
+
+WorldFeed 원래9함수와 반응 검증2/error/provider 계약을 Social service/contracts로 옮기고 runtime에는 기존 Session의 실제 타 업무·provider 연결을 두었다. 값7/공개 dispatch/전체 주기 정책이 실제 책임을 나눠 소유하며, 기존 async 전체 흐름과 retained client를 포함한18개 정의의 AST가 정확한 조회·lazy callback 복원 후 동일하다. nullable 조회2는 원래 db.get 의미 그대로다.
+
+기존 반응·Search·World Package 집중 회귀는 **27 PASS / 31.50초 / 기존 warning 1개**다. 새로운 실패 주입 회귀의 첫 실행은 기존7 PASS/신규1 FAIL이었으며, 새 테스트가 잘못 참조한 observation 필드·상태 이름을 실제 post_id/retryable_failed로 고쳤다. 제품/기존 assertion/상태 모델은 변경하지 않았다. Community87·provider client/prompt 마무리·G07·full B5·capture/Hosted는 후속 범위다.
+
+C18 최종 확대 검증은 **330 PASS / 83.41초 / 기존 Starlette warning 1개**다. 새 실패 주입 회귀가 반응·실행·성공 이벤트 rollback, 이전 관찰/친숙함 유지, retryable_failed claim 저장을 확인했다. 경계 **823 module / 2904 edge / legacy179**, L4 parity99와 ER0 84/87/24/44/7, PR #258/#263 API/schema/ORM·변경 보호 테스트2파일 assertion·전체 split evidence도 통과했다. 기존 L6 네 client/owner 연결만 runtime의 정확한 새 위치로 승계했고, 옛 runtime과 aggregate 의존 등 stale8개를 제거했다. 부정확한 테스트 파일명을 지정한 확대 명령은 수집 전 중단돼 실행0이었고, 실제 경로를 확인한 최종 명령의330 PASS만 결과로 사용한다.
+
+
+## AR-B5-C19 — World Feed prompt 정책·provider 연결 종료
+
+원래 prompt 값2와 planner/writer prompt 조립2를 Social service에, credential·trace·직접 LLM provider 실제 구현은 runtime에 두고 옛 services/feed_reaction_planner를 제거했다. 기존3 provider 정의/2 값 정의/4 상수는 prompt block 복원 후 전체 AST가 동일하다. Direct provider의 네트워크만 대체한 새 회귀는 context/tracker/schema 동일 객체와900/1000 token·medium·planner JSON 재시도 금지·writer 기본값 및 원래 공개 근거 구성을 검사한다.
+
+최초 자동 추출은 multi-line 문자열 내부 들여쓰기 때문에 syntax 수집3오류가 났다. AST statement를 그대로 추출해 문자열 값까지 보존하도록 수정했으며, 새 텍스트나 검증 완화는 추가하지 않았다. Community87 및 G07/full B5/capture/Hosted 종료는 후속이다.
+
+C19 최종 직접/검색/Package/보안 검증은 **37 PASS / 35.38초 / 기존 Starlette warning 1개**다. 경계 **824 module / 2908 edge / legacy177**, L4 parity99·ER0 84/87/24/44/7과 PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence가 통과했다. 첫 split 진단의 이전 단계 실제 이동4정의 누락은 원래 C18 전체 추적 행을 승계해 보완했다. 같은 원래 검사 재실행0오류이며 보호 baseline·assertion은 변경하지 않았다.
+
+
+## AR-B5-C20 — 소비 이력·게시물 주제·활동 로그 실제 소유
+
+Community 실제28함수를 Routines 이력 서비스/조회, Social Post/주제/공개 판단, 공통 JSON 값으로 나눴다. 남은59함수와 이동28함수 전체 AST는 정확한 SQL/callback 복원 후 동일하다. Routines service는 foreign ORM/query import 없이 readonly Social 협력을 사용하고, 컬럼 우선/로그 fallback·cutoff/order/limit·로그 저장/rollback 의미를 보존했다.
+
+최초 기존69개 집중 회귀는64 PASS/5 FAIL로, 모두 옛 Community helper를 monkeypatch하던 대상이 실제 새 소유 함수에 연결되지 않은 문제였다. 정확11개의 receiver를 이동했고 기존 assertion은 유지했다. 확대285 중284 PASS/1 FAIL 역시 Character lore의 옛 history mock 대상이어서 실제 runtime history로 연결했다. 최종 새 SQLite 포함 집중은 **90 PASS / 6.49초 / 기존 warning 2개**다. 새 회귀는 구성 IO0·attached Post/log·owner roots·추가 SQL 없는 컬럼 우선·caller rollback 후 로그 복원을 확인한다. Community59·G07·full B5/capture/Hosted는 계속한다.
+
+C20 최종 확대 검증은 **454 PASS / 54.81초 / 기존 warning 5개**다. 처음 경계 검사에서 Social이 Routines 상수를 직접 참조하고 repository를 업무 진입점으로 노출한 문제를 발견했다. 원래 cutoff·상한·이미 소비했는지 판단은 Routines service가 소유하고, Social repository는 전달받은 값으로 원래 SQL만 수행하도록 정리했다. 검사 예외를 추가하지 않았으며 최종 경계 **833 module / 2951 edge / legacy178**, L4 parity99·ER0 84/87/24/44/7, PR #258/#263 API/schema/ORM·변경 보호 테스트2파일 assertion·전체 split evidence가 통과했다. 기존28개 이전 함수와59개 잔여 함수의 전체 AST는 정확한 SQL/callback 복원 후 동일하다.
+
+
+## AR-B5-C21 — Social 도구 권한·Run 범위 판단 소유
+
+원래 권한9함수는 Social service/contracts로 옮기고 기존 Routines 조회·활동 허용 검사/Identity nullable 조회는 runtime이 같은 Session으로 연결한다. 이동9개와 잔여50개 함수의 전체 AST는 정확한 readonly 타입/조회 협력 복원 후 동일하다. 원래 Social 오류 class·진단 문자열·시크릿 대신 fingerprint·auth key 우선/daypart 차단/fallback 순서를 유지한다.
+
+첫 집중 검증은78 PASS/1 FAIL로, nullable User 조회 한 곳이 잘못된 Protocol을 db.get에 전달한 실제 연결 오류를 새 SQLite 회귀가 잡았다. 해당 위치를 원래 User 조회 협력으로 바로잡았으며 최종 직접 회귀는 **79 PASS / 6.36초 / 기존 warning2개**다. 새2개 회귀는 attached Run/User, pending 상태 조회/autoflush, commit 없음/caller rollback과 daypart 즉시 거절·지정 오류만 변환을 검사한다. 기존 assertion을 변경하지 않았다. Community50/G07/full B5 및 capture/Hosted는 후속이다.
+
+C21 최종 확대 Social·Relationships·Daypart·Tendency·LangGraph·Feed 검증은 **369 PASS / 47.75초 / 기존 warning3개**다. PR #258/#263 API/schema/ORM·보호 assertion·전체 split evidence가 통과했고, 경계 **836 module / 2962 edge / legacy180**, L4 parity99·ER0 84/87/24/44/7도 통과했다. Agent writing의 기존 권한 조회 소비자만 실제 owner/runtime으로 연결했으며 그 별도 writing 업무 구현은 이 단계에서 이전하지 않았다.
+
+
+## AR-B5-C22 — Social 도구 게시·답글·반응·팔로우 실제 소유
+
+Community 실제10개 행동은 AgentToolActionService로 옮겼다. 같은 Social timeline과 주제 메타데이터를 직접 호출하고, Routines의 실제 권한·로그·cue는 runtime 협력으로 연결한다. 10개 전체 함수와40개 잔여 함수 AST는 self/정확 협력 호출 복원 후 동일하다. Agent writing/LangGraph/RoutinePost/WorldFeed 실행의 실제 소비자도 구성된 서비스로 연결했다.
+
+첫 수집은 RoutinePost의 future import보다 새 import가 앞에 놓여1오류였으며 올바른 import 위치로 수정했다. 이후 기존88개 중86 PASS/2 FAIL은 옛 Community monkeypatch 대상이어서 실제 함수/연결 대상으로10개 receiver만 변경했다. 기존 assertion은 유지했고 **88 PASS / 8.12초**, 새 SQLite/권한/반응/Search 집중은 **20 PASS / 6.84초**다. 새 회귀는 실제 World 게시/주제/성공 로그를 원래 deferred_commits 아래에서 실행하고 caller rollback으로 함께 취소함을 검증한다. Community40 및 G07/full B5/capture/Hosted는 계속한다.
+
+C22 확대 첫 실행은386 PASS/7 FAIL/기존 PostgreSQL 전용 skip1이었다. LangGraph7개 mock receiver와 RoutinePost의 실제 실패 주입2개 참조를 새 실행 instance로 연결했고 원래 assertion·skip은 유지했다. 최종 확대는 **393 PASS / 1 기존 skip / 59.32초 / warning3개**다. PR #258/#263 API/schema/ORM·보호 변경3파일 assertion·전체 split evidence와 경계 **838 module / 2987 edge / legacy180**, L4 parity99·ER0가 통과했다. split 지도는 기존 형식대로 실제 top-level class와 destination_member를 함께 명시해10개 원래 함수의 정확한 메서드 소유를 기록했으며 검사 코드는 변경하지 않았다.
+
+
+## AR-B5-C23 — Social 도구 피드·Inbox·관찰 읽기 소유
+
+실제15개 읽기/Inbox/관찰 함수는 AgentToolReadService로 옮기고 Routines 활동로그 SQL1개는 해당 repository로 분리했다. 원래15개/잔여25개 전체 함수와 SQL이 정확한 self/타입/협력 복원 후 동일하다. 공개/캐릭터·Run 범위, scan500/페이지100/Inbox10 제한, neutral 응답, 전달기록 fingerprint/ID 처리 및 로그·읽음 쓰기 순서를 유지했다.
+
+최초 기존81개 중79 PASS/2 FAIL은 Post author mock의 옛 대상이었다. 실제 service의2개 receiver만 연결했고 기존 assertion은 그대로다. 새 SQLite 및 관련 소유 회귀 포함 **83 PASS / 6.71초 / 기존 warning2개**다. 새 테스트는 attached 로그·created/id 정렬·다른 Character/이전 Run 제외, malformed/boolean ID 처리, 일치한 잘못된 최신 payload에서 fallback 금지, pending autoflush와 caller rollback을 확인한다. Community25/G07/full B5/capture/Hosted는 계속한다.
+
+C23 최종 확대 Social·Relationships·Tendency·LangGraph·Feed·RoutinePost 검증은 **394 PASS / 기존 PostgreSQL skip1 / 59.10초 / warning3개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence가 통과했고, 경계 **840 module / 3017 edge / legacy181**, L4 parity99·ER0도 통과했다. 실제15개 메서드와 Routines 조회1의 소유 경로/직접 소비자/동작 검증을 현재 지도에 기록했으며 기존 저장 모델·SQL 정렬·상한·오류 계약을 변경하지 않았다.
+
+
+## AR-B5-C24 — 활동 계획용 feed note·정제·진단 소유
+
+기존 note2/diagnostics4 실제 함수는 Routines로 옮기고 planning 입력/응답 DTO3도 원문 그대로 같은 schema 객체로 연결했다. 원래6함수/잔여19함수/DTO3의 전체 AST가 정확한 협력 복원 후 동일하다. Routines가 Social 내부 ORM/저장소/서비스를 직접 참조하지 않으며, 원래 canonical visibility·권한과 같은 Session의 history 데이터를 runtime이 제공한다.
+
+최초 기존69개 중59 PASS/10 FAIL은 note 테스트의 옛 mock receiver였다. 해당10함수 내부의35개 receiver를 실제 함수/바인딩으로 연결했고 원래 assertion은 그대로 유지했다. 최종 직접 회귀는 **71 PASS / 6.41초 / 기존 warning2개**다. 새 테스트나 실행 제한을 추가하지 않았으며 existing note 회귀의 immutable metadata·기록 상태·raw payload 비노출·오류 분류를 유지했다. Community19/G07/full B5/capture/Hosted는 후속이다.
+
+C24 최종 확대 검증은 **394 PASS / 기존 PostgreSQL skip1 / 70.11초 / warning3개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence가 모두 통과했다. 경계 **843 module / 3037 edge / legacy182**, L4 parity99·ER0도 통과했다. 처음 runtime/resident 배치에서 생긴 실제 runtime package 순환은 Social-facing 실행 조립을 runtime/social로 옮겨 해결했고 검사 예외는 추가하지 않았다. 옛 schema 소비자 지도62개는 이미 삭제된 app/schemas/community.py 대신 실제 app/schemas/__init__.py로 정확히 연결해 동일 검사0오류를 확인했다. DTO3는 실제 정의/공통 aggregate/Social 소비자에서 동일 class 객체다.
+
+
+## AR-B5-C25 — 캐릭터 상태·도구 저장 의미 보존
+
+Community 실제6함수는 Characters의 메모 값 정책3, runtime의 Character 오류 변환2/Social 도구 실행1로 옮겼고 nullable state lookup은 Characters 실제 소유에 추출했다. 원래6/잔여13 전체 AST와 LG/LocalBot caller 전체 함수는 정확한 callback/self/type 복원 후 동일하다. auth→캐릭터 일치→nullable 조회→관찰→중복 억제 또는 저장→성공 로그 순서를 유지했다.
+
+첫 실제 확대는 **219 PASS / 9.52초**였다. 기존 LG6개·LocalBot1개 mock receiver만 실제 소유로 연결했으며 assertion은 변경하지 않았다. 새 SQLite 회귀는 공백/casefold 동일 메모에 대해 mood/summary까지 기존값을 유지함, 로그 원래 순서, 실제 새로운 상태와 로그의 caller rollback을 검사한다. 최초 테스트가 rollback된 로그 객체를 보유해 SQLite ID 재사용 warning이 발생했으므로 검증 완료된 임시 로그 참조를 해제해 fixture 수명을 정리했다. Community13/G07/full B5 및 capture/Hosted는 계속한다.
+
+C25 최종 확대 검증은 **422 PASS / 기존 PostgreSQL skip1 / 81.68초 / 기존 warning3개**다. 새 상태 회귀의 로그 객체 수명 정리 후 추가 SQLAlchemy warning은 없다. PR #258/#263 API/schema/ORM·보호 변경2파일 assertion·전체 split evidence0, 경계 **846 module /3057 edge /legacy182**, L4 parity99·ER0가 통과했다. Character 오류의 실제 변환2함수는 runtime에 두어 Social→Character exceptions deep import 없이 원래 예외 종류/메시지를 보존했다. 실제 업무·호출 순서나 검사 예외를 완화하지 않았다.
+
+
+## AR-B5-C26 — Social tick 후보·사전 검증·완료 실제 소유
+
+Community 마지막13개 실제 함수와4개 상수를 Social tick service/policy로 옮겼다. Social Inbox SQL1개와 Routines thread-view 증거 SQL1개는 각 owner repository에 추출했다. 원래13/상수4 전체 AST와SQL2가 정확한 self/callback/type 복원 후 동일하다. Community에는 실제 함수/class가0개이며 남은 compatibility 연결과 실제 소비자 종료는 후속이다.
+
+최초 직접73개 중72 PASS/새1 FAIL은 신규 테스트가 기존 좋아요 로그명을 post_liked로 잘못 예상한 문제였다. 실제 원래 값 liked를 새 테스트에 반영했으며 제품/기존 assertion은 변경하지 않았다. 새 SQLite2개는 전체 사전 검증 전 partial action 금지, 반응/상태/성공 로그의 caller rollback, 원래 cutoff/scope/order/limit·pending autoflush를 검증한다. G07/full B5/capture/Hosted는 계속한다.
+
+C26 최종 확대는 **424 PASS / 기존 PostgreSQL skip1 /72.57초 /기존 warning3개**다. PR #258/#263 API/schema/ORM·보호 assertion·전체 split evidence0, 경계 **849 module /3089 edge /legacy183**, L4 parity99·ER0가 통과했다. 기존 함수/class와 상수는 실제 owner에 모두 정의되어 있으며 Community는 임시 같은객체 수출만 남았다. 신규 SQLite2개는 실제 좋아요/상태/로그 전체 rollback과 중복 payload의 사전 차단, 읽지 않은 답글30개 정렬 및 Run 이후 thread 증거 원래 필터를 확인했다.
+
+
+## AR-B5-C27 — 수동 답글 Inbox 상태·claim 실제 소유
+
+원래 runtime Inbox 실제11함수/오류는 Social service·repository·값/계약으로 옮겼고 기존 runtime 파일을 제거했다. 소유 SQL5 및11함수/오류 전체 AST가 정확한 self/query/foreign-read 복원 후 동일하다. 기존 수동 답글/후속 beat/L4 집중은 **35 PASS / 기존 PostgreSQL skip1 /20.81초**, 새 SQLite 및 실제 후속 beat 회귀는 **2 PASS /5.81초**다.
+
+새 회귀는 활성 다른 claim 거절, claim/release의 실제 commit과 consume의 flush-only/caller rollback을 확인한다. pending 상호 차단을 같은 Session으로 읽어 무효 후보 거절과 함께 원래 commit하는 의미도 검증한다. 원래 assertion이나 DB 제약은 변경하지 않았다. Canonical RoutineInteraction3·G07/full B5/capture/Hosted는 후속이다.
+
+C27 최종 Social·Relationships·RoutinePost 검증은 **130 PASS / 기존 PostgreSQL skip1 /63.73초 /기존 warning1개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence0, 경계 **852 module /3099 edge /legacy182**, L4 parity99·ER0가 통과했다. 기존 L4 구조 검사의 단일 실제 소유 파일 경로를 Social service로 연결했으며 검사 조건은 유지했다. 사라진 runtime→전역 ORM 정확1개 임시 예외도 제거했다.
+
+
+## AR-B5-C28 — 성공 Social 이벤트의 RoutinePost 후보 실제 소유
+
+Canonical interaction의 후보 실제 메서드/관계 band/상호 차단은 각각 Relationships service와 Social repository로 옮겼고 event/evidence/방향별 관계 SQL2도 Relationships가 소유한다. 기존 compatibility 본체와 services의 module alias를 제거했다. 원래 후보 전체 AST·band/block·SQL2·constructor factory가 정확한 callback/query 복원 후 동일하다. 기존 Social/RoutinePost 집중은 **34 PASS /기존 PostgreSQL skip1 /18.09초**다.
+
+신규 회귀 최초는 기존13 PASS/새1 FAIL로, SQLite rollback 재조회에서 datetime timezone 표시가 naive로 복원되기 때문에 새 테스트의 dataclass 전체 비교가 달랐다. 새 테스트에서 UTC 시간 표현을 정규화한 뒤 같은 전체 후보 값으로 비교하며 제품 시간/SQL/기존 assertion은 변경하지 않았다. 최종 호환/G07/full B5/capture/Hosted는 계속한다.
+
+C28 최종 확대는 **131 PASS /기존 PostgreSQL skip1 /63.62초 /기존 warning1개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence0, 경계 **855 module /3108 edge /legacy181**, L4 parity99·ER0가 통과했다. 첫 지도 검사가 legacy의 단일 factory 이전을 다중 분할로 기재한1항목을 거절했으므로, 실제 단일 구현 이전과 남은 임시 import aggregate로 구분해 같은 검사0오류를 확인했다. DTO·업무·SQL·assertion은 변경하지 않았다.
+
+C28 독립 리뷰 후속: `RuntimeRoutineInteractionReferences.get_post`가 원래 `db.get` 대신 공개/댓글 eager-load 조회에 연결된 차이를 발견했다. 신규 SQLite 회귀가 숨김 attached 객체 조회에서 **1 FAIL**로 결정적으로 재현했다. 이미 존재하는 실제 `social.repository.event_evidence.get_post`의 동일 `db.get`로 연결하여 identity-map hit의 SQL/flush0, miss의 숨김 객체/단일 SELECT/no eager-load, caller rollback·없는 ID를 확인했다. 직접 Social·RoutinePost 회귀는 **36 PASS /기존 PostgreSQL skip1 /19.50초**다. 앞선 AST 보존은 callback 호출 복원까지의 증거였으며 이 후속 검증이 실제 callback SQL 의미도 보완한다. 기존 판단/SQL/회귀 assertion은 변경하지 않았다.
+
+
+## AR-B5-C29 — Social 잔여 계층·집합 종료
+
+소비자가 없는 전달 계층4함수와 public/API/infrastructure/ports 집합을 제거하고 현재11소비자를 실제 service/contracts/UoW로 연결했다. 기존 쓰기 테스트는 원래 단언을 유지한 채 실제 실행기 메서드에 이름을 연결한다. 관찰 Protocol은 contracts로 원문 이동, subjective migration/helper도 실제 동일객체로 연결했다. 두 Feed runtime의 concrete Resident context 타입을 readonly contract로 바꾸어 원래 context/credential/콜백 객체를 그대로 전달한다. provider/cycle 전체 구현 AST는 타입 복원 후 동일하다.
+
+기존 Social·RoutinePost·UoW·오류/커서·Feed 검증은 **138 PASS /기존 PostgreSQL skip1 /50.69초 /기존 warning1개**다. 실행기를 건너뛰거나 새 provider/commit 경계를 만들지 않았으며 새 테스트 노드나 검사 예외를 추가하지 않았다. Community 소비자·G07/full B5/capture/Hosted는 후속이다.
+
+C29 보존 검사: PR #258/#263 API/schema/ORM·보호 변경4파일 assertion·전체 split evidence가0오류이며, 경계848 module/3089 edge/legacy181 및 L4 parity99·ER0도 통과했다. 실제 subjective migration·Windows supported-upgrade verifier·Today inventory 회귀5개와 동결 Today inventory --check가 통과했다. 동결 JSON/역사 migration 본문은 다시 쓰지 않았다.
+
+
+## AR-B5 순차 통합 준비 — main B4 후속과 Social C29
+
+검증된 main `8f58d95`에 signed Social C29 `e56e645`의 실제 소유 변경을 합쳤다. 이미 B4에서 옮긴 Resident graph/작성/실행의 본문은 새 위치에 유지하고, Social actions/reads/state/subjective context와 Routines Run·FeedCue를 실제 소유 함수에 연결했다. 옛 LangGraph·작성 실행 파일과 이동된 테스트 블록을 복원하거나 중복 도입하지 않았다. Public action의 기존 생성·완료 함수와 새 evidence 대입 네 함수를 같은 실제 Routines 서비스에 합치고 runtime은 해당 서비스와 원래 조회 함수를 조립한다.
+
+첫 수집에서 삭제된 activity policy/brief import를 발견하여 실제 역할 경로로 수정한 뒤 **2,379 nodes 수집**이 통과했다. 첫 집중 검사는 **431 PASS /6 FAIL /기존 skip1 /84.91초**였다. 실패는 FeedCue actual owner 연결, Writer 권한 모듈의 동명 alias 충돌, 첫 인사·작성 테스트의 이전 namespace 세 종류였으며 assertion을 바꾸지 않고 호출 대상/monkeypatch를 실제 소유 객체로 연결했다. 해당 네 파일 재검사는 **123 PASS /11.53초**다.
+
+Social의 activity admission이 Resident runtime을 역참조하는 순환은 root의 독립 signed `a85a63d`와 byte-identical인 `runtime/routines/activity_policy.py`·`activity_scope.py` 두 실제 파일 이동으로 제거했다. G5 ancestry를 합치지 않고 원래 Session·lazy World 조회·정책 함수를 그대로 공유한다. 이 변경의 집중 검사는 **11 PASS /23.75초**다. 실제 사라진 exact 예외 26개만 제거하고, 남은 미호출 action-menu/allowed-tool helper의 동일 visibility 소비는 AR-B8-A 종료 대상으로 정확히 기록했다.
+
+현재 단계는 C30 이후 Community/CRUD 소비자 종료, 원래 signed introduction 수집 및 append, stock 보존 전체·전체 backend·Hosted CI·설치 검증 이전의 통합 준비다. main의 원장 92 records와 PR258/263 동결 자료는 수정하지 않았다. 앞선 실패 이력은 최종 통과와 별도로 남긴다.
+
+## AR-B5-C30 — Community 임시 서비스 집합 제거
+
+실제 함수/class0인 Community 집합을 삭제하고18소비자의129참조를 소유 서비스/실행 instance/오류/상수로 연결했다. 제품742개 전체 함수/class AST가 정확한 import 해석 후 동일하다. 기존 test 단언은 실제 owner의 지역 import로 기존 표현을 유지하며 namespace 복제나 범용 facade를 추가하지 않았다.
+
+최초 집중은350 PASS/9 FAIL/기존 PGskip1로 LocalBot의 옛 mock receiver가 원인이었다. LocalBot10·Routines2 receiver를 실제 owner로 옮긴 후 같은 집중은 **359 PASS /기존 PostgreSQL skip1 /22.54초 /기존 warning3개**다. 기존 Community25임시bridge/17legacyedge를 제거하고, 현재 branch의 미합류 AgentRun/Writer/LocalBot 실제consumer13개만 정확한 종료 조건과 함께 기록했다. parent의 이미 구현된 runtime/resident 및 LocalBot 합류에서 이 임시 oldconsumer들을 제거한다. CRUD별칭/G07/full B5/capture/Hosted는 후속이다.
+
+C30 최종 보존은 PR #258/#263 API/schema/ORM·보호 변경12파일 assertion·전체 split evidence0, 경계847 module/3050 edge/legacy164, L4 parity99·ER0 PASS다. 실제 첫인사 receiver2개가 쓰이는 기존 회귀1개도 PASS다. 지도 생성 첫 시도에서 역사 pilot 형식을 일반 split으로 재작성한7항목은 원래 HEAD의 정확 AR-B1/AR-F1을 복구해 동일 검사0오류로 종료했다. 부모 strict 지도 검사가 C29의 한 번도 추적되지 않은 infrastructure/__init__.py 가상 항목을 발견했고 전체 Git 도입 이력0을 확인하여 그 항목만 제거했다. 원본 snapshot이나 테스트 단언은 변경하지 않았다.
+
+
+## AR-B5-C31 — 데모 데이터 초기화 실제 runtime 소유
+
+CRUD의 마지막 실제 seed 함수는 runtime/bootstrap으로 옮겼다. 실제 Identity·Character·Routines·Social 모델을 직접 명시하며 원래 전체 AST는 모델 import 복원 후 동일하다. 기존 factory 기본 콜백/실행 설정·데모 본문/기본값·기존 user 보완·credential/setting 추가·flush/commit 순서를 유지한다. 새 SQLite2개는 최초1회 commit 및 반복 no-op, 기존 user→credential→setting의3개 commit 순서와 password 검증을 확인한다.
+
+초기22 PASS 뒤 factory/runtime/logging는45 PASS/1 FAIL이었다. 실패는 선행 Relationships router 이동의 옛 mock 대상으로, 실제 router·runtime gateway 및 같은 request/db DI를 연결하고 원래 단언을 유지했다. 최종 **46 PASS /44.97초 /기존 warning1개**, 같은 DB object 명시 후 해당1개도 PASS다. CRUD별칭/Relationships public/G07/full B5/capture/Hosted는 후속이다.
+
+C31 PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence0을 확인했다. 남아 있는 public_main도 같은 실제 seed 콜백으로 연결했으며 parent G06 최종 통합에서는 main의 동일 콜백을 보존한다. 실제 initializer 새 경로 외에 데모 활성 설정이나 factory 본문은 변경하지 않았다.
+
+
+## AR-B5 C30–C31 순차 통합 검증
+
+B4가 이미 소유한 실제 Resident 실행·graph·작성 본문을 유지하면서 C30의 Community 집합 제거와 C31의 실제 데모 초기화를 연결했다. 원래 수집은 **2,381 nodes**, Social·Relationships·Resident·RoutinePost·실제 factory/초기화 집중은 **434 PASS /기존 skip1 /148.11초**다. 첫 테스트 명령의 존재하지 않는 파일 인자는 실행 전 오류였으며 제품 실패나 통과로 계산하지 않았다.
+
+실행 context의 세 Social 협력은 `runtime/resident/feed_context_references.py`의 `ResidentSocialContextBindings`가 호출 시 실제 함수를 선택한다. 원래 같은 Session과 지연 호출을 유지하며, 부모의 독립 `55d1c2f9` 구현과 해당 파일이 정확히 같다. 이 연결 뒤 context·daypart·실행 검사는 **12 PASS /28.45초**다. 사라진 정확 legacy edge 10개만 제거했고 현재 경계 **987 modules /3,695 edges /legacy134 /cycle0**, ER0 및 deferred inventory 검사를 통과했다.
+
+원장 main의 92 records와 PR #258/#263 동결 자료는 그대로다. C32의 CRUD 별칭 제거와 G07 테스트 소유권 이전, 원래 최초 도입 증거 append, stock 보존·전체 backend·PR/설치 검증은 이어서 수행한다.
+
+## AR-B5-C32 — Community CRUD 집합 제거
+
+실제 함수/class0인 CRUD 집합을 삭제하고11개 소비자의68참조를 실제 소유 서비스·조회에 연결했다. 제품660개 전체 정의는 import 해석 후 동일하며, Post의 원래 공개 필터/댓글 eager-load 조회를 다른 내부 조회로 바꾸지 않았다. 기존 assertion 표현은 실제 owner import로 유지하고 LG/Resident mock2개도 실제 Post repository를 향한다.
+
+집중 회귀는 **342 PASS /기존 PostgreSQL skip18 /29.97초 /기존 warning3개**다. 신규 테스트 노드는 없고 부모의 이미 전환한 Resident/Tree/Lore 실제 소비자에 연결할 정확한 지도와 임시 bridge 종료 조건을 남겼다. Relationships 집합/G07/full B5/capture/Hosted는 후속이다.
+
+C32 최종 보존은 PR #258/#263 API/schema/ORM·보호 변경7파일 assertion·전체 split evidence0, 경계848 module/3037 edge/legacy154 및 L4 parity99·ER0 PASS다. 실제 도입 원본과 역사 pilot 기록은 유지했으며 새 테스트 노드를 추가하지 않았다.
+
+
+## AR-B5 C32 순차 통합 검증
+
+삭제된 `cruds/community.py`의 원래 실제 소유 함수들을 B4의 현재 Resident graph·작성·미전환 Daypart 소비자에 연결했다. 이미 옮긴 실행 본문을 복원하지 않았으며, monkeypatch 두 receiver도 실제 조회 모듈을 선택한다. 기존 CRUD 조회가 수행하던 필터·eager-load·동일 Session 의미를 바꾸지 않고 같은 실제 함수를 호출한다.
+
+현재 집중은 **244 PASS /기존 PostgreSQL skip18 /9.44초**, 경계 **986 modules /3,667 edges /legacy126 /cycle0**다. ER0 및 L4 현재 inventory를 갱신했고 사라진 exact 예외 10개만 제거했다. 새 테스트 노드나 원본 assertion 변경은 없으며 G07·원래 source 증거 append·stock 전체 검증은 후속이다.
+
+## AR-B5-C33 — G07 Social·Relationships 테스트 소유 위치
+
+Social11개·Relationships7개 파일을 업무 폴더로 옮겼다. 전체18개 원문 Git-text는 두 `__file__` 부모 깊이를 원래 위치로 복원하면 동일하며,92개 parametric node가 새 위치에 정확히 한 번씩 대응한다. 공유 fixture22개 import와 CI8개 실행 경로·L4/ER0/frontend portability 목록을 실제 새 위치로 연결했다. 옛 API schema를 가리키던 frontend portability1개도 원래 source map의 실제 `schemas/manual.py`로 연결했다.
+
+초기 collection의22개 오류는 옛 root fixture import였고 실제 업무 package로 수정했다. 최종 집중은 **188 PASS /기존 PostgreSQL skip1 /114.33초 /기존 warning1개**이며 승인된 공개604개/current2303 수집과 원래92개 정확 대응이 통과했다. API/schema/ORM·보호19파일 assertion·전체 split evidence0, 경계848/3037/legacy154, L4/ER0 generator와 frontend designcheck도 통과했다.
+
+추가 CI/inventory/factory26개 중24개는 통과했다. 두 기존 고정 수치 검사는 각각 PostgreSQL marker84 `<82`, parity99 `==97`에서 실패했다. Git로 이동 전 C32의 동일 값84/99를 확인했으며, G07 때문에 늘거나 누락된 항목은 없다. 원래 단언을 완화하지 않고 부모의 잔여 source집합·동결97/현재99(검색 회귀2추가) 검증 항목으로 인계한다. Relationships public 제거와 복합 Chat/Today/image 테스트 위치·전체 B5 통합/Hosted는 후속이다.
+
+
+## AR-B5 C33 순차 통합 — G07 및 현재 parity 검사 후속
+
+Social11·Relationships7개 파일의 원래92개 노드와 fixture import/CI 경로를 현재 B4 main에 합쳤다. 최초 집중은 **201 PASS /기존 skip1 /1 FAIL /107.99초**다. 실패는 원래97개를 단언한 L4 parity 수량이 현재99개로 늘어난 점이다. 기존 단언이나 source 기준을 덮어쓰지 않고, 후속에서 #263 원래97 근거와 현재 전체 source parity 목록·수량·counter를 각각 검증한다. 이 시점은 전체 통과가 아니며 original source 수집 및 전체 Gate도 진행 중이다.
+
+
+### L4 parity 고정 수량과 현재 source의 분리 검증
+
+기존 `behavior["parity_test_node_count"] == 97` 단언은 #263 immutable inventory의 원래 behavior에 그대로 적용한다. 현재 behavior는 policy가 가리키는 모든 파일의 SHA256·무필터 top-level test AST 목록·전체 수량과 직접 비교하고, 원래97개가 명시적 이동 후 모두 포함되는지 확인한다. Counter의 이름/값/노드도 원래 frozen 계약을 실제 경로로 연결한 결과와 전체 비교한다. 최신99를 새 고정 숫자로 쓰거나 검사에서 테스트를 제외하지 않는다.
+
+기존 검사와 stale 수량·누락 node·counter 변조 음성3개를 포함한 검증은 **10 PASS /15.93초**다. 이 후속의 신규3개 노드는 `tests/test_l4_parity_current_source.py`에 실제 최초 source 커밋으로 기록하며, 원장 append와 stock 검증을 이어서 수행한다. 앞선201 PASS/1 FAIL 이력은 그대로 유지한다.
+
+## AR-B5-C34 — Relationships public 집합 제거
+
+원래 public 이름70개 모두가 실제 계약·오류·schema·service 객체와 동일함을 제거 전에 대조했다. 18개 소비자의163참조를 실제 소유 모듈로 연결했고 제품61개 전체 정의는 정확 import 해석 후 동일하다. 순수 import 집합만 제거했으며 모든 실제 정의와 Graph 방향·권한·근거·fallback 처리는 유지한다. 구조 membership 단언은 `public.py`→`service/graph_read.py`의 정확 file/module 지도에 따라 바뀌며 기존 normalizer로 통과한다. 검사 변경이나 범용 예외는 없고 기존 public bridge18개를 제거했다.
+
+Relationships·Graph recall/planner/Both·경계·동결 I/K/M inventory 집중은 **123 PASS /기존 PostgreSQL skip1 /48.36초 /기존 warning1개**다. PR #258/#263 API/schema/ORM, 보호 변경8파일 assertion 및 전체 split evidence는0오류, 경계847 module/3027 edge/legacy154와 현재 L4/ER0 generator도 통과했다. frozen JSON과 역사적 정책 설명 문자열은 다시 쓰지 않았다.
+
+B5 준비 branch의 실제 업무 이전·옛 Social/Relationships 계층·Community service/CRUD/public 집합 제거와 G07 18파일은 source로 준비됐다. 부모 통합은 이미 별도로 전환된 Resident·Chat·LocalBot·Character image·공통 DB/모델 등록 소비자를 합류하고 전체 gate 및 Hosted/설치를 검증한다. 복합 Chat/Today/image 테스트의 최종 소유 위치와 앞선 G07 고정 수치 검사는 부모의 정확 통합 검증 대상으로 남는다.
+
+
+## AR-B5 C34 순차 통합 검증
+
+Relationships 공개 집합의 실제 정의70개·원래 실제 소비자 전환을 현재 B4 실행과 합쳤다. C34 제품61개 AST 동일 근거와 정확 public→graph_read 경로 대응을 유지하고, 기존 Graph Recall·Planner·Both·response streaming 및 경계/L4 검사는 **156 PASS /기존 skip1 /65.47초**다. 현재 경계 **985 modules /3,657 edges /legacy126 /cycle0**, ER0 및 L4 현재 inventory도 통과했다. 전역 facade를 다시 만들거나 호출 순서·provider·Session을 바꾸지 않았다.
+
+B5 source 통합이 준비되었으며 원래 signed source 증거 append, stock 전체 보존과 전체 backend, PR required CI·설치 Gate를 이어서 실행한다. 이후 B6/B7/B8 및 G5/G06 완료를 이 결과로 앞당겨 선언하지 않는다.
+
+## AR-B5 최초 전체 검증과 통합 연결 보정 — 2026-09-06
+
+첫 전체 backend 검사는 **20 FAIL /2,342 PASS /기존 skip22 /752.72초**였다. 실패는 `runtime/characters/management.py`의 실제 Social media 조회 import 누락, 불변 Alembic 0088이 사용하는 schema helper 경로 삭제, 현재 core/source/HTTP inventory 경로 미갱신으로 분류했다. 원래 migration 본문과 ORM 구현은 바꾸지 않고 역사 경로에 실제 schema helper 두 개만 같은 함수 객체로 복구했다. 클래스 export나 새 infrastructure marker는 추가하지 않았다. 나머지는 기존 조회를 실제 모듈에 연결하고 현재 core 두 항목, HTTP module 필드 38개와 실제 검사 입력 경로를 갱신했다. 관련 마이그레이션·생성/활성화·패키지 가져오기·보안·tendency 확대 회귀는 **158 PASS /기존 warning5 /30.56초**다.
+
+첫 stock 보존 검사는 API/ORM/원장/2,384개 노드의 원본 보존을 확인했으나, 이동 후 split 증거의 현재 소비자/노드 경로와 tendency 단언의 지역 이름 네 개를 거절했다. 원래 단언은 같은 실제 owner의 지역 import에 연결해 복원했다. 현재 경로 참조 543개를 검토된 file/node 지도에 따라 연결하고, AR-B5-C1에서 원래 위치에 보존했던 Run 정의 42개는 실제 후속 B4-C4b2의 기존 분할 증거를 승계했다. 역사 pilot의 상대 경로 설명과 원본 source 키·원본 정의·단언은 유지했다. 수정 후 원래 **`check_refactor_preservation.py --contracts --nodes` 전체 PASS**, PR258 1,867 /PR263 1,907 /현재 보호·수집 **2,384 /2,384**, K01–K23/G01–G13 **37항목 PASS**다. 현재 경계는 **986 modules /3,659 edges /legacy126 /cycle0**, L4·ER0·deferred·public HTTP inventory도 통과했다.
+
+원장은 main의 **92개 기록을 불변 prefix**로 유지하고 최초 signed source **52개 기록**을 추가해 **144개**로 준비했다. 각 source는 고립된 원본 Git archive에서 수집하며 현재 구현으로 기준선을 재생성하지 않았다. 추가 파일 증거 211개와 신규 노드 73개를 최초 정의 커밋까지 대조했고, RoutineInteraction 조회 회귀 한 개는 후속 C31이 아닌 실제 최초 `696ada3` 기록에 배치했다. World Feed 검색 회귀 두 개도 최초 `49c0f1f` 기록과 기존 경로에서 C33 이동 지도로 이어진다. PR258/263 동결 source/checkpoint/승인 목록은 바꾸지 않았다.
+
+보안 사전 검증은 Gitleaks 8.30.1로 history 519 commits와 추적 source+원장 draft를 각각 검사했다. C33 지도의 공개 테스트 파일 SHA256 한 줄이 generic-api-key로 감지되어 원래 signed `f977215` 테스트 blob의 SHA256과 동일함을 검증했다. exact path/rule/전체 line 한 개에만 예외를 추가했고 변경 hash/key/path/prefix/suffix 음성 6개를 거절했다. 후속 history 및 source draft 검사에서 **0 leaks**이며 기존 secret allowlist 25개는 그대로다. 최종 source 기준 전체 backend·PR required CI·병합 후 실행 Gate는 다음 결과로 기록한다.
+
+### 최종 B5 후보 전체 검증
+
+수정 source `9a7f76d`와 최초 도입 원장 metadata `0108a3a`를 signed로 고정한 뒤 전체 backend가 **2,362 PASS /기존 skip22 /warning27 /733.18초**로 통과했다. 동일 source의 원래 stock 검사도 **보호2,384 /현재2,384 /37항목 PASS**다. 원래 tendency 단언의 중복 import만 정리한 별도4개 회귀도 통과했으며, 전체 실행 중 source/test/metadata를 편집하지 않았다. 최초20개 실패 이력은 위 기록에 유지한다.
+
+같은 커밋의 Gitleaks 추적 source와 HEAD 전체 조상 history는 모두0 leaks, DCO·secret metadata25·Local OSS/CI policy·frontend design은 PASS다. 원래 custom scanner의 현재 Git tree는2,081파일/치명0이다. 공유 개발 저장소의 `--history`는 `--all`을 읽기 때문에 미합류 B8 `3500f3f`의 신규 `tests/integrations/test_direct_llm.py`에서3개 synthetic fixture 오탐을 발견했다. 그 경로와 blob `a464aad`는 B5 HEAD 조상에 없고 해당 B8 source가 자기 경로의 기존 exact allowlist를 이미 이전했다. B5에 미래 예외를 추가하지 않고, 후보 전체 조상만 있는 별도 bare 저장소에서 원래 history 검사를 그대로 실행해 PR 범위 결과를 분리한다. PR required CI와 병합 후 실행·installer Gate는 아직 완료로 표시하지 않는다.
+
+
+### PR #283 첫 원격 Gate와 실행 경로 검사 보완
+
+Head `39efec7`의 Security 전체는 PASS였으나 Core backend는 pytest 전 현재 Memory batch inventory hash 5개에서, Local autonomy는 옛 `tests/test_activity_proposal_runtime.py` 실행 인자에서 실패했다. 제품 소스/원래 테스트 단언을 추가 수정하지 않고 검토된 실제 `tests/relationships/test_activity_proposals.py`를 실행하도록 연결하고 현재 inventory만 원래 generator로 갱신했다. immutable Today predecessor와 모든 schema/budget 계약은 유지했다.
+
+전체 pytest 수집만으로 별도 smoke 명령의 사라진 파일을 발견하지 못했던 점을 보완했다. 기존 CI policy가 실제 workflow pytest step의 literal Python 테스트 경로를 읽어 파일 존재를 확인하며, POSIX/Windows·backend 상대 경로를 지원한다. 실제 새 위치가 존재해도 옛 위치를 거절하고, 유효했던 파일을 삭제하면 거절하는5개 신규 사례와 기존 CI/활동/Memory inventory 관련 검증은 **18 PASS /9.59초**다. 동적 shell 표현과 실제 실행 결과는 해당 workflow가 계속 검증하며 이 정적 검사가 대신하지 않는다. 초기 집중 명령의 존재하지 않는 inventory 테스트 인자는 실행 전 오류로 별도 남기며, 수정 명령의18개 결과만 PASS로 계산했다.
+
+Custom history도 후보 `0108a3a`의 전체786 ancestor만 가진 별도 bare 저장소에서 **8,718 blobs /치명0**을 확인했다. 공유 저장소의 미합류 B8 경로3건과 구분했으며 원래 scanner·exact allowlist25·검사 범위 규칙은 변경하지 않았다. 원격 backend 전체·Local/Host/installer는 수정 head에서 다시 확인한다.

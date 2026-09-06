@@ -1,3 +1,5 @@
+import app.domains.social.repository.posts as social_posts_repository
+from app.domains.social.service import visibility as social_visibility
 from app.runtime.resident.context_references import SqlAlchemyResidentActionReferences
 from app.domains.routines.service.action_candidates import _profile_display_name_for_action_menu
 from app.domains.routines.service.action_admission import _profile_following_status
@@ -21,10 +23,8 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.config import settings
-from app.cruds import community as community_crud
-from app.runtime.resident import activity_policy as agent_activity_policy
+from app.runtime.routines import activity_policy as agent_activity_policy
 from app.domains.routines.service.action_briefs import is_feed_scan_community_theme_brief
-from app.services import community as community_service
 from app.core.context_text import neutralize_context_text
 
 
@@ -216,7 +216,7 @@ def _build_daypart_memory_note(
     if isinstance(interests, list) and interests and isinstance(interests[0], dict):
         item = interests[0]
         source_post_id = str(item.get("post_id") or "").strip()
-        post = community_crud.get_post(db, source_post_id) if source_post_id else None
+        post = social_posts_repository.get_post(db, source_post_id) if source_post_id else None
         seen_person = (
             _profile_display_name_for_action_menu(
                 SqlAlchemyResidentActionReferences(db), user_id=post.author_user_id, character_id=post.author_character_id
@@ -333,7 +333,7 @@ def _record_provided_daypart_observations(
     if isinstance(interests, list) and interests and isinstance(interests[0], dict):
         item = interests[0]
         source_post_id = str(item.get("post_id") or "").strip() or None
-        post = community_crud.get_post(db, source_post_id) if source_post_id else None
+        post = social_posts_repository.get_post(db, source_post_id) if source_post_id else None
         seen_person = (
             _profile_display_name_for_action_menu(
                 SqlAlchemyResidentActionReferences(db), user_id=post.author_user_id, character_id=post.author_character_id
@@ -429,8 +429,8 @@ def _format_v6_action_menu(
             post_id = str(item.get("post_id") or "").strip()
             if not post_id:
                 continue
-            post = community_crud.get_post(db, post_id)
-            if post is None or not community_service.is_post_public_context_visible(db, post):
+            post = social_posts_repository.get_post(db, post_id)
+            if post is None or not social_visibility.is_post_public_context_visible(db, post):
                 continue
             has_feed_interest_context = True
             author_target_type, author_target_id = _profile_target_parts(
@@ -552,8 +552,8 @@ def _v6_possible_post_actions(
     reply_root_post_id: str,
     reply_label: str,
 ) -> list[str]:
-    post = community_crud.get_post(db, post_id)
-    if post is None or not community_service.is_post_public_context_visible(db, post):
+    post = social_posts_repository.get_post(db, post_id)
+    if post is None or not social_visibility.is_post_public_context_visible(db, post):
         return []
     actions: list[str] = []
     self_authored = post.author_character_id == character_id

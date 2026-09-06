@@ -136,7 +136,7 @@ def test_relationship_graph_cleanup_removes_horizontal_compatibility_modules() -
     assert "app.cruds.social_memory" not in modules
     assert "app.models.graph_projection" not in modules
     assert "app.models.social_memory" not in modules
-    assert "app.domains.relationships.public" in modules
+    assert "app.domains.relationships.service.graph_read" in modules
     assert (
         "app.runtime.graph_projection.relationship_graph_read" in modules
     )
@@ -144,7 +144,7 @@ def test_relationship_graph_cleanup_removes_horizontal_compatibility_modules() -
     assert "app.runtime.graph_projection.replay" in modules
     assert "app.runtime.relationships.sqlalchemy_social_event" in modules
     assert (
-        "app.domains.relationships.infrastructure.sqlalchemy_social_models"
+        "app.domains.relationships.models.social"
         in modules
     )
 

@@ -26,32 +26,32 @@
     {
       "counter": "degraded_search_provider_calls",
       "expected": 0,
-      "test": "backend/tests/test_feed_reaction_intent.py::test_unavailable_search_is_explicit_and_uses_zero_provider_calls"
+      "test": "backend/tests/social/test_feed_reaction_intent.py::test_unavailable_search_is_explicit_and_uses_zero_provider_calls"
     },
     {
       "counter": "provider_calls",
       "expected": 0,
-      "test": "backend/tests/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls"
+      "test": "backend/tests/social/test_feed_reaction_intent.py::test_no_candidate_uses_zero_provider_calls"
     },
     {
       "counter": "provider_calls_per_reused_minute_cycle",
       "expected": 1,
-      "test": "backend/tests/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call"
+      "test": "backend/tests/social/test_feed_reaction_intent.py::test_same_minute_cycle_is_reused_without_second_provider_call"
     },
     {
       "counter": "manual_post_reply_provider_calls",
       "expected": 0,
-      "test": "backend/tests/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free"
+      "test": "backend/tests/social/test_l3_owner_manual_social_inbox.py::test_owner_manual_post_and_reply_are_idempotent_and_provider_free"
     },
     {
       "counter": "successful_social_event_outbox_rows",
       "expected": 1,
-      "test": "backend/tests/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once"
+      "test": "backend/tests/relationships/test_social_event_runtime.py::test_successful_comment_creates_canonical_evidence_directional_state_and_outbox_once"
     },
     {
       "counter": "failed_transaction_committed_rows",
       "expected": 0,
-      "test": "backend/tests/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
+      "test": "backend/tests/relationships/test_social_event_runtime.py::test_transaction_rollback_removes_event_evidence_relationship_and_outbox"
     },
     {
       "counter": "concurrent_world_package_commits",
@@ -145,20 +145,20 @@
   ],
   "parity_test_files": [
     "backend/tests/test_embedded_data_migration.py",
-    "backend/tests/test_feed_reaction_intent.py",
-    "backend/tests/test_graph_projection_replay.py",
-    "backend/tests/test_graph_projection_worker.py",
+    "backend/tests/social/test_feed_reaction_intent.py",
+    "backend/tests/relationships/test_projection_replay.py",
+    "backend/tests/relationships/test_graph_projection_worker.py",
     "backend/tests/test_l2_5_frontend_architecture_boundaries.py",
     "backend/tests/world_packages/test_import_commit.py",
     "backend/tests/test_l3_er3_graph_query_parity.py",
-    "backend/tests/test_l3_owner_manual_social_inbox.py",
-    "backend/tests/test_l4_social_search_projection.py",
-    "backend/tests/test_relationship_graph_api.py",
-    "backend/tests/test_relationship_graph_repository.py",
-    "backend/tests/test_social_event_runtime.py",
+    "backend/tests/social/test_l3_owner_manual_social_inbox.py",
+    "backend/tests/social/test_l4_social_search_projection.py",
+    "backend/tests/relationships/test_relationship_graph_api.py",
+    "backend/tests/relationships/test_relationship_graph_repository.py",
+    "backend/tests/relationships/test_social_event_runtime.py",
     "backend/tests/test_t2_architecture_inventory.py",
     "backend/tests/worlds/test_definition_contract.py",
-    "backend/tests/test_world_feed_search.py"
+    "backend/tests/social/test_world_feed_search.py"
   ],
   "policy_id": "angmoo-l4-pr-a-p5-p7-inventory-v1",
   "schema_version": 1

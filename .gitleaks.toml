@@ -182,3 +182,12 @@ regexes = [
   '''^\s*"backend/app/domains/worlds/repository/credential_scope\.py":\ "d946317189427c821eab62ba757b49f8c4f8154d",?\s*$''',
   '''^\s*"backend/tests/identity/test_character_credential_transaction\.py":\ "6e78bc39545122921f33e389f73a3ab0614ed470",?\s*$''',
 ]
+
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact C33 original test-source SHA256, independently recomputed from signed f9772155 Git content; not a credential; reviewed 2026-09-06"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)security/refactor_path_map\.json$''']
+regexes = ['''^\s*"tests/test_relationship_graph_api\.py":\ "dd2d8cad0e58de251fa405caa9eb85432e7669c58dc55fa7eefe141a057af97c",?\s*$''']

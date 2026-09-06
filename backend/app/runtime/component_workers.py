@@ -8,9 +8,7 @@ from typing import Any, Protocol
 
 from app.config import Settings, settings
 from app.core.db import SessionLocal
-from app.domains.relationships.ports.projection import (
-    RelationshipProjectionBackendError,
-)
+from app.domains.relationships.contracts.projection import (RelationshipProjectionBackendError)
 from app.runtime.graph_projection.process_client import (
     borrow_process_graph_client,
     graph_client_from_settings,

@@ -35,3 +35,22 @@ def build_post_search_document(
         if (text := normalize_search_text(value, max_chars=limit))
     ]
     return "\n".join(normalized)
+
+
+def _like_search_terms(query: str) -> list[str]:
+    raw = query.strip()
+    if not raw:
+        return []
+    terms = [raw]
+    if raw.startswith("@") and len(raw) > 1:
+        terms.append(raw[1:])
+    return list(dict.fromkeys(terms))
+
+
+def _like_pattern(term: str) -> str:
+    escaped = (
+        term.replace("\\", "\\\\")
+        .replace("%", "\\%")
+        .replace("_", "\\_")
+    )
+    return f"%{escaped}%"

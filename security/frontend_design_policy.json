@@ -231,7 +231,7 @@
     "CONTRIBUTING.md",
     "backend/app/domains/social/schemas/manual.py",
     "backend/app/runtime/social/sqlalchemy_read_repository.py",
-    "backend/tests/test_l3_owner_manual_social_inbox.py",
+    "backend/tests/social/test_l3_owner_manual_social_inbox.py",
     "browser-tests/fixtures/visual-corpus.json",
     "browser-tests/package.json",
     "browser-tests/playwright.ui-e-local-settings.config.ts",

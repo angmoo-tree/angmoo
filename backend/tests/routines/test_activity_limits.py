@@ -1,3 +1,5 @@
+from app.runtime.social.timeline import timeline_service
+from app.domains.social.service import posts as social_posts
 from app.domains.routines.service import activity_management, autonomy_management, manual_activity, feed_cues
 from app.domains.routines.service import first_greeting as first_greeting_service
 from app.runtime.resident import tendency_analysis
@@ -26,7 +28,7 @@ from app.config import settings
 from app.domains.routines import constants as agent_run_crud
 from app.cruds import agents as agent_crud
 from app.domains.worlds import public as world_service
-from app.runtime.resident import activity_policy as agent_activity_policy
+from app.runtime.routines import activity_policy as agent_activity_policy
 from app.runtime.resident import execution as agent_run_service
 from app.runtime.resident import scheduler as resident_tick_scheduler
 from app.runtime.characters import creator as draft_service
@@ -2497,9 +2499,9 @@ def test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident
     monkeypatch.setattr(agent_service.security, "decrypt_secret", lambda value, **_kwargs: "api-key")
     monkeypatch.setattr(agent_service, "_run_first_greeting_writer", _writer)
     monkeypatch.setattr(agent_service, "_attach_first_greeting_image", _image)
-    monkeypatch.setattr(agent_service.community_service, "create_post", _create_post)
+    monkeypatch.setattr(agent_service.timeline_service, "create_post", _create_post)
     monkeypatch.setattr(
-        agent_service.community_service,
+        agent_service.social_posts,
         "get_post",
         lambda db, post_id: _post_detail(db.get(models.Post, post_id)),
     )

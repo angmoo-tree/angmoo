@@ -1,9 +1,9 @@
 """Registry identity across the Social move and immutable migration imports."""
 from app import models as registered
 from app.core.db import Base
-from app.domains.social import public
+from app.domains.social import contracts as public
 from app.domains.social.contracts import subjective_context, today_activity, writes
-from app.domains.social.infrastructure import sqlalchemy_subjective_context_models as historical
+from app.domains.social.models import subjective_context as historical
 from app.domains.social.models import feed, manual_writes, posts, subjective_context as context_models
 
 

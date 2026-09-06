@@ -1,5 +1,9 @@
 """Bind resident context to the caller's existing transaction and Social flows."""
-from collections.abc import Sequence
+from app.domains.social.service import feed as social_feed
+from app.domains.social.service import resident_affordances
+from app.domains.routines.service import feed_history_values
+
+from collections.abc import Callable, Sequence
 from datetime import datetime
 from typing import Protocol, TypeGuard
 
@@ -68,3 +72,21 @@ class SqlAlchemyResidentContextReferences(SqlAlchemyResidentActionReferences):
 
     def is_post_instance(self, value: object) -> TypeGuard[Post]:
         return isinstance(value, Post)
+
+class ResidentSocialContextBindings:
+    """Read each concrete owner operation at the original call position."""
+
+    @property
+    def list_feed(self) -> Callable[..., ContextFeed]:
+        return social_feed.list_feed
+
+    @property
+    def list_resident_actionable_inbox_notifications(self) -> Callable[..., Sequence[ContextNotification]]:
+        return resident_affordances.list_resident_actionable_inbox_notifications
+
+    @property
+    def activity_result_text_for_prompt(self) -> Callable[..., str]:
+        return feed_history_values.activity_result_text_for_prompt
+
+
+resident_social_context = ResidentSocialContextBindings()

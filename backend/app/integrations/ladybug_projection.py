@@ -22,11 +22,9 @@ from typing import Any
 
 import ladybug as lb
 
-from app.domains.relationships.ports.projection import (
-    RelationshipProjectionBackendError,
-)
-from app.domains.relationships.graph_read.repository import GraphQueryTemplate
-from app.domains.relationships.projection.commands import (
+from app.domains.relationships.contracts.projection import (RelationshipProjectionBackendError)
+from app.domains.relationships.contracts.graph_query import (GraphQueryTemplate)
+from app.domains.relationships.contracts.projection_commands import (
     NoGraphMutationCommand,
     ProjectionCommand,
     RelationshipStateProjectionCommand,

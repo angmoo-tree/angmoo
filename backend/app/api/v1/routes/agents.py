@@ -1,3 +1,4 @@
+import app.domains.social.exceptions as social_errors
 from app.domains.characters.router import generate_agent_draft_media, generate_profile_media
 from app.domains.characters.router import (
     get_agent_draft_media,
@@ -37,7 +38,6 @@ from app.core.db import get_db
 from app.runtime.characters import creator as draft_service
 from app.runtime.characters import management as agent_service
 from app.domains.routines import exceptions as agent_run_service
-from app.services import community as community_service
 from app.services import maintenance as maintenance_service
 from app.services.direct_llm import DirectLlmDeferred, DirectLlmError, DirectLlmJsonError
 from app.services.runtime_boundary import OpenClawGatewayAuthError, OpenClawGatewayError

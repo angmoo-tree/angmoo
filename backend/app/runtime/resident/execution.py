@@ -1,4 +1,8 @@
 """Resident execution, provider calls, leases and same-Session failure compensation."""
+from app.domains.routines import constants as social_constants
+from app.runtime.social import feed_history as social_feed_history
+from app.domains.routines.service import feed_history_values as social_feed_history_values
+from app.domains.social.service import posts as social_posts
 from app.config import settings
 from app.core.db import SessionLocal
 from app.core.redaction import redact_secret_text
@@ -117,18 +121,18 @@ from app.domains.routines.service.tool_policy import _gemini_free_effective_acti
 from app.domains.routines.service.tool_policy import _policy_allows_observe
 from app.domains.routines.service.tool_policy import _resident_public_tools_allow
 from app.domains.routines.service.tool_policy import _should_allow_resident_thread_tool
-from app.domains.social.public import current_social_search
+from app.runtime.search.binding import current_social_search
 from app.domains.world_characters.public import is_owner_controlled_character
 from app.domains.world_characters.public import owner_controlled_character_ids
 from app.domains.world_characters.service import readiness as activity_profile_readiness
-from app.runtime.resident import activity_policy as agent_activity_policy
+from app.runtime.routines import activity_policy as agent_activity_policy
 from app.runtime.resident import slots as resident_slots
 from app.runtime.resident.context_references import SqlAlchemyResidentActionReferences
 from app.runtime.resident.credential_profiles import _ensure_slot_auth_profile
 from app.runtime.resident.credential_profiles import _release_slot_auth_profile
 from app.runtime.resident.decision_lanes import _run_action_decision
 from app.runtime.resident.decision_lanes import _run_feed_perception
-from app.runtime.resident.feed_context_references import SqlAlchemyResidentContextReferences
+from app.runtime.resident.feed_context_references import SqlAlchemyResidentContextReferences, resident_social_context
 from app.runtime.resident.gateway_results import _build_llm_trace_context
 from app.runtime.resident.identity_references import SqlAlchemyRunIdentityReferences
 from app.runtime.resident.post_selection import SqlAlchemyPostSelectionReferences
@@ -143,7 +147,6 @@ from app.runtime.resident.request_options import _feed_history_sanitize_stream_p
 from app.runtime.resident.request_options import _feed_scan_stream_params
 from app.runtime.resident.request_options import _tool_choice_any
 from app.runtime.resident.slots import build_slot_request_workflows
-from app.services import community as community_service
 from app.services import maintenance as maintenance_service
 from app.services.agent_runs import _build_daypart_memory_note
 from app.services.agent_runs import _filter_daypart_duplicate_feed_interest
@@ -261,7 +264,7 @@ async def run_community_once(
     post_id = _select_tick_post_id(
         SqlAlchemyPostSelectionReferences(db), preferred_post_id=data.post_id, character_id=character.id
     )
-    post = community_service.get_post(db, post_id) if post_id else None
+    post = social_posts.get_post(db, post_id) if post_id else None
     user_id = _resolve_run_owner(character, data.user_id)
 
     credential = _resolve_run_credential(
@@ -309,7 +312,7 @@ async def run_community_once(
     )
     feed_cue = feed_cue_queries.get_pending_feed_cue(db, character.id)
     inbox_threads, has_inbox = _format_inbox_threads(
-        SqlAlchemyResidentContextReferences(db, social=community_service),
+        SqlAlchemyResidentContextReferences(db, social=resident_social_context),
         run_id=run_id,
         user_id=user_id,
         character_id=character.id,
@@ -318,7 +321,7 @@ async def run_community_once(
         else DEFAULT_ACTIVITY_ACTIONS,
     )
     recent_feed_roots, actionable_feed_candidates = _format_recent_feed_sections(
-        SqlAlchemyResidentContextReferences(db, social=community_service),
+        SqlAlchemyResidentContextReferences(db, social=resident_social_context),
         run_id=run_id,
         character_id=character.id,
         allowed_actions=activity_policy.allowed_actions
@@ -326,19 +329,19 @@ async def run_community_once(
         else DEFAULT_ACTIVITY_ACTIONS,
     )
     recent_own_posts_to_avoid = _format_recent_own_posts_to_avoid(
-        SqlAlchemyResidentContextReferences(db, social=community_service), character_id=character.id
+        SqlAlchemyResidentContextReferences(db, social=resident_social_context), character_id=character.id
     )
     recent_activity_summary = _format_recent_activity_summary(
-        SqlAlchemyResidentContextReferences(db, social=community_service), character_id=character.id
+        SqlAlchemyResidentContextReferences(db, social=resident_social_context), character_id=character.id
     )
     relationship_review_candidate = _format_relationship_review_candidate(
-        SqlAlchemyResidentContextReferences(db, social=community_service),
+        SqlAlchemyResidentContextReferences(db, social=resident_social_context),
         character_id=character.id,
         has_feed_cue=feed_cue is not None,
         has_inbox=has_inbox,
     )
     social_connection_candidate = _format_social_connection_candidate(
-        SqlAlchemyResidentContextReferences(db, social=community_service),
+        SqlAlchemyResidentContextReferences(db, social=resident_social_context),
         character_id=character.id,
         feed_cue=feed_cue,
         allowed_actions=activity_policy.allowed_actions
@@ -346,7 +349,7 @@ async def run_community_once(
         else DEFAULT_ACTIVITY_ACTIONS,
     )
     strong_social_connection_candidate = _format_strong_social_connection_candidate(
-        SqlAlchemyResidentContextReferences(db, social=community_service),
+        SqlAlchemyResidentContextReferences(db, social=resident_social_context),
         character_id=character.id,
         feed_cue=feed_cue,
         allowed_actions=activity_policy.allowed_actions
@@ -743,7 +746,7 @@ async def _run_resident_individual_tool_flow(
 ) -> dict[str, Any]:
     allowed_actions = _gemini_free_effective_actions(activity_policy.allowed_actions)
     inbox_scan_candidates = _collect_v6_inbox_candidates(
-        SqlAlchemyResidentContextReferences(db, social=community_service),
+        SqlAlchemyResidentContextReferences(db, social=resident_social_context),
         character_id=character.id,
         allowed_actions=allowed_actions,
         limit=10,
@@ -834,7 +837,7 @@ async def _run_resident_individual_tool_flow(
         db, character_id=character.id, since=run_started_at
     )
     inbox_candidates = _v6_inbox_candidates_from_review(
-        SqlAlchemyResidentContextReferences(db, social=community_service), character_id=character.id, payload=inbox_review_payload
+        SqlAlchemyResidentContextReferences(db, social=resident_social_context), character_id=character.id, payload=inbox_review_payload
     )
     if use_daypart_main_session and daypart_start_date and activity_daypart:
         inbox_candidates = _filter_daypart_duplicate_inbox_candidates(
@@ -847,12 +850,12 @@ async def _run_resident_individual_tool_flow(
         )
     inbox_threads = _format_v6_inbox_compact_candidate(inbox_candidates)
     feed_history_sanitize_skeleton = (
-        community_service.build_feed_history_sanitize_skeleton(
+        social_feed_history.build_feed_history_sanitize_skeleton(
             db, character_id=character.id
         )
     )
     feed_history_sanitize_task_sections = (
-        community_service.format_feed_history_sanitize_skeleton_for_prompt(
+        social_feed_history_values.format_feed_history_sanitize_skeleton_for_prompt(
             feed_history_sanitize_skeleton
         )
     )
@@ -961,14 +964,14 @@ async def _run_resident_individual_tool_flow(
         result["feed_history_sanitize_lane"] = exc.lane_result
     feed_history_sanitize_payload = _latest_v6_feed_history_sanitize_payload(
         db, character_id=character.id, since=run_started_at,
-        action_type=community_service.FEED_HISTORY_SANITIZED_ACTION_TYPE,
+        action_type=social_constants.FEED_HISTORY_SANITIZED_ACTION_TYPE,
     )
     if feed_history_sanitize_payload is None:
         result["feed_history_sanitize_fallback"] = "metadata_only"
         if sanitize_retry_exhausted:
             result["feed_history_sanitize_fallback_reason"] = "retry_exhausted"
         feed_history_sections = (
-            community_service.format_feed_history_metadata_fallback_for_prompt(
+            social_feed_history.format_feed_history_metadata_fallback_for_prompt(
                 db, character_id=character.id
             )
         )
@@ -1001,7 +1004,7 @@ async def _run_resident_individual_tool_flow(
             db,
             user_id=user_id,
             character_id=character.id,
-            action_type=community_service.FEED_HISTORY_SANITIZED_ACTION_TYPE,
+            action_type=social_constants.FEED_HISTORY_SANITIZED_ACTION_TYPE,
             target_post_id=None,
             reason=_feed_history_sanitize_metadata_fallback_reason(
                 retry_exhausted=sanitize_retry_exhausted
@@ -1010,7 +1013,7 @@ async def _run_resident_individual_tool_flow(
         )
     else:
         feed_history_sections = (
-            community_service.format_feed_history_sanitize_payload_for_prompt(
+            social_feed_history_values.format_feed_history_sanitize_payload_for_prompt(
                 feed_history_sanitize_payload
             )
         )
@@ -1096,10 +1099,10 @@ async def _run_resident_individual_tool_flow(
             feed_interest_payload=feed_interest_payload,
         )
     feed_interests = _format_v6_feed_interests(
-        SqlAlchemyResidentContextReferences(db, social=community_service), feed_interest_payload=feed_interest_payload
+        SqlAlchemyResidentContextReferences(db, social=resident_social_context), feed_interest_payload=feed_interest_payload
     )
     relationship_review_candidate = _format_relationship_review_candidate(
-        SqlAlchemyResidentContextReferences(db, social=community_service),
+        SqlAlchemyResidentContextReferences(db, social=resident_social_context),
         character_id=character.id,
         has_feed_cue=feed_cue is not None
         or bool(feed_interest_payload.get("interests"))
@@ -1447,7 +1450,7 @@ async def _run_resident_slot_once(
             character_id=character.id,
             scoped_runtime=use_langgraph_resident,
         )
-        post = community_service.get_post(db, selected_post_id) if selected_post_id else None
+        post = social_posts.get_post(db, selected_post_id) if selected_post_id else None
         session_key = (
             f"agent:{slot.agent_id}:{'resident-manual' if require_public_action else 'resident-tick'}:{slot.assigned_user_id}:{character.id}:{run_id}"
             if enforce_activity_policy
@@ -1607,7 +1610,7 @@ async def _run_resident_slot_once(
         )
         feed_cue = feed_cue_queries.get_pending_feed_cue(db, character.id)
         inbox_threads, has_inbox = _format_inbox_threads(
-            SqlAlchemyResidentContextReferences(db, social=community_service),
+            SqlAlchemyResidentContextReferences(db, social=resident_social_context),
             run_id=run_id,
             user_id=slot.assigned_user_id,
             character_id=character.id,
@@ -1616,7 +1619,7 @@ async def _run_resident_slot_once(
             else DEFAULT_ACTIVITY_ACTIONS,
         )
         recent_feed_roots, actionable_feed_candidates = _format_recent_feed_sections(
-            SqlAlchemyResidentContextReferences(db, social=community_service),
+            SqlAlchemyResidentContextReferences(db, social=resident_social_context),
             run_id=run_id,
             character_id=character.id,
             allowed_actions=activity_policy.allowed_actions
@@ -1624,19 +1627,19 @@ async def _run_resident_slot_once(
             else DEFAULT_ACTIVITY_ACTIONS,
         )
         recent_own_posts_to_avoid = _format_recent_own_posts_to_avoid(
-            SqlAlchemyResidentContextReferences(db, social=community_service), character_id=character.id
+            SqlAlchemyResidentContextReferences(db, social=resident_social_context), character_id=character.id
         )
         recent_activity_summary = _format_recent_activity_summary(
-            SqlAlchemyResidentContextReferences(db, social=community_service), character_id=character.id
+            SqlAlchemyResidentContextReferences(db, social=resident_social_context), character_id=character.id
         )
         relationship_review_candidate = _format_relationship_review_candidate(
-            SqlAlchemyResidentContextReferences(db, social=community_service),
+            SqlAlchemyResidentContextReferences(db, social=resident_social_context),
             character_id=character.id,
             has_feed_cue=feed_cue is not None,
             has_inbox=has_inbox,
         )
         social_connection_candidate = _format_social_connection_candidate(
-            SqlAlchemyResidentContextReferences(db, social=community_service),
+            SqlAlchemyResidentContextReferences(db, social=resident_social_context),
             character_id=character.id,
             feed_cue=feed_cue,
             allowed_actions=activity_policy.allowed_actions
@@ -1644,7 +1647,7 @@ async def _run_resident_slot_once(
             else DEFAULT_ACTIVITY_ACTIONS,
         )
         strong_social_connection_candidate = _format_strong_social_connection_candidate(
-            SqlAlchemyResidentContextReferences(db, social=community_service),
+            SqlAlchemyResidentContextReferences(db, social=resident_social_context),
             character_id=character.id,
             feed_cue=feed_cue,
             allowed_actions=activity_policy.allowed_actions

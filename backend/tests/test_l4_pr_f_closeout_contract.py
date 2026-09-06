@@ -11,11 +11,11 @@ APP_ROOT = REPO_ROOT / "backend" / "app"
 
 def test_l4_social_runtime_has_one_concrete_owner_and_no_temporary_facades() -> None:
     required = (
-        APP_ROOT / "domains" / "social" / "public.py",
+        APP_ROOT / "domains" / "social" / "contracts" / "__init__.py",
         APP_ROOT / "domains" / "social" / "contracts" / "inbox.py",
         APP_ROOT / "domains" / "social" / "models" / "manual_writes.py",
         APP_ROOT / "runtime" / "social" / "sqlalchemy_unit_of_work.py",
-        APP_ROOT / "runtime" / "social" / "sqlalchemy_inbox.py",
+        APP_ROOT / "domains" / "social" / "service" / "manual_inbox.py",
         APP_ROOT / "runtime" / "social" / "sqlalchemy_read_repository.py",
         APP_ROOT / "runtime" / "routine_posts" / "sqlalchemy_runtime.py",
         APP_ROOT / "core" / "sqlite_concurrency.py",

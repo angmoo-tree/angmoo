@@ -9,7 +9,7 @@ from app.domains.worlds.models import World
 from app.domains.world_characters.models import WorldActivityRepertoire, WorldCommunityProfile
 from app.domains.routines.models import AgentActivitySetting
 from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
-from app.compatibility.routine_posts.canonical_interactions import CanonicalRoutineInteractionSource
+from app.runtime.routine_posts.interactions import canonical_interaction_source
 from app.domains.routine_posts.contracts.context import RoutineInteractionSource
 
 
@@ -33,7 +33,7 @@ class SqlAlchemyRoutineContextReferences(SqlAlchemyActivityReferences):
         return self._db.get(AgentActivitySetting, character_id)
 
     def default_interaction_source(self) -> RoutineInteractionSource:
-        return CanonicalRoutineInteractionSource()
+        return canonical_interaction_source()
 
     def current_item(self, *, world_character_id: str, current: datetime) -> routines_models.DailyActivityPlanItem | None:
         return self._db.scalar(

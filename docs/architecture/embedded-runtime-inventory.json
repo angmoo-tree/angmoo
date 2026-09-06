@@ -27,7 +27,7 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "712ac66847d77aed38a3337a654933d70218a397e696806ab828daa4325e0dc4"
+      "sha256": "8fb6e311408707aaa76cf15abfccf210ded6ca937808c8d99d213c0cbb4acba8"
     },
     {
       "path": "backend/app/runtime/resident/scheduler.py",
@@ -35,7 +35,7 @@
     },
     {
       "path": "backend/app/runtime/graph_projection/worker.py",
-      "sha256": "cdc807b1a80cff2ed41384498321b776a22c2a9153852c81459424275b70d9da"
+      "sha256": "1a8f3c2b6e25d8b27cd75ecd27d1a663571fffa2abe01bc27f5079fb64538a38"
     }
   ],
   "dependencies": {
@@ -151,7 +151,7 @@
         "phase": "P4",
         "tests": [
           "backend/tests/routine_posts/test_runtime.py",
-          "backend/tests/test_l3_owner_manual_social_inbox.py"
+          "backend/tests/social/test_l3_owner_manual_social_inbox.py"
         ]
       },
       {
@@ -159,8 +159,8 @@
         "missing_tests": [],
         "phase": "P5",
         "tests": [
-          "backend/tests/test_world_feed_search.py",
-          "backend/tests/test_feed_reaction_intent.py"
+          "backend/tests/social/test_world_feed_search.py",
+          "backend/tests/social/test_feed_reaction_intent.py"
         ]
       },
       {
@@ -168,8 +168,8 @@
         "missing_tests": [],
         "phase": "P6",
         "tests": [
-          "backend/tests/test_social_event_runtime.py",
-          "backend/tests/test_activity_proposal_runtime.py"
+          "backend/tests/relationships/test_social_event_runtime.py",
+          "backend/tests/relationships/test_activity_proposals.py"
         ]
       },
       {
@@ -177,11 +177,11 @@
         "missing_tests": [],
         "phase": "P7",
         "tests": [
-          "backend/tests/test_graph_projection_commands.py",
-          "backend/tests/test_graph_projection_replay.py",
-          "backend/tests/test_graph_projection_worker.py",
-          "backend/tests/test_relationship_graph_repository.py",
-          "backend/tests/test_relationship_graph_api.py"
+          "backend/tests/relationships/test_projection_commands.py",
+          "backend/tests/relationships/test_projection_replay.py",
+          "backend/tests/relationships/test_graph_projection_worker.py",
+          "backend/tests/relationships/test_relationship_graph_repository.py",
+          "backend/tests/relationships/test_relationship_graph_api.py"
         ]
       }
     ]
@@ -263,7 +263,7 @@
       "owner": "ER4",
       "path": "backend/app/runtime/graph_projection/worker.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "cdc807b1a80cff2ed41384498321b776a22c2a9153852c81459424275b70d9da",
+      "source_sha256": "1a8f3c2b6e25d8b27cd75ecd27d1a663571fffa2abe01bc27f5079fb64538a38",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -274,7 +274,7 @@
       "owner": "ER4",
       "path": "backend/app/runtime/graph_projection/process_client.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "35b1eeda4b5722a29d5b25d1dabe617212ee32fd6d27c6bdd34d2da031e70035",
+      "source_sha256": "8b0fdcbee1a37ddb485d198e8dd38d51112bcd3e719d5ca39dd53f0b40fffe0a",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -287,7 +287,7 @@
       "owner": "ER4",
       "path": "backend/app/public_main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "2f7feb13fde66484191bd22345715a4ae264e3b346d98199fd4cb6fb36870a1c",
+      "source_sha256": "08829df27d8477daea2e0f920392d7cd42031d10d07acf627f4745ccc24782ea",
       "transition_pr": "ER4 PR J"
     },
     {

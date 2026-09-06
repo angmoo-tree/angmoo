@@ -8,12 +8,12 @@ import threading
 import time
 from typing import Callable
 
-from app.domains.relationships.ports.outbox import OutboxPort, ProjectionWorkItem
-from app.domains.relationships.ports.projection import (
+from app.domains.relationships.contracts.outbox import (OutboxPort, ProjectionWorkItem)
+from app.domains.relationships.contracts.projection import (
     RelationshipProjectionBackendError,
     RelationshipProjectionPort,
 )
-from app.domains.relationships.projection.commands import ProjectionCommandError
+from app.domains.relationships.contracts.projection_commands import (ProjectionCommandError)
 from app.runtime.graph_projection.sqlalchemy_outbox import (
     SessionFactory,
     SqlAlchemyProjectionOutbox,

@@ -1,4 +1,7 @@
 from __future__ import annotations
+import app.domains.characters.service.profile as characters_profile_service
+
+from app.runtime.social import feed_history as resident_feed_history
 
 import asyncio
 from dataclasses import dataclass
@@ -24,7 +27,7 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.cruds import agents as agent_crud
-from app.cruds import community as community_crud
+
 from app.credentials import (
     CredentialPurpose,
     CredentialResolutionError,
@@ -37,7 +40,7 @@ from app.services.direct_llm import (
     RunLlmTracker,
     wait_for_provider_rate_limit,
 )
-from app.services import community as community_service
+
 from app.services import lore_parser_quota
 from app.core.context_text import neutralize_context_text
 
@@ -508,7 +511,7 @@ def build_lore_search_query(
     now: datetime | None = None,
 ) -> str:
     current_time = now or datetime.now(UTC)
-    recent_topics = community_service.format_recent_own_root_topic_history_for_prompt(
+    recent_topics = resident_feed_history.format_recent_own_root_topic_history_for_prompt(
         db, character_id=character.id
     )
     recent_lore = _format_recent_lore_usage(db, character_id=character.id)
@@ -640,7 +643,7 @@ def _store_chunks_with_embeddings(
 def _get_owned_character(
     db: Session, user: models.User, character_id: str
 ) -> models.Character:
-    character = community_crud.get_character(db, character_id)
+    character = characters_profile_service.get_character(db, character_id)
     if character is None or character.deleted_at is not None or character.owner_id != user.id:
         raise CharacterLoreNotFoundError(character_id)
     return character

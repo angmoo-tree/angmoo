@@ -129,7 +129,37 @@ def _service_images(jobs: dict[object, object]) -> list[tuple[str, str]]:
     return images
 
 
-def check_workflow(path: Path) -> tuple[list[str], list[str]]:
+def check_pytest_paths(document: dict, root: Path) -> list[str]:
+    """Check literal Python test arguments in workflow pytest steps.
+
+    Collection of the full suite cannot detect a separately named smoke test
+    left at an old path. Dynamic expressions and shell execution remain the
+    responsibility of the actual workflow jobs.
+    """
+    errors: list[str] = []
+    pattern = re.compile(r"(?<![\w/\\])(?:backend[/\\])?tests[/\\][\w./\\-]+\.py\b")
+    for job_name, job in document.get("jobs", {}).items():
+        if not isinstance(job, dict):
+            continue
+        for index, step in enumerate(job.get("steps", [])):
+            if not isinstance(step, dict):
+                continue
+            command = step.get("run")
+            if not isinstance(command, str) or not re.search(r"\bpytest\b", command):
+                continue
+            for literal in sorted(set(pattern.findall(command))):
+                relative = literal.replace("\\", "/")
+                if not relative.startswith("backend/"):
+                    relative = "backend/" + relative
+                candidate = (root / relative).resolve()
+                if not candidate.is_relative_to(root.resolve()) or not candidate.is_file():
+                    errors.append(
+                        f"{job_name}.steps[{index}]: pytest test file is missing: {literal}"
+                    )
+    return errors
+
+
+def check_workflow(path: Path, *, root: Path | None = None) -> tuple[list[str], list[str]]:
     text = path.read_text(encoding="utf-8")
     errors: list[str] = []
     try:
@@ -177,6 +207,8 @@ def check_workflow(path: Path) -> tuple[list[str], list[str]]:
     for label, image in _service_images(jobs):
         if "@sha256:" not in image:
             errors.append(f"service image is not pinned by digest: {label}={image}")
+    if root is not None:
+        errors.extend(check_pytest_paths(document, root))
     return errors, [str(name) for name in jobs]
 
 
@@ -188,7 +220,7 @@ def check_repo(root: Path = REPO_ROOT) -> list[str]:
     ] if actual != EXPECTED_WORKFLOWS else []
     all_jobs: list[str] = []
     for name in sorted(actual):
-        workflow_errors, jobs = check_workflow(workflow_root / name)
+        workflow_errors, jobs = check_workflow(workflow_root / name, root=root)
         errors.extend(f"{name}: {error}" for error in workflow_errors)
         all_jobs.extend(jobs)
     counts = Counter(all_jobs)

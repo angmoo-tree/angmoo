@@ -1,3 +1,10 @@
+import app.domains.social.service.activity_results as social_activity_results_service
+import app.domains.social.service.feed as social_feed_service
+import app.domains.social.service.inbox as social_inbox_service
+import app.domains.social.service.posts as social_posts_service
+import app.domains.social.service.profiles as social_profiles_service
+import app.runtime.social.timeline as social_timeline_runtime
+from app.runtime.social import agent_tool_state as social_state
 from dataclasses import dataclass
 from datetime import UTC, datetime, time, timedelta
 import logging
@@ -13,10 +20,10 @@ from app.core import unit_of_work
 from app.cruds import agents as agent_crud
 from app.domains.routines.service import tick_schedule as agent_activity_policy
 from app.runtime.characters import management as agent_service
-from app.services import community as community_service
+
 from app.domains.identity.service import demo_access as demo_lock
 from app.services import local_bot_quota
-from app.services import post_image_generation
+from app.runtime.social import image_generation as post_image_generation
 
 
 POST_COOLDOWN = timedelta(minutes=30)
@@ -121,7 +128,7 @@ def save_state(
     )
     try:
         with unit_of_work.deferred_commits():
-            state = community_service.save_character_state(
+            state = social_state.save_character_state(
                 db,
                 context.character.id,
                 schemas.CharacterStateWrite(
@@ -170,7 +177,7 @@ def list_feed(
 ) -> schemas.BotFeedPage:
     _ensure_read_rate_limit(db, context, label="read")
     return _bot_feed_page(
-        community_service.list_feed(db, limit=limit, cursor=cursor, content=content)
+        social_feed_service.list_feed(db, limit=limit, cursor=cursor, content=content)
     )
 
 
@@ -184,7 +191,7 @@ def list_following_feed(
 ) -> schemas.BotFeedPage:
     _ensure_read_rate_limit(db, context, label="read")
     return _bot_feed_page(
-        community_service.list_character_following_feed(
+        social_feed_service.list_character_following_feed(
             db,
             context.user,
             context.character.id,
@@ -199,7 +206,7 @@ def get_post_thread(
     db: Session, context: LocalBotContext, post_id: str
 ) -> schemas.BotPostThreadRead:
     _ensure_read_rate_limit(db, context, label="read")
-    return _bot_post_thread(community_service.get_post_thread(db, post_id))
+    return _bot_post_thread(social_posts_service.get_post_thread(db, post_id))
 
 
 def list_notifications(
@@ -211,7 +218,7 @@ def list_notifications(
 ) -> schemas.BotNotificationPage:
     _ensure_read_rate_limit(db, context, label="read")
     return _bot_notification_page(
-        community_service.list_notifications_for_character(
+        social_inbox_service.list_notifications_for_character(
             db,
             user_id=context.user.id,
             character_id=context.character.id,
@@ -225,7 +232,7 @@ def get_character_profile(
     db: Session, context: LocalBotContext, character_id: str
 ) -> schemas.BotProfileRead:
     _ensure_read_rate_limit(db, context, label="read")
-    return _bot_profile_read(community_service.get_character_profile(db, character_id))
+    return _bot_profile_read(social_profiles_service.get_character_profile(db, character_id))
 
 
 def get_activity(
@@ -255,7 +262,7 @@ def mark_notification_read(
     db: Session, context: LocalBotContext, notification_id: int
 ) -> schemas.BotNotificationRead:
     return _bot_notification_read(
-        community_service.mark_character_notification_read(
+        social_inbox_service.mark_character_notification_read(
             db,
             user_id=context.user.id,
             character_id=context.character.id,
@@ -271,7 +278,7 @@ def create_post(
     now = datetime.now(UTC)
     try:
         with unit_of_work.deferred_commits():
-            post = community_service.create_post(
+            post = social_timeline_runtime.timeline_service.create_post(
                 db,
                 context.user,
                 schemas.PostCreate(
@@ -289,7 +296,7 @@ def create_post(
                 action_type="post_created",
                 target_post_id=post.id,
                 reason="local_bot_post",
-                result=community_service.build_post_created_activity_result(
+                result=social_activity_results_service.build_post_created_activity_result(
                     post_id=post.id,
                     title=post.title,
                     body=post.body,
@@ -331,7 +338,7 @@ def create_reply(
     try:
         with unit_of_work.deferred_commits():
             result = _bot_post_detail(
-                community_service.create_reply(
+                social_timeline_runtime.timeline_service.create_reply(
                     db,
                     context.user,
                     post_id,
@@ -357,7 +364,7 @@ def like_post(
     try:
         with unit_of_work.deferred_commits():
             result = _bot_post_detail(
-                community_service.like_post(
+                social_timeline_runtime.timeline_service.like_post(
                     db,
                     context.user,
                     post_id,
@@ -385,7 +392,7 @@ def unlike_post(
     try:
         with unit_of_work.deferred_commits():
             result = _bot_post_detail(
-                community_service.unlike_post(
+                social_timeline_runtime.timeline_service.unlike_post(
                     db,
                     context.user,
                     post_id,
@@ -412,7 +419,7 @@ def repost_post(
     try:
         with unit_of_work.deferred_commits():
             result = _bot_post_detail(
-                community_service.repost_post(
+                social_timeline_runtime.timeline_service.repost_post(
                     db,
                     context.user,
                     post_id,
@@ -440,7 +447,7 @@ def unrepost_post(
     try:
         with unit_of_work.deferred_commits():
             result = _bot_post_detail(
-                community_service.unrepost_post(
+                social_timeline_runtime.timeline_service.unrepost_post(
                     db,
                     context.user,
                     post_id,
@@ -468,7 +475,7 @@ def follow_profile(
     existing = _profile_follow_exists(db, context, data.target_id)
     try:
         with unit_of_work.deferred_commits():
-            result = community_service.follow_profile(
+            result = social_profiles_service.follow_profile(
                 db,
                 context.user,
                 schemas.FollowCreate(
@@ -508,7 +515,7 @@ def unfollow_profile(
     existing = _profile_follow_exists(db, context, data.target_id)
     try:
         with unit_of_work.deferred_commits():
-            community_service.unfollow_profile(
+            social_profiles_service.unfollow_profile(
                 db,
                 context.user,
                 schemas.FollowCreate(

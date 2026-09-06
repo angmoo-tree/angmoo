@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from sqlalchemy import Connection
 
-from app.domains.social.infrastructure.sqlalchemy_subjective_context_models import (
+from app.domains.social.models.subjective_context import (
     SUBJECTIVE_CONTEXT_SCHEMA_TABLES,
     create_subjective_context_schema,
 )

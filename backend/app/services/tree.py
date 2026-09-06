@@ -1,9 +1,10 @@
+import app.domains.characters.service.profile as characters_profile_service
 from uuid import uuid4
 
 from sqlalchemy.orm import Session
 
 from app import models, schemas
-from app.cruds import community as community_crud
+
 from app.cruds import tree as tree_crud
 
 
@@ -106,7 +107,7 @@ def _validate_related_character(
 ) -> str | None:
     if character_id is None:
         return None
-    character = community_crud.get_character(db, character_id)
+    character = characters_profile_service.get_character(db, character_id)
     if character is None or character.deleted_at is not None or character.owner_id != user.id:
         raise TreeRelatedCharacterError(character_id)
     return character.id

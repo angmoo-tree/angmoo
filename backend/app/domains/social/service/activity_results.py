@@ -1,19 +1,13 @@
 """Canonical post-result text and bounded topic/preview values."""
+from app.core.bounded_text import _clip_text, _safe_topic_text
 import json
 from typing import Any
 from app.core.context_text import neutralize_context_text
 from app.domains.social.constants import FEED_SCAN_BODY_PREVIEW_CHARS
 
 
-def _clip_text(value: str | None, limit: int) -> str:
-    text = (value or "").strip()
-    if len(text) <= limit:
-        return text
-    return f"{text[: max(0, limit - 3)]}..."
 
 
-def _safe_topic_text(value: object, limit: int = 300) -> str:
-    return _clip_text(neutralize_context_text(str(value or "")), limit)
 
 
 def _body_preview(value: str | None) -> str:

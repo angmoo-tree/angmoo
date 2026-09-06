@@ -1,6 +1,7 @@
 from __future__ import annotations
 from app.domains.routines.repository import public_action_executions as public_action_queries
 from app.domains.routines.service import public_action_executions as public_action_executions
+from app.runtime.social.agent_tools import agent_tool_actions
 
 from app.runtime.routines.joint_references import SqlAlchemyJointReferences
 
@@ -28,22 +29,22 @@ from app.domains.routines.service.execution import claims as activity_claims
 from app.domains.routines.service.execution import lifecycle as activity_lifecycle
 from app.domains.routines import exceptions as activity_errors
 from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
-from app.runtime.social.sqlalchemy_inbox import (
+from app.runtime.social.manual_inbox import (
     ManualInboxRuntimeError,
     claimed_observation_post_id,
     is_manual_inbox_source,
 )
-from app.runtime.social.sqlalchemy_inbox import claim as claim_manual_inbox
-from app.runtime.social.sqlalchemy_inbox import (
+from app.runtime.social.manual_inbox import claim as claim_manual_inbox
+from app.runtime.social.manual_inbox import (
     consume_claims as consume_manual_inbox_claims,
 )
-from app.runtime.social.sqlalchemy_inbox import (
+from app.runtime.social.manual_inbox import (
     release_claims as release_manual_inbox_claims,
 )
 from app.runtime.social.observations import observe_source
-from app.domains.social.public import SocialObservationError
+from app.domains.social.contracts.observations import SocialObservationError
 from app.domains.social.contracts.subjective_context import ActionSubjectiveContextV1
-from app.runtime.social.subjective_context import record_declared_subjective_context
+from app.runtime.social.subjective_composition import record_declared_subjective_context
 from app.integrations.direct_llm import (
     DirectLlmDeferred,
     DirectLlmError,
@@ -57,7 +58,6 @@ agent_run_crud = legacy.agent_run_crud
 agent_activity_policy = legacy.agent_activity_policy
 from app.domains.routines.service import joint_activity as joint_activity_runtime
 social_event_runtime = legacy.social_event_runtime
-community_service = legacy.community_service
 LangGraphResidentContext = legacy.LangGraphResidentContext
 
 
@@ -548,7 +548,7 @@ async def run_routine_post_runtime(
                 world_id=context.world.id,
                 actor_world_character_id=world_character.id,
             )
-            post_read = community_service.create_agent_tool_post(
+            post_read = agent_tool_actions.create_agent_tool_post(
                 db,
                 resident_context.session_key,
                 legacy.PostCreate(

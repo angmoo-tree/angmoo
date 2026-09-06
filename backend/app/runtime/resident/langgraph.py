@@ -1,4 +1,11 @@
 from __future__ import annotations
+from app.domains.social.repository import posts as social_post_queries
+from app.domains.social.repository import inbox as social_inbox_queries
+from app.domains.characters.service import profile as character_profile
+from app.runtime.social.agent_tools import agent_tool_actions
+from app.runtime.social.agent_tool_reads import agent_tool_reads
+from app.domains.social.service import resident_affordances as social_resident_affordances
+from app.runtime.social.agent_tool_state import agent_tool_state
 from app.runtime.resident import langgraph_queries
 from app.domains.routines.policies import execution_results
 from app.domains.routines.contracts.context_reads import RelationshipContextWorkflows, WritingContextWorkflows, ConversationWorkflows
@@ -162,7 +169,6 @@ from app.credentials import (
 )
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
-from app.cruds import community as community_crud
 from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
     AUTONOMOUS_FEED_RUNTIME_MODE,
@@ -173,16 +179,16 @@ from app.domains.social.contracts.subjective_context import (
     ActionMotivationKind,
     ActionSubjectiveContextV1,
 )
-from app.runtime.social.subjective_context import record_declared_subjective_context
+from app.runtime.social.subjective_composition import record_declared_subjective_context
 from app.runtime.routine_posts.sqlalchemy_runtime import (
     routine_world_character_for_character,
     run_routine_post_runtime,
 )
-from app.runtime.resident import activity_policy as agent_activity_policy
+from app.runtime.routines import activity_policy as agent_activity_policy
 from app.services import character_lore as character_lore_service
-from app.services import community as community_service
-from app.services import langgraph_social_apply
-from app.services import post_image_generation
+from app.runtime.social import langgraph_actions as langgraph_social_apply
+from app.runtime.social import image_generation as post_image_generation
+from app.domains.social.service import image_attachment
 from app.services import prompt_safety
 from app.services.direct_llm import (
     DirectLlmCallContext,
@@ -195,7 +201,7 @@ from app.services.direct_llm import (
 from app.core.context_text import neutralize_context_text
 from app.runtime.resident.context import LangGraphResidentContext
 from app.domains.routines.contracts.resident import ResidentGraphState as _ResidentGraphState
-from app.services.world_feed_runtime import run_world_keyword_feed
+from app.runtime.social.feed_cycle import run_world_keyword_feed
 
 
 logger = logging.getLogger("app.services.langgraph_resident")
@@ -264,7 +270,7 @@ _writing_context_workflows = WritingContextWorkflows(
 _conversation_workflows = ConversationWorkflows(
     clip=_clip,
     get_post=lambda db, post_id: _conversation_context_post(db, post_id),
-    thread_replies=lambda db, post_id, **kwargs: community_crud.list_post_thread_replies(db, post_id, **kwargs),
+    thread_replies=lambda db, post_id, **kwargs: social_post_queries.list_post_thread_replies(db, post_id, **kwargs),
 )
 _tendency_action_note = partial(relationship_context_service._tendency_action_note, workflows=_relationship_context_workflows)
 _relationship_daypart_memory = partial(relationship_context_service._relationship_daypart_memory, workflows=_relationship_context_workflows)
@@ -317,7 +323,7 @@ _action_planning_workflows = ActionPlanningWorkflows(
 _action_budget_workflows = ActionBudgetWorkflows(
     ensure_setting=lambda db, character_id: activity_settings.ensure_setting(db, character_id),
     count_today=lambda db, **kwargs: agent_activity_policy.count_action_today(db, **kwargs),
-    get_post=lambda db, post_id: community_crud.get_post(db, post_id),
+    get_post=lambda db, post_id: social_post_queries.get_post(db, post_id),
     reply_task_id=lambda **kwargs: _reply_task_id(**kwargs),
 )
 _filter_action_plan = partial(action_plans_service._filter_action_plan, workflows=_action_planning_workflows)
@@ -826,7 +832,7 @@ def _relationship_point_to_state(
         except Exception:
             ctx.db.rollback()
         return None
-    source_character = community_crud.get_character(ctx.db, point.source_character_id)
+    source_character = character_profile.get_character(ctx.db, point.source_character_id)
     if (
         source_character is None
         or source_character.deleted_at is not None
@@ -1473,7 +1479,7 @@ async def _run_state_recorder(
         }
 
     try:
-        saved = community_service.save_agent_tool_character_state(
+        saved = agent_tool_state.save_agent_tool_character_state(
             ctx.db,
             ctx.session_key,
             ctx.character.id,
@@ -1670,7 +1676,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
 
     async def feed_observer(state: _ResidentGraphState) -> dict[str, Any]:
         session_key = f"{ctx.session_key}:scratch:feed-scan:langgraph"
-        feed_page = community_service.list_agent_tool_feed(ctx.db, session_key, limit=30)
+        feed_page = agent_tool_reads.list_agent_tool_feed(ctx.db, session_key, limit=30)
         seen_post_ids = _seen_daypart_feed_post_ids(ctx)
         items: list[dict[str, Any]] = []
         seed_candidates: list[dict[str, Any]] = []
@@ -1680,10 +1686,10 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
         for item in feed_page.items:
             if item.post_id in seen_post_ids:
                 continue
-            post = community_crud.get_post(ctx.db, item.post_id)
+            post = social_post_queries.get_post(ctx.db, item.post_id)
             author_character_id = getattr(post, "author_character_id", None)
             author_character = (
-                community_crud.get_character(ctx.db, author_character_id)
+                character_profile.get_character(ctx.db, author_character_id)
                 if author_character_id
                 else None
             )
@@ -1696,7 +1702,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
             if topic and topic not in topics:
                 topics.append(topic)
             affordance = (
-                community_service.resident_feed_action_affordance(
+                social_resident_affordances.resident_feed_action_affordance(
                     ctx.db,
                     post=post,
                     character_id=ctx.character.id,
@@ -1884,7 +1890,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
 
     async def inbox_observer(state: _ResidentGraphState) -> dict[str, Any]:
         session_key = f"{ctx.session_key}:scratch:inbox:langgraph"
-        notifications = community_service.list_agent_tool_notifications(
+        notifications = agent_tool_reads.list_agent_tool_notifications(
             ctx.db, session_key, limit=10
         )
         inbox_lane_only = bool(state.get("inbox_lane_only"))
@@ -1918,7 +1924,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
             }:
                 continue
             source_post_id = notification.source_post_id or notification.post_id
-            raw_notification = community_crud.get_notification_for_agent(
+            raw_notification = social_inbox_queries.get_notification_for_agent(
                 ctx.db,
                 user_id=ctx.user_id,
                 character_id=ctx.character.id,
@@ -1927,7 +1933,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
             observation_receipt = None
             if inbox_lane_only:
                 source_post = (
-                    community_crud.get_post(ctx.db, source_post_id)
+                    social_post_queries.get_post(ctx.db, source_post_id)
                     if source_post_id
                     else None
                 )
@@ -1964,7 +1970,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
                 ctx.db.commit()
             observed_notification_ids.append(notification.id)
             affordance = (
-                community_service.resident_inbox_action_affordance(
+                social_resident_affordances.resident_inbox_action_affordance(
                     ctx.db,
                     notification=raw_notification,
                     character_id=ctx.character.id,
@@ -3231,7 +3237,7 @@ def _execute_planned_action(
             "failure_class": "missing_post_id",
         }
     if action_type == "follow" and target_id is None and post_id is not None:
-        post = community_crud.get_post(ctx.db, post_id)
+        post = social_post_queries.get_post(ctx.db, post_id)
         if post is not None and post.author_character_id:
             target_type = "character"
             target_id = post.author_character_id
@@ -3335,7 +3341,7 @@ def _execute_planned_action(
             if action_type == "reply":
                 if not body:
                     raise ValueError("reply body missing")
-                result = community_service.reply_agent_tool_post(
+                result = agent_tool_actions.reply_agent_tool_post(
                     ctx.db,
                     ctx.session_key,
                     post_id or "",
@@ -3345,7 +3351,7 @@ def _execute_planned_action(
                 )
                 payload = {"post_id": result.id, "reply_to_post_id": post_id}
             elif action_type == "like":
-                result = community_service.like_agent_tool_post(
+                result = agent_tool_actions.like_agent_tool_post(
                     ctx.db,
                     ctx.session_key,
                     post_id or "",
@@ -3353,7 +3359,7 @@ def _execute_planned_action(
                 )
                 payload = {"post_id": result.id}
             elif action_type == "repost":
-                result = community_service.repost_agent_tool_post(
+                result = agent_tool_actions.repost_agent_tool_post(
                     ctx.db,
                     ctx.session_key,
                     post_id or "",
@@ -3361,7 +3367,7 @@ def _execute_planned_action(
                 )
                 payload = {"post_id": result.id}
             elif action_type == "follow":
-                result = community_service.follow_agent_tool_profile(
+                result = agent_tool_actions.follow_agent_tool_profile(
                     ctx.db,
                     ctx.session_key,
                     schemas.FollowCreate(
@@ -3375,7 +3381,7 @@ def _execute_planned_action(
                     "target_id": result.target.id,
                 }
             elif action_type == "unfollow":
-                community_service.unfollow_agent_tool_profile(
+                agent_tool_actions.unfollow_agent_tool_profile(
                     ctx.db,
                     ctx.session_key,
                     schemas.FollowCreate(
@@ -3546,7 +3552,7 @@ def _execute_writing_plan(
     if blocked is not None:
         blocked_field, blocked_result = blocked
         if prepared_image is not None:
-            post_image_generation.release_prepared_post_image_quota(
+            image_attachment.release_prepared_post_image_quota(
                 db=ctx.db,
                 prepared=prepared_image,
                 status="failed",
@@ -3593,7 +3599,7 @@ def _execute_writing_plan(
             character_id=ctx.character.id,
         )
         with unit_of_work.deferred_commits():
-            result = community_service.create_agent_tool_post(
+            result = agent_tool_actions.create_agent_tool_post(
                 ctx.db,
                 ctx.session_key,
                 schemas.PostCreate(
@@ -3614,7 +3620,7 @@ def _execute_writing_plan(
                 author_world_character_id=actor.id,
             )
             image_attempt = (
-                post_image_generation.attach_prepared_post_image(
+                image_attachment.attach_prepared_post_image(
                     db=ctx.db,
                     post_id=result.id,
                     prepared=prepared_image,
@@ -3756,7 +3762,7 @@ def _create_relationship_point_from_post(
 ) -> dict[str, Any]:
     if not recipient_character_id:
         return {"created": False, "reason": "recipient_not_character"}
-    recipient = community_crud.get_character(ctx.db, recipient_character_id)
+    recipient = character_profile.get_character(ctx.db, recipient_character_id)
     if recipient is None or recipient.deleted_at is not None:
         return {"created": False, "reason": "recipient_unavailable"}
     if recipient.moderation_status == "suspended":
@@ -3878,7 +3884,7 @@ def _record_relationship_points_after_publish(
         result = action.get("result") if isinstance(action.get("result"), dict) else {}
         reply_post_id = str(result.get("post_id") or "").strip()
         parent_post_id = str(result.get("reply_to_post_id") or "").strip()
-        parent = community_crud.get_post(ctx.db, parent_post_id) if parent_post_id else None
+        parent = social_post_queries.get_post(ctx.db, parent_post_id) if parent_post_id else None
         if parent is None or not parent.author_character_id:
             skipped.append(
                 {

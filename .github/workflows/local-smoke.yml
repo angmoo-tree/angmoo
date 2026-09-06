@@ -148,7 +148,7 @@ jobs:
             tests/routines/test_daily_activity_runtime.py \
             tests/routine_posts/test_runtime.py \
             tests/world_characters/test_owner_identity.py \
-            tests/test_l3_owner_manual_social_inbox.py \
+            tests/social/test_l3_owner_manual_social_inbox.py \
             tests/test_l3_domain_boundary_map.py \
             tests/test_l3_closeout_contract.py \
             tests/world_packages/test_v1_contract.py \
@@ -161,10 +161,10 @@ jobs:
             tests/world_packages/test_uow_registry.py \
             tests/world_packages/test_seed_replay_race.py \
             tests/test_l4_pr_f_closeout_contract.py \
-            tests/test_feed_reaction_intent.py \
-            tests/test_world_feed_search.py \
-            tests/test_social_event_runtime.py \
-            tests/test_activity_proposal_runtime.py
+            tests/social/test_feed_reaction_intent.py \
+            tests/social/test_world_feed_search.py \
+            tests/relationships/test_social_event_runtime.py \
+            tests/relationships/test_activity_proposals.py
 
   local-full-graph:
     runs-on: ubuntu-latest
@@ -198,9 +198,9 @@ jobs:
             tests/test_l3_er2_sqlite_concurrency.py \
             tests/test_l3_er3_ladybug_projection.py \
             tests/test_l3_er3_graph_query_parity.py \
-            tests/test_graph_projection_commands.py \
-            tests/test_graph_projection_metrics.py \
-            tests/test_graph_projection_replay.py \
-            tests/test_graph_projection_worker.py \
-            tests/test_relationship_graph_api.py \
-            tests/test_relationship_graph_repository.py
+            tests/relationships/test_projection_commands.py \
+            tests/relationships/test_graph_projection_metrics.py \
+            tests/relationships/test_projection_replay.py \
+            tests/relationships/test_graph_projection_worker.py \
+            tests/relationships/test_relationship_graph_api.py \
+            tests/relationships/test_relationship_graph_repository.py
