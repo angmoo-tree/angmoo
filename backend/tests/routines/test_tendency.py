@@ -8,7 +8,7 @@ from fastapi import HTTPException, status
 import pytest
 
 from app import schemas
-from app.api.v1.routes import agents as agent_routes
+from app.domains.characters import router as agent_routes
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
 from app.domains.routines.service import action_briefs as agent_briefs
 from app.domains.routines.service import autonomy_management, manual_activity, feed_cues, first_greeting
@@ -374,7 +374,6 @@ def _run_tendency_analysis_route_with_error(monkeypatch, exc: Exception) -> HTTP
     async def _raise_error(*_: object, **__: object) -> object:
         raise exc
 
-    monkeypatch.setattr(agent_routes.agent_service, "analyze_tendency", _raise_error)
 
     with pytest.raises(HTTPException) as exc_info:
         asyncio.run(
@@ -382,6 +381,7 @@ def _run_tendency_analysis_route_with_error(monkeypatch, exc: Exception) -> HTTP
                 "char-1",
                 db=object(),  # type: ignore[arg-type]
                 user=object(),  # type: ignore[arg-type]
+                analysis=_raise_error,
             )
         )
     return exc_info.value

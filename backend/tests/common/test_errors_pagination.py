@@ -90,7 +90,11 @@ def test_request_body_limit_catches_the_shared_error_for_streamed_chunks(excess)
 
 
 def test_shared_busy_error_keeps_different_social_and_autonomy_http_contracts(monkeypatch):
-    from app.api.v1.routes import agents, manual_social
+    from app.api.v1.routes import manual_social
+    from app.domains.characters import router as character_http
+    from app.domains.routines import exceptions as routine_errors
+    from types import SimpleNamespace
+    agents = SimpleNamespace(update_settings=character_http.update_settings, agent_service=SimpleNamespace(AgentAutonomyRetryableError=routine_errors.AgentAutonomyRetryableError, SqliteBusyRetryExhausted=exceptions.SqliteBusyRetryExhausted))
 
     with pytest.raises(HTTPException) as social_error:
         manual_social._raise_error(SocialWriteRetryableError())
@@ -102,9 +106,9 @@ def test_shared_busy_error_keeps_different_social_and_autonomy_http_contracts(mo
     def busy(*args, **kwargs):
         raise agents.agent_service.AgentAutonomyRetryableError(detail)
 
-    monkeypatch.setattr(agents.agent_service, "update_settings", busy)
+    monkeypatch.setattr(character_http.activity_management, "update_settings", busy)
     with pytest.raises(HTTPException) as autonomy_error:
-        agents.update_settings("synthetic-character", None, db=None, user=None)
+        agents.update_settings("synthetic-character", None, db=None, user=None, references=None)
     assert autonomy_error.value.status_code == 409
     assert autonomy_error.value.detail == detail
     assert agents.agent_service.SqliteBusyRetryExhausted is exceptions.SqliteBusyRetryExhausted

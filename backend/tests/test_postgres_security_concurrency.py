@@ -1,3 +1,6 @@
+from app.domains.routines.service import activity_management, autonomy_management, manual_activity, feed_cues
+from app.domains.routines.service import first_greeting as first_greeting_service
+from app.runtime.resident import tendency_analysis
 from app.runtime.resident import slots as resident_slots
 from app.domains.routines.service import slot_assignments as slot_assignments
 from app.domains.routines.service import slot_pool as slot_pool
@@ -2095,7 +2098,7 @@ def test_world_autonomy_capacity_is_atomic_across_postgres_sessions(
             assert user is not None
             barrier.wait(timeout=10)
             try:
-                agent_service.activate_agent(db, user, character_id)
+                autonomy_management.activate_agent(db, user, character_id, workflows=agent_service.build_autonomy_workflows())
             except agent_service.AgentAutonomyCapacityError as exc:
                 return exc.reason_code
             return "activated"

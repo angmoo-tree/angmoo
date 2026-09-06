@@ -955,6 +955,7 @@
       "app.pagination"
     ],
     "modules": [
+      "app.domains.characters.constants",
       "app.domains.characters.contracts",
       "app.domains.characters.dependencies",
       "app.domains.characters.exceptions",
@@ -1005,6 +1006,7 @@
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
+      "app.domains.operations.exceptions",
       "app.domains.routine_posts.client",
       "app.domains.routine_posts.constants",
       "app.domains.routine_posts.contracts",
@@ -1265,6 +1267,7 @@
       "app.domains.identity.service.world_character_credentials",
       "app.domains.media.contracts",
       "app.domains.media.schemas",
+      "app.domains.operations.exceptions",
       "app.domains.routine_posts.contracts",
       "app.domains.routine_posts.contracts.context",
       "app.domains.routine_posts.contracts.generation",
@@ -1295,6 +1298,7 @@
       "app.domains.routines.contracts.run_identity",
       "app.domains.routines.contracts.slot_requests",
       "app.domains.routines.contracts.tendency_analysis",
+      "app.domains.routines.exceptions",
       "app.domains.routines.schemas",
       "app.domains.routines.schemas.first_greeting",
       "app.domains.routines.schemas.plans",
@@ -2853,6 +2857,14 @@
         "reason": "Exact same request class temporarily reexported by the existing mixed schema aggregate while HTTP callers migrate. No additional implementation or backwards import.",
         "removal_condition": "Complete C7 actual HTTP schema imports and remaining aggregate consumers during AR-B8-A, then remove this exact one-way class reexport.",
         "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.maintenance",
+        "target": "app.domains.operations.exceptions",
+        "owner_stage": "AR-B8-A",
+        "review_date": "2026-09-06",
+        "reason": "One original error class moved to actual Operations owner for existing HTTP catches. The remaining old service imports the same object; no alternate implementation exists.",
+        "removal_condition": "Root joins the already-authored Operations 5fb092b source, which owns maintenance service and removes app.services.maintenance before B8-A."
       }
     ]
   }

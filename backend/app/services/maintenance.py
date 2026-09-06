@@ -1,3 +1,4 @@
+from app.domains.operations.exceptions import AgentActivityMaintenanceError
 from sqlalchemy.orm import Session
 
 from app import models, schemas
@@ -8,8 +9,7 @@ INFO_BANNER_KEY = "agent_activity_info"
 MAINTENANCE_BANNER_KEY = "agent_activity_maintenance"
 
 
-class AgentActivityMaintenanceError(Exception):
-    pass
+
 
 
 def get_agent_activity_maintenance(

@@ -757,3 +757,8 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 ### 캐릭터의 자격 증명 관리
 
 키·모델 변경, metadata 조회와 삭제의 실제 규칙은 `identity/service/credential_management.py`가 담당합니다. `/agents/{id}/credential`은 Character 리소스 HTTP이며 이 서비스를 typed workflow와 함께 직접 호출합니다. World membership과 WorldCharacter 범위 조회는 각 소유 repository가, 활동 슬롯과 설정은 Routines가 담당합니다. 모든 협력은 기존 Session과 붙어 있는 객체를 사용합니다. 슬롯 실행 중 거절, profile 연결/해제, commit=False와 최종 commit/rollback의 순서는 해당 서비스의 계약입니다. 성공 응답에는 기존 CredentialRead만 포함합니다.
+
+
+### 활동 HTTP의 연결
+
+`/agents/{id}` 아래의 설정·모이·활성화·수동 실행·첫인사·성향 분석은 Character 리소스 HTTP로 배치합니다. 실제 판단과 저장은 Routines 서비스가 수행하고, 긴 provider 실행은 typed runner로 연결합니다. 앱 생성에서 workflow factory를 등록하며 HTTP dependency는 원래 request Session과 인증 이후에 이를 전달합니다. HTTP 오류 처리를 공유할 때는 검토한 정확한 exceptions 모듈만 공개 entry에 등록할 수 있습니다. 다른 파일·하위 모듈·repository·HTTP 접근을 함께 허용하지 않으며 예외 모듈의 framework/DB 접근도 계속 금지합니다.

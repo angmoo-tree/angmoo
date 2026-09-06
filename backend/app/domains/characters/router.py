@@ -595,3 +595,345 @@ def delete_credential(
     except errors.CredentialSyncError as exc:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+from app.domains.characters.constants import TENDENCY_ANALYSIS_RETRY_DETAIL
+from app.domains.routines import schemas as routine_schemas, exceptions as routine_errors
+from app.domains.routines.service import activity_management, autonomy_management, manual_activity, feed_cues
+from app.domains.routines.service import first_greeting as first_greeting_service
+from app.domains.routines.contracts.activity_management import ActivityManagementReferences
+from app.domains.routines.contracts.autonomy_management import AutonomyWorkflows
+from app.domains.routines.contracts.manual_activity import ManualActivityWorkflows
+from app.domains.routines.contracts.feed_cues import FeedCueWorkflows
+from app.domains.routines.contracts.first_greeting import FirstGreetingWorkflows
+from app.domains.routines.contracts.tendency_analysis import TendencyAnalysisRunner
+from app.domains.routines.schemas.first_greeting import AgentFirstGreetingCreate
+from app.api.schemas.first_greeting import AgentFirstGreetingRead
+from app.domains.operations.exceptions import AgentActivityMaintenanceError
+from app.integrations.direct_llm import DirectLlmDeferred, DirectLlmError, DirectLlmJsonError
+from app.domains.characters.dependencies import (
+    get_activity_management_references, get_autonomy_workflows,
+    get_manual_activity_workflows, get_feed_cue_workflows,
+    get_first_greeting_workflows, get_tendency_analysis_runner,
+)
+
+
+@router.get("/{character_id}/feed-cue", response_model=routine_schemas.AgentFeedCueRead | None)
+def get_feed_cue(
+    character_id: str,
+    db: Session = Depends(get_db),
+    user: CharacterOwner = Depends(get_current_user),
+    workflows: FeedCueWorkflows = Depends(get_feed_cue_workflows),
+) -> routine_schemas.AgentFeedCueRead | None:
+    try:
+        return feed_cues.get_feed_cue(db, user, character_id, workflows=workflows)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+    except errors.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+
+
+@router.post(
+    "/{character_id}/feed-cue",
+    response_model=routine_schemas.AgentFeedCueRead,
+    status_code=status.HTTP_201_CREATED,
+)
+def give_feed_cue(
+    character_id: str,
+    data: routine_schemas.AgentFeedCueCreate,
+    db: Session = Depends(get_db),
+    user: CharacterOwner = Depends(get_current_user),
+    workflows: FeedCueWorkflows = Depends(get_feed_cue_workflows),
+) -> routine_schemas.AgentFeedCueRead:
+    try:
+        return feed_cues.give_feed_cue(db, user, character_id, data, workflows=workflows)
+    except AgentActivityMaintenanceError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
+        ) from exc
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+    except errors.AgentSuspendedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+    except (
+        routine_errors.AgentFeedCueConflictError,
+        routine_errors.AgentFeedCueUnavailableError,
+        errors.AgentExecutionModeError,
+    ) as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except errors.PromptInjectionDetectedError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+
+
+@router.get("/{character_id}/settings", response_model=routine_schemas.AgentActivitySettingRead)
+def get_settings(
+    character_id: str,
+    db: Session = Depends(get_db),
+    user: CharacterOwner = Depends(get_current_user),
+    references: ActivityManagementReferences = Depends(get_activity_management_references),
+) -> routine_schemas.AgentActivitySettingRead:
+    try:
+        return activity_management.get_settings(db, user, character_id, references=references)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+
+
+@router.put("/{character_id}/settings", response_model=routine_schemas.AgentActivitySettingRead)
+def update_settings(
+    character_id: str,
+    data: routine_schemas.AgentActivitySettingUpdate,
+    db: Session = Depends(get_db),
+    user: CharacterOwner = Depends(get_current_user),
+    references: ActivityManagementReferences = Depends(get_activity_management_references),
+) -> routine_schemas.AgentActivitySettingRead:
+    try:
+        return activity_management.update_settings(db, user, character_id, data, references=references)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+    except DemoAccountLockedError as exc:
+        _raise_demo_account_locked(exc)
+    except errors.AgentActiveHoursInvalidError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(exc),
+        ) from exc
+    except errors.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except routine_errors.AgentAutonomyCapacityError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except routine_errors.AgentAutonomyRetryableError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+
+
+@router.post("/{character_id}/tendency/analyze", response_model=schemas.AgentDetailRead)
+async def analyze_tendency(
+    character_id: str,
+    db: Session = Depends(get_db),
+    user: CharacterOwner = Depends(get_current_user),
+    analysis: TendencyAnalysisRunner[schemas.AgentDetailRead] = Depends(get_tendency_analysis_runner),
+) -> schemas.AgentDetailRead:
+    try:
+        return await analysis(db, user, character_id)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+    except DemoAccountLockedError as exc:
+        _raise_demo_account_locked(exc)
+    except errors.AgentSuspendedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+    except errors.CredentialRequiredError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except errors.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except routine_errors.LlmCredentialInvalidError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+    except routine_errors.OpenClawNotConfiguredError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
+        ) from exc
+    except routine_errors.AgentSlotUnavailableError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except errors.CredentialSyncError as exc:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+    except DirectLlmJsonError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=TENDENCY_ANALYSIS_RETRY_DETAIL,
+        ) from exc
+    except routine_errors.TendencyPromptInjectionDetectedError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+    except routine_errors.TendencyAnalysisParseError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=TENDENCY_ANALYSIS_RETRY_DETAIL,
+        ) from exc
+    except OpenClawGatewayAuthError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="OpenClaw Gateway authentication failed",
+        ) from exc
+    except OpenClawGatewayError as exc:
+        credential_error = creator_policy.llm_credential_error_message(exc)
+        if credential_error is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=credential_error,
+            ) from exc
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+
+
+@router.post("/{character_id}/activate", response_model=schemas.AgentDetailRead)
+def activate_agent(
+    character_id: str,
+    db: Session = Depends(get_db),
+    user: CharacterOwner = Depends(get_current_user),
+    workflows: AutonomyWorkflows[schemas.AgentDetailRead] = Depends(get_autonomy_workflows),
+) -> schemas.AgentDetailRead:
+    try:
+        return autonomy_management.activate_agent(db, user, character_id, workflows=workflows)
+    except AgentActivityMaintenanceError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
+        ) from exc
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+    except errors.AgentSuspendedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+    except errors.CredentialRequiredError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except errors.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except routine_errors.AgentAutonomyCapacityError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except routine_errors.AgentAutonomyRetryableError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except (
+        routine_errors.TendencyAnalysisRequiredError,
+        routine_errors.ActivityProfileRequiredError,
+    ) as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except (
+        errors.ActiveSlotBusyError,
+        routine_errors.AgentSlotUnavailableError,
+    ) as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except errors.CredentialSyncError as exc:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+    except (
+        routine_errors.CharacterOwnershipError,
+        routine_errors.CredentialOwnershipError,
+        routine_errors.CredentialDisabledError,
+    ) as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+    except workflows.social_character_not_found_error as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+
+
+@router.post("/{character_id}/deactivate", response_model=schemas.AgentDetailRead)
+def deactivate_agent(
+    character_id: str,
+    db: Session = Depends(get_db),
+    user: CharacterOwner = Depends(get_current_user),
+    workflows: AutonomyWorkflows[schemas.AgentDetailRead] = Depends(get_autonomy_workflows),
+) -> schemas.AgentDetailRead:
+    try:
+        return autonomy_management.deactivate_agent(db, user, character_id, workflows=workflows)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+    except errors.ActiveSlotBusyError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except errors.CredentialSyncError as exc:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+
+
+@router.post("/{character_id}/run-now", response_model=routine_schemas.OpenClawAgentRunRead)
+async def run_now(
+    character_id: str,
+    db: Session = Depends(get_db),
+    user: CharacterOwner = Depends(get_current_user),
+    workflows: ManualActivityWorkflows = Depends(get_manual_activity_workflows),
+) -> routine_schemas.OpenClawAgentRunRead:
+    try:
+        return await manual_activity.run_agent_now(db, user, character_id, workflows=workflows)
+    except AgentActivityMaintenanceError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
+        ) from exc
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+    except errors.CredentialRequiredError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except errors.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except (
+        routine_errors.TendencyAnalysisRequiredError,
+        routine_errors.ActivityProfileRequiredError,
+    ) as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except (
+        routine_errors.RunNowSlotUnavailableError,
+        routine_errors.RunNowSlotBusyError,
+        routine_errors.RunNowSchedulerBusyError,
+        routine_errors.RunNowSoonScheduledError,
+    ) as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except routine_errors.RunNowCooldownError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=str(exc),
+        ) from exc
+    except routine_errors.OpenClawNotConfiguredError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
+        ) from exc
+    except (
+        routine_errors.AgentSlotUnavailableError,
+        routine_errors.AgentSessionBusyError,
+    ) as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except (
+        routine_errors.CharacterOwnershipError,
+        routine_errors.CredentialOwnershipError,
+        routine_errors.CredentialDisabledError,
+    ) as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+    except OpenClawGatewayAuthError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="OpenClaw Gateway authentication failed",
+        ) from exc
+    except OpenClawGatewayError as exc:
+        credential_error = creator_policy.llm_credential_error_message(exc)
+        if credential_error is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=credential_error,
+            ) from exc
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
+
+
+@router.post(
+    "/{character_id}/first-greeting",
+    response_model=AgentFirstGreetingRead,
+)
+async def first_greeting(
+    character_id: str,
+    data: AgentFirstGreetingCreate,
+    db: Session = Depends(get_db),
+    user: CharacterOwner = Depends(get_current_user),
+    workflows: FirstGreetingWorkflows[AgentFirstGreetingRead] = Depends(get_first_greeting_workflows),
+) -> AgentFirstGreetingRead:
+    try:
+        return await first_greeting_service.run_first_greeting(db, user, character_id, data, workflows=workflows)
+    except AgentActivityMaintenanceError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)
+        ) from exc
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
+    except errors.AgentSuspendedError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+    except errors.CredentialRequiredError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except errors.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except routine_errors.TendencyAnalysisRequiredError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except routine_errors.FirstGreetingUnavailableError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except routine_errors.FirstGreetingCooldownError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"{str(exc)} {exc.available_at.isoformat()} 이후 다시 시도할 수 있습니다.",
+        ) from exc
+    except DirectLlmDeferred as exc:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"첫인사는 {exc.retry_at.isoformat()} 이후 다시 시도할 수 있습니다.",
+        ) from exc
+    except DirectLlmError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="첫인사를 만들지 못했습니다. 잠시 후 다시 시도해주세요.",
+        ) from exc
+    except workflows.social_service_error as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc

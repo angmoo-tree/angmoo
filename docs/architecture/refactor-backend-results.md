@@ -1171,3 +1171,12 @@ C7-D 최종 원래 six 읽기 전용 진단은 모두 오류0, 보호2139/현재
 키와 모델 변경·metadata·삭제·World scope4를 Identity 실제 서비스로 이전하고, 기존 Character 리소스 HTTP3을 Character router에서 직접 연결했다. request schema와 원래 오류도 실제 소유에 두었다. World/WC의 원래 scalar 조회2, Routines의 optional 설정 disable, Character의 한 대입은 각 소유에 있으며 같은 Session으로 호출한다. 전체 원문4함수·HTTP3·DTO/오류 및 추출 SQL/대입은 정확 callback 복원 후 AST가 동일하다. 초기 기존49검사가 통과했으며 신규 SQLite2는 flush된 슬롯과 설정이 최종 commit까지 다른 Session에 보이지 않고, World 처리 실패 시 전체 rollback되는 것을 검증한다. 새 테스트의 필수 auth_profile_id fixture를 보완한 뒤 두 검사가 통과했다. 제품 동작·기존 assertion·원래 오류 순서는 변경하지 않았다.
 
 C7-F 최종 검증은 **80 passed / 기존 경고2 / 19.63초**이다. 경계792 modules /2778 edges / exact legacy204 / cycle0, L4 792/14/97, ER0 86/87/24/44/7, Memory current이다. 두 실제 앱 생성 함수는 같은 typed credential workflow를 연결한다. 처음 runtime.routines에서 Character factory를 역으로 조립하여 드러난 package cycle은 앱 생성의 기존 Character 조립 위치로 연결을 옮겨 해소했다. 경계 예외는 늘리지 않았다. 읽기 전용 원래6검사 모두 오류0(보호2139/current2291), frozen/checkpoint/additions 불변이다. stock gate는 root의 선형 최초 도입 연결 뒤 확인한다.
+
+
+## AR-B4-C7-G — 활동 리소스 HTTP와 실행 연결
+
+Character HTTP9를 실제 Routines service와 typed tendency runner에 직접 연결하고 중간 management 전달9함수를 삭제했다. route 순서·응답 class·상태/detail·오류 순서를 유지했고 원문 HTTP9와 상수/오류 AST가 같다. 남은 management 함수들의 원문 AST도 모두 동일하다. 초기 구조 추출 중 발견된 문법 오류는 원래 source snapshot에서 정확9함수만 제거하도록 수정했고, 이후 기존178회귀가 통과했다. 신규 요청2는 실제 resource route9의 정의 소유와 같은 request Session/인증 객체, durable 설정 및 내부 parse 상세를 숨기는 원래 오류 응답을 확인했다.
+
+검토된 root source `1565688ffa8095b37ec8fb843f5547c6c87705ae`의 정확한 예외 entry 지원만 선행 반영했다. 해당 원본 negative3은 byte 동일한 임시파일에서 기존 partialscope63/HTTP2와 함께68통과한 뒤 임시파일을 제거하여 원래 최초 도입 계보를 보존했다. 새 blanket exception이나 계약 alias는 추가하지 않았다. 실제 Operations 오류 한 클래스만 부분 이전하고 기존 service는 같은 객체를 import한다. root Operations 서비스 source 합류 시 이 정확 bridge가 제거된다.
+
+C7-G 최종 검증은 **245 passed / 기존 경고5 / 32.45초**이다. 현재 경계795 modules /2805 edges /exact legacy204 /cycle0, L4 795/14/97, ER0 86/87/24/44/7, Memory current이다. Social 오류 직접 import로 발견된 Character→Social→WC→Character 순환은 기존 workflow에 원래 오류 class 두 객체를 전달하여 해소했으며 순환 예외를 추가하지 않았다. 정확한 Operations/Routines 오류 entry만 등록한다. 원래 여섯 검사의 읽기 전용 진단은 모두 오류0(보호2139/current2293)이며 frozen/checkpoint/additions는 그대로이다. stock gate는 root의 선형 도입 원장 연결 뒤 확인한다.

@@ -68,3 +68,4 @@ class FirstGreetingWorkflows(Generic[ResultT]):
     attach_image: GreetingImage
     get_post: Callable[[Session, str], GreetingPostValue]
     deferred_error: type[Exception]
+    social_service_error: type[Exception]

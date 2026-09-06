@@ -77,3 +77,4 @@ class AutonomyWorkflows(Generic[DetailT]):
     credential_required_error: type[Exception]
     credential_sync_error: type[Exception]
     slot_busy_error: type[Exception]
+    social_character_not_found_error: type[Exception]

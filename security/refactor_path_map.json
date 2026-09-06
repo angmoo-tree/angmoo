@@ -10769,6 +10769,7 @@
       "split_files": {
         "backend/app/api/v1/routes/agents.py": [
           "backend/app/api/v1/routes/agents.py",
+          "backend/app/domains/characters/constants.py",
           "backend/app/domains/characters/router.py"
         ]
       },
@@ -10785,13 +10786,17 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::TENDENCY_ANALYSIS_RETRY_DETAIL",
-          "new": "backend/app/api/v1/routes/agents.py::TENDENCY_ANALYSIS_RETRY_DETAIL",
+          "new": "backend/app/domains/characters/constants.py::TENDENCY_ANALYSIS_RETRY_DETAIL",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/domains/characters/router.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
-          ]
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[settings]",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[tendency]"
+          ],
+          "source_member": "Original resource HTTP body/decorator/response class/route insertion order. Same error objects and original status/detail branches; directly invoke actual owner service or typed original async runtime runner, with workflow dependency after original request Session/auth dependencies. Original body AST unchanged after exact call/import restoration."
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::_raise_demo_account_locked",
@@ -11009,23 +11014,31 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::get_feed_cue",
-          "new": "backend/app/api/v1/routes/agents.py::get_feed_cue",
+          "new": "backend/app/domains/characters/router.py::get_feed_cue",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/domains/characters/router.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
-          ]
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[settings]",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[tendency]"
+          ],
+          "source_member": "Original resource HTTP body/decorator/response class/route insertion order. Same error objects and original status/detail branches; directly invoke actual owner service or typed original async runtime runner, with workflow dependency after original request Session/auth dependencies. Original body AST unchanged after exact call/import restoration."
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::give_feed_cue",
-          "new": "backend/app/api/v1/routes/agents.py::give_feed_cue",
+          "new": "backend/app/domains/characters/router.py::give_feed_cue",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/domains/characters/router.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
-          ]
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[settings]",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[tendency]"
+          ],
+          "source_member": "Original resource HTTP body/decorator/response class/route insertion order. Same error objects and original status/detail branches; directly invoke actual owner service or typed original async runtime runner, with workflow dependency after original request Session/auth dependencies. Original body AST unchanged after exact call/import restoration."
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::update_profile",
@@ -11229,73 +11242,101 @@
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::get_settings",
-          "new": "backend/app/api/v1/routes/agents.py::get_settings",
+          "new": "backend/app/domains/characters/router.py::get_settings",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/domains/characters/router.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
-          ]
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[settings]",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[tendency]"
+          ],
+          "source_member": "Original resource HTTP body/decorator/response class/route insertion order. Same error objects and original status/detail branches; directly invoke actual owner service or typed original async runtime runner, with workflow dependency after original request Session/auth dependencies. Original body AST unchanged after exact call/import restoration."
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::update_settings",
-          "new": "backend/app/api/v1/routes/agents.py::update_settings",
+          "new": "backend/app/domains/characters/router.py::update_settings",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/domains/characters/router.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
-          ]
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[settings]",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[tendency]"
+          ],
+          "source_member": "Original resource HTTP body/decorator/response class/route insertion order. Same error objects and original status/detail branches; directly invoke actual owner service or typed original async runtime runner, with workflow dependency after original request Session/auth dependencies. Original body AST unchanged after exact call/import restoration."
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::analyze_tendency",
-          "new": "backend/app/api/v1/routes/agents.py::analyze_tendency",
+          "new": "backend/app/domains/characters/router.py::analyze_tendency",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/domains/characters/router.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
-          ]
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[settings]",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[tendency]"
+          ],
+          "source_member": "Original resource HTTP body/decorator/response class/route insertion order. Same error objects and original status/detail branches; directly invoke actual owner service or typed original async runtime runner, with workflow dependency after original request Session/auth dependencies. Original body AST unchanged after exact call/import restoration."
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::activate_agent",
-          "new": "backend/app/api/v1/routes/agents.py::activate_agent",
+          "new": "backend/app/domains/characters/router.py::activate_agent",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/domains/characters/router.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
-          ]
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[settings]",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[tendency]"
+          ],
+          "source_member": "Original resource HTTP body/decorator/response class/route insertion order. Same error objects and original status/detail branches; directly invoke actual owner service or typed original async runtime runner, with workflow dependency after original request Session/auth dependencies. Original body AST unchanged after exact call/import restoration."
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::deactivate_agent",
-          "new": "backend/app/api/v1/routes/agents.py::deactivate_agent",
+          "new": "backend/app/domains/characters/router.py::deactivate_agent",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/domains/characters/router.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
-          ]
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[settings]",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[tendency]"
+          ],
+          "source_member": "Original resource HTTP body/decorator/response class/route insertion order. Same error objects and original status/detail branches; directly invoke actual owner service or typed original async runtime runner, with workflow dependency after original request Session/auth dependencies. Original body AST unchanged after exact call/import restoration."
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::run_now",
-          "new": "backend/app/api/v1/routes/agents.py::run_now",
+          "new": "backend/app/domains/characters/router.py::run_now",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/domains/characters/router.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
-          ]
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[settings]",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[tendency]"
+          ],
+          "source_member": "Original resource HTTP body/decorator/response class/route insertion order. Same error objects and original status/detail branches; directly invoke actual owner service or typed original async runtime runner, with workflow dependency after original request Session/auth dependencies. Original body AST unchanged after exact call/import restoration."
         },
         {
           "old": "backend/app/api/v1/routes/agents.py::first_greeting",
-          "new": "backend/app/api/v1/routes/agents.py::first_greeting",
+          "new": "backend/app/domains/characters/router.py::first_greeting",
           "direct_consumers": [
-            "backend/app/api/v1/routes/agents.py"
+            "backend/app/api/v1/routes/agents.py",
+            "backend/app/domains/characters/router.py"
           ],
           "test_nodes": [
-            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http"
-          ]
+            "tests/characters/test_character_http_workflows.py::test_shared_auth_override_and_original_route_order_work_for_character_http",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[settings]",
+            "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[tendency]"
+          ],
+          "source_member": "Original resource HTTP body/decorator/response class/route insertion order. Same error objects and original status/detail branches; directly invoke actual owner service or typed original async runtime runner, with workflow dependency after original request Session/auth dependencies. Original body AST unchanged after exact call/import restoration."
         }
       ]
     },
@@ -33726,6 +33767,226 @@
         "tests/identity/test_character_credential_transaction.py::test_credential_delete_keeps_shared_session_and_rolls_back_flushed_slot[rollback]"
       ],
       "remaining": "Root joins already-authored Identity credential repository/upsert source c2cd2a64 and updates the exact current runtime builder references. Final C7 closes remaining resource HTTP9 and mixed management presentation/composition; no old credential service function aliases remain."
+    },
+    "AR-B4-C7-G-activity-http": {
+      "status": "IMPLEMENTED — final245PASS /existing5warnings; boundary795/2805/exactlegacy204/cycle0; read-only original6 checks0/protected2139/current2293; stock gate awaits root sequential introduction append",
+      "split_files": {
+        "backend/app/services/maintenance.py": [
+          "backend/app/domains/operations/exceptions.py",
+          "backend/app/services/maintenance.py"
+        ]
+      },
+      "split_symbols": [
+        {
+          "old": "backend/app/services/maintenance.py::INFO_BANNER_KEY",
+          "new": "backend/app/services/maintenance.py::INFO_BANNER_KEY",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::MAINTENANCE_BANNER_KEY",
+          "new": "backend/app/services/maintenance.py::MAINTENANCE_BANNER_KEY",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::AgentActivityMaintenanceError",
+          "new": "backend/app/domains/operations/exceptions.py::AgentActivityMaintenanceError",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::get_agent_activity_maintenance",
+          "new": "backend/app/services/maintenance.py::get_agent_activity_maintenance",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::agent_activity_maintenance_enabled",
+          "new": "backend/app/services/maintenance.py::agent_activity_maintenance_enabled",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::agent_activity_blocks_auto_ticks",
+          "new": "backend/app/services/maintenance.py::agent_activity_blocks_auto_ticks",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::agent_activity_blocks_run_now",
+          "new": "backend/app/services/maintenance.py::agent_activity_blocks_run_now",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::agent_activity_blocks_feed_cues",
+          "new": "backend/app/services/maintenance.py::agent_activity_blocks_feed_cues",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::agent_activity_auto_tick_allowed_character_ids",
+          "new": "backend/app/services/maintenance.py::agent_activity_auto_tick_allowed_character_ids",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::ensure_auto_ticks_available",
+          "new": "backend/app/services/maintenance.py::ensure_auto_ticks_available",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::ensure_run_now_available",
+          "new": "backend/app/services/maintenance.py::ensure_run_now_available",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::ensure_feed_cues_available",
+          "new": "backend/app/services/maintenance.py::ensure_feed_cues_available",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::ensure_agent_activity_available",
+          "new": "backend/app/services/maintenance.py::ensure_agent_activity_available",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::_banner_row",
+          "new": "backend/app/services/maintenance.py::_banner_row",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::_info_banner",
+          "new": "backend/app/services/maintenance.py::_info_banner",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        },
+        {
+          "old": "backend/app/services/maintenance.py::_maintenance_banner",
+          "new": "backend/app/services/maintenance.py::_maintenance_banner",
+          "source_member": "Original one error class moves to Operations; all other exact module definitions/constants remain owned by the pending root Operations source 5fb092b. No service implementation copying or removal occurs in this slice.",
+          "direct_consumers": [
+            "backend/app/domains/characters/router.py",
+            "backend/app/services/maintenance.py"
+          ],
+          "test_nodes": [
+            "tests/routines/test_activity_limits.py::test_maintenance_blocked_tick_counts_sqlite_naive_due_slot"
+          ]
+        }
+      ],
+      "actual_paths": [
+        "backend/app/domains/characters/router.py",
+        "backend/app/domains/characters/dependencies.py",
+        "backend/app/domains/characters/constants.py",
+        "backend/app/domains/routines/contracts/tendency_analysis.py",
+        "backend/app/domains/operations/exceptions.py",
+        "backend/app/runtime/characters/management.py",
+        "backend/tests/routines/test_activity_http.py"
+      ],
+      "ownership": "Character resource HTTP9 directly uses actual Routines services; typed tendency runner connects the original provider workflow. Old mixed-management forwarding9 deleted; all remaining function AST is unchanged. Both app factories register the real request workflows.",
+      "new_regression": [
+        "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[settings]",
+        "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[tendency]"
+      ],
+      "prerequisite_source": "1565688ffa8095b37ec8fb843f5547c6c87705ae scripts/ci/refactor_boundaries.py exact reviewed exceptions-entry support. Original test_refactor_error_entries.py3 were temporarily executed as exact bytes and removed before commit to preserve the root first-introduction provenance. Current original partial-scope63 guards are unchanged.",
+      "remaining": "C7-H closes activity presentation, imported-World runtime guard and execution readiness ownership. Four dormant original execution helpers stay unchanged for B8 actual-owner preservation; zero current callers does not authorize deletion. Root joins already-authored Operations service and removes its exact legacy bridge.",
+      "cycle_resolution": "Exact Operations/Routines exceptions entries are registered. Two original Social error class objects are supplied by existing Autonomy/FirstGreeting workflows; this preserves catch identity and removes Character→Social→WC→Character dependency without a cycle exception."
     }
   },
   "test_symbols": {
