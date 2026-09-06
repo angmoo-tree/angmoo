@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-import { SITE_URL } from "@/lib/seo";
+import { SITE_URL } from "@/config/seo";
 
 const lastModified = new Date("2026-06-25T00:00:00.000Z");
 

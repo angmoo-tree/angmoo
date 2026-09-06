@@ -65,7 +65,7 @@ REQUIRED_FILES = (
     "frontend/DESIGN.md",
     "frontend/src/features/memory/api/memory-client.ts",
     "frontend/src/features/memory/types/memory-contract.ts",
-    "frontend/src/features/memory/public.ts",
+    "frontend/src/features/memory/api/memory-client.ts",
     "frontend/src/features/memory/components/memory-workspace.module.css",
     "frontend/src/features/memory/components/memory-workspace.tsx",
     "scripts/generate_public_route_inventory.py",

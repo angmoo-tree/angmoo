@@ -5,10 +5,8 @@
     "chat",
     "creator-studio",
     "device-home",
-    "device-shell",
     "identity",
     "memory",
-    "pwa-shell",
     "relationships",
     "runtime-status",
     "social",
@@ -69,48 +67,25 @@
       "presentCharacterRecentActivity",
       "target_post_id"
     ],
-    "frontend/src/features/characters/public.ts": [
-      "AgentsDashboardClient",
-      "WorldCharacterProfile",
-      "presentCharacterAutonomy",
-      "presentCharacterRecentActivity"
-    ],
     "frontend/src/features/chat/api/chat-client.ts": [
-      "/api/backend",
-      "clearStoredUser",
-      "requestChatApi",
-      "runtimeFetch"
+      "createMessageThread"
     ],
     "frontend/src/features/chat/types/chat-contract.ts": [
       "MESSAGE_GOOGLE_GEMINI_MODELS",
       "MessageThreadRead"
     ],
-    "frontend/src/features/chat/public.ts": [
-      "MessageThreadClient",
-      "MessagesClient",
-      "createMessageThread",
-      "getWorldChatEntry"
-    ],
     "frontend/src/features/chat/components/message-thread-client.tsx": [
+      "MessageThreadClient",
       "model_busy",
       "답장 중"
     ],
     "frontend/src/features/chat/components/messages-client.tsx": [
       "/messages/",
+      "MessagesClient",
       "listMessageThreads"
     ],
-    "frontend/src/features/memory/api/memory-client.ts": [
-      "getMemoryItem",
-      "getMemorySetting",
-      "getWorldChatEvidence",
-      "listMemoryItems"
-    ],
-    "frontend/src/features/memory/public.ts": [
-      "MemoryScopeSummary",
-      "MemoryWorkspace",
-      "WorldChatEvidenceInspector"
-    ],
     "frontend/src/features/memory/components/memory-workspace.tsx": [
+      "MemoryWorkspace",
       "data-product-shell=\"memory\"",
       "getMemoryItem",
       "listMemoryItems"
@@ -120,24 +95,16 @@
       "studioWorldRoute(world.world_id)",
       "worldAppRoute(world.world_id)"
     ],
-    "frontend/src/features/device-home/public.ts": [
-      "WorldSurfaceItem",
+    "frontend/src/features/device-home/api/device-home-client.ts": [
       "getLocalWorldSurface"
     ],
     "frontend/src/lib/navigation/device-navigation.ts": [
-      "LOCAL_DEVICE_NAVIGATION",
       "LOCAL_PRODUCT_ROUTE_CAPABILITIES",
-      "isStaticLocalProductRouteSupported",
-      "static: \"unsupported\""
-    ],
-    "frontend/src/features/device-shell/public.ts": [
-      "DeviceShell",
-      "LOCAL_PRODUCT_ROUTE_CAPABILITIES",
-      "LocalDeviceNavigation",
-      "LocalProductLink"
+      "LocalDeviceNavigation"
     ],
     "frontend/src/components/layout/device-shell.tsx": [
       "DeviceFrame",
+      "DeviceShell",
       "data-device-shell=\"phone\"",
       "navigation?: ReactNode"
     ],
@@ -146,6 +113,7 @@
       "cursor: not-allowed"
     ],
     "frontend/src/components/navigation/local-product-link.tsx": [
+      "LocalProductLink",
       "aria-disabled=\"true\"",
       "data-product-route-unavailable=\"true\"",
       "isStaticFrontendProfile",
@@ -166,13 +134,10 @@
       "shouldOpenPostFromCardKeyDown",
       "useRuntimeRouter"
     ],
-    "frontend/src/features/ui-foundation/public.ts": [
-      "SemanticFoundationFixture"
-    ],
-    "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx": [
+    "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx": [
       "data-fixture-schema=\"ui-b-semantic-primitives-v1\"",
       "data-ui-foundation-fixture",
-      "from \"@/shared/ui/public\"",
+      "from \"@/components/ui/button\"",
       "onSelect={setActiveNavigation}",
       "src=\"/icon.svg\""
     ],
@@ -200,12 +165,12 @@
     "frontend/src/components/ui/profile-avatar.tsx": [
       "<Avatar",
       "export function ProfileAvatar",
-      "import { Avatar } from \"./avatar\";"
+      "import { Avatar } from \"@/components/ui/avatar\";"
     ],
     "frontend/src/components/ui/status-badge.tsx": [
       "<StatusChip",
       "export function StatusBadge",
-      "import { StatusChip, type StatusChipTone } from \"./status\";"
+      "import { StatusChip, type StatusChipTone } from \"@/components/ui/status\";"
     ],
     "frontend/src/features/device-home/utils/device-home-presentation.ts": [
       "bezelWidthPx: 3",
@@ -222,6 +187,24 @@
     "frontend/src/features/chat/config/models.ts": [
       "DEFAULT_MESSAGE_GOOGLE_MODEL",
       "MESSAGE_GOOGLE_GEMINI_MODELS"
+    ],
+    "frontend/src/features/characters/components/agents-dashboard-client.tsx": [
+      "AgentsDashboardClient"
+    ],
+    "frontend/src/composition/screens/world-character-profile-screen.tsx": [
+      "WorldCharacterProfile"
+    ],
+    "frontend/src/features/chat/api/world-chat-client.ts": [
+      "getWorldChatEntry"
+    ],
+    "frontend/src/features/device-home/types/index.ts": [
+      "WorldSurfaceItem"
+    ],
+    "frontend/src/features/memory/components/memory-scope-summary.tsx": [
+      "MemoryScopeSummary"
+    ],
+    "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx": [
+      "WorldChatEvidenceInspector"
     ]
   },
   "required_paths": [
@@ -243,6 +226,7 @@
     "frontend/src/components/ui/app-icon.tsx",
     "frontend/src/components/ui/avatar.tsx",
     "frontend/src/components/ui/button.tsx",
+    "frontend/src/components/ui/device-frame.module.css",
     "frontend/src/components/ui/device-frame.tsx",
     "frontend/src/components/ui/dialog.tsx",
     "frontend/src/components/ui/feedback.tsx",
@@ -263,6 +247,7 @@
     "frontend/src/composition/shells/creator-studio-frame.tsx",
     "frontend/src/composition/shells/local-device-navigation.tsx",
     "frontend/src/composition/shells/world-app-navigation.ts",
+    "frontend/src/config/pwa.ts",
     "frontend/src/features/characters/api/character-dashboard-client.ts",
     "frontend/src/features/characters/api/feed-actor.ts",
     "frontend/src/features/characters/api/world-character-profile-client.ts",
@@ -270,7 +255,6 @@
     "frontend/src/features/characters/components/agents-dashboard-client.tsx",
     "frontend/src/features/characters/components/characters-dashboard.module.css",
     "frontend/src/features/characters/components/world-character-profile.module.css",
-    "frontend/src/features/characters/public.ts",
     "frontend/src/features/characters/stores/character-dashboard-session.ts",
     "frontend/src/features/characters/types/feed-actor.ts",
     "frontend/src/features/characters/types/world-character-profile.ts",
@@ -283,30 +267,27 @@
     "frontend/src/features/chat/components/world-chat.module.css",
     "frontend/src/features/chat/components/world-chat.tsx",
     "frontend/src/features/chat/config/models.ts",
-    "frontend/src/features/chat/public.ts",
     "frontend/src/features/chat/types/chat-contract.ts",
     "frontend/src/features/chat/types/view-slots.ts",
     "frontend/src/features/chat/types/world-chat-contract.ts",
     "frontend/src/features/creator-studio/components/creator-studio-dashboard.tsx",
-    "frontend/src/features/device-home/public.ts",
+    "frontend/src/features/device-home/api/device-home-client.ts",
+    "frontend/src/features/device-home/types/index.ts",
     "frontend/src/features/device-home/utils/device-home-presentation.ts",
-    "frontend/src/features/device-shell/public.ts",
     "frontend/src/features/identity/api/session.ts",
     "frontend/src/features/memory/api/memory-client.ts",
     "frontend/src/features/memory/components/memory-scope-summary.tsx",
     "frontend/src/features/memory/components/memory-workspace.module.css",
     "frontend/src/features/memory/components/memory-workspace.tsx",
     "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
-    "frontend/src/features/memory/public.ts",
     "frontend/src/features/memory/types/memory-contract.ts",
-    "frontend/src/features/pwa-shell/public.ts",
     "frontend/src/features/relationships/api/relationship-graph.ts",
     "frontend/src/features/relationships/components/relationship-graph-client.tsx",
     "frontend/src/features/relationships/components/relationship-graph-frame.module.css",
     "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
     "frontend/src/features/relationships/types/relationship-graph.ts",
-    "frontend/src/features/runtime-status/public.ts",
     "frontend/src/features/runtime-status/types/runtime-status.ts",
+    "frontend/src/features/runtime-status/utils/runtime-status-presentation.ts",
     "frontend/src/features/social/api/social-feed-client.ts",
     "frontend/src/features/social/api/social-feed-server.ts",
     "frontend/src/features/social/api/social-write-client.ts",
@@ -317,9 +298,8 @@
     "frontend/src/features/social/types/social-feed-contract.ts",
     "frontend/src/features/social/types/social-presentation-contract.ts",
     "frontend/src/features/social/types/social-write-contract.ts",
-    "frontend/src/features/ui-foundation/public.ts",
-    "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.module.css",
-    "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
+    "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.module.css",
+    "frontend/src/features/ui-foundation/components/semantic-foundation-fixture.tsx",
     "frontend/src/features/worlds/api/world-app-client.ts",
     "frontend/src/features/worlds/types/world-app.ts",
     "frontend/src/hooks/use-auth.ts",
@@ -327,12 +307,8 @@
     "frontend/src/lib/auth/auth-context.ts",
     "frontend/src/lib/auth/browser-session.ts",
     "frontend/src/lib/navigation/device-navigation.ts",
+    "frontend/src/lib/navigation/product-routes.ts",
     "frontend/src/lib/server/backend.ts",
-    "frontend/src/shared/api/public.ts",
-    "frontend/src/shared/auth/public.ts",
-    "frontend/src/shared/interaction/public.ts",
-    "frontend/src/shared/navigation/public.ts",
-    "frontend/src/shared/ui/public.ts",
     "frontend/src/styles/semantic-tokens.css",
     "frontend/src/utils/class-names.ts",
     "frontend/src/utils/post-card-navigation.ts",
@@ -353,6 +329,7 @@
       "social",
       "support",
       "tree",
+      "ui-foundation",
       "world-packages",
       "worlds"
     ],
@@ -408,175 +385,6 @@
       "utils/safe-navigation",
       "utils/scroll-viewport"
     ],
-    "bridges": [
-      {
-        "importer": "features/device-shell/public",
-        "target": "components/layout/device-shell",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "features/device-shell/public",
-        "target": "components/navigation/local-product-link",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "features/device-shell/public",
-        "target": "lib/navigation/device-navigation",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/api/public",
-        "target": "lib/server/backend",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/auth/public",
-        "target": "hooks/use-auth",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/auth/public",
-        "target": "lib/auth/browser-session",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/desktop/public",
-        "target": "lib/desktop/product-window",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/interaction/public",
-        "target": "hooks/use-mobile-pull-to-refresh",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/interaction/public",
-        "target": "utils/scroll-viewport",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/media/safe-media-url",
-        "target": "lib/media/safe-media-url",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/media/use-runtime-media-url",
-        "target": "hooks/use-runtime-media-url",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/navigation/product-routes",
-        "target": "lib/navigation/product-routes",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/navigation/public",
-        "target": "hooks/use-runtime-navigation",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/runtime/runtime-config",
-        "target": "lib/runtime/runtime-config",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/ui/app-icon",
-        "target": "components/ui/app-icon",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/ui/button",
-        "target": "components/ui/button",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/ui/class-names",
-        "target": "utils/class-names",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/ui/public",
-        "target": "components/ui/avatar",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/ui/public",
-        "target": "components/ui/device-frame",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/ui/public",
-        "target": "components/ui/dialog",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/ui/public",
-        "target": "components/ui/feedback",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/ui/public",
-        "target": "components/ui/form-controls",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/ui/public",
-        "target": "components/ui/navigation",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/ui/public",
-        "target": "components/ui/profile-avatar",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/ui/public",
-        "target": "components/ui/status",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/ui/public",
-        "target": "components/ui/status-badge",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/ui/public",
-        "target": "components/ui/surfaces",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "shared/ui/public",
-        "target": "utils/profile-presentation",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      }
-    ]
+    "bridges": []
   }
 }

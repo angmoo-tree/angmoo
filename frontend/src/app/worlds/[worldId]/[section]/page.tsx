@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { worldAppSectionFromSegment } from "@/composition/shells/world-app-navigation";
-import { NO_INDEX_ROBOTS } from "@/lib/seo";
+import { NO_INDEX_ROBOTS } from "@/config/seo";
 
 import { WorldAppRouteClient } from "@/composition/screens/world-app-screen";
 

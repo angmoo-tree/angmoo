@@ -147,19 +147,10 @@ def _backend_contract() -> dict[str, Any]:
 
 
 def _frontend_contract() -> dict[str, Any]:
-    _require_text(
-        "frontend/src/features/characters/public.ts",
-        (
-            "getWorldCharacterProfile",
-            "listWorldCharacterProfiles",
-            "WorldCharacterDirectory",
-            "WorldCharacterProfile",
-        ),
-    )
-    _require_text(
-        "frontend/src/features/chat/public.ts",
-        ("getWorldChatEntry", "createOrGetWorldChatThread", "WorldChatEntryRead"),
-    )
+    _require_text("frontend/src/features/characters/api/world-character-profile-client.ts", ("getWorldCharacterProfile", "listWorldCharacterProfiles"))
+    _require_text("frontend/src/features/characters/components/world-character-directory.tsx", ("WorldCharacterDirectory",))
+    _require_text("frontend/src/composition/screens/world-character-profile-screen.tsx", ("WorldCharacterProfile",))
+    _require_text("frontend/src/features/chat/api/world-chat-client.ts", ("getWorldChatEntry", "createOrGetWorldChatThread", "WorldChatEntryRead"))
     _require_text(
         "frontend/src/features/social/components/world-social-feed.tsx",
         ("author_profile_capability", "worldCharacterProfileRoute"),

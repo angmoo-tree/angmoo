@@ -1,4 +1,4 @@
-import { StatusChip, type StatusChipTone } from "./status";
+import { StatusChip, type StatusChipTone } from "@/components/ui/status";
 
 export type StatusBadgeTone = "blocked" | "degraded" | "healthy" | "neutral";
 

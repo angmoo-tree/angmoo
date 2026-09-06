@@ -1,7 +1,4 @@
-import type {
-  LocalWorldSurfaceRead,
-  WorldSurface,
-} from "../types";
+import type { LocalWorldSurfaceRead, WorldSurface } from "@/features/device-home/types/index";
 import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
 

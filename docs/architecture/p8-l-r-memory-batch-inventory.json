@@ -483,10 +483,6 @@
       "sha256": "0525352581d4d7ce84a67f773ef74b0f5333a47073c955e54fb22b4e1ff23918"
     },
     {
-      "path": "frontend/src/features/memory/public.ts",
-      "sha256": "065aa61df4799ffbc007ed0381a1321ecfb5e6416fba0dcbb156c7455e623d04"
-    },
-    {
       "path": "frontend/src/features/memory/types/memory-batch-contract.ts",
       "sha256": "f78af1e643a60df292dfe0db224022debaa9538a0bbaf0a82c0a17141383c053"
     },

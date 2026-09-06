@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { SemanticFoundationFixture } from "@/features/ui-foundation/public";
+import { SemanticFoundationFixture } from "@/features/ui-foundation/components/semantic-foundation-fixture";
 
 export const metadata: Metadata = {
   robots: {

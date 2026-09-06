@@ -130,7 +130,47 @@ def rewrite_paths(text: str, moves: dict[str, str]) -> str:
                   lambda m: m[1] + replacements.get(m[2], m[2]) + m[1], text)
 
 
-def verify(root: Path, frozen: dict[str, bytes], moves: dict[str, str]) -> list[str]:
+def rewrite_split_imports(text: str, moves: dict[str, str], splits: dict, root: Path) -> str:
+    """Rewrite only named import bindings whose recorded declaration owner moved.
+
+    A former facade can supply types from multiple files. Every binding keeps
+    its imported name, local alias and type modifier; all other source bytes
+    remain the immutable oracle. Destinations must declare the original symbol.
+    """
+    modules = {}
+    for old, destinations in splits.items():
+        for name, destination in destinations.items():
+            target = (root / destination).resolve()
+            declaration = rf"\bexport\s+(?:async\s+)?(?:function|class|const|let|type|interface|enum)\s+{re.escape(name)}\b"
+            if (not destination.startswith("frontend/src/") or not target.is_relative_to((root / "frontend/src").resolve())
+                    or not target.is_file() or re.search(declaration, target.read_text(encoding="utf-8")) is None):
+                raise ValueError(f"invalid split import declaration: {old}::{name} -> {destination}")
+        aliases = [old, *(path for path in moves if mapped(path, moves) == old)]
+        for alias in aliases:
+            for prefix in ("@/", "../frontend/src/", "src/"):
+                modules[prefix + alias.removeprefix("frontend/src/").rsplit(".", 1)[0]] = (prefix, destinations)
+    pattern = re.compile(r"import\s+(type\s+)?\{([^}]+)\}\s+from\s+([\"'])([^\"'\n]+)\3\s*;", re.S)
+    def replace(match):
+        if match[4] not in modules:
+            return match[0]
+        prefix, destinations = modules[match[4]]
+        groups = {}
+        for value in match[2].split(","):
+            value = value.strip()
+            if not value:
+                continue
+            binding = re.fullmatch(r"(?:(type)\s+)?([A-Za-z_$][\w$]*)(?:\s+as\s+([A-Za-z_$][\w$]*))?", value)
+            if binding is None or binding[2] not in destinations:
+                raise ValueError(f"unmapped split import binding: {match[4]}::{value}")
+            destination = destinations[binding[2]]
+            spec = prefix + destination.removeprefix("frontend/src/").rsplit(".", 1)[0]
+            groups.setdefault(spec, []).append(value)
+        kind = "type " if match[1] else ""
+        return "\n".join(f"import {kind}{{ {', '.join(bindings)} }} from {match[3]}{spec}{match[3]};" for spec, bindings in groups.items())
+    return pattern.sub(replace, text)
+
+
+def verify(root: Path, frozen: dict[str, bytes], moves: dict[str, str], splits: dict | None = None) -> list[str]:
     errors = []
     for old, original in sorted(frozen.items()):
         new = mapped(old, moves)
@@ -149,7 +189,7 @@ def verify(root: Path, frozen: dict[str, bytes], moves: dict[str, str]) -> list[
         if Path(old).suffix in {".png", ".ico", ".jpg", ".woff", ".woff2"}:
             equal = current == original
         else:
-            expected = rewrite_paths(original.decode("utf-8"), moves).replace("\r\n", "\n")
+            expected = rewrite_paths(rewrite_split_imports(original.decode("utf-8"), moves, splits or {}, root), moves).replace("\r\n", "\n")
             equal = current.decode("utf-8").replace("\r\n", "\n") == expected
         if not equal:
             errors.append(f"[frontend_oracle_changed] {old} -> {new}")
@@ -237,7 +277,10 @@ def main() -> int:
         raise ValueError("frontend checkpoint differs from pinned PR290 Git source")
     path_map = json.loads((ROOT / PATH_MAP).read_text(encoding="utf-8"))
     moves = path_map["files"]
-    errors = verify(ROOT, frozen, moves)
+    splits = {}
+    for detail in path_map.get("details", {}).values():
+        splits.update(detail.get("frontend_import_splits", {}))
+    errors = verify(ROOT, frozen, moves, splits)
     errors.extend(verify_retirements(ROOT, frozen, moves, path_map.get("details", {})))
     for error in errors:
         print(error)

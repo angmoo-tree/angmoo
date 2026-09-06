@@ -1,9 +1,9 @@
 # Frontend refactor execution results
 
-Current: **AR-F2-0~AR-F2-C #291~#294 and AR-F3-A #295 COMPLETE;
-AR-F3-B #296 MERGED with post-merge running; AR-F3-C #297 and AR-F3-D #298
-pre-merge 23/23 PASS; AR-F3-E #299, AR-F3-F #300 and AR-F3-G #301 in CI;
-AR-F4-A local implementation/validation; AR-F4-B~AR-F5-B NOT STARTED**.
+Current: **AR-F2-0~AR-F3-B #291~#296 COMPLETE; AR-F3-C #297 MERGED
+with post-merge running; AR-F3-D #298~AR-F3-F #300 pre-merge 23/23 PASS;
+AR-F3-G #301 and AR-F4-A/B/C #302~#304 in CI; AR-F5-A local implementation;
+AR-F5-B and AR-X NOT STARTED**.
 The user delegated implementation, validation, PRs and merges. AR-X, P8-L-S,
 real-provider product verification, Release and Production remain separate.
 
@@ -430,3 +430,27 @@ committed history were deleted.
   `817071ddd549daec36f565af539280c045abf6cb` at 2026-09-07 06:33:34 KST.
   Its post-merge remains pending; following PRs merge only after it passes.
 - Chat local full preservation: 2753 protected/current nodes and 37 contracts PASS.
+
+## AR-F5-A remaining facade and consumer cleanup — local validation
+
+- Removed 38 named export entries and the unused Home route alias. Every frozen
+  export in the 36 static facades maps to an actual declaration; earlier splits
+  of the large agents/community files remain recorded with all surviving owners.
+- The final two character post actions retain their original request bodies in
+  Social API. Auth forwarding wrappers disappear in favor of the existing session
+  implementation. Product API behavior and roles are not merged indiscriminately.
+- The supported semantic showcase lives in ui-foundation/components. Browser-only
+  fixtures stay with browser-tests; no production import of testing helpers.
+  SEO constants are in config. Frozen public assets and snapshots stay unchanged.
+- Split type imports in a frozen browser file retain every binding, alias and
+  assertion. The guard validates actual symbol declarations and rejects missing,
+  escaped or wrong owners; 49 guard tests PASS. Existing contracts check current
+  owners; original facade-only assertions read their real historical Git source.
+- Web 21 and Settings 2, both builds, type/lint and whole-tree ownership PASS.
+  Source-contract run 475 PASS with 17 old-path/current-inventory failures, then
+  related 57 PASS and additional 24 PASS after precise fixes. Static/current
+  source capture, full preservation and CI remain required before completion.
+- Chat CI found one stale helper location in P8-L-D inventory. The helper is now
+  checked at its real utility owner; original route operations remain unchanged.
+  Memory's historical assertion is materialized from real Git source so its
+  original assertion AST remains protected. Local focused 9 PASS.

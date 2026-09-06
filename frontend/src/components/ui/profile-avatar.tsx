@@ -2,8 +2,8 @@
 
 import { safeSameOriginMediaUrl } from "@/lib/media/safe-media-url";
 import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
-import { Avatar } from "./avatar";
-import { getProfileColor, getProfileInitial } from "../../utils/profile-presentation";
+import { Avatar } from "@/components/ui/avatar";
+import { getProfileColor, getProfileInitial } from "@/utils/profile-presentation";
 
 export function ProfileAvatar({
   name,

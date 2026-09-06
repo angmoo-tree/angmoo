@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { CreatorStudioFrame } from "@/composition/shells/creator-studio-frame";
-import { NO_INDEX_ROBOTS } from "@/lib/seo";
+import { NO_INDEX_ROBOTS } from "@/config/seo";
 
 import { StudioRouteClient } from "@/composition/screens/studio-screen";
 

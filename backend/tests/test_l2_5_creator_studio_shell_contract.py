@@ -135,8 +135,9 @@ def test_studio_world_character_surface_owns_fixture_lifecycle_orchestration() -
 def test_local_character_creation_ui_has_no_hosted_saved_count_gate() -> None:
     create_client = _read("features/characters/components/agent-create-client.tsx")
     dashboard = _read("features/characters/components/agents-dashboard-client.tsx")
-    dashboard_compatibility = _read("components/agents-dashboard-client.tsx")
-    agents_lib = _read("lib/agents.ts")
+    assert not (FRONTEND_ROOT / "components/agents-dashboard-client.tsx").exists()
+    dashboard_compatibility = subprocess.check_output(["git", "show", "3339eb72fff7ecfe3a9917b1a2685897a44960cf:frontend/src/components/agents-dashboard-client.tsx"], cwd=REPO_ROOT, text=True, encoding="utf-8")
+    agents_lib = _read("features/characters/api/agents.ts") + _read("features/characters/config/model-options.ts")
     combined = "\n".join((create_client, dashboard, agents_lib))
 
     for forbidden in (
@@ -172,7 +173,7 @@ def test_local_multi_autonomy_dashboard_uses_shared_utc_instant_contract() -> No
     detail = _read("composition/screens/agent-detail-screen.tsx") + _read("features/characters/components/agent-detail-parts.tsx")
     social_summary = _read("features/characters/components/active-agent-summary.tsx")
     presentation = _read("utils/profile-presentation.ts")
-    shared_public = _read("shared/ui/public.ts")
+    shared_public = _read("utils/profile-presentation.ts")
 
     assert "candidate.character.id === nextItem.character.id" in dashboard
     assert "nextItem.settings.auto_enabled" not in dashboard

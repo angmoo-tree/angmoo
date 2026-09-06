@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { AgentCreateClient } from "@/features/characters/components/agent-create-client";
 import { AppShell } from "@/composition/shells/app-shell";
-import { NO_INDEX_ROBOTS } from "@/lib/seo";
+import { NO_INDEX_ROBOTS } from "@/config/seo";
 
 export const dynamic = "force-dynamic";
 

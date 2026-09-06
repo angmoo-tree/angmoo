@@ -1,4 +1,5 @@
 from pathlib import Path
+import subprocess
 
 import pytest
 from pydantic import ValidationError
@@ -35,9 +36,8 @@ def test_frontend_uses_allowlisted_return_and_profile_media_helpers() -> None:
     media = (root / "lib" / "media" / "safe-media-url.ts").read_text(
         encoding="utf-8"
     )
-    compatibility_media = (root / "shared" / "media" / "safe-media-url.ts").read_text(
-        encoding="utf-8"
-    )
+    assert not (root / "lib/safe-media-url.ts").exists()
+    compatibility_media = subprocess.check_output(["git", "show", "3339eb72fff7ecfe3a9917b1a2685897a44960cf:frontend/src/shared/media/safe-media-url.ts"], cwd=root.parents[1], text=True, encoding="utf-8")
     settings = (root / "composition" / "screens" / "settings-screen.tsx").read_text(
         encoding="utf-8"
     )

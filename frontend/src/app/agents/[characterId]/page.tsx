@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { AgentDetailClient } from "@/composition/screens/agent-detail-screen";
 import { AppShell } from "@/composition/shells/app-shell";
-import { NO_INDEX_ROBOTS } from "@/lib/seo";
+import { NO_INDEX_ROBOTS } from "@/config/seo";
 
 type PageProps = {
   params: Promise<{

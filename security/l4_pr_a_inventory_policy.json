@@ -78,7 +78,7 @@
       "frontend/src/features/relationships/components/relationship-graph-client.tsx",
       "frontend/src/composition/screens/post-list-screen.tsx",
       "frontend/src/features/social/components/world-social-feed.tsx",
-      "frontend/src/lib/community.ts"
+      "frontend/src/features/social/api/community.ts"
     ],
     "current_route_globs": [
       "frontend/src/app/api/community/**/route.ts"
@@ -98,7 +98,7 @@
         "reply_target_unavailable",
         "sqlite_busy_retry_exhausted"
       ],
-      "frontend/src/lib/community.ts": [
+      "frontend/src/features/social/api/community.ts": [
         "getPostThread",
         "createPost",
         "createReply"

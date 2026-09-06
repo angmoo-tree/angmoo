@@ -60,6 +60,13 @@ def test_chat_feature_has_no_legacy_component_or_lib_imports() -> None:
 
 
 def test_legacy_chat_frontend_paths_are_thin_compatibility_facades() -> None:
+    assert not (ROOT / "frontend/src/features/chat/public.ts").exists()
+    for name in ("messages-client", "message-thread-client"):
+        assert not (ROOT / f"frontend/src/components/{name}.tsx").exists()
+        assert (ROOT / f"frontend/src/features/chat/components/{name}.tsx").is_file()
+    # Original forwarding contract remains a real historical fact, not runtime code.
+    def _read(relative: str) -> str:
+        return subprocess.check_output(["git", "show", "3339eb72fff7ecfe3a9917b1a2685897a44960cf:" + relative], cwd=ROOT, text=True, encoding="utf-8")
     assert _read("frontend/src/components/messages-client.tsx").strip() == (
         'export { MessagesClient } from "@/features/chat/public";'
     )
