@@ -2775,14 +2775,6 @@
       },
       {
         "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.constants",
-        "owner_stage": "AR-B4-C",
-        "reason": "Remaining real AgentRun orchestration catches the same actual Routines conflict class and consumes canonical lifecycle constants after the old CRUD exports are removed.",
-        "removal_condition": "Move remaining AgentRun real execution to runtime/owner services in B4-C, removing this exact legacy consumer by B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
         "target": "app.domains.routines.utils.context_text",
         "owner_stage": "AR-B4-C",
         "reason": "Remaining actual execution/prompt composition consumes the same actual Routines evidence/text function after responsibility extraction.",
@@ -2811,30 +2803,6 @@
         "owner_stage": "AR-B5",
         "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
         "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.action_candidates",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing actual resident execution uses canonical original response/decision/log policy and same provider workflow after full implementation move; no forwarding function.",
-        "removal_condition": "Move actual remaining resident composition in C6 and remove legacy entry before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.social.repository.resident_context",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing mixed Resident composition calls exactly the original query functions after Social-owned SQL extraction; no copied policy, query or wrapper.",
-        "removal_condition": "Move actual admission/context composition to typed same-Session runtime collaborator in C6b2/C6c and retire exact legacy importer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.action_admission",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing actual execution calls the canonical original admission/menu policy with explicit same-Session read references; no forwarding facade or copied query.",
-        "removal_condition": "Move remaining actual execution composition in C6c/C6d and remove exact legacy importer before B8-A.",
         "review_date": "2026-09-06"
       },
       {

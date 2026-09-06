@@ -767,3 +767,8 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 ### 활동 요약과 로그 표현
 
 `routines/service/activity_presentation.py`는 활동 요약과 팔로우 로그의 대상 표현을 담당합니다. 프로필은 Character/Identity의 기존 nullable 조회를 같은 Session으로 연결합니다. 상세 화면의 여러 기능 조립은 runtime에 남으며 활동 설정과 로그는 실제 Routines 소유 서비스에서 읽습니다. 시간대와 오늘 행동 수를 먼저 계산하지 않고 기존 응답 필드 평가 위치에서 읽습니다. 가져온 World의 명시적 활성화 제한은 `service/runtime_guards.py`의 실제 판단이며 런타임이 현재 World의 잠금 조회와 원래 오류 클래스를 전달합니다. 일반 캐릭터의 수동 실행과 가져온 World의 활성화 조건을 합치지 않습니다.
+
+
+### 보존된 활동 보조 기능
+
+기존 text 메뉴와 tool 복구 문구는 각각 `routines/service/action_menu.py`와 `state_prompts.py`에 보존합니다. 현재 실행기는 기존 table 메뉴를 사용하며 이 이전으로 과거 메뉴를 활성화하지 않습니다. 같은 Character 상태 대입도 `characters/service/mutations.py::set_character_status`는 원래 commit까지 수행하고 `set_activity_status`는 호출자의 transaction에 참여하는 대입만 하므로 서로 합치지 않습니다. 다른 캐릭터의 활성 설정 조회는 기존 `runtime/resident/autonomy_reads.py`의 정확한 join을 사용한 뒤 그 같은 Session과 결과 list를 `activity_settings.disable_other_active_settings`에 즉시 전달합니다. 서비스는 원래 UTC timestamp·대입·조건부 commit/flush를 소유합니다.

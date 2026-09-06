@@ -1,4 +1,5 @@
 """Activity-setting defaults and explicit commit/flush update modes."""
+from datetime import UTC, datetime
 from sqlalchemy.orm import Session
 from app.core import active_hours
 from app.domains.routines import models, schemas
@@ -78,3 +79,20 @@ def disable_auto_if_present(db: Session, character_id: str) -> None:
     setting = db.get(models.AgentActivitySetting, character_id)
     if setting is not None:
         setting.auto_enabled = False
+
+
+def disable_other_active_settings(
+    db: Session,
+    settings: list[models.AgentActivitySetting],
+    *,
+    commit: bool = True,
+) -> list[models.AgentActivitySetting]:
+    now = datetime.now(UTC)
+    for setting in settings:
+        setting.auto_enabled = False
+        setting.updated_at = now
+    if settings and commit:
+        db.commit()
+    elif settings:
+        db.flush()
+    return settings

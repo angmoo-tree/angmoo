@@ -300,48 +300,13 @@ def upsert_credential(
     return credential
 
 
-def set_character_status(db: Session, character: models.Character, status: str) -> None:
-    character.status = status
-    db.commit()
 
 
-def disable_other_active_settings(
-    db: Session,
-    *,
-    user_id: str,
-    keep_character_id: str,
-    commit: bool = True,
-) -> list[models.AgentActivitySetting]:
-    settings = list_other_active_settings(
-        db, user_id=user_id, keep_character_id=keep_character_id
-    )
-    now = datetime.now(UTC)
-    for setting in settings:
-        setting.auto_enabled = False
-        setting.updated_at = now
-    if settings and commit:
-        db.commit()
-    elif settings:
-        db.flush()
-    return settings
 
 
-def list_other_active_settings(
-    db: Session, *, user_id: str, keep_character_id: str
-) -> list[models.AgentActivitySetting]:
-    settings = list(
-        db.scalars(
-            select(models.AgentActivitySetting)
-            .join(models.Character)
-            .where(
-                models.Character.owner_id == user_id,
-                models.Character.deleted_at.is_(None),
-                models.Character.id != keep_character_id,
-                models.AgentActivitySetting.auto_enabled.is_(True),
-            )
-        )
-    )
-    return settings
+
+
+
 
 
 

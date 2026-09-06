@@ -1189,3 +1189,12 @@ C7-G 최종 검증은 **245 passed / 기존 경고5 / 32.45초**이다. 현재 �
 현재 호출되지 않는 AgentRun 메뉴/복구4와 old CRUD3은 원문 그대로 보존하며 B8에서 실제 소유에 배치한다. 현재 호출0만으로 기능 삭제를 판단하지 않는다. Memory Daypart7 및 다른 담당자가 이미 작성한 Identity/Character image/LocalBot/Relationships 구현은 root의 선형 합류에서 원래 callback/alias를 actual 소유로 연결한다. 소유가 없는 구현을 일반 runtime 이름으로 옮겨 종료하지 않는다.
 
 C7-H 최종 관련 검증은 **689 passed / 기존 PostgreSQL 조건1 skipped / 기존 경고22 / 265.67초**이다. 최종 검사 동안 제품/테스트 source는 고정했다. 현재 경계798 modules /2817 edges /exact legacy204 /cycle0, L4 798/14/97, ER0 86/87/24/44/7, Memory current이며 원래6검사 읽기 진단은 오류0(보호2139/current2297)이다. 동료 읽기 검토에서도 lazy 평가 순서·같은 Session의 nullable 프로필·World guard4연결에 차단 문제는 발견되지 않았다. 보존할 AgentRun11/CRUD3의 본문도 이전 signed source와 AST가 동일하다. frozen/checkpoint/additions 및 기존 단언은 그대로이며 stock gate는 root의 순차 도입 연결 뒤 검증한다.
+
+
+## AR-B8 — 보존된 Resident 보조 기능7의 실제 소유
+
+메뉴2/복구2를 기존 Routines policy/prompt 모듈로, commit을 포함한 Character 상태1을 Character mutations로, 활성설정 disable1과 혼합조회1을 Routines service와 기존 runtime 조회로 옮겼다. 새 production 파일·추상 port·빈 전달 함수·활성 호출을 추가하지 않았다. 원래 전체7함수 AST는 정확한 기존 협력/type/query 추출 복원 후 모두 동일하다. 초기11회귀가 통과했다. 신규SQLite3은 owner/deleted/keep/enabled join 필터, 같은 attached 결과, 조건부 commit/flush/empty no-write, 별도 Session 가시성과 rollback, Character 상태의 원래 전체 caller commit을 검증한다.
+
+과거 비활성 text 메뉴는 원래 prepared_create_post_brief가 정의되지 않아 independent 구간에서 NameError를 낸다. 원본과 이전본의 격리된 synthetic 입력에서 같은 오류를 재현했다. 이번 이전에서 임의 기본값/인자를 추가하거나 새 실행 경로를 만들지 않고 원문과 잠재 결함 근거를 보존한다는 parent 결정을 따랐다. 현재 table 메뉴와 동작은 그대로이다.
+
+최종 관련26검사(29.49초), 원문7 AST복원, 경계798 modules /2812 edges /exact legacy204 /cycle0이 통과했다. 원래6검사의 읽기 전용 진단은 모두 오류0(보호2139/current2300), L4 798/14/97, ER0 86/87/24/44/7, Memory current이다. 검사 중 소스는 고정했고 종료 후 old Memory 잔여 파일의 EOF 빈줄만 AST 동일하게 정리했다. frozen/checkpoint/additions·기존 단언·검사기는 변경하지 않았으며 root의 선형 첫 도입 연결과 stock 검증/CI/merge는 별도이다.

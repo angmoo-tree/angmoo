@@ -1,6 +1,6 @@
 {
-  "edge_count": 2817,
-  "external_import_count": 2446,
+  "edge_count": 2812,
+  "external_import_count": 2447,
   "module_count": 798,
   "modules": [
     {
@@ -4636,6 +4636,7 @@
     },
     {
       "external_imports": [
+        "datetime",
         "sqlalchemy.orm"
       ],
       "imports": [
@@ -11411,15 +11412,10 @@
         "app.config",
         "app.core.context_text",
         "app.cruds.community",
-        "app.domains.routines.constants",
-        "app.domains.routines.service.action_admission",
         "app.domains.routines.service.action_briefs",
-        "app.domains.routines.service.action_candidates",
         "app.domains.routines.utils.context_text",
-        "app.domains.social.repository.resident_context",
         "app.models",
         "app.runtime.resident.activity_policy",
-        "app.runtime.resident.context_references",
         "app.schemas",
         "app.services.community"
       ],
