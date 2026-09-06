@@ -14899,7 +14899,7 @@
   },
   "frontend_transition": {
     "checkpoint_commit": "33e9df8593272f6c81236c477ae73ef057d0d3dd",
-    "status": "AR-F3-C POST-MERGE; AR-F4 CI; AR-F5-A LOCAL CLEANUP",
+    "status": "STRUCTURAL_IMPLEMENTATION_COMPLETE; FINAL_INTEGRATION_TRACKED_IN_PR_306",
     "documentation": "docs/architecture/refactor-frontend-results.md",
     "scope_note": "Backend completion and existing per-item state are unchanged. These stages track frontend consumers independently. AR-F1 product remains preserved.",
     "items": {
@@ -15153,6 +15153,7 @@
         "status": "IMPLEMENTED - final validation and integration pending",
         "scope": "Whole-tree frontend checks, contributor documentation and final runtime gates"
       }
-    }
+    },
+    "status_snapshot": "2026-09-07: dated per-stage gate snapshots below; final exact-head and merge state are in PR306 and its merge Actions"
   }
 }
