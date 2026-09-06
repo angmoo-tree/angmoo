@@ -1201,3 +1201,9 @@ Memory 업무 검사 명령은 `python -m pytest -q tests/memory`입니다. 별�
 
 
 Relationships의 `public.py` 집합은 제거했습니다. Graph 읽기와 회상은 `service/graph_read.py`·`graph_recall.py`, 계획 검증·실행은 `service/graph_planning.py`, IO 없는 값은 `contracts/`, HTTP 응답은 `schemas.py`, 오류는 `exceptions.py`에서 가져옵니다. 실제 query와 transport 조립은 runtime에 있으며 원래 같은 gateway/Session 객체를 전달합니다. 한 이름을 찾기 위해 다시 모든 도메인 기능을 모으는 집합을 만들지 않습니다.
+
+### 공유 확장 등록 상태
+
+`runtime/extensions/hosted_configuration.py`는 선택적 Hosted 설정·prompt 제공자의 등록, 중복 등록 거절과 lifespan 정리를 소유합니다. `runtime/extensions/resident_adapter.py`는 선택적 Resident adapter의 등록과 fail-closed 호출을 소유합니다. 앱과 현재 runtime 소비자는 이 구현을 직접 사용하며 registry state는 각각 한 곳에만 있습니다.
+
+기존 별도 배포 Hosted 확장이 사용하는 `services/hosted_configuration.py`와 `services/runtime_boundary.py`는 같은 함수·타입·객체를 내보내는 최소 호환 경로입니다. 호환 파일에 구현이나 별도 registry state를 두지 않습니다. 외부 확장의 실제 import를 함께 이전하기 전까지 이 두 계약을 유지하며, 새 기능의 시작점은 실제 runtime 소유 모듈입니다.

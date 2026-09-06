@@ -8,7 +8,7 @@ from pydantic import SecretStr
 
 from app.config import DEFAULT_APP_SECRET, Settings
 from app.runtime.startup_security import StartupSecurityError, validate_startup_security
-from app.services.runtime_boundary import get_resident_runtime_adapter
+from app.runtime.extensions.resident_adapter import get_resident_runtime_adapter
 
 
 def _production_settings(**overrides: object) -> Settings:

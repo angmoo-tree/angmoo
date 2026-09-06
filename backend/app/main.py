@@ -70,15 +70,15 @@ from app.runtime.startup_security import validate_startup_security
 
 from app.runtime.world_characters.recovery import reconcile_local_autonomous_runtime_modes
 
-from app.services.hosted_configuration import HostedConfigurationRegistrationError
+from app.runtime.extensions.hosted_configuration import HostedConfigurationRegistrationError
 
-from app.services.hosted_configuration import HostedPromptProvider
+from app.runtime.extensions.hosted_configuration import HostedPromptProvider
 
-from app.services.hosted_configuration import HostedSettingsProvider
+from app.runtime.extensions.hosted_configuration import HostedSettingsProvider
 
-from app.services.hosted_configuration import register_hosted_configuration
+from app.runtime.extensions.hosted_configuration import register_hosted_configuration
 
-from app.services.hosted_configuration import unregister_hosted_configuration
+from app.runtime.extensions.hosted_configuration import unregister_hosted_configuration
 
 register_models()
 

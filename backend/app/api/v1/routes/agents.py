@@ -108,9 +108,9 @@ from app.integrations.direct_llm import DirectLlmError
 
 from app.integrations.direct_llm import DirectLlmJsonError
 
-from app.services.runtime_boundary import OpenClawGatewayAuthError
+from app.runtime.extensions.resident_adapter import OpenClawGatewayAuthError
 
-from app.services.runtime_boundary import OpenClawGatewayError
+from app.runtime.extensions.resident_adapter import OpenClawGatewayError
 
 register_models()
 

@@ -15,13 +15,13 @@ from app.main import (
     validate_public_runtime_settings,
 )
 from app.runtime.resident import execution as agent_run_service
-from app.services.hosted_configuration import (
+from app.runtime.extensions.hosted_configuration import (
     HOSTED_EXTENSION_CONTRACT_VERSION,
     HostedConfigurationRegistrationError,
     get_hosted_prompt,
     get_hosted_setting,
 )
-from app.services.runtime_boundary import (
+from app.runtime.extensions.resident_adapter import (
     OpenClawGatewayClient,
     ResidentRuntimeUnavailableError,
     get_resident_runtime_adapter,

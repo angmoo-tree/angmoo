@@ -2695,3 +2695,15 @@ B5 준비 branch의 실제 업무 이전·옛 Social/Relationships 계층·Commu
 - Social11/Relationships7 기존 테스트 파일 이동을 실제 현재 호출자와 연결했다. Relationships public 집합은 제거하고 Chat/Graph의 현재8개 소비자43참조도 실제 계약·서비스로 연결했다. 부모의 이미 이전한 Chat/Memory/모델 구현을 과거 계층으로 되돌리지 않았다.
 - 관련 Social·Relationships·Chat 조립·구조 회귀 **245 passed / 기존 PG1 skipped / 1 warning / 112.42초**.
 - 두 WorldFeedSearch 회귀의 C33 이동은 B5 원래 signed `49c0f1f4cc9d57346de72f76387df3ae3d809579` 도입 기록이 필요하므로, 현재92records만 사용하는 읽기진단은 이 source-introduction 연결에서 의도대로 대기한다. 임의 baseline/node 생성 없이 B5 선형 original 원장을 합류한다.
+
+### B8 공유 확장 registry 실제 소유 이전
+
+- 설정/prompt와 Resident adapter의 전체 원문 두 모듈을 `runtime/extensions`로 옮겼다. 실제 함수·클래스·전역 state body는 원본과 정확히 같고 현재11개 소비자는 실제 소유자를 참조한다.
+- 별도 Hosted 확장 main·gateway 및 release builder에서 현재 소비가 확인된 기존 import 두 개는 동일 객체 export만 유지한다. Hosted 구현·인증·설정 기능을 삭제하거나 별도 제품을 수정하지 않았다.
+- 기존 runtime/lifespan/security/creator 오류 및 외부 import와 현재 runtime 사이의 단일 등록 상태 회귀: **58 passed / 기존 1 skipped / 2 warnings / 30.61초**. 새 두 테스트는 실제 old-path 등록→new-path 조회/중복 거절→new-path 해제→old-path 기본값/거절 복구를 검증한다.
+- 원본 source capture와 선형 stock/전체/CI/설치 Gate는 부모 통합에 남는다.
+
+- Peer 원문 리뷰에서 두 실제 registry의 함수/class/상태 AST가 원본과 정확히 같음을 확인했다. 초기 신규 테스트의 previous import까지 일반 소비자 변환에 포함된 문제를 찾아 실제 옛 `app.services` 경로로 복원했고, 해당 변환에서도 제외했다. 수정한 실제 두 import 경로의 등록·조회·중복 거절·정리 및 기존 M4 **19 passed / 10.90초**. 앞선 확대 검사의 기존56개와 함께 검증 근거를 구분한다.
+- 최종 원본 보호 읽기 진단은 보호2311/current2509, source·split·assertion·suppression·ASGI·APIORM·missing nodes 모두0이다. 옛 split 기록의 private 상태/helper11개도 실제 새 모듈로 연결했다. 원본source/체크포인트·동결자료는 변경하지 않았다.
+
+- C34/G06 제거 후 최종 조립에서 두 실제 확장 registry와 old import 계약, 단일 main factory 및 M4 runtime **25 passed / 39.45초**. Private 확장 경로를 위해 남긴 export는 실제 runtime 함수·객체 한 벌을 공유한다.
