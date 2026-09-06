@@ -46,7 +46,7 @@ from app.providers.registry import (
 )
 
 
-REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
+REPOSITORY_ROOT = Path(__file__).resolve().parents[3]
 HIGH_REASONING_MODELS = (
     "gemini-3.1-flash-lite",
     "gemini-3.5-flash-lite",

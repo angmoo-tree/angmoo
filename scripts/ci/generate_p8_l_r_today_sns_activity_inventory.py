@@ -77,7 +77,7 @@ REQUIRED_FILES = (
     "backend/tests/test_p8_l_r_today_sns_activity.py",
     "backend/tests/test_p8_l_r_today_sns_activity_inventory.py",
     "backend/tests/test_p8_l_r_today_sns_activity_migration.py",
-    "backend/tests/test_p8_l_p_evidence_response_streaming.py",
+    "backend/tests/chat/test_p8_l_p_evidence_response_streaming.py",
     "backend/security/privacy_deletion_inventory.json",
     "browser-tests/product-shell.spec.ts",
     "browser-tests/static-product-shell.spec.ts",

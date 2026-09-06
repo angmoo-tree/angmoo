@@ -63,7 +63,7 @@ REQUIRED_FILES = (
     "backend/app/domains/chat/service/retrieval_routing.py",
     "backend/app/integrations/llm/retrieval_router.py",
     "backend/app/runtime/chat/retrieval_policy.py",
-    "backend/tests/test_p8_l_k_retrieval_router.py",
+    "backend/tests/chat/test_p8_l_k_retrieval_router.py",
     "backend/tests/fixtures/p8_l/router_hotfix_v1/current_context_ko.jsonl",
     "backend/tests/test_oss_architecture_boundaries.py",
     "backend/tests/test_l4_pr_a_inventory.py",

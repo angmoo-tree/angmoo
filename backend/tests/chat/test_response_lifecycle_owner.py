@@ -15,14 +15,14 @@ from app.domains.chat.repository.response_lifecycle import (
 )
 from app.runtime.chat import world_generation
 from app.runtime.chat.message_composition import thread_service
-from test_p8_l_d_world_chat_identity import (
+from chat.test_p8_l_d_world_chat_identity import (
     _character,
     _create_tables,
     _installation,
     _seed_world,
     _user,
 )
-from test_p8_l_j_response_generation_lifecycle import (
+from chat.test_p8_l_j_response_generation_lifecycle import (
     _commit_payload,
     _fence,
     _ready_to_commit,

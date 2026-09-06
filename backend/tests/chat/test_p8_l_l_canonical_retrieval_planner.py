@@ -44,7 +44,7 @@ from app.integrations.llm.canonical_retrieval_planner import (
 NOW = datetime(2026, 9, 2, 3, tzinfo=UTC)
 DEADLINE = NOW + timedelta(seconds=30)
 CORPUS_PATH = (
-    Path(__file__).resolve().parent
+    Path(__file__).resolve().parents[1]
     / "fixtures/p8_l/canonical_planner_v1/held_out_ko.jsonl"
 )
 

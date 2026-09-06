@@ -411,24 +411,24 @@
       "sha256": "2eeb2d6850f68232168ac34147e5736d31101eaa817b7693ebb4869d0c3b5cc7"
     },
     {
-      "path": "backend/tests/test_p8_l_r_memory_batch_api.py",
-      "sha256": "e394ff12284c91eee82b0706ee004f65b3ab48b370710c7402d0c17e852131a6"
+      "path": "backend/tests/memory/test_p8_l_r_memory_batch_api.py",
+      "sha256": "c1e315cf2ca00c0669d1890242bbb447b9ee385255fc0180061762793ed98b36"
     },
     {
-      "path": "backend/tests/test_p8_l_r_memory_batch_migration.py",
+      "path": "backend/tests/memory/test_p8_l_r_memory_batch_migration.py",
       "sha256": "7937e69639032e03ebb967e53e11b3a89b6b5e0d77e598b9d6cf087624f169a3"
     },
     {
-      "path": "backend/tests/test_p8_l_r_memory_batch_policy.py",
+      "path": "backend/tests/memory/test_p8_l_r_memory_batch_policy.py",
       "sha256": "efa4f7e7e36cd4078de16872d0cdd5f55be18ce148f0543d8e1be27bf4c1d047"
     },
     {
-      "path": "backend/tests/test_p8_l_r_memory_batch_runtime.py",
-      "sha256": "10e6fd780527947c4eba8069b0747c2c7d52452e7ee930c19d70e5b5b0ecdccc"
+      "path": "backend/tests/memory/test_p8_l_r_memory_batch_runtime.py",
+      "sha256": "5c537f79f8d552c7b110e4714e52e7bf1a7b8d7c02eadfb6275400c4e69a24d9"
     },
     {
-      "path": "backend/tests/test_p8_l_r_memory_batch_safety.py",
-      "sha256": "41546b8d36277772ecea23012c1235505e1b7422dcd2eeb8a9b833c9d0b7c5ff"
+      "path": "backend/tests/memory/test_p8_l_r_memory_batch_safety.py",
+      "sha256": "d32a25c9b64b024f059c8a263d8ec1494bff5deb42b554f12ccaa2f82ffeea82"
     },
     {
       "path": "browser-tests/memory-batch-fixture.ts",
@@ -508,7 +508,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_r_memory_batch_inventory.py",
-      "sha256": "b372b7b356d04f4791eab6ff4f8ba4ae6a7723a052d89123661cde34bdad2cc5"
+      "sha256": "69292086997b6cb42da6c48cd12c5a8e04d7dbd21ffaf6d889305da8d53c3bbb"
     },
     {
       "path": "scripts/ci/run_windows_installer_supported_upgrade.ps1",

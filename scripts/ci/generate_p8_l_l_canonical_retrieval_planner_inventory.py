@@ -50,7 +50,7 @@ REQUIRED_FILES = (
     "backend/app/domains/chat/contracts/call_tracker.py",
     "backend/app/integrations/llm/canonical_retrieval_planner.py",
     "backend/tests/fixtures/p8_l/canonical_planner_v1/held_out_ko.jsonl",
-    "backend/tests/test_p8_l_l_canonical_retrieval_planner.py",
+    "backend/tests/chat/test_p8_l_l_canonical_retrieval_planner.py",
     "backend/tests/test_p8_l_l_canonical_retrieval_planner_inventory.py",
     "docs/architecture/backend-domains.md",
     "docs/architecture/p8-l-l-canonical-retrieval-planner.md",

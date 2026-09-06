@@ -24,7 +24,7 @@ from app.domains.memory.models.items import MemoryMaintenanceJob
 from app.integrations.llm import memory_selection
 from app.providers.contracts import ProviderResponse, ProviderUsage
 from app.runtime.memory.shutdown import MemoryShutdownAdmissionMiddleware
-from test_p8_l_q_memory_read_inspector import _fixture, _seed, FRONTEND_HEADERS
+from memory.test_p8_l_q_memory_read_inspector import _fixture, _seed, FRONTEND_HEADERS
 
 
 def test_batch_settings_require_explicit_consent_exact_scope_csrf_and_saved_version(

@@ -1380,7 +1380,7 @@
       "owner": "P8-L-G",
       "path": "scripts/ci/generate_p8_l_g_memory_write_inventory.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "0d0cf9f38444c9ffef60fe528ab5c23169d782e4f5cd88217e93103d68d7a5f0",
+      "source_sha256": "fcf29bb7f01dc294e31c53edeb32241c266f6f056d02fa1a5372bba069076a0e",
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
