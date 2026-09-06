@@ -1101,6 +1101,7 @@
       "app.domains.social.contracts.inbox",
       "app.domains.social.contracts.inbox_reads",
       "app.domains.social.contracts.manual_feed",
+      "app.domains.social.contracts.observation_execution",
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
       "app.domains.social.contracts.profile_references",
@@ -1394,6 +1395,7 @@
       "app.domains.social.contracts.inbox",
       "app.domains.social.contracts.inbox_reads",
       "app.domains.social.contracts.manual_feed",
+      "app.domains.social.contracts.observation_execution",
       "app.domains.social.contracts.observations",
       "app.domains.social.contracts.profile_activity",
       "app.domains.social.contracts.profile_references",
@@ -2208,54 +2210,6 @@
         "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
         "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
         "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.social.application.observations",
-        "target": "app.domains.social.contracts.observations",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.social.application.writes",
-        "target": "app.domains.social.contracts.writes",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.social.infrastructure.sqlalchemy_subjective_context_models",
-        "target": "app.domains.social.models.subjective_context",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.social.ports.observation_unit_of_work",
-        "target": "app.domains.social.contracts.observations",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.social.public",
-        "target": "app.domains.social.contracts",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.domains.social.public",
-        "target": "app.domains.social.contracts.inbox",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "The named remaining consumer uses the single Social model or value definition while its actual service/runtime ownership is migrated in the following slice.",
-        "removal_condition": "Move this exact consumer to its canonical owner; retain only the immutable subjective-context migration alias and retire the aggregate models in G5.",
         "review_date": "2026-09-05"
       },
       {
@@ -3075,22 +3029,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.domains.social.application.writes",
-        "target": "app.domains.social.contracts.write_execution",
-        "owner_stage": "AR-B5",
-        "reason": "The exact still-supported source-write consumer uses the single transaction execution contract while callers move to the owning service/runtime executor.",
-        "removal_condition": "Remove this exact application/ports consumer after its remaining calls and type exports use the canonical contract; no new implementation belongs in this compatibility path.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.social.ports",
-        "target": "app.domains.social.contracts.write_execution",
-        "owner_stage": "AR-B5",
-        "reason": "The exact still-supported source-write consumer uses the single transaction execution contract while callers move to the owning service/runtime executor.",
-        "removal_condition": "Remove this exact application/ports consumer after its remaining calls and type exports use the canonical contract; no new implementation belongs in this compatibility path.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.services.community",
         "target": "app.domains.social.repository.resident_affordances",
         "owner_stage": "AR-B5 / AR-B4",
@@ -3160,38 +3098,6 @@
         "owner_stage": "AR-B5 / AR-B4",
         "reason": "Existing resident history caller consumes actual Routines policy and original limits; no implementation remains in this old import surface for these symbols.",
         "removal_condition": "Finish Community/AgentRun runtime ownership and remove exact old consumer imports while retaining the actual Routines service/constant call.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.social.application",
-        "target": "app.domains.social.service.keyword_feed",
-        "owner_stage": "AR-B5",
-        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
-        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.social.ports",
-        "target": "app.domains.social.contracts.search_index",
-        "owner_stage": "AR-B5",
-        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
-        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.social.public",
-        "target": "app.domains.social.contracts.search_index",
-        "owner_stage": "AR-B5",
-        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
-        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.domains.social.public",
-        "target": "app.domains.social.service.keyword_feed",
-        "owner_stage": "AR-B5",
-        "reason": "The existing consumer now uses the actual Social search owner instead of the removed implementation.",
-        "removal_condition": "Remove the remaining Social application/ports/public aggregate or move the actual planner and WorldFeed orchestration in AR-B5; keep the actual owned definition.",
         "review_date": "2026-09-06"
       },
       {

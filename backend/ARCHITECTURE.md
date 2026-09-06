@@ -774,3 +774,6 @@ Social tick 완료의 실제 업무는 `social/service/complete_tick.py`가 소�
 
 
 RoutinePost가 읽는 성공 답글 후보는 `relationships/service/routine_interactions.py`가 canonical event 상태·대상·공개 조건과 방향별 관계 band를 판단한다. Event/evidence join과 관계 상태 SQL은 Relationships, Post/상호 차단 SQL은 Social 소유다. runtime은 원래 lazy 결과의 행 수·시간/ID 순서와 같은 Session을 보존하고, 기존 `RoutineInteractionInput` class를 그대로 사용해 RoutinePost에 전달한다. 수동 Inbox 후보는 같은 Social service의 실제 후보 검증을 거친 뒤 원래 순서로 이어 붙인다.
+
+
+Social 호출자는 실제 `service`·`contracts`를 선택한다. 옛 `public`·`application`·`ports`·`infrastructure` 집합은 제거했고, 원자적 수동 쓰기는 runtime UoW의 실제 메서드를 사용한다. 관찰도 같은 실행기에서 Relationships의 실제 관찰 정책을 호출한다. World feed는 readonly context 계약으로 원래 attached context/credential을 받아 실행하므로 Social runtime이 Resident의 구체 context class를 가져오지 않는다.

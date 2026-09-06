@@ -6,7 +6,7 @@ from app.domains.social.service.feed_reaction_prompts import (
     build_comment_prompts,
 )
 
-from app.domains.social.contracts.feed_execution import FeedReactionProvider
+from app.domains.social.contracts.feed_execution import FeedReactionProvider, WorldFeedContext
 from app.domains.social.exceptions import FeedReactionValidationError
 from app.domains.social.service.feed_reaction_validation import (
     validate_reaction_decision,
@@ -29,7 +29,6 @@ from app.services.direct_llm import (
     RunLlmTracker,
     generate_json,
 )
-from app.runtime.resident.context import LangGraphResidentContext
 from app.domains.social.contracts.world_feed import ReadySearchProfile
 
 
@@ -44,7 +43,7 @@ GEMINI_PROPOSAL_PREVIEW_RESPONSE_SCHEMA = build_gemini_developer_response_schema
 )
 
 
-def _api_key(ctx: LangGraphResidentContext) -> str:
+def _api_key(ctx: WorldFeedContext) -> str:
     try:
         return CredentialResolver.resolve_llm_credential(
             ctx.credential,
@@ -55,7 +54,7 @@ def _api_key(ctx: LangGraphResidentContext) -> str:
 
 
 def _llm_context(
-    ctx: LangGraphResidentContext, *, node: str, lane: str
+    ctx: WorldFeedContext, *, node: str, lane: str
 ) -> DirectLlmCallContext:
     return DirectLlmCallContext(
         credential_id=ctx.credential.id,
@@ -73,7 +72,7 @@ class DirectFeedReactionProvider:
     async def plan(
         self,
         *,
-        resident_context: LangGraphResidentContext,
+        resident_context: WorldFeedContext,
         profile: ReadySearchProfile,
         candidates: tuple[schemas.WorldFeedCandidateRead, ...],
         tracker: RunLlmTracker,
@@ -124,7 +123,7 @@ class DirectFeedReactionProvider:
     async def write_comment(
         self,
         *,
-        resident_context: LangGraphResidentContext,
+        resident_context: WorldFeedContext,
         profile: ReadySearchProfile,
         candidate: schemas.WorldFeedCandidateRead,
         decision: schemas.FeedReactionDecision,

@@ -406,7 +406,15 @@
     "backend/app/runtime/social/sqlalchemy_inbox.py": "backend/app/domains/social/service/manual_inbox.py",
     "backend/app/compatibility/routine_posts/canonical_interactions.py": "backend/app/domains/relationships/service/routine_interactions.py",
     "backend/app/services/social_routine_interactions.py": "backend/app/runtime/routine_posts/interactions.py",
-    "backend/app/compatibility/routine_posts/legacy.py": "backend/app/runtime/routine_posts/interactions.py"
+    "backend/app/compatibility/routine_posts/legacy.py": "backend/app/runtime/routine_posts/interactions.py",
+    "backend/app/domains/social/public.py": "backend/app/domains/social/contracts/__init__.py",
+    "backend/app/domains/social/application/__init__.py": "backend/app/domains/social/__init__.py",
+    "backend/app/domains/social/application/writes.py": "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+    "backend/app/domains/social/application/observations.py": "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+    "backend/app/domains/social/ports/__init__.py": "backend/app/domains/social/contracts/__init__.py",
+    "backend/app/domains/social/ports/observation_unit_of_work.py": "backend/app/domains/social/contracts/observation_execution.py",
+    "backend/app/domains/social/infrastructure/__init__.py": "backend/app/domains/social/__init__.py",
+    "backend/app/domains/social/api/__init__.py": "backend/app/domains/social/__init__.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -41543,8 +41551,8 @@
           "direct_consumers": [
             "backend/app/domains/social/dependencies.py",
             "backend/app/domains/social/router.py",
-            "backend/app/domains/social/application/writes.py",
-            "backend/app/domains/social/ports/__init__.py"
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/domains/social/contracts/__init__.py"
           ],
           "test_nodes": [
             "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
@@ -41560,8 +41568,8 @@
           "direct_consumers": [
             "backend/app/domains/social/dependencies.py",
             "backend/app/domains/social/router.py",
-            "backend/app/domains/social/application/writes.py",
-            "backend/app/domains/social/ports/__init__.py"
+            "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+            "backend/app/domains/social/contracts/__init__.py"
           ],
           "test_nodes": [
             "tests/social/test_manual_http_ownership.py::test_manual_http_factories_share_request_session_without_constructor_io",
@@ -73174,6 +73182,51 @@
         ],
         "evidence": "Independent review caught a wrong visible/eager-loaded Post query binding. Deterministic new SQLite regression failed at hidden attached Post identity before correction; original nullable db.get owner is now bound. Identity hit performs zero SQL/flush, miss returns hidden row with one SELECT and no comments eager load; caller rollback and missing row preserved. Original candidate predicates and existing assertions unchanged."
       }
+    },
+    "AR-B5-C29": {
+      "status": "IMPLEMENTED source; capture pending",
+      "scope": "Remove unused Social legacy public/application/ports/API/infrastructure aggregates. Runtime observations call the existing executor method directly; existing write tests bind actual unbound UoW methods to retain original assertions without a production forwarding facade. Observation execution Protocol moves verbatim to contracts. Runtime Feed context imports are replaced by readonly structural contracts; actual context/credential/provider identity and body stay unchanged.",
+      "removed_compatibility_files": {
+        "backend/app/domains/social/public.py": "backend/app/domains/social/contracts/__init__.py",
+        "backend/app/domains/social/application/__init__.py": "backend/app/domains/social/__init__.py",
+        "backend/app/domains/social/application/writes.py": "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+        "backend/app/domains/social/application/observations.py": "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
+        "backend/app/domains/social/ports/__init__.py": "backend/app/domains/social/contracts/__init__.py",
+        "backend/app/domains/social/ports/observation_unit_of_work.py": "backend/app/domains/social/contracts/observation_execution.py",
+        "backend/app/domains/social/infrastructure/sqlalchemy_subjective_context_models.py": "backend/app/domains/social/models/subjective_context.py",
+        "backend/app/domains/social/infrastructure/__init__.py": "backend/app/domains/social/__init__.py",
+        "backend/app/domains/social/api/__init__.py": "backend/app/domains/social/__init__.py"
+      },
+      "direct_consumers": [
+        "backend/tests/test_l4_social_write_uow.py",
+        "backend/tests/test_social_event_runtime.py",
+        "backend/tests/common/test_errors_pagination.py",
+        "backend/tests/routine_posts/test_runtime.py",
+        "backend/app/runtime/routine_posts/sqlalchemy_runtime.py",
+        "backend/app/runtime/social/observations.py",
+        "backend/app/domains/chat/domain/today_sns_activity.py",
+        "backend/app/domains/chat/ports/today_sns_activity.py",
+        "scripts/ci/generate_p8_l_r_today_sns_activity_inventory.py",
+        "backend/app/runtime/migrations/sqlite_versions/v7_to_v8_social_action_subjective_context.py",
+        "scripts/ci/build_windows_installer_supported_upgrade_fixture.py"
+      ],
+      "removed_forwarders": {
+        "create_owner_post": "SqlAlchemySocialWriteUnitOfWork.create_owner_post",
+        "create_owner_reply": "SqlAlchemySocialWriteUnitOfWork.create_owner_reply",
+        "apply_validated_autonomous_result": "SqlAlchemySocialWriteUnitOfWork.apply_validated_autonomous_result",
+        "observe_social_source": "SqlAlchemySocialObservationUnitOfWork.observe"
+      },
+      "test_files": [
+        "tests/test_l4_social_write_uow.py",
+        "tests/test_social_event_runtime.py",
+        "tests/routine_posts/test_runtime.py",
+        "tests/social/test_foundation_contracts.py",
+        "tests/common/test_errors_pagination.py",
+        "tests/test_feed_reaction_intent.py",
+        "tests/social/test_feed_reaction_provider_contract.py"
+      ],
+      "evidence": "Original executor/owner implementation unchanged; provider/cycle actual whole AST identical after type restoration. Focused existing138 PASS/1 PG skip; protected assertions retained. Existing migration body unchanged apart from same-object helper import. No new nodes.",
+      "remaining": "Community facade consumer removal/G07. Parent integration maps old Resident consumers onto runtime/resident/{execution,langgraph,writing}; its activity-policy runtime reverse dependency must be composed outside Resident, without package-cycle exceptions."
     }
   }
 }

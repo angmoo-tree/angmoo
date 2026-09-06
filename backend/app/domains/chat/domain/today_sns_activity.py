@@ -9,7 +9,7 @@ import json
 from collections.abc import Mapping
 from types import MappingProxyType
 
-from app.domains.social.public import TodaySocialCoverageStatus
+from app.domains.social.contracts.today_activity import TodaySocialCoverageStatus
 
 
 TODAY_SNS_ACTIVITY_SNAPSHOT_VERSION = "today-sns-activity-snapshot.v1"

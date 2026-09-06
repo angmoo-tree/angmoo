@@ -40,7 +40,7 @@ from app.runtime.social.manual_inbox import (
     release_claims as release_manual_inbox_claims,
 )
 from app.runtime.social.observations import observe_source
-from app.domains.social.public import SocialObservationError
+from app.domains.social.contracts.observations import SocialObservationError
 from app.domains.social.contracts.subjective_context import ActionSubjectiveContextV1
 from app.runtime.social.subjective_composition import record_declared_subjective_context
 from app.integrations.direct_llm import (

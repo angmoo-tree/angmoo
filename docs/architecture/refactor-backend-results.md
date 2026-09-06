@@ -1371,3 +1371,12 @@ Canonical interaction의 후보 실제 메서드/관계 band/상호 차단은 �
 C28 최종 확대는 **131 PASS /기존 PostgreSQL skip1 /63.62초 /기존 warning1개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence0, 경계 **855 module /3108 edge /legacy181**, L4 parity99·ER0가 통과했다. 첫 지도 검사가 legacy의 단일 factory 이전을 다중 분할로 기재한1항목을 거절했으므로, 실제 단일 구현 이전과 남은 임시 import aggregate로 구분해 같은 검사0오류를 확인했다. DTO·업무·SQL·assertion은 변경하지 않았다.
 
 C28 독립 리뷰 후속: `RuntimeRoutineInteractionReferences.get_post`가 원래 `db.get` 대신 공개/댓글 eager-load 조회에 연결된 차이를 발견했다. 신규 SQLite 회귀가 숨김 attached 객체 조회에서 **1 FAIL**로 결정적으로 재현했다. 이미 존재하는 실제 `social.repository.event_evidence.get_post`의 동일 `db.get`로 연결하여 identity-map hit의 SQL/flush0, miss의 숨김 객체/단일 SELECT/no eager-load, caller rollback·없는 ID를 확인했다. 직접 Social·RoutinePost 회귀는 **36 PASS /기존 PostgreSQL skip1 /19.50초**다. 앞선 AST 보존은 callback 호출 복원까지의 증거였으며 이 후속 검증이 실제 callback SQL 의미도 보완한다. 기존 판단/SQL/회귀 assertion은 변경하지 않았다.
+
+
+## AR-B5-C29 — Social 잔여 계층·집합 종료
+
+소비자가 없는 전달 계층4함수와 public/API/infrastructure/ports 집합을 제거하고 현재11소비자를 실제 service/contracts/UoW로 연결했다. 기존 쓰기 테스트는 원래 단언을 유지한 채 실제 실행기 메서드에 이름을 연결한다. 관찰 Protocol은 contracts로 원문 이동, subjective migration/helper도 실제 동일객체로 연결했다. 두 Feed runtime의 concrete Resident context 타입을 readonly contract로 바꾸어 원래 context/credential/콜백 객체를 그대로 전달한다. provider/cycle 전체 구현 AST는 타입 복원 후 동일하다.
+
+기존 Social·RoutinePost·UoW·오류/커서·Feed 검증은 **138 PASS /기존 PostgreSQL skip1 /50.69초 /기존 warning1개**다. 실행기를 건너뛰거나 새 provider/commit 경계를 만들지 않았으며 새 테스트 노드나 검사 예외를 추가하지 않았다. Community 소비자·G07/full B5/capture/Hosted는 후속이다.
+
+C29 보존 검사: PR #258/#263 API/schema/ORM·보호 변경4파일 assertion·전체 split evidence가0오류이며, 경계848 module/3089 edge/legacy181 및 L4 parity99·ER0도 통과했다. 실제 subjective migration·Windows supported-upgrade verifier·Today inventory 회귀5개와 동결 Today inventory --check가 통과했다. 동결 JSON/역사 migration 본문은 다시 쓰지 않았다.

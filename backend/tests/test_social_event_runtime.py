@@ -16,7 +16,7 @@ from app.core.db import Base
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )
-from app.domains.social.public import SocialObservationError
+from app.domains.social.contracts.observations import SocialObservationError
 from app.runtime.social import langgraph_actions as langgraph_social_apply
 from app.services import world_character_contracts
 from app.runtime.graph_projection.sqlalchemy_commands import (

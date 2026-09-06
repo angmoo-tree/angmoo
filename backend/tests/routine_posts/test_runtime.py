@@ -22,7 +22,9 @@ from app.cruds import agents as agent_crud
 from app.runtime.social.sqlalchemy_unit_of_work import (
     SqlAlchemySocialWriteUnitOfWork,
 )
-from app.domains.social.public import OwnerReplyCommand, create_owner_reply
+from app.domains.social.contracts.writes import OwnerReplyCommand
+from app.runtime.social.sqlalchemy_unit_of_work import SqlAlchemySocialWriteUnitOfWork
+create_owner_reply = SqlAlchemySocialWriteUnitOfWork.create_owner_reply
 from app.providers.gemini import build_generate_content_config
 from app.services import (
     activity_state_contracts,
