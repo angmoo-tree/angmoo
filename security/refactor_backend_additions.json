@@ -7578,6 +7578,473 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "f52dbdbc727bf08935cd7cbdca245aa81d6cd6ab",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: refactor(tree): own board models queries services and HTTP",
+      "tracked_files": {
+        "backend/app/domains/tree/__init__.py": "b708d5da0a77764d02ac0fb7a941de52b42ac894",
+        "backend/app/domains/tree/constants.py": "469b867a006e1ceb2f65d1faaeda80a289f539d8",
+        "backend/app/domains/tree/contracts.py": "8cf39bc4f0357d4f714ab7c5c1f6d120513d063d",
+        "backend/app/domains/tree/dependencies.py": "daebb322b2116e5f625cf18a3f46fd2711472c92",
+        "backend/app/domains/tree/exceptions.py": "7d9ba19628939197ba042d9f6b0f1a5eafc4b014",
+        "backend/app/runtime/tree.py": "24fd387a5cadd90d20e171432953fa9534c703ac",
+        "backend/tests/tree/test_role_contracts.py": "a703603cae2354685333c640cacf71692826f2e6",
+        "backend/app/domains/tree/models.py": "ad417cb3003f8ba8d9d663eec2d7513f62d79300",
+        "backend/app/domains/tree/repository.py": "4184b27a3c11292e76d5726deb3dd6d6ba92f559",
+        "backend/app/domains/tree/router.py": "ea0eaa9b7f1503647f8157dc08c7c541db62658a",
+        "backend/app/domains/tree/schemas.py": "ccc5945aed6cb36e76b8d8ad7e2e65caece13e97",
+        "backend/app/domains/tree/service.py": "f26773d431b8a2838e8c5b4b076bc4c1d88ba71e",
+        "backend/tests/tree/test_public_contract.py": "d27dfaa85620d69a11d83fcae98a12a5430ccee1"
+      },
+      "test_nodes": [
+        "tests/tree/test_role_contracts.py::test_both_factories_wire_tree_http_with_original_dependencies[full]",
+        "tests/tree/test_role_contracts.py::test_both_factories_wire_tree_http_with_original_dependencies[public]",
+        "tests/tree/test_role_contracts.py::test_repository_commit_failure_does_not_refresh_or_swallow",
+        "tests/tree/test_role_contracts.py::test_search_keeps_author_comment_scope_and_tied_cursor_order",
+        "tests/tree/test_role_contracts.py::test_writes_keep_same_session_commit_refresh_and_deleted_profile"
+      ],
+      "test_assertions": {
+        "tests/tree/test_role_contracts.py": {
+          "db": [],
+          "owner": [],
+          "test_search_keeps_author_comment_scope_and_tied_cursor_order": [
+            "assert [item.id for item in page.items] == ['tree-a', 'tree-b']",
+            "assert page.next_cursor == 'tree-b'",
+            "assert 'EXISTS' in statements[0] and 'users.display_name' in statements[0]",
+            "assert [item.id for item in next_page.items] == ['tree-c']",
+            "assert next_page.next_cursor is None",
+            "assert [item.id for item in comment_page.items] == ['tree-c']"
+          ],
+          "test_writes_keep_same_session_commit_refresh_and_deleted_profile": [
+            "assert seen == [(db, character.id)]",
+            "assert writes == ['commit', ('refresh', models.TreePost)]",
+            "assert (result.title, result.body) == ('Title', 'Body')",
+            "assert writes == ['commit', ('refresh', models.TreeComment)]",
+            "assert detail.comments[0].content == 'Comment'",
+            "assert (deleted.name, deleted.handle, deleted.avatar_url) == ('삭제한 앵무', None, None)",
+            "assert Base.metadata.tables['tree_posts'] is models.TreePost.__table__",
+            "assert Base.metadata.tables['tree_comments'] is models.TreeComment.__table__"
+          ],
+          "test_repository_commit_failure_does_not_refresh_or_swallow": [
+            "pytest.raises(RuntimeError)",
+            "assert caught.value is failure",
+            "assert calls == ['commit']",
+            "assert db.get(models.TreePost, 'failed') is None"
+          ],
+          "test_both_factories_wire_tree_http_with_original_dependencies": [
+            "assert application.state.tree_references().get_character is build_tree_references().get_character",
+            "assert created.status_code == 201",
+            "assert public_read.status_code == 200",
+            "assert [item['id'] for item in public_read.json()['items']] == [created.json()['id']]",
+            "assert application.openapi()['paths']['/api/v1/tree/posts']['get']['operationId'] == 'list_tree_posts_api_v1_tree_posts_get'"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/tree/test_role_contracts.py": {}
+      }
+    },
+    {
+      "commit": "f7f303d9464d594f7651f8b508e71e3266595d1b",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: refactor(lore): own models contracts and parser admission",
+      "tracked_files": {
+        "backend/app/domains/character_lore/__init__.py": "bfcec04fbe3db6afa89d5b48bf8638d4a47fd6d7",
+        "backend/app/domains/character_lore/constants.py": "35c9ab3bb0e56fb8676afdc6d641b431468ffad6",
+        "backend/app/domains/character_lore/contracts.py": "c80ec1446ebf13bce23b2034b74c31f5391e0a1b",
+        "backend/app/domains/character_lore/exceptions.py": "1b7057004aa5be64404532d2b8f8096e84a27b09",
+        "backend/app/domains/character_lore/service/__init__.py": "e4976653e08c19f9be94c1b4cce4c431eaa3e064",
+        "backend/app/domains/character_lore/models.py": "b0a9e56934ca448b0f85d17f75f8798108c74b65",
+        "backend/app/domains/character_lore/schemas.py": "a46f22ca9eb81a76f7a2f1f89f7f9a0969dcce49",
+        "backend/app/domains/character_lore/service/parser_quota.py": "a385a85dd634cd4946f449641b69511e138a719a",
+        "backend/tests/character_lore/test_documents.py": "8919e7654c0ca6b97250b5d438a9e1f8e736bdca",
+        "backend/tests/character_lore/test_parser_quota.py": "d19e4c00c956e6c74c7f851cf7694cb7fbf996e1",
+        "backend/tests/character_lore/test_upload_security.py": "96ffc528f1aca3e6d55b00f1296b606bf3dec699"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "c4a0a6a2dc5b952a98522a748fb5c57ea9835026",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: refactor(lore): own bounded parser and document text policies",
+      "tracked_files": {
+        "backend/app/domains/character_lore/parser.py": "2ab7a9f3d17133a16fb7a6e62bcf10c0f4dd4121",
+        "backend/app/domains/character_lore/policies/__init__.py": "1773b9540767de1b7044aeb2f9e23d9f8a6afc1f",
+        "backend/app/domains/character_lore/policies/chunking.py": "bcd2cb397fa7c52bedd9bc0c9cad834441581ae6",
+        "backend/app/domains/character_lore/service/presentation.py": "c2218bf4a9f687b33716b5f035f07fbf423926be",
+        "backend/app/domains/character_lore/utils.py": "10f6da01beb89635b24d9d7ee84d6d7874804ac1"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "9cd5eb14a0145e0f904b44e0125bfd7697bef8df",
+      "feature_id": "AR-B8-A",
+      "reason": "Original signed source integration: refactor(lore): own document and retrieval services with explicit composition",
+      "tracked_files": {
+        "backend/app/domains/character_lore/dependencies.py": "6fa7cf593c950624fa3fe0dfb79a18265eac719a",
+        "backend/app/domains/character_lore/policies/ranking.py": "9b5c9a1d0b630ff8b1492194c5619cfe00b8569f",
+        "backend/app/domains/character_lore/repository.py": "70d41984c5a18e09a4b74085347ca20fe7336d37",
+        "backend/app/domains/character_lore/service/documents.py": "76d31a9f7d1be6c1bfe5fe4336c023a21d9bc33a",
+        "backend/tests/character_lore/test_lore_role_contracts.py": "18906b79536b86f5518efb750954a90ee8fd16da",
+        "backend/app/domains/character_lore/router.py": "758f01656b6747e0d627e83d23229270a0403408",
+        "backend/app/runtime/character_lore.py": "1b76523630987fcc08c0a0f4b6b898c0cc3edad0"
+      },
+      "test_nodes": [
+        "tests/character_lore/test_lore_role_contracts.py::test_both_factories_wire_lore_same_session_and_original_authentication[full]",
+        "tests/character_lore/test_lore_role_contracts.py::test_both_factories_wire_lore_same_session_and_original_authentication[public]",
+        "tests/character_lore/test_lore_role_contracts.py::test_failed_embedding_is_saved_and_empty_scope_skips_provider",
+        "tests/character_lore/test_lore_role_contracts.py::test_upload_duplicate_and_rebuild_keep_session_commit_and_embedding_reuse"
+      ],
+      "test_assertions": {
+        "tests/character_lore/test_lore_role_contracts.py": {
+          "context": [],
+          "test_upload_duplicate_and_rebuild_keep_session_commit_and_embedding_reuse": [
+            "assert uploaded.status == 'ready'",
+            "assert writes == ['commit', ('refresh', models.CharacterLoreSource)]",
+            "assert len(embedded) == 1",
+            "assert duplicate.id == uploaded.id",
+            "assert writes == [] and len(embedded) == 1",
+            "assert rebuilt.status == 'ready' and rebuilt.chunk_count == 1",
+            "assert len(embedded) == 1",
+            "assert writes == ['commit', ('refresh', models.CharacterLoreSource)]",
+            "assert looked_up == [(db, character.id)] * 3",
+            "assert session is db and character_id == character.id"
+          ],
+          "test_failed_embedding_is_saved_and_empty_scope_skips_provider": [
+            "assert source is not None and source.status == 'embedding_failed'",
+            "assert source.chunks[0].error_message == 'embedding failed'",
+            "assert len(calls) == 1",
+            "assert empty_scope.mode == 'fallback_no_lore'",
+            "assert len(calls) == 1"
+          ],
+          "test_both_factories_wire_lore_same_session_and_original_authentication": [
+            "assert response.status_code == 200",
+            "assert response.json()['source_count'] == 0",
+            "assert observed == [(db, character.id)]",
+            "assert get_current_user is canonical_auth"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/character_lore/test_lore_role_contracts.py": {}
+      }
+    },
+    {
+      "commit": "5fb092b2f97b7027f19e8c1d1653929d9ffeec8e",
+      "feature_id": "AR-B8-A-RESIDUAL",
+      "reason": "Original signed source integration: refactor(operations): own settings maintenance and audit persistence",
+      "tracked_files": {
+        "backend/app/domains/operations/constants.py": "325a9080de45c64ed93b2074566c3161c39be2e1",
+        "backend/app/domains/operations/contracts.py": "106978aeac13668d45bfe1566552fdf0ac6d3272",
+        "backend/app/domains/operations/repository.py": "34f360a91db1c0b4f2bed464245e99ab4937bc88",
+        "backend/app/domains/operations/service/__init__.py": "7b7f99040f755e219c338fe58bfeccad99849865"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "940ef7896fb414d18b703d20d118dbea918ed2df",
+      "feature_id": "AR-B8-A-RESIDUAL",
+      "reason": "Original signed source integration: refactor(characters): own image settings key policy and persistence",
+      "tracked_files": {
+        "backend/app/domains/characters/repository/__init__.py": "46634cc97fb9113e05c89458b4f82227a1789721",
+        "backend/app/domains/characters/repository/image_settings.py": "34ef8db3ee284f7ec2e4a8eaa83a7d81850065f2",
+        "backend/app/domains/characters/service/image_settings.py": "9be1280ffbda76f454d0b39537d0bc3a7955ef76"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "e703fbc41963a1504a2b9cade64023a307dee4bb",
+      "feature_id": "AR-B8-A-RESIDUAL",
+      "reason": "Original signed source integration: refactor(local-bot): own keys models schemas and quota persistence",
+      "tracked_files": {
+        "backend/app/domains/local_bot/__init__.py": "7b74e3b11b17af4c501df7edc95f0f741657d340",
+        "backend/app/domains/local_bot/constants.py": "80302d032359162f4c5621993e1440c622d141ac",
+        "backend/app/domains/local_bot/exceptions.py": "d7f6940718347de43b73a9f14ca72cb115af8f2e",
+        "backend/app/domains/local_bot/repository/__init__.py": "3635e3d3afd8f826f53867e534020e76d668ff77",
+        "backend/app/domains/local_bot/repository/quota.py": "c2eac03e76eed2eda52e53aab76c3424ba84313a",
+        "backend/app/domains/local_bot/schemas.py": "b2d575463bc01975945ea1866dbb76e63f438e6c",
+        "backend/app/domains/local_bot/service/__init__.py": "782270a211f01c2cfb21449e3bd40034d3f221e7"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "d6e81bed7e3b9dae840364c8b2629fb04f51eb32",
+      "feature_id": "AR-B8-A-RESIDUAL",
+      "reason": "Original signed source integration: refactor(characters): own image setting workflows and HTTP",
+      "tracked_files": {
+        "backend/app/domains/characters/service/image_settings_owner.py": "e81547841d6f8803673cd417efdfbab6dd1cbef4",
+        "backend/tests/characters/test_image_settings_owner.py": "e99b59640ce28a71aa56cc19a7d9d63aa6f1bc69"
+      },
+      "test_nodes": [
+        "tests/characters/test_image_settings_owner.py::test_image_seed_http_keeps_manual_identity_and_commits_real_file_lifecycle[auto]",
+        "tests/characters/test_image_settings_owner.py::test_image_seed_http_keeps_manual_identity_and_commits_real_file_lifecycle[manual]",
+        "tests/characters/test_image_settings_owner.py::test_image_settings_http_preserves_owner_and_missing_key_admission"
+      ],
+      "test_assertions": {
+        "tests/characters/test_image_settings_owner.py": {
+          "image_owner": [
+            "assert session is db and user_id == owner.id",
+            "assert quota_date == datetime.now(ZoneInfo('Asia/Seoul')).date()"
+          ],
+          "test_image_seed_http_keeps_manual_identity_and_commits_real_file_lifecycle": [
+            "assert response.status_code == 200",
+            "assert response.json()['visual_identity_mode'] == identity_mode",
+            "assert response.status_code == 200",
+            "assert response.json()['visual_identity_mode'] == expected_mode",
+            "assert url == setting.seed_image_url",
+            "assert stored.is_file()",
+            "assert response.status_code == 200",
+            "assert response.json()['seed_image_url'] is None",
+            "assert response.json()['visual_identity_mode'] == expected_mode",
+            "assert not stored.exists()",
+            "assert commits == [db, db]",
+            "assert quota_reads == [None, url, None]",
+            "assert saved.seed_image_url == url",
+            "assert saved.visual_identity_source_hash is None",
+            "assert saved.visual_identity_prompt == ('Fixture character portrait' if identity_mode == 'manual' else None)"
+          ],
+          "test_image_settings_http_preserves_owner_and_missing_key_admission": [
+            "assert client.get('/agents/missing/image-settings').status_code == 404",
+            "assert response.status_code == 422",
+            "assert 'key' in response.json()['detail']",
+            "assert setting.image_key_mode == 'disabled'",
+            "assert response.status_code == 200",
+            "assert response.json()['image_key_mode'] == 'disabled'",
+            "assert response.json()['has_pollinations_api_key'] is False",
+            "assert quota_reads == [None]",
+            "assert list(media_root.rglob('*.webp')) == []"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/characters/test_image_settings_owner.py": {}
+      }
+    },
+    {
+      "commit": "c2cd2a64b18a42320292a68db37ba1f0c9d78f69",
+      "feature_id": "AR-B8-A-RESIDUAL",
+      "reason": "Original signed source integration: refactor(identity): own credential persistence and shared image secrets",
+      "tracked_files": {
+        "backend/app/domains/identity/repository/__init__.py": "e4ee852f0d5663515a4ffeccb1debd60d62bcd4f",
+        "backend/app/domains/identity/repository/credentials.py": "0b9ce9d658cb67b8cf888cbfc579aeb816381277",
+        "backend/app/domains/identity/service/character_credentials.py": "047c77960301580d3e339d3aef122f627710b974"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "3b547b227ba864b08092f0a3a9fac2b8a0658e01",
+      "feature_id": "AR-B8-A-RESIDUAL",
+      "reason": "Original signed source integration: refactor(local-bot): own key management and owner HTTP",
+      "tracked_files": {
+        "backend/app/domains/local_bot/contracts/__init__.py": "1ff36bafbf6d97851b59ddae28411313836810c7",
+        "backend/app/domains/local_bot/contracts/key_management.py": "bf711e2cab8cc08017a66a50a5f723db44fcda2f",
+        "backend/app/domains/local_bot/dependencies.py": "11ac1b044b0a1b340f93636d90bbfdee7abf57d4",
+        "backend/app/domains/local_bot/repository/keys.py": "ff3e335265f3dcfe3e97797a5954f18339860f20",
+        "backend/app/domains/local_bot/router/__init__.py": "cb185a9079d3af2d195189ba2f06f4e3f7627652",
+        "backend/app/domains/local_bot/router/keys.py": "c9ae6ebd1860e3633cbeaa7f1387fdb9d06ce7d7",
+        "backend/app/domains/local_bot/service/key_management.py": "b121334d21ca75ac7012681e71098036a3fca1df",
+        "backend/app/domains/local_bot/service/key_records.py": "10f6488e7cbcfb0e738cfc31088969e80b637aeb",
+        "backend/app/runtime/local_bot/__init__.py": "62d6a3e4929afecbb383ae7d4bf240f14fc9d932",
+        "backend/app/runtime/local_bot/keys.py": "890a6abda4bf09c5f54b0b4fdb5db5f02567797b",
+        "backend/tests/local_bot/test_key_management.py": "5cf033a643499618ac81b37a3c1c03ccc325e102"
+      },
+      "test_nodes": [
+        "tests/local_bot/test_key_management.py::test_local_key_http_rejects_foreign_owner_and_server_mode_without_key_or_log",
+        "tests/local_bot/test_key_management.py::test_local_key_http_rotation_authentication_and_revocation_share_persisted_identity"
+      ],
+      "test_assertions": {
+        "tests/local_bot/test_key_management.py": {
+          "key_owner": [],
+          "test_local_key_http_rotation_authentication_and_revocation_share_persisted_identity": [
+            "assert client.get('/agents/local-bird/local-connection').json()['has_active_key'] is False",
+            "assert first.status_code == 201",
+            "assert token.startswith('angmoo_local_')",
+            "assert key is not None and key.token_hash != token",
+            "assert key.token_prefix == token[:24] + '...'",
+            "assert authenticated.local_key is key",
+            "assert key.last_used_at is not None",
+            "assert read.status_code == 200 and 'token' not in read.json()",
+            "assert read.json()['last_used_at'] is not None",
+            "assert second.status_code == 201",
+            "assert replacement != token",
+            "assert get_active_local_key_by_hash(db, security.hash_token(token)) is None",
+            "assert client.delete('/agents/local-bird/local-key').status_code == 204",
+            "assert get_active_local_key_by_hash(db, security.hash_token(replacement)) is None",
+            "assert len(keys) == 2",
+            "assert all((not row.enabled and row.revoked_at is not None for row in keys))",
+            "assert actions == ['local_key_issued', 'local_key_issued', 'local_key_revoked']"
+          ],
+          "test_local_key_http_rejects_foreign_owner_and_server_mode_without_key_or_log": [
+            "assert list(db.scalars(select(AgentLocalKey))) == []",
+            "assert list(db.scalars(select(AgentActivityLog))) == []",
+            "assert method(f'/agents/foreign-bird/{suffix}').status_code == 404",
+            "assert method(f'/agents/server-bird/{suffix}').status_code == 409"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/local_bot/test_key_management.py": {}
+      }
+    },
+    {
+      "commit": "5efe7493047010f3d48fb8ccba748b954d883a16",
+      "feature_id": "AR-B8-A-RESIDUAL",
+      "reason": "Original signed source integration: refactor(local-bot): own authentication and public response projection",
+      "tracked_files": {
+        "backend/app/domains/local_bot/contracts/authentication.py": "38f05b3a368c47db93ac18da948bc80d3576d912",
+        "backend/app/domains/local_bot/policies/rate_limit_clock.py": "5ab2c5d29e5c0288ca10646bf815966d7a2f14f7",
+        "backend/app/domains/local_bot/service/authentication.py": "5c3384472db2667d9e868e0837ac10cb5e44aeea",
+        "backend/app/domains/local_bot/service/presentation.py": "0153f4435dd08acdaec9577d85b57a8f40dac7e5",
+        "backend/app/runtime/local_bot/authentication.py": "8af351caaec6f4e6bc1b04dbe1c67ae126542283",
+        "backend/tests/local_bot/test_authentication.py": "a39cbbdf8f8d1a45883d9dd2e3d4840fd634dca2"
+      },
+      "test_nodes": [
+        "tests/local_bot/test_authentication.py::test_authentication_preserves_attached_values_and_owner_lookup_order",
+        "tests/local_bot/test_authentication.py::test_authentication_rejections_stop_reads_before_persisting_key_usage"
+      ],
+      "test_assertions": {
+        "tests/local_bot/test_authentication.py": {
+          "test_authentication_preserves_attached_values_and_owner_lookup_order": [
+            "assert result.character is character and result.user is owner and (result.local_key is key)",
+            "assert events == ['key', 'character', 'user', 'persist-used']",
+            "assert session is db",
+            "assert token_hash == authentication.security.hash_token('angmoo_local_fixture')",
+            "assert session is db and character_id == 'bot'",
+            "assert session is db and user_id == 'owner'",
+            "assert session is db and row is key"
+          ],
+          "test_authentication_rejections_stop_reads_before_persisting_key_usage": [
+            "pytest.raises(error)",
+            "assert events == expected",
+            "assert session is db",
+            "assert session is db"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/local_bot/test_authentication.py": {}
+      }
+    },
+    {
+      "commit": "e19b36cc7e5542af4a4a470b77504bdd8c97ffdd",
+      "feature_id": "AR-B8-A-RESIDUAL",
+      "reason": "Original signed source integration: refactor(local-bot): isolate caller-session owner queries",
+      "tracked_files": {
+        "backend/app/runtime/local_bot/queries.py": "c8021bca97a141fc28a75fb408af3435fd5d15de"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "480426256302628c445b4ead07db4bdfd60c5e25",
+      "feature_id": "AR-B8-A-RESIDUAL",
+      "reason": "Original signed source integration: refactor(local-bot): own quota admission and retry policy",
+      "tracked_files": {
+        "backend/app/domains/local_bot/contracts/rate_limits.py": "b0e66d04f23a0cf8a169158269c9e853d3306575",
+        "backend/app/domains/local_bot/service/rate_limits.py": "c5d507751ef1189a36a11e136558325826445df9",
+        "backend/app/runtime/local_bot/rate_limits.py": "70b8c03e006a071037f44fd08916d9ac454513bf"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "1565688ffa8095b37ec8fb843f5547c6c87705ae",
+      "feature_id": "AR-B8-A-RESIDUAL",
+      "reason": "Original signed source integration: refactor(local-bot): own actions and authenticated HTTP workflows",
+      "tracked_files": {
+        "backend/app/api/authorization.py": "3e65b7af6253f35a932e7312d2f7d06248c3783f",
+        "backend/app/domains/local_bot/contracts/actions.py": "a936caa4faff92e7378f482a3a29a25d56e01c0c",
+        "backend/app/runtime/local_bot/composition.py": "5bf369783128fc3a81ef3c0f020970baf89b3601",
+        "backend/tests/local_bot/support.py": "05a76ce573fe40331e9545dbd8fc93363a6ecbf9",
+        "backend/tests/local_bot/test_http_workflows.py": "7945a031972482bf8184416b926c43989703fb53",
+        "backend/tests/test_refactor_error_entries.py": "4e6d8ee5257d4dfb81c456d479ea8dd4a3381806"
+      },
+      "test_nodes": [
+        "tests/local_bot/test_http_workflows.py::test_bot_http_auth_errors_precede_quota_and_preserve_status_details",
+        "tests/local_bot/test_http_workflows.py::test_bot_http_read_quota_keeps_retry_after_and_does_not_overspend",
+        "tests/local_bot/test_http_workflows.py::test_bot_http_same_session_authentication_state_commit_and_private_response",
+        "tests/local_bot/test_http_workflows.py::test_both_app_factories_register_same_bot_workflows_and_shared_http_parser",
+        "tests/test_refactor_error_entries.py::test_error_entry_does_not_open_unlisted_siblings_storage_http_or_deep_modules",
+        "tests/test_refactor_error_entries.py::test_explicit_error_entry_allows_same_class_http_catches_without_domain_completion",
+        "tests/test_refactor_error_entries.py::test_explicit_error_entry_keeps_framework_and_storage_imports_forbidden"
+      ],
+      "test_assertions": {
+        "tests/local_bot/test_http_workflows.py": {
+          "bot_http": [],
+          "test_bot_http_same_session_authentication_state_commit_and_private_response": [
+            "assert read.status_code == 200",
+            "assert read.json()['character']['id'] == character.id",
+            "assert observed == [('character', db, character), ('owner', db, owner)]",
+            "assert object_session(key) is db and key.last_used_at is not None",
+            "assert all((name not in read.text for name in (token, 'token_hash', 'persona_summary')))",
+            "assert db.get(LocalBotReadQuotaBucket, key.id).used_count == 1",
+            "assert saved.status_code == 200",
+            "assert saved.json()['state']['summary'] == 'HTTP update'",
+            "assert denied.status_code == 429",
+            "assert db.get(CharacterState, character.id).summary == 'HTTP update'",
+            "assert observer.get(CharacterState, character.id).memory_note == 'Retain this'",
+            "assert bucket.used_count == 0 and bucket.quota_date is None",
+            "assert bucket.last_succeeded_at is not None",
+            "assert list(observer.scalars(select(AgentActivityLog.action_type).order_by(AgentActivityLog.id))) == ['observation_note_saved', 'state_saved']"
+          ],
+          "test_bot_http_auth_errors_precede_quota_and_preserve_status_details": [
+            "assert response.status_code == 409",
+            "assert response.json() == {'detail': 'Only local mode characters can use bot API.'}",
+            "assert response.status_code == 403",
+            "assert response.json() == {'detail': 'Local bot character is not available.'}",
+            "assert key.last_used_at is None",
+            "assert list(db.scalars(select(LocalBotReadQuotaBucket))) == []",
+            "assert response.status_code == 401 and response.json() == {'detail': detail}"
+          ],
+          "test_bot_http_read_quota_keeps_retry_after_and_does_not_overspend": [
+            "assert response.status_code == 429",
+            "assert response.json() == {'detail': 'Local bot read rate limit is reached.'}",
+            "assert int(response.headers['Retry-After']) > 0",
+            "assert db.get(LocalBotReadQuotaBucket, key.id).used_count == MAX_READS_PER_WINDOW",
+            "assert list(db.scalars(select(AgentActivityLog.action_type))) == ['local_bot_rate_limited']"
+          ],
+          "test_both_app_factories_register_same_bot_workflows_and_shared_http_parser": [
+            "assert identity_dependencies.AuthorizationHeader is AuthorizationHeader",
+            "assert identity_dependencies._bearer_token is _bearer_token",
+            "assert dependencies.AuthorizationHeader is AuthorizationHeader",
+            "assert dependencies._bearer_token is _bearer_token",
+            "assert application.state.local_bot_workflows is build_bot_workflows",
+            "assert application.state.local_bot_authentication_workflows is build_authentication_workflows"
+          ]
+        },
+        "tests/test_refactor_error_entries.py": {
+          "test_explicit_error_entry_allows_same_class_http_catches_without_domain_completion": [
+            "assert result == []"
+          ],
+          "test_error_entry_does_not_open_unlisted_siblings_storage_http_or_deep_modules": [
+            "assert any(('cross_domain_deep_import' in error for error in result))",
+            "assert any(('cross_domain_deep_import' in error for error in result))"
+          ],
+          "test_explicit_error_entry_keeps_framework_and_storage_imports_forbidden": [
+            "assert any((expected in error for error in result))"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/local_bot/test_http_workflows.py": {},
+        "tests/test_refactor_error_entries.py": {}
+      }
     }
   ]
 }

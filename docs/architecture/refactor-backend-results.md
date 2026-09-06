@@ -2613,3 +2613,14 @@ Docker의 실제 contributor entrypoint와 PyInstaller의 실제 sidecar entrypo
 
 
 G06 원본 계보 보완: 현재 실제 소유 준비 `9aafe289`와 원래 `cc513f4`의 미합류 비-merge commit은 `90d7fd7`·`cc513f4` 두 개뿐임을 Git로 확인했다. 따라서 미래 G5/호환 제거 구현을 앞당기지 않고 이 두 원래 source ancestry를 지금 합류했다. 현재 소스에서 이미 보존·실행 검증한 main/profile·40개 업무 조립·15export·실제 caller·원래 test·보존 checker·frozen/current inventory·추가 원장은 모두 동일하다. 변경은 ER7 문서의 현재 ASGI 경로 한 줄과 기존 G06 결과 이력 추가뿐이며 `g06-original-ancestry-proof.json`에 목록을 보존했다. 원래90d/cc의 immutable snapshot을 현재 최초 도입 원장으로 직접 연결할 수 있으며 ancestry 검사를 완화하거나 대체 source를 최초 도입으로 기록하지 않는다.
+
+Tree/Lore의 원래 signed source 네 개를 기존 committed snapshot으로 연결했다. `f52dbdbc`는 파일13개·신규5 nodes, `f7f303d9`는 파일11개·신규0 nodes, `c4a0a6a2`는 파일5개·신규0 nodes, `9cd5eb14`는 파일7개·신규4 nodes다. 원래 수집기의 도입 판정과 변경하지 않은 `addition_errors`로 각 Git blob·최초 도입·단언·suppression·ancestor를 검증한 뒤 **162개 불변 prefix → 166개**로 append했다. `d8f5b446`과 후보 `7bc89bf0`의 기존 원장도 동일하다. 현재 후보에서 기준 자료를 재수집하거나 원본 단언을 변경하지 않았다.
+
+현재 소스 목록 **1056 modules / 3925 internal edges / 3018 external imports**, 구조 경계 **legacy103**, deferred22, L4 parity99, OSS·secret allowlist metadata25·launcher6명령/2서비스·desktop installer 계약은 통과했다. 공식 stock/API·ORM/node와 전체 backend는 이 metadata를 고정한 후보에서 이어서 수행한다. Hosted CI·설치·post-merge 및 G5/G06/B8-B 최종 판정은 아직 별도 단계다.
+
+
+### AR-B8-A LocalBot·이미지·Identity·Operations 원본 도입 기록
+
+Tree/Lore signed `ac8829f1cfa3f7b92ab9f80d020c449f7e14f299`의 기존166개 원장을 불변 prefix로 유지하고, 실제 순차 후보 `57a3c8bf6a6b863bac9b0ca273bfce842edae03b`에 포함된 원본10개 signed source의 파일46개·test node14개를 append했다. 원래 committed_snapshot cache는 commit/tree가 같은지 검증했고, 누락된 LocalBot 중간3단계만 같은 production collector로 isolated Git archive에서 수집했다. 각 source의 최초 도입·blob·단언·suppression·node 및 원장 과거 prefix를 쓰기 전/후 원래 checker로 확인한 결과는 오류0이며 최종176개다.
+
+`runtime/local_bot/composition.py`는 원래 `55d1c2f9e373a5b42b1ddafc0ac04ee12fd3e8b0`와 Git bytes가 같고, 파일 자체의 최초 도입은 `1565688ffa8095b37ec8fb843f5547c6c87705ae`다. 미래G06을 포함한55d 전체 ancestry를 이번 후보에 합류하지 않았다. Visual identity 원본734492bf는 기존파일 수정만 있으며 새로운 test/file 도입이 없어 추가record로 중복 등록하지 않는다. 제품·테스트·frozen 기준·검사 변경0이며 현재 navigation/stock·전체backend·CI/PR Gate는 다음 metadata 후보에서 별도로 확인한다.
