@@ -2329,3 +2329,11 @@ Memory가 소유하는 실제 repository/service와 명시적인 source/scope/re
 
 별도 읽기 진단의 첫 입력 구성 오류도 기록한다. archive의 전체 test 목록을 희소 assertion 자료에 직접 붙이거나 assertion 자료가 없는 #258 source baseline을 단언 비교에 포함한 진단은 중단했다. 제품 checker와 같은 원래 #263/additions 구성 및 원래 수집기 방식으로9개 signed source의 신규 증거를 메모리에서 계산한 최종 진단은 **assertions0 / split0**이다. baseline/checkpoint/원장·원래 test assertion/skip은 변경하지 않았다. 현재 구조 **1036 modules / 3872 edges / legacy124**, API public196·현재 L4/ER0/Memory batch inventory도 확인했다. 다음 metadata commit에서 B6 원장153개를 불변 prefix로 유지해 원래9개 도입을 append한 뒤 공식 stock·backend 전체·PR Gate를 수행한다. 이 상태를 B7 최종 완료나 전체 backend 종료로 표시하지 않는다.
 원래 signed9개 source의 파일35개·노드13개는 변경 없는 원장 검증을 통과해 **153개 불변 prefix → 162개**로 append했다. 각 Git blob·첫 도입 SHA·원래 assertion/suppression을 검증했으며 source `274f90e7`의 제품 코드는 이 metadata append에서 변경하지 않았다. 공식 stock/API/ORM/node 및 backend 전체 검사는 이 후보에서 이어간다.
+
+### AR-B7 공식 전체·원래 보존 검증과 현재 core 목록 보정
+
+고정 source `274f90e7`/metadata `d8f5b446`의 공식 stock은 **보호2428 = 현재2428 / 37항목 PASS**다. original #258/#263 및162개 append-only 기록의 API/ORM/assertion/suppression/node를 변경하지 않고 검사했다. 실제 d8 tree/history Gitleaks는0 findings이며 custom 현재 **2145 files /치명0**, 별도 bare 저장소의 전체 **843 ancestors /9523 blobs /치명0**이다. 기존 asset audit22개는 별도 유지하며 DCO·CI 정책·OSS 경계도 통과했다.
+
+같은 고정 tree의 전체 backend는 **2405 passed / 기존22 skipped / 1 failed / 27 warnings / 1526.32초**다. 유일 실패는 `tests/test_l0_local_runtime_contract.py::test_repository_runtime_contract_passes`의 `core module inventory is stale`였다. Daypart 원문에서 도입한 실제 공통 helper `app.core.context_clipping`은 Git 원문 그대로 존재하지만 현재 `security/local_runtime_contract.json` 목록에서 빠져 있었다. 전체 프로세스가 끝난 뒤 해당 모듈의 keep/AR-B7-DAYPART 기록 한 항목6줄만 추가했다. 원본 checker·제품·테스트·단언과162개 원장은 바꾸지 않았다.
+
+원래 실패가 포함된 L0 runtime contract와 실제 Daypart 회귀는 **10 passed /8.83초**다. 목록 보정 전 전체 실패와 보정 후 집중 결과를 합쳐 전체 PASS라고 쓰지 않으며, 정확한 최종 PR head의 Core backend 전체를 최종 전체 Gate로 확인한다. B6 #284 merge `4c1d06a277388d9ec317f5966f836b3008304fd8` 이후의 순차 합류와 stock/PR/installer는 별도 확인한다.
