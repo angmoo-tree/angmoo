@@ -27,7 +27,7 @@ from app.runtime.memory.source_delivery import (
     install_memory_delivery,
     uninstall_memory_delivery,
 )
-from test_p8_l_o_memory_consolidation import memory_session, _stack, _propose
+from memory.test_p8_l_o_memory_consolidation import memory_session, _stack, _propose
 
 
 class Selector:

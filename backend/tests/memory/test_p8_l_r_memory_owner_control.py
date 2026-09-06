@@ -7,7 +7,7 @@ from app.domains.memory.exceptions import MemoryNotFoundError
 from app.runtime.memory.composition import (
     memory_repository as SqlAlchemyMemoryRepository,
 )
-from test_p8_l_q_memory_read_inspector import (
+from memory.test_p8_l_q_memory_read_inspector import (
     FRONTEND_HEADERS,
     _fixture,
     _seed,

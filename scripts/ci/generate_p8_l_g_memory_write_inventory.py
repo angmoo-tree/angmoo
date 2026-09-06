@@ -48,7 +48,7 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/service/source_evidence.py",
     "backend/app/domains/memory/repository/queue.py",
     "backend/app/domains/memory/public.py",
-    "backend/tests/test_p8_l_g_memory_write_lifecycle.py",
+    "backend/tests/memory/test_p8_l_g_memory_write_lifecycle.py",
     "docs/architecture/p8-l-g-memory-write-lifecycle.md",
 )
 
@@ -130,7 +130,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/tests/test_p8_l_g_memory_write_lifecycle.py",
+        "backend/tests/memory/test_p8_l_g_memory_write_lifecycle.py",
         (
             "test_memory_opt_out_fixture_is_an_executable_zero_write_gate",
             "test_item_and_evidence_rollback_together_on_provenance_failure",

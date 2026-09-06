@@ -10,7 +10,7 @@ from app.models import Base
 from app.domains.memory.contracts.scope import MemoryScope
 from app.domains.memory.exceptions import MemoryScopeError
 from app.runtime.memory.composition import memory_batch_repository, memory_repository
-from test_p8_l_f_memory_domain import _seed_scope
+from memory.test_p8_l_f_memory_domain import _seed_scope
 
 
 def test_memory_scope_timezone_sees_caller_flush_without_committing(tmp_path):

@@ -450,8 +450,8 @@ uv run --directory backend python -m pytest -q tests/test_t2_5_architecture_boun
 아래는 현재 경로의 기능 회귀 예시입니다. 수정한 문제의 범위에 맞는 테스트를 선택하고, 전체 회귀가 필요한 단계에서는 마지막 명령을 사용합니다.
 
 ```powershell
-uv run --directory backend python -m pytest -q tests/test_p8_l_g_memory_write_lifecycle.py
-uv run --directory backend python -m pytest -q tests/test_p8_l_h_canonical_recall.py
+uv run --directory backend python -m pytest -q tests/memory/test_p8_l_g_memory_write_lifecycle.py
+uv run --directory backend python -m pytest -q tests/memory/test_p8_l_h_canonical_recall.py
 uv run --directory backend python -m pytest -q tests
 ```
 
@@ -1175,3 +1175,9 @@ Social 호출자는 실제 `service`·`contracts`를 선택한다. 옛 `public`�
 `tests/chat`에는 Chat의 서비스·HTTP·World별 identity·마이그레이션·응답 lifecycle·회상 라우팅·근거 기반 응답·모델 정책 검사를 함께 둡니다. 기존 테스트를 파일 단위로 옮기며 테스트 이름·동작·조건을 유지합니다. 공유 `model_fixture_support`와 `chat_service_support`는 여러 업무가 사용하므로 `tests` 루트에 남습니다. 평가 JSONL은 `tests/fixtures/p8_l`의 원본 자료를 사용합니다. 이 공통 자료를 Chat 폴더에 복제하지 않습니다.
 
 현재 테스트를 실행할 때는 `python -m pytest -q tests/chat`를 사용합니다. 과거 승인 목록·동결 inventory는 당시 경로를 유지하며, 현재 수집 경로는 보존 이동표가 정확하게 연결합니다. 따라서 폴더 이동을 이유로 승인 노드 목록이나 평가 자료를 다시 생성하지 않습니다.
+
+### Memory 테스트 소유
+
+`tests/memory`에는 Memory 스키마·범위·쓰기 lifecycle·회상·정리·조회·소유자 관리와 배치 정책·실행·안전성·마이그레이션 검사를 모읍니다. 공통 준비 코드를 공유하는 테스트는 `memory.test_*`의 기존 fixture를 가져옵니다. `__init__.py`는 이 테스트 이름 공간만 정하며, fixture나 제품 구현을 추가하지 않습니다. 여러 업무가 사용하는 ORM fixture와 원본 평가 자료는 `tests`의 공통 위치를 사용합니다.
+
+Memory 업무 검사 명령은 `python -m pytest -q tests/memory`입니다. 별도 루트 inventory 검사는 역사적 승인·동결 자료와 현재 자료의 연결을 계속 확인합니다. 과거 노드를 새 이름으로 재승인하거나 JSONL·동결 predecessor를 복제하지 않고, 기존 노드에서 현재 테스트로의 정확한 이동표를 사용합니다.

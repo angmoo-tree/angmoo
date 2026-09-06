@@ -50,7 +50,7 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/contracts/maintenance_transaction.py",
     "backend/app/domains/memory/public.py",
     "backend/app/integrations/llm/memory_consolidation.py",
-    "backend/tests/test_p8_l_o_memory_consolidation.py",
+    "backend/tests/memory/test_p8_l_o_memory_consolidation.py",
     "backend/tests/test_p8_l_o_memory_consolidation_inventory.py",
     "docs/architecture/backend-domains.md",
     "docs/architecture/p8-l-o-memory-consolidation-hot-brief.md",

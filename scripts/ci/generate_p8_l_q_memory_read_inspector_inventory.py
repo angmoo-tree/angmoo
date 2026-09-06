@@ -66,7 +66,7 @@ REQUIRED_FILES = (
     "backend/tests/test_l4_pr_a_inventory.py",
     "backend/tests/test_m4_public_runtime.py",
     "backend/tests/test_p8_l_q_frontend_memory.py",
-    "backend/tests/test_p8_l_q_memory_read_inspector.py",
+    "backend/tests/memory/test_p8_l_q_memory_read_inspector.py",
     "browser-tests/product-shell.spec.ts",
     "browser-tests/static-product-shell.spec.ts",
     "desktop/platform/windows-host-tauri-dev.json",

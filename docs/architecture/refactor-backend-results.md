@@ -2566,3 +2566,13 @@ Current collection is **2503 nodes**. Social, Relationships, RoutinePost, Reside
 현재/역사 generator7개는 정확한 test source 경로를 따라가며 frozen predecessor payload와 digest는 그대로다. #258/#263 baseline, 추가 원장, public604 승인 목록, P8-L-H 원문·평가자료는 변경하지 않았다. 기존 테스트 이동표와 소비자 증거·G07 위치를 갱신했고 Memory12/DirectLLM 분할·다른 도메인 잔여 정리는 별도 범위다. 첫 Chat 전체 검증은205 PASS/기존경고4/34.50초이다. 원래 보존 및 전체수집·관련 inventory 검증은 아래 최종 결과로 구분한다.
 
 최종 Chat205 PASS/기존경고4, before/after 전체 수집2503개는179개 경로 치환 후 집합이 완전히 같다(신규0/누락0). 공개604 승인 원본은 그대로이며 연결 검사가 PASS다. 원래7 읽기 보존 진단은 모두오류0(보호2311/current2503)이고 소스 도입 원장을 쓰지 않았다. 관련 inventory25개 검사 중24 PASS이며, 실패1은 기준348d8b5에 이미 있던 `world_scope_migration.py`의 frozen20595→실제20594bytes 차이다. 현재 제품 파일과 기준blob이 같은 것을 확인했고 부모가 역사적 원문 복원을 별도 소유한다. 이번 source에서는 해당 migration·검증문·동결JSON을 수정하지 않았다. L4/Today current와 원문759개 단언의 전체모듈 AST 동일성을 확인했다.
+
+## AR-G07 — Memory 테스트 소유 경로
+
+기존 root Memory 동작 테스트 12파일·113노드를 `backend/tests/memory`로 whole-file 이동했다. 테스트 함수명·단언·parametrize·예외 조건·fake provider·기존 fixture 본문은 유지한다. 기존 3개 Memory 소유 테스트와 옮긴 4개 테스트의 fixture import는 `memory.test_*`를 사용하며 package marker 하나로 같은 모듈을 참조한다. G 쓰기 lifecycle의 공통 원본 fixture 경로 한 곳만 깊이를 보정했다. 새 테스트 노드는 없다.
+
+Generator 7개의 정확한 현재 테스트 경로를 연결했다. Memory batch의 현재 inventory는 이동한 5개 배치 테스트 전체와 생성기 소스를 계속 기록하며, P8-L-H 및 F/G/O/Q/owner-control 동결 자료·digest·baseline/checkpoint/additions·원래 승인 목록은 수정하지 않았다. 수집 노드·원본 모듈 AST·관련 실행 및 보존 결과는 아래와 같다.
+
+최종 고정 트리의 Memory/관련 inventory 검사는 **136 PASS / 기존 경고 2 / 177.46초**이다. 기존 12개 모듈의 AST는 정확한 fixture import와 경로 한 곳을 되돌려 비교하면 원문과 같으며 **기존 단언 480개**를 유지했다. 전체 수집은 이전/이후 **2503개**, 이동표 113개 외 누락·신규 노드 **0개**이다. L4 현재 inventory **1102/14/99** 및 Memory batch 현재 inventory도 통과했다. Batch inventory의 기존 C29 설치 fixture 생성기 hash 한 건은 변경 없는 signed base 소스와 동일함을 확인하여 현재 기록만 갱신했다.
+
+원래 보존 진단의 source·split·assertion·suppression·ASGI·API/ORM·노드 항목은 모두 **오류 0개**이며 보호 노드 2311개/현재 2503개다. 이 결과는 선행 signed source `869bae55`의 정확한 두 경로만 메모리에 보충한 읽기 전용 진단이다. 동결 자료나 추가 원장을 재생성하지 않았으며, 원래 stock gate의 최종 통과·source 최초 도입 capture·선형 통합·전체 backend·Hosted CI·설치 검증은 부모 통합 단계에서 별도로 마무리한다.

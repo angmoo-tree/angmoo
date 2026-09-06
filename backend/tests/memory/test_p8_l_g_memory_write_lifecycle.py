@@ -59,7 +59,7 @@ from app.domains.memory.contracts.items import MemoryWriteOutcome
 NOW = datetime(2026, 9, 1, 12, tzinfo=UTC)
 
 FIXTURE_ROOT = (
-    Path(__file__).parent / "fixtures" / "core_experience" / "p0-contract-v1"
+    Path(__file__).parents[1] / "fixtures" / "core_experience" / "p0-contract-v1"
 )
 
 class FakeSourceReader:
