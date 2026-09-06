@@ -13,7 +13,7 @@ BACKEND_ROOT = REPO_ROOT / "backend"
 sys.path.insert(0, str(BACKEND_ROOT))
 
 from app.main import app as private_app  # noqa: E402
-from app.public_main import app as public_app  # noqa: E402
+from app.main import public_app  # noqa: E402
 from app.domains.routines.contracts.resident import ResidentGraphState as _ResidentGraphState  # noqa: E402
 
 

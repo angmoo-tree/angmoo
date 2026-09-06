@@ -19,7 +19,7 @@ from app.domains.local_bot.service import authentication as local_bot_service
 from app.runtime.local_bot.authentication import build_authentication_workflows
 from app.domains.local_bot.repository import keys as local_key_repository
 from app.domains.local_bot.service import key_records
-from app.public_main import app as public_app
+from app.main import public_app
 
 
 DEMO_EMAIL = "demo-kimarin@angmoo.test"

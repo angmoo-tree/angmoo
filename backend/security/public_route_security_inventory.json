@@ -519,7 +519,7 @@
     },
     "GET /health": {
       "access": "public",
-      "module": "app.public_main",
+      "module": "app.main",
       "endpoint": "health"
     },
     "PATCH /api/v1/agents/drafts/{draft_id}": {

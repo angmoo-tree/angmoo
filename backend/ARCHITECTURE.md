@@ -108,7 +108,7 @@ backend/
 
 `runtime`, `integrations`, `credentials`는 Angmoo 실행에 필요한 영역입니다. 참조 저장소와 폴더 이름을 맞추기 위해 실행 기능을 없애지 않습니다. `templates`와 `requirements`는 조건부이며, 이번 구조 전환에서 현재 `pyproject.toml`·`uv.lock`을 다른 의존성 관리 방식으로 교체하지 않습니다.
 
-현재 존재하는 `public_main.py`는 G06 전환 중에만 호환 경로로 유지합니다. Local의 명시적 `RuntimeConfig`, 복구, Memory 시작·종료와 각 지원 profile의 계약을 `main.py`의 단일 앱 생성 구현으로 통합한 뒤, 실행·테스트·CI·패키징 소비자를 옮깁니다. 검증 후 호환 파일을 제거하고 그 파일이 없는 후보에서 다시 실행을 확인합니다. 이 목표를 현재 구현 완료로 읽지 않으며, scheduler·DB·Memory의 세부 처리는 소유 runtime과 도메인에 둡니다.
+`main.py`의 실제 `create_app`·`create_lifespan`이 Local RuntimeConfig, 복구, Memory 시작·종료와 현재 B7 업무 연결을 함께 소유합니다. `main.app`은 원래 full health·component 기본값을, `main.public_app`은 원래 public readiness·미구성 component 기본값을 선택합니다. `create_public_app`은 같은 factory의 public profile을 선택하는 partial입니다. 공식 contributor/sidecar와 개발 ASGI는 main의 public export를 사용합니다. `public_main.py`에는 원래 15개 이름의 단방향 임시 export만 남습니다. G5의 단일 Base·DB 등록과 B8-B의 검증 후 호환 제거·새 bundle 실행은 별도 단계이며, scheduler·DB·Memory의 세부 처리는 소유 runtime과 도메인에 둡니다.
 
 ## 2. 도메인 안에서 코드 찾기
 
@@ -359,7 +359,7 @@ Angmoo는 Docker의 브라우저 실행과 Windows 설치 앱에서 같은 백�
 
 | 영역 | 담당하는 일 |
 | --- | --- |
-| `main.py` | 목표 단일 앱 생성과 지원 profile의 router·오류·startup/shutdown 연결. 현재 `public_main.py`의 Local 구현은 G06에서 통합·임시 호환·검증 후 제거 |
+| `main.py` | 실제 단일 앱 생성과 full/public profile의 router·오류·startup/shutdown 연결. `public_main.py`는 같은 객체의 임시 export이며 G5와 B8-B 검증 후 제거는 별도 단계 |
 | `runtime` | 설정·DB·서비스 구성, scheduler·worker·lease·종료·복구 |
 | `domains/runtime` | 현재 runtime 상태·진단 등 업무 계약; worker를 실행하는 폴더와 구분 |
 | `integrations`, `providers` | 실제 통신, SDK별 요청·응답·오류·usage 변환, fake 제공 |

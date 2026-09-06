@@ -584,7 +584,8 @@
     "backend/app/domains/runtime/infrastructure/__init__.py": "backend/app/domains/runtime/models.py",
     "backend/app/domains/runtime/application/__init__.py": "backend/app/domains/runtime/service/status.py",
     "backend/app/domains/runtime/domain/__init__.py": "backend/app/domains/runtime/contracts/status.py",
-    "backend/app/domains/runtime/api/__init__.py": "backend/app/domains/runtime/schemas.py"
+    "backend/app/domains/runtime/api/__init__.py": "backend/app/domains/runtime/schemas.py",
+    "backend/app/public_main.py": "backend/app/main.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -1825,7 +1826,6 @@
           "direct_consumers": [
             "backend/app/core/request_limits.py",
             "backend/app/main.py",
-            "backend/app/public_main.py",
             "backend/tests/common/test_request_body_limits.py"
           ],
           "test_nodes": [
@@ -2118,7 +2118,6 @@
       ],
       "direct_consumers": [
         "backend/app/main.py",
-        "backend/app/public_main.py",
         "backend/app/runtime/contributor_backend.py",
         "backend/app/runtime/desktop_sidecar.py",
         "Dockerfile.backend",
@@ -8397,8 +8396,7 @@
           "old": "backend/app/cruds/community.py::seed_demo_data",
           "new": "backend/app/runtime/bootstrap/demo_seed.py::seed_demo_data",
           "direct_consumers": [
-            "backend/app/main.py",
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
@@ -22208,7 +22206,7 @@
           "old": "backend/app/domains/world_characters/infrastructure/sqlalchemy_runtime_modes.py::reconcile_local_autonomous_runtime_modes",
           "new": "backend/app/runtime/world_characters/recovery.py::reconcile_local_autonomous_runtime_modes",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/world_characters/test_runtime_mode_repair.py::test_file_backed_repair_is_bounded_idempotent_and_preserves_evidence"
@@ -31108,7 +31106,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
           "new": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -31150,7 +31148,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::logger",
           "new": "backend/app/runtime/memory/batch_runtime.py::logger",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -31178,7 +31176,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
           "new": "backend/app/domains/memory/service/reconciliation.py::reconcile_sources",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -31192,7 +31190,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::schedule_batches",
           "new": "backend/app/domains/memory/service/batch_scheduling.py::schedule_batches",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -31276,7 +31274,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
           "new": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -31318,7 +31316,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::logger",
           "new": "backend/app/runtime/memory/batch_runtime.py::logger",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -31346,7 +31344,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
           "new": "backend/app/domains/memory/service/reconciliation.py::reconcile_sources",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -31360,7 +31358,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::schedule_batches",
           "new": "backend/app/domains/memory/service/batch_scheduling.py::schedule_batches",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -39301,7 +39299,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
           "new": "backend/app/runtime/memory/batch_runtime.py::MemoryBatchRuntime",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -39343,7 +39341,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::logger",
           "new": "backend/app/runtime/memory/batch_runtime.py::logger",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -39371,7 +39369,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::reconcile_sources",
           "new": "backend/app/domains/memory/service/reconciliation.py::reconcile_sources",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -39385,7 +39383,7 @@
           "old": "backend/app/runtime/memory/batch_runtime.py::schedule_batches",
           "new": "backend/app/domains/memory/service/batch_scheduling.py::schedule_batches",
           "direct_consumers": [
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_memory_batch_runtime.py::test_selection_persists_items_and_audit_once",
@@ -54381,8 +54379,7 @@
           "old": "backend/app/cruds/community.py::seed_demo_data",
           "new": "backend/app/runtime/bootstrap/demo_seed.py::seed_demo_data",
           "direct_consumers": [
-            "backend/app/main.py",
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/characters/test_character_foundation.py::test_model_and_schema_compatibility_exports_have_one_identity",
@@ -99399,8 +99396,7 @@
           "old": "backend/app/cruds/community.py::seed_demo_data",
           "new": "backend/app/runtime/bootstrap/demo_seed.py::seed_demo_data",
           "direct_consumers": [
-            "backend/app/main.py",
-            "backend/app/public_main.py"
+            "backend/app/main.py"
           ],
           "test_nodes": [
             "tests/runtime/test_demo_seed.py::test_demo_seed_keeps_initial_defaults_and_noop_replay",
@@ -127897,6 +127893,85 @@
       ],
       "preserved": "Same defining values/types/functions; two existing test namespaces bind the actual role objects with assertions unchanged. No product compatibility namespace remains.",
       "remaining": "G5 single Base/DB/registry; G06 canonical factory integration/removal; later B4/B5/B6 consumers on sequential merge."
+    },
+    "AR-B8-G06-A1": {
+      "reason": "Unify actual app/lifecycle/configuration/extension/readiness definitions in main; public_main retains only explicit same-object exports and public-profile partial adapters.",
+      "source_commit": "274f90e7bd811d1715f4e6dc2c1e423115ec4671",
+      "source_mapping": {
+        "backend/app/public_main.py": "backend/app/main.py"
+      },
+      "contracts": {
+        "create_app": "main.create_app(profile=full) keeps basic health/default components; main.create_public_app is partial of the same body for prior public health and unconfigured no-component default.",
+        "create_lifespan": "One lifecycle body preserves Memory recovery/start/stop/disposal; public partial supplies the former lambda:None component default.",
+        "imports": "Both module apps skip media preparation so importing public_main through main remains lazy; explicit factory calls keep prepare_media_directories=True.",
+        "shared_types": "Both former module imports expose the same error/dataclass objects, with no second classes or factory body.",
+        "pending": "Current B7 callbacks are preserved. G5 and verified B8-B removal remain separate."
+      },
+      "verification_nodes": [
+        "tests/runtime/test_app_factory_ownership.py::test_single_factory_keeps_both_health_contracts_and_shared_types[full]",
+        "tests/runtime/test_app_factory_ownership.py::test_single_factory_keeps_both_health_contracts_and_shared_types[public]",
+        "tests/runtime/test_app_factory_ownership.py::test_public_lifespan_keeps_no_component_default_while_full_uses_its_default",
+        "tests/runtime/test_app_factory_ownership.py::test_shared_lifespan_preserves_recovery_hooks_memory_cleanup_order[False]",
+        "tests/runtime/test_app_factory_ownership.py::test_shared_lifespan_preserves_recovery_hooks_memory_cleanup_order[True]",
+        "tests/runtime/test_app_factory_ownership.py::test_both_module_imports_are_lazy_and_explicit_factory_still_prepares_media"
+      ],
+      "existing_verification": [
+        "tests/test_l3_er4_single_backend_runtime.py",
+        "tests/test_l3_er7_runtime_composition.py",
+        "tests/test_m4_public_runtime.py",
+        "tests/logging/test_runtime_logging.py",
+        "tests/test_m3_security_harness.py",
+        "tests/chat/test_http_ownership.py"
+      ],
+      "compatibility": {
+        "path": "backend/app/public_main.py",
+        "owner": "G06 bootstrap",
+        "remove_at": "AR-B8-B after actual reference conversion and no-file candidate validation",
+        "direction": "public_main -> main only",
+        "active_consumers": "Original dedicated factory tests retain the 15-export comparison. Current product and launchers use main actual exports."
+      },
+      "structural_alignment": "M3 inventory helper no longer normalizes actual app.main health ownership to public_main; existing assertions and nodes are unchanged. Authored health module field and generated inventory now name the actual owner.",
+      "original_design_sources": [
+        "90d7fd7f2332b2b27cf2f1bd92ed0e206427e6f7",
+        "cc513f4bc078f0547d626d97bbf2210e424b27cb"
+      ]
+    },
+    "AR-B8-G06-A2": {
+      "reason": "Move active bootstrap/ASGI/test/CI/current-inventory references to main without changing the selected application contract.",
+      "asgi_export": "app.public_main:app -> app.main:public_app; the canonical factory is create_app and create_public_app is its public-profile partial.",
+      "guard": "Only the two frozen application namespaces are eligible. The origin must be a protected Python source with an actual app/factory definition, the target must follow the file map and resolve through one actual same-named FastAPI factory or partial/name alias. Only an entire matching ASGI string constant is normalized. --contracts compares the actual new export against the original full/public frozen API contract.",
+      "direct_consumers": [
+        "backend/app/runtime/contributor_backend.py",
+        "backend/app/runtime/desktop_sidecar.py",
+        "backend/app/main.py",
+        "scripts/generate_public_route_inventory.py",
+        "scripts/verify_m4_contracts.py",
+        "scripts/ci/check_refactor_preservation.py",
+        "scripts/verify_embedded_runtime_inventory.py",
+        "scripts/ci/generate_p8_l_r_memory_batch_inventory.py"
+      ],
+      "packaging": "Docker uses runtime.contributor_backend and PyInstaller uses runtime.desktop_sidecar; both now statically import main.create_public_app and dynamically register models through main before upgrade. Neither build definition had a direct public_main/hidden-import reference. Logging bundle resources and onefile/onedir settings are unchanged; fresh bundle and installer verification remain B8-B gates.",
+      "existing_assertion_change": {
+        "node": "tests/logging/test_runtime_logging.py::test_public_and_legacy_cli_keep_their_existing_asgi_target",
+        "old": "assert args == (\"app.public_main:app\",)",
+        "new": "assert args == (\"app.main:public_app\",)",
+        "preserved": "Same calls count, host, port, reload and LOGGING_CONFIG; actual app export is also checked against frozen public OpenAPI. No behavior predicates or exception checks exempted."
+      },
+      "remaining_references": {
+        "compatibility_only": [
+          "backend/app/public_main.py",
+          "backend/tests/runtime/test_app_factory_ownership.py"
+        ],
+        "historical_or_literal_evidence": [
+          "FROZEN_ASGI_EXPORTS and exact negative fixtures",
+          "Chat pytest historical case IDs",
+          "app.public_main logger name retained as the original log contract",
+          "P8-L-H REQUIRED_FILES inside the frozen predecessor generator branch",
+          "immutable snapshots and historical documents"
+        ],
+        "canonical_local_alias": "test_config_paths names an import of app.main as public_main only to retain its original object-identity assertion; this does not import the former module."
+      },
+      "pending": "G5 Base/database; B8-B removal and final runtime/bundle/installer/CI verification after all preceding scopes."
     }
   },
   "test_symbols": {
@@ -127958,5 +128033,8 @@
     "backend/tests/test_tendency_note_action_selection.py::test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought": "backend/tests/routines/test_tendency.py::test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought",
     "backend/tests/test_tendency_note_action_selection.py::test_self_update_composition_prompt_excludes_state_and_activity": "backend/tests/routines/test_tendency.py::test_self_update_composition_prompt_excludes_state_and_activity",
     "backend/tests/test_tendency_note_action_selection.py::test_self_update_composition_prompt_includes_lore_as_private_reference": "backend/tests/routines/test_tendency.py::test_self_update_composition_prompt_includes_lore_as_private_reference"
+  },
+  "asgi_exports": {
+    "app.public_main:app": "app.main:public_app"
   }
 }

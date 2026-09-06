@@ -120,7 +120,7 @@ def test_enhance_persona_calls_provider_after_owner_gate_and_commits_sanitized_f
 
 def test_both_factories_install_creator_and_draft_routes_keep_original_position():
     from app.main import create_app as hosted_factory
-    from app.public_main import create_app as public_factory
+    from app.main import create_public_app as public_factory
     from app.api.v1.routes import agents
     from app.domains.characters import router
     for factory in (hosted_factory, public_factory):

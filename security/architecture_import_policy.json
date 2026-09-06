@@ -77,10 +77,6 @@
           "imported": "app.models.worlds"
         },
         {
-          "importer": "app.public_main",
-          "imported": "app.services.hosted_configuration"
-        },
-        {
           "imported": "app.cruds.agents",
           "importer": "app.runtime.character_lore"
         },

@@ -13,7 +13,7 @@ from p7_graph_support import seed_projection_fixture, sqlite_engine
 
 def test_both_factories_bind_relationship_readers_and_register_each_route_once():
     from app.main import create_app as hosted
-    from app.public_main import create_app as local
+    from app.main import create_public_app as local
 
     for factory in (hosted, local):
         app = factory()

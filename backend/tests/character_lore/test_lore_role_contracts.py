@@ -138,19 +138,19 @@ def test_failed_embedding_is_saved_and_empty_scope_skips_provider(context):
 
 
 @pytest.mark.parametrize(
-    "module_name", ["app.main", "app.public_main"], ids=["full", "public"]
+    "profile", ["full", "public"], ids=["full", "public"]
 )
 def test_both_factories_wire_lore_same_session_and_original_authentication(
-    context, module_name
+    context, profile
 ):
-    import importlib
+    from app import main
 
     db, user, character = context
-    module = importlib.import_module(module_name)
-    application = module.create_app(
+    factory = main.create_app if profile == "full" else main.create_public_app
+    application = factory(
         **(
             {"prepare_media_directories": False}
-            if module_name == "app.public_main"
+            if profile == "public"
             else {}
         )
     )

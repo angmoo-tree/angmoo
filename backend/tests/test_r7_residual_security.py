@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.main import app as private_app
-from app.public_main import app as public_app
+from app.main import public_app
 from app.runtime.resident import execution as agent_run_service
 from chat_service_support import messages as message_service
 
