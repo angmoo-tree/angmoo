@@ -2341,3 +2341,5 @@ Memory가 소유하는 실제 repository/service와 명시적인 source/scope/re
 같은 고정 tree의 전체 backend는 **2405 passed / 기존22 skipped / 1 failed / 27 warnings / 1526.32초**다. 유일 실패는 `tests/test_l0_local_runtime_contract.py::test_repository_runtime_contract_passes`의 `core module inventory is stale`였다. Daypart 원문에서 도입한 실제 공통 helper `app.core.context_clipping`은 Git 원문 그대로 존재하지만 현재 `security/local_runtime_contract.json` 목록에서 빠져 있었다. 전체 프로세스가 끝난 뒤 해당 모듈의 keep/AR-B7-DAYPART 기록 한 항목6줄만 추가했다. 원본 checker·제품·테스트·단언과162개 원장은 바꾸지 않았다.
 
 원래 실패가 포함된 L0 runtime contract와 실제 Daypart 회귀는 **10 passed /8.83초**다. 목록 보정 전 전체 실패와 보정 후 집중 결과를 합쳐 전체 PASS라고 쓰지 않으며, 정확한 최종 PR head의 Core backend 전체를 최종 전체 Gate로 확인한다. B6 #284 merge `4c1d06a277388d9ec317f5966f836b3008304fd8` 이후의 순차 합류와 stock/PR/installer는 별도 확인한다.
+
+B6 main을 이어받은 `65abcea991c4b96639c6b2b78d21989a218fc7e3`의 최종 원래 stock도 **보호2428=현재2428 /37항목 PASS**다. 이 head의 실제 Gitleaks tree/history는 모두0이며 DCO도 통과했다. 전체 검사를 수행한 d8f5b446와의 차이는 위 current core 목록 및 결과 문서뿐이고 제품/테스트/162개 원장 변경은 없다. 이후 검증 문서만 기록해 PR을 제출하며 정확 PR head의 Core 전체·보안·Windows·설치 검증을 최종 Gate로 확인한다. B6의 병합 후7개 workflow와 installer가 완료되기 전에는 B7 PR을 선행 제출하지 않는다.
