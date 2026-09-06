@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.runtime.social.agent_tool_state import agent_tool_state
 from app.runtime.resident import langgraph_queries
 from app.domains.routines.policies import execution_results
 from app.domains.routines.contracts.context_reads import RelationshipContextWorkflows, WritingContextWorkflows, ConversationWorkflows
@@ -1480,7 +1481,7 @@ async def _run_state_recorder(
         }
 
     try:
-        saved = community_service.save_agent_tool_character_state(
+        saved = agent_tool_state.save_agent_tool_character_state(
             ctx.db,
             ctx.session_key,
             ctx.character.id,

@@ -53,23 +53,20 @@ from app.domains.routines.service.execution import lifecycle as activity_lifecyc
 from app.domains.routines import exceptions as activity_errors
 
 from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
-
-from app.runtime.social.sqlalchemy_inbox import ManualInboxRuntimeError
-
-from app.runtime.social.sqlalchemy_inbox import claimed_observation_post_id
-
-from app.runtime.social.sqlalchemy_inbox import is_manual_inbox_source
-
-from app.runtime.social.sqlalchemy_inbox import claim as claim_manual_inbox
-
-from app.runtime.social.sqlalchemy_inbox import consume_claims as consume_manual_inbox_claims
-
-from app.runtime.social.sqlalchemy_inbox import release_claims as release_manual_inbox_claims
-
+from app.runtime.social.manual_inbox import (
+    ManualInboxRuntimeError,
+    claimed_observation_post_id,
+    is_manual_inbox_source,
+)
+from app.runtime.social.manual_inbox import claim as claim_manual_inbox
+from app.runtime.social.manual_inbox import (
+    consume_claims as consume_manual_inbox_claims,
+)
+from app.runtime.social.manual_inbox import (
+    release_claims as release_manual_inbox_claims,
+)
 from app.runtime.social.observations import observe_source
-
-from app.domains.social.public import SocialObservationError
-
+from app.domains.social.contracts.observations import SocialObservationError
 from app.domains.social.contracts.subjective_context import ActionSubjectiveContextV1
 
 from app.runtime.social.subjective_composition import record_declared_subjective_context

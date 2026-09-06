@@ -29,13 +29,9 @@ from app.core import sqlite_concurrency
 from app.domains.device_home import repository as home
 
 from app.domains.device_home.exceptions import InvalidWorldSurfaceCursorError
-
-from app.domains.social.public import SocialWriteRetryableError
-
-from app.domains.social.public import WorldCharacterSocialProfileQuery
-
-from app.domains.social.public import WorldCharacterSocialProfileValidationError
-
+from app.domains.social.contracts.writes import SocialWriteRetryableError
+from app.domains.social.contracts.profile_activity import WorldCharacterSocialProfileQuery
+from app.domains.social.contracts.profile_activity import WorldCharacterSocialProfileValidationError
 from app.runtime import persistence
 
 from app.domains.social.service import profile_cursor as social

@@ -978,6 +978,20 @@
     },
     {
       "markers": {
+        "row_lock": [
+          80,
+          98,
+          107
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/social/repository/manual_inbox.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "1480731cb75c8c9ebb074e01173a231020c09a15c405a8be612164eb3a4ec9b2",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
         "advisory_lock": [
           93
         ],
@@ -1276,20 +1290,6 @@
       "path": "backend/app/runtime/routines/plan_references.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "64fa96c692634fd082642677f89713c3cd6e5d0da70ab775a91d88a1cbb6d858",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "row_lock": [
-          219,
-          297,
-          322
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/runtime/social/sqlalchemy_inbox.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "cb57af59ded6edaaebc2b980403ad18984b960177d338f867982116ffc3da0cf",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {

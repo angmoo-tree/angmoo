@@ -4,9 +4,8 @@ from __future__ import annotations
 from typing import Any
 from sqlalchemy.orm import Session
 from app.domains.world_characters.models import CharacterActiveWorld
-from app.domains.social.contracts.feed_execution import FeedReactionProvider
+from app.domains.social.contracts.feed_execution import FeedReactionProvider, WorldFeedContext
 from app.domains.social.service import feed_cycle as service
-from app.runtime.resident.context import LangGraphResidentContext
 from app.runtime.social.world_feed_queries import WorldFeedQueries
 from app.runtime.activity_proposals import composition as activity_proposal_runtime
 from app.runtime.social import world_feed_actions as world_feed_social_apply
@@ -55,7 +54,7 @@ class RuntimeWorldFeedWorkflows:
 
 
 async def run_world_keyword_feed(
-    ctx: LangGraphResidentContext, *, provider: FeedReactionProvider | None = None
+    ctx: WorldFeedContext, *, provider: FeedReactionProvider | None = None
 ) -> dict[str, Any]:
     return await service.run_world_keyword_feed(
         ctx, workflows=RuntimeWorldFeedWorkflows(), provider=provider

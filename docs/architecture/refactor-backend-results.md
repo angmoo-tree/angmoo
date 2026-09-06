@@ -2505,3 +2505,56 @@ The first architecture check rejected the new Identity service as an undeclared 
 ### G5 preparation: retained transactions and utilities
 
 Original quota source331094f and retained utilities b013974 are integrated after the final B4 owner connection. Quota file-backed transaction tests passed2;18 existing PostgreSQL-only tests remain conditional skips. Seven retained utility definitions use their original actual owners, including the Character operation that commits the caller transaction. Test model imports now use the existing canonical fixture support. No dormant caller was activated. The source captures and original whole-AST proofs remain associated with their original signed commits; final sequential ledger and backend closeout are still pending.
+
+
+## AR-B5-C25 — 캐릭터 상태·도구 저장 의미 보존
+
+Community 실제6함수는 Characters의 메모 값 정책3, runtime의 Character 오류 변환2/Social 도구 실행1로 옮겼고 nullable state lookup은 Characters 실제 소유에 추출했다. 원래6/잔여13 전체 AST와 LG/LocalBot caller 전체 함수는 정확한 callback/self/type 복원 후 동일하다. auth→캐릭터 일치→nullable 조회→관찰→중복 억제 또는 저장→성공 로그 순서를 유지했다.
+
+첫 실제 확대는 **219 PASS / 9.52초**였다. 기존 LG6개·LocalBot1개 mock receiver만 실제 소유로 연결했으며 assertion은 변경하지 않았다. 새 SQLite 회귀는 공백/casefold 동일 메모에 대해 mood/summary까지 기존값을 유지함, 로그 원래 순서, 실제 새로운 상태와 로그의 caller rollback을 검사한다. 최초 테스트가 rollback된 로그 객체를 보유해 SQLite ID 재사용 warning이 발생했으므로 검증 완료된 임시 로그 참조를 해제해 fixture 수명을 정리했다. Community13/G07/full B5 및 capture/Hosted는 계속한다.
+
+C25 최종 확대 검증은 **422 PASS / 기존 PostgreSQL skip1 / 81.68초 / 기존 warning3개**다. 새 상태 회귀의 로그 객체 수명 정리 후 추가 SQLAlchemy warning은 없다. PR #258/#263 API/schema/ORM·보호 변경2파일 assertion·전체 split evidence0, 경계 **846 module /3057 edge /legacy182**, L4 parity99·ER0가 통과했다. Character 오류의 실제 변환2함수는 runtime에 두어 Social→Character exceptions deep import 없이 원래 예외 종류/메시지를 보존했다. 실제 업무·호출 순서나 검사 예외를 완화하지 않았다.
+
+
+## AR-B5-C26 — Social tick 후보·사전 검증·완료 실제 소유
+
+Community 마지막13개 실제 함수와4개 상수를 Social tick service/policy로 옮겼다. Social Inbox SQL1개와 Routines thread-view 증거 SQL1개는 각 owner repository에 추출했다. 원래13/상수4 전체 AST와SQL2가 정확한 self/callback/type 복원 후 동일하다. Community에는 실제 함수/class가0개이며 남은 compatibility 연결과 실제 소비자 종료는 후속이다.
+
+최초 직접73개 중72 PASS/새1 FAIL은 신규 테스트가 기존 좋아요 로그명을 post_liked로 잘못 예상한 문제였다. 실제 원래 값 liked를 새 테스트에 반영했으며 제품/기존 assertion은 변경하지 않았다. 새 SQLite2개는 전체 사전 검증 전 partial action 금지, 반응/상태/성공 로그의 caller rollback, 원래 cutoff/scope/order/limit·pending autoflush를 검증한다. G07/full B5/capture/Hosted는 계속한다.
+
+C26 최종 확대는 **424 PASS / 기존 PostgreSQL skip1 /72.57초 /기존 warning3개**다. PR #258/#263 API/schema/ORM·보호 assertion·전체 split evidence0, 경계 **849 module /3089 edge /legacy183**, L4 parity99·ER0가 통과했다. 기존 함수/class와 상수는 실제 owner에 모두 정의되어 있으며 Community는 임시 같은객체 수출만 남았다. 신규 SQLite2개는 실제 좋아요/상태/로그 전체 rollback과 중복 payload의 사전 차단, 읽지 않은 답글30개 정렬 및 Run 이후 thread 증거 원래 필터를 확인했다.
+
+
+## AR-B5-C27 — 수동 답글 Inbox 상태·claim 실제 소유
+
+원래 runtime Inbox 실제11함수/오류는 Social service·repository·값/계약으로 옮겼고 기존 runtime 파일을 제거했다. 소유 SQL5 및11함수/오류 전체 AST가 정확한 self/query/foreign-read 복원 후 동일하다. 기존 수동 답글/후속 beat/L4 집중은 **35 PASS / 기존 PostgreSQL skip1 /20.81초**, 새 SQLite 및 실제 후속 beat 회귀는 **2 PASS /5.81초**다.
+
+새 회귀는 활성 다른 claim 거절, claim/release의 실제 commit과 consume의 flush-only/caller rollback을 확인한다. pending 상호 차단을 같은 Session으로 읽어 무효 후보 거절과 함께 원래 commit하는 의미도 검증한다. 원래 assertion이나 DB 제약은 변경하지 않았다. Canonical RoutineInteraction3·G07/full B5/capture/Hosted는 후속이다.
+
+C27 최종 Social·Relationships·RoutinePost 검증은 **130 PASS / 기존 PostgreSQL skip1 /63.73초 /기존 warning1개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence0, 경계 **852 module /3099 edge /legacy182**, L4 parity99·ER0가 통과했다. 기존 L4 구조 검사의 단일 실제 소유 파일 경로를 Social service로 연결했으며 검사 조건은 유지했다. 사라진 runtime→전역 ORM 정확1개 임시 예외도 제거했다.
+
+
+## AR-B5-C28 — 성공 Social 이벤트의 RoutinePost 후보 실제 소유
+
+Canonical interaction의 후보 실제 메서드/관계 band/상호 차단은 각각 Relationships service와 Social repository로 옮겼고 event/evidence/방향별 관계 SQL2도 Relationships가 소유한다. 기존 compatibility 본체와 services의 module alias를 제거했다. 원래 후보 전체 AST·band/block·SQL2·constructor factory가 정확한 callback/query 복원 후 동일하다. 기존 Social/RoutinePost 집중은 **34 PASS /기존 PostgreSQL skip1 /18.09초**다.
+
+신규 회귀 최초는 기존13 PASS/새1 FAIL로, SQLite rollback 재조회에서 datetime timezone 표시가 naive로 복원되기 때문에 새 테스트의 dataclass 전체 비교가 달랐다. 새 테스트에서 UTC 시간 표현을 정규화한 뒤 같은 전체 후보 값으로 비교하며 제품 시간/SQL/기존 assertion은 변경하지 않았다. 최종 호환/G07/full B5/capture/Hosted는 계속한다.
+
+C28 최종 확대는 **131 PASS /기존 PostgreSQL skip1 /63.62초 /기존 warning1개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence0, 경계 **855 module /3108 edge /legacy181**, L4 parity99·ER0가 통과했다. 첫 지도 검사가 legacy의 단일 factory 이전을 다중 분할로 기재한1항목을 거절했으므로, 실제 단일 구현 이전과 남은 임시 import aggregate로 구분해 같은 검사0오류를 확인했다. DTO·업무·SQL·assertion은 변경하지 않았다.
+
+C28 독립 리뷰 후속: `RuntimeRoutineInteractionReferences.get_post`가 원래 `db.get` 대신 공개/댓글 eager-load 조회에 연결된 차이를 발견했다. 신규 SQLite 회귀가 숨김 attached 객체 조회에서 **1 FAIL**로 결정적으로 재현했다. 이미 존재하는 실제 `social.repository.event_evidence.get_post`의 동일 `db.get`로 연결하여 identity-map hit의 SQL/flush0, miss의 숨김 객체/단일 SELECT/no eager-load, caller rollback·없는 ID를 확인했다. 직접 Social·RoutinePost 회귀는 **36 PASS /기존 PostgreSQL skip1 /19.50초**다. 앞선 AST 보존은 callback 호출 복원까지의 증거였으며 이 후속 검증이 실제 callback SQL 의미도 보완한다. 기존 판단/SQL/회귀 assertion은 변경하지 않았다.
+
+
+## AR-B5-C29 — Social 잔여 계층·집합 종료
+
+소비자가 없는 전달 계층4함수와 public/API/infrastructure/ports 집합을 제거하고 현재11소비자를 실제 service/contracts/UoW로 연결했다. 기존 쓰기 테스트는 원래 단언을 유지한 채 실제 실행기 메서드에 이름을 연결한다. 관찰 Protocol은 contracts로 원문 이동, subjective migration/helper도 실제 동일객체로 연결했다. 두 Feed runtime의 concrete Resident context 타입을 readonly contract로 바꾸어 원래 context/credential/콜백 객체를 그대로 전달한다. provider/cycle 전체 구현 AST는 타입 복원 후 동일하다.
+
+기존 Social·RoutinePost·UoW·오류/커서·Feed 검증은 **138 PASS /기존 PostgreSQL skip1 /50.69초 /기존 warning1개**다. 실행기를 건너뛰거나 새 provider/commit 경계를 만들지 않았으며 새 테스트 노드나 검사 예외를 추가하지 않았다. Community 소비자·G07/full B5/capture/Hosted는 후속이다.
+
+C29 보존 검사: PR #258/#263 API/schema/ORM·보호 변경4파일 assertion·전체 split evidence가0오류이며, 경계848 module/3089 edge/legacy181 및 L4 parity99·ER0도 통과했다. 실제 subjective migration·Windows supported-upgrade verifier·Today inventory 회귀5개와 동결 Today inventory --check가 통과했다. 동결 JSON/역사 migration 본문은 다시 쓰지 않았다.
+
+### G5 preparation: Social C25–C29 integration
+
+Signed Social sources through `e56e645f7963609650dccdefbf9cf78474f9931e` are connected to the actual Resident graph, RoutinePost runtime, Character state and canonical models. Original graph state-recorder mocks now patch the actual state service. Manual inbox claims and successful routine interaction reads use their existing owner operations; C28's corrected direct `db.get` query is included.
+
+Current collection is **2503 nodes**. Social, Relationships, RoutinePost, Resident graph, LocalBot response, shared errors and write-UoW validation passed **335 / existing PostgreSQL skip1 / 82.79s**. All seven read-only original preservation diagnostics report0errors (protected2311/current2503). The never-tracked `social/infrastructure/__init__.py` was removed from move metadata after full Git-history verification, matching the reviewed C30 correction; no source or frozen baseline was removed. Sequential source ledger and final backend/architecture/installer closeout remain pending.

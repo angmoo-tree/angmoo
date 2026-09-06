@@ -73,6 +73,3 @@ from app.domains.routines.service.activity_settings import update_setting
 from app.domains.routines.repository.slots import get_assigned_slot
 
 register_models()
-
-
-

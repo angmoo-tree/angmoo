@@ -10,11 +10,10 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from model_fixture_support import models
 from app.models import Base
-from app.domains.social.application import (
-    apply_validated_autonomous_result,
-    create_owner_post,
-    create_owner_reply,
-)
+from app.runtime.social.sqlalchemy_unit_of_work import SqlAlchemySocialWriteUnitOfWork
+apply_validated_autonomous_result = SqlAlchemySocialWriteUnitOfWork.apply_validated_autonomous_result
+create_owner_post = SqlAlchemySocialWriteUnitOfWork.create_owner_post
+create_owner_reply = SqlAlchemySocialWriteUnitOfWork.create_owner_reply
 from app.domains.social.contracts import (
     OwnerPostCommand,
     OwnerReplyCommand,

@@ -5,6 +5,8 @@ activity denial exception is translated; unrelated failures keep propagating.
 """
 
 from datetime import datetime
+from app.domains.routines.contracts.activity_policy import ActivityPolicy
+from app.domains.characters import schemas as character_schemas
 from typing import Protocol
 from app.domains.social.contracts.topic_history import (
     CreationTopicLog,
@@ -14,6 +16,8 @@ from sqlalchemy.orm import Session
 
 
 class ToolRun(Protocol):
+    @property
+    def session_key(self) -> str: ...
     @property
     def created_at(self) -> datetime: ...
     @property
@@ -103,3 +107,48 @@ class AgentToolReadWorkflows(AgentToolReferences, Protocol):
         reason: str,
         result: str,
     ) -> object: ...
+
+
+class ToolCharacterState(Protocol):
+    @property
+    def character_id(self) -> str: ...
+    @property
+    def mood(self) -> str: ...
+    @property
+    def summary(self) -> str: ...
+    @property
+    def memory_note(self) -> str: ...
+    @property
+    def updated_at(self) -> datetime: ...
+
+
+class AgentToolStateWorkflows(AgentToolReferences, Protocol):
+    def save_character_state(
+        self,
+        db: Session,
+        character_id: str,
+        data: character_schemas.CharacterStateWrite,
+    ) -> character_schemas.CharacterStateRead: ...
+    def get_character_state(
+        self, db: Session, character_id: str
+    ) -> ToolCharacterState | None: ...
+    def log_activity(
+        self,
+        db: Session,
+        *,
+        user_id: str,
+        character_id: str,
+        action_type: str,
+        target_post_id: str | None,
+        reason: str,
+        result: str,
+    ) -> object: ...
+
+
+class AgentToolTickWorkflows(AgentToolActionWorkflows, Protocol):
+    def build_activity_policy(
+        self, db: Session, *, character_id: str, ignore_active_hours: bool
+    ) -> ActivityPolicy: ...
+    def find_thread_viewed_log_id(
+        self, db: Session, *, character_id: str, root_post_id: str, created_at: datetime
+    ) -> int | None: ...

@@ -26,7 +26,7 @@ from app.domains.social.contracts.subjective_context import (  # noqa: E402
     ACTION_SUBJECTIVE_CONTEXT_VERSION, MAX_SUBJECTIVE_TEXT_CHARS,
     ActionEmotionLabel, ActionMotivationKind,
 )
-from app.domains.social.public import TodaySocialActivityKind  # noqa: E402
+from app.domains.social.contracts.today_activity import TodaySocialActivityKind
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest  # noqa: E402
 from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION  # noqa: E402
 from app.domains.social.constants import (  # noqa: E402
@@ -53,8 +53,8 @@ REQUIRED_FILES = (
     "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
     "backend/app/domains/social/domain/subjective_context.py",
     "backend/app/domains/social/domain/today_activity.py",
-    "backend/app/domains/social/infrastructure/sqlalchemy_subjective_context_models.py",
-    "backend/app/domains/social/public.py",
+    "backend/app/domains/social/models/subjective_context.py",
+    "backend/app/domains/social/contracts/today_activity.py",
     "backend/app/integrations/llm/character_response_generator.py",
     "backend/app/integrations/llm/retrieval_router.py",
     "backend/app/runtime/chat/today_sns_activity.py",

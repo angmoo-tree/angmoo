@@ -47,7 +47,7 @@ from app.domains.chat.models import (
 from app.domains.memory.models.items import (
     drop_memory_schema_v1,
 )
-from app.domains.social.infrastructure.sqlalchemy_subjective_context_models import (
+from app.domains.social.models.subjective_context import (
     drop_subjective_context_schema,
 )
 from app.domains.worlds.contracts import (

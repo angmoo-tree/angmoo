@@ -1154,3 +1154,18 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 ### 보존된 활동 보조 기능
 
 기존 text 메뉴와 tool 복구 문구는 각각 `routines/service/action_menu.py`와 `state_prompts.py`에 보존합니다. 현재 실행기는 기존 table 메뉴를 사용하며 이 이전으로 과거 메뉴를 활성화하지 않습니다. 같은 Character 상태 대입도 `characters/service/mutations.py::set_character_status`는 원래 commit까지 수행하고 `set_activity_status`는 호출자의 transaction에 참여하는 대입만 하므로 서로 합치지 않습니다. 다른 캐릭터의 활성 설정 조회는 기존 `runtime/resident/autonomy_reads.py`의 정확한 join을 사용한 뒤 그 같은 Session과 결과 list를 `activity_settings.disable_other_active_settings`에 즉시 전달합니다. 서비스는 원래 UTC timestamp·대입·조건부 commit/flush를 소유합니다.
+
+
+도구 상태 저장은 `social/service/agent_tool_state.py`에서 Run 권한·캐릭터 일치, 관찰 로그, 중복 메모 저장 억제와 성공 기록을 원래 순서대로 수행한다. 메모의 공백/대소문자 정규화와 실제 상태 조회/쓰기는 Characters가 소유한다. 같은 메모이면 mood/summary도 덮어쓰지 않는 기존 의미를 유지하고, 모든 실제 상태/활동 로그는 호출자의 Session과 deferred commit에 참여한다. LocalBot가 사용하는 Character 오류의 Social 분류는 runtime의 실제 오류 변환 함수에 유지한다.
+
+
+Social tick 완료의 실제 업무는 `social/service/complete_tick.py`가 소유한다. 실행 전에 전체 action을 원래 순서대로 검증하고, 서버 후보 ID·공개/중복 판단·후속 알림/상태/성공 기록을 연결한다. 후보 ID와 완료 값은 `social/policies/complete_tick.py`, 읽지 않은 답글 알림 SQL은 Social repository, Run 시작 이후 thread 조회 증거 SQL은 Routines repository가 소유한다. 권한/활동 허용 정책과 실제 행동 서비스는 같은 Session으로 조립하고, 기존 반복 조회나 쓰기/로그의 commit 시점을 바꾸지 않는다.
+
+
+수동 답글 Inbox 후보의 상태 전이는 `social/service/manual_inbox.py`, 실제 후보·차단 조회는 Social repository가 소유한다. runtime은 같은 Session의 WorldCharacter/membership만 원래 조회 위치에 제공한다. 무효 후보 거절·claim·release의 commit과, 후속 게시물과 함께 원자적으로 처리하는 consume의 flush를 구분한다. 만료 전 다른 claim 거절, target beat/run fencing, 원래 상태/version·source-context 검증을 유지한다.
+
+
+RoutinePost가 읽는 성공 답글 후보는 `relationships/service/routine_interactions.py`가 canonical event 상태·대상·공개 조건과 방향별 관계 band를 판단한다. Event/evidence join과 관계 상태 SQL은 Relationships, Post/상호 차단 SQL은 Social 소유다. runtime은 원래 lazy 결과의 행 수·시간/ID 순서와 같은 Session을 보존하고, 기존 `RoutineInteractionInput` class를 그대로 사용해 RoutinePost에 전달한다. 수동 Inbox 후보는 같은 Social service의 실제 후보 검증을 거친 뒤 원래 순서로 이어 붙인다.
+
+
+Social 호출자는 실제 `service`·`contracts`를 선택한다. 옛 `public`·`application`·`ports`·`infrastructure` 집합은 제거했고, 원자적 수동 쓰기는 runtime UoW의 실제 메서드를 사용한다. 관찰도 같은 실행기에서 Relationships의 실제 관찰 정책을 호출한다. World feed는 readonly context 계약으로 원래 attached context/credential을 받아 실행하므로 Social runtime이 Resident의 구체 context class를 가져오지 않는다.
