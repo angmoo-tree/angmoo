@@ -15,7 +15,7 @@
 | AR-G4 | PR #269 CI 진행 | Alembic 물리 경로·역사 본문 보존; G5 최종 모델 등록 연결 대기 |
 | AR-B2 | #270~#276 순차 PR CI · WC workflow LOCAL VERIFIED | Identity·Characters·Worlds·WC 기반 후 profile/setup/lifecycle 통합 및 기존 Package race 수정 |
 | AR-B3 | NOT STARTED | World Package→media |
-| AR-B4 | ROUTINES A1/A2/A3a/b LOCAL VERIFIED · INTEGRATION/PR PENDING | 실제 계획·guarded lifecycle·실행 claim 이전; joint·routine_posts·resident 후속 |
+| AR-B4 | CORE PR #281 MERGED · RESIDENT/C7/WRITER FOLLOWUP LOCAL VERIFIED · FINAL C7 HTTP/RESPONSE PENDING | 실제 AgentRun·LangGraph·작성 정책/실행·C7-F까지 합류; 마지막 활동 HTTP/상세 응답 후 전체 backend/stock/PR 검증 |
 | AR-B5 | NOT STARTED | social→relationships→projection |
 | AR-B6 | NOT STARTED | Chat transport→generation→retrieval/response |
 | AR-B7 | NOT STARTED | Memory read/write→owner→batch→runtime |
@@ -1397,3 +1397,10 @@ Writer8신규·credential2·tendency2 및 기존 activity/Daypart/구조경로/O
 
 
 Writer 원래 signed 최초 도입의 5파일/8노드를 순서대로 append하여 ledger는 **89 → 90 records**다. 기존 main64·직전89 불변 prefix 및 원래 provenance checker를 모두 통과했다. 현재 후보의 최종 C7 HTTP/상세 응답 후속은 아직 준비 중이며 전체 backend·최종 stock·GitHub CI는 모두 합류한 exact head에서 진행한다.
+
+
+### B4 후속 후보 현재 검증 — 30c7e77 source tree
+
+CI architecture 8파일 **209 passed / 13.06초**, DCO, required10/advisory1/workflows8 CI 정책, exact allowlist25, container·launcher·installer·Windows Tauri dev 계약이 통과했다. 현재 Git tree secret scan은 files1880 / binary15 / audit11 / **fatal0**이며 전체 로컬 Git refs 이력 scan은 files9889 / binary26 / audit22 / **fatal0**다. audit 항목은 기존 공개 자산 검토 대상이며 새 비밀 허용 예외를 추가하지 않았다.
+
+현재 상태 표의 AR-B4를 실제 #281 core 병합 및 후속 source 준비 상태로 갱신했다. 마지막 C7 HTTP와 상세 응답 후속의 signed 소스, 후보 전체 backend·stock, GitHub CI·후속 PR/merge는 아직 완료로 기록하지 않는다. 최초 전체 검사 실패 2건과 수정·재검증 이력은 유지한다.
