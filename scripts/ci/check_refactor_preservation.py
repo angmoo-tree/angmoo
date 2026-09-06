@@ -10,6 +10,7 @@ import ast
 from collections import Counter
 from functools import lru_cache
 import hashlib
+import importlib
 import json
 from pathlib import Path, PurePosixPath
 import re
@@ -33,16 +34,20 @@ def digest(value: object) -> str:
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode()).hexdigest()
 
 
-def current_contracts() -> dict:
+def current_contracts(asgi_moves: dict[str, str] | None = None) -> dict:
     # Import without lifespan: no DB initialization, scheduler, or provider call.
     sys.path.insert(0, str(ROOT / "backend"))
     from app.main import app as full_app
-    from app.public_main import app as public_app
+    from app.main import public_app
     import app.models  # noqa: F401 - canonical model registration
     from app.core.db import Base
 
     contracts = {}
-    for name, application in (("full", full_app), ("public", public_app)):
+    applications = [("full", full_app), ("public", public_app)]
+    for old, target in (asgi_moves or {}).items():
+        module, export = target.split(":")
+        applications.append(("asgi:" + old, getattr(importlib.import_module(module), export)))
+    for name, application in applications:
         schema = application.openapi()
         contracts[name] = {
             "operations": {f"{method.upper()} {path}": digest(operation)
@@ -60,6 +65,98 @@ def current_contracts() -> dict:
         }) for name, table in sorted(Base.metadata.tables.items())
     }
     return contracts
+
+
+# These are the two application exports whose API contracts were frozen at AR-0.
+# This is a namespace migration, never an arbitrary assertion/literal allowlist.
+FROZEN_ASGI_EXPORTS = {"app.main:app": "full", "app.public_main:app": "public"}
+
+
+def _asgi_spec(value: str) -> tuple[str, str, str]:
+    if not isinstance(value, str) or not re.fullmatch(r"app(?:\.[A-Za-z_]\w*)+:[A-Za-z_]\w*", value):
+        raise ValueError("ASGI move requires an exact Python module:export")
+    module, export = value.split(":")
+    return module, export, "backend/" + module.replace(".", "/") + ".py"
+
+
+def _asgi_factory(source: str, export: str) -> str:
+    """Resolve an app assignment through local same-factory partial/name aliases."""
+    definitions: dict[str, list[ast.AST]] = {}
+    for node in ast.parse(source).body:
+        if isinstance(node, ast.FunctionDef):
+            definitions.setdefault(node.name, []).append(node)
+        elif isinstance(node, (ast.Assign, ast.AnnAssign)):
+            targets = node.targets if isinstance(node, ast.Assign) else [node.target]
+            for target in targets:
+                if isinstance(target, ast.Name):
+                    definitions.setdefault(target.id, []).append(node.value)
+
+    def binding(name: str, seen: set[str]) -> ast.AST:
+        if name in seen or len(definitions.get(name, [])) != 1:
+            raise ValueError("ASGI export/factory must have one actual definition: " + name)
+        seen.add(name)
+        return definitions[name][0]
+
+    def factory(name: str, seen: set[str]) -> str:
+        node = binding(name, seen)
+        if isinstance(node, ast.FunctionDef) and any(
+            isinstance(child, ast.Call) and isinstance(child.func, ast.Name)
+            and child.func.id == "FastAPI" for child in ast.walk(node)
+        ):
+            return name
+        if isinstance(node, ast.Name):
+            return factory(node.id, seen)
+        if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+                and node.func.id == "partial" and node.args and isinstance(node.args[0], ast.Name)):
+            return factory(node.args[0].id, seen)
+        raise ValueError("ASGI target is not the actual FastAPI factory or a same-factory alias")
+
+    def application(name: str, seen: set[str]) -> str:
+        node = binding(name, seen)
+        if isinstance(node, ast.Name):
+            return application(node.id, seen)
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+            return factory(node.func.id, seen)
+        raise ValueError("ASGI export is not an application from the actual factory")
+
+    return application(export, set())
+
+
+def validated_asgi_moves(moves: dict[str, str], files: dict[str, str], snapshots: list[dict],
+                         root: Path = ROOT) -> dict[str, str]:
+    """Admit only protected app exports moved to their actual mapped Python owner."""
+    if not isinstance(moves, dict):
+        raise ValueError("ASGI moves must be a module:export mapping")
+    accepted = {}
+    for old, target in moves.items():
+        if old not in FROZEN_ASGI_EXPORTS:
+            raise ValueError("ASGI origin lacks a frozen application contract: " + str(old))
+        _, old_export, old_path = _asgi_spec(old)
+        _, new_export, new_path = _asgi_spec(target)
+        records = [snapshot["tracked_files"][old_path] for snapshot in snapshots
+                   if old_path in snapshot.get("tracked_files", {})]
+        if not records or files.get(old_path) != new_path:
+            raise ValueError("ASGI move must follow its protected Python source mapping")
+        blob = records[-1]
+        original = git_bytes("cat-file", "blob", blob["git_blob"] if isinstance(blob, dict) else blob,
+                             root=root).decode("utf-8-sig")
+        destination = (root / new_path).resolve()
+        if not destination.is_relative_to(root.resolve()) or not destination.is_file():
+            raise ValueError("ASGI target source is missing or unsafe")
+        if _asgi_factory(original, old_export) != _asgi_factory(destination.read_text(encoding="utf-8-sig"), new_export):
+            raise ValueError("ASGI move must retain the same actual factory through explicit aliases")
+        accepted[old] = target
+    return accepted
+
+
+def asgi_contract_errors(moves: dict[str, str], current: dict, snapshots: list[dict]) -> list[str]:
+    errors = []
+    for old in moves:
+        for snapshot in snapshots:
+            expected = snapshot.get("contracts", {}).get(FROZEN_ASGI_EXPORTS[old])
+            if expected is None or current.get("asgi:" + old) != expected:
+                errors.append("moved ASGI export changed its frozen application contract: " + old)
+    return errors
 
 
 def mapped_targets(approved: list[str], moves: dict[str, str], *, nodes: bool = False,
@@ -313,7 +410,7 @@ def _compiled_path_literals(literals: tuple[tuple[str, str], ...]):
     return tuple(compiled)
 
 
-def normalized_assertion(fragment: str, literals: list[tuple[str, str]], *, roots: dict[str, str] | None = None) -> str:
+def normalized_assertion(fragment: str, literals: list[tuple[str, str]], asgi_moves: dict[str, str] | None = None, *, roots: dict[str, str] | None = None) -> str:
     roots = roots or {}
     compiled_literals = _compiled_path_literals(tuple(literals))
     exact_paths = {old: new for old, new in literals if old.startswith("backend/") and new.startswith("backend/")}
@@ -350,7 +447,7 @@ def normalized_assertion(fragment: str, literals: list[tuple[str, str]], *, root
 
         def visit_Constant(self, node):
             if isinstance(node.value, str):
-                original = node.value
+                original = (asgi_moves or {}).get(node.value, node.value)
                 # The complete ordered literal map is the cache key. Compiling
                 # once avoids re's small global cache thrashing as moves grow;
                 # replacement order, exact boundaries and all source facts stay
@@ -364,7 +461,8 @@ def normalized_assertion(fragment: str, literals: list[tuple[str, str]], *, root
 
 
 def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict[str, str], root: Path = ROOT,
-                     symbols: dict[str, str] | None = None) -> list[str]:
+                     symbols: dict[str, str] | None = None,
+                     asgi_moves: dict[str, str] | None = None) -> list[str]:
     errors, cache, checked = [], {}, set()
     root_cache, frozen_root_cache = {}, {}
     literals = path_literals(files)
@@ -414,11 +512,11 @@ def check_assertions(snapshots: list[dict], targets: dict[str, str], files: dict
                 frozen_root_cache[(old_path, blob)] = literal_path_roots(text, "backend/" + old_path)
             old_roots = frozen_root_cache.get((old_path, blob), {}).get(old_function, {})
             new_roots = root_cache.get(new_path, {}).get(new_function, {})
-            required = Counter(normalized_assertion(value, literals, roots=old_roots) for value in expected)
+            required = Counter(normalized_assertion(value, literals, asgi_moves, roots=old_roots) for value in expected)
             # An unchanged synthetic legacy-path fixture and a migrated real
             # path assertion are equivalent under the same exact move map.
             # Normalize both sides; behavior predicates remain mandatory.
-            found = Counter(normalized_assertion(value, literals, roots=new_roots) for value in actual)
+            found = Counter(normalized_assertion(value, literals, asgi_moves, roots=new_roots) for value in actual)
             if required - found:
                 errors.append(f"preserved assertion/exception expectation missing or changed: {node} -> {new_path}::{new_function}")
     return errors
@@ -676,6 +774,7 @@ def main() -> int:
     checkpoint = json.loads(CHECKPOINT.read_text(encoding="utf-8"))
     additions = json.loads(ADDITIONS.read_text(encoding="utf-8"))
     errors = check_inventory(inventory, baseline) + checkpoint_errors(checkpoint, baseline_bytes)
+    asgi_moves = {}
     try:
         errors.extend(addition_errors(additions, checkpoint))
         snapshots = [checkpoint, *additions["records"]]
@@ -684,6 +783,7 @@ def main() -> int:
         targets = mapped_targets(approved, moves["test_nodes"], nodes=True,
                                  node_snapshots=[baseline["test_nodes"], *(snapshot["test_nodes"] for snapshot in snapshots)])
         file_targets = mapped_targets(sources, moves["files"])
+        asgi_moves = validated_asgi_moves(moves.get("asgi_exports", {}), file_targets, [baseline, *snapshots])
         errors.extend(check_sources(sources, moves["files"]))
         errors.extend(check_split_evidence(moves, [baseline, *snapshots]))
         errors.extend(unrecorded_committed_sources(checkpoint, snapshots, file_targets))
@@ -692,13 +792,14 @@ def main() -> int:
         symbols = mapped_targets(sorted(set().union(*(set(nodes) for nodes in symbol_snapshots))),
                                  moves.get("test_symbols", {}), nodes=True, node_snapshots=symbol_snapshots)
         errors.extend(check_assertions(snapshots, targets, file_targets,
-                                      symbols={old: new for old, new in symbols.items() if old != new}))
+                                      symbols={old: new for old, new in symbols.items() if old != new}, asgi_moves=asgi_moves))
         errors.extend(check_suppressions(snapshots, file_targets))
     except (KeyError, TypeError, ValueError) as exc:
         errors.append(str(exc))
         targets = {}
     if args.contracts:
-        contracts = current_contracts()
+        contracts = current_contracts(asgi_moves)
+        errors.extend(asgi_contract_errors(asgi_moves, contracts, [baseline, checkpoint]))
         for snapshot in (baseline, checkpoint):
             for name, values in snapshot["contracts"].items():
                 if contracts.get(name) != values:

@@ -2328,3 +2328,19 @@ Memory가 소유하는 실제 repository/service와 명시적인 source/scope/re
 첫 수집은 옛 Social 모델 집합과 Memory router import 때문에 중단됐고 실제 경로 연결 뒤 **2428개 collection PASS**다. 고정67파일 검사는 **608 PASS / 2 FAIL / 5 warnings / 523.58초**였으며 두 실패는 기존 테스트의 concrete repository 생성에 필요한 same-Session factory와 inspector inventory generator의 옛 Memory contract import였다. 단언/fixture의 업무 의미를 바꾸지 않고 두 import를 연결한 뒤 실패 파일과 Memory scope/source/daypart 회귀는 **29 PASS / 32.43초**다. 존재하지 않는 보조 테스트 경로를 포함한 중간 명령은 수집 전에 종료됐으며 결과에서 제외했다.
 
 별도 읽기 진단의 첫 입력 구성 오류도 기록한다. archive의 전체 test 목록을 희소 assertion 자료에 직접 붙이거나 assertion 자료가 없는 #258 source baseline을 단언 비교에 포함한 진단은 중단했다. 제품 checker와 같은 원래 #263/additions 구성 및 원래 수집기 방식으로9개 signed source의 신규 증거를 메모리에서 계산한 최종 진단은 **assertions0 / split0**이다. baseline/checkpoint/원장·원래 test assertion/skip은 변경하지 않았다. 현재 구조 **1036 modules / 3872 edges / legacy124**, API public196·현재 L4/ER0/Memory batch inventory도 확인했다. 다음 metadata commit에서 B6 원장153개를 불변 prefix로 유지해 원래9개 도입을 append한 뒤 공식 stock·backend 전체·PR Gate를 수행한다. 이 상태를 B7 최종 완료나 전체 backend 종료로 표시하지 않는다.
+
+## AR-B8 G06-A — B7 순차 후보의 실제 factory 통합
+
+기준은 signed B7 `274f90e7bd811d1715f4e6dc2c1e423115ec4671`이다. 원래 G06 준비 `90d7fd7f2332b2b27cf2f1bd92ed0e206427e6f7`·`cc513f4bc078f0547d626d97bbf2210e424b27cb`의 실제 factory와 실행 참조 변경만 현재 B7에 적용했다. 미래 Runtime·Tree·Lore·LocalBot callback이나 G5 Base/database를 앞당기지 않았다.
+
+실제 제품 변경은 `main.py`, `public_main.py`, `runtime/contributor_backend.py`, `runtime/desktop_sidecar.py` 네 파일이다. `main.create_app`과 `main.create_lifespan`이 실제 구현 하나를 소유하고 `main.app`·`main.public_app`은 원래 full/public health와 lifecycle 기본값을 선택한다. 임시 `public_main.py`는 원래 53줄·15개 export의 바이트를 유지하며 public partial 및 동일 객체만 가져온다. 두 launcher는 기존 모델 등록→upgrade→설정→앱 생성 순서를 유지하고 실제 public factory를 import한다.
+
+현재 B7의 Character·World Package·Routines·Chat·Memory·Social·Relationships 연결 26문장의 순서와 내용이 그대로다. 원문 비교 15항목에서 정의7개, lifespan 본문·기존 인자, 명시 profile 선택 외 factory 전체, CLI의 exact ASGI 문자열 외 본문, launcher 두 파일 전체 AST가 같음을 확인했다. 기존 19개 테스트 파일의 155함수/509단언·예외 기대와 suppression은 보존되며 새 3개 테스트 파일(21 nodes)은 원래 `cc513f4` 소스와 바이트가 같다.
+
+초기 집중 검증은 **230 PASS / 3 timeout / 1 warning / 388.53초**다. 같은 제한으로 직접 관련 15개를 재실행해 **13 PASS / 2 timeout / 216.60초**였고 contributor·sidecar의 실제 DB 초기화(기존 60초)는 통과했다. 남은 lazy import·sidecar HTTP의 기존 30초 probe만 단독 재실행한 결과도 처음에는 **2 timeout / 87.54초**였다. 실패 뒤 해당 probe 자식 프로세스 잔존은 없었다.
+
+저장소 코드와 timeout을 바꾸지 않고 외부에서 정확한 cold 입력을 실행하면 16.74초, 시스템 임시 폴더에서는 18.28초에 정상 종료했다. 25초 stack dump를 예약한 진단 실행도 dump 없이 두 검사가 통과했다. 진단 삽입을 제거한 **원래 두 검사의 최종 실행은 2 PASS / 30.82초**이며 각 case는 10.93초·11.15초다. 이 기록은 앞선 시간 초과를 없던 결과로 바꾸지 않으며, 원인을 특정 제품 결함이나 단순 동시 부하라고 단정하지 않는다. 별도 실행들의 PASS를 합쳐 동일 후보 전체 suite PASS로 표시하지 않는다.
+
+최종 읽기 delta 검증은 기존 단언·suppression, G5 미변경, frozen 문서 미변경, ASGI profile, API/ORM 모두 오류0이다. full/public 각 **196 operations**, ORM **102 tables**가 #258/#263 계약과 같다. Public 승인 **604 / 현재 2449 nodes** 검사가 통과했다. 현재 구조는 **1036 modules / 3854 edges / legacy123 PASS**이며 ER0·L4·deferred·public route·현재 Memory batch inventory를 실제 후보로 연결했다. frozen predecessor inventory, baseline/checkpoint/additions는 바꾸지 않았다.
+
+이 단계는 G06-A source 준비다. 원본 source/node의 append-only capture·공식 stock·순차 PR/CI는 부모 통합에서 수행한다. G5 이후 alias가 있는 고정 후보의 삭제 전 검사, AR-B8-B의 실제 alias 제거·엄격 원문 증명과 제거 후 fresh bundle/installer·전체 backend 검증은 별도 완료 조건으로 남는다.

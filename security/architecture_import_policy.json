@@ -145,10 +145,6 @@
           "imported": "app.models.worlds"
         },
         {
-          "importer": "app.public_main",
-          "imported": "app.services.hosted_configuration"
-        },
-        {
           "importer": "app.runtime.characters.creator",
           "imported": "app.cruds.agent_runs"
         },

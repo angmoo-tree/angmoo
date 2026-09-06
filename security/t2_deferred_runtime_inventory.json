@@ -76,6 +76,15 @@
     },
     {
       "markers": [
+        "hosted-extension-type"
+      ],
+      "owner_phases": [
+        "L0-L4 hosted extension compatibility audit"
+      ],
+      "path": "backend/tests/runtime/test_app_factory_ownership.py"
+    },
+    {
+      "markers": [
         "privacy-contact",
         "product-host"
       ],

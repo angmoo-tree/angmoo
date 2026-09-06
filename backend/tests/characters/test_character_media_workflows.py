@@ -162,7 +162,7 @@ def test_private_http_keeps_owner_dependency_file_headers_and_route_identity(tmp
 
 def test_both_factories_supply_same_media_runtime_callbacks():
     from app.main import create_app as hosted
-    from app.public_main import create_app as local
+    from app.main import create_public_app as local
     for factory in (hosted, local):
         request = Request({"type": "http", "app": factory()})
         callbacks = dependencies.get_character_media_workflows(request)

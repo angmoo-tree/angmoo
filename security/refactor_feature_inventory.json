@@ -7767,20 +7767,14 @@
         "backend/app/main.py::create_app",
         "backend/app/main.py::health",
         "backend/app/main.py::main",
-        "backend/app/public_main.py::PublicRuntimeConfigurationError",
-        "backend/app/public_main.py::HostedExtensionConfigurationError",
-        "backend/app/public_main.py::HostedBackendExtension",
-        "backend/app/public_main.py::_reject_duplicates",
-        "backend/app/public_main.py::validate_public_runtime_settings",
-        "backend/app/public_main.py::create_lifespan",
-        "backend/app/public_main.py::create_app",
-        "backend/app/public_main.py::health",
-        "backend/app/public_main.py::runtime_health",
-        "backend/app/public_main.py::main",
-        "backend/app/runtime/desktop_sidecar.py::_process_alive"
+        "backend/app/main.py::runtime_health",
+        "backend/app/runtime/desktop_sidecar.py::_process_alive",
+        "backend/app/main.py::create_public_app",
+        "backend/app/main.py::create_public_lifespan"
       ],
       "consumers": [
-        "backend/app/runtime/contributor_backend.py"
+        "backend/app/runtime/contributor_backend.py",
+        "backend/app/runtime/desktop_sidecar.py"
       ],
       "test_paths": [
         "backend/tests/config/test_startup_security.py",
@@ -7799,7 +7793,10 @@
         "backend/tests/test_p8_l_r_memory_batch_runtime.py",
         "backend/tests/routine_posts/test_runtime.py",
         "backend/tests/relationships/test_social_event_runtime.py",
-        "backend/tests/routines/test_daily_activity_runtime.py"
+        "backend/tests/routines/test_daily_activity_runtime.py",
+        "backend/tests/runtime/test_app_factory_ownership.py",
+        "backend/tests/runtime/test_asgi_preservation.py",
+        "backend/tests/runtime/test_canonical_bootstrap.py"
       ],
       "test_nodes": [
         "tests/relationships/test_activity_proposals.py::test_exact_schedule_failure_rolls_back_acceptance_and_plan_revision",
@@ -8001,7 +7998,7 @@
         "item_status": "MAPPED; test association is navigation, not a claim every branch is covered",
         "remaining": "Pilot head/merge/runtime evidence recorded separately; full transition and P8-L-S remain pending"
       },
-      "disposition": "CONSOLIDATE_MAIN_THEN_REMOVE_PUBLIC_MAIN_AFTER_VERIFICATION",
+      "disposition": "AR-B8-A sequential source unifies actual main factory and current B7 callbacks. Contributor/sidecar/ASGI use main public export. Original 15-export temporary facade remains; G5 and verified B8-B removal/full runtime gates are pending.",
       "notes": "Exact files resolved from frozen tracked tree. Symbols are representative; complete module consumers and test nodes remain in frozen baseline. Target directories need not exist yet.",
       "backend_status": "MAPPED"
     },

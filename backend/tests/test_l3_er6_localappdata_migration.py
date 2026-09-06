@@ -51,7 +51,7 @@ def _preview_fixture(root: Path) -> dict[str, str]:
     # The installed sidecar imports the public composition root before it
     # initializes SQLite. Mirror that explicit model-registration boundary;
     # the migrations package must not provide it as an accidental side effect.
-    import_module("app.public_main")
+    import_module("app.main")
     database = SqliteCanonicalDatabase(
         StaticRuntimeDataPath(root),
         settings=SqliteCanonicalSettings(generation="er6-preview-v1"),
