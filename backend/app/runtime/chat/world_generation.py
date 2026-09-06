@@ -65,10 +65,8 @@ from app.domains.memory.public import (
 from app.domains.relationships.models.social import (
     RelationshipState,
 )
-from app.domains.relationships.public import (
-    GraphRecallService,
-    GraphRetrievalPlanExecutor,
-)
+from app.domains.relationships.service.graph_recall import GraphRecallService
+from app.domains.relationships.service.graph_planning import GraphRetrievalPlanExecutor
 from app.integrations.llm import (
     DirectLlmCanonicalRetrievalPlannerProvider,
     DirectLlmCharacterResponseGenerator,

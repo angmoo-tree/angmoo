@@ -21,25 +21,13 @@ from app.domains.chat.public import (
     parse_retrieval_intent_payload,
 )
 from app.domains.identity.public import CredentialMaterial, CredentialPurpose
-from app.domains.relationships.public import (
-    GRAPH_RECALL_PRIMITIVE_REGISTRY,
-    GraphPlanContractError,
-    GraphPlanExecutionContext,
-    GraphPlannerEntity,
-    GraphPlannerOutputError,
-    GraphPlannerProviderResult,
-    GraphPlannerRequest,
-    GraphRecallDirection,
-    GraphRecallOperation,
-    GraphRecallResult,
-    GraphRecallScope,
-    GraphRecallSource,
-    GraphRecallStatus,
-    GraphRetrievalPlanExecutor,
-    GraphRetrievalPlanValidator,
-    graph_retrieval_plan_response_schema,
-    parse_graph_retrieval_plan_payload,
-)
+from app.domains.relationships.contracts.graph_recall_gateway import GRAPH_RECALL_PRIMITIVE_REGISTRY
+from app.domains.relationships.contracts.graph_plan import GraphPlanContractError
+from app.domains.relationships.contracts.graph_execution import GraphPlanExecutionContext
+from app.domains.relationships.contracts.graph_planner import GraphPlannerEntity, GraphPlannerOutputError, GraphPlannerProviderResult, GraphPlannerRequest
+from app.domains.relationships.contracts.graph_recall import GraphRecallDirection, GraphRecallOperation, GraphRecallResult, GraphRecallScope, GraphRecallSource, GraphRecallStatus
+from app.domains.relationships.service.graph_planning import GraphRetrievalPlanExecutor, GraphRetrievalPlanValidator
+from app.domains.relationships.policies.graph_plan_schema import graph_retrieval_plan_response_schema, parse_graph_retrieval_plan_payload
 from app.integrations.llm.graph_retrieval_planner import (
     DirectLlmGraphRetrievalPlannerProvider,
 )

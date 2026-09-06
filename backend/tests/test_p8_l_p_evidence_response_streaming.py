@@ -100,7 +100,7 @@ from app.domains.memory.public import (
     MemoryScope,
     MemoryScopeService,
 )
-from app.domains.relationships.public import GRAPH_RECALL_PRIMITIVE_REGISTRY
+from app.domains.relationships.contracts.graph_recall_gateway import GRAPH_RECALL_PRIMITIVE_REGISTRY
 from app.runtime.chat.world_generation import (
     accept_world_message,
     get_world_response_request,

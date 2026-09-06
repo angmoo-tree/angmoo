@@ -16,7 +16,7 @@
 | AR-B2 | IDENTITY PR #270 · CHARACTER FOUNDATION INTEGRATION | Identity full backend PASS; Character 기반·Creator 정책 통합 후 HTTP/Worlds/WC 후속 |
 | AR-B3 | NOT STARTED | World Package→media |
 | AR-B4 | ROUTINES A1/A2/A3a/b LOCAL VERIFIED · INTEGRATION/PR PENDING | 실제 계획·guarded lifecycle·실행 claim 이전; joint·routine_posts·resident 후속 |
-| AR-B5 | NOT STARTED | social→relationships→projection |
+| AR-B5 | SOURCE PREPARED · INTEGRATION PENDING | Social→Relationships→projection 실제 소유·Community/public 집합 제거 및 G07 18파일 준비. 전체 통합/Hosted는 부모 단계에서 검증 |
 | AR-B6 | NOT STARTED | Chat transport→generation→retrieval/response |
 | AR-B7 | NOT STARTED | Memory read/write→owner→batch→runtime |
 | AR-B8-A | NOT STARTED | 잔여 업무·G06 단일 앱 생성·호환·소비자 전환 |
@@ -1416,3 +1416,12 @@ Social11개·Relationships7개 파일을 업무 폴더로 옮겼다. 전체18개
 초기 collection의22개 오류는 옛 root fixture import였고 실제 업무 package로 수정했다. 최종 집중은 **188 PASS /기존 PostgreSQL skip1 /114.33초 /기존 warning1개**이며 승인된 공개604개/current2303 수집과 원래92개 정확 대응이 통과했다. API/schema/ORM·보호19파일 assertion·전체 split evidence0, 경계848/3037/legacy154, L4/ER0 generator와 frontend designcheck도 통과했다.
 
 추가 CI/inventory/factory26개 중24개는 통과했다. 두 기존 고정 수치 검사는 각각 PostgreSQL marker84 `<82`, parity99 `==97`에서 실패했다. Git로 이동 전 C32의 동일 값84/99를 확인했으며, G07 때문에 늘거나 누락된 항목은 없다. 원래 단언을 완화하지 않고 부모의 잔여 source집합·동결97/현재99(검색 회귀2추가) 검증 항목으로 인계한다. Relationships public 제거와 복합 Chat/Today/image 테스트 위치·전체 B5 통합/Hosted는 후속이다.
+
+
+## AR-B5-C34 — Relationships public 집합 제거
+
+원래 public 이름70개 모두가 실제 계약·오류·schema·service 객체와 동일함을 제거 전에 대조했다. 18개 소비자의163참조를 실제 소유 모듈로 연결했고 제품61개 전체 정의는 정확 import 해석 후 동일하다. 순수 import 집합만 제거했으며 모든 실제 정의와 Graph 방향·권한·근거·fallback 처리는 유지한다. 구조 membership 단언은 `public.py`→`service/graph_read.py`의 정확 file/module 지도에 따라 바뀌며 기존 normalizer로 통과한다. 검사 변경이나 범용 예외는 없고 기존 public bridge18개를 제거했다.
+
+Relationships·Graph recall/planner/Both·경계·동결 I/K/M inventory 집중은 **123 PASS /기존 PostgreSQL skip1 /48.36초 /기존 warning1개**다. PR #258/#263 API/schema/ORM, 보호 변경8파일 assertion 및 전체 split evidence는0오류, 경계847 module/3027 edge/legacy154와 현재 L4/ER0 generator도 통과했다. frozen JSON과 역사적 정책 설명 문자열은 다시 쓰지 않았다.
+
+B5 준비 branch의 실제 업무 이전·옛 Social/Relationships 계층·Community service/CRUD/public 집합 제거와 G07 18파일은 source로 준비됐다. 부모 통합은 이미 별도로 전환된 Resident·Chat·LocalBot·Character image·공통 DB/모델 등록 소비자를 합류하고 전체 gate 및 Hosted/설치를 검증한다. 복합 Chat/Today/image 테스트의 최종 소유 위치와 앞선 G07 고정 수치 검사는 부모의 정확 통합 검증 대상으로 남는다.

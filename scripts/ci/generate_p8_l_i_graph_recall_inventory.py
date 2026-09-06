@@ -45,7 +45,7 @@ class InventoryError(RuntimeError):
 REQUIRED_FILES = (
     "backend/app/domains/relationships/contracts/graph_recall.py",
     "backend/app/domains/relationships/service/graph_recall.py",
-    "backend/app/domains/relationships/public.py",
+    "backend/app/domains/relationships/service/graph_read.py",
     "backend/app/domains/relationships/contracts/graph_query.py",
     "backend/app/runtime/graph_projection/relationship_graph_read.py",
     "backend/tests/test_p8_l_i_graph_recall.py",
