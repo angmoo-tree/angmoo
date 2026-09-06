@@ -161,21 +161,21 @@
     },
     {
       "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "frontend/src/components/agent-detail-client.tsx"
-    },
-    {
-      "markers": [
         "private-admin-flag"
       ],
       "owner_phases": [
         "L0-L2 runtime feature-flag reference audit"
       ],
-      "path": "frontend/src/lib/features.ts"
+      "path": "frontend/src/config/features.ts"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "frontend/src/features/characters/components/agent-detail-parts.tsx"
     },
     {
       "markers": [
