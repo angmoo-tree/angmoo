@@ -199,6 +199,9 @@ def create_app(
     configure_world_package_runtime(runtime_app)
     from app.runtime.routines.composition import configure_routines_runtime
     configure_routines_runtime(runtime_app)
+
+    from app.runtime.chat.message_composition import configure_chat_services
+    configure_chat_services(runtime_app)
     from app.runtime.characters.management import build_character_management_workflows
     runtime_app.state.character_management_workflows = build_character_management_workflows
     from app.runtime.characters.management import build_character_credential_workflows

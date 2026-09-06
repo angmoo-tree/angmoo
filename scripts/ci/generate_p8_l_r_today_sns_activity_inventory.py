@@ -17,8 +17,8 @@ PREDECESSOR_SHA256 = "c02287d0d563582522a58c0ca9fd217b6b6985a59eafafa7b6278b6f8a
 BATCH_INVENTORY = ROOT / "docs/architecture/p8-l-r-memory-batch-inventory.json"
 FROZEN_SHA256 = "2120ef3cccb09753119deebd7025f1f9a01d316c518c5d2eda053c5221cbf5ec"
 
-from app.domains.chat.domain.call_tracker import NORMAL_NODE_BUDGETS  # noqa: E402
-from app.domains.chat.domain.today_sns_activity import (  # noqa: E402
+from app.domains.chat.contracts.call_tracker import NORMAL_NODE_BUDGETS  # noqa: E402
+from app.domains.chat.contracts.today_sns_activity import (  # noqa: E402
     MAX_TODAY_ENTRY_TEXT_CHARS, MAX_TODAY_ROUTER_ENTRIES,
     MAX_TODAY_ROUTER_VIEW_CHARS, TODAY_SNS_ACTIVITY_SNAPSHOT_VERSION,
 )
@@ -38,17 +38,17 @@ REQUIRED_FILES = (
     ".github/workflows/windows-installer.yml",
     "backend/app/alembic/versions/20260904_0088_social_action_subjective_context.py",
     "backend/app/domains/chat/api/schemas.py",
-    "backend/app/domains/chat/application/evidence_assembly.py",
-    "backend/app/domains/chat/application/response_workflow.py",
-    "backend/app/domains/chat/application/retrieval_routing.py",
-    "backend/app/domains/chat/application/today_sns_activity.py",
-    "backend/app/domains/chat/domain/evidence_bundle.py",
-    "backend/app/domains/chat/domain/retrieval_intent.py",
-    "backend/app/domains/chat/domain/retrieval_router.py",
-    "backend/app/domains/chat/domain/today_sns_activity.py",
-    "backend/app/domains/chat/ports/character_response_generator.py",
-    "backend/app/domains/chat/ports/retrieval_router_provider.py",
-    "backend/app/domains/chat/ports/today_sns_activity.py",
+    "backend/app/domains/chat/service/evidence_assembly.py",
+    "backend/app/domains/chat/service/response_workflow.py",
+    "backend/app/domains/chat/service/retrieval_routing.py",
+    "backend/app/domains/chat/service/today_sns_activity.py",
+    "backend/app/domains/chat/contracts/evidence_bundle.py",
+    "backend/app/domains/chat/contracts/retrieval_intent.py",
+    "backend/app/domains/chat/contracts/retrieval_router.py",
+    "backend/app/domains/chat/contracts/today_sns_activity.py",
+    "backend/app/domains/chat/contracts/character_response_generator.py",
+    "backend/app/domains/chat/contracts/retrieval_router_provider.py",
+    "backend/app/domains/chat/contracts/today_sns_activity.py",
     "backend/app/domains/routine_posts/api/schemas.py",
     "backend/app/domains/routine_posts/infrastructure/direct_llm_provider.py",
     "backend/app/domains/social/domain/subjective_context.py",
@@ -125,8 +125,8 @@ def _boundaries():
     for relative in (
         "backend/app/domains/social/domain/subjective_context.py",
         "backend/app/domains/social/domain/today_activity.py",
-        "backend/app/domains/chat/domain/today_sns_activity.py",
-        "backend/app/domains/chat/application/today_sns_activity.py",
+        "backend/app/domains/chat/contracts/today_sns_activity.py",
+        "backend/app/domains/chat/service/today_sns_activity.py",
     ):
         tree = ast.parse((ROOT / relative).read_text(encoding="utf-8"))
         imports = []
@@ -138,7 +138,7 @@ def _boundaries():
         for name in imports:
             if name.startswith(("app.runtime", "app.integrations", "sqlalchemy", "fastapi")):
                 raise ValueError(f"framework/provider boundary violation: {relative}: {name}")
-    _require("backend/app/domains/chat/application/response_workflow.py",
+    _require("backend/app/domains/chat/service/response_workflow.py",
              "today_sns_snapshot.router_view()", "assert_current(command.today_sns_snapshot)",
              "source_context_changed")
     _require("backend/app/runtime/social/sqlalchemy_today_activity.py",

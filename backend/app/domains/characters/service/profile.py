@@ -212,3 +212,14 @@ def list_mentionable_characters(db: Session, handles: list[str]) -> list[models.
             )
         )
     )
+
+def list_message_source_characters(
+    db: Session, owner_id: str
+) -> list[models.Character]:
+    characters = db.scalars(
+        select(models.Character)
+        .where(models.Character.owner_id == owner_id)
+        .where(models.Character.deleted_at.is_(None))
+        .order_by(models.Character.created_at.desc())
+    ).all()
+    return characters

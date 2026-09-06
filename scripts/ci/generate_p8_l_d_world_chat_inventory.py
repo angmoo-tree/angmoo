@@ -114,7 +114,7 @@ def _require_text(relative: str, values: tuple[str, ...]) -> None:
 
 
 def _route_operations() -> tuple[str, ...]:
-    path = ROOT / "backend/app/api/v1/routes/world_chat.py"
+    path = ROOT / "backend/app/domains/chat/router/world_chat.py"
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
     prefix = None
     operations: set[str] = set()
@@ -204,7 +204,7 @@ def _migration_contract() -> dict[str, Any]:
 
 
 def _thread_contract() -> dict[str, Any]:
-    relative = "backend/app/domains/chat/infrastructure/sqlalchemy_models.py"
+    relative = "backend/app/domains/chat/models.py"
     _require_text(
         relative,
         (*REQUIRED_THREAD_COLUMNS, *REQUIRED_THREAD_CONSTRAINTS, *REQUIRED_THREAD_INDEXES),

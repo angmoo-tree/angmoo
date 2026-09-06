@@ -224,7 +224,7 @@
     },
     {
       "path": "backend/app/public_main.py",
-      "sha256": "2f7feb13fde66484191bd22345715a4ae264e3b346d98199fd4cb6fb36870a1c"
+      "sha256": "c0a589558ce20c7150b9fe32e92a32108cab8eb2e53eafe795f32bfe93570faf"
     },
     {
       "path": "backend/app/runtime/account_deletion.py",
@@ -232,7 +232,7 @@
     },
     {
       "path": "backend/app/runtime/characters/management.py",
-      "sha256": "991f27b7b31d648c8b4b9c8db9959f948ff1b21b30a87a3a72ac7b49f6564a31"
+      "sha256": "64f9a7795c666f2f7530b0dc5e7aa9cbe10bb2c12cbb1ded5040a087c831138c"
     },
     {
       "path": "backend/app/runtime/desktop_sidecar.py",
@@ -264,7 +264,7 @@
     },
     {
       "path": "backend/app/runtime/memory/sqlalchemy_source_reader.py",
-      "sha256": "4a2d1952f6d1d6803132494fcc21aad73b2789ec176faf1a1ea872d043c5217c"
+      "sha256": "7b0d0c9d1f3bd50a0185f2137bf2850816044ac47e5bbc756e76a6f5529bb64f"
     },
     {
       "path": "backend/app/runtime/memory/sqlite_fts5_recall.py",
@@ -272,7 +272,7 @@
     },
     {
       "path": "backend/app/runtime/memory/subjective_source.py",
-      "sha256": "25907230333d56b12c3f9624c8c032040431f7ece5cd1e642bbd66f7ed3d0193"
+      "sha256": "cc982f0d8e9174ab18a85490c5a7c33ae14719a53f1efcf6b5a431934b6e62b7"
     },
     {
       "path": "backend/app/runtime/memory_privacy.py",
@@ -388,7 +388,7 @@
     },
     {
       "path": "scripts/ci/build_windows_installer_supported_upgrade_fixture.py",
-      "sha256": "9b949db3b400a9e7f87473aa2fe28d1c631ac0efc68f974cd2a231791ea98a61"
+      "sha256": "1080745e7251d905bac542e6797fd5ae8fc273b7ce7b0163535225b693b53d20"
     },
     {
       "path": "scripts/ci/check_windows_installer_supported_upgrade_matrix.py",

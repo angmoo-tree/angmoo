@@ -1,6 +1,8 @@
 """Supported backend boundary for Chat consumers."""
 
-from app.domains.chat.api.schemas import (
+from app.compatibility.chat_service import ChatService
+from app.compatibility.chat_generation_lifecycle import GenerationLifecycleService
+from app.domains.chat.schemas import (
     CharacterMessageSettingRead,
     CharacterMessageSettingUpdate,
     MessageMessageCreate,
@@ -29,7 +31,7 @@ from app.domains.chat.api.schemas import (
     WorldChatThreadModelUpdate,
     WorldChatThreadRead,
 )
-from app.domains.chat.application import (
+from app.domains.chat.service import (
     AnswerRequestContractValidator,
     BoundedFakeAnswerRequestExecutor,
     BothRetrievalCommand,
@@ -39,11 +41,9 @@ from app.domains.chat.application import (
     CanonicalPlanningResult,
     CanonicalRetrievalCommand,
     CanonicalRetrievalPlanningService,
-    ChatService,
     ClarificationCandidate,
     ClarificationResolution,
     CoordinatedRetrievalReference,
-    GenerationLifecycleService,
     GraphPlanningMetrics,
     GraphPlanningResult,
     GraphRetrievalCommand,
@@ -53,7 +53,7 @@ from app.domains.chat.application import (
     RetrievalRoutingService,
     WorkflowCoordinatorMetrics,
 )
-from app.domains.chat.domain import (
+from app.domains.chat.contracts import (
     CHAT_GENERATION_STREAM_VERSION,
     RESOLVED_RETRIEVAL_VERSION,
     RETRIEVAL_INTENT_VERSION,
@@ -101,7 +101,7 @@ from app.domains.chat.domain import (
     retrieval_router_response_schema,
     select_workflow_recipe,
 )
-from app.domains.chat.ports import (
+from app.domains.chat.contracts import (
     CanonicalRetrievalScope,
     RetrievalEntityCandidate,
     RetrievalEntityResolution,
@@ -119,7 +119,7 @@ from app.domains.memory.public import (
     CanonicalRetrievalPlan,
 )
 from app.domains.relationships.contracts.graph_plan import GRAPH_PLAN_VERSION, GraphPlanStep, GraphRetrievalPlan
-from app.domains.chat.domain.errors import (
+from app.domains.chat.exceptions import (
     MessageCredentialInvalidError,
     MessageCredentialRequiredError,
     MessageForbiddenError,

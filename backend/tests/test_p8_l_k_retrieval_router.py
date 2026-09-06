@@ -12,8 +12,8 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.db import Base
-from app.domains.chat.application import RetrievalRoutingService
-from app.domains.chat.domain import (
+from app.domains.chat.service import RetrievalRoutingService
+from app.domains.chat.contracts import (
     ROUTER_VALIDATION_CODES,
     RetrievalContractError,
     RetrievalRoute,
@@ -23,7 +23,7 @@ from app.domains.chat.domain import (
     parse_retrieval_intent_payload,
     retrieval_router_response_schema,
 )
-from app.domains.chat.ports import (
+from app.domains.chat.contracts import (
     CanonicalRetrievalScope,
     RetrievalEntityCandidate,
     RetrievalEntityResolution,

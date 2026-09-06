@@ -11,7 +11,7 @@ from typing import Any
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-from app.domains.chat.infrastructure.sqlalchemy_models import (
+from app.domains.chat.models import (
     MessageMessage,
     MessageThread,
 )

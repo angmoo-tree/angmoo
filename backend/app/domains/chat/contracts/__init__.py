@@ -1,0 +1,236 @@
+"""Pure Chat domain policy, retrieval, and generation contracts."""
+
+from app.domains.chat.contracts.call_tracker import (
+    LlmNode,
+    NORMAL_NODE_BUDGETS,
+    RouteAwareCallTracker,
+)
+from app.domains.chat.contracts.generation_lifecycle import (
+    CHAT_GENERATION_STREAM_VERSION,
+    GenerationContractError,
+    GenerationEvent,
+    GenerationEventType,
+    GenerationFence,
+    ResponseRequestState,
+    ResponseTerminalReason,
+    SequenceOutcome,
+    TERMINAL_STATES,
+)
+from app.domains.chat.contracts.resolved_envelope import (
+    RESOLVED_RETRIEVAL_VERSION,
+    ResolvedEntityBinding,
+    ResolvedRetrievalEnvelope,
+    RetrievalHardCaps,
+)
+from app.domains.chat.contracts.response_request import (
+    CreateResponseRequest,
+    DegradedReason,
+    EvidenceCapability,
+    ResponseCommitPayload,
+    ResponseMetadata,
+    ResponseRequestRecord,
+    RetrievalAxis,
+    RetrievalOutcome,
+    build_request_scope_hash,
+)
+from app.domains.chat.contracts.retrieval_intent import (
+    RETRIEVAL_INTENT_VERSION,
+    RetrievalAggregationKind,
+    RetrievalAggregationMeaning,
+    RetrievalContractError,
+    RetrievalDecision,
+    RetrievalEntityMention,
+    RetrievalIntentEnvelope,
+    RetrievalRelationshipMeaning,
+    RetrievalRoute,
+    RetrievalTimeKind,
+    RetrievalTimeMeaning,
+)
+from app.domains.chat.contracts.retrieval_router import (
+    ROUTER_DIAGNOSTIC_VERSION,
+    ROUTER_AGGREGATION_TARGETS,
+    ROUTER_CLARIFICATION_SLOTS,
+    ROUTER_COORDINATION_HINTS,
+    ROUTER_ENTITY_ROLES,
+    ROUTER_INTENTS,
+    ROUTER_SECURITY_VALIDATION_CODES,
+    ROUTER_VALIDATION_CODES,
+    RetrievalRouterRepairExhaustedError,
+    RouterFailureDiagnostic,
+    normalize_router_validation_code,
+    parse_retrieval_intent_payload,
+    retrieval_router_response_schema,
+    router_validation_code_from_exception,
+    router_validation_is_retryable,
+)
+from app.domains.chat.contracts.workflow_recipe import (
+    RETRIEVAL_WORKFLOW_VERSION,
+    RetrievalWorkflow,
+    WORKFLOW_RECIPE_REGISTRY,
+    WorkflowAxis,
+    WorkflowDependencyBinding,
+    WorkflowDependencyKind,
+    WorkflowMergeMode,
+    WorkflowRecipe,
+    WorkflowRecipeSelection,
+    WorkflowRecipeSpec,
+    select_workflow_recipe,
+)
+from app.domains.chat.contracts.model_binding import (
+    MESSAGE_MODEL_BINDING_MODES,
+    MessageModelBindingMode,
+)
+from app.domains.chat.contracts.evidence_bundle import (
+    EVIDENCE_BUNDLE_VERSION,
+    EvidenceBundle,
+    EvidenceBundleContractError,
+    EvidenceItem,
+    EvidenceKind,
+)
+from app.domains.chat.contracts.today_sns_activity import (
+    TODAY_SNS_ACTIVITY_SNAPSHOT_VERSION,
+    TodaySnsActivityEntry,
+    TodaySnsActivitySnapshot,
+    TodaySnsSubjectiveContext,
+)
+
+__all__ = [
+    "CHAT_GENERATION_STREAM_VERSION",
+    "CreateResponseRequest",
+    "DegradedReason",
+    "EvidenceCapability",
+    "EVIDENCE_BUNDLE_VERSION",
+    "EvidenceBundle",
+    "EvidenceBundleContractError",
+    "EvidenceItem",
+    "EvidenceKind",
+    "GenerationContractError",
+    "GenerationEvent",
+    "GenerationEventType",
+    "GenerationFence",
+    "LlmNode",
+    "MESSAGE_MODEL_BINDING_MODES",
+    "MessageModelBindingMode",
+    "NORMAL_NODE_BUDGETS",
+    "RESOLVED_RETRIEVAL_VERSION",
+    "RETRIEVAL_INTENT_VERSION",
+    "RETRIEVAL_WORKFLOW_VERSION",
+    "ResolvedEntityBinding",
+    "ResolvedRetrievalEnvelope",
+    "ResponseCommitPayload",
+    "ResponseMetadata",
+    "ResponseRequestRecord",
+    "ResponseRequestState",
+    "ResponseTerminalReason",
+    "RetrievalContractError",
+    "RetrievalAggregationKind",
+    "RetrievalAggregationMeaning",
+    "RetrievalAxis",
+    "RetrievalDecision",
+    "RetrievalEntityMention",
+    "RetrievalHardCaps",
+    "RetrievalIntentEnvelope",
+    "RetrievalRelationshipMeaning",
+    "RetrievalRoute",
+    "RetrievalTimeKind",
+    "RetrievalTimeMeaning",
+    "RetrievalOutcome",
+    "RetrievalWorkflow",
+    "ROUTER_AGGREGATION_TARGETS",
+    "ROUTER_CLARIFICATION_SLOTS",
+    "ROUTER_COORDINATION_HINTS",
+    "ROUTER_DIAGNOSTIC_VERSION",
+    "ROUTER_ENTITY_ROLES",
+    "ROUTER_INTENTS",
+    "ROUTER_SECURITY_VALIDATION_CODES",
+    "ROUTER_VALIDATION_CODES",
+    "RetrievalRouterRepairExhaustedError",
+    "RouterFailureDiagnostic",
+    "RouteAwareCallTracker",
+    "SequenceOutcome",
+    "TERMINAL_STATES",
+    "TODAY_SNS_ACTIVITY_SNAPSHOT_VERSION",
+    "TodaySnsActivityEntry",
+    "TodaySnsActivitySnapshot",
+    "TodaySnsSubjectiveContext",
+    "WORKFLOW_RECIPE_REGISTRY",
+    "WorkflowAxis",
+    "WorkflowDependencyBinding",
+    "WorkflowDependencyKind",
+    "WorkflowMergeMode",
+    "WorkflowRecipe",
+    "WorkflowRecipeSelection",
+    "WorkflowRecipeSpec",
+    "build_request_scope_hash",
+    "normalize_router_validation_code",
+    "parse_retrieval_intent_payload",
+    "retrieval_router_response_schema",
+    "router_validation_code_from_exception",
+    "router_validation_is_retryable",
+    "select_workflow_recipe",
+]
+
+"""Chat thread model-binding contracts shared by storage and HTTP."""
+from app.domains.chat.contracts.model_binding import (
+    MESSAGE_MODEL_BINDING_MODES,
+    MessageModelBindingMode,
+)
+
+__all__ += ["MESSAGE_MODEL_BINDING_MODES", "MessageModelBindingMode"]
+
+
+# Typed collaborators implemented by providers, persistence and runtime.
+
+from app.domains.chat.contracts.response_lifecycle import ResponseLifecycleRepositoryPort
+from app.domains.chat.contracts.retrieval_policy import (
+    CanonicalRetrievalScope,
+    RetrievalEntityCandidate,
+    RetrievalEntityResolution,
+    RetrievalPolicyResolverPort,
+    RetrievalPreflightCommand,
+)
+from app.domains.chat.contracts.retrieval_router_provider import (
+    RetrievalRouterContextMessage,
+    RetrievalRouterOutputError,
+    RetrievalRouterProviderPort,
+    RetrievalRouterProviderResult,
+    RetrievalRouterRequest,
+)
+from app.domains.chat.contracts.response_workflow import ResponseWorkflowUnitOfWorkPort
+from app.domains.chat.contracts.successful_chat_memory import (
+    SuccessfulChatMemoryProducerPort,
+    SuccessfulChatMemorySource,
+)
+from app.domains.chat.contracts.character_response_generator import (
+    CharacterResponseContextMessage,
+    CharacterResponseGeneratorError,
+    CharacterResponseGeneratorPort,
+    CharacterResponseGeneratorRequest,
+    CharacterResponseGeneratorResult,
+    CharacterResponseProfile,
+)
+from app.domains.chat.contracts.today_sns_activity import TodaySnsActivityReaderPort
+
+__all__ += [
+    "CanonicalRetrievalScope",
+    "CharacterResponseContextMessage",
+    "CharacterResponseGeneratorError",
+    "CharacterResponseGeneratorPort",
+    "CharacterResponseGeneratorRequest",
+    "CharacterResponseGeneratorResult",
+    "CharacterResponseProfile",
+    "ResponseLifecycleRepositoryPort",
+    "ResponseWorkflowUnitOfWorkPort",
+    "SuccessfulChatMemoryProducerPort",
+    "SuccessfulChatMemorySource",
+    "TodaySnsActivityReaderPort",
+    "RetrievalEntityCandidate",
+    "RetrievalEntityResolution",
+    "RetrievalPolicyResolverPort",
+    "RetrievalPreflightCommand",
+    "RetrievalRouterContextMessage",
+    "RetrievalRouterOutputError",
+    "RetrievalRouterProviderPort",
+    "RetrievalRouterProviderResult",
+    "RetrievalRouterRequest",
+]

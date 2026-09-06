@@ -9,11 +9,13 @@ import pytest
 
 from app import models, schemas
 from app.services import direct_llm
-from app.services import messages
+from chat_service_support import messages
 
 
 def test_message_service_user_facing_strings_are_not_mojibake() -> None:
-    source = Path(messages.__file__).read_text(encoding="utf-8")
+    from app.domains.chat.service import messages as message_module, settings, threads
+
+    source = "\n".join(Path(module.__file__).read_text(encoding="utf-8") for module in (message_module, settings, threads))
 
     for marker in ("履", "筌", "?댁", "?쒕", "?묐"):
         assert marker not in source

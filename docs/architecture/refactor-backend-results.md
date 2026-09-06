@@ -2026,3 +2026,137 @@ B5 source 통합이 준비되었으며 원래 signed source 증거 append, stock
 수정 source `9a7f76d`와 최초 도입 원장 metadata `0108a3a`를 signed로 고정한 뒤 전체 backend가 **2,362 PASS /기존 skip22 /warning27 /733.18초**로 통과했다. 동일 source의 원래 stock 검사도 **보호2,384 /현재2,384 /37항목 PASS**다. 원래 tendency 단언의 중복 import만 정리한 별도4개 회귀도 통과했으며, 전체 실행 중 source/test/metadata를 편집하지 않았다. 최초20개 실패 이력은 위 기록에 유지한다.
 
 같은 커밋의 Gitleaks 추적 source와 HEAD 전체 조상 history는 모두0 leaks, DCO·secret metadata25·Local OSS/CI policy·frontend design은 PASS다. 원래 custom scanner의 현재 Git tree는2,081파일/치명0이다. 공유 개발 저장소의 `--history`는 `--all`을 읽기 때문에 미합류 B8 `3500f3f`의 신규 `tests/integrations/test_direct_llm.py`에서3개 synthetic fixture 오탐을 발견했다. 그 경로와 blob `a464aad`는 B5 HEAD 조상에 없고 해당 B8 source가 자기 경로의 기존 exact allowlist를 이미 이전했다. B5에 미래 예외를 추가하지 않고, 후보 전체 조상만 있는 별도 bare 저장소에서 원래 history 검사를 그대로 실행해 PR 범위 결과를 분리한다. PR required CI와 병합 후 실행·installer Gate는 아직 완료로 표시하지 않는다.
+
+## AR-B6-A1 Chat 모델 정책·요청 계약 준비
+
+고정 source `9c1ad0f07cb824c158e07618d7b2ec1eca5f3135`에서 Chat의 schemas·exceptions·policies·model_binding 계약 네 파일을 실제 역할 경로로 옮겼다. 함수·클래스 본문 AST와 정책 상수는 동일하며 20개 실제 소비자와 기존 테스트의 module 참조를 바꿨다. Gemini HIGH/LOW, Gemma의 미설정 reasoning, token cap 및 lease 정책은 그대로다. 신규 행위나 신규 test node를 추가하지 않았다. Frozen migration 및 과거 inventory branch는 변경하지 않았다.
+
+- Chat B/D domain·identity/migration·모델 Hotfix·쪽지 회귀: **83 passed / 16.37초**, 고정 source에서 완료.
+- Live architecture **627 modules / 2,003 edges / exact legacy 281 PASS**. Deferred 22, L4 parity 97, ER0 76/87/24/44/7, P8-R current inventory PASS.
+- 정확한 기반 module 5개·entry 3개와 임시 소비 연결 8개만 scope에 반영했다. Thread repository/service, generation lifecycle 및 HTTP endpoint 구현은 아직 이전하지 않았다.
+
+이는 AR-B5 후 순차 통합할 독립 준비 source다. 전체 보존 계보 capture·통합 회귀·PR·merge·post-merge 및 AR-B6 완료로 표시하지 않는다.
+
+
+
+## AR-B6-A1 — Chat 계약·모델과 실제 thread SQL 기반
+
+Media `dd78da66`에서 새 Chat 작업트리를 만들고 계약 준비 `4def2b5`를 합친 merge `8e6be936dce66626119a43d4fe0a55632dd91c9d`를 먼저 고정했다. B5 이후 순차 병합할 준비 구현이며 Chat 전체 완료가 아니다.
+
+남은 순수 값/검증 계약 9개 파일과 package export를 `contracts/`로, Chat ORM 5개와 DDL helper를 `models.py`로 옮겼다. 함수/class **85개 AST 본문은 동일**하고 모든 class는 같은 Base/metadata를 사용한다. immutable v5→v6와 Alembic 본문은 수정하지 않았으며 이전 models module만 같은 객체 alias로 유지한다. 실제 소비자와 살아 있는 검사기의 물리 경로를 새 역할로 연결했고 frozen 역사 inventory·source/checkpoint·승인 node를 다시 만들지 않았다.
+
+`repository/threads.py`에는 실제 SQL query 9개와 원래 advisory lock/tuple lookup 함수 4개를 옮겼다. requester/deleted/ambiguous scope·정렬·limit 2·joinedload·같은 Session은 유지하고 repository에서 commit/rollback하지 않는다. World/legacy count는 동일 requester/deleted 조건의 하나의 query를 사용한다. thread admission·mutation/commit·오류 판단은 아직 원래 실행 service에 있으며 A2에서 교차 owner/credential 협력과 함께 이전한다.
+
+새 회귀 1개는 실제 SQLite에서 owner/삭제 필터·정렬·중복 후보 최대 2개·동일 attached 객체·caller rollback을 검증한다. 첫 집중 134개 실행은 generated inventory 명령 후반과 겹쳤으므로 고정tree 통과 증거로 사용하지 않고, 모든 명령 종료 뒤 동일 범위를 다시 실행한다.
+
+고정 tree 재실행은 **134 passed / 기존 4 warnings / 22.26초**였다. 모델/계약 85개와 원문에서 온 lock/lookup 함수 4개의 AST가 같고 현재 API·ORM 계약은 원래 baseline와 후속 checkpoint 모두 차이가 없었다. Live architecture는 **638 modules / 2,064 edges / exact legacy 265 PASS**, ER0 **77/87/24/44/7 PASS**, L4 parity **97**, Memory batch 및 World Chat identity inventory current다.
+
+전체 assertion 보존 검사는 많은 이동 경로의 정규식 재컴파일 병목으로 종료 전에 중단했으므로 PASS로 표시하지 않는다. 별도 검증된 검사기 성능 수정의 적용 뒤 source·assertion·node 통합 검사를 다시 실행한다. 신규 source/test introduction capture와 PR·merge·설치 Gate는 root의 선형 통합에서 진행한다.
+
+검사기 성능 수정은 root source `36fd4748cb55744d3effbcfb9d18eb921e0fd8d9`의 해당 파일 diff만 그대로 적용했다. 경로 순서와 정규식 경계는 유지하고 컴파일된 immutable pattern만 재사용한다. 기존 보존/partial-scope 회귀 **149 passed / 1.24초**를 통과했다. 이후 전체 보존 명령이 종료되어 source 목적지·split·assertion·skip/xfail 억제·API·ORM·수집 node 누락은 없음을 확인했다. 최초 실행에서 K17/K18/K20 등 중복 feature 행의 옛 계약 경로를 찾아 현재 경로만 정확히 수정했고 feature inventory 재검사는 차이 0이었다.
+
+보호 계보 **2,129 / 현재 2,158**이며 source 29개·node 29개는 선행 Media/WC 및 이번 A1의 실제 첫 도입 commit capture를 root에서 이어가야 하므로 명령 전체 exit 1을 완료 PASS로 바꾸지 않는다. 원래 frozen 기준과 승인 node는 그대로다.
+
+
+## AR-B6-A2 — 실제 스레드·설정·쪽지 서비스와 같은 Session 협력
+
+A1 `2f36a6af` 및 보존 보완 `abbf2647` 뒤 실제 runtime SQL 업무 57개를 `ThreadService` 27개, `MessageSettingsService` 14개, `MessageService` 11개, 프로필 변환·조회 5개로 분리했다. HTTP는 각 실제 소유 인스턴스를 직접 호출하며 Any port와 SQL forwarding adapter는 production 호출 경로에서 제거했다. 골격만 옮긴 것이 아니라 권한·model/quota·lease·provider/commit·재시도 구현이 서비스 파일에 있다.
+
+명시적 `self`·소유 service binding을 제외한 함수 본문은 **46/57 AST 동일**하다. 바뀐 11개는 같은 Session의 join 6개, Character nullable/profile picker 읽기, Identity credential 조회·flush-only 쓰기·clear 협력으로 분리한 부분이다. provider/send/retry 11개 함수는 모두 AST 본문이 같다. 기존 World/installation 확인과 오류 순서, PostgreSQL lock 조건·join·필터·정렬·limit, 재검증과 IntegrityError 1회 재시도, preference flush/commit 차이 및 plaintext reveal 지점은 유지한다.
+
+새 회귀는 실제 owning instance를 쓰는 HTTP 연결, 설치 owner 거부의 선행 순서와 lock 전달, 실제 SQLite join의 같은 attached 객체·단일 query·scope 필터, credential envelope scope·flush-only/caller rollback, 예기치 않은 전송 실패의 같은 lease 해제를 검증한다. 기존 tests의 assertion은 그대로 두고 test-only helper가 monkeypatch를 실제 소유 인스턴스로 전달한다. 옛 구조 전용 node는 원본 forwarder를 compatibility에 한 번만 보존하고 새 직접 서비스 경로 회귀와 B8 퇴역 조건을 정확히 지도에 적었다.
+
+첫 59개 집중 검사는 **58 passed / 1 failed**였고 실패는 선행 WC source의 이미 옮겨진 provider에 대한 reveal 허용 경로 한 건이었다. 해당 경로만 `world_characters/client.py`로 맞춘 뒤 신규 회귀·모델 Hotfix를 포함해 **74 passed / 기존 4 warnings / 19.01초**를 통과했다. 보존 기준선·허용 동작을 넓히지 않았다. 최종 inventory/보존·확장 집중 검사는 이 기록 이후 별도로 수행한다.
+
+최종 고정 tree의 Chat·World Chat·generation·Today SNS·credential/deletion 집중 묶음은 **170 passed / 기존 4 warnings / 38.56초**, 보존/부분 scope 회귀는 **149 passed / 0.97초**였다. 전체 보존 `--contracts --nodes`는 source 목적지·분리 symbol/소비자·assertion·억제 표시·API·ORM·기존 node에서 오류 0이며 보호 **2,129 / 현재 2,166**을 확인했다. 선행 Media/WC/A1의 아직 capture되지 않은 source 29개·node 29개 때문에 명령은 exit 1이다. 이번 미커밋 slice의 신규 node 8개와 helper/서비스 파일은 이 source의 첫 introduction SHA로 root에서 추가 증거를 남긴다.
+
+Live architecture **645 modules / 2,103 edges / exact legacy 265 PASS**, ER0 **79/87/24/44/7 PASS**, L4 parity **97**, Memory batch current, 공개 route inventory **196**이다. Root의 독립 읽기 리뷰에서도 query의 owner/World/WC/membership 조건·limit 2/FOR UPDATE·nullable 반환과 같은 Session, credential flush-only·clear/envelope 경계에서 추가 문제는 발견되지 않았다. 이 결과를 generation/retrieval 전체 전환이나 Hosted CI·설치 Gate 완료로 확대하지 않는다.
+
+
+## AR-B6-B1 — 검색·근거·응답 실행 서비스와 실제 lifecycle 저장소
+
+A2 `57528d22072f7541e7f1f1b982071afd5c1d537c` 뒤 실제 검색 계획·근거 조립·답변 생성 업무를 `service/`로, 실제 provider/UoW/Memory 협력 형식을 `contracts/`로, lease·CAS·최종 저장 구현을 `repository/response_lifecycle.py`로 이전했다. 이전 경로 21개의 명시적 대응을 남겼으며 Today SNS snapshot과 reader/validator가 같은 이름의 파일로 합쳐질 때 기존 snapshot 검증·hash·serialization을 모두 보존했다.
+
+기존 함수/class 본문은 **76개 AST 동일**하다. 나머지 3개 class 차이는 workflow 생성자 annotation 1개와 repository/Protocol에 같은 함수 alias를 추가한 2개다. runtime의 accept/retry/stream/expired recovery/사전 실패 처리 5개 함수는 원래 `GenerationLifecycleService(...)` 외부 전달 생성자만 제거하면 AST가 동일하다. 실행은 실제 repository를 직접 사용하며 원래 wrapper는 기존 공개 계약과 streaming 테스트 helper `_request`·`_workflow` 때문에 compatibility 한 곳에 보존한다. 이 승인 테스트의 실제 workflow 검증을 없애지 않고 B8에서 원래 assertion과 새 실제 저장소 경로 대응을 확인한다.
+
+새 회귀 2개는 옛 wrapper 생성 시 실패하도록 막은 실제 accept/replay 경로와 같은 SQLite 메시지·요청 한 건, 오래된 lease fence 거부, 최종 assistant 한 건과 재실행 중복 방지를 검증한다. 고정 tree 집중 검사는 **187 passed / 기존 4 warnings / 23.77초**다. 신규 검사 최초 실행도 **2 passed / 3.86초**였다.
+
+전체 `--contracts --nodes` 검사에서 source 목적지·분리 symbol/소비자·assertion·억제 표시·API·ORM·기존 node 오류는 0이었다. 보호 계보 **2,129 / 현재 2,168**이며 선행 Media/WC 및 A1/A2의 아직 캡처되지 않은 committed source 36개·node 37개 때문에 명령 전체는 exit 1이다. 이번 source의 신규 2 nodes와 실제 소유 파일의 첫 도입 SHA는 root가 선형 통합에서 캡처한다. Frozen 원본·checkpoint·승인 node는 바꾸지 않았다.
+
+Live architecture **641 modules / 2,094 edges / exact legacy 265 PASS**, ER0 **79/87/24/44/7 PASS**, L4 parity **97**, Memory batch current, 공개 route inventory **196**이다. 후속 B6-B2/C에서 runtime의 generation admission·evidence 읽기·provider/다중 업무 조립과 HTTP 진입점을 이어서 정리한다. B5 합류·전체 Chat 완료·Hosted CI·설치 Gate 완료를 의미하지 않는다.
+
+
+## AR-B6-B2A — 생성 접수·재시도·상태와 실패 기록의 실제 서비스
+
+B1 `408a29e0306aa9b95b08e3ed383032eebf4c6f8c` 뒤 runtime의 실제 업무 12개를 `GenerationService`로, 같은 thread의 active/latest SQL 2개를 `repository/response_requests.py`로 이전했다. HTTP 네 동작은 실제 서비스 인스턴스를 직접 호출한다. 기존 stream/evidence의 동일 인스턴스 메서드 alias는 남은 실제 호출을 위해서만 유지하며, API·runtime·repository·새 service를 원래 source의 완전한 symbol 분리 지도로 연결했다.
+
+12개 메서드는 명시적 self·ThreadService·repository binding을 원래 이름으로 되돌리면 **모두 AST 동일**하고 SQL 2개도 동일하다. user message flush→request 생성→commit→refresh, 같은 idempotency 키·내용 재확인, 최신 실패 요청과 같은 user message/response slot 재시도, 모델 PATCH와 같은 tuple 잠금·scope 재검증, 만료 복구 commit, accepted/failed sequence·lease fence 및 terminal 오류 저장 순서를 유지했다.
+
+첫 집중 검사 **46 passed / 3 failed**에서 모델 snapshot 함수를 SettingsService로 잘못 연결한 부분을 찾아 실제 ThreadService 소유로 수정했다. 기존 Hotfix 잠금 회귀는 monkeypatch 대상만 실제 owning instance로 옮기고 assertion은 그대로 유지했다. 수정 뒤 **56 passed / 기존 4 warnings / 14.10초**, 고정 tree 확장 묶음은 **194 passed / 기존 4 warnings / 24.95초**였다. 신규 node는 추가하지 않았으며 B1의 실제 accept/replay·fence 회귀와 기존 전송·재시도·재연결·모델 Hotfix 검증을 사용했다.
+
+전체 보존 검사에서 source/split/assertion/억제 표시/API/ORM/기존 node 오류 0, 보호 **2,129 / 현재 2,168**을 확인했다. 선행 source 37개·node 39개의 append-only capture가 root 순차 통합에 남아 있어 명령 전체는 exit 1이다. 이번 실제 service/repository 2개 파일의 첫 도입 SHA도 그 순서로 캡처한다. Live architecture **643 modules / 2,109 edges / exact legacy 265 PASS**, ER0 **79/87/24/44/7 PASS**, L4 **97**, Memory batch current, public **196**이다.
+
+근거 inspector의 현재 원본·revision/공개 상태 재검증과 provider/Memory/graph/Today 실행 조립은 후속 B2B/C 범위다. 전체 Chat·B5 순차 통합·CI·설치 완료로 표시하지 않는다.
+
+
+## AR-B6-B2B — 근거 공개 상태·revision 정책과 같은 Session 읽기 협력
+
+B2A `f4a5ddc74eb7651d91a100272a21dc26cb41543c` 뒤 근거 inspector의 실제 정책을 `service/evidence.py`로 이전했다. `contracts/evidence_reads.py`는 필요한 Memory/Today/관계/이름 읽기 결과를 명시하며, runtime의 `evidence_reads.py`는 기존 reader 구성·nullable Relationship 조회·World 이름 join만 수행한다. HTTP 근거 조회는 실제 EvidenceService 인스턴스를 직접 사용한다.
+
+두 업무 메서드는 self 및 명시된 reader 협력을 원래 표현으로 복원하면 **전체 AST 동일**하고 순수 helper 3개 본문도 동일하다. source reader는 요청에서 한 번 만들고 같은 객체와 Session을 Memory detail에 넘긴다. Today의 ±1초 구간과 composite revision, canonical 원본의 World/revision/성공/공개/관찰/참여/차단, Memory 활성·version·현재 evidence, 관계 version/방향/참여·차단 검증과 기존 오류 catch 순서를 유지했다.
+
+새 회귀 5개는 정상·다른 World·비공개·비활성 참여·revision 변경의 현재 원본을 재조회해, 허용된 경우에만 500자 excerpt와 연결을 반환하고 그렇지 않으면 과거 본문과 이름을 노출하지 않음을 확인한다. 최초 근거/Memory/Today/stream 집중 묶음은 **44 passed / 기존 1 warning / 12.39초**, 고정 tree 확장 묶음은 **199 passed / 기존 4 warnings / 23.75초**다.
+
+전체 보존 검사는 source/split/assertion/억제 표시/API/ORM/기존 node 오류 0, 보호 **2,129 / 현재 2,173**이다. 선행 committed source 38개·node 39개의 append-only capture가 남아 명령 전체는 exit 1이다. 이번 신규 5 nodes의 첫 도입 파일은 `tests/chat/test_evidence_ownership.py`이며 실제 service/contracts/runtime 읽기 3개 파일과 함께 source SHA별로 root에서 캡처한다. Live architecture **646 modules / 2,133 edges / exact legacy 265 PASS**, ER0 **78/87/24/44/7 PASS**, L4 **97**, Memory batch current, public **196**이다.
+
+남은 provider/Memory/graph/Today 생성 조립, recent-context SQL과 실제 streaming 입장 판단은 B2C에서 이어간다. 전체 B6·B5 합류·CI·설치 완료는 별개다.
+
+
+## AR-B6-B2C — 실제 stream 입장 판단과 순서를 보존한 실행 조립
+
+B2B `4694b5dc6eaa81e3c01ddb41ea01e5732cbe636c` 뒤 stream의 실제 요청·상태·기한·context·로컬 runtime·credential/model 판단과 최종 command 생성을 GenerationService로 이전했다. Character/World nullable 조회는 해당 소유 서비스의 같은 `db.get` 구현을 사용한다. recent-context SQL은 repository로, 같은 20개/8,000자 선택 정책은 생성 서비스로, Character 응답 profile 변환은 기존 Chat profiles 파일로 옮겼다.
+
+`contracts/execution.py`의 실제 입력/결과 형식을 통해 runtime의 `generation_workflows.py`가 기존 canonical provider/executor → graph gateway/provider/executor → World 이름 목록 → router/CRG/UoW/Memory/Today 객체를 원래 순서로 만든다. 원래 생성 블록과 UoW는 **AST 동일**하고 서비스의 stream은 명시된 소유 조회 및 실행 조립을 원래 표현으로 펼치면 **전체 AST 동일**하다. 최근 context 선택도 SQL 이전을 제외한 본문은 동일하다. Provider 호출·budget·credential reveal 횟수를 늘리지 않았다.
+
+새 회귀 2개는 실제 builder의 provider 생성 순서·동일 material/Session/lifecycle/label과, Memory 실행이 불가능한 경우 실제 repository에 accepted→failed와 retryable 상태를 저장하고 provider builder를 호출하지 않는 경로를 검증한다. 첫 집중 묶음 **62 passed / 1 failed**는 A2 구조 전용 테스트의 옛 module attribute가 제거되어 발생했다. 해당 attribute는 같은 기존 module을 가리키는 검사 전용 alias로 B8까지 보존했으며 실제 HTTP 동작은 실제 service instance를 직접 호출한다. 기존 assertion을 약화하지 않았다. 신규·서비스 소유 회귀 **10 passed / 5.07초**, 최종 고정 tree 확장 묶음은 **209 passed / 기존 4 warnings / 34.47초**다.
+
+전체 보존 검사는 source/split/assertion/억제 표시/API/ORM/기존 node 오류 0, 보호 **2,129 / 현재 2,175**이다. 선행 source 42개·node 44개 append-only capture가 남아 명령 전체는 exit 1이다. 이번 신규 파일 `contracts/execution.py`, `runtime/chat/generation_workflows.py`, `tests/chat/test_generation_composition.py`와 신규 2 nodes는 이 source의 첫 SHA로 root에서 캡처한다. Live architecture **648 modules / 2,148 edges / exact legacy 265 PASS**, ER0 **78/87/24/44/7 PASS**, L4 **97**, Memory batch current, public **196**이다.
+
+남은 실제 canonical preflight/entity resolution과 Today snapshot hash 판단을 소유 service로 이어서 이전하고, 그 뒤 Request→app.state 기반 service 주입·두 factory 등록·동일 standalone router 테스트 구성을 통해 HTTP owner를 마무리한다. runtime Memory 성공 후보는 실제 after-commit UoW 협력이며 원래 한 번의 제안·commit/rollback 의미를 유지한다. 전체 B6·B5 통합·CI·설치 완료로 표시하지 않는다.
+
+
+
+## AR-B6-B2D — 검색 사전 정책·Unicode 재확인·Today snapshot 소유
+
+Source `4d1f0f4836e913251f7fa92c091e93d8b1ce3409`에서 preflight의 실제 거부 순서와 entity 후보 판단을 `service/retrieval_policy.py`로 이전했다. 같은 Session의 교차 업무 SQL 5개는 `runtime/chat/retrieval_queries.py`, Chat thread 조회는 자체 repository에 있다. `contracts/retrieval_reads.py`는 필요한 값과 read 계약이다. Today snapshot의 complete-through/hash 검증은 기존 Today 서비스의 실제 validator가 수행하고 runtime은 같은 reader를 구성한다.
+
+사전 판단 3개 메서드는 명시된 읽기 협력을 원래 표현으로 펼치면 전체 AST 동일하다. 새 교차 SQL 5개와 Chat thread 조회의 표현 AST도 원래 query와 동일하며 Today assert_current 본문은 변경하지 않았다. Unicode casefold 재확인, 활성·공개·차단 후보의 observable 조건, 소유자→World→thread→역할→차단→Memory 조회 순서와 오류를 보존한다. 새 회귀 3개는 잘못된 설치 소유자에서 후속 조회가 실행되지 않는 두 경우와 Unicode/차단 후보의 실제 정책을 검증한다.
+
+고정 tree 확장 검증 **212 passed / 기존 4 warnings / 22.49초**. 전체 보존은 source/split/assertion/억제 표시/API/ORM/기존 node의 실질 오류 0, 보호 **2,129 / 현재 2,178**이며 선행 source/node introduction은 root의 선형 capture 전까지 미완료다. Live architecture **651 modules / 2,155 edges / exact legacy 265 PASS**, ER0 **78/87/24/44/7**, L4 **97**, Memory batch current, public **196**이다. 신규 실제 contract/service/runtime queries와 `tests/chat/test_retrieval_policy_ownership.py`의 첫 도입 SHA는 위 source commit이다.
+
+HTTP Request 기반 service 주입·두 앱 factory와 standalone route 테스트 구성은 다음 B6-C 범위다. B5/B7 합류 시 새 Social/Memory reader·models·factory로 정확히 연결하고, 이전 constructor 이름과 구조 검사용 alias는 B8 종료 대상으로 추적한다. 전체 B6/CI/설치 완료로 승격하지 않는다.
+
+
+
+## AR-B6-C1 — 실제 Chat HTTP 소유와 Request 기반 서비스 주입
+
+기존 쪽지/설정 11개, World thread/진입 5개, 생성/근거/NDJSON 6개 HTTP 함수는 `chat/router/messages.py`, `world_chat.py`, `world_chat_response.py`로 이전했다. 같은 domain의 schema/error와 `dependencies.py`가 제공하는 typed 실제 service를 사용한다. 두 factory는 같은 concrete service를 등록하고 standalone 기존 API fixture 세 곳도 같은 연결을 사용한다. 요청마다 새 service/provider/Session을 만들지 않는다.
+
+22개 원래 함수의 body·decorator·기존 인자는 **새 typed Depends 인자 하나와 errors 모듈 alias를 복원하면 전체 AST 동일**하다. 실제 API 조립의 순서·prefix·URL·operation ID·schema와 기존 get_db/get_current_user 함수 identity를 보존했다. route_security_inventory의 Chat module 22필드만 실제 소유 경로로 바꿨다. 선행 WC 7필드 지연은 별도 `581b4b61440cc6dbe49dc1024f1147e3737872a9`에서 수정했으며 HTTP 업무 변경을 포함하지 않는다.
+
+새 회귀 5개는 두 factory의 동일 service/route 함수와 인증 callable, 실제 HTTP의 같은 Session/user 전달, 원래 runtime 설정·recall 협력 및 UTF-8 NDJSON bytes/no-store/nosniff, 미등록 시 암묵적 fallback을 만들지 않는 것을 검증한다. 신규 fixture의 초기 실패는 잘못 쓴 contract import와 FastAPI의 nested route 열거/기존 max_threads=5 응답을 반영해 수정했다. 최종 확장 묶음은 **253 passed / 기존 4 warnings / 47.89초**다. 이전 검사에서 드러난 P8-L-E 정책 검사 경로는 실제 ThreadService로 연결했으며 frozen JSON을 다시 쓰지 않고 --check PASS다.
+
+전체 보존 실행에서 기존 API/ORM·assertion·억제 표시·node 계약은 유지됐고 보호 **2,129 / 현재 2,183**이다. 해당 실행의 C1 mapping 형식 오류는 실제 파일 전체 이전을 여러 구현 분할로 잘못 기록한 3건이었다. 모든 22개 actual symbol은 canonical 파일 하나에 있으므로 파일 전체 이전으로 기록하고 같은 함수의 옛 import-only alias는 별도 B8 bridge로 남겼다. 수정 후 전체 split evidence 검사도 PASS다. 선행 미캡처 **48 sources / 49 nodes** 때문에 보존 명령 전체의 완료는 root의 선형 introduction capture 뒤 확인한다. 신규 `dependencies.py`, router 4파일(패키지 marker 포함), `tests/chat/test_http_ownership.py` 및 5 nodes는 이 구현 source의 최초 SHA로 캡처한다. Live architecture **656 modules / 2,171 edges / exact legacy 265**, ER0 **78/87/24/44/7**, L4 **97**, Memory batch current, public **196**이다. 독립 읽기 리뷰에서 stream·same Session·runtime 설정·두 factory DI에 추가 차단 문제를 발견하지 못했다.
+
+남은 실제 통합/호환 책임은 다음과 같다.
+
+| 경로/책임 | 실제 현재 용도와 종료 |
+| --- | --- |
+| runtime/chat/{scope_queries,retrieval_queries,evidence_reads,generation_workflows,memory_producer} | 같은 Session의 여러 업무 조회·provider 조립·성공 후 Memory propose→commit/rollback. 실제 협력이며 이름만 바꾸기 위해 삭제하지 않는다. B5/B7 canonical read/model/factory 합류는 root 순차 통합에서 연결한다. |
+| runtime/chat/sqlalchemy_service.py, services/messages.py | 동일 서비스 메서드 alias. 남은 실제 소비자는 runtime/memory_selection_provider의 credential 함수와 과거 테스트이며 B7/B8에서 canonical service와 원래 monkeypatch 계약에 대응해 종료한다. |
+| runtime/chat/world_generation.py와 api/v1/routes의 옛 Chat 3파일 | 실제 workflow/HTTP body 없음. 기존 검사 alias이며 제품 API는 canonical router를 사용한다. A2 구조 node와 새 HTTP 동작 회귀의 대응을 기록하고 B8에서 제거한다. |
+| compatibility/chat_service.py, chat_runtime_contract.py, chat_generation_lifecycle.py | 원래 forwarding 전용 구조 검사 보존. 신규 제품 호출 없음. B8에서 원래 assertion/node와 실제 서비스·repository 회귀를 일대일로 대응한 뒤 퇴역한다. |
+| chat/public.py·schemas/messages.py·models/messages.py·runtime/chat/model_bindings.py·옛 api marker | 동일 객체 집합/미사용 표면. B8/G5에서 import 및 frozen source/test 대응을 확인해 제거한다. 전체 모델 집합으로 새 소비자를 연결하지 않는다. |
+| chat/infrastructure의 model alias와 migration helpers | 과거 Alembic/embedded migration과 baseline rebuild의 실제 소비가 있다. G5/B8의 정확한 등록/역사적 helper 승계와 별개이며 파일명 정리 때문에 migration 본문/DDL을 바꾸지 않는다. |
+
+이 source는 Chat 자체의 역할 이전과 HTTP 연결을 준비한 상태다. B4/B5/B7 합류·G5·G06·B8 호환 제거·Hosted CI·신규 installer·설치 데이터 업그레이드 및 전체 백엔드 종료는 완료로 표시하지 않는다.

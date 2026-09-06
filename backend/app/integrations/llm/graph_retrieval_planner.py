@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 
-from app.domains.chat.domain.policies import (
+from app.domains.chat.policies import (
     WORLD_CHAT_FOREGROUND_MAX_OUTPUT_TOKENS,
     resolve_world_chat_model_execution_policy,
 )
