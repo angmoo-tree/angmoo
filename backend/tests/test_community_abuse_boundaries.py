@@ -1,3 +1,4 @@
+import app.runtime.social.timeline as social_timeline_runtime
 from datetime import UTC, datetime
 
 import pytest
@@ -6,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app import models, schemas
-from app.services import community as community_service
+
 from app.services import community_abuse_quota
 
 
@@ -78,7 +79,7 @@ def test_three_reports_do_not_automatically_hide_post() -> None:
         db.commit()
 
         for reporter in reporters:
-            result = community_service.report_post(
+            result = social_timeline_runtime.timeline_service.report_post(
                 db,
                 reporter,
                 post.id,

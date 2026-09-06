@@ -1,3 +1,9 @@
+import app.domains.routines.constants as routines_constants
+import app.domains.routines.service.feed_history_values as routines_feed_history_values_service
+import app.domains.social.exceptions as social_errors
+import app.domains.social.service.feed as social_feed_service
+import app.domains.social.service.posts as social_posts_service
+import app.domains.social.service.visibility as social_visibility_service
 from app.runtime.social import feed_history as resident_feed_history
 from app.domains.routines.service import feed_history_values
 from app.domains.social.service import resident_affordances
@@ -48,7 +54,7 @@ from app.services.agent_briefs import (
     build_self_update_create_post_brief,
     is_feed_scan_community_theme_brief,
 )
-from app.services import community as community_service
+
 from app.core.context_text import neutralize_context_text
 from app.services import maintenance as maintenance_service
 from app.services.direct_llm import DirectLlmDeferred
@@ -398,7 +404,7 @@ def _resident_action_candidate_id(
 def _format_recent_feed_sections(
     db: Session, *, run_id: str, character_id: str, allowed_actions: tuple[str, ...]
 ) -> tuple[str, str]:
-    feed = community_service.list_feed(db, limit=50)
+    feed = social_feed_service.list_feed(db, limit=50)
     if not feed.items:
         return "- none", "- none"
     lines: list[str] = []
@@ -695,7 +701,7 @@ def _latest_v6_feed_history_sanitize_payload(
         .where(
             models.AgentActivityLog.character_id == character_id,
             models.AgentActivityLog.action_type
-            == community_service.FEED_HISTORY_SANITIZED_ACTION_TYPE,
+            == routines_constants.FEED_HISTORY_SANITIZED_ACTION_TYPE,
             models.AgentActivityLog.created_at >= since,
         )
         .order_by(models.AgentActivityLog.created_at.desc(), models.AgentActivityLog.id.desc())
@@ -832,7 +838,7 @@ def _format_v6_feed_interests(
         if not post_id:
             continue
         post = community_crud.get_post(db, post_id)
-        if post is None or not community_service.is_post_public_context_visible(db, post):
+        if post is None or not social_visibility_service.is_post_public_context_visible(db, post):
             continue
         topic_signature = _clip_text(
             neutralize_context_text(
@@ -1223,7 +1229,7 @@ def _format_v6_action_menu(
             if not post_id:
                 continue
             post = community_crud.get_post(db, post_id)
-            if post is None or not community_service.is_post_public_context_visible(db, post):
+            if post is None or not social_visibility_service.is_post_public_context_visible(db, post):
                 continue
             has_feed_interest_context = True
             author_target_type, author_target_id = _profile_target_parts(
@@ -1419,7 +1425,7 @@ def _format_v6_action_menu_table(
             if not post_id:
                 continue
             post = community_crud.get_post(db, post_id)
-            if post is None or not community_service.is_post_public_context_visible(db, post):
+            if post is None or not social_visibility_service.is_post_public_context_visible(db, post):
                 continue
             has_feed_interest_context = True
             author_target_type, author_target_id = _profile_target_parts(
@@ -1644,7 +1650,7 @@ def _v6_possible_post_actions(
     reply_label: str,
 ) -> list[str]:
     post = community_crud.get_post(db, post_id)
-    if post is None or not community_service.is_post_public_context_visible(db, post):
+    if post is None or not social_visibility_service.is_post_public_context_visible(db, post):
         return []
     actions: list[str] = []
     self_authored = post.author_character_id == character_id
@@ -1728,7 +1734,7 @@ def _v6_allowed_tool_calls(
     reply_label: str,
 ) -> list[str]:
     post = community_crud.get_post(db, post_id)
-    if post is None or not community_service.is_post_public_context_visible(db, post):
+    if post is None or not social_visibility_service.is_post_public_context_visible(db, post):
         return []
     actions: list[str] = []
     self_authored = post.author_character_id == character_id
@@ -1806,7 +1812,7 @@ def _v6_unavailable_post_actions(
     reply_root_post_id: str,
 ) -> list[str]:
     post = community_crud.get_post(db, post_id)
-    if post is None or not community_service.is_post_public_context_visible(db, post):
+    if post is None or not social_visibility_service.is_post_public_context_visible(db, post):
         return []
     unavailable: list[str] = []
     self_authored = post.author_character_id == character_id
@@ -3015,7 +3021,7 @@ def _format_recent_activity_summary(db: Session, *, character_id: str) -> str:
     return "\n".join(
         (
             f"- {log.created_at.isoformat()} {log.action_type}: "
-            f"{_clip_text(neutralize_context_text(community_service.activity_result_text_for_prompt(log.result, log.reason)), 240)}"
+            f"{_clip_text(neutralize_context_text(routines_feed_history_values_service.activity_result_text_for_prompt(log.result, log.reason)), 240)}"
         )
         for log in logs
     )
@@ -3203,7 +3209,7 @@ def _format_social_connection_candidate(
             break
 
     if len(candidates) < 5:
-        feed = community_service.list_feed(db, limit=50)
+        feed = social_feed_service.list_feed(db, limit=50)
         for post in feed.items:
             target_type, target_id = _profile_target_parts(
                 user_id=post.author_user_id, character_id=post.author_character_id
@@ -4874,7 +4880,7 @@ def _validate_character_and_credential(
 ) -> tuple[models.Character, models.LlmCredential]:
     character = community_crud.get_character(db, character_id)
     if character is None or character.deleted_at is not None:
-        raise community_service.CharacterNotFoundError(character_id)
+        raise social_errors.CharacterNotFoundError(character_id)
     if character.owner_id != user_id:
         raise CharacterOwnershipError(
             f"user {user_id} cannot run character {character.id}"
@@ -5630,13 +5636,13 @@ async def run_community_once(
 
     character = community_crud.get_character(db, data.character_id)
     if character is None or character.deleted_at is not None:
-        raise community_service.CharacterNotFoundError(data.character_id)
+        raise social_errors.CharacterNotFoundError(data.character_id)
     if character.moderation_status == "suspended":
-        raise community_service.CharacterSuspendedError("character_suspended")
+        raise social_errors.CharacterSuspendedError("character_suspended")
     post_id = _select_tick_post_id(
         db, preferred_post_id=data.post_id, character_id=character.id
     )
-    post = community_service.get_post(db, post_id) if post_id else None
+    post = social_posts_service.get_post(db, post_id) if post_id else None
     user_id = data.user_id or character.owner_id
     if character.owner_id != user_id:
         raise CharacterOwnershipError(
@@ -6395,7 +6401,7 @@ async def _run_resident_individual_tool_flow(
             db,
             user_id=user_id,
             character_id=character.id,
-            action_type=community_service.FEED_HISTORY_SANITIZED_ACTION_TYPE,
+            action_type=routines_constants.FEED_HISTORY_SANITIZED_ACTION_TYPE,
             target_post_id=None,
             reason=_feed_history_sanitize_metadata_fallback_reason(
                 retry_exhausted=sanitize_retry_exhausted
@@ -6841,7 +6847,7 @@ async def _run_resident_slot_once(
             character_id=character.id,
             scoped_runtime=use_langgraph_resident,
         )
-        post = community_service.get_post(db, selected_post_id) if selected_post_id else None
+        post = social_posts_service.get_post(db, selected_post_id) if selected_post_id else None
         session_key = (
             f"agent:{slot.agent_id}:{'resident-manual' if require_public_action else 'resident-tick'}:{slot.assigned_user_id}:{character.id}:{run_id}"
             if enforce_activity_policy
@@ -7995,9 +8001,9 @@ async def run_assigned_resident_slot_once(
     maintenance_service.ensure_run_now_available(db)
     character = community_crud.get_character(db, character_id)
     if character is None or character.deleted_at is not None:
-        raise community_service.CharacterNotFoundError(character_id)
+        raise social_errors.CharacterNotFoundError(character_id)
     if character.moderation_status == "suspended":
-        raise community_service.CharacterSuspendedError("character_suspended")
+        raise social_errors.CharacterSuspendedError("character_suspended")
     timeout = timeout_seconds or settings.openclaw_timeout_seconds
     slot = agent_run_crud.claim_resident_slot_assignment(
         db,

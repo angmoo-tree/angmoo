@@ -777,3 +777,6 @@ RoutinePost가 읽는 성공 답글 후보는 `relationships/service/routine_int
 
 
 Social 호출자는 실제 `service`·`contracts`를 선택한다. 옛 `public`·`application`·`ports`·`infrastructure` 집합은 제거했고, 원자적 수동 쓰기는 runtime UoW의 실제 메서드를 사용한다. 관찰도 같은 실행기에서 Relationships의 실제 관찰 정책을 호출한다. World feed는 readonly context 계약으로 원래 attached context/credential을 받아 실행하므로 Social runtime이 Resident의 구체 context class를 가져오지 않는다.
+
+
+Social의 옛 `services/community.py` 집합은 제거했다. HTTP와 다른 실행 흐름은 피드·Inbox·도구 행동·tick·상태·활동 이력의 실제 owner를 이름으로 선택한다. 실행에 타 업무 협력이 필요하면 구성된 runtime instance를 사용한다. 예외와 값만 필요한 소비자는 해당 실제 정의를 읽으며, 모든 Social 기능을 모아 다시 내보내는 범용 facade를 만들지 않는다.

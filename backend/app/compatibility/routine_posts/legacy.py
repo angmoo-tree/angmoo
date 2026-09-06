@@ -18,7 +18,7 @@ from app.services import (
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )
-from app.services import community as community_service
+
 from app.core.context_text import neutralize_context_text
 from app.runtime.resident.context import LangGraphResidentContext
 
@@ -31,7 +31,6 @@ __all__ = [
     "activity_state_contracts",
     "agent_activity_policy",
     "agent_run_crud",
-    "community_service",
     "models",
     "neutralize_context_text",
     "social_event_runtime",

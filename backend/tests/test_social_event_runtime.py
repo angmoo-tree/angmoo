@@ -1,4 +1,5 @@
 from __future__ import annotations
+import app.runtime.social.timeline as social_timeline_runtime
 
 from app.runtime.activity_proposals import composition as activity_proposal_runtime
 
@@ -891,7 +892,7 @@ def test_self_target_and_cross_world_target_are_rejected() -> None:
 
 def test_source_deletion_retains_audit_rows_and_emits_one_exclusion() -> None:
     from app.runtime.graph_projection import social_memory_read
-    from app.services import community
+
     from app.runtime.routine_posts import interactions as social_routine_interactions
 
     engine = _engine()
@@ -948,7 +949,7 @@ def test_source_deletion_retains_audit_rows_and_emits_one_exclusion() -> None:
 
         owner = db.get(models.User, fixture.actor.owner_id)
         assert owner is not None
-        community.delete_post(db, owner, reply.id)
+        social_timeline_runtime.timeline_service.delete_post(db, owner, reply.id)
         deleted_reply = db.get(models.Post, reply.id)
         assert deleted_reply is not None
         assert deleted_reply.deleted_at is not None

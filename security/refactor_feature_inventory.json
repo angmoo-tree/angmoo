@@ -1625,7 +1625,6 @@
         "backend/app/runtime/social/today_activity.py",
         "backend/app/runtime/social/subjective_composition.py",
         "backend/app/runtime/social/timeline.py",
-        "backend/app/services/community.py",
         "backend/app/services/community_abuse_quota.py",
         "backend/tests/social/test_foundation_contracts.py",
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts",

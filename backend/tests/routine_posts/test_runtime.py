@@ -1,4 +1,6 @@
 from __future__ import annotations
+import app.domains.social.exceptions as social_errors
+import app.runtime.social.timeline as social_timeline_runtime
 
 import asyncio
 import os
@@ -34,7 +36,7 @@ from app.services import (
     world_character_contracts,
 )
 from app.runtime.characters import management as agent_service
-from app.services import community as community_service
+
 from app.services.agent_activity_policy import ActivityPolicy
 from app.services.direct_llm import DirectLlmCallContext, DirectLlmError
 from app.runtime.resident.context import LangGraphResidentContext
@@ -1291,7 +1293,7 @@ def test_publish_fault_rolls_back_post_state_and_execution(monkeypatch) -> None:
 
         def create_then_fail(*args, **kwargs):
             original_create(*args, **kwargs)
-            raise community_service.CommunityServiceError("fault after post flush")
+            raise social_errors.CommunityServiceError("fault after post flush")
 
         monkeypatch.setattr(
             routine_post_runtime.agent_tool_actions,
@@ -1552,11 +1554,12 @@ def test_combined_inbox_lane_distinguishes_llm_no_action_from_not_run(
 
 
 def test_scoped_post_pair_and_identity_are_validated_by_service() -> None:
+    import app.domains.social.exceptions as community_service
     engine = _engine()
     with Session(engine, expire_on_commit=False) as db:
         fixture = _seed(db)
         with pytest.raises(community_service.PostWorldScopeError):
-            community_service.create_post(
+            social_timeline_runtime.timeline_service.create_post(
                 db,
                 fixture.user,
                 schemas.PostCreate(

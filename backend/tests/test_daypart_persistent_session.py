@@ -1,3 +1,4 @@
+import app.runtime.social.agent_tool_authorization as social_agent_tool_authorization_runtime
 from datetime import datetime
 import inspect
 from types import SimpleNamespace
@@ -6,7 +7,7 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from app.services import agent_writing
-from app.services import community
+
 from app.services import agent_runs
 
 
@@ -123,22 +124,23 @@ def test_writing_composition_prefers_run_tool_auth_key() -> None:
 
 
 def test_agent_tool_auth_rejects_daypart_session_key(monkeypatch) -> None:
+    import app.domains.social.exceptions as community
     def fail_session_lookup(*args, **kwargs):  # noqa: ANN002, ANN003
         raise AssertionError("daypart session key must not fall back to session lookup")
 
     monkeypatch.setattr(
-        community.agent_run_crud,
+        social_agent_tool_authorization_runtime.agent_run_crud,
         "get_active_run_for_tool_auth_key",
         lambda db, key: None,
     )
     monkeypatch.setattr(
-        community.agent_run_crud,
+        social_agent_tool_authorization_runtime.agent_run_crud,
         "get_active_run_for_session",
         fail_session_lookup,
     )
 
     with pytest.raises(community.AgentRunAuthorizationError) as exc:
-        community._get_agent_tool_run(
+        social_agent_tool_authorization_runtime._get_agent_tool_run(
             None,
             session_key="agent:angmoo-8:resident-daypart:char-a:2026-06-09:afternoon",
             action="post",
@@ -157,17 +159,17 @@ def test_agent_tool_auth_keeps_run_scoped_session_fallback(monkeypatch) -> None:
     )
 
     monkeypatch.setattr(
-        community.agent_run_crud,
+        social_agent_tool_authorization_runtime.agent_run_crud,
         "get_active_run_for_tool_auth_key",
         lambda db, key: None,
     )
     monkeypatch.setattr(
-        community.agent_run_crud,
+        social_agent_tool_authorization_runtime.agent_run_crud,
         "get_active_run_for_session",
         lambda db, key: run if key == "agent:angmoo-8:resident-tick:user-a:char-a:run-1" else None,
     )
 
-    resolved = community._get_agent_tool_run(
+    resolved = social_agent_tool_authorization_runtime._get_agent_tool_run(
         None,
         session_key=(
             "agent:angmoo-8:resident-tick:user-a:char-a:run-1"

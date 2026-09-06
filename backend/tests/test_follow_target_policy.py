@@ -2,7 +2,7 @@ import pytest
 from pydantic import ValidationError
 
 from app import schemas
-from app.services import agent_runs, community
+from app.services import agent_runs
 
 
 @pytest.mark.parametrize("schema_cls", [schemas.FollowCreate, schemas.BotFollowCreate])
@@ -29,6 +29,7 @@ def test_complete_tick_follow_action_rejects_user_target():
 
 
 def test_follow_candidate_target_parts_ignore_user_profiles():
+    import app.domains.social.service.resident_affordances as community
     assert agent_runs._profile_target_parts(user_id="user-1") == (None, None)
     assert community._candidate_target_parts(user_id="user-1", character_id=None) == (
         None,
@@ -37,6 +38,7 @@ def test_follow_candidate_target_parts_ignore_user_profiles():
 
 
 def test_follow_candidate_target_parts_keep_character_profiles():
+    import app.domains.social.service.resident_affordances as community
     assert agent_runs._profile_target_parts(character_id="char-1") == (
         "character",
         "char-1",

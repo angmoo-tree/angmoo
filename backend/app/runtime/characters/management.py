@@ -1,4 +1,7 @@
 from __future__ import annotations
+import app.domains.social.service.activity_results as social_activity_results_service
+import app.domains.social.service.posts as social_posts_service
+import app.runtime.social.timeline as social_timeline_runtime
 
 from app.runtime.world_characters.queries import count_enabled_autonomous_world_characters
 from app.domains.characters.service import media as media_service
@@ -87,7 +90,7 @@ from app.cruds import community as community_crud
 from app.policies import name_policy
 from app.services import agent_activity_policy
 from app.domains.world_characters.service import readiness as activity_profile_readiness
-from app.services import community as community_service
+
 from app.services import agent_runs as agent_run_service
 from app.domains.identity.service import demo_access as demo_lock
 from app.services import image_prompt_safety
@@ -736,7 +739,7 @@ async def run_first_greeting(
             tracker=tracker,
             topic=data.topic,
         )
-        post = community_service.create_post(
+        post = social_timeline_runtime.timeline_service.create_post(
             db,
             user,
             schemas.PostCreate(
@@ -754,7 +757,7 @@ async def run_first_greeting(
             action_type="post_created",
             target_post_id=post.id,
             reason="onboarding_first_greeting",
-            result=community_service.build_post_created_activity_result(
+            result=social_activity_results_service.build_post_created_activity_result(
                 post_id=post.id,
                 title=post.title,
                 body=post.body,
@@ -772,7 +775,7 @@ async def run_first_greeting(
             topic=data.topic,
             post=post,
         )
-        post = community_service.get_post(db, post.id)
+        post = social_posts_service.get_post(db, post.id)
         gateway_result = {
             "engine": "first_greeting_writer",
             "status": "completed",

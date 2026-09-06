@@ -1,3 +1,4 @@
+import app.domains.social.exceptions as social_errors
 from app.domains.characters.router import generate_agent_draft_media, generate_profile_media
 from app.domains.characters.router import (
     get_agent_draft_media,
@@ -37,7 +38,7 @@ from app.core.db import get_db
 from app.runtime.characters import creator as draft_service
 from app.runtime.characters import management as agent_service
 from app.services import agent_runs as agent_run_service
-from app.services import community as community_service
+
 from app.services import maintenance as maintenance_service
 from app.services.direct_llm import DirectLlmDeferred, DirectLlmError, DirectLlmJsonError
 from app.services.runtime_boundary import OpenClawGatewayAuthError, OpenClawGatewayError
@@ -576,7 +577,7 @@ def activate_agent(
         agent_run_service.CredentialDisabledError,
     ) as exc:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
-    except community_service.CharacterNotFoundError as exc:
+    except social_errors.CharacterNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
 
 
@@ -704,5 +705,5 @@ async def first_greeting(
             status_code=status.HTTP_502_BAD_GATEWAY,
             detail="첫인사를 만들지 못했습니다. 잠시 후 다시 시도해주세요.",
         ) from exc
-    except community_service.CommunityServiceError as exc:
+    except social_errors.CommunityServiceError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc

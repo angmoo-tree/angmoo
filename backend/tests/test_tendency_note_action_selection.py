@@ -1,3 +1,13 @@
+import app.domains.social.service.visibility as social_visibility_service
+import app.domains.routines.constants as routines_constants
+import app.domains.routines.service.feed_history_notes as routines_feed_history_notes_service
+import app.domains.social.exceptions as social_errors
+import app.domains.social.service.activity_results as social_activity_results_service
+import app.runtime.social.agent_tool_authorization as social_agent_tool_authorization_runtime
+import app.runtime.social.agent_tool_reads as social_agent_tool_reads_runtime
+import app.runtime.social.agent_tools as social_agent_tools_runtime
+import app.runtime.social.feed_history as social_feed_history_runtime
+import app.runtime.social.feed_history_notes as social_feed_history_notes_runtime
 from app.domains.routines.service import feed_history_notes as note_service
 from app.runtime.social import feed_history_notes as note_runtime
 from app.domains.social.service import agent_tool_reads as tool_read_service
@@ -19,7 +29,7 @@ import pytest
 
 from app import schemas
 from app.api.v1.routes import agents as agent_routes
-from app.services import (agent_activity_policy, agent_briefs, agent_runs, agent_writing, character_lore, community as community_service, direct_llm)
+from app.services import agent_activity_policy, agent_briefs, agent_runs, agent_writing, character_lore, direct_llm
 from app.runtime.characters import management as agent_service
 
 
@@ -1245,7 +1255,7 @@ def test_recent_feed_interest_history_formatter_limits_and_filters(monkeypatch):
         lambda _db, post_id: posts.get(post_id),
     )
 
-    result = community_service.format_recent_feed_interest_history_for_prompt(
+    result = social_feed_history_runtime.format_recent_feed_interest_history_for_prompt(
         None, character_id="char-1"
     )
 
@@ -1291,7 +1301,7 @@ def test_agent_feed_post_summary_uses_topic_and_preview(monkeypatch):
         body="x" * 350,
     )
 
-    card = community_service._agent_feed_post_summary(None, post)
+    card = social_agent_tool_reads_runtime.agent_tool_reads._agent_feed_post_summary(None, post)
 
     assert card.post_id == "post-1"
     assert card.author == "source author"
@@ -1329,12 +1339,13 @@ def test_agent_feed_post_summary_prefers_post_topic_columns(monkeypatch):
         novelty_basis="column novelty",
     )
 
-    card = community_service._agent_feed_post_summary(None, post)
+    card = social_agent_tool_reads_runtime.agent_tool_reads._agent_feed_post_summary(None, post)
 
     assert card.topic_signature == "column topic wins"
 
 
 def test_post_topic_signature_falls_back_to_activity_log_metadata(monkeypatch):
+    import app.runtime.social.topic_metadata as community_service
     monkeypatch.setattr(
         topic_policy,
         "_latest_post_created_topic_metadata",
@@ -1392,7 +1403,7 @@ def test_note_agent_tool_feed_interests_stores_topic_metadata(monkeypatch):
 
     monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = community_service.note_agent_tool_feed_interests(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_interests(
         None,
         "session-1",
         schemas.AgentFeedInterestsCreate(
@@ -1453,7 +1464,7 @@ def test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable(
 
     monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = community_service.note_agent_tool_feed_interests(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_interests(
         None,
         "session-1",
         schemas.AgentFeedInterestsCreate(
@@ -1493,7 +1504,7 @@ def test_note_agent_tool_feed_interests_drops_seed_without_interest(monkeypatch)
 
     monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = community_service.note_agent_tool_feed_interests(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_interests(
         None,
         "session-1",
         schemas.AgentFeedInterestsCreate(
@@ -1547,7 +1558,7 @@ def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch)
 
     monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = community_service.note_agent_tool_feed_interests(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_interests(
         None,
         "session-1",
         schemas.AgentFeedInterestsCreate(
@@ -1572,6 +1583,7 @@ def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch)
 
 
 def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch):
+    import app.domains.routines.constants as community_service
     monkeypatch.setattr(
         note_runtime,
         "_get_agent_tool_run",
@@ -1587,7 +1599,7 @@ def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch)
 
     monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = community_service.note_agent_tool_feed_history_sanitize(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_history_sanitize(
         None,
         "session-1",
         schemas.AgentFeedHistorySanitizeCreate(
@@ -1630,7 +1642,7 @@ def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch)
 
 
 def test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton(monkeypatch):
-    style_marker = community_service.FEED_HISTORY_STYLE_MARKER_RE.pattern[
+    style_marker = routines_constants.FEED_HISTORY_STYLE_MARKER_RE.pattern[
         1:
     ].split("|")[0]
     monkeypatch.setattr(
@@ -1663,7 +1675,7 @@ def test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton(monkeypat
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
 
-    result = community_service.note_agent_tool_feed_history_sanitize(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_history_sanitize(
         SimpleNamespace(),
         "session-1",
         schemas.AgentFeedHistorySanitizeCreate(
@@ -1724,7 +1736,7 @@ def test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_meta
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
 
-    result = community_service.note_agent_tool_feed_history_sanitize(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_history_sanitize(
         SimpleNamespace(),
         "session-1",
         schemas.AgentFeedHistorySanitizeCreate(),
@@ -1765,8 +1777,8 @@ def test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
 
-    with caplog.at_level("INFO", logger=community_service.logger.name):
-        community_service.note_agent_tool_feed_history_sanitize(
+    with caplog.at_level("INFO", logger=routines_feed_history_notes_service.logger.name):
+        social_feed_history_notes_runtime.note_agent_tool_feed_history_sanitize(
             SimpleNamespace(),
             "session-secret-value",
             schemas.AgentFeedHistorySanitizeCreate(
@@ -1797,14 +1809,15 @@ def test_note_agent_tool_feed_history_sanitize_logs_authorization_error(
     monkeypatch,
     caplog,
 ):
+    import app.domains.social.exceptions as community_service
     def reject(*args, **kwargs):
-        raise community_service.AgentRunAuthorizationError("no session")
+        raise social_errors.AgentRunAuthorizationError("no session")
 
     monkeypatch.setattr(note_runtime, "_get_agent_tool_run", reject)
 
-    with caplog.at_level("WARNING", logger=community_service.logger.name):
+    with caplog.at_level("WARNING", logger=routines_feed_history_notes_service.logger.name):
         with pytest.raises(community_service.AgentRunAuthorizationError):
-            community_service.note_agent_tool_feed_history_sanitize(
+            social_feed_history_notes_runtime.note_agent_tool_feed_history_sanitize(
                 SimpleNamespace(),
                 "session-secret-value",
                 schemas.AgentFeedHistorySanitizeCreate(),
@@ -1854,7 +1867,7 @@ def test_feed_history_metadata_fallback_excludes_raw_seed(monkeypatch):
         lambda *args, **kwargs: "- none",
     )
 
-    sections = community_service.format_feed_history_metadata_fallback_for_prompt(
+    sections = social_feed_history_runtime.format_feed_history_metadata_fallback_for_prompt(
         None, character_id="char-1"
     )
 
@@ -1911,7 +1924,7 @@ def test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic(
 
     monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = community_service.note_agent_tool_feed_interests(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_interests(
         None,
         "session-1",
         schemas.AgentFeedInterestsCreate(
@@ -1938,7 +1951,7 @@ def test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic(
 
 
 def test_post_created_activity_result_stores_topic_metadata():
-    result = community_service.build_post_created_activity_result(
+    result = social_activity_results_service.build_post_created_activity_result(
         post_id="post-1",
         title="visible title",
         body="visible body",
@@ -1967,7 +1980,7 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
             return SimpleNamespace(id="user-1")
 
     monkeypatch.setattr(
-        community_service.agent_run_crud,
+        social_agent_tool_authorization_runtime.agent_run_crud,
         "get_active_run_for_session",
         lambda *args, **kwargs: run,
     )
@@ -2001,12 +2014,12 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
         lambda *args, **kwargs: None,
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        social_agent_tools_runtime.agent_crud,
         "mark_pending_feed_cue_used",
         lambda *args, **kwargs: None,
     )
 
-    community_service.create_agent_tool_post(
+    social_agent_tools_runtime.agent_tool_actions.create_agent_tool_post(
         FakeDb(),
         "session-1",
         schemas.PostCreate(
@@ -2034,7 +2047,7 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
             return SimpleNamespace(id="user-1")
 
     monkeypatch.setattr(
-        community_service.agent_run_crud,
+        social_agent_tool_authorization_runtime.agent_run_crud,
         "get_active_run_for_session",
         lambda *args, **kwargs: run,
     )
@@ -2068,12 +2081,12 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
         lambda *args, **kwargs: None,
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        social_agent_tools_runtime.agent_crud,
         "get_pending_feed_cue",
         lambda *args, **kwargs: SimpleNamespace(id=77),
     )
     monkeypatch.setattr(
-        community_service.agent_crud,
+        social_agent_tools_runtime.agent_crud,
         "mark_pending_feed_cue_used",
         lambda *args, **kwargs: consumed.append(kwargs),
     )
@@ -2083,8 +2096,8 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
         body="body",
         author_character_id="char-1",
     )
-    community_service.create_agent_tool_post(FakeDb(), "session-1", post_data)
-    community_service.create_agent_tool_post(
+    social_agent_tools_runtime.agent_tool_actions.create_agent_tool_post(FakeDb(), "session-1", post_data)
+    social_agent_tools_runtime.agent_tool_actions.create_agent_tool_post(
         FakeDb(),
         "session-1",
         post_data,
@@ -2098,6 +2111,7 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
 
 
 def test_recent_own_root_topic_exists_uses_post_topic_columns(monkeypatch):
+    import app.runtime.social.feed_history as community_service
     post = SimpleNamespace(
         id="post-1",
         title="fallback title",
@@ -2207,7 +2221,7 @@ def test_v6_action_menu_keeps_feed_actions_without_post_seed(monkeypatch):
     )
     monkeypatch.setattr(agent_runs.community_crud, "get_post", lambda *args, **kwargs: post)
     monkeypatch.setattr(
-        agent_runs.community_service,
+        social_visibility_service,
         "is_post_public_context_visible",
         lambda *args, **kwargs: True,
     )
