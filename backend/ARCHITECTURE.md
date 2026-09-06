@@ -822,3 +822,8 @@ Resident 문맥에 쓰이는 알림·최근 게시물·상호 답글 후보의 S
 `service/writing_results.py`는 준비된 brief 해석, 생성 결과와 사용량 정제, 같은 Session에서 Run의 작성 사용량을 저장하는 업무를 담당합니다. `runtime/resident/writing.py`는 Social 권한 확인과 실제 게시·답글 저장, provider 호출, Lore 사용 기록과 Memory 저장을 연결합니다. 원래의 생성기 호출 횟수, 사용량 기록 후 JSON 검증 순서와 게시 완료 후 Memory 저장 순서를 유지합니다.
 
 현재 B4 source에서 옛 `services/agent_writing.py`에 남은 실제 함수는 Daypart 이벤트 저장 하나입니다. 이미 별도 B7 source에 구현된 Memory 서비스가 통합되면 이 기존 구현을 그 서비스로 연결하고 제거합니다. Identity credential, Social 및 Lore의 기존 협력도 해당 소유 source와 순차 통합하며, 새 작성 정책을 옛 서비스로 추가하지 않습니다. 두 legacy 작성 진입 함수는 이 source에서 활성 제품 호출자가 없지만 기존 구현과 계약을 보존합니다.
+
+
+### 활동 HTTP의 연결
+
+`/agents/{id}` 아래의 설정·모이·활성화·수동 실행·첫인사·성향 분석은 Character 리소스 HTTP로 배치합니다. 실제 판단과 저장은 Routines 서비스가 수행하고, 긴 provider 실행은 typed runner로 연결합니다. 앱 생성에서 workflow factory를 등록하며 HTTP dependency는 원래 request Session과 인증 이후에 이를 전달합니다. HTTP 오류 처리를 공유할 때는 검토한 정확한 exceptions 모듈만 공개 entry에 등록할 수 있습니다. 다른 파일·하위 모듈·repository·HTTP 접근을 함께 허용하지 않으며 예외 모듈의 framework/DB 접근도 계속 금지합니다.

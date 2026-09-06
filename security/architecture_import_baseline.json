@@ -1,7 +1,7 @@
 {
-  "edge_count": 2920,
+  "edge_count": 2947,
   "external_import_count": 2551,
-  "module_count": 827,
+  "module_count": 830,
   "modules": [
     {
       "external_imports": [],
@@ -877,6 +877,13 @@
       "wildcard_imports": []
     },
     {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.characters.constants",
+      "path": "backend/app/domains/characters/constants.py",
+      "wildcard_imports": []
+    },
+    {
       "external_imports": [
         "__future__",
         "dataclasses",
@@ -897,9 +904,17 @@
       ],
       "imports": [
         "app.api.identity_dependencies",
+        "app.api.schemas.first_greeting",
         "app.core.db",
         "app.domains.characters.contracts",
-        "app.domains.identity.contracts"
+        "app.domains.characters.schemas",
+        "app.domains.identity.contracts",
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.autonomy_management",
+        "app.domains.routines.contracts.feed_cues",
+        "app.domains.routines.contracts.first_greeting",
+        "app.domains.routines.contracts.manual_activity",
+        "app.domains.routines.contracts.tendency_analysis"
       ],
       "module": "app.domains.characters.dependencies",
       "path": "backend/app/domains/characters/dependencies.py",
@@ -949,6 +964,8 @@
         "sqlalchemy.orm"
       ],
       "imports": [
+        "app.api.schemas.first_greeting",
+        "app.domains.characters.constants",
         "app.domains.characters.contracts",
         "app.domains.characters.dependencies",
         "app.domains.characters.exceptions",
@@ -964,8 +981,24 @@
         "app.domains.identity.service.credential_management",
         "app.domains.identity.service.demo_access",
         "app.domains.media.contracts",
+        "app.domains.operations.exceptions",
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.autonomy_management",
         "app.domains.routines.contracts.execution_errors",
-        "app.domains.runtime.contracts"
+        "app.domains.routines.contracts.feed_cues",
+        "app.domains.routines.contracts.first_greeting",
+        "app.domains.routines.contracts.manual_activity",
+        "app.domains.routines.contracts.tendency_analysis",
+        "app.domains.routines.exceptions",
+        "app.domains.routines.schemas",
+        "app.domains.routines.schemas.first_greeting",
+        "app.domains.routines.service.activity_management",
+        "app.domains.routines.service.autonomy_management",
+        "app.domains.routines.service.feed_cues",
+        "app.domains.routines.service.first_greeting",
+        "app.domains.routines.service.manual_activity",
+        "app.domains.runtime.contracts",
+        "app.integrations.direct_llm"
       ],
       "module": "app.domains.characters.router",
       "path": "backend/app/domains/characters/router.py",
@@ -3173,6 +3206,20 @@
       ],
       "module": "app.domains.memory.public",
       "path": "backend/app/domains/memory/public.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.operations",
+      "path": "backend/app/domains/operations/__init__.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [],
+      "imports": [],
+      "module": "app.domains.operations.exceptions",
+      "path": "backend/app/domains/operations/exceptions.py",
       "wildcard_imports": []
     },
     {
@@ -12239,6 +12286,7 @@
       ],
       "imports": [
         "app.config",
+        "app.domains.operations.exceptions",
         "app.models",
         "app.schemas"
       ],

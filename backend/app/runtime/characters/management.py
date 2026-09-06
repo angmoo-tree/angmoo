@@ -1,4 +1,5 @@
 from __future__ import annotations
+from app.domains.routines.contracts.tendency_analysis import TendencyAnalysisRunner
 from app.domains.characters.exceptions import ActiveSlotBusyError
 from app.domains.identity.contracts import CharacterCredentialWorkflows
 from app.domains.worlds.repository import credential_scope as credential_worlds
@@ -1436,12 +1437,10 @@ def build_activity_management_references() -> ActivityManagementReferences:
     )
 
 
-def get_settings(db: Session, user: models.User, character_id: str) -> schemas.AgentActivitySettingRead:
-    return activity_management.get_settings(db, user, character_id, references=build_activity_management_references())
 
 
-def update_settings(db: Session, user: models.User, character_id: str, data: schemas.AgentActivitySettingUpdate) -> schemas.AgentActivitySettingRead:
-    return activity_management.update_settings(db, user, character_id, data, references=build_activity_management_references())
+
+
 
 
 def build_autonomy_workflows() -> AutonomyWorkflows[schemas.AgentDetailRead]:
@@ -1470,15 +1469,14 @@ def build_autonomy_workflows() -> AutonomyWorkflows[schemas.AgentDetailRead]:
         credential_required_error=CredentialRequiredError,
         credential_sync_error=CredentialSyncError,
         slot_busy_error=ActiveSlotBusyError,
+        social_character_not_found_error=community_service.CharacterNotFoundError,
     )
 
 
-def activate_agent(db: Session, user: models.User, character_id: str) -> schemas.AgentDetailRead:
-    return autonomy_management.activate_agent(db, user, character_id, workflows=build_autonomy_workflows())
 
 
-def deactivate_agent(db: Session, user: models.User, character_id: str) -> schemas.AgentDetailRead:
-    return autonomy_management.deactivate_agent(db, user, character_id, workflows=build_autonomy_workflows())
+
+
 
 
 def _ensure_activity_profile_ready(db: Session, *, character: character_models.Character, setting: models.AgentActivitySetting) -> schemas.AgentActivityProfileReadinessRead:
@@ -1520,16 +1518,13 @@ def build_feed_cue_workflows() -> FeedCueWorkflows:
     )
 
 
-async def run_agent_now(db: Session, user: models.User, character_id: str) -> schemas.OpenClawAgentRunRead:
-    return await manual_activity.run_agent_now(db, user, character_id, workflows=build_manual_activity_workflows())
 
 
-def get_feed_cue(db: Session, user: models.User, character_id: str) -> schemas.AgentFeedCueRead | None:
-    return feed_cues.get_feed_cue(db, user, character_id, workflows=build_feed_cue_workflows())
 
 
-def give_feed_cue(db: Session, user: models.User, character_id: str, data: schemas.AgentFeedCueCreate) -> schemas.AgentFeedCueRead:
-    return feed_cues.give_feed_cue(db, user, character_id, data, workflows=build_feed_cue_workflows())
+
+
+
 
 
 def build_first_greeting_workflows() -> FirstGreetingWorkflows:
@@ -1552,11 +1547,11 @@ def build_first_greeting_workflows() -> FirstGreetingWorkflows:
         attach_image=_attach_first_greeting_image,
         get_post=community_service.get_post,
         deferred_error=DirectLlmDeferred,
+        social_service_error=community_service.CommunityServiceError,
     )
 
 
-async def run_first_greeting(db: Session, user: models.User, character_id: str, data: schemas.AgentFirstGreetingCreate) -> schemas.AgentFirstGreetingRead:
-    return await first_greeting.run_first_greeting(db, user, character_id, data, workflows=build_first_greeting_workflows())
+
 
 
 def build_tendency_analysis_workflows() -> TendencyAnalysisWorkflows[schemas.AgentDetailRead]:
@@ -1573,8 +1568,7 @@ def build_tendency_analysis_workflows() -> TendencyAnalysisWorkflows[schemas.Age
     )
 
 
-async def analyze_tendency(db: Session, user: models.User, character_id: str) -> schemas.AgentDetailRead:
-    return await tendency_analysis.analyze_tendency(db, user, character_id, workflows=build_tendency_analysis_workflows())
+
 
 
 def build_character_credential_workflows() -> CharacterCredentialWorkflows:
@@ -1602,3 +1596,17 @@ def build_character_credential_workflows() -> CharacterCredentialWorkflows:
         slot_busy_error=ActiveSlotBusyError,
         credential_required_error=CredentialRequiredError,
     )
+
+
+def build_tendency_analysis_runner() -> TendencyAnalysisRunner[schemas.AgentDetailRead]:
+    return partial(tendency_analysis.analyze_tendency, workflows=build_tendency_analysis_workflows())
+
+
+def configure_character_activity_http(app: Any) -> None:
+    """Connect the actual owner workflows once while the application is assembled."""
+    app.state.activity_management_references = build_activity_management_references
+    app.state.autonomy_workflows = build_autonomy_workflows
+    app.state.manual_activity_workflows = build_manual_activity_workflows
+    app.state.feed_cue_workflows = build_feed_cue_workflows
+    app.state.first_greeting_workflows = build_first_greeting_workflows
+    app.state.tendency_analysis_runner = build_tendency_analysis_runner

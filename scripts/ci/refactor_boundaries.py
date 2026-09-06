@@ -5,6 +5,8 @@ import re
 from datetime import date
 
 ENTRY_ROLES = {"service", "schemas", "contracts"}
+# Errors can be a reviewed exact entry without opening every sibling/descendant.
+EXPLICIT_ENTRY_ROLES = ENTRY_ROLES | {"exceptions"}
 OLD_ROLES = {"api", "application", "domain", "infrastructure", "ports", "public"}
 PURE_ROLES = {"policies", "utils", "exceptions"}
 OLD_BACKEND_PREFIXES = {
@@ -49,8 +51,8 @@ def validate_scope(policy: dict, *, frontend: bool) -> list[str]:
                     return [f"[refactor_invalid_scope] {field} must name exact new domain role modules"]
                 if field == "modules" and owner in policy.get("domains", []):
                     return ["[refactor_invalid_scope] partial modules must not duplicate completed domains"]
-                if field == "entries" and (role not in ENTRY_ROLES or not migrated_backend_module(value, policy)):
-                    return ["[refactor_invalid_scope] entries must name migrated service/schema/contract modules"]
+                if field == "entries" and (role not in EXPLICIT_ENTRY_ROLES or not migrated_backend_module(value, policy)):
+                    return ["[refactor_invalid_scope] entries must name migrated service/schema/contract/exception modules"]
     return []
 
 

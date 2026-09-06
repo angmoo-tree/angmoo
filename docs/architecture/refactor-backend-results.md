@@ -1404,3 +1404,17 @@ Writer 원래 signed 최초 도입의 5파일/8노드를 순서대로 append하�
 CI architecture 8파일 **209 passed / 13.06초**, DCO, required10/advisory1/workflows8 CI 정책, exact allowlist25, container·launcher·installer·Windows Tauri dev 계약이 통과했다. 현재 Git tree secret scan은 files1880 / binary15 / audit11 / **fatal0**이며 전체 로컬 Git refs 이력 scan은 files9889 / binary26 / audit22 / **fatal0**다. audit 항목은 기존 공개 자산 검토 대상이며 새 비밀 허용 예외를 추가하지 않았다.
 
 현재 상태 표의 AR-B4를 실제 #281 core 병합 및 후속 source 준비 상태로 갱신했다. 마지막 C7 HTTP와 상세 응답 후속의 signed 소스, 후보 전체 backend·stock, GitHub CI·후속 PR/merge는 아직 완료로 기록하지 않는다. 최초 전체 검사 실패 2건과 수정·재검증 이력은 유지한다.
+## AR-B4-C7-G — 활동 리소스 HTTP와 실행 연결
+
+Character HTTP9를 실제 Routines service와 typed tendency runner에 직접 연결하고 중간 management 전달9함수를 삭제했다. route 순서·응답 class·상태/detail·오류 순서를 유지했고 원문 HTTP9와 상수/오류 AST가 같다. 남은 management 함수들의 원문 AST도 모두 동일하다. 초기 구조 추출 중 발견된 문법 오류는 원래 source snapshot에서 정확9함수만 제거하도록 수정했고, 이후 기존178회귀가 통과했다. 신규 요청2는 실제 resource route9의 정의 소유와 같은 request Session/인증 객체, durable 설정 및 내부 parse 상세를 숨기는 원래 오류 응답을 확인했다.
+
+검토된 root source `1565688ffa8095b37ec8fb843f5547c6c87705ae`의 정확한 예외 entry 지원만 선행 반영했다. 해당 원본 negative3은 byte 동일한 임시파일에서 기존 partialscope63/HTTP2와 함께68통과한 뒤 임시파일을 제거하여 원래 최초 도입 계보를 보존했다. 새 blanket exception이나 계약 alias는 추가하지 않았다. 실제 Operations 오류 한 클래스만 부분 이전하고 기존 service는 같은 객체를 import한다. root Operations 서비스 source 합류 시 이 정확 bridge가 제거된다.
+
+C7-G 최종 검증은 **245 passed / 기존 경고5 / 32.45초**이다. 현재 경계795 modules /2805 edges /exact legacy204 /cycle0, L4 795/14/97, ER0 86/87/24/44/7, Memory current이다. Social 오류 직접 import로 발견된 Character→Social→WC→Character 순환은 기존 workflow에 원래 오류 class 두 객체를 전달하여 해소했으며 순환 예외를 추가하지 않았다. 정확한 Operations/Routines 오류 entry만 등록한다. 원래 여섯 검사의 읽기 전용 진단은 모두 오류0(보호2139/current2293)이며 frozen/checkpoint/additions는 그대로이다. stock gate는 root의 선형 도입 원장 연결 뒤 확인한다.
+
+
+### B4 후속 통합 — C7-G 실제 활동 HTTP
+
+원래 signed 6faae3c의 Character 활동 HTTP9·실제 Request/app.state workflow 연결 및 중간 전달9 제거를 합류했다. 원래 위치에 같은 APIRoute를 조립하며 same-Session·오류 catch순서·status/detail을 보존했다. 정확한 exceptions role 허용은 root 최초1565688의 checker 변경만 공유하며 root 신규 negative test파일을 중복 도입하지 않았다.
+
+신규 Request/Session2 및 Writer·성향·credential·기존 Activity/Package/WC/OSS 회귀는 **171 passed / 5 warnings / 36.64초**다. 현재 경계는 830 modules / 2947 edges / 202 exact legacy edges다. C7-H의 실제 활동 log/상세 응답과 잔여 정리, 최종 전체 backend/stock/PR gate는 아직 남아 있다.

@@ -1,7 +1,7 @@
 """Same-session owner and profile collaboration for tendency analysis."""
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Callable, Generic, TypeVar
+from typing import Callable, Generic, TypeVar, Protocol
 from sqlalchemy.orm import Session
 from app.domains.routines.contracts.activity_management import ActivityOwner, TendencyPersona
 from app.domains.routines.contracts.autonomy_management import AutonomyCredential, ProfileBind, ProfileRelease
@@ -20,3 +20,9 @@ class TendencyAnalysisWorkflows(Generic[DetailT]):
     release_profile: ProfileRelease
     build_detail: Callable[[Session, TendencyPersona], DetailT]
     credential_required_error: type[Exception]
+
+
+DetailResultT = TypeVar("DetailResultT", covariant=True)
+
+class TendencyAnalysisRunner(Protocol[DetailResultT]):
+    async def __call__(self, db: Session, user: ActivityOwner, character_id: str) -> DetailResultT: ...
