@@ -279,3 +279,10 @@ committed history were deleted.
   `6ca211869dfb7e32c7a6689544e18137e0ecdfe5` at 2026-09-07 04:40:30 KST.
   Its seven post workflows are running. GitHub automatically retargeted stacked
   Identity PR #295 to main when C merged; no early product merge was performed.
+
+- AR-F3-B full preservation PASS: 2753 protected/current nodes and 37 contracts.
+  PR #296 targets main for the complete CodeQL/CI matrix; its final diff becomes
+  Character-only after predecessor #295 integrates. The main target does not
+  authorize an out-of-order merge: #295 post-merge PASS is still required first.
+  Full history secret scan: 737 commits, 41.11 MB, no leaks after the verified
+  exact blob exception. No credential or provider call was used by parity tests.
