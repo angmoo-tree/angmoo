@@ -1418,3 +1418,6 @@ C7-G 최종 검증은 **245 passed / 기존 경고5 / 32.45초**이다. 현재 �
 원래 signed 6faae3c의 Character 활동 HTTP9·실제 Request/app.state workflow 연결 및 중간 전달9 제거를 합류했다. 원래 위치에 같은 APIRoute를 조립하며 same-Session·오류 catch순서·status/detail을 보존했다. 정확한 exceptions role 허용은 root 최초1565688의 checker 변경만 공유하며 root 신규 negative test파일을 중복 도입하지 않았다.
 
 신규 Request/Session2 및 Writer·성향·credential·기존 Activity/Package/WC/OSS 회귀는 **171 passed / 5 warnings / 36.64초**다. 현재 경계는 830 modules / 2947 edges / 202 exact legacy edges다. C7-H의 실제 활동 log/상세 응답과 잔여 정리, 최종 전체 backend/stock/PR gate는 아직 남아 있다.
+
+
+C7-G 최초 signed archive의 source3파일/testfile1/2노드를 원래 commit에서 확인하고 순차 append했다. 원장 **90 → 91 records**, 기존 main64·직전90 불변 prefix, 원래 provenance checker PASS다. 후속 H source는 별도 집중/원문 보존 검증 뒤 최종 확대 실행 중이며 이 후보에는 아직 합류하지 않았다.

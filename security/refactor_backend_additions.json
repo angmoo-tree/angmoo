@@ -4857,6 +4857,43 @@
       "test_suppressions": {
         "tests/routines/test_writing_composition.py": {}
       }
+    },
+    {
+      "commit": "6faae3c322cf39e2119125273dec2091e13ff1e8",
+      "feature_id": "AR-B4",
+      "reason": "Original signed source integration: refactor(routines): connect activity resource HTTP to actual owners",
+      "tracked_files": {
+        "backend/app/domains/characters/constants.py": "05cae53a5c652f41accc67adcccb1b9424b4142f",
+        "backend/app/domains/operations/__init__.py": "97ee1c1e56a166d7fe2717763089a7652c0a854c",
+        "backend/app/domains/operations/exceptions.py": "3b92e3a9a10d09041d42dd8c67b9c542f649f2ee",
+        "backend/tests/routines/test_activity_http.py": "f950209e3cf01186cf2ba991e0a5f467e224a333"
+      },
+      "test_nodes": [
+        "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[settings]",
+        "tests/routines/test_activity_http.py::test_activity_resource_http_preserves_route_owner_and_request_session[tendency]"
+      ],
+      "test_assertions": {
+        "tests/routines/test_activity_http.py": {
+          "test_activity_resource_http_preserves_route_owner_and_request_session": [
+            "assert set(actual) == expected",
+            "assert all((route.endpoint.__module__ == 'app.domains.characters.router' for route in actual.values()))",
+            "assert current is db and principal is user",
+            "assert character_id == 'character'",
+            "assert current is db and principal is user",
+            "assert character_id == 'character'",
+            "assert response.status_code == 200",
+            "assert response.json()['character_id'] == 'character'",
+            "assert calls == ['owned']",
+            "assert response.status_code == 502",
+            "assert response.json() == {'detail': '성향 분석 결과를 정리하지 못했습니다. 잠시 후 다시 시도해주세요.'}",
+            "assert calls == ['analysis']",
+            "assert observer.get(AgentActivitySetting, 'character') is not None"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/routines/test_activity_http.py": {}
+      }
     }
   ]
 }
