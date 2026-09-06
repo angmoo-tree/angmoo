@@ -542,10 +542,10 @@
       {
         "importer": "app.domains.world_characters.infrastructure",
         "target": "app.domains.world_characters.models",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "reason": "Historical WC submodule imports execute this package initializer, which re-exports the identical CharacterActiveWorld and WorldCharacter classes.",
+        "removal_condition": "Keep while supported historical WC migration submodules load through this package. Retire only after their import contract is replaced and verified, without changing original migration bodies or model identity.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.domains.world_characters.infrastructure.sqlalchemy_models",
@@ -598,184 +598,184 @@
       {
         "importer": "app.runtime.characters.creator",
         "target": "app.domains.characters.exceptions",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
-        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.exceptions; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.creator",
         "target": "app.domains.characters.models",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-G5",
-        "removal_condition": "Retain legitimate runtime composition while transitioning remaining activity owners and completing aggregate ORM removal.",
-        "reason": "Character ORM and owned profile query use their canonical implementation instead of old aggregate exports.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.models; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.creator",
         "target": "app.domains.characters.service.creator",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
-        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.service.creator; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.creator",
         "target": "app.domains.characters.service.image_quota",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
-        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.service.image_quota; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.creator",
         "target": "app.domains.characters.service.profile",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-G5",
-        "removal_condition": "Retain legitimate runtime composition while transitioning remaining activity owners and completing aggregate ORM removal.",
-        "reason": "Character ORM and owned profile query use their canonical implementation instead of old aggregate exports.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.service.profile; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.creator",
         "target": "app.domains.identity.service.demo_access",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
-        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.identity.service.demo_access; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.management",
         "target": "app.domains.characters.exceptions",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
-        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.exceptions; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.management",
         "target": "app.domains.characters.models",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-G5",
-        "removal_condition": "Retain legitimate runtime composition while transitioning remaining activity owners and completing aggregate ORM removal.",
-        "reason": "Character ORM and owned profile query use their canonical implementation instead of old aggregate exports.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.models; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.management",
         "target": "app.domains.characters.service.access",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
-        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.service.access; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.management",
         "target": "app.domains.characters.service.mutations",
-        "owner_stage": "AR-B2-B / AR-G5",
-        "removal_condition": "Preserve multi-domain composition but remove aggregate role bridges after their consumers migrate.",
-        "reason": "Canonical Character role implementation owns this mutation/model.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.service.mutations; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.management",
         "target": "app.domains.characters.service.persona",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
-        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.service.persona; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.management",
         "target": "app.domains.characters.service.profile",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-G5",
-        "removal_condition": "Retain legitimate runtime composition while transitioning remaining activity owners and completing aggregate ORM removal.",
-        "reason": "Character ORM and owned profile query use their canonical implementation instead of old aggregate exports.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.service.profile; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.management",
         "target": "app.domains.characters.service.promotion",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "removal_condition": "Finish the recorded Creator/profile and activity consumers, retaining only actual multi-domain runtime composition; retire aggregate exports during G5.",
-        "reason": "The former mixed implementation now calls the exact canonical Character class or service. This bridge does not permit new legacy edges.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.service.promotion; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.management",
         "target": "app.domains.identity.service.demo_access",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Redirect the named legacy consumer to its own migrated role and remove this exact edge; identity.public closes after its remaining cross-domain ORM callers migrate.",
-        "reason": "Same implementation/type identity while this specific consumer remains unconverted; canonical identity files never import this bridge.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.identity.service.demo_access; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.api.v1.routes.agents",
         "target": "app.domains.characters.router",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
-        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "reason": "Supported HTTP/route assembly consumes the exact actual owner app.domains.characters.router, preserving its original route order, prefix, dependency or error identity. No pending aggregate ownership migration is implied.",
+        "removal_condition": "Keep while the exact supported HTTP/assembly consumer remains. Retire only with its verified URL/order/auth/Session/error contract and reverse-boundary checks preserved.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.management",
         "target": "app.domains.characters.contracts",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
-        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.contracts; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.management",
         "target": "app.domains.characters.service.management",
-        "owner_stage": "AR-B2-B / AR-B4 / AR-B8-A",
-        "reason": "Exact same-object bridge from an unconverted aggregate/runtime to its canonical role. HTTP assembly retains the original route ordering.",
-        "removal_condition": "Finish mixed API/activity consumers and remove old schema exports; runtime keeps only explicitly composed workflows.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.service.management; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.creator",
         "target": "app.domains.characters.service.drafts",
-        "owner_stage": "AR-B2-B / AR-B3 / AR-B8-A",
-        "reason": "Actual Creator ORM lifecycle moved; runtime binds provider/file/Character callbacks and its remaining media operations use the canonical owned-draft gate.",
-        "removal_condition": "Retire temporary lifecycle wrappers when mixed HTTP/media consumers move; retain only external and multi-domain work.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.service.drafts; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.creator",
         "target": "app.domains.characters.contracts",
-        "owner_stage": "AR-B2-B / AR-B3 / AR-B8-A",
-        "reason": "Actual Creator ORM lifecycle moved; runtime binds provider/file/Character callbacks and its remaining media operations use the canonical owned-draft gate.",
-        "removal_condition": "Retire temporary lifecycle wrappers when mixed HTTP/media consumers move; retain only external and multi-domain work.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.contracts; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.runtime.characters.management",
         "target": "app.domains.characters.service.creator",
-        "owner_stage": "AR-B2-B / AR-B3 / AR-B4 / AR-B8-A",
-        "reason": "Same runtime-neutral/validation error object or exact credential message policy is now shared with canonical Creator HTTP.",
-        "removal_condition": "Remove old aggregate error imports when runtime/media consumers migrate; no duplicate exception definitions.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "reason": "Supported multi-domain runtime composition consumes the exact actual owner app.domains.characters.service.creator; business policy and ORM definitions are already domain-owned. This explicit row also prevents a migrated implementation from importing the composition back.",
+        "removal_condition": "Keep while this supported composition consumes this exact owner. Remove only when that actual caller is retired or equivalently rewired, with same-Session, provider/file ordering and reverse-boundary checks preserved.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.api.v1.routes.community",
         "target": "app.domains.characters.router",
-        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
-        "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
-        "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "reason": "Supported HTTP/route assembly consumes the exact actual owner app.domains.characters.router, preserving its original route order, prefix, dependency or error identity. No pending aggregate ownership migration is implied.",
+        "removal_condition": "Keep while the exact supported HTTP/assembly consumer remains. Retire only with its verified URL/order/auth/Session/error contract and reverse-boundary checks preserved.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.api.v1.routes.world_activity_runtime",
         "target": "app.domains.routines.router",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
-        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
+        "owner_stage": "AR-B8-B",
+        "reason": "Supported HTTP/route assembly consumes the exact actual owner app.domains.routines.router, preserving its original route order, prefix, dependency or error identity. No pending aggregate ownership migration is implied.",
+        "removal_condition": "Keep while the exact supported HTTP/assembly consumer remains. Retire only with its verified URL/order/auth/Session/error contract and reverse-boundary checks preserved.",
         "review_date": "2026-09-06"
       },
       {
         "importer": "app.domains.memory.infrastructure.batch_models",
         "target": "app.domains.memory.models.batch",
         "owner_stage": "AR-B7 / AR-G5 historical migrations",
-        "removal_condition": "Retain only the exact five schema constants/builders while immutable Alembic and SQLite revisions import this historical path; no current runtime caller or ORM implementation.",
+        "removal_condition": "Retain the exact MEMORY_BATCH_TABLES constant and create_memory_batch_schema builder while supported SQLite v8-to-v9 and Alembic0089 import this historical path. Retire only after a verified import-contract replacement or support retirement.",
         "reason": "Original schema builder object is re-exported for immutable historical revisions; no duplicate implementation.",
         "review_date": "2026-09-05"
       },
@@ -783,80 +783,56 @@
         "importer": "app.domains.memory.infrastructure.sqlalchemy_models",
         "target": "app.domains.memory.models.items",
         "owner_stage": "AR-B7 / AR-G5 historical migrations",
-        "removal_condition": "Retain only the exact five schema constants/builders while immutable Alembic and SQLite revisions import this historical path; no current runtime caller or ORM implementation.",
+        "removal_condition": "Retain the exact MEMORY_SCHEMA_V1_TABLES constant and create_memory_schema_v1/drop_memory_schema_v1 builders while supported SQLite v4-to-v5 and Alembic0085 import this historical path. Retire only after a verified import-contract replacement or support retirement.",
         "reason": "Original schema builder object is re-exported for immutable historical revisions; no duplicate implementation.",
         "review_date": "2026-09-05"
       },
       {
         "importer": "app.domains.chat.infrastructure.model_binding_migration",
         "target": "app.domains.chat.contracts.model_binding",
-        "owner_stage": "AR-B6 / AR-G5 / AR-B8-A",
-        "removal_condition": "Move the recorded actual Chat service or aggregate consumer to its supported role, then remove the obsolete typed export. No new legacy consumers.",
-        "reason": "Existing Chat consumer now uses the identical schema/error/model-choice object from its canonical owner; no duplicate implementation.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while the named supported migration imports this path. Retire only after a separately verified import-contract replacement or support retirement; no duplicate schema, policy or ORM implementation.",
+        "reason": "Supported SQLite v6-to-v7 and Alembic0087 execute the original binding migration using these identical canonical policy/value definitions.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.domains.chat.infrastructure.model_binding_migration",
         "target": "app.domains.chat.policies",
-        "owner_stage": "AR-B6 / AR-G5 / AR-B8-A",
-        "removal_condition": "Move the recorded actual Chat service or aggregate consumer to its supported role, then remove the obsolete typed export. No new legacy consumers.",
-        "reason": "Existing Chat consumer now uses the identical schema/error/model-choice object from its canonical owner; no duplicate implementation.",
-        "review_date": "2026-09-05"
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while the named supported migration imports this path. Retire only after a separately verified import-contract replacement or support retirement; no duplicate schema, policy or ORM implementation.",
+        "reason": "Supported SQLite v6-to-v7 and Alembic0087 execute the original binding migration using these identical canonical policy/value definitions.",
+        "review_date": "2026-09-06"
       },
       {
         "importer": "app.domains.chat.infrastructure.sqlalchemy_models",
         "target": "app.domains.chat.models",
-        "owner_stage": "AR-B6 / AR-G5 / AR-B8-A",
-        "removal_condition": "Move the exact remaining Chat workflow or aggregate consumer; retain only the same-module frozen migration alias until final compatibility retirement.",
-        "reason": "Existing consumer of the same Chat contract/model at the canonical role while its actual workflow moves in the next Chat slice.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.api.v1.routes.messages",
-        "target": "app.domains.chat.router.messages",
-        "owner_stage": "AR-B8-A",
-        "reason": "Original A2 structural assertion imports only; actual API composition uses canonical Chat HTTP. Same function/router objects, no copied policy.",
-        "removal_condition": "Retire exact tests/chat/test_service_ownership.py historical route-module inspection after mapping it to test_http_ownership real service/transport regressions. No new product consumers.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.api.v1.routes.world_chat",
-        "target": "app.domains.chat.router.world_chat",
-        "owner_stage": "AR-B8-A",
-        "reason": "Original A2 structural assertion imports only; actual API composition uses canonical Chat HTTP. Same function/router objects, no copied policy.",
-        "removal_condition": "Retire exact tests/chat/test_service_ownership.py historical route-module inspection after mapping it to test_http_ownership real service/transport regressions. No new product consumers.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.api.v1.routes.world_chat_response",
-        "target": "app.domains.chat.router.world_chat_response",
-        "owner_stage": "AR-B8-A",
-        "reason": "Original A2 structural assertion imports only; actual API composition uses canonical Chat HTTP. Same function/router objects, no copied policy.",
-        "removal_condition": "Retire exact tests/chat/test_service_ownership.py historical route-module inspection after mapping it to test_http_ownership real service/transport regressions. No new product consumers.",
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while the named supported migration imports this path. Retire only after a separately verified import-contract replacement or support retirement; no duplicate schema, policy or ORM implementation.",
+        "reason": "Supported SQLite v5-to-v6 and Alembic0086 import the identical Chat response schema builders from this historical path.",
         "review_date": "2026-09-06"
       },
       {
         "importer": "app.api.v1.routes.world_activity_runtime",
         "target": "app.domains.relationships.router",
-        "owner_stage": "AR-B5",
-        "removal_condition": "Move this exact Character prefix/tags route aggregation to final G06 API assembly, preserving order and URL contracts.",
-        "reason": "The old mixed route module only includes actual Routines and Relationships routers; no duplicate endpoint or business implementation remains.",
+        "owner_stage": "AR-B8-B",
+        "removal_condition": "Keep while the exact supported HTTP/assembly consumer remains. Retire only with its verified URL/order/auth/Session/error contract and reverse-boundary checks preserved.",
+        "reason": "Supported HTTP/route assembly consumes the exact actual owner app.domains.relationships.router, preserving its original route order, prefix, dependency or error identity. No pending aggregate ownership migration is implied.",
         "review_date": "2026-09-06"
       },
       {
         "importer": "app.api.v1.routes.agent_runs",
         "target": "app.domains.routines.service.slot_status",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing exact execution/slot-route consumer calls the actual original owner policy after implementation move; no forwarding facade or copied query.",
-        "removal_condition": "Move actual execution in C6d and Slot HTTP in C7; remove exact legacy consumer before B8-A.",
+        "owner_stage": "AR-B8-B",
+        "reason": "Supported HTTP/route assembly consumes the exact actual owner app.domains.routines.service.slot_status, preserving its original route order, prefix, dependency or error identity. No pending aggregate ownership migration is implied.",
+        "removal_condition": "Keep while the exact supported HTTP/assembly consumer remains. Retire only with its verified URL/order/auth/Session/error contract and reverse-boundary checks preserved.",
         "review_date": "2026-09-06"
       },
       {
         "importer": "app.api.v1.routes.agents",
         "target": "app.domains.routines.exceptions",
-        "owner_stage": "AR-B4-C7",
-        "reason": "Existing mixed HTTP route now imports actual same Routines error classes instead of removed execution re-exports.",
-        "removal_condition": "Move actual activity/slot/first-greeting HTTP in C7 and remove legacy route consumer before B8-A.",
+        "owner_stage": "AR-B8-B",
+        "reason": "Supported HTTP/route assembly consumes the exact actual owner app.domains.routines.exceptions, preserving its original route order, prefix, dependency or error identity. No pending aggregate ownership migration is implied.",
+        "removal_condition": "Keep while the exact supported HTTP/assembly consumer remains. Retire only with its verified URL/order/auth/Session/error contract and reverse-boundary checks preserved.",
         "review_date": "2026-09-06"
       },
       {
@@ -921,7 +897,7 @@
       {
         "module": "app.domains.world_characters.infrastructure",
         "kind": "package_marker",
-        "reason": "Only the package marker for the exact historical/extension contracts listed in this document.",
+        "reason": "Historical WC submodule initialization preserves the identical CharacterActiveWorld and WorldCharacter class re-exports; this is not an empty package marker.",
         "contract": "docs/architecture/backend-compatibility.md"
       },
       {

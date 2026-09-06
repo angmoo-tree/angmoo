@@ -1,7 +1,7 @@
 {
-  "edge_count": 3967,
+  "edge_count": 3961,
   "external_import_count": 3099,
-  "module_count": 1064,
+  "module_count": 1061,
   "modules": [
     {
       "external_imports": [],
@@ -181,16 +181,6 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [],
-      "imports": [
-        "app.domains.chat.router.messages",
-        "app.runtime.chat.message_composition"
-      ],
-      "module": "app.api.v1.routes.messages",
-      "path": "backend/app/api/v1/routes/messages.py",
-      "wildcard_imports": []
-    },
-    {
       "external_imports": [
         "fastapi"
       ],
@@ -219,26 +209,6 @@
       ],
       "module": "app.api.v1.routes.world_character_setup",
       "path": "backend/app/api/v1/routes/world_character_setup.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.chat.router.world_chat",
-        "app.runtime.chat.message_composition"
-      ],
-      "module": "app.api.v1.routes.world_chat",
-      "path": "backend/app/api/v1/routes/world_chat.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.chat.router.world_chat_response",
-        "app.runtime.chat.message_composition"
-      ],
-      "module": "app.api.v1.routes.world_chat_response",
-      "path": "backend/app/api/v1/routes/world_chat_response.py",
       "wildcard_imports": []
     },
     {

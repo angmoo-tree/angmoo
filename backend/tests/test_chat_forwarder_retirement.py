@@ -36,7 +36,7 @@ def candidate(tmp_path):
         "backend/app/runtime/chat/message_composition.py",
         "backend/app/runtime/chat/generation_workflows.py",
         "backend/app/domains/social/repository/blocks.py",
-        "backend/app/api/v1/routes/world_chat_response.py",
+        *(path.replace("/api/v1/routes/", "/domains/chat/router/") for path in proof.ROUTE_FACADES),
         *(path for path, _ in proof.TESTS.values()),
     ]
     for path in files:
@@ -49,6 +49,7 @@ def candidate(tmp_path):
         "backend/app/domains/chat/application/generation_lifecycle.py": "backend/app/domains/chat/repository/response_lifecycle.py",
         "backend/app/runtime/chat/world_generation.py": "backend/app/domains/chat/service/generation.py",
     }
+    moves.update({path: path.replace("/api/v1/routes/", "/domains/chat/router/") for path in proof.ROUTE_FACADES})
     return tmp_path, moves
 
 
@@ -81,6 +82,10 @@ def test_exact_original_layers_and_actual_owner_tests_are_verified(candidate, si
     "asyncio_attribute", "asyncio_setattr", "asyncio_nested_import", "module_side_effect",
     "star_import", "retained_package",
     "relative_import", "exported_uow_stub", "block_query_binding", "block_query_body",
+    "route_package", "route_active_import", "route_wrong_disposition",
+    "request_wrong_getter", "request_missing_configuration", "request_other_app",
+    "dependency_wrong_state", "dependency_missing_guard", "http_wrong_dependency",
+    "http_endpoint_stub", "route_owner_type_shadow",
 ])
 def test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks(candidate, signed_reader, mutation):
     root, moves = candidate
@@ -110,8 +115,41 @@ def test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks(candi
     elif mutation == "block_query_body":
         rewrite(root, "backend/app/domains/social/repository/blocks.py", "return db.scalar(", "return False\n    return db.scalar(")
     elif mutation == "route_binding_rebind":
-        with (root / "backend/app/api/v1/routes/world_chat_response.py").open("a") as stream:
+        path = root / "backend/app/api/v1/routes/world_chat_response.py"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a") as stream:
             stream.write("\ngeneration_service = evidence_service\n")
+    elif mutation == "route_package":
+        path = root / "backend/app/api/v1/routes/messages/__init__.py"
+        path.parent.mkdir(parents=True)
+        path.write_text("from app.domains.chat.router.messages import router\n")
+    elif mutation == "route_active_import":
+        path = root / "backend/scripts/chat.py"
+        path.parent.mkdir(parents=True)
+        path.write_text("from app.api.v1.routes import world_chat\n")
+    elif mutation == "route_wrong_disposition":
+        moves["backend/app/api/v1/routes/messages.py"] = "backend/app/domains/chat/router/world_chat.py"
+    elif mutation == "request_wrong_getter":
+        rewrite(root, routes, "messages.get_thread_service(request)", "messages.get_message_service(request)")
+    elif mutation == "request_missing_configuration":
+        rewrite(root, routes, "message_composition.configure_chat_services(app)", "pass")
+    elif mutation == "request_other_app":
+        rewrite(root, routes, 'Request({"type": "http", "app": app})', 'Request({"type": "http", "app": FastAPI()})')
+    elif mutation == "dependency_wrong_state":
+        rewrite(root, "backend/app/domains/chat/dependencies.py", '"chat_thread_service"', '"chat_message_service"')
+    elif mutation == "dependency_missing_guard":
+        rewrite(root, "backend/app/domains/chat/dependencies.py", "if service is None:", "if False:")
+    elif mutation == "http_wrong_dependency":
+        rewrite(root, "backend/app/domains/chat/router/messages.py", "Depends(get_thread_service)", "Depends(get_message_service)")
+    elif mutation == "http_endpoint_stub":
+        path = root / "backend/app/domains/chat/router/messages.py"
+        tree = ast.parse(path.read_text())
+        endpoint = next(node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == "list_threads")
+        endpoint.body = [ast.Return(value=ast.List(elts=[], ctx=ast.Load()))]
+        path.write_text(ast.unparse(tree))
+    elif mutation == "route_owner_type_shadow":
+        with (root / routes).open("a") as stream:
+            stream.write("\nfrom fake_service import Fake as ThreadService\n")
     elif mutation == "delegate_missing_result":
         rewrite(root, delegate, 'assert asyncio.run(messages.send_message(db, user, "thread-1", data)) == "sent"', 'assert True')
     elif mutation == "delegate_missing_failure_finalization":
@@ -133,7 +171,7 @@ def test_retirement_rejects_reintroduced_layers_and_weakened_actual_checks(candi
         with (root / owner).open("a") as stream:
             stream.write("\nfrom fake_path import fake as __file__\n")
     elif mutation == "route_self_identity":
-        rewrite(root, routes, "assert world_chat_response.generation_service is message_composition.generation_service", "assert message_composition.generation_service is message_composition.generation_service")
+        rewrite(root, routes, "assert world_chat_response.get_generation_service(request) is message_composition.generation_service", "assert message_composition.generation_service is message_composition.generation_service")
     elif mutation == "unsafe_disposition":
         moves[next(iter(moves))] = "../unrelated.py"
     elif mutation == "missing_disposition":

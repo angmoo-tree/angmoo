@@ -19,6 +19,11 @@ OLD = {
     "backend/app/compatibility/chat_generation_lifecycle.py": "16349e33da9ecf43d72f09ceac80bcc336184e1d",
     "backend/app/runtime/chat/world_generation.py": "dc3a4ba58771ab9f01694c6150ff9a7256d92a84",
 }
+ROUTE_FACADES = {
+    "backend/app/api/v1/routes/messages.py": "434f364dd808e5b9aa4eb3ff762c0a1c9e360182",
+    "backend/app/api/v1/routes/world_chat.py": "d4b661fbfb8197f73c6ba741846c1e9da08287a3",
+    "backend/app/api/v1/routes/world_chat_response.py": "b396dacec9f442d13f360952424ad8ee22b50a03",
+}
 TARGETS = {
     "backend/app/compatibility/chat_service.py": "backend/app/domains/chat/service/threads.py",
     "backend/app/compatibility/chat_runtime_contract.py": "backend/app/domains/chat/dependencies.py",
@@ -249,12 +254,36 @@ def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
     imports[0].module = block_module
     if dump(expected_composition) != dump(ast.parse((root / composition).read_text(encoding="utf-8-sig"))):
         raise ValueError("Chat actual service construction changed")
-    route = "backend/app/api/v1/routes/world_chat_response.py"
-    expected_route = ast.parse(before(route))
-    expected_route.body = [n for n in expected_route.body if not (isinstance(n, ast.ImportFrom) and n.module == "app.runtime.chat" and [(a.name, a.asname) for a in n.names] == [("world_generation", "chat_service")])]
-    if dump(expected_route) != dump(ast.parse((root / route).read_text(encoding="utf-8-sig"))):
-        raise ValueError("Chat response route actual bindings changed")
-    forbidden = {path.removeprefix("backend/").removesuffix(".py").replace("/", ".") for path in OLD}
+    # These three original route files only imported the actual HTTP endpoints
+    # and the service instances whose construction was proved above. Retire the
+    # import surface only after proving the complete original HTTP/DI modules;
+    # the replacement test uses their real Request dependency getters.
+    for route, expected_blob in ROUTE_FACADES.items():
+        if git_bytes("rev-parse", f"{ANCHOR}:{route}", root=root).decode().strip() != expected_blob:
+            raise ValueError("Chat route facade anchor path drift")
+        raw = git_bytes("cat-file", "blob", expected_blob, root=root)
+        if hashlib.sha1(f"blob {len(raw)}\0".encode() + raw).hexdigest() != expected_blob:
+            raise ValueError("Chat route facade original blob drift")
+        if (root / route).exists() or (root / route).with_suffix("").exists():
+            raise ValueError("Chat route facade was retained or recreated")
+        actual_route = route.replace("/api/v1/routes/", "/domains/chat/router/")
+        if file_moves.get(route) != actual_route or not (root / actual_route).is_file():
+            raise ValueError("Chat route facade requires its exact actual HTTP disposition")
+        actual_module = actual_route.removeprefix("backend/").removesuffix(".py").replace("/", ".")
+        for node in meaningful_body(ast.parse(raw.decode("utf-8-sig"))):
+            if not isinstance(node, ast.ImportFrom) or node.level or any(a.name == "*" for a in node.names):
+                raise ValueError("Chat historical route facade contained implementation")
+            if node.module not in {actual_module, "app.runtime.chat.message_composition"}:
+                # This one original export was already retired with the exact
+                # world_generation forwarding proof above; no other alias is allowed.
+                if not (route.endswith("/world_chat_response.py") and node.module == "app.runtime.chat" and [(a.name, a.asname) for a in node.names] == [("world_generation", "chat_service")]):
+                    raise ValueError("Chat historical route facade binding changed")
+        if dump(ast.parse(before(actual_route))) != dump(ast.parse((root / actual_route).read_text(encoding="utf-8-sig"))):
+            raise ValueError("Chat actual HTTP endpoint or dependency binding changed")
+    dependency = "backend/app/domains/chat/dependencies.py"
+    if dump(ast.parse(before(dependency))) != dump(ast.parse((root / dependency).read_text(encoding="utf-8-sig"))):
+        raise ValueError("Chat actual Request dependency control or binding changed")
+    forbidden = {path.removeprefix("backend/").removesuffix(".py").replace("/", ".") for path in (*OLD, *ROUTE_FACADES)}
     for directory in (root / "backend/app", root / "backend/tests", root / "backend/scripts", root / "scripts"):
         for path in directory.rglob("*.py"):
             tree = ast.parse(path.read_text(encoding="utf-8-sig"))
@@ -298,8 +327,33 @@ def validate(enabled, file_moves, snapshots, root: Path, git_bytes):
             if dump(actual) != dump(expected):
                 raise ValueError("Chat durable owner retirement weakened the existing transaction test")
         else:
+            for role in ("threads", "settings", "messages"):
+                protected_import(source, OWNER_CLASSES[role], "app.domains.chat.service." + role, OWNER_CLASSES[role])
             expected = ast.parse(ast.unparse(frozen)).body[0]
             expected = ast.parse(ast.unparse(expected).replace("from app.runtime.chat import message_composition, world_generation", "from app.runtime.chat import message_composition\n    from app.domains.chat.service.generation import GenerationService").replace("assert world_chat_response.chat_service is world_generation", "assert world_chat_response.generation_service is message_composition.generation_service\n    assert world_chat_response.evidence_service is message_composition.evidence_service\n    assert type(world_chat_response.generation_service) is GenerationService")).body[0]
+            # Preserve all six instance-identity and four concrete-type checks.
+            # Only the removed module attributes become the exact real getters
+            # on the unchanged canonical HTTP modules, configured by production.
+            expected = ast.parse(ast.unparse(expected).replace("from app.api.v1.routes import messages, world_chat, world_chat_response", "from fastapi import FastAPI, Request\n    from app.domains.chat.router import messages, world_chat, world_chat_response")).body[0]
+            expected.body[4:4] = ast.parse("app = FastAPI()\nmessage_composition.configure_chat_services(app)\nrequest = Request({'type': 'http', 'app': app})").body
+            getters = {
+                ("messages", "thread_service"): "get_thread_service",
+                ("messages", "settings_service"): "get_settings_service",
+                ("messages", "message_service"): "get_message_service",
+                ("world_chat", "chat_service"): "get_thread_service",
+                ("world_chat_response", "generation_service"): "get_generation_service",
+                ("world_chat_response", "evidence_service"): "get_evidence_service",
+            }
+
+            class ActualRequestGetter(ast.NodeTransformer):
+                def visit_Attribute(self, node):
+                    self.generic_visit(node)
+                    getter = getters.get((node.value.id, node.attr)) if isinstance(node.value, ast.Name) else None
+                    if getter is None:
+                        return node
+                    return ast.Call(func=ast.Attribute(value=node.value, attr=getter, ctx=ast.Load()), args=[ast.Name(id="request", ctx=ast.Load())], keywords=[])
+
+            expected = ActualRequestGetter().visit(expected)
             if dump(actual) != dump(expected):
                 raise ValueError("Chat actual route owner binding test changed")
         result[function] = {"paths": {path, path.replace("/tests/chat/", "/tests/")}, "current_path": path,

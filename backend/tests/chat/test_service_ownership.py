@@ -218,20 +218,25 @@ def test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback(
 
 
 def test_routes_call_actual_owner_services_without_runtime_port_chain():
-    from app.api.v1.routes import messages, world_chat, world_chat_response
+    from fastapi import FastAPI, Request
+    from app.domains.chat.router import messages, world_chat, world_chat_response
     from app.runtime.chat import message_composition
     from app.domains.chat.service.generation import GenerationService
 
-    assert messages.thread_service is message_composition.thread_service
-    assert messages.settings_service is message_composition.settings_service
-    assert messages.message_service is message_composition.message_service
-    assert world_chat.chat_service is message_composition.thread_service
-    assert world_chat_response.generation_service is message_composition.generation_service
-    assert world_chat_response.evidence_service is message_composition.evidence_service
-    assert type(world_chat_response.generation_service) is GenerationService
-    assert type(messages.thread_service) is ThreadService
-    assert type(messages.settings_service) is MessageSettingsService
-    assert type(messages.message_service) is MessageService
+    app = FastAPI()
+    message_composition.configure_chat_services(app)
+    request = Request({"type": "http", "app": app})
+
+    assert messages.get_thread_service(request) is message_composition.thread_service
+    assert messages.get_settings_service(request) is message_composition.settings_service
+    assert messages.get_message_service(request) is message_composition.message_service
+    assert world_chat.get_thread_service(request) is message_composition.thread_service
+    assert world_chat_response.get_generation_service(request) is message_composition.generation_service
+    assert world_chat_response.get_evidence_service(request) is message_composition.evidence_service
+    assert type(world_chat_response.get_generation_service(request)) is GenerationService
+    assert type(messages.get_thread_service(request)) is ThreadService
+    assert type(messages.get_settings_service(request)) is MessageSettingsService
+    assert type(messages.get_message_service(request)) is MessageService
 
 
 def test_legacy_send_releases_original_fence_after_unexpected_failure(monkeypatch):

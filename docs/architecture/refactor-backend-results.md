@@ -3757,3 +3757,11 @@ namespace 표시 파일 제외 후에도 이전과 이후의 **2,507개 수집 n
 이후 발견한 무사용 Chat route 호환3개와 현재 bridge 설명은 별도 마지막 정리로 검증한다. 보안의 첫 실제 후보 검사에서 Gitleaks 현재1건·이력0건, custom 현재2209files/치명0·고립 전체이력11471blobs/치명72건을 발견했다. 현재1건은 이전 Worlds foundation과 AST literal이 같은 공개 idempotency marker의 새 경로 누락이고, 이력72건은 과거24blob의 같은3개 합성 Google fixture가 원래 exact allowlist 경로를 잃은 결과다. 원본 Git blob·기존 정확값·규칙·경로를 대조한 증거와 실패 결과를 보존하고, 동일값/규칙 조건을 유지한 경로 보완 및 실제 전체 재검사로 닫는다. 이 단락은 보안 PASS 선언이 아니다.
 
 전체2676 PASS는 이 고정 소스의 결과다. 이후 변경의 차이·집중 검사와 최종 후보의 실제 Docker/Windows Host Tauri·PR-head·설치·post-merge 증거를 별도로 확인한다. 실제 AI의 SNS 사건→기억→재시작 후 대화 근거 연결은 이 구조 검증의 완료 범위에 포함하지 않는다.
+
+### AR-B8-B 무사용 Chat route 호환 3개 종료
+
+`app/api/v1/routes/{messages,world_chat,world_chat_response}.py`는 실제 제품 소비가 없는 import-only 경로였다. 삭제 전에 32개 export가 실제 소유 모듈의 같은 객체임을 실행으로 확인했고, signed `fd312e6a55d264f4ef704ee866f6819322119858`의 정확한 원본 3개 blob과 현재 실제 Chat HTTP 3개 모듈·Request dependency 전체 AST가 동일함을 검증했다. 실제 endpoint/service/SQL/Session/provider/구성 함수 본문은 변경하지 않았다.
+
+기존 `tests/chat/test_service_ownership.py::test_routes_call_actual_owner_services_without_runtime_port_chain`은 실제 `FastAPI`/`Request`와 production `configure_chat_services`를 통해 같은 서비스 객체를 받는 6개 identity·4개 concrete type 단언으로 이어진다. 원래 frozen 함수와 정확한 변환을 증명하는 guard가 getter/다른 app/누락된 설정/DI state·guard/endpoint stub/type shadow, 삭제 모듈·package·실행 import 재등장을 거부한다. 기존 실제 HTTP·같은 Session·NDJSON 회귀와 새 음성 11개를 포함한 집중 검사는 **60 passed / 1 warning / 33.68초**다. 원래 source/assertion/suppression/unrecorded-source 진단은 모두0이며, `world_generation.__all__`의 기존 승계 map에서 마지막 옛 facade 소비자를 실제 `GenerationService` 생성자인 `runtime/chat/message_composition.py`로 연결한 뒤 원래 split 검사도0이다. 원본 파일/심볼/노드와 203개 원장은 변경하지 않았다.
+
+원래 생성기로 현재 inventory를 갱신했고 경계 검사는 **1061 modules / 3961 internal edges / legacy_exact_edges 0 / PASS**다. 제품 소비가 끝난 Chat bridge 3개만 제거하여 **38개 = 역사 지원13개 + 정상 runtime/HTTP 조립25개**를 유지한다. 25개는 현재 실제 소유 소비와 역방향 import 차단을 보존하기 위해 남겼으며, 낡은 다음 slice/G5 대기 문구를 실제 지원 caller의 종료 조건으로 바꿨다. `legacy_exception_groups`와 legacy module cycle은0이며, 역사 migration와 외부 extension의 retained module20개는 별도 지원 계약이다. 새 source의 immutable capture·11개 신규 node 기록, 최종 Host·설치·stock·보안·원격 CI·post는 후속 exact 후보 Gate로 남긴다. 전체2676 PASS는 앞선30dc 결과로 그대로 보존한다.

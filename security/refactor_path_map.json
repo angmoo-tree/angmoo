@@ -53577,8 +53577,7 @@
           "old": "backend/app/runtime/chat/sqlalchemy_adapter.py::SqlAlchemyChatRuntime",
           "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_j_response_generation_lifecycle.py::test_fenced_finalize_is_atomic_idempotent_and_stores_no_partial_delta",
@@ -53694,8 +53693,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::RESPONSE_REQUEST_DEADLINE_SECONDS",
           "new": "backend/app/domains/chat/service/generation.py::RESPONSE_REQUEST_DEADLINE_SECONDS",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
@@ -53746,8 +53744,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::accept_world_message",
           "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
@@ -53759,8 +53756,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::retry_world_response",
           "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
@@ -53772,8 +53768,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::get_world_response_request",
           "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
@@ -53785,8 +53780,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::get_latest_world_response_request",
           "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
@@ -53798,8 +53792,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::get_world_response_evidence",
           "new": "backend/app/domains/chat/service/evidence.py::EvidenceService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_today_sns_activity.py::test_today_inspector_revalidates_exact_revision_after_edit"
@@ -53810,8 +53803,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::stream_world_response",
           "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_generation_composition.py::test_runtime_builder_keeps_provider_order_material_and_session"
@@ -53822,8 +53814,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::_mutation_thread",
           "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
@@ -53857,8 +53848,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::_recover_if_expired",
           "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
@@ -53870,8 +53860,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::_request_read",
           "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
@@ -53883,8 +53872,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::_record_read",
           "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
@@ -53896,8 +53884,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::_chat_evidence_item",
           "new": "backend/app/domains/chat/service/evidence.py::EvidenceService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/test_p8_l_r_today_sns_activity.py::test_today_inspector_revalidates_exact_revision_after_edit"
@@ -53979,8 +53966,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::_fail_before_workflow",
           "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
@@ -53992,8 +53978,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::_terminal_event",
           "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
@@ -54005,8 +53990,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::_fence",
           "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
@@ -54018,8 +54002,7 @@
           "old": "backend/app/runtime/chat/world_generation.py::_event",
           "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
-            "backend/app/runtime/chat/message_composition.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
@@ -54031,13 +54014,13 @@
           "old": "backend/app/runtime/chat/world_generation.py::__all__",
           "new": "backend/app/domains/chat/service/generation.py::GenerationService",
           "direct_consumers": [
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/runtime/chat/message_composition.py"
           ],
           "test_nodes": [
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_send_replay_and_retry_reuse_one_user_message_and_response_slot",
             "tests/chat/test_p8_l_p_evidence_response_streaming.py::test_status_read_recovers_an_expired_non_terminal_request"
           ],
-          "retirement_evidence": "Original seven advertised exports remain in actual GenerationService methods, deadline constant and generation_workflows.SqlAlchemyResponseWorkflowUnitOfWork. Closed signed-source Chat retirement proof checks all three original owner definitions unchanged; no synthetic __all__ or forwarding object remains."
+          "retirement_evidence": "Original seven advertised exports remain in actual GenerationService methods, deadline constant and generation_workflows.SqlAlchemyResponseWorkflowUnitOfWork. Closed signed-source Chat retirement proof checks all three original owner definitions unchanged; no synthetic __all__ or forwarding object remains. The remaining real constructor consumer is runtime/chat/message_composition.py, which imports GenerationService and constructs the same instance; removed route aliases are no longer current consumers."
         },
         {
           "old": "backend/app/runtime/chat/world_generation.py::get_world_response_evidence",
@@ -54333,8 +54316,7 @@
           "new": "backend/app/domains/chat/router/messages.py::list_threads",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/messages.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
@@ -54345,8 +54327,7 @@
           "new": "backend/app/domains/chat/router/messages.py::create_thread",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/messages.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
@@ -54357,8 +54338,7 @@
           "new": "backend/app/domains/chat/router/messages.py::get_thread",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/messages.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
@@ -54369,8 +54349,7 @@
           "new": "backend/app/domains/chat/router/messages.py::update_thread",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/messages.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
@@ -54381,8 +54360,7 @@
           "new": "backend/app/domains/chat/router/messages.py::delete_thread",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/messages.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
@@ -54393,8 +54371,7 @@
           "new": "backend/app/domains/chat/router/messages.py::send_message",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/messages.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
@@ -54405,8 +54382,7 @@
           "new": "backend/app/domains/chat/router/messages.py::retry_message",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/messages.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
@@ -54417,8 +54393,7 @@
           "new": "backend/app/domains/chat/router/messages.py::get_message_settings",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/messages.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
@@ -54429,8 +54404,7 @@
           "new": "backend/app/domains/chat/router/messages.py::update_message_settings",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/messages.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
@@ -54441,8 +54415,7 @@
           "new": "backend/app/domains/chat/router/messages.py::get_character_message_settings",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/messages.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
@@ -54453,8 +54426,7 @@
           "new": "backend/app/domains/chat/router/messages.py::update_character_message_settings",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/messages.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
@@ -54465,8 +54437,7 @@
           "new": "backend/app/domains/chat/router/messages.py::router",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/messages.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_request_injected_service_receives_the_original_session_and_user"
@@ -54477,8 +54448,7 @@
           "new": "backend/app/domains/chat/router/world_chat.py::get_world_chat_entry",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -54489,8 +54459,7 @@
           "new": "backend/app/domains/chat/router/world_chat.py::list_world_threads",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -54501,8 +54470,7 @@
           "new": "backend/app/domains/chat/router/world_chat.py::create_or_get_world_thread",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -54513,8 +54481,7 @@
           "new": "backend/app/domains/chat/router/world_chat.py::get_world_thread",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -54525,8 +54492,7 @@
           "new": "backend/app/domains/chat/router/world_chat.py::update_world_thread_model",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -54537,8 +54503,7 @@
           "new": "backend/app/domains/chat/router/world_chat.py::router",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -54549,8 +54514,7 @@
           "new": "backend/app/domains/chat/router/world_chat.py::entry_router",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -54561,8 +54525,7 @@
           "new": "backend/app/domains/chat/router/world_chat.py::__all__",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -54573,8 +54536,7 @@
           "new": "backend/app/domains/chat/router/world_chat_response.py::accept_world_message",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -54585,8 +54547,7 @@
           "new": "backend/app/domains/chat/router/world_chat_response.py::retry_world_response",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -54597,8 +54558,7 @@
           "new": "backend/app/domains/chat/router/world_chat_response.py::get_latest_world_response_request",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -54609,8 +54569,7 @@
           "new": "backend/app/domains/chat/router/world_chat_response.py::get_world_response_request",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -54621,8 +54580,7 @@
           "new": "backend/app/domains/chat/router/world_chat_response.py::get_world_response_evidence",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -54633,8 +54591,7 @@
           "new": "backend/app/domains/chat/router/world_chat_response.py::stream_world_response_events",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -54645,8 +54602,7 @@
           "new": "backend/app/domains/chat/router/world_chat_response.py::router",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -54657,8 +54613,7 @@
           "new": "backend/app/domains/chat/router/world_chat_response.py::__all__",
           "direct_consumers": [
             "backend/app/api/v1/main.py",
-            "backend/app/api/v1/public.py",
-            "backend/app/api/v1/routes/world_chat_response.py"
+            "backend/app/api/v1/public.py"
           ],
           "test_nodes": [
             "tests/chat/test_http_ownership.py::test_stream_uses_injected_generation_and_preserves_ndjson_and_runtime_context"
@@ -135305,6 +135260,18 @@
         "module_preservation": "whole module AST55 top-level definitions/assertions107; only exact repo root depth corrected in one file",
         "ci": "No current workflow literal references to moved files; existing full backend suite collects all; exact documentation command updated"
       }
+    },
+    "AR-B8-B-chat-route-retirement": {
+      "status": "MOVED; exact source/DI retirement verification; final Host/installer/CI/post Gates remain separate",
+      "removed_paths": [
+        "backend/app/api/v1/routes/messages.py",
+        "backend/app/api/v1/routes/world_chat.py",
+        "backend/app/api/v1/routes/world_chat_response.py"
+      ],
+      "original_source": "fd312e6a55d264f4ef704ee866f6819322119858",
+      "proof": "scripts/ci/chat_forwarder_retirement.py pins the three original import-only blobs, unchanged complete actual HTTP and Request dependency AST, and existing original test function before exact getter substitution.",
+      "behavior": "Real FastAPI/Request and production configure_chat_services preserve six service instance identities and four concrete types. No product endpoint, service, SQL, Session, provider or construction body changes.",
+      "policy": "Removed only the three product-unused facade bridges. Retained 13 historical and 25 supported composition edges with accurate caller retirement conditions; existing boundary checker is unchanged."
     }
   },
   "asgi_exports": {
