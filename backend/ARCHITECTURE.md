@@ -1188,3 +1188,7 @@ Social의 옛 `services/community.py` 집합은 제거했다. HTTP와 다른 실
 실제 구현을 소유한 모듈로 소비자를 연결한 뒤 `services/activity_state_contracts`, `daily_activity_plans`, `direct_llm`, `routine_post_runtime`, `world_character_contracts`, `agent_runs`와 `cruds/agents`의 남은 전달 경로를 제거했습니다. 활동·슬롯은 Routines, credential 조회·저장은 Identity, 이미지 정제·파일 처리는 해당 업무 및 integrations의 실제 모듈을 사용합니다. 테스트도 같은 구현을 직접 참조하며 기존 단언에 쓰인 지역 이름은 실제 모듈 import의 별칭으로 유지합니다.
 
 `services/messages`, `prompt_safety`, `world_character_provider`, `profile_media`는 과거 경로의 객체 동일성을 직접 검사하는 원본 테스트 때문에 아직 남아 있습니다. 이 검사는 다른 실제 owner를 가리키는지 확인해야 하므로 자기 자신과 비교하는 단언으로 바꾸지 않습니다. 새로운 제품 코드는 이 경로를 사용하지 않으며, 별도의 좁은 호환 종료 증명과 원본 기능 검증을 거쳐 제거합니다. Hosted 설정과 runtime adapter 등록의 실제 상태 저장소는 별도 전환 범위입니다.
+
+### 외부 LLM과 작성 파라미터 테스트
+
+`tests/integrations/test_direct_llm.py`는 외부 LLM 요청 설정, JSON 응답 진단, 재시도, 사용량 기록과 호출 제한을 검증합니다. 작성 작업이 선택하는 파라미터는 `tests/routines/test_writing_parameters.py`에 둡니다. LangGraph 실행 검사는 기존 `tests/routines/test_resident_graph.py`를 사용합니다. 파일 이름에 이전 실행기의 이름을 남기는 대신 실제 검사 대상의 소유 위치에서 테스트를 찾을 수 있습니다.
