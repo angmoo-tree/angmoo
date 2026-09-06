@@ -1,4 +1,7 @@
 from __future__ import annotations
+import app.domains.social.service.resident_affordances as social_resident_affordances_service
+import app.runtime.social.agent_tool_reads as social_agent_tool_reads_runtime
+import app.runtime.social.agent_tools as social_agent_tools_runtime
 from app.runtime.social.agent_tool_state import agent_tool_state
 from app.runtime.resident import langgraph_queries
 from app.domains.routines.policies import execution_results
@@ -187,7 +190,7 @@ from app.runtime.routine_posts.sqlalchemy_runtime import (
 )
 from app.runtime.resident import activity_policy as agent_activity_policy
 from app.domains.character_lore.service import documents as character_lore_service
-from app.services import community as community_service
+
 from app.runtime.social import langgraph_actions as langgraph_social_apply
 from app.runtime.social import image_generation as post_image_generation
 from app.services import prompt_safety
@@ -1678,7 +1681,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
 
     async def feed_observer(state: _ResidentGraphState) -> dict[str, Any]:
         session_key = f"{ctx.session_key}:scratch:feed-scan:langgraph"
-        feed_page = community_service.list_agent_tool_feed(ctx.db, session_key, limit=30)
+        feed_page = social_agent_tool_reads_runtime.agent_tool_reads.list_agent_tool_feed(ctx.db, session_key, limit=30)
         seen_post_ids = _seen_daypart_feed_post_ids(ctx)
         items: list[dict[str, Any]] = []
         seed_candidates: list[dict[str, Any]] = []
@@ -1704,7 +1707,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
             if topic and topic not in topics:
                 topics.append(topic)
             affordance = (
-                community_service.resident_feed_action_affordance(
+                social_resident_affordances_service.resident_feed_action_affordance(
                     ctx.db,
                     post=post,
                     character_id=ctx.character.id,
@@ -1892,7 +1895,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
 
     async def inbox_observer(state: _ResidentGraphState) -> dict[str, Any]:
         session_key = f"{ctx.session_key}:scratch:inbox:langgraph"
-        notifications = community_service.list_agent_tool_notifications(
+        notifications = social_agent_tool_reads_runtime.agent_tool_reads.list_agent_tool_notifications(
             ctx.db, session_key, limit=10
         )
         inbox_lane_only = bool(state.get("inbox_lane_only"))
@@ -1972,7 +1975,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
                 ctx.db.commit()
             observed_notification_ids.append(notification.id)
             affordance = (
-                community_service.resident_inbox_action_affordance(
+                social_resident_affordances_service.resident_inbox_action_affordance(
                     ctx.db,
                     notification=raw_notification,
                     character_id=ctx.character.id,
@@ -3343,7 +3346,7 @@ def _execute_planned_action(
             if action_type == "reply":
                 if not body:
                     raise ValueError("reply body missing")
-                result = community_service.reply_agent_tool_post(
+                result = social_agent_tools_runtime.agent_tool_actions.reply_agent_tool_post(
                     ctx.db,
                     ctx.session_key,
                     post_id or "",
@@ -3353,7 +3356,7 @@ def _execute_planned_action(
                 )
                 payload = {"post_id": result.id, "reply_to_post_id": post_id}
             elif action_type == "like":
-                result = community_service.like_agent_tool_post(
+                result = social_agent_tools_runtime.agent_tool_actions.like_agent_tool_post(
                     ctx.db,
                     ctx.session_key,
                     post_id or "",
@@ -3361,7 +3364,7 @@ def _execute_planned_action(
                 )
                 payload = {"post_id": result.id}
             elif action_type == "repost":
-                result = community_service.repost_agent_tool_post(
+                result = social_agent_tools_runtime.agent_tool_actions.repost_agent_tool_post(
                     ctx.db,
                     ctx.session_key,
                     post_id or "",
@@ -3369,7 +3372,7 @@ def _execute_planned_action(
                 )
                 payload = {"post_id": result.id}
             elif action_type == "follow":
-                result = community_service.follow_agent_tool_profile(
+                result = social_agent_tools_runtime.agent_tool_actions.follow_agent_tool_profile(
                     ctx.db,
                     ctx.session_key,
                     schemas.FollowCreate(
@@ -3383,7 +3386,7 @@ def _execute_planned_action(
                     "target_id": result.target.id,
                 }
             elif action_type == "unfollow":
-                community_service.unfollow_agent_tool_profile(
+                social_agent_tools_runtime.agent_tool_actions.unfollow_agent_tool_profile(
                     ctx.db,
                     ctx.session_key,
                     schemas.FollowCreate(
@@ -3601,7 +3604,7 @@ def _execute_writing_plan(
             character_id=ctx.character.id,
         )
         with unit_of_work.deferred_commits():
-            result = community_service.create_agent_tool_post(
+            result = social_agent_tools_runtime.agent_tool_actions.create_agent_tool_post(
                 ctx.db,
                 ctx.session_key,
                 schemas.PostCreate(

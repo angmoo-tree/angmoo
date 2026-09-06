@@ -1,3 +1,5 @@
+import app.domains.social.service.posts as social_posts_actual
+import app.runtime.social.timeline as social_timeline_actual
 from app.domains.routines.service import activity_management, autonomy_management, manual_activity, feed_cues
 from app.domains.routines.service import first_greeting as first_greeting_service
 from app.runtime.resident import tendency_analysis
@@ -2498,9 +2500,9 @@ def test_first_greeting_succeeds_without_assigned_slot_and_does_not_use_resident
     monkeypatch.setattr(agent_service.security, "decrypt_secret", lambda value, **_kwargs: "api-key")
     monkeypatch.setattr(agent_service, "_run_first_greeting_writer", _writer)
     monkeypatch.setattr(agent_service, "_attach_first_greeting_image", _image)
-    monkeypatch.setattr(agent_service.community_service, "create_post", _create_post)
+    monkeypatch.setattr(social_timeline_actual.timeline_service, "create_post", _create_post)
     monkeypatch.setattr(
-        agent_service.community_service,
+        social_posts_actual,
         "get_post",
         lambda db, post_id: _post_detail(db.get(models.Post, post_id)),
     )

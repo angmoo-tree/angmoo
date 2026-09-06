@@ -1,4 +1,8 @@
 from __future__ import annotations
+import app.domains.social.exceptions as social_errors
+import app.domains.social.service.activity_results as social_activity_results_service
+import app.domains.social.service.posts as social_posts_service
+import app.runtime.social.timeline as social_timeline_runtime
 
 from app.domains.local_bot.constants import LOCAL_KEY_PREFIX
 
@@ -212,7 +216,7 @@ from app.runtime.resident import activity_policy as agent_activity_policy
 
 from app.domains.world_characters.service import readiness as activity_profile_readiness
 
-from app.services import community as community_service
+
 
 from app.runtime.resident import execution as agent_run_service
 
@@ -1191,7 +1195,7 @@ def build_autonomy_workflows() -> AutonomyWorkflows[schemas.AgentDetailRead]:
         credential_required_error=CredentialRequiredError,
         credential_sync_error=CredentialSyncError,
         slot_busy_error=ActiveSlotBusyError,
-        social_character_not_found_error=community_service.CharacterNotFoundError,
+        social_character_not_found_error=social_errors.CharacterNotFoundError,
     )
 
 def build_manual_activity_workflows() -> ManualActivityWorkflows:
@@ -1257,12 +1261,12 @@ def build_first_greeting_workflows() -> FirstGreetingWorkflows:
         _run_first_greeting_writer=_run_first_greeting_writer,
         post_input=schemas.PostCreate,
         build_response=schemas.AgentFirstGreetingRead,
-        create_post=community_service.create_post,
-        build_post_created_activity_result=community_service.build_post_created_activity_result,
+        create_post=social_timeline_runtime.timeline_service.create_post,
+        build_post_created_activity_result=social_activity_results_service.build_post_created_activity_result,
         attach_image=_attach_first_greeting_image,
-        get_post=community_service.get_post,
+        get_post=social_posts_service.get_post,
         deferred_error=DirectLlmDeferred,
-        social_service_error=community_service.CommunityServiceError,
+        social_service_error=social_errors.CommunityServiceError,
     )
 
 def build_tendency_analysis_workflows() -> TendencyAnalysisWorkflows[schemas.AgentDetailRead]:

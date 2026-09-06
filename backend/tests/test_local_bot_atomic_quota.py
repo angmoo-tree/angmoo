@@ -1,3 +1,4 @@
+import app.runtime.social.timeline as social_timeline_actual
 from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 
@@ -255,7 +256,7 @@ def test_failed_domain_write_rolls_back_without_consuming_quota(
     quota = _FakeQuota()
     monkeypatch.setattr(actions.rate_limits, "_ensure_post_rate_limit", lambda *_args, **_kwargs: quota)
     monkeypatch.setattr(
-        bot_composition.community,
+        social_timeline_actual.timeline_service,
         "create_post",
         lambda *_args, **_kwargs: SimpleNamespace(
             id="post-quota",
@@ -294,7 +295,7 @@ def test_noop_like_commits_without_consuming_quota(
     )
     monkeypatch.setattr(bot_composition.queries, "_post_like_exists", lambda *_args: True)
     monkeypatch.setattr(
-        bot_composition.community,
+        social_timeline_actual.timeline_service,
         "like_post",
         lambda *_args, **_kwargs: marker,
     )

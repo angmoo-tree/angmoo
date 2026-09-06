@@ -2558,3 +2558,18 @@ C29 보존 검사: PR #258/#263 API/schema/ORM·보호 변경4파일 assertion·
 Signed Social sources through `e56e645f7963609650dccdefbf9cf78474f9931e` are connected to the actual Resident graph, RoutinePost runtime, Character state and canonical models. Original graph state-recorder mocks now patch the actual state service. Manual inbox claims and successful routine interaction reads use their existing owner operations; C28's corrected direct `db.get` query is included.
 
 Current collection is **2503 nodes**. Social, Relationships, RoutinePost, Resident graph, LocalBot response, shared errors and write-UoW validation passed **335 / existing PostgreSQL skip1 / 82.79s**. All seven read-only original preservation diagnostics report0errors (protected2311/current2503). The never-tracked `social/infrastructure/__init__.py` was removed from move metadata after full Git-history verification, matching the reviewed C30 correction; no source or frozen baseline was removed. Sequential source ledger and final backend/architecture/installer closeout remain pending.
+
+
+## AR-B5-C30 — Community 임시 서비스 집합 제거
+
+실제 함수/class0인 Community 집합을 삭제하고18소비자의129참조를 소유 서비스/실행 instance/오류/상수로 연결했다. 제품742개 전체 함수/class AST가 정확한 import 해석 후 동일하다. 기존 test 단언은 실제 owner의 지역 import로 기존 표현을 유지하며 namespace 복제나 범용 facade를 추가하지 않았다.
+
+최초 집중은350 PASS/9 FAIL/기존 PGskip1로 LocalBot의 옛 mock receiver가 원인이었다. LocalBot10·Routines2 receiver를 실제 owner로 옮긴 후 같은 집중은 **359 PASS /기존 PostgreSQL skip1 /22.54초 /기존 warning3개**다. 기존 Community25임시bridge/17legacyedge를 제거하고, 현재 branch의 미합류 AgentRun/Writer/LocalBot 실제consumer13개만 정확한 종료 조건과 함께 기록했다. parent의 이미 구현된 runtime/resident 및 LocalBot 합류에서 이 임시 oldconsumer들을 제거한다. CRUD별칭/G07/full B5/capture/Hosted는 후속이다.
+
+C30 최종 보존은 PR #258/#263 API/schema/ORM·보호 변경12파일 assertion·전체 split evidence0, 경계847 module/3050 edge/legacy164, L4 parity99·ER0 PASS다. 실제 첫인사 receiver2개가 쓰이는 기존 회귀1개도 PASS다. 지도 생성 첫 시도에서 역사 pilot 형식을 일반 split으로 재작성한7항목은 원래 HEAD의 정확 AR-B1/AR-F1을 복구해 동일 검사0오류로 종료했다. 부모 strict 지도 검사가 C29의 한 번도 추적되지 않은 infrastructure/__init__.py 가상 항목을 발견했고 전체 Git 도입 이력0을 확인하여 그 항목만 제거했다. 원본 snapshot이나 테스트 단언은 변경하지 않았다.
+
+### Social C30 실제 소비자 연결 — 준비 통합 검증
+
+- 옛 `app.services.community`를 삭제하고 원래 함수 호출을 Social·Routines의 실제 담당 코드로 연결했다. Local Bot과 Resident context의 실행 조립은 동일한 Session과 호출 시점의 함수 조회를 유지한다.
+- 관련 회귀 검증: **382 passed / 기존 PostgreSQL 1 skipped / 3 warnings / 75.78초**.
+- 원본 보호 읽기 진단: 보호 2,311 / 현재 2,503 nodes, source·split symbol·assertion·suppression·ASGI·API/ORM·missing node **각 0 오류**. 선형 source introduction을 적용한 stock gate·전체 CI·설치 검증을 대신하지 않는다.

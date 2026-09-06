@@ -1842,7 +1842,6 @@
         "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
         "backend/app/runtime/social/subjective_composition.py",
         "backend/app/runtime/social/timeline.py",
-        "backend/app/services/community.py",
         "backend/app/domains/social/service/abuse_quota.py",
         "backend/app/domains/identity/service/mutation_quota.py",
         "backend/app/domains/identity/repository/mutation_quota.py",

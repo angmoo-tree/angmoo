@@ -22,10 +22,6 @@
         },
         {
           "importer": "app.api.v1.routes.agents",
-          "imported": "app.services.community"
-        },
-        {
-          "importer": "app.api.v1.routes.agents",
           "imported": "app.services.runtime_boundary"
         },
         {
@@ -90,15 +86,7 @@
         },
         {
           "importer": "app.runtime.characters.management",
-          "imported": "app.services.community"
-        },
-        {
-          "importer": "app.runtime.characters.management",
           "imported": "app.services.runtime_boundary"
-        },
-        {
-          "imported": "app.services.community",
-          "importer": "app.runtime.local_bot.composition"
         },
         {
           "importer": "app.runtime.resident.langgraph",
@@ -115,10 +103,6 @@
         {
           "importer": "app.runtime.resident.langgraph",
           "imported": "app.schemas"
-        },
-        {
-          "importer": "app.runtime.resident.langgraph",
-          "imported": "app.services.community"
         },
         {
           "importer": "app.runtime.resident.langgraph",
@@ -167,26 +151,6 @@
         {
           "importer": "app.services.agent_runs",
           "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.agent_runs",
-          "imported": "app.services.community"
-        },
-        {
-          "importer": "app.services.community",
-          "imported": "app.cruds.agent_runs"
-        },
-        {
-          "importer": "app.services.community",
-          "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.services.community",
-          "imported": "app.cruds.community"
-        },
-        {
-          "importer": "app.services.community",
-          "imported": "app.schemas"
         }
       ],
       "id": "pre-t2-5-horizontal-layer-imports",
@@ -204,10 +168,6 @@
         {
           "importer": "app.compatibility.routine_posts.legacy",
           "imported": "app.services.activity_state_contracts"
-        },
-        {
-          "importer": "app.compatibility.routine_posts.legacy",
-          "imported": "app.services.community"
         }
       ],
       "id": "l3-routine-post-legacy-persistence-bridge",
@@ -238,10 +198,6 @@
         },
         {
           "importer": "app.runtime.resident.execution",
-          "imported": "app.services.community"
-        },
-        {
-          "importer": "app.runtime.resident.execution",
           "imported": "app.services.runtime_boundary"
         }
       ],
@@ -260,19 +216,6 @@
         {
           "importer": "app.runtime.resident.writing",
           "imported": "app.cruds.community"
-        }
-      ]
-    },
-    {
-      "id": "ar-b4-writer-app-services-community",
-      "owner_stage": "L6",
-      "reason": "Existing writer collaboration relocated to actual runtime; no added policy or wider namespace. Pending owner: AR-B5 Social workflow integration.",
-      "removal_condition": "Connect exact existing admission/read/write collaborators in the same Session and original order.",
-      "review_date": "2026-09-06",
-      "edges": [
-        {
-          "importer": "app.runtime.resident.writing",
-          "imported": "app.services.community"
         }
       ]
     },
@@ -2068,22 +2011,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.services.community",
-        "target": "app.domains.characters.service.state",
-        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
-        "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
-        "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.characters.exceptions",
-        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
-        "reason": "State admission/writes are canonical Character work; old Community consumers retain their same error type and HTTP assembly keeps the same APIRoute.",
-        "removal_condition": "Retire Community state wrappers after Social/tool consumers call Character service directly; keep HTTP assembly only while mixed routes migrate.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.api.v1.routes.community",
         "target": "app.domains.characters.router",
         "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A",
@@ -2212,46 +2139,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.services.community",
-        "target": "app.domains.social.constants",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The actual Social read/response/error or nullable Identity lookup now has one owner; this named legacy consumer uses the same object while its workflow transition remains pending.",
-        "removal_condition": "Switch the exact legacy Community consumer to its canonical service and remove this bridge; no new owner imports the legacy aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.exceptions",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The actual Social read/response/error or nullable Identity lookup now has one owner; this named legacy consumer uses the same object while its workflow transition remains pending.",
-        "removal_condition": "Switch the exact legacy Community consumer to its canonical service and remove this bridge; no new owner imports the legacy aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.posts",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The actual Social read/response/error or nullable Identity lookup now has one owner; this named legacy consumer uses the same object while its workflow transition remains pending.",
-        "removal_condition": "Switch the exact legacy Community consumer to its canonical service and remove this bridge; no new owner imports the legacy aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.presentation",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The actual Social read/response/error or nullable Identity lookup now has one owner; this named legacy consumer uses the same object while its workflow transition remains pending.",
-        "removal_condition": "Switch the exact legacy Community consumer to its canonical service and remove this bridge; no new owner imports the legacy aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.visibility",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The actual Social read/response/error or nullable Identity lookup now has one owner; this named legacy consumer uses the same object while its workflow transition remains pending.",
-        "removal_condition": "Switch the exact legacy Community consumer to its canonical service and remove this bridge; no new owner imports the legacy aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.cruds.community",
         "target": "app.domains.social.repository.reactions",
         "owner_stage": "AR-B5 / AR-B8-A",
@@ -2265,30 +2152,6 @@
         "owner_stage": "AR-B5 / AR-B8-A",
         "reason": "Temporary same-object alias exposes the actual owned Social source/reaction persistence to remaining named callers.",
         "removal_condition": "Migrate the remaining canonical consumers and remove the old Community CRUD aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.activity_results",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
-        "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.notifications",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
-        "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.timeline",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The named old caller imports actual Social workflow/helper objects or the identical original quota exception.",
-        "removal_condition": "Move remaining HTTP/agent callers to the canonical service and retire the exact legacy alias. Historical quota model/public identity is a root-approved G5/B8 review item.",
         "review_date": "2026-09-05"
       },
       {
@@ -2740,38 +2603,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.profiles",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The remaining named Community callers use the identical profile workflow and bounded limit helper after actual implementation moves to Social ownership.",
-        "removal_condition": "Move remaining HTTP and agent callers to canonical services and remove this exact legacy import.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.utils.limits",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The remaining named Community callers use the identical profile workflow and bounded limit helper after actual implementation moves to Social ownership.",
-        "removal_condition": "Move remaining HTTP and agent callers to canonical services and remove this exact legacy import.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.feed",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "Remaining old HTTP and agent callers use identical actual Feed/Inbox service functions while their source transition is pending.",
-        "removal_condition": "Move the remaining consumers to canonical Social services and remove this exact import.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.inbox",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "Remaining old HTTP and agent callers use identical actual Feed/Inbox service functions while their source transition is pending.",
-        "removal_condition": "Move the remaining consumers to canonical Social services and remove this exact import.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.cruds.community",
         "target": "app.domains.characters.service.search",
         "owner_stage": "AR-B5 / AR-B8-A",
@@ -3020,22 +2851,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.community",
-        "target": "app.domains.social.repository.resident_affordances",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Exact pre-existing resident/agent tool functions now resolve to their actual Social owner; no new business policy is added to the old consumer.",
-        "removal_condition": "Move the remaining Community/AgentRun/LangGraph/writing orchestration to actual owner/runtime modules and remove these exact same-function consumer imports.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.resident_affordances",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Exact pre-existing resident/agent tool functions now resolve to their actual Social owner; no new business policy is added to the old consumer.",
-        "removal_condition": "Move the remaining Community/AgentRun/LangGraph/writing orchestration to actual owner/runtime modules and remove these exact same-function consumer imports.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.services.agent_writing",
         "target": "app.domains.social.service.resident_affordances",
         "owner_stage": "AR-B5 / AR-B4",
@@ -3052,22 +2867,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.agent_presentation",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Exact pre-existing resident/agent tool functions now resolve to their actual Social owner; no new business policy is added to the old consumer.",
-        "removal_condition": "Move the remaining Community/AgentRun/LangGraph/writing orchestration to actual owner/runtime modules and remove these exact same-function consumer imports.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.routines.service.feed_history_values",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Existing resident history caller consumes actual Routines policy and original limits; no implementation remains in this old import surface for these symbols.",
-        "removal_condition": "Finish Community/AgentRun runtime ownership and remove exact old consumer imports while retaining the actual Routines service/constant call.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.services.agent_runs",
         "target": "app.domains.routines.service.feed_history_values",
         "owner_stage": "AR-B5 / AR-B4",
@@ -3076,51 +2875,11 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.community",
-        "target": "app.domains.routines.constants",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Existing resident history caller consumes actual Routines policy and original limits; no implementation remains in this old import surface for these symbols.",
-        "removal_condition": "Finish Community/AgentRun runtime ownership and remove exact old consumer imports while retaining the actual Routines service/constant call.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.routines.service.feed_history",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Remaining Community consumes the actual Routines consumed-source decision; its nullable SQL is owned by the same domain repository.",
-        "removal_condition": "Finish Community tool action/runtime ownership and remove exact old imports, preserving actual Routines history and Social topic owners.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.topic_metadata",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Remaining Community actions consume actual owner history queries/topic policy while their own workflow is migrated; no original history implementation remains in this old surface.",
-        "removal_condition": "Finish Community tool action/runtime ownership and remove exact old imports, preserving actual Routines history and Social topic owners.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.service.agent_tool_authorization",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Unfinished tool/writing consumers call the actual Social authorization policy; old authorization function bodies are removed.",
-        "removal_condition": "Complete Community tool and separate Agent writing ownership, then remove these exact old consumer imports.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.services.agent_writing",
         "target": "app.domains.social.service.agent_tool_authorization",
         "owner_stage": "AR-B5 / AR-B4",
         "reason": "Unfinished tool/writing consumers call the actual Social authorization policy; old authorization function bodies are removed.",
         "removal_condition": "Complete Community tool and separate Agent writing ownership, then remove these exact old consumer imports.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.routines.service.feed_history_notes",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Remaining Community facade exposes actual Routines note helpers while final tool route/legacy removal proceeds; no note body remains in Community.",
-        "removal_condition": "Connect final tool route callers to runtime.resident.feed_history_notes and remove exact old diagnostic imports.",
         "review_date": "2026-09-06"
       },
       {
@@ -3143,14 +2902,6 @@
         "importer": "app.services.agent_runs",
         "target": "app.domains.routines.service.action_briefs",
         "owner_stage": "AR-B4-C",
-        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
-        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.routines.service.action_briefs",
-        "owner_stage": "AR-B5",
         "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
         "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
         "review_date": "2026-09-06"
@@ -3180,19 +2931,11 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.community",
-        "target": "app.domains.characters.service.state_notes",
-        "owner_stage": "AR-B5",
-        "reason": "Community compatibility imports actual state implementations while final complete-tick/tool route consumers move; no state implementation remains in Community.",
-        "removal_condition": "Finish actual complete tick callers and remove Community facade imports.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.community",
-        "target": "app.domains.social.policies.complete_tick",
-        "owner_stage": "AR-B5",
-        "reason": "Final Community facade retains original pure candidate/completion names as direct aliases while consumers move; no implementation remains.",
-        "removal_condition": "Remove final Community compatibility imports after all exact callers use actual service/policy.",
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.routines.constants",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "Remaining pre-integration caller now uses the actual owner directly after Community facade removal; original caller body and same-Session behavior are unchanged.",
+        "removal_condition": "Map these exact calls onto signed runtime/resident or runtime/local_bot composition in parent integration and remove the obsolete caller module/bridge.",
         "review_date": "2026-09-06"
       }
     ]

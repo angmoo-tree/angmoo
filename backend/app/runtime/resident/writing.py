@@ -1,6 +1,13 @@
 """Same-session Social/Lore collaboration and actual gateway writer execution."""
 
 from __future__ import annotations
+import app.domains.routines.service.feed_history_values as routines_feed_history_values_service
+import app.domains.social.exceptions as social_errors
+import app.domains.social.service.agent_tool_authorization as social_agent_tool_authorization_service
+import app.domains.social.service.posts as social_posts_service
+import app.domains.social.service.resident_affordances as social_resident_affordances_service
+import app.runtime.social.agent_tool_authorization as social_agent_tool_authorization_runtime
+import app.runtime.social.agent_tools as social_agent_tools_runtime
 
 import asyncio
 import hashlib
@@ -45,7 +52,7 @@ from app.domains.routines.service.writing_results import (
 )
 from app.domains.social.schemas import community as schemas
 from app.domains.character_lore.service import documents as character_lore_service
-from app.services import community as community_service
+
 from app.services.agent_writing import _record_daypart_action_memory
 from app.services.runtime_boundary import OpenClawGatewayClient, OpenClawGatewayError
 from app.domains.character_lore.service import presentation as lore_presentation
@@ -61,7 +68,7 @@ def prompt_workflows() -> WritingPromptWorkflows:
             writing_prompts._format_recent_activity(
                 character_id,
                 db,
-                activity_result_text=community_service.activity_result_text_for_prompt,
+                activity_result_text=routines_feed_history_values_service.activity_result_text_for_prompt,
             )
         ),
         format_lore_prompt_context=lore_presentation.format_lore_prompt_context,
@@ -75,23 +82,23 @@ def create_agent_tool_post_from_brief(
         "agent_writing_from_brief_request_received action=post "
         "header_source=%s session=%s requested_character=%s",
         _agent_tool_header_source(session_key),
-        community_service._session_fingerprint(session_key),
+        social_agent_tool_authorization_service._session_fingerprint(session_key),
         data.author_character_id,
     )
-    run = community_service._get_agent_tool_run(
+    run = social_agent_tool_authorization_runtime._get_agent_tool_run(
         db,
         session_key=session_key,
         action="post",
         requested_character_id=data.author_character_id,
     )
-    character_id = community_service._agent_tool_character_id(
+    character_id = social_agent_tool_authorization_service._agent_tool_character_id(
         run,
         data.author_character_id,
         action="post",
         session_key=session_key,
     )
-    community_service._agent_tool_user(db, run, action="post", session_key=session_key)
-    community_service._ensure_tick_action_allowed(
+    social_agent_tool_authorization_runtime._agent_tool_user(db, run, action="post", session_key=session_key)
+    social_agent_tool_authorization_runtime._ensure_tick_action_allowed(
         db, session_key=session_key, run=run, action="post"
     )
     brief = _resolve_create_post_brief(run, data.brief)
@@ -124,7 +131,7 @@ def create_agent_tool_post_from_brief(
     )
     lore_chunk_ids = lore_retrieval.chunk_ids if lore_retrieval is not None else []
     retrieval_mode = lore_retrieval.mode if lore_retrieval is not None else None
-    post = community_service.create_agent_tool_post(
+    post = social_agent_tools_runtime.agent_tool_actions.create_agent_tool_post(
         db,
         session_key,
         post_data,
@@ -162,36 +169,36 @@ def reply_agent_tool_post_from_brief(
         "agent_writing_from_brief_request_received action=reply "
         "header_source=%s session=%s requested_post=%s requested_character=%s",
         _agent_tool_header_source(session_key),
-        community_service._session_fingerprint(session_key),
+        social_agent_tool_authorization_service._session_fingerprint(session_key),
         post_id,
         data.author_character_id,
     )
-    run = community_service._get_agent_tool_run(
+    run = social_agent_tool_authorization_runtime._get_agent_tool_run(
         db,
         session_key=session_key,
         action="reply",
         requested_post_id=post_id,
         requested_character_id=data.author_character_id,
     )
-    character_id = community_service._agent_tool_character_id(
+    character_id = social_agent_tool_authorization_service._agent_tool_character_id(
         run,
         data.author_character_id,
         action="reply",
         session_key=session_key,
         post_id=post_id,
     )
-    community_service._agent_tool_user(db, run, action="reply", session_key=session_key)
-    community_service._ensure_tick_action_allowed(
+    social_agent_tool_authorization_runtime._agent_tool_user(db, run, action="reply", session_key=session_key)
+    social_agent_tool_authorization_runtime._ensure_tick_action_allowed(
         db, session_key=session_key, run=run, action="reply"
     )
     target_post = community_crud.get_post(db, post_id)
     if target_post is None:
-        raise community_service.PostNotFoundError(post_id)
+        raise social_errors.PostNotFoundError(post_id)
     if target_post.author_character_id == character_id:
-        raise community_service.AgentRunAuthorizationError(
+        raise social_errors.AgentRunAuthorizationError(
             "reply target is self-authored. Reply to another character's post in the viewed thread instead."
         )
-    community_service._ensure_agent_can_reply_to_thread(
+    social_resident_affordances_service._ensure_agent_can_reply_to_thread(
         db, post_id=post_id, character_id=character_id
     )
 
@@ -214,7 +221,7 @@ def reply_agent_tool_post_from_brief(
             "composition returned an invalid reply payload"
         ) from exc
 
-    post = community_service.reply_agent_tool_post(db, session_key, post_id, reply_data)
+    post = social_agent_tools_runtime.agent_tool_actions.reply_agent_tool_post(db, session_key, post_id, reply_data)
     action_memory = _build_compact_action_memory(
         kind="reply",
         post=post,
@@ -248,7 +255,7 @@ def _compose_writing_from_brief(
 ]:
     character = character_profile.get_character(db, character_id)
     if character is None or character.deleted_at is not None:
-        raise community_service.CharacterNotFoundError(character_id)
+        raise social_errors.CharacterNotFoundError(character_id)
     credential = _run_credential(db, run)
     setting = activity_settings.ensure_setting(db, character_id)
     state = character_state.get_character_state(db, character_id)
@@ -377,7 +384,7 @@ def _writing_scratch_base_session_key(
         memory_session_key = session_context.get("memory_session_key")
         if isinstance(memory_session_key, str) and memory_session_key.strip():
             return memory_session_key.strip()
-    return community_service._agent_tool_lookup_session_key(
+    return social_agent_tool_authorization_service._agent_tool_lookup_session_key(
         run.session_key or fallback_session_key
     )
 
@@ -385,9 +392,9 @@ def _writing_scratch_base_session_key(
 def _format_reply_context(db: Session, post_id: str) -> str:
     target = community_crud.get_post(db, post_id)
     if target is None:
-        raise community_service.PostNotFoundError(post_id)
-    root_id = community_service._thread_root_post_id(db, post_id)
-    thread = community_service.get_post_thread(db, root_id)
+        raise social_errors.PostNotFoundError(post_id)
+    root_id = social_resident_affordances_service._thread_root_post_id(db, post_id)
+    thread = social_posts_service.get_post_thread(db, root_id)
     lines = [
         f"root_post_id: {thread.post.id}",
         f"root_author: {thread.post.author_name} (@{thread.post.author_handle or '-'})",

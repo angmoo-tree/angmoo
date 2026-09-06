@@ -1,4 +1,7 @@
 from __future__ import annotations
+import app.runtime.social.agent_tool_state as social_agent_tool_state_runtime
+import app.runtime.social.inbox as social_inbox_runtime
+import app.runtime.social.timeline as social_timeline_runtime
 from app.runtime import account_deletion
 
 from datetime import UTC, date, datetime, timedelta
@@ -24,7 +27,7 @@ from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
 from app.domains.character_lore.service import documents as lore_service
 from app.runtime.character_lore import build_lore_workflows
-from app.services import community as community_service
+
 from chat_service_support import messages as message_service
 
 
@@ -620,6 +623,7 @@ def test_account_deletion_restores_private_media_when_database_commit_fails(
 def test_two_user_object_authorization_matrix_denies_cross_owner_access(
     tmp_path, monkeypatch
 ) -> None:
+    import app.domains.social.exceptions as community_service
     monkeypatch.setattr(settings, "MEDIA_ROOT", str(tmp_path / "media"))
     monkeypatch.setattr(settings, "AGENT_ACTIVITY_ENGINE", "langgraph")
     engine = _engine()
@@ -652,7 +656,7 @@ def test_two_user_object_authorization_matrix_denies_cross_owner_access(
         with pytest.raises(message_service.MessageNotFoundError):
             message_service.get_thread(db, intruder, f"thread-{character.id}")
         with pytest.raises(community_service.CharacterNotFoundError):
-            community_service.save_character_state_for_user(
+            social_agent_tool_state_runtime.save_character_state_for_user(
                 db,
                 intruder,
                 character.id,
@@ -660,9 +664,9 @@ def test_two_user_object_authorization_matrix_denies_cross_owner_access(
             )
         notification_id = db.scalar(select(models.Notification.id))
         with pytest.raises(community_service.NotificationNotFoundError):
-            community_service.mark_notification_read(db, intruder, notification_id)
+            social_inbox_runtime.inbox_service.mark_notification_read(db, intruder, notification_id)
         with pytest.raises(community_service.CharacterOwnershipError):
-            community_service.delete_post(db, intruder, post.id)
+            social_timeline_runtime.timeline_service.delete_post(db, intruder, post.id)
         with pytest.raises(CredentialResolutionError, match="owner does not match"):
             CredentialResolver.resolve_llm_credential(
                 db.get(models.LlmCredential, f"credential-{character.id}"),

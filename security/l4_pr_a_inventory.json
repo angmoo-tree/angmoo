@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3145,
-      "internal_edge_count": 4192,
+      "external_import_count": 3137,
+      "internal_edge_count": 4165,
       "legacy_import_exception_count": 0,
-      "module_count": 1102,
+      "module_count": 1101,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -2946,7 +2946,7 @@
       },
       {
         "path": "backend/tests/test_social_event_runtime.py",
-        "sha256": "377aee56c12a17a0c206bb8a8a026f4879c38a31f616714ebf47f1f058eeb251"
+        "sha256": "e730723fbfc1fc8081ee6de93d634f96296a3a18c4df2dca422f56985a4cdb7b"
       },
       {
         "path": "backend/tests/test_t2_architecture_inventory.py",

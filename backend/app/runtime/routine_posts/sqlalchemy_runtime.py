@@ -101,7 +101,6 @@ agent_activity_policy = legacy.agent_activity_policy
 
 social_event_runtime = legacy.social_event_runtime
 
-community_service = legacy.community_service
 
 LangGraphResidentContext = legacy.LangGraphResidentContext
 

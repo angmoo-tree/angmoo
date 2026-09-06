@@ -1,3 +1,5 @@
+import app.domains.social.service.notifications as social_notifications_service
+import app.domains.social.service.presentation as social_presentation_service
 from app.domains.social.service import feed as social_feed
 from app.domains.social.service import notifications as social_notifications
 
@@ -7,7 +9,7 @@ from types import SimpleNamespace
 
 from app import schemas
 from app.domains.social import router as community_routes
-from app.services import community as community_service
+
 
 
 def test_list_posts_route_passes_limit(monkeypatch) -> None:
@@ -26,6 +28,7 @@ def test_list_posts_route_passes_limit(monkeypatch) -> None:
 
 
 def test_list_posts_service_uses_feed_limit(monkeypatch) -> None:
+    import app.domains.social.service.feed as community_service
     captured: dict[str, object] = {}
     page = schemas.FeedPage(items=[], next_cursor=None)
 
@@ -58,7 +61,7 @@ def test_mentioned_characters_for_texts_resolves_existing_handles_once() -> None
         ]
     )
 
-    mentions = community_service._mentioned_characters_for_texts(
+    mentions = social_presentation_service._mentioned_characters_for_texts(
         db,
         "오늘 @zogwangbae 이야기",
         "@zogwangbae 다시, @honagyn도 같이",
@@ -75,7 +78,7 @@ def test_mentioned_characters_for_texts_ignores_unknown_and_mid_word_at() -> Non
         ]
     )
 
-    mentions = community_service._mentioned_characters_for_texts(
+    mentions = social_presentation_service._mentioned_characters_for_texts(
         db,
         "메일 test@zogwangbae.example 은 mention 아님",
         "없는 @missing_handle 과 유저 @user_handle 은 제외, @zogwangbae만 포함",
@@ -91,7 +94,7 @@ def test_mentioned_characters_for_texts_accepts_trailing_period_punctuation() ->
         ]
     )
 
-    mentions = community_service._mentioned_characters_for_texts(
+    mentions = social_presentation_service._mentioned_characters_for_texts(
         db,
         "say hello to @zogwangbae.",
         "@zogwangbae. next sentence",
@@ -108,7 +111,7 @@ def test_mentioned_characters_for_texts_does_not_link_domain_like_dot_suffix() -
         ]
     )
 
-    mentions = community_service._mentioned_characters_for_texts(
+    mentions = social_presentation_service._mentioned_characters_for_texts(
         db,
         "email test@zogwangbae.example is not a mention",
         "@zogwangbae.example should not partially link",
@@ -144,7 +147,7 @@ def test_notify_mentioned_characters_creates_mention_notifications(monkeypatch) 
         lambda _db, **kwargs: created.append(kwargs),
     )
 
-    community_service._notify_mentioned_characters(
+    social_notifications_service._notify_mentioned_characters(
         object(),
         post=SimpleNamespace(id="post-mention", title="hi @zogwangbae", body="@honagyn"),
         actor_user_id=None,
@@ -204,7 +207,7 @@ def test_notify_mentioned_characters_skips_actor_and_owner_duplicates(
         lambda _db, **kwargs: created.append(kwargs),
     )
 
-    community_service._notify_mentioned_characters(
+    social_notifications_service._notify_mentioned_characters(
         object(),
         post=SimpleNamespace(id="post-mention", title="@author @owner @target", body=""),
         actor_user_id=None,
@@ -251,7 +254,7 @@ def test_post_reference_includes_mention_metadata(monkeypatch) -> None:
         lambda db, *texts: [mention],
     )
 
-    reference = community_service._post_reference(object(), "post-1")
+    reference = social_presentation_service._post_reference(object(), "post-1")
 
     assert reference is not None
     assert reference.mentioned_characters == [mention]

@@ -1,3 +1,9 @@
+import app.domains.social.service.feed as social_feed_actual
+import app.domains.social.service.inbox as social_inbox_actual
+import app.domains.social.service.posts as social_posts_actual
+import app.domains.social.service.profiles as social_profiles_actual
+import app.runtime.social.agent_tool_state as social_agent_tool_state_actual
+import app.runtime.social.timeline as social_timeline_actual
 from datetime import UTC, datetime
 import json
 from pathlib import Path
@@ -148,7 +154,7 @@ def test_bot_state_read_and_save_contract(monkeypatch):
         calls.append(("log_activity", kwargs))
 
     monkeypatch.setattr(actions.rate_limits, "_ensure_activity_rate_limit", fake_limit)
-    monkeypatch.setattr(bot_composition.community, "save_character_state", fake_save_state)
+    monkeypatch.setattr(social_agent_tool_state_actual, "save_character_state", fake_save_state)
     monkeypatch.setattr(bot_composition.activity_logs, "log_activity", fake_log_activity)
 
     saved = local_bot.save_state(
@@ -184,12 +190,12 @@ def test_bot_state_read_and_save_contract(monkeypatch):
 def test_bot_feed_and_thread_hide_author_user_id(monkeypatch):
     monkeypatch.setattr(actions.rate_limits, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
     monkeypatch.setattr(
-        bot_composition.community,
+        social_feed_actual,
         "list_feed",
         lambda *args, **kwargs: schemas.FeedPage(items=[_post_summary()]),
     )
     monkeypatch.setattr(
-        bot_composition.community,
+        social_posts_actual,
         "get_post_thread",
         lambda *args, **kwargs: schemas.PostThreadRead(
             post=_post_detail(), replies=[_post_summary()]
@@ -232,7 +238,7 @@ def test_bot_following_feed_hides_author_user_id(monkeypatch):
         return schemas.FeedPage(items=[_post_summary()], next_cursor="cursor-2")
 
     monkeypatch.setattr(
-        bot_composition.community, "list_character_following_feed", fake_following_feed
+        social_feed_actual, "list_character_following_feed", fake_following_feed
     )
 
     page = local_bot.list_following_feed(
@@ -253,7 +259,7 @@ def test_bot_following_feed_hides_author_user_id(monkeypatch):
 def test_bot_character_profile_hides_owner_and_persona(monkeypatch):
     monkeypatch.setattr(actions.rate_limits, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
     monkeypatch.setattr(
-        bot_composition.community,
+        social_profiles_actual,
         "get_character_profile",
         lambda *args, **kwargs: schemas.ProfileRead(
             profile=schemas.ProfileRef(
@@ -396,7 +402,7 @@ def test_bot_create_post_does_not_store_metadata(monkeypatch):
         captured["post_info"] = post_info
         return _post_detail()
 
-    monkeypatch.setattr(bot_composition.community, "create_post", fake_create_post)
+    monkeypatch.setattr(social_timeline_actual.timeline_service, "create_post", fake_create_post)
 
     response = local_bot.create_post(
         object(),
@@ -423,7 +429,7 @@ def test_bot_create_post_queues_image_request(monkeypatch):
         captured.update(kwargs)
         return schemas.BotImageRequestRead(status="queued", job_id=7)
 
-    monkeypatch.setattr(bot_composition.community, "create_post", fake_create_post)
+    monkeypatch.setattr(social_timeline_actual.timeline_service, "create_post", fake_create_post)
     monkeypatch.setattr(
         bot_composition.post_image_generation,
         "create_local_api_post_image_request",
@@ -477,7 +483,7 @@ def test_bot_notifications_hide_user_and_recipient_fields(monkeypatch):
         created_at=NOW,
     )
     monkeypatch.setattr(
-        bot_composition.community,
+        social_inbox_actual,
         "list_notifications_for_character",
         lambda *args, **kwargs: schemas.NotificationPage(items=[notification]),
     )
@@ -502,7 +508,7 @@ def test_bot_follow_response_is_character_profile_only(monkeypatch):
     monkeypatch.setattr(actions.rate_limits, "_ensure_reaction_rate_limit", lambda *args, **kwargs: None)
     monkeypatch.setattr(bot_composition.activity_logs, "log_activity", lambda *args, **kwargs: None)
     monkeypatch.setattr(
-        bot_composition.community,
+        social_profiles_actual,
         "follow_profile",
         lambda *args, **kwargs: schemas.FollowRead(
             follower=schemas.ProfileRef(
