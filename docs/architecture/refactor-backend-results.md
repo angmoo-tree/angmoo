@@ -6,6 +6,26 @@
 
 출발점은 #263 merge `d7037625a19071eb279ad2ea35c3ace6fe5b5289`, tree `35ded40a2b5fd33d1a54dac3a396e72d24c88714`다. 원격 main과 로컬 HEAD가 일치하고 시작 시 작업 트리는 깨끗했다. 원본 #258 기준과 승인 public test 목록, frozen migration 자료는 계속 보존한다.
 
+| 단계 | 현재 상태 | 범위와 근거 |
+| --- | --- | --- |
+| AR-G0~G4 | MERGED · PR/POST-MERGE PASS | #265~#269, G2 보안 후속 #272; G4의 역사적 Alembic 이전 완료, 최종 G5 등록 연결은 별도 |
+| AR-B2 | MERGED · PR/POST-MERGE PASS | Identity #270, Characters #271·#273·#274, Worlds #275, WorldCharacters #276~#278 |
+| AR-B3 | MERGED · PR/POST-MERGE PASS | World Package #279, Media #280 |
+| AR-B4 | MERGED · PR/POST-MERGE PASS | Routines core #281, Resident·활동관리·Writer 후속 #282 |
+| AR-B5 | MERGED · PR/POST-MERGE PASS | Social·Relationships·projection #283 |
+| AR-B6 | MERGED · PR/POST-MERGE PASS | Chat #284 |
+| AR-B7 | MERGED · PR/POST-MERGE PASS | Memory #285 |
+| AR-B8-A Tree/Lore | MERGED · PR/POST-MERGE PASS | #286, merge 02bbdc9c; post 7/7 및 Installer 5/5 SUCCESS |
+| AR-B8-A Residual | PR #287 OPEN · CI 진행 | exact95e15741; 기존 local stock2451 및 보안 검증을 유지하며 원격 전체·설치 결과를 별도 확인 |
+| AR-B8-A Runtime/G06-A | LOCAL VERIFIED · 순차 PR 대기 | clean6f3d4f3e, 보존2478·전체2456 PASS/22 SKIP; Residual post 완료 후 제출 |
+| AR-G5 | LOCAL VERIFIED · 순차 PR 대기 | clean85198e7e, 보존2507·전체2485 PASS/22 SKIP; 단일 Base/database/등록, Runtime post 완료 후 제출 |
+| AR-B8-B | IN PROGRESS · 최종 호환/검사·실행 검증 | clean30dcbd81 stock2698·전체2676 PASS/22 SKIP; 마지막 Chat 호환·보안 경로·최종 실제 실행·PR/merge/post 검증은 진행 중 |
+
+현재 상태는 2026-09-06 17:17 KST의 실제 원격/로컬 근거를 구분한 기록이다. 아래 각 단계의 이전 `NOT STARTED`, `PENDING`, 최초 실패 기록은 해당 시점의 이력이며 현재 상태를 덮어쓰지 않는다. AR-B8-B 종료와 §8.3·AR-X·P8-L-S·Release/Production 완료를 앞당기지 않는다.
+
+<details>
+<summary>이전 작업 중간 상태표 — 역사적 기록</summary>
+
 | 단계 | 상태 | 범위 |
 | --- | --- | --- |
 | AR-G0 | PR #265 MERGED · PR CI/POST-MERGE PASS | 후속 체크포인트·부분 scope·단계/소유권·Actions 연결 |
@@ -25,6 +45,8 @@
 | AR-B8-A | NOT STARTED | 잔여 업무·G06 단일 앱 생성·호환·소비자 전환 |
 | AR-G5 | NOT STARTED | models.py·단일 Base·database·등록 |
 | AR-B8-B | NOT STARTED | G06 검증 후 제거·호환 정리·백엔드 통합 |
+
+</details>
 
 ## AR-G0: 기준과 검사를 먼저 연결
 
@@ -3717,3 +3739,21 @@ namespace 표시 파일 제외 후에도 이전과 이후의 **2,507개 수집 n
 현재 후보의 cold/bootstrap·Memory·호환 제거 집중 실행은 최초 350 PASS/2 FAIL/241.76초였다. 실패 둘은 실제 Chat service constructor가 달라져서가 아니라, 원래 제거 증명이 signed fd312의 Runtime import 문장까지 고정한 데서 발생했다. B6의 signed618ca622에서 이미 `world_character_pair_is_blocked`를 같은 Social repository로 직접 연결했으며, 원래 Runtime도 그 함수를 그대로 가져오고 있었다.
 
 검사는 이 원래 re-export binding과 Social blocks 모듈의 전체 AST가 동일한지 먼저 증명하고, 정확히 해당 import 한 문장만 실제 소유 경로로 대조한다. Chat 인스턴스 생성과 연결의 나머지 전체 AST는 계속 동일해야 한다. 다른 block 함수를 같은 이름으로 바꿔 주입하거나 SQL 함수를 stub으로 바꾸는 두 음성 회귀를 추가했다. 제품 코드와 기존 행위 단언은 바꾸지 않았다. 수정 후 원래 제거·Chat 실제 서비스/응답 소유 검사 **46 PASS/43.00초**를 확인했다. 전체 backend와 최종 stock은 이후 정확 후보에서 별도 실행한다.
+
+## AR-B8-B 원본 도입 기록과 최종 보존 검사
+
+고정한 `30dcbd811a4c94aa7857c8ab8ceb4ac5b248c3d0`에서 선행 G5의185개 기록을 정확한 불변 prefix로 유지하고, 원래 signed source18개의 실제 파일29개와 새 회귀 node191개를 연결해 **185 → 203**으로 append했다. 원본16개 source의178개 새 검사는 Git의 최초 함수 도입까지 추적해 더 이른 누락 source0을 확인했다. Windows Host CI의 원본 `c9969dbd`는 새 함수4개의11개 case, Chat 보존 검사의 원본 `f8c1735c`는 기존 parameter prefix를 그대로 둔 새2개 case다. 각 immutable committed snapshot의 commit/tree/전체 tracked blob과 서명을 확인했으며, 나중 통합한 현재 tree를 최초 source로 재귀속하지 않았다.
+
+원래 production checkpoint/addition 검사를 쓰기 전후 그대로 실행해 최초 source·Git blob·단언·suppression·node·ancestry 오류0을 확인한 뒤 원장을 한 번 저장했다. G5에서 제외한 무사용 Chat namespace docstring 파일을 뒤의 snapshot에서 재도입하거나 다른 source에 귀속하지 않았다. frozen 기준과 기존185개 기록, 제품·테스트·검사기·현재 pathmap은 이 append에서 바뀌지 않았다.
+
+추가 후보 원장을 입력한 사전 읽기 진단은 source/split/unrecorded-source/assertion/suppression 모두0이었다. 이 진단 자체를 공식 stock 통과로 취급하지 않는다. 같은 고정 커밋의 변경하지 않은 `check_refactor_preservation.py --contracts --nodes` 결과와 전체 backend·Hosted·설치·post-merge 결과는 각 실행이 완료된 뒤 기록한다.
+
+같은 고정 `30dcbd81`의 변경하지 않은 공식 `check_refactor_preservation.py --contracts --nodes`가 **exit0 / items37 PASS / PR #258 1,867 / PR #263 1,907 / protected 2,698 = current 2,698**로 통과했다. 원본 API·ORM·ASGI·source·분할 증거·단언·suppression·node 및203개 기록의 Git 증명을 유지한다. 전체 backend·보안·Hosted·설치·post-merge 결과는 별도 실행 결과로 기록하며, 이 stock 통과로 승격하지 않는다.
+
+### AR-B8-B 전체 백엔드 검증 — clean30dcbd81
+
+원본 기록203개와 공식 보존 검사를 통과한 동일 고정 commit `30dcbd811a4c94aa7857c8ab8ceb4ac5b248c3d0`에서 전체 backend tests를 실행해 **2,676 passed / 기존22 skipped / 28 warnings / 1087.30초 / exit0**를 확인했다. 테스트 실행 중 제품·테스트·검사기·원장을 변경하지 않았다. 앞선 집중 검사의 Chat 보존 실패2건은 signedf8c의 원래 Social binding 증명과 음성 회귀를 적용한 뒤 이 전체 실행에서 모두 통과했다.
+
+이후 발견한 무사용 Chat route 호환3개와 현재 bridge 설명은 별도 마지막 정리로 검증한다. 보안의 첫 실제 후보 검사에서 Gitleaks 현재1건·이력0건, custom 현재2209files/치명0·고립 전체이력11471blobs/치명72건을 발견했다. 현재1건은 이전 Worlds foundation과 AST literal이 같은 공개 idempotency marker의 새 경로 누락이고, 이력72건은 과거24blob의 같은3개 합성 Google fixture가 원래 exact allowlist 경로를 잃은 결과다. 원본 Git blob·기존 정확값·규칙·경로를 대조한 증거와 실패 결과를 보존하고, 동일값/규칙 조건을 유지한 경로 보완 및 실제 전체 재검사로 닫는다. 이 단락은 보안 PASS 선언이 아니다.
+
+전체2676 PASS는 이 고정 소스의 결과다. 이후 변경의 차이·집중 검사와 최종 후보의 실제 Docker/Windows Host Tauri·PR-head·설치·post-merge 증거를 별도로 확인한다. 실제 AI의 SNS 사건→기억→재시작 후 대화 근거 연결은 이 구조 검증의 완료 범위에 포함하지 않는다.
