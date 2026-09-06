@@ -36,12 +36,12 @@
       "start_url: \"/\""
     ],
     "frontend/src/app/messages/[threadId]/page.tsx": [
-      "@/features/chat/public",
+      "@/features/chat/components/message-thread-client",
       "MessageThreadClient",
       "dynamic = \"force-dynamic\""
     ],
     "frontend/src/app/messages/page.tsx": [
-      "@/features/chat/public",
+      "@/features/chat/components/messages-client",
       "MessagesClient",
       "dynamic = \"force-dynamic\""
     ],
@@ -81,8 +81,7 @@
       "requestChatApi",
       "runtimeFetch"
     ],
-    "frontend/src/features/chat/model/chat-contract.ts": [
-      "DEFAULT_MESSAGE_GOOGLE_MODEL",
+    "frontend/src/features/chat/types/chat-contract.ts": [
       "MESSAGE_GOOGLE_GEMINI_MODELS",
       "MessageThreadRead"
     ],
@@ -92,11 +91,11 @@
       "createMessageThread",
       "getWorldChatEntry"
     ],
-    "frontend/src/features/chat/ui/message-thread-client.tsx": [
+    "frontend/src/features/chat/components/message-thread-client.tsx": [
       "model_busy",
       "답장 중"
     ],
-    "frontend/src/features/chat/ui/messages-client.tsx": [
+    "frontend/src/features/chat/components/messages-client.tsx": [
       "/messages/",
       "listMessageThreads"
     ],
@@ -219,6 +218,10 @@
       "<DeviceHome authStatus={status} />",
       "<DeviceHomeShell status={<RuntimeStatusSummary state={runtimeState} />}>",
       "getProductRuntimeState"
+    ],
+    "frontend/src/features/chat/config/models.ts": [
+      "DEFAULT_MESSAGE_GOOGLE_MODEL",
+      "MESSAGE_GOOGLE_GEMINI_MODELS"
     ]
   },
   "required_paths": [
@@ -256,6 +259,7 @@
     "frontend/src/composition/screens/post-list-screen.tsx",
     "frontend/src/composition/screens/world-app.tsx",
     "frontend/src/composition/screens/world-character-profile-screen.tsx",
+    "frontend/src/composition/screens/world-chat-screen.tsx",
     "frontend/src/composition/shells/creator-studio-frame.tsx",
     "frontend/src/composition/shells/local-device-navigation.tsx",
     "frontend/src/composition/shells/world-app-navigation.ts",
@@ -274,13 +278,15 @@
     "frontend/src/features/characters/utils/character-recent-activity-presentation.ts",
     "frontend/src/features/chat/api/chat-client.ts",
     "frontend/src/features/chat/api/world-chat-client.ts",
-    "frontend/src/features/chat/model/chat-contract.ts",
-    "frontend/src/features/chat/model/world-chat-contract.ts",
+    "frontend/src/features/chat/components/message-thread-client.tsx",
+    "frontend/src/features/chat/components/messages-client.tsx",
+    "frontend/src/features/chat/components/world-chat.module.css",
+    "frontend/src/features/chat/components/world-chat.tsx",
+    "frontend/src/features/chat/config/models.ts",
     "frontend/src/features/chat/public.ts",
-    "frontend/src/features/chat/ui/message-thread-client.tsx",
-    "frontend/src/features/chat/ui/messages-client.tsx",
-    "frontend/src/features/chat/ui/world-chat.module.css",
-    "frontend/src/features/chat/ui/world-chat.tsx",
+    "frontend/src/features/chat/types/chat-contract.ts",
+    "frontend/src/features/chat/types/view-slots.ts",
+    "frontend/src/features/chat/types/world-chat-contract.ts",
     "frontend/src/features/creator-studio/components/creator-studio-dashboard.tsx",
     "frontend/src/features/device-home/public.ts",
     "frontend/src/features/device-home/utils/device-home-presentation.ts",
@@ -337,6 +343,7 @@
   "refactor": {
     "features": [
       "characters",
+      "chat",
       "creator-studio",
       "device-home",
       "identity",

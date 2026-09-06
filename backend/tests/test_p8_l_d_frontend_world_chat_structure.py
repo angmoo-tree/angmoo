@@ -14,7 +14,7 @@ def _read(relative: str) -> str:
 def test_world_chat_contract_transport_and_public_boundary_are_feature_owned() -> None:
     public = _read("frontend/src/features/chat/public.ts")
     contract = _read(
-        "frontend/src/features/chat/model/world-chat-contract.ts"
+        "frontend/src/features/chat/types/world-chat-contract.ts"
     )
     client = _read("frontend/src/features/chat/api/world-chat-client.ts")
 
@@ -24,7 +24,7 @@ def test_world_chat_contract_transport_and_public_boundary_are_feature_owned() -
         "WorldChatThreadListRead",
         "WorldChatThreadCreateRead",
         "resolvedLegacyWorldChatRouteParts",
-        'export { WorldChat } from "./ui/world-chat";',
+        'export { WorldChat } from "./components/world-chat";',
     ):
         assert marker in public or marker in contract
     for marker in (
@@ -82,8 +82,8 @@ def test_world_chat_ui_preserves_p8_l_d_scope_under_p8_l_p_successor() -> None:
     world_contract = _read(
         "frontend/src/composition/shells/world-app-navigation.ts"
     )
-    ui = _read("frontend/src/features/chat/ui/world-chat.tsx")
-    css = _read("frontend/src/features/chat/ui/world-chat.module.css")
+    ui = _read("frontend/src/features/chat/components/world-chat.tsx")
+    css = _read("frontend/src/features/chat/components/world-chat.module.css")
 
     assert 'availability: "available"' in world_contract
     assert 'activeSection.id === "chat"' in world_app
@@ -119,13 +119,11 @@ def test_world_chat_ui_preserves_p8_l_d_scope_under_p8_l_p_successor() -> None:
 
 
 def test_legacy_messages_redirect_only_resolved_scope_and_name_other_states() -> None:
-    contract = _read("frontend/src/features/chat/model/chat-contract.ts")
-    helper = _read(
-        "frontend/src/features/chat/model/world-chat-contract.ts"
-    )
-    listing = _read("frontend/src/features/chat/ui/messages-client.tsx")
+    contract = _read("frontend/src/features/chat/types/chat-contract.ts")
+    helper = _read("frontend/src/features/chat/utils/legacy-world-route.ts")
+    listing = _read("frontend/src/features/chat/components/messages-client.tsx")
     thread = _read(
-        "frontend/src/features/chat/ui/message-thread-client.tsx"
+        "frontend/src/features/chat/components/message-thread-client.tsx"
     )
 
     assert '"resolved" | "ambiguous" | "quarantined"' in contract

@@ -13,7 +13,7 @@ import {
 import { useEffect, useState, type ReactNode } from "react";
 
 import { WorldCharacterProfile } from "@/composition/screens/world-character-profile-screen";
-import { WorldChat } from "@/features/chat/public";
+import { WorldChatScreen as WorldChat } from "@/composition/screens/world-chat-screen";
 import { WorldCharacterDirectory } from "@/features/characters/components/world-character-directory";
 import { WorldSocialFeed } from "@/features/social/components/world-social-feed";
 import { PRODUCT_ROUTES, relationshipGraphRoute, worldCharacterProfileRoute } from "@/lib/navigation/product-routes";

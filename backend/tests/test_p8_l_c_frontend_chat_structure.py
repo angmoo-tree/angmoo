@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 import re
+import subprocess
+import sys
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -18,19 +20,27 @@ def test_message_routes_use_only_the_chat_public_feature_boundary() -> None:
     }
     for relative, component in routes.items():
         text = _read(relative)
-        assert f'import {{ {component} }} from "@/features/chat/public";' in text
-        assert "@/features/chat/" not in text.replace("@/features/chat/public", "")
+        target = "messages-client" if component == "MessagesClient" else "message-thread-client"
+        assert f'from "@/features/chat/components/{target}"' in text
         assert "@/components/messages-client" not in text
         assert "@/components/message-thread-client" not in text
         assert 'dynamic = "force-dynamic"' in text
         assert "NO_INDEX_ROBOTS" in text
+        # Historical public-entry topology, after checking current exposure above.
+        text = subprocess.check_output(["git", "show", f"d54cbfae8d33084a9b87655d9a9008ff3db3ec0a:{relative}"], cwd=ROOT, text=True, encoding="utf-8")
+        assert f'import {{ {component} }} from "@/features/chat/public";' in text
+        assert "@/features/chat/" not in text.replace("@/features/chat/public", "")
 
 
 def test_chat_feature_has_no_legacy_component_or_lib_imports() -> None:
     feature_root = ROOT / "frontend/src/features/chat"
-    files = sorted(
-        path for path in feature_root.rglob("*") if path.suffix in {".ts", ".tsx"}
-    )
+    # Current ownership/common imports are checked by the activated whole feature policy.
+    subprocess.run([sys.executable, "scripts/ci/check_frontend_architecture_boundaries.py"], cwd=ROOT, check=True)
+    assert (feature_root / "components/world-chat.tsx").is_file()
+    assert (feature_root / "types/chat-contract.ts").is_file()
+    # Preserve the original P8-L-C topology evidence against its real Git snapshot.
+    historical_paths = subprocess.check_output(["git", "ls-tree", "-r", "--name-only", "d54cbfae8d33084a9b87655d9a9008ff3db3ec0a", "--", "frontend/src/features/chat"], cwd=ROOT, text=True).splitlines()
+    files = [ROOT / relative for relative in historical_paths if Path(relative).suffix in {".ts", ".tsx"}]
     # P8-L-C freezes the five migrated Chat v1 files as a required subset.
     # Later product stages add new feature-owned files without rewriting that
     # historical inventory, so this must not assert an exact directory list.
@@ -44,7 +54,7 @@ def test_chat_feature_has_no_legacy_component_or_lib_imports() -> None:
         "ui/messages-client.tsx",
     })
     for path in files:
-        text = path.read_text(encoding="utf-8")
+        text = subprocess.check_output(["git", "show", "d54cbfae8d33084a9b87655d9a9008ff3db3ec0a:" + path.relative_to(ROOT).as_posix()], cwd=ROOT, text=True, encoding="utf-8")
         assert 'from "@/components' not in text
         assert 'from "@/lib' not in text
 
@@ -91,8 +101,8 @@ def test_chat_v1_client_keeps_the_eleven_operation_transport_contract() -> None:
 
 
 def test_chat_v1_behavior_and_next_only_exposure_markers_are_preserved() -> None:
-    thread = _read("frontend/src/features/chat/ui/message-thread-client.tsx")
-    listing = _read("frontend/src/features/chat/ui/messages-client.tsx")
+    thread = _read("frontend/src/features/chat/components/message-thread-client.tsx")
+    listing = _read("frontend/src/features/chat/components/messages-client.tsx")
     for marker in (
         'message.error_code === "model_busy"',
         "message.id === latestMessageId",

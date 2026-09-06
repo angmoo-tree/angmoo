@@ -9,7 +9,7 @@ import { ExpandablePostText } from "@/components/content/expandable-post-text";
 import { useAuth } from "@/hooks/use-auth";
 import { PostMediaGrid } from "@/components/media/post-media-grid";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
-import { createMessageThread, getMessageSettings } from "@/features/chat/public";
+import { createMessageThread, getMessageSettings } from "@/features/chat/api/chat-client";
 import { followProfile, getCharacterProfileFeed, getFollowStatus } from "@/features/social/api/community";
 import { type FeedPage, type ProfileFeedTab, type PostSummary, type ProfileRead } from "@/features/social/types/community";
 import { formatDate } from "@/utils/profile-presentation";

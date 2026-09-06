@@ -40,7 +40,7 @@
         "ADAPTED"
       ],
       "path": "frontend/src/composition/screens/character-profile-screen.tsx",
-      "sha256": "01c3809cd1b7d8a568e7a3f9cb28a5ef78e168b27843c7014c8c63da63277761"
+      "sha256": "501909196f1b5393b1908a201d623e684b14c31129b882010247457ce871f403"
     },
     {
       "classifications": [
@@ -61,7 +61,7 @@
         "LOCAL"
       ],
       "path": "frontend/src/composition/screens/world-app.tsx",
-      "sha256": "fcdb7b7d88aca59e442e89928d1229825f6c2b0e811b47804c796223b03f9b08"
+      "sha256": "fed71cfe8e31a8d84f79fc2e011a52cb1f6334c9f278962cb489efd12d01d5a0"
     },
     {
       "classifications": [
@@ -631,7 +631,7 @@
       },
       {
         "occurrences": 39,
-        "path": "frontend/src/features/chat/ui/message-thread-client.tsx",
+        "path": "frontend/src/features/chat/components/message-thread-client.tsx",
         "values": {
           "#101828": 5,
           "#344054": 1,
@@ -652,7 +652,7 @@
       },
       {
         "occurrences": 16,
-        "path": "frontend/src/features/chat/ui/messages-client.tsx",
+        "path": "frontend/src/features/chat/components/messages-client.tsx",
         "values": {
           "#101828": 2,
           "#667085": 1,
@@ -1190,7 +1190,7 @@
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
     "next_static_inventory_route_count": 44,
-    "next_static_inventory_sha256": "cfe32dbcf3ee724615ea2b3edf24d9ba1154dfdb465eb150ff72e02e1f4ab022",
+    "next_static_inventory_sha256": "06de9679447b8823aacafa08dbeda12489cc8a2bec064d722c0411a02042121b",
     "reviewed_surface_count": 18
   },
   "schema_version": 1,

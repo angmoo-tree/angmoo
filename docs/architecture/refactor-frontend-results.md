@@ -1,9 +1,9 @@
 # Frontend refactor execution results
 
-Current: **AR-F2-0~AR-F2-C #291~#294 COMPLETE; AR-F3-A #295 MERGED,
-post-merge validation running; AR-F3-B #296, AR-F3-C #297 and AR-F3-D #298
-local full preservation PASS and CI running; AR-F3-E Social local implementation
-and validation in progress; AR-F3-F local implementation/validation; AR-F3-G local implementation/validation; AR-F4-A~AR-F5-B NOT STARTED**.
+Current: **AR-F2-0~AR-F2-C #291~#294 and AR-F3-A #295 COMPLETE;
+AR-F3-B #296 MERGED with post-merge running; AR-F3-C #297 and AR-F3-D #298
+pre-merge 23/23 PASS; AR-F3-E #299, AR-F3-F #300 and AR-F3-G #301 in CI;
+AR-F4-A local implementation/validation; AR-F4-B~AR-F5-B NOT STARTED**.
 The user delegated implementation, validation, PRs and merges. AR-X, P8-L-S,
 real-provider product verification, Release and Production remain separate.
 
@@ -382,3 +382,25 @@ committed history were deleted.
 - Typecheck, architecture boundary and 324-source preservation PASS. Runtime,
   source contracts, builds, capture/full preservation and sequential CI gates
   remain required. This is not completion of AR-F3-G or AR-F5-B.
+
+## AR-F4-A Chat with Memory panels — local implementation
+
+- Chat UI/types/config/utils have actual role owners; request and stream bodies
+  are unchanged. The shared product screen supplies required Memory summary
+  and evidence renderers, preserving the inspector request-ID key and thread
+  state reset. No temporary removal of the existing Memory UI.
+- Type/lint/architecture, web 21 and Settings 2 PASS. Related current Chat/model/
+  evidence contracts 28 PASS. Historical public-only topology remains tied to
+  its real Git source while current imports use the activated architecture gate.
+- Both builds/static, source capture/full preservation, CI and sequential
+  integration remain required. AR-F4-B handles Memory internals next.
+
+## Integration receipts — AR-F3-A close and AR-F3-B merge
+
+- #295 post-merge seven workflows and five Installer jobs SUCCESS, COMPLETE.
+- #296 exact head `3b2e89a10487a267991861d6feb155eabd252a30` passed 23/23 checks;
+  merge `69abd8242ec3b454147582281fa1aa9578e6a054` at 2026-09-07 06:00:10 KST.
+  Post-merge running. #297/#298 each have pre-merge 23/23 PASS and await order.
+- Social and Relationships local full preservation each passed 2753 protected/
+  current nodes and 37 contracts. Tree #301 has four new source records; its
+  full preservation remains in progress. No final AR-F5-B or AR-X claim.

@@ -136,7 +136,7 @@ def test_high_reasoning_serialization_has_no_numeric_thinking_budget(
 
 
 def test_frontend_message_catalog_exposes_35_without_expanding_agent_models() -> None:
-    chat_contract = (REPOSITORY_ROOT / "frontend/src/features/chat/model/chat-contract.ts").read_text(encoding="utf-8")
+    chat_contract = (REPOSITORY_ROOT / "frontend/src/features/chat/config/models.ts").read_text(encoding="utf-8")
     agent_contract = (REPOSITORY_ROOT / "frontend/src/lib/agents.ts").read_text(encoding="utf-8")
 
     assert chat_contract.count('value: "gemini-3.5-flash-lite"') == 1

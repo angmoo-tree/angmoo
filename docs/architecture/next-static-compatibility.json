@@ -212,7 +212,7 @@
       "path": "frontend/src/app/messages/[threadId]/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/messages/[threadId]",
-      "source_sha256": "ef1a6287e6fd01d1ff458c181b931f11f4653af46f83a7d1cde7c1d4bf23f012",
+      "source_sha256": "b547fbe9ab8af3ebd51902f4cfe4182854a4c720598c2860d6abd068f9f6e189",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -222,7 +222,7 @@
       "path": "frontend/src/app/messages/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/messages",
-      "source_sha256": "953cd79ddc5d14af298c195307e8c814ac61e9f1d25b1db7c75ea1edc7887109",
+      "source_sha256": "5519743f8bbe02fdeb9aff5d7e33b7913ac76e1b9966b24cc33edd9269607d82",
       "transition_pr": "ER5 PR K"
     },
     {

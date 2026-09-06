@@ -803,7 +803,13 @@
     "frontend/src/components/tree-post-detail-client.tsx": "frontend/src/features/tree/components/tree-post-detail-client.tsx",
     "frontend/src/lib/angmoo-api-docs.ts": "frontend/src/features/support/api/documents-server.ts",
     "frontend/src/components/right-rail-insights.tsx": "frontend/src/features/social/components/right-rail-insights.tsx",
-    "frontend/src/components/active-agent-card.tsx": "frontend/src/features/characters/components/active-agent-card.tsx"
+    "frontend/src/components/active-agent-card.tsx": "frontend/src/features/characters/components/active-agent-card.tsx",
+    "frontend/src/features/chat/ui/message-thread-client.tsx": "frontend/src/features/chat/components/message-thread-client.tsx",
+    "frontend/src/features/chat/ui/messages-client.tsx": "frontend/src/features/chat/components/messages-client.tsx",
+    "frontend/src/features/chat/ui/world-chat.module.css": "frontend/src/features/chat/components/world-chat.module.css",
+    "frontend/src/features/chat/ui/world-chat.tsx": "frontend/src/features/chat/components/world-chat.tsx",
+    "frontend/src/features/chat/model/chat-contract.ts": "frontend/src/features/chat/types/chat-contract.ts",
+    "frontend/src/features/chat/model/world-chat-contract.ts": "frontend/src/features/chat/types/world-chat-contract.ts"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -135979,6 +135985,46 @@
           "route": "frontend/src/app/licenses/page.tsx",
           "content": "frontend/src/features/support/components/licenses-content.tsx",
           "preserved": "Exact license notices, links, dynamic route and AppShell; unsupported static route unchanged"
+        }
+      }
+    },
+    "AR-F4-A": {
+      "scope": "Chat components/types/config/utils and same-screen Memory composition",
+      "files": {
+        "frontend/src/features/chat/ui/message-thread-client.tsx": "frontend/src/features/chat/components/message-thread-client.tsx",
+        "frontend/src/features/chat/ui/messages-client.tsx": "frontend/src/features/chat/components/messages-client.tsx",
+        "frontend/src/features/chat/ui/world-chat.module.css": "frontend/src/features/chat/components/world-chat.module.css",
+        "frontend/src/features/chat/ui/world-chat.tsx": "frontend/src/features/chat/components/world-chat.tsx",
+        "frontend/src/features/chat/model/chat-contract.ts": "frontend/src/features/chat/types/chat-contract.ts",
+        "frontend/src/features/chat/model/world-chat-contract.ts": "frontend/src/features/chat/types/world-chat-contract.ts"
+      },
+      "status": "IMPLEMENTED - isolated validation",
+      "source_contract_consumers": [
+        "backend/tests/chat/test_p8_l_p_high_reasoning_hotfix.py",
+        "backend/tests/test_p8_l_c_frontend_chat_structure.py",
+        "backend/tests/test_p8_l_d_frontend_world_chat_structure.py",
+        "backend/tests/test_p8_l_p_frontend_streaming.py",
+        "backend/tests/test_p8_l_q_frontend_memory.py",
+        "scripts/ci/generate_p8_l_d_world_chat_inventory.py",
+        "scripts/ci/generate_p8_l_p_evidence_response_streaming_inventory.py",
+        "scripts/ci/generate_p8_l_q_memory_read_inspector_inventory.py"
+      ],
+      "frontend_extractions": {
+        "frontend/src/features/chat/model/chat-contract.ts": {
+          "types": "frontend/src/features/chat/types/chat-contract.ts",
+          "models": "frontend/src/features/chat/config/models.ts",
+          "preserved": "Unchanged model values, labels, default and DTO definitions"
+        },
+        "frontend/src/features/chat/model/world-chat-contract.ts": {
+          "types": "frontend/src/features/chat/types/world-chat-contract.ts",
+          "legacy_route": "frontend/src/features/chat/utils/legacy-world-route.ts",
+          "preserved": "Resolved scope and all required World identities must exist"
+        },
+        "frontend/src/features/chat/ui/world-chat.tsx": {
+          "component": "frontend/src/features/chat/components/world-chat.tsx",
+          "composition": "frontend/src/composition/screens/world-chat-screen.tsx",
+          "slots": "frontend/src/features/chat/types/view-slots.ts",
+          "preserved": "Same summary/inspector components, request-ID key, thread key, close callback, selection, effect and stream state ordering"
         }
       }
     }

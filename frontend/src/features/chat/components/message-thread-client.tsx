@@ -2,30 +2,18 @@
 
 import { ArrowLeft, Loader2, RotateCcw, Send, Trash2 } from "lucide-react";
 import Link from "next/link";
-import {
-  useRuntimeRouter as useRouter,
-  useRuntimeSearchParams as useSearchParams,
-  worldChatThreadRoute,
-} from "@/shared/navigation/public";
+import { useRuntimeRouter as useRouter, useRuntimeSearchParams as useSearchParams } from "@/hooks/use-runtime-navigation";
+import { worldChatThreadRoute } from "@/lib/navigation/product-routes";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { useAuth } from "@/shared/auth/public";
-import { ProfileAvatar, formatHandle } from "@/shared/ui/public";
-import {
-  deleteMessageThread,
-  getMessageThread,
-  retryThreadMessage,
-  sendThreadMessage,
-  updateMessageThread,
-} from "../api/chat-client";
-import {
-  DEFAULT_MESSAGE_GOOGLE_MODEL,
-  MESSAGE_GOOGLE_GEMINI_MODELS,
-  type MessageGoogleGeminiModel,
-  type MessageMessageRead,
-  type MessageThreadRead,
-} from "../model/chat-contract";
-import { resolvedLegacyWorldChatRouteParts } from "../model/world-chat-contract";
+import { useAuth } from "@/hooks/use-auth";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { formatHandle } from "@/utils/profile-presentation";
+import { deleteMessageThread, getMessageThread, retryThreadMessage, sendThreadMessage, updateMessageThread } from "@/features/chat/api/chat-client";
+import { MESSAGE_GOOGLE_GEMINI_MODELS } from "@/features/chat/config/models";
+import { DEFAULT_MESSAGE_GOOGLE_MODEL } from "@/features/chat/config/models";
+import { type MessageGoogleGeminiModel, type MessageMessageRead, type MessageThreadRead } from "@/features/chat/types/chat-contract";
+import { resolvedLegacyWorldChatRouteParts } from "@/features/chat/utils/legacy-world-route";
 
 function asMessageGoogleModel(value: string | undefined): MessageGoogleGeminiModel {
   return MESSAGE_GOOGLE_GEMINI_MODELS.some((option) => option.value === value)

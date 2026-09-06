@@ -4,8 +4,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-CHAT_UI = ROOT / "frontend/src/features/chat/ui/world-chat.tsx"
-CHAT_CSS = ROOT / "frontend/src/features/chat/ui/world-chat.module.css"
+CHAT_UI = ROOT / "frontend/src/features/chat/components/world-chat.tsx"
+CHAT_CSS = ROOT / "frontend/src/features/chat/components/world-chat.module.css"
 CHAT_CLIENT = ROOT / "frontend/src/features/chat/api/world-chat-client.ts"
 
 

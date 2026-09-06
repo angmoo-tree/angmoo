@@ -1,7 +1,4 @@
-import type {
-  MessageGoogleGeminiModel,
-  MessageMessageRead,
-} from "./chat-contract";
+import type { MessageGoogleGeminiModel, MessageMessageRead } from "@/features/chat/types/chat-contract";
 
 export type WorldChatControlMode = "autonomous" | "owner_controlled";
 export type WorldChatModelBindingMode = "default" | "thread_override";
@@ -146,21 +143,3 @@ export type WorldChatGenerationEvent = {
     | { failure_class: string; retryable: boolean }
     | { reason: string };
 };
-
-export function resolvedLegacyWorldChatRouteParts(thread: {
-  id: string;
-  requester_world_character_id: string | null;
-  responding_world_character_id: string | null;
-  world_id: string | null;
-  world_scope_status: "resolved" | "ambiguous" | "quarantined";
-}): { threadId: string; worldId: string } | null {
-  if (
-    thread.world_scope_status !== "resolved" ||
-    !thread.world_id ||
-    !thread.requester_world_character_id ||
-    !thread.responding_world_character_id
-  ) {
-    return null;
-  }
-  return { threadId: thread.id, worldId: thread.world_id };
-}

@@ -252,7 +252,7 @@ def _transport_contract() -> dict[str, Any]:
     ):
         _require_text(relative, ("world_chat.router",))
     _require_text(
-        "frontend/src/features/chat/model/world-chat-contract.ts",
+        "frontend/src/features/chat/types/world-chat-contract.ts",
         (
             "WorldChatThreadRead",
             "WorldChatThreadCreate",

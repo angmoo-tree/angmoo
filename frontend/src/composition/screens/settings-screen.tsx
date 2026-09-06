@@ -18,15 +18,9 @@ import { Field, Input, Select } from "@/components/ui/form-controls";
 import { InlineError, Toast } from "@/components/ui/feedback";
 import { PageHeader } from "@/components/ui/navigation";
 import { StatusChip } from "@/components/ui/status";
-import {
-  DEFAULT_MESSAGE_GOOGLE_MODEL,
-  getMessageSettings,
-  MESSAGE_GOOGLE_GEMINI_MODELS,
-  updateMessageSettings,
-  type MessageCredentialSource,
-  type MessageGoogleGeminiModel,
-  type MessageSettingsRead,
-} from "@/features/chat/public";
+import { DEFAULT_MESSAGE_GOOGLE_MODEL, MESSAGE_GOOGLE_GEMINI_MODELS } from "@/features/chat/config/models";
+import { getMessageSettings, updateMessageSettings } from "@/features/chat/api/chat-client";
+import { type MessageCredentialSource, type MessageGoogleGeminiModel, type MessageSettingsRead } from "@/features/chat/types/chat-contract";
 import { clearAuth } from "@/lib/auth/browser-session";
 import { getLocalBootstrapStatus, logoutCurrentSession } from "@/features/identity/api/identity";
 import { type LocalBootstrapRead } from "@/features/identity/types/identity";

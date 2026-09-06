@@ -1,15 +1,7 @@
-import { clearStoredUser, notifyAuthChanged } from "@/shared/auth/public";
-import { runtimeFetch } from "@/shared/runtime/public";
+import { clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
+import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
-import type {
-  CharacterMessageSettingRead,
-  MessageCredentialSource,
-  MessageGoogleGeminiModel,
-  MessageSendRead,
-  MessageSettingsRead,
-  MessageThreadListRead,
-  MessageThreadRead,
-} from "../model/chat-contract";
+import type { CharacterMessageSettingRead, MessageCredentialSource, MessageGoogleGeminiModel, MessageSendRead, MessageSettingsRead, MessageThreadListRead, MessageThreadRead } from "@/features/chat/types/chat-contract";
 
 type ChatRequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
