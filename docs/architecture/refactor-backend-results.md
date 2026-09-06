@@ -15,7 +15,7 @@
 | AR-G4 | PR #269 CI 진행 | Alembic 물리 경로·역사 본문 보존; G5 최종 모델 등록 연결 대기 |
 | AR-B2 | #270~#276 순차 PR CI · WC workflow LOCAL VERIFIED | Identity·Characters·Worlds·WC 기반 후 profile/setup/lifecycle 통합 및 기존 Package race 수정 |
 | AR-B3 | NOT STARTED | World Package→media |
-| AR-B4 | CORE PR #281 MERGED · RESIDENT/C7/WRITER FOLLOWUP LOCAL VERIFIED · FINAL C7 HTTP/RESPONSE PENDING | 실제 AgentRun·LangGraph·작성 정책/실행·C7-F까지 합류; 마지막 활동 HTTP/상세 응답 후 전체 backend/stock/PR 검증 |
+| AR-B4 | CORE PR #281 MERGED · RESIDENT/C7/WRITER FOLLOWUP LOCAL VERIFIED · FINAL INTEGRATION GATES PENDING | 실제 AgentRun·LangGraph·작성·C7-H 활동 HTTP/상세 응답 소유까지 합류; 전체 backend/stock/PR 검증 준비 |
 | AR-B5 | NOT STARTED | social→relationships→projection |
 | AR-B6 | NOT STARTED | Chat transport→generation→retrieval/response |
 | AR-B7 | NOT STARTED | Memory read/write→owner→batch→runtime |
@@ -1421,3 +1421,21 @@ C7-G 최종 검증은 **245 passed / 기존 경고5 / 32.45초**이다. 현재 �
 
 
 C7-G 최초 signed archive의 source3파일/testfile1/2노드를 원래 commit에서 확인하고 순차 append했다. 원장 **90 → 91 records**, 기존 main64·직전90 불변 prefix, 원래 provenance checker PASS다. 후속 H source는 별도 집중/원문 보존 검증 뒤 최종 확대 실행 중이며 이 후보에는 아직 합류하지 않았다.
+## AR-B4-C7-H — 활동 표현·가져온 World 실행 제한·최종 실제 소유
+
+활동 로그3·summary 생성식·가져온 World guard를 실제 Routines 서비스로 이전했다. Character/Identity의 nullable 조회는 같은 Session으로 연결하고, 기존 설정/로그 조회도 actual 소유 서비스를 사용한다. 상세 응답 자체는 여러 업무를 조립하는 runtime 책임으로 남는다. 원래 전체 detail 본문은 추출 표현식을 정확히 복원하면 AST가 동일하다. 실행 준비 여부의 원래 None→False도 유지하며 이미 동일한 성향 판단을 재사용한다. 기존 profile readiness 단순 전달 함수는 실제 서비스와 명시적 runtime 협력 연결로 제거했다. 초기 관련118검사/기존PG1skip이 통과했고 원문 AST7이 동일하다. 신규4는 실제 attached 프로필/별도 Session의 미커밋 가시성·rollback, 시간대/댓글/글/좋아요 조회 순서와 원래 필드 평가 시점, 없는 설정의 준비 거절을 검증한다.
+
+현재 호출되지 않는 AgentRun 메뉴/복구4와 old CRUD3은 원문 그대로 보존하며 B8에서 실제 소유에 배치한다. 현재 호출0만으로 기능 삭제를 판단하지 않는다. Memory Daypart7 및 다른 담당자가 이미 작성한 Identity/Character image/LocalBot/Relationships 구현은 root의 선형 합류에서 원래 callback/alias를 actual 소유로 연결한다. 소유가 없는 구현을 일반 runtime 이름으로 옮겨 종료하지 않는다.
+
+C7-H 최종 관련 검증은 **689 passed / 기존 PostgreSQL 조건1 skipped / 기존 경고22 / 265.67초**이다. 최종 검사 동안 제품/테스트 source는 고정했다. 현재 경계798 modules /2817 edges /exact legacy204 /cycle0, L4 798/14/97, ER0 86/87/24/44/7, Memory current이며 원래6검사 읽기 진단은 오류0(보호2139/current2297)이다. 동료 읽기 검토에서도 lazy 평가 순서·같은 Session의 nullable 프로필·World guard4연결에 차단 문제는 발견되지 않았다. 보존할 AgentRun11/CRUD3의 본문도 이전 signed source와 AST가 동일하다. frozen/checkpoint/additions 및 기존 단언은 그대로이며 stock gate는 root의 순차 도입 연결 뒤 검증한다.
+
+
+### B4 후속 통합 — 최종 C7-H 소유와 잔여 경계
+
+원래 signed c2ceac3의 실제 활동 summary/log presentation과 imported World 실행 guard를 합류했다. 시간대·comment/post/like 수·설정 필드의 lazy 평가 순서, nullable profile의 같은 Session attached 객체, 원래 setting=None 결과를 유지한다. Character 상세 화면의 여러 업무 조립은 runtime의 실제 책임으로 남긴다.
+
+최종 H 담당 source는 기존 관련 **689 passed / PostgreSQL 1 skipped / 22 warnings / 265.67초**이며, 합류 tree의 H4신규·HTTP2·Writer8·credential2·성향2 및 Activity/RoutinePost/OSS 회귀는 **167 passed / 기존 PostgreSQL 1 skipped / 5 warnings / 27.79초**다. 현재 경계는 **833 modules / 2959 edges / 202 exact legacy edges**다.
+
+원래 AgentRun의 Memory7과 서로 다른 dormant 메뉴/복구4, old CRUD의 별도 commit 계약3은 삭제하지 않았다. 각 실제 소유 source와 합류한 뒤 B7/B8에서 처리하며, no-current-caller를 근거로 구현이나 단언을 지우지 않는다. 기존 Social/Relationships/Identity/Lore/LocalBot 협력과 module aliases도 정확한 소비자·소유·제거 조건으로 추적한다. 이 PR은 후속 B5/B6/B7/B8 전체 source를 포함하지 않는다.
+
+C7-H 원본 archive2297nodes는 준비됐고, source3파일/testfile1/4노드의 최초 도입 ledger append 뒤 고정 head에서 전체 backend와 원래 stock 보존을 실행한다. 현재 상태 표는 최종 C7 source 합류 완료와 통합 gate 대기를 구분하도록 갱신했다.

@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from sqlalchemy.orm import Session
 from app.domains.routines import models, schemas
+from app.domains.routines.service import tendency_settings
 from app.domains.routines.repository import slots as slot_queries
 from app.domains.routines.service import tick_schedule as agent_activity_schedule
 
@@ -30,3 +31,9 @@ def _resident_slot_is_due(slot: models.AgentSlot, *, now: datetime) -> bool:
     return agent_activity_schedule.aware_utc(
         slot.next_tick_at
     ) <= agent_activity_schedule.aware_utc(now)
+
+
+def _has_tendency_analysis(setting: models.AgentActivitySetting | None) -> bool:
+    if not setting:
+        return False
+    return tendency_settings._has_tendency_analysis(setting)

@@ -1,7 +1,7 @@
 {
-  "edge_count": 2947,
-  "external_import_count": 2551,
-  "module_count": 830,
+  "edge_count": 2959,
+  "external_import_count": 2559,
+  "module_count": 833,
   "modules": [
     {
       "external_imports": [],
@@ -3828,6 +3828,17 @@
     },
     {
       "external_imports": [
+        "dataclasses",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [],
+      "module": "app.domains.routines.contracts.activity_presentation",
+      "path": "backend/app/domains/routines/contracts/activity_presentation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "typing"
       ],
@@ -4858,6 +4869,24 @@
     },
     {
       "external_imports": [
+        "datetime",
+        "re",
+        "sqlalchemy.orm",
+        "typing"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.activity_policy",
+        "app.domains.routines.contracts.activity_presentation",
+        "app.domains.routines.models",
+        "app.domains.routines.schemas"
+      ],
+      "module": "app.domains.routines.service.activity_presentation",
+      "path": "backend/app/domains/routines/service/activity_presentation.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "zoneinfo"
       ],
       "imports": [
@@ -5528,6 +5557,18 @@
     },
     {
       "external_imports": [
+        "sqlalchemy.orm"
+      ],
+      "imports": [
+        "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.activity_presentation"
+      ],
+      "module": "app.domains.routines.service.runtime_guards",
+      "path": "backend/app/domains/routines/service/runtime_guards.py",
+      "wildcard_imports": []
+    },
+    {
+      "external_imports": [
         "__future__",
         "datetime"
       ],
@@ -5680,6 +5721,7 @@
         "app.domains.routines.models",
         "app.domains.routines.repository.slots",
         "app.domains.routines.schemas",
+        "app.domains.routines.service.tendency_settings",
         "app.domains.routines.service.tick_schedule"
       ],
       "module": "app.domains.routines.service.slot_status",
@@ -9347,6 +9389,7 @@
         "app.domains.identity.service.profile",
         "app.domains.routines.constants",
         "app.domains.routines.contracts.activity_management",
+        "app.domains.routines.contracts.activity_presentation",
         "app.domains.routines.contracts.autonomy_management",
         "app.domains.routines.contracts.feed_cues",
         "app.domains.routines.contracts.first_greeting",
@@ -9359,13 +9402,16 @@
         "app.domains.routines.repository.slots",
         "app.domains.routines.schemas.first_greeting",
         "app.domains.routines.schemas.tendency",
+        "app.domains.routines.service.activity_logs",
         "app.domains.routines.service.activity_management",
+        "app.domains.routines.service.activity_presentation",
         "app.domains.routines.service.activity_settings",
         "app.domains.routines.service.autonomy_management",
         "app.domains.routines.service.feed_cues",
         "app.domains.routines.service.first_greeting",
         "app.domains.routines.service.manual_activity",
         "app.domains.routines.service.runs",
+        "app.domains.routines.service.runtime_guards",
         "app.domains.routines.service.slot_assignments",
         "app.domains.routines.service.slot_pool",
         "app.domains.routines.service.tendency",

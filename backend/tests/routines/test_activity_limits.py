@@ -1201,6 +1201,7 @@ def test_activity_policy_keeps_observe_internal_when_setting_disabled() -> None:
 
 
 def test_visible_activity_actions_hide_observe() -> None:
+    from app.domains.routines.service import activity_presentation as agent_service
     assert agent_service._visible_activity_actions(["post", "observe", "like"]) == [
         "post",
         "like",

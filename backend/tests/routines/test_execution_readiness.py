@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from app.domains.routines.service import slot_status as agent_run_service
-from app.services import agent_runs
+from app.domains.routines.service import slot_status as agent_runs
 
 
 @pytest.mark.parametrize(

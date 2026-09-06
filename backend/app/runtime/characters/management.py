@@ -1,4 +1,7 @@
 from __future__ import annotations
+from app.domains.routines.contracts.activity_presentation import ActivityPresentationReads
+from app.domains.routines.service import activity_presentation, activity_logs, runtime_guards
+from app.domains.characters.service import profile as character_profile
 from app.domains.routines.contracts.tendency_analysis import TendencyAnalysisRunner
 from app.domains.characters.exceptions import ActiveSlotBusyError
 from app.domains.identity.contracts import CharacterCredentialWorkflows
@@ -311,7 +314,7 @@ def create_agent(
 
 
 def _after_character_created(db, user, character, data) -> schemas.AgentDetailRead:
-    setting = agent_crud.ensure_setting(db, character.id)
+    setting = activity_settings.ensure_setting(db, character.id)
     _apply_initial_activity_settings(db, setting, data)
     _ensure_initial_image_settings(db, character.id)
     if data.execution_mode == "llm":
@@ -483,7 +486,7 @@ def update_persona(
 
 
 def _after_character_persona_updated(db, user, character) -> schemas.AgentDetailRead:
-    setting = agent_crud.ensure_setting(db, character.id)
+    setting = activity_settings.ensure_setting(db, character.id)
     _clear_tendency_analysis(setting)
     db.commit()
     agent_crud.log_activity(
@@ -818,27 +821,7 @@ def _reload_openclaw_secrets_sync() -> None:
 
 
 
-def _ensure_imported_world_runtime_enabled(
-    db: Session,
-    *,
-    character: character_models.Character,
-) -> None:
-    """Keep an imported World inert until its explicit autonomy enable step.
 
-    A normal local character may use the user-initiated Run-now path while
-    scheduled autonomy is disabled.  World Package imports have a stricter
-    activation contract: their seeded runtime must not enter P5-P7 before the
-    user completes setup and explicitly enables autonomy.  Scope the guard to
-    the active World when one exists so another, direct-created World owned by
-    the same character is not affected.
-    """
-
-    if agent_activity_policy.is_imported_world_runtime_locked_for_character(
-        db, character_id=character.id
-    ):
-        raise AgentExecutionModeError(
-            "가져온 World는 자율활동을 먼저 켠 뒤 지금 한 번 활동을 실행할 수 있어요."
-        )
 
 
 
@@ -1195,17 +1178,16 @@ def _deleted_character_handle(db: Session, character_id: str) -> str:
 
 
 
-def _visible_activity_actions(actions: Iterable[str]) -> list[str]:
-    return [action for action in actions if action != "observe"]
+
 
 
 def _build_agent_detail(
     db: Session, character: character_models.Character, *, recent_activity_limit: int = 20
 ) -> schemas.AgentDetailRead:
-    setting = agent_crud.ensure_setting(db, character.id)
+    setting = activity_settings.ensure_setting(db, character.id)
     credential = agent_crud.get_character_credential(db, character.id)
     slot = slot_queries.get_assigned_slot(db, character.id)
-    recent_activity = agent_crud.list_recent_activity(
+    recent_activity = activity_logs.list_recent_activity(
         db, character.id, limit=recent_activity_limit
     )
     policy = agent_activity_policy.build_activity_policy(db, character_id=character.id)
@@ -1240,33 +1222,15 @@ def _build_agent_detail(
             character=character,
             setting=setting,
         ),
-        activity_summary=schemas.AgentActivitySummaryRead(
-            within_active_hours=policy.within_active_hours,
-            timezone=agent_activity_policy.activity_timezone_name(
-                db, character_id=character.id
-            ),
-            allowed_actions=_visible_activity_actions(policy.allowed_actions),
-            blocked_reasons=policy.blocked_reasons,
+        activity_summary=activity_presentation.build_activity_summary(
+            db, character=character, setting=setting, slot=slot, policy=policy,
             last_activity_at=last_activity_at,
-            next_activity_at=(
-                slot.next_tick_at if slot is not None and setting.auto_enabled else None
-            ),
             manual_run_available_at=manual_run_available_at,
             first_greeting_available_at=first_greeting_available_at,
-            today_comment_count=agent_activity_policy.count_action_today(
-                db, character_id=character.id, action="comment"
-            ),
-            max_comments_per_day=setting.max_comments_per_day,
-            today_post_count=agent_activity_policy.count_action_today(
-                db, character_id=character.id, action="post"
-            ),
-            max_posts_per_day=setting.max_posts_per_day,
-            today_like_count=agent_activity_policy.count_action_today(
-                db, character_id=character.id, action="like"
-            ),
+            reads=build_activity_presentation_reads(),
         ),
         recent_activity=[
-            _activity_log_read(db, log) for log in recent_activity
+            activity_presentation._activity_log_read(db, log, reads=build_activity_presentation_reads()) for log in recent_activity
         ],
     )
 
@@ -1357,46 +1321,10 @@ def _invalidate_image_visual_identity_if_present(db: Session, character_id: str)
 
 
 
-def _activity_log_read(
-    db: Session, log: models.AgentActivityLog
-) -> schemas.AgentActivityLogRead:
-    data = schemas.AgentActivityLogRead.model_validate(log).model_dump()
-    target = _activity_log_target_profile(db, log)
-    if target is not None:
-        data.update(target)
-    return schemas.AgentActivityLogRead.model_validate(data)
 
 
-def _activity_log_target_profile(
-    db: Session, log: models.AgentActivityLog
-) -> dict[str, str | None] | None:
-    if log.action_type not in {"followed", "unfollowed"}:
-        return None
-    match = re.search(r"\b(user|character):([A-Za-z0-9_-]+)", log.result)
-    if match is None:
-        return None
-    profile_type, profile_id = match.group(1), match.group(2)
-    if profile_type == "character":
-        character = db.get(character_models.Character, profile_id)
-        if character is None:
-            return None
-        return {
-            "target_profile_type": "character",
-            "target_profile_id": character.id,
-            "target_profile_name": character.name,
-            "target_profile_handle": character.handle,
-            "target_profile_avatar_url": character.avatar_url,
-        }
-    user = db.get(models.User, profile_id)
-    if user is None:
-        return None
-    return {
-        "target_profile_type": "user",
-        "target_profile_id": user.id,
-        "target_profile_name": user.display_name,
-        "target_profile_handle": None,
-        "target_profile_avatar_url": None,
-    }
+
+
 
 
 def build_character_management_workflows() -> CharacterManagementWorkflows:
@@ -1479,8 +1407,7 @@ def build_autonomy_workflows() -> AutonomyWorkflows[schemas.AgentDetailRead]:
 
 
 
-def _ensure_activity_profile_ready(db: Session, *, character: character_models.Character, setting: models.AgentActivitySetting) -> schemas.AgentActivityProfileReadinessRead:
-    return autonomy_management._ensure_activity_profile_ready(db, character=character, setting=setting, workflows=build_autonomy_workflows())
+
 
 
 def build_manual_activity_workflows() -> ManualActivityWorkflows:
@@ -1489,9 +1416,16 @@ def build_manual_activity_workflows() -> ManualActivityWorkflows:
         ensure_not_suspended=_ensure_not_suspended,
         is_owner_controlled_character=is_owner_controlled_character,
         ensure_llm_mode=_ensure_llm_mode,
-        ensure_imported_world_runtime_enabled=_ensure_imported_world_runtime_enabled,
+        ensure_imported_world_runtime_enabled=partial(
+            runtime_guards._ensure_imported_world_runtime_enabled,
+            locked=agent_activity_policy.is_imported_world_runtime_locked_for_character,
+            execution_mode_error=AgentExecutionModeError,
+        ),
         ensure_run_now_available=maintenance_service.ensure_run_now_available,
-        _ensure_activity_profile_ready=_ensure_activity_profile_ready,
+        _ensure_activity_profile_ready=partial(
+            autonomy_management._ensure_activity_profile_ready,
+            workflows=build_autonomy_workflows(),
+        ),
         get_credential=agent_crud.get_character_credential,
         run_assigned_slot=agent_run_service.run_assigned_resident_slot_once,
         claim_temporary_slot=agent_run_service.claim_temporary_resident_slot,
@@ -1511,7 +1445,11 @@ def build_feed_cue_workflows() -> FeedCueWorkflows:
         get_owned_character=_get_owned_character,
         ensure_not_suspended=_ensure_not_suspended,
         ensure_llm_mode=_ensure_llm_mode,
-        ensure_imported_world_runtime_enabled=_ensure_imported_world_runtime_enabled,
+        ensure_imported_world_runtime_enabled=partial(
+            runtime_guards._ensure_imported_world_runtime_enabled,
+            locked=agent_activity_policy.is_imported_world_runtime_locked_for_character,
+            execution_mode_error=AgentExecutionModeError,
+        ),
         ensure_feed_cues_available=maintenance_service.ensure_feed_cues_available,
         build_activity_policy=agent_activity_policy.build_activity_policy,
         prompt_injection_error=PromptInjectionDetectedError,
@@ -1532,7 +1470,11 @@ def build_first_greeting_workflows() -> FirstGreetingWorkflows:
         get_owned_character=_get_owned_character,
         ensure_not_suspended=_ensure_not_suspended,
         ensure_llm_mode=_ensure_llm_mode,
-        ensure_imported_world_runtime_enabled=_ensure_imported_world_runtime_enabled,
+        ensure_imported_world_runtime_enabled=partial(
+            runtime_guards._ensure_imported_world_runtime_enabled,
+            locked=agent_activity_policy.is_imported_world_runtime_locked_for_character,
+            execution_mode_error=AgentExecutionModeError,
+        ),
         ensure_run_now_available=maintenance_service.ensure_run_now_available,
         build_activity_policy=agent_activity_policy.build_activity_policy,
         has_authored_post=social_post_queries.character_has_authored_post,
@@ -1559,7 +1501,11 @@ def build_tendency_analysis_workflows() -> TendencyAnalysisWorkflows[schemas.Age
         get_owned_character=_get_owned_character,
         ensure_mutable=demo_lock.ensure_demo_user_mutable,
         ensure_llm_mode=_ensure_llm_mode,
-        ensure_imported_world_runtime_enabled=_ensure_imported_world_runtime_enabled,
+        ensure_imported_world_runtime_enabled=partial(
+            runtime_guards._ensure_imported_world_runtime_enabled,
+            locked=agent_activity_policy.is_imported_world_runtime_locked_for_character,
+            execution_mode_error=AgentExecutionModeError,
+        ),
         get_credential=agent_crud.get_character_credential,
         bind_profile=_bind_slot_auth_profile,
         release_profile=_release_slot_auth_profile,
@@ -1610,3 +1556,12 @@ def configure_character_activity_http(app: Any) -> None:
     app.state.feed_cue_workflows = build_feed_cue_workflows
     app.state.first_greeting_workflows = build_first_greeting_workflows
     app.state.tendency_analysis_runner = build_tendency_analysis_runner
+
+
+def build_activity_presentation_reads() -> ActivityPresentationReads:
+    return ActivityPresentationReads(
+        get_character=character_profile.get_character,
+        get_user=identity_profile.get_user,
+        activity_timezone_name=agent_activity_policy.activity_timezone_name,
+        count_action_today=agent_activity_policy.count_action_today,
+    )
