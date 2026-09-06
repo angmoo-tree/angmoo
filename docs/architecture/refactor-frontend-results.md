@@ -150,11 +150,14 @@ committed history were deleted.
   normalization, history, window commands and shutdown meaning are unchanged.
 - Local: 114 related regression tests, TypeScript/ESLint, architecture and design
   PASS; stock 324 PASS; all-client/static transitive server-dependency audit PASS.
-  Existing real-Next World Package proxy PASS; web 21 PASS (56.4s). Settings,
-  production/static builds and static corpus are being verified.
+  Existing real-Next World Package proxy PASS; web 21 PASS (56.4s), Settings 2
+  PASS (9.3s), Next/static production builds PASS, static 68 PASS (32.9s).
 - Initial worktree-only Next start failed because Turbopack rejects an external
   node_modules junction. Preserve that junction outside the worktree and install
   the same frozen dependencies locally (350 cached packages, no version/lock
   change). The proxy and web tests then pass; no product configuration workaround.
 - Regenerate only current L4/design/Memory batch inventories after reviewed path
   moves. Preserve frozen Today/P8-L-Q predecessors, source and visual oracles.
+- Source commit `f9fe45d338e86d88bf54e373f438fcd67b0168ad` introduces two new
+  files and no new backend test nodes. Append its first-introduction record;
+  the full preservation guard is being run before PR integration.
