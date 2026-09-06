@@ -22,7 +22,7 @@ from app.runtime.social.composition import configure_social_runtime
 from app.domains.social.router import manual_router as manual_social_router
 from app.domains.world_characters.router.profile import router as owner_identity_router
 from app.runtime.social.sqlalchemy_read_repository import list_owner_world_feed
-from app.services import world_character_contracts
+from app.domains.world_characters.service import setup_validation as world_character_contracts
 
 FRONTEND_HEADERS = {"Origin": "http://127.0.0.1:3000"}
 MIGRATION_PATH = (

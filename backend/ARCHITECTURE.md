@@ -1182,3 +1182,9 @@ Social의 옛 `services/community.py` 집합은 제거했다. HTTP와 다른 실
 
 
 옛 `cruds/community.py` 집합도 제거했다. Character 조회는 Character 서비스, Post 조회는 Social repository, 여러 업무의 초기 데이터 조립은 bootstrap이 소유한다. 소비자는 필요한 실제 기능을 직접 선택하며, 공개 Post 조회와 필터 없는 내부 근거 조회는 서로 다른 계약으로 유지한다.
+
+### 서비스 호환 경로의 종료
+
+실제 구현을 소유한 모듈로 소비자를 연결한 뒤 `services/activity_state_contracts`, `daily_activity_plans`, `direct_llm`, `routine_post_runtime`, `world_character_contracts`, `agent_runs`와 `cruds/agents`의 남은 전달 경로를 제거했습니다. 활동·슬롯은 Routines, credential 조회·저장은 Identity, 이미지 정제·파일 처리는 해당 업무 및 integrations의 실제 모듈을 사용합니다. 테스트도 같은 구현을 직접 참조하며 기존 단언에 쓰인 지역 이름은 실제 모듈 import의 별칭으로 유지합니다.
+
+`services/messages`, `prompt_safety`, `world_character_provider`, `profile_media`는 과거 경로의 객체 동일성을 직접 검사하는 원본 테스트 때문에 아직 남아 있습니다. 이 검사는 다른 실제 owner를 가리키는지 확인해야 하므로 자기 자신과 비교하는 단언으로 바꾸지 않습니다. 새로운 제품 코드는 이 경로를 사용하지 않으며, 별도의 좁은 호환 종료 증명과 원본 기능 검증을 거쳐 제거합니다. Hosted 설정과 runtime adapter 등록의 실제 상태 저장소는 별도 전환 범위입니다.

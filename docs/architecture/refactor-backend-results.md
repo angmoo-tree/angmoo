@@ -2625,3 +2625,15 @@ C32 최종 보존은 PR #258/#263 API/schema/ORM·보호 변경7파일 assertion
 - Demo 초기 데이터 생성은 `runtime/bootstrap/demo_seed.py`의 원래 구현을 단일 main에서 호출한다. 정의가 모두 이전된 Community CRUD 파일을 삭제하고 현재 코드와 테스트를 실제 담당 조회/쓰기 함수에 연결했다.
 - 통합 첫 검사 **229 passed / 2 failed**는 Writer 테스트의 삭제된 Community module 대역 두 경로였다. 원래 조건/저장순서 assertion을 유지하고 실제 eight 함수의 대역 위치를 연결한 뒤 해당 파일 **8 passed / 6.28초**.
 - 원본 보호 읽기 진단: 보호2311/current2509, source·split·assertion·suppression·ASGI·API/ORM·missing nodes 모두0. 최종 stock/전체/CI/설치 검증은 이어서 수행한다.
+
+## AR-B8 — 남은 서비스 facade와 실제 소비자 연결
+
+실제 함수·class 정의가 없는 7개 옛 파일을 제거하고 직접 소비자·mock 24파일을 실제 owner로 연결했다. AgentRun에 남은 dormant 상수2의 원문 assignment는 Routines constants로 보존했으며 동작 없는 wrapper나 새 namespace 객체를 만들지 않았다. 기존 테스트의 assert/raises receiver는 실제 owner module을 원래 지역 이름으로 직접 import하여 유지한다. Profile media의 원래 객체 동일성 검사는 변형하지 않았다.
+
+직접 같은 객체를 검사하는 messages/prompt_safety/world_character_provider/profile_media 4개 facade와 정확한 기존 테스트는 후속의 좁은 종료 증명까지 남긴다. Hosted/runtime extension 등록은 부모 소유이며 schema aggregate는 이번 범위에 포함하지 않는다. M4 verifier의 이미 제거된 LangGraph source 참조도 실제 ResidentGraphState 계약으로 연결했다. 변경된 소비자 전체의 원문 비-import AST 및 동결 자료·API/ORM·노드 보존 결과는 최종 검증 뒤 기록한다.
+
+최종 원문 비교는 **789개 함수/async 본문·1854개 단언·dormant 상수2**의 동일성을 확인했다. 첫 영향 묶음은542 PASS/기존19 SKIP/옛 로그 mock receiver1 FAIL이었고, 해당 receiver를 실제 Routines activity_logs의 기존 지역 이름으로 연결하고 credential mock5개를 Identity owner로 연결했다. 이 최종 영향·cold registration 재검사는 **75 PASS / 기존경고3 / 62.81초**이다. 동일 기능 함수 객체에 대한 호출 순서·Session·provider 경계와 기존 assert/raises 원문을 유지했다.
+
+원래 source·split·assertion·suppression·ASGI·API/ORM·노드 보존 진단은 전부 **오류0 / protected2311·current2509**이며, 현재 경계검사는 **1094modules·4081edges·exactlegacy27 PASS**다. L4·Memory batch·ER0·deferred 현재 inventory도 통과했다. 기존 signed869bae 두 경로의 메모리 보충을 사용하는 읽기 전용 진단이며 최종 stock 최초 도입 캡처/선형 통합/CI PASS로 표현하지 않는다.
+
+역사적 M4 verifier는 현재 CI·launcher·공식 README/CONTRIBUTING의 실행 소비자가 없다. 제공된 signed9c14의 결과 문서1212/2319행도 기존148/120/182와 현재196/160/266의 차이를 이미 기록한다. 9c14 원문은 삭제된 LangGraph import에서 실패하며, 여기서는 해당 import만 실제 계약으로 연결했다. 그 오래된 기대값을 다시 쓰거나 현재 API를 과거 크기로 줄이지 않았다.

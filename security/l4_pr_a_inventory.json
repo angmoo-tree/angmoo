@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 3128,
-      "internal_edge_count": 4128,
+      "external_import_count": 3115,
+      "internal_edge_count": 4081,
       "legacy_import_exception_count": 0,
-      "module_count": 1101,
+      "module_count": 1094,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -2868,7 +2868,7 @@
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
-        "sha256": "1e7d4f129800a1b3e87674c560d584c0e56364821917f1f3611121feeee47177"
+        "sha256": "e0f6a57b6511a52cf828347b435db2dc5de57b6c0872d739797ad330385896e3"
       },
       {
         "path": "backend/tests/relationships/test_projection_replay.py",
@@ -2884,7 +2884,7 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "f8edb70ef5c728e77105e64e21ed8a97a89635878f83309f56b18df52970f178"
+        "sha256": "980e8104f6ff3a6bec41b4f7c7cf821b3049761754d9f388298cbc2280587cf9"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
@@ -2892,7 +2892,7 @@
       },
       {
         "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
-        "sha256": "c1710db5bc9bba15345580f2bd3edd68c5ae9c7f85ea6cd2a75d3e3128b63d24"
+        "sha256": "586c508b725ce59419bfd85a9848c82f31d22e216768492ce9b43eb1553e1544"
       },
       {
         "path": "backend/tests/test_l4_social_search_projection.py",
@@ -2908,7 +2908,7 @@
       },
       {
         "path": "backend/tests/test_social_event_runtime.py",
-        "sha256": "e730723fbfc1fc8081ee6de93d634f96296a3a18c4df2dca422f56985a4cdb7b"
+        "sha256": "066e8962f2346beffe9e7893d1af8a703e2354c485d26a91879b2cf9d787f89e"
       },
       {
         "path": "backend/tests/test_t2_architecture_inventory.py",
@@ -2920,7 +2920,7 @@
       },
       {
         "path": "backend/tests/test_world_feed_search.py",
-        "sha256": "67243411d62411cb0ea71b6c374afcf9b94b895929421845437f97d364c804b1"
+        "sha256": "8299afe411c1a078d3b1b671a57aea37306a5a211acb037a3b6349312564072e"
       }
     ],
     "parity_test_node_count": 99,

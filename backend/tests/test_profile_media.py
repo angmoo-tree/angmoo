@@ -1,10 +1,13 @@
+from app.domains.characters.service import media_storage as character_media
+from app.integrations.media import files as media_files
+
 from io import BytesIO
 
 import pytest
 from PIL import Image
 
 from app.config import settings
-from app.services import profile_media
+
 
 
 def _image_bytes(
@@ -33,7 +36,7 @@ def media_root(tmp_path, monkeypatch):
 
 
 def test_save_profile_media_stores_jpeg_as_webp(media_root):
-    url = profile_media.save_profile_media_bytes(
+    url = character_media.save_profile_media_bytes(
         character_id="char-1",
         media_type="avatar",
         content_type="image/jpeg",
@@ -49,7 +52,7 @@ def test_save_profile_media_stores_jpeg_as_webp(media_root):
 
 
 def test_save_draft_media_stores_png_as_webp_without_upscale(media_root):
-    url = profile_media.save_draft_profile_media_bytes(
+    url = character_media.save_draft_profile_media_bytes(
         draft_id="draft-1",
         media_type="banner",
         content_type="image/png",
@@ -65,7 +68,7 @@ def test_save_draft_media_stores_png_as_webp_without_upscale(media_root):
 
 
 def test_save_profile_media_flattens_transparent_webp(media_root):
-    url = profile_media.save_profile_media_bytes(
+    url = character_media.save_profile_media_bytes(
         character_id="char-1",
         media_type="avatar",
         content_type="image/webp",
@@ -85,7 +88,7 @@ def test_promote_legacy_draft_media_reencodes_as_webp(media_root):
     source = draft_dir / "avatar-legacy.jpg"
     source.write_bytes(_image_bytes(fmt="JPEG", size=(64, 64)))
 
-    url = profile_media.promote_draft_profile_media(
+    url = character_media.promote_draft_profile_media(
         character_id="char-1",
         media_type="avatar",
         draft_media_url="/media/drafts/draft-1/avatar-legacy.jpg",
@@ -97,8 +100,9 @@ def test_promote_legacy_draft_media_reencodes_as_webp(media_root):
 
 
 def test_rejects_mismatched_mime(media_root):
+    from app.domains.media import contracts as profile_media
     with pytest.raises(profile_media.InvalidProfileMediaError):
-        profile_media.save_profile_media_bytes(
+        character_media.save_profile_media_bytes(
             character_id="char-1",
             media_type="avatar",
             content_type="image/png",
@@ -107,8 +111,9 @@ def test_rejects_mismatched_mime(media_root):
 
 
 def test_rejects_corrupt_image_payload(media_root):
+    from app.domains.media import contracts as profile_media
     with pytest.raises(profile_media.InvalidProfileMediaError):
-        profile_media.save_profile_media_bytes(
+        character_media.save_profile_media_bytes(
             character_id="char-1",
             media_type="avatar",
             content_type="image/jpeg",
@@ -120,8 +125,9 @@ def test_rejects_oversized_image_payload(media_root, monkeypatch):
     content = _image_bytes(fmt="JPEG")
     monkeypatch.setattr(settings, "MEDIA_UPLOAD_MAX_BYTES", len(content) - 1)
 
+    from app.domains.media import contracts as profile_media
     with pytest.raises(profile_media.InvalidProfileMediaError):
-        profile_media.save_profile_media_bytes(
+        character_media.save_profile_media_bytes(
             character_id="char-1",
             media_type="avatar",
             content_type="image/jpeg",
@@ -132,11 +138,12 @@ def test_rejects_oversized_image_payload(media_root, monkeypatch):
 def test_rejects_image_dimension_above_limit_before_write(media_root):
     content = _image_bytes(fmt="PNG", size=(4097, 1))
 
+    from app.domains.media import contracts as profile_media
     with pytest.raises(
         profile_media.InvalidProfileMediaError,
         match="dimensions",
     ):
-        profile_media.save_profile_media_bytes(
+        character_media.save_profile_media_bytes(
             character_id="char-1",
             media_type="avatar",
             content_type="image/png",
@@ -159,11 +166,12 @@ def test_rejects_animated_webp_before_write(media_root):
         loop=0,
     )
 
+    from app.domains.media import contracts as profile_media
     with pytest.raises(
         profile_media.InvalidProfileMediaError,
         match="Animated",
     ):
-        profile_media.save_profile_media_bytes(
+        character_media.save_profile_media_bytes(
             character_id="char-1",
             media_type="avatar",
             content_type="image/webp",
@@ -179,7 +187,7 @@ def test_private_media_quarantine_can_restore_after_database_rollback(media_root
     source = character_dir / "avatar.webp"
     source.write_bytes(b"private-avatar")
 
-    quarantine = profile_media.quarantine_private_media([character_dir])
+    quarantine = media_files.quarantine_private_media([character_dir])
 
     assert not source.exists()
     assert quarantine.root is not None
@@ -195,7 +203,7 @@ def test_private_media_quarantine_purges_after_database_commit(media_root):
     draft_dir.mkdir(parents=True)
     (draft_dir / "avatar.webp").write_bytes(b"private-draft")
 
-    quarantine = profile_media.quarantine_private_media([draft_dir])
+    quarantine = media_files.quarantine_private_media([draft_dir])
     quarantine.purge()
 
     assert not draft_dir.exists()
@@ -209,8 +217,9 @@ def test_private_media_quarantine_rejects_paths_outside_media_root(
     outside = tmp_path.parent / "outside-private-media"
     outside.mkdir(exist_ok=True)
 
+    from app.integrations.media import files as profile_media
     with pytest.raises(
         profile_media.PrivateMediaCleanupError,
         match="private_media_path_outside_root",
     ):
-        profile_media.quarantine_private_media([outside])
+        media_files.quarantine_private_media([outside])

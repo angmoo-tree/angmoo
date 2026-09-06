@@ -6,8 +6,8 @@ import pytest
 
 from app import schemas
 from app.providers.gemini import build_generate_content_config
-from app.services import world_character_contracts as contracts
-from app.services import world_character_provider
+from app.domains.world_characters.service import setup_validation as contracts
+from app.domains.world_characters import client as world_character_provider
 
 
 def _character(**overrides):

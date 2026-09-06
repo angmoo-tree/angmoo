@@ -8,7 +8,7 @@ import time
 
 from sqlalchemy.orm import Session
 
-from app.cruds import agents as agent_crud
+
 from app.domains.character_lore.constants import EMBEDDING_DIMENSION, EMBEDDING_MODEL
 from app.domains.character_lore.contracts import (
     LoreWorkflows,

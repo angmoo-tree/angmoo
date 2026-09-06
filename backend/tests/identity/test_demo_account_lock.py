@@ -12,7 +12,7 @@ from app.api.v1.routes import agents as agent_routes
 from app.domains.characters import router as character_routes
 from app.domains.identity.router import auth as auth_routes
 from app.config import settings
-from app.cruds import agents as agent_crud
+
 from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
 from app.domains.identity.service import demo_access as demo_lock

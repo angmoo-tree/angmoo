@@ -27,7 +27,7 @@ from app.domains.worlds.contracts import (
 from app.runtime.migrations.sqlite_versions.v2_to_v3_no_specific_role import (
     upgrade_v2_to_v3,
 )
-from app.services import world_character_provider
+from app.domains.world_characters import client as world_character_provider
 from app.domains.world_characters.service import autonomous_setup as world_character_setup
 from app.runtime.world_characters import cleanup as setup_cleanup
 

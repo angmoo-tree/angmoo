@@ -21,7 +21,7 @@ from app.runtime.relationships import (
 from app.domains.social.contracts.search_state import SocialSearchState
 from app.runtime.search import CallbackSearchIndexAdapter
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
-from app.services import world_character_contracts
+from app.domains.world_characters.service import setup_validation as world_character_contracts
 from app.integrations.direct_llm import DirectLlmError
 from app.integrations.direct_llm import RunLlmTracker
 from app.domains.social.service.feed_reaction_validation import validate_reaction_decision

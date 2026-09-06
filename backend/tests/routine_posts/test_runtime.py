@@ -1,4 +1,7 @@
 from __future__ import annotations
+from app.domains.routines.service import activity_settings as routines_settings
+from app.domains.routines.service import plans as routine_plans
+
 import app.domains.social.exceptions as social_errors
 import app.runtime.social.timeline as social_timeline_runtime
 from app.domains.routines.service import autonomy_management
@@ -22,7 +25,7 @@ from app import schemas
 from model_fixture_support import models
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.models import Base
-from app.cruds import agents as agent_crud
+
 from app.runtime.social.sqlalchemy_unit_of_work import (
     SqlAlchemySocialWriteUnitOfWork,
 )
@@ -30,7 +33,9 @@ from app.domains.social.contracts.writes import OwnerReplyCommand
 from app.runtime.social.sqlalchemy_unit_of_work import SqlAlchemySocialWriteUnitOfWork
 create_owner_reply = SqlAlchemySocialWriteUnitOfWork.create_owner_reply
 from app.providers.gemini import build_generate_content_config
-from app.services import activity_state_contracts, daily_activity_plans, routine_post_runtime, world_character_contracts
+from app.domains.routines.policies import activity_state as activity_state_contracts
+from app.runtime.routine_posts import sqlalchemy_runtime as routine_post_runtime
+from app.domains.world_characters.service import setup_validation as world_character_contracts
 from app.runtime.resident import langgraph as langgraph_resident
 from app.runtime.characters import management as agent_service
 
@@ -552,7 +557,7 @@ def test_world_profile_readiness_replaces_legacy_tendency_gate() -> None:
     engine = _engine()
     with Session(engine) as db:
         fixture = _seed(db)
-        setting = agent_crud.ensure_setting(db, fixture.character.id)
+        setting = routines_settings.ensure_setting(db, fixture.character.id)
 
         assert not agent_service._has_tendency_analysis(setting)
 
@@ -579,7 +584,7 @@ def test_world_profile_readiness_rejects_incomplete_repertoire() -> None:
     engine = _engine()
     with Session(engine) as db:
         fixture = _seed(db)
-        setting = agent_crud.ensure_setting(db, fixture.character.id)
+        setting = routines_settings.ensure_setting(db, fixture.character.id)
         candidate = db.get(models.WorldActivityCandidate, "candidate-morning-10")
         assert candidate is not None
         candidate.enabled = False
@@ -607,7 +612,7 @@ def test_legacy_runtime_still_requires_legacy_tendency_analysis() -> None:
     engine = _engine()
     with Session(engine) as db:
         fixture = _seed(db)
-        setting = agent_crud.ensure_setting(db, fixture.character.id)
+        setting = routines_settings.ensure_setting(db, fixture.character.id)
         fixture.world_character.activity_runtime_mode = "legacy_resident_v1"
         db.commit()
 
@@ -1330,7 +1335,7 @@ def test_runtime_mode_readiness_does_not_enable_autonomy() -> None:
         fixture.world_character.activity_runtime_mode = "legacy_resident_v1"
         db.commit()
 
-        updated = daily_activity_plans.update_activity_runtime_mode(
+        updated = routine_plans.update_activity_runtime_mode(
             db,
             references=SqlAlchemyPlanReferences(db),
             character_id=fixture.character.id,

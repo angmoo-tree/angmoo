@@ -131,12 +131,12 @@ def test_model_only_credential_update_preserves_existing_key(monkeypatch):
     monkeypatch.setattr(agent_service, "_get_owned_character", lambda *_: character)
     monkeypatch.setattr(agent_service.slot_queries, "get_assigned_slot", lambda *_: None)
     monkeypatch.setattr(
-        agent_service.agent_crud,
+        agent_service.identity_credentials,
         "get_character_credential",
         lambda *_: credential,
     )
     monkeypatch.setattr(
-        agent_service.agent_crud,
+        agent_service.identity_credential_records,
         "upsert_credential",
         lambda *_, **__: (_ for _ in ()).throw(
             AssertionError("upsert_credential should not be called")
@@ -190,7 +190,7 @@ def test_api_key_credential_update_without_slot_commits_in_upsert(monkeypatch):
     monkeypatch.setattr(agent_service, "_get_owned_character", lambda *_: character)
     monkeypatch.setattr(agent_service.slot_queries, "get_assigned_slot", lambda *_: None)
     monkeypatch.setattr(
-        agent_service.agent_crud, "upsert_credential", fake_upsert_credential
+        agent_service.identity_credential_records, "upsert_credential", fake_upsert_credential
     )
     monkeypatch.setattr(agent_service.agent_crud, "log_activity", lambda *_, **__: None)
 
@@ -267,7 +267,7 @@ def test_api_key_credential_update_with_idle_slot_syncs_profile(monkeypatch):
     monkeypatch.setattr(agent_service, "_get_owned_character", lambda *_: character)
     monkeypatch.setattr(agent_service.slot_queries, "get_assigned_slot", lambda *_: slot)
     monkeypatch.setattr(
-        agent_service.agent_crud, "upsert_credential", fake_upsert_credential
+        agent_service.identity_credential_records, "upsert_credential", fake_upsert_credential
     )
     monkeypatch.setattr(agent_service.agent_crud, "log_activity", lambda *_, **__: None)
     monkeypatch.setattr(agent_service, "_resident_openclaw_sync_enabled", lambda: True)
@@ -308,7 +308,7 @@ def test_model_only_credential_update_requires_existing_key(monkeypatch):
     monkeypatch.setattr(agent_service, "_get_owned_character", lambda *_: character)
     monkeypatch.setattr(agent_service.slot_queries, "get_assigned_slot", lambda *_: None)
     monkeypatch.setattr(
-        agent_service.agent_crud,
+        agent_service.identity_credentials,
         "get_character_credential",
         lambda *_: None,
     )

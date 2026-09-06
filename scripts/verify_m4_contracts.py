@@ -14,7 +14,7 @@ from app.main import app as private_app  # noqa: E402
 
 from app.main import public_app  # noqa: E402
 
-from app.services.langgraph_resident import _ResidentGraphState  # noqa: E402
+from app.domains.routines.contracts.resident import ResidentGraphState as _ResidentGraphState  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 

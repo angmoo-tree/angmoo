@@ -29,20 +29,8 @@
           "imported": "app.schemas"
         },
         {
-          "importer": "app.cruds.agents",
-          "imported": "app.schemas"
-        },
-        {
           "importer": "app.main",
           "imported": "app.services.hosted_configuration"
-        },
-        {
-          "importer": "app.runtime.character_lore",
-          "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.runtime.characters.creator",
-          "imported": "app.cruds.agents"
         },
         {
           "importer": "app.runtime.characters.creator",
@@ -58,10 +46,6 @@
         },
         {
           "importer": "app.runtime.characters.management",
-          "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.runtime.characters.management",
           "imported": "app.runtime.social.image_generation"
         },
         {
@@ -74,15 +58,7 @@
         },
         {
           "importer": "app.runtime.resident.langgraph",
-          "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.runtime.resident.langgraph",
           "imported": "app.schemas"
-        },
-        {
-          "importer": "app.runtime.resident.langgraph",
-          "imported": "app.services.prompt_safety"
         },
         {
           "importer": "app.runtime.social.image_job_worker",
@@ -119,10 +95,6 @@
         {
           "importer": "app.schemas.agents",
           "imported": "app.schemas.media_security"
-        },
-        {
-          "importer": "app.services.agent_runs",
-          "imported": "app.schemas"
         }
       ],
       "id": "pre-t2-5-horizontal-layer-imports",
@@ -130,19 +102,6 @@
       "reason": "Exact edges present before the domain-first contract; no wider prefix or new edge is allowed.",
       "removal_condition": "Remove each edge when its owning domain/runtime stage adopts a canonical public API; remove all remaining edges at L6.",
       "review_date": "2026-11-14"
-    },
-    {
-      "edges": [
-        {
-          "importer": "app.compatibility.routine_posts.legacy",
-          "imported": "app.services.activity_state_contracts"
-        }
-      ],
-      "id": "l3-routine-post-legacy-persistence-bridge",
-      "owner_stage": "L6",
-      "reason": "L4 PR F moves routine orchestration into app.runtime.routine_posts while this narrow compatibility adapter still delegates agent-run, joint-activity, and community persistence owned by pre-domain services.",
-      "removal_condition": "Remove each exact edge when L6 moves the remaining agent-run, joint-activity, and community persistence operations behind canonical public ports.",
-      "review_date": "2026-11-19"
     },
     {
       "id": "ar-b2-identity-account-deletion-uow",
@@ -1845,14 +1804,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.services.world_character_contracts",
-        "target": "app.domains.world_characters.service.setup_validation",
-        "owner_stage": "AR-B2",
-        "reason": "This exact existing service/HTTP/compatibility consumer is pending the WC workflow slice; canonical modules never import this source.",
-        "removal_condition": "Move the actual named consumer into its new owner role in the next WC slice and remove this exact bridge; aggregate models close at G5.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.services.world_character_provider",
         "target": "app.domains.world_characters.client",
         "owner_stage": "AR-B2",
@@ -2077,14 +2028,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.services.activity_state_contracts",
-        "target": "app.domains.routines.policies.activity_state",
-        "owner_stage": "AR-B4-B / AR-B4-C",
-        "removal_condition": "Replace this exact legacy consumer with its owned plan/lifecycle role in AR-B4-A, provider/resident role in AR-B4-B/C, or single model registration in AR-G5; remove the same-object alias after its last consumer moves.",
-        "reason": "This partial foundation introduces the same schema/model/pure decision object while the specific active caller keeps its existing transaction and execution semantics.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.schemas",
         "target": "app.domains.routine_posts.schemas",
         "owner_stage": "AR-G5",
@@ -2095,30 +2038,6 @@
       {
         "importer": "app.api.v1.routes.world_activity_runtime",
         "target": "app.domains.routines.router",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
-        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agents",
-        "target": "app.domains.routines.constants",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
-        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agents",
-        "target": "app.domains.routines.service.activity_logs",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
-        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agents",
-        "target": "app.domains.routines.service.activity_settings",
         "owner_stage": "AR-B4-C",
         "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
         "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
@@ -2194,38 +2113,6 @@
         "owner_stage": "AR-B8-A",
         "removal_condition": "Remove original aggregate/workflow caller after remaining LocalBot roles and G5 registration transition; none remain at AR-B8-B.",
         "reason": "Existing same-object value/model/quota caller during actual LocalBot source migration.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agents",
-        "target": "app.domains.identity.repository.credentials",
-        "owner_stage": "AR-B4/AR-B8-A",
-        "removal_condition": "Remove same-object CRUD exports when all original callers use actual Identity roles; none remain at AR-B8-B.",
-        "reason": "Existing unconverted caller keeps the same actual query or scoped credential workflow and caller Session.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agents",
-        "target": "app.domains.identity.service.character_credentials",
-        "owner_stage": "AR-B4/AR-B8-A",
-        "removal_condition": "Remove same-object CRUD exports when all original callers use actual Identity roles; none remain at AR-B8-B.",
-        "reason": "Existing unconverted caller keeps the same actual query or scoped credential workflow and caller Session.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agents",
-        "target": "app.domains.local_bot.repository.keys",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Remove original same-object CRUD key aliases after LocalBot authentication/actions and remaining callers move; none remain at AR-B8-B.",
-        "reason": "Existing caller uses the same key query/write function during actual LocalBot role migration.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agents",
-        "target": "app.domains.local_bot.service.key_records",
-        "owner_stage": "AR-B8-A",
-        "removal_condition": "Remove original same-object CRUD key aliases after LocalBot authentication/actions and remaining callers move; none remain at AR-B8-B.",
-        "reason": "Existing caller uses the same key query/write function during actual LocalBot role migration.",
         "review_date": "2026-09-06"
       },
       {
@@ -2557,46 +2444,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.social.service.resident_affordances",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Exact pre-existing resident/agent tool functions now resolve to their actual Social owner; no new business policy is added to the old consumer.",
-        "removal_condition": "Move the remaining Community/AgentRun/LangGraph/writing orchestration to actual owner/runtime modules and remove these exact same-function consumer imports.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.feed_history_values",
-        "owner_stage": "AR-B5 / AR-B4",
-        "reason": "Existing resident history caller consumes actual Routines policy and original limits; no implementation remains in this old import surface for these symbols.",
-        "removal_condition": "Finish Community/AgentRun runtime ownership and remove exact old consumer imports while retaining the actual Routines service/constant call.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.agents",
-        "target": "app.domains.routines.repository.slots",
-        "owner_stage": "AR-B4-C",
-        "reason": "Exact same get_assigned_slot function export preserves existing assertion bindings; production reads use the canonical repository.",
-        "removal_condition": "Close the exact mixed test alias with reviewed test-owner transition by B8-A, preserving every assertion.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.utils.context_text",
-        "owner_stage": "AR-B4-C",
-        "reason": "Remaining actual execution/prompt composition consumes the same actual Routines evidence/text function after responsibility extraction.",
-        "removal_condition": "Move remaining actual execution/prompt composition in B4-C; retire exact legacy consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.service.action_briefs",
-        "owner_stage": "AR-B4-C",
-        "reason": "Existing actual execution/writing workflow uses canonical same prompt/brief policy after full implementation move; no copied policy or forwarding function.",
-        "removal_condition": "Move remaining actual caller workflow in its B4-C/B5 owner stage and remove exact legacy consumer before B8-A.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.api.v1.routes.agent_runs",
         "target": "app.domains.routines.service.slot_status",
         "owner_stage": "AR-B4-C",
@@ -2618,14 +2465,6 @@
         "owner_stage": "AR-B4 / AR-B8-A",
         "reason": "Exact same request class temporarily reexported by the existing mixed schema aggregate while HTTP callers migrate. No additional implementation or backwards import.",
         "removal_condition": "Complete C7 actual HTTP schema imports and remaining aggregate consumers during AR-B8-A, then remove this exact one-way class reexport.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.agent_runs",
-        "target": "app.domains.routines.constants",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
-        "reason": "Remaining pre-integration caller now uses the actual owner directly after Community facade removal; original caller body and same-Session behavior are unchanged.",
-        "removal_condition": "Map these exact calls onto signed runtime/resident or runtime/local_bot composition in parent integration and remove the obsolete caller module/bridge.",
         "review_date": "2026-09-06"
       }
     ]

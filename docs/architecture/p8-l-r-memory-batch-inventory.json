@@ -308,7 +308,7 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "7c73a68771f838c468d0d85a91fa5fb1f00e27549a78ef4cac6f6b9b6a635266"
+      "sha256": "fc1f4ee2704b01bfdc5b1a1485887ade453631a23c2ec443a7c670dec871da53"
     },
     {
       "path": "backend/app/runtime/account_deletion.py",
@@ -316,7 +316,7 @@
     },
     {
       "path": "backend/app/runtime/characters/management.py",
-      "sha256": "22d33fd88e5f2158373fa4db5d168bdb4062831a8d63e32be786e25bb01765d6"
+      "sha256": "fa8e965d7796356a71cbc2e56c2e14f5bb9e4943672d84c24196f66b6c55a1e5"
     },
     {
       "path": "backend/app/runtime/desktop_sidecar.py",
@@ -500,7 +500,7 @@
     },
     {
       "path": "scripts/ci/build_windows_installer_supported_upgrade_fixture.py",
-      "sha256": "7d2ef90db5103c6370dac59cec0dca2e2f8b7df41c4185cf8270cc92898a9026"
+      "sha256": "be2eeb89cb8426b1ecf34cd19691e983b3ba869252c7bd763e1fc0d52db80acf"
     },
     {
       "path": "scripts/ci/check_windows_installer_supported_upgrade_matrix.py",

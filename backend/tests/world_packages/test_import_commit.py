@@ -73,10 +73,8 @@ from app.runtime.search import CallbackSearchIndexAdapter
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
 from app.runtime.characters import management as agent_service
 from app.runtime.resident import langgraph as langgraph_resident
-from app.services import (
-    world_character_contracts,
-    world_character_provider,
-)
+from app.domains.world_characters.service import setup_validation as world_character_contracts
+from app.domains.world_characters import client as world_character_provider
 from app.domains.world_characters.service import autonomous_setup as world_character_setup
 from app.runtime.resident.context import LangGraphResidentContext
 from app.runtime.social.feed_cycle import run_world_keyword_feed
