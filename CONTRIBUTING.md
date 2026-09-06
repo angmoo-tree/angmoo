@@ -180,12 +180,17 @@ credentials, lease/retry, and user-data boundaries are compatibility surfaces.
 Intentional breaking changes require an Issue, migration or compatibility plan
 when applicable, focused tests, and a clear rollback path.
 
-T2.5 adds the incremental domain-first contract in
-`docs/architecture/backend-domains.md`. Before adding backend behavior, choose
-the owning domain or runtime area there. Cross-domain imports must use
-`app.domains.<name>.public`; do not reach into another domain's internal module
-or add a dependency on the horizontal `services`, `models`, `schemas`, or
-`cruds` paths.
+The backend structure and ownership rules are described in
+[`backend/ARCHITECTURE.md`](backend/ARCHITECTURE.md), with a navigation guide in
+[`docs/architecture/backend-domains.md`](docs/architecture/backend-domains.md).
+Before adding behavior, choose the owning domain and role. Import supported
+services, schemas, contracts, and exceptions explicitly from their actual owner;
+an aggregate `public.py` is not required. A service filename does not make every
+helper a supported cross-domain operation. Do not bypass another domain's
+authorization, state transitions, or persistence rules through its models or
+repositories. Compose multi-domain work in runtime, preserving the shared
+Session and commit/rollback contract. Do not add new behavior to the retired
+horizontal service, model, schema, or CRUD collections.
 
 The L2.5 frontend product-shell contract is documented in
 `docs/architecture/frontend-product-shell.md`. Route files import migrated

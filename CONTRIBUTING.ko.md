@@ -148,11 +148,16 @@ REST/OpenAPI, Alembic, 일과·SNS·관계 그래프, 권한, credential, lease/
 사용자 데이터 경계는 호환성 계약입니다. 의도적인 breaking change에는 Issue,
 필요한 migration 또는 호환 계획, focused test와 rollback 경로가 필요합니다.
 
-T2.5의 점진적 domain-first 계약은
-`docs/architecture/backend-domains.md`에 있습니다. backend 동작을 추가하기
-전에 그 문서에서 소유 domain 또는 runtime 영역을 정합니다. domain 간 import는
-`app.domains.<name>.public`을 사용하며, 다른 domain의 내부 module이나 수평
-`services`, `models`, `schemas`, `cruds` 경로에 새로 의존하지 않습니다.
+백엔드의 구조와 소유권 규칙은
+[`backend/ARCHITECTURE.md`](backend/ARCHITECTURE.md)에, 코드 탐색 안내는
+[`docs/architecture/backend-domains.md`](docs/architecture/backend-domains.md)에 있습니다.
+동작을 추가하기 전에 소유 업무와 역할을 정합니다. 다른 업무가 지원하는 service,
+schema, contract, exception은 실제 소유 위치에서 명시적으로 import하며,
+집합 `public.py`를 거칠 필요는 없습니다. service 파일의 모든 helper가 외부 호출을
+지원하는 것은 아닙니다. 다른 업무의 model이나 repository를 통해 권한·상태 전이·저장
+규칙을 우회하지 않습니다. 여러 업무의 협력은 runtime에서 조립하고 같은 Session과
+기존 commit/rollback 계약을 유지합니다. 폐기한 수평 service·model·schema·CRUD
+집합에 새 동작을 추가하지 않습니다.
 
 L2.5 frontend 제품 shell 계약은
 `docs/architecture/frontend-product-shell.md`에 있습니다. 이동을 완료한 route는

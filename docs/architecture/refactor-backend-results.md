@@ -2860,3 +2860,7 @@ Backend ARCHITECTURE는 기여자가 업무와 역할, 실제 호출자, Session
 후속 통합 `32ef4065`에서 G07 원본 e724의 여섯 테스트 이동을 합쳐 **65 PASS / 11.98초**를 확인했다. 현재 읽기 지도는 37항목의 backend 경로6339개와 실제 직접 import edge7972개를 확인했다. 원래 entrypoint/test node/보존 계약/실행 경로 및 Device Home VERIFIED 원문, frontend 상태, 이전 조사 문서 본문은 그대로다. 경계1064/3964/legacy0, L4, ER0, 현재 Memory batch와 deferred inventory도 통과했다.
 
 이 기록은 준비 후보의 실행 증거다. 순차 PR의 원본 도입 원장과 stock, AR-B8-A/G5/B8-B 최종 후보의 CI·Docker/Host Tauri·installer 및 post-merge 결과는 해당 정확한 후보에서 별도로 닫는다. §8.3·AR-X·P8-L-S 및 Release/Production 완료를 뜻하지 않는다.
+
+### B8-B 기여 안내의 실제 소유 경로 연결
+
+독립 문서 검토에서 영문·한국어 CONTRIBUTING의 backend 새 기능 지침이 아직 `app.domains.<name>.public`을 필수 경로로 안내하는 것을 발견했다. 두 문서를 현재 ARCHITECTURE의 실제 service/schema/contracts/exceptions 명시 import, 지원 호출 범위, 업무 권한·저장 규칙, 같은 Session의 runtime 조립 설명에 맞췄다. 옛 T2.5 역사 자료와 frontend의 아직 진행하지 않은 전환 규칙은 유지했다. 이 변경은 문서3개뿐이며 제품·테스트·검사·원장·동결 근거를 수정하지 않았다.
