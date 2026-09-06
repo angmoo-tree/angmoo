@@ -5,7 +5,7 @@ from app.domains.memory.repository.recall import SqlAlchemyCanonicalRecallReposi
 from app.runtime.memory.recall_queries import read_character_summary_rows
 from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
 from app.runtime.memory.source_queries import models as source_models
-from test_p8_l_h_canonical_recall import NOW, _accept_chat_memory, runtime_factory
+from memory.test_p8_l_h_canonical_recall import NOW, _accept_chat_memory, runtime_factory
 
 
 def test_character_summary_reads_use_the_current_session_without_committing(runtime_factory):

@@ -20,7 +20,7 @@ from app.domains.characters.exceptions import CredentialRequiredError, Credentia
 from app.domains.routines.exceptions import LlmCredentialInvalidError
 from app.domains.characters.service.creator import llm_credential_error_message
 from app.integrations.direct_llm import RunLlmTracker, DirectLlmCallContext, DirectLlmError, generate_json
-from app.services.runtime_boundary import OpenClawGatewayClient, OpenClawGatewayError
+from app.runtime.extensions.resident_adapter import OpenClawGatewayClient, OpenClawGatewayError
 
 async def analyze_tendency(
     db: Session, user: ActivityOwner, character_id: str,

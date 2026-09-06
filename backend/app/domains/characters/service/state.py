@@ -57,4 +57,5 @@ def save_character_state_for_user(
 
 
 def get_character_state(db: Session, character_id: str) -> models.CharacterState | None:
+    """Read the caller's attached state at the original lookup position."""
     return db.get(models.CharacterState, character_id)

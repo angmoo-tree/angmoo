@@ -23,7 +23,7 @@ from app.credentials import (
     CredentialResolver,
 )
 from app.providers.gemini import build_gemini_developer_response_schema
-from app.services.direct_llm import (
+from app.integrations.direct_llm import (
     DirectLlmCallContext,
     DirectLlmError,
     RunLlmTracker,

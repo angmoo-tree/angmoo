@@ -27,11 +27,11 @@
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "a90f495bbcaae4b516f39c3e85ee6aa563c0d15ecdd632183d2a829efc5b3697"
+      "sha256": "ae68dae69b4829d3570b5c425e3ed3a64c3ecbd29e7fd6db76ad169621a385b8"
     },
     {
       "path": "backend/app/runtime/resident/scheduler.py",
-      "sha256": "68a100c196c8f0e3351b5a95a6ca5137d6631b8a09c867fad7172e8a3297d131"
+      "sha256": "2740337cb2a49f60c9d5e70879b4415105b1b72d5f0f2df2ccf8827d6b1af7e0"
     },
     {
       "path": "backend/app/runtime/graph_projection/worker.py",
@@ -123,7 +123,7 @@
         "tests": [
           "backend/tests/worlds/test_creator_routes.py",
           "backend/tests/worlds/test_definition_contract.py",
-          "backend/tests/test_world_foundation.py"
+          "backend/tests/worlds/test_foundation.py"
         ]
       },
       {
@@ -237,7 +237,7 @@
       "owner": "ER4",
       "path": "backend/app/runtime/resident/scheduler.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "68a100c196c8f0e3351b5a95a6ca5137d6631b8a09c867fad7172e8a3297d131",
+      "source_sha256": "2740337cb2a49f60c9d5e70879b4415105b1b72d5f0f2df2ccf8827d6b1af7e0",
       "transition_pr": "ER4 PR J"
     },
     {
@@ -287,7 +287,7 @@
       "owner": "ER4",
       "path": "backend/app/main.py",
       "removal_condition": "in-process singleton, drain, backlog recovery, aggregate status, and legacy regression PASS",
-      "source_sha256": "a90f495bbcaae4b516f39c3e85ee6aa563c0d15ecdd632183d2a829efc5b3697",
+      "source_sha256": "ae68dae69b4829d3570b5c425e3ed3a64c3ecbd29e7fd6db76ad169621a385b8",
       "transition_pr": "ER4 PR J"
     },
     {

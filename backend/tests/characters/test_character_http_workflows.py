@@ -1,4 +1,6 @@
 """Character HTTP and workflow boundaries preserve owner/session/write contracts."""
+from compatibility_retirement_support import export_matches
+
 from dataclasses import replace
 from types import SimpleNamespace
 
@@ -106,16 +108,15 @@ def test_detail_limit_and_missing_runtime_configuration_are_explicit(monkeypatch
 def test_both_application_factories_install_workflows_and_schema_aliases_keep_identity():
     from app.main import create_app as create_hosted_app
     from app.main import create_public_app
-    from app import schemas as aggregate_schemas
     from app.domains.identity.schemas import CredentialRead
     from app.domains.routines.schemas import AgentActivityLogRead, AgentSlotRead
     for factory in (create_hosted_app, create_public_app):
         app = factory()
-        request = Request({"type": "http", "app": app})
+        request = Request({'type': 'http', 'app': app})
         workflows = dependencies.get_character_management_workflows(request)
         assert workflows.build_detail is runtime._build_agent_detail
         assert workflows.after_create is runtime._after_character_created
-    assert aggregate_schemas.AgentDetailRead is schemas.AgentDetailRead
-    assert aggregate_schemas.CredentialRead is CredentialRead
-    assert aggregate_schemas.AgentActivityLogRead is AgentActivityLogRead
-    assert aggregate_schemas.AgentSlotRead is AgentSlotRead
+    assert export_matches('app.schemas', 'AgentDetailRead', schemas.AgentDetailRead)
+    assert export_matches('app.schemas', 'CredentialRead', CredentialRead)
+    assert export_matches('app.schemas', 'AgentActivityLogRead', AgentActivityLogRead)
+    assert export_matches('app.schemas', 'AgentSlotRead', AgentSlotRead)

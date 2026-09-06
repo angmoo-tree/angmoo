@@ -1,4 +1,6 @@
 from __future__ import annotations
+import app.domains.characters.schemas as character_schemas
+import app.domains.identity.schemas as schema_identity_schemas
 import app.runtime.social.agent_tool_state as social_agent_tool_state_runtime
 import app.runtime.social.inbox as social_inbox_runtime
 import app.runtime.social.timeline as social_timeline_runtime
@@ -13,7 +15,7 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app import schemas
+
 from model_fixture_support import models
 from app.config import settings
 from app.models import Base
@@ -27,6 +29,7 @@ from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
 from app.domains.character_lore.service import documents as lore_service
 from app.runtime.character_lore import build_lore_workflows
+
 from chat_service_support import messages as message_service
 
 
@@ -451,7 +454,7 @@ def test_account_deletion_removes_private_graph_and_keeps_public_content(
         auth_service.delete_current_user_account(
             db,
             user,
-            schemas.AccountDeletionCreate(
+            schema_identity_schemas.AccountDeletionCreate(
                 confirmation=auth_service.ACCOUNT_DELETE_CONFIRMATION
             ),
             workflow=account_deletion.delete_current_user_account,
@@ -526,7 +529,7 @@ def test_account_deletion_flushes_active_slot_before_credential_delete(
         auth_service.delete_current_user_account(
             db,
             user,
-            schemas.AccountDeletionCreate(
+            schema_identity_schemas.AccountDeletionCreate(
                 confirmation=auth_service.ACCOUNT_DELETE_CONFIRMATION
             ),
             workflow=account_deletion.delete_current_user_account,
@@ -565,7 +568,7 @@ def test_character_deletion_resets_cross_user_preference_and_removes_private_dat
             db,
             owner,
             character.id,
-            schemas.AgentDeleteCreate(confirmation=character.name),
+            character_schemas.AgentDeleteCreate(confirmation=character.name),
         )
 
         assert db.get(models.User, owner.id).deleted_at is None
@@ -607,7 +610,7 @@ def test_account_deletion_restores_private_media_when_database_commit_fails(
             auth_service.delete_current_user_account(
                 db,
                 user,
-                schemas.AccountDeletionCreate(
+                schema_identity_schemas.AccountDeletionCreate(
                     confirmation=auth_service.ACCOUNT_DELETE_CONFIRMATION
                 ),
                 workflow=account_deletion.delete_current_user_account,
@@ -659,7 +662,7 @@ def test_two_user_object_authorization_matrix_denies_cross_owner_access(
                 db,
                 intruder,
                 character.id,
-                schemas.CharacterStateWrite(mood="safe", summary="unchanged"),
+                character_schemas.CharacterStateWrite(mood="safe", summary="unchanged"),
             )
         notification_id = db.scalar(select(models.Notification.id))
         with pytest.raises(community_service.NotificationNotFoundError):
@@ -692,13 +695,13 @@ def test_sensitive_update_schemas_ignore_ownership_and_secret_mass_assignment() 
         "encrypted_api_key": "forbidden-envelope",
         "key_fingerprint": "forbidden-fingerprint",
     }
-    profile = schemas.AgentProfileUpdate.model_validate(
+    profile = character_schemas.AgentProfileUpdate.model_validate(
         {"name": "Safe name", **attempts}
     ).model_dump(exclude_unset=True)
-    persona = schemas.AgentPersonaUpdate.model_validate(
+    persona = character_schemas.AgentPersonaUpdate.model_validate(
         {"personality": "Safe persona", **attempts}
     ).model_dump(exclude_unset=True)
-    user = schemas.UserDisplayNameUpdate.model_validate(
+    user = schema_identity_schemas.UserDisplayNameUpdate.model_validate(
         {"display_name": "Safe user", **attempts}
     ).model_dump(exclude_unset=True)
 

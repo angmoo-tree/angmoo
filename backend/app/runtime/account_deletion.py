@@ -1,70 +1,120 @@
-from app.domains.routines import constants as routine_constants
 from uuid import uuid4
+
 from app.domains.operations import repository as operation_repository
 
+from sqlalchemy import delete
 
-from sqlalchemy import delete, false, or_, select, update
+from sqlalchemy import false
+
+from sqlalchemy import or_
+
+from sqlalchemy import select
+
+from sqlalchemy import update
+
 from sqlalchemy.exc import IntegrityError
+
 from sqlalchemy.orm import Session
+
 from app.domains.routines.models.resident import AgentActivityLog as _model_AgentActivityLog
+
 from app.domains.routines.models.resident import AgentActivitySetting as _model_AgentActivitySetting
+
 from app.domains.characters.models import AgentCreationDraft as _model_AgentCreationDraft
+
 from app.domains.memory.models.daypart import AgentDaypartMemoryEvent as _model_AgentDaypartMemoryEvent
+
 from app.domains.routines.models.resident import AgentFeedCue as _model_AgentFeedCue
+
 from app.domains.characters.models import AgentImageGenerationSetting as _model_AgentImageGenerationSetting
+
 from app.domains.local_bot.models import AgentLocalKey as _model_AgentLocalKey
+
 from app.domains.routines.models.resident import AgentPublicActionExecution as _model_AgentPublicActionExecution
+
 from app.domains.relationships.models.points import AgentRelationshipPoint as _model_AgentRelationshipPoint
+
 from app.domains.routines.models.resident import AgentRun as _model_AgentRun
+
 from app.domains.routines.models.resident import AgentSlot as _model_AgentSlot
+
 from app.domains.identity.models import AuthSession as _model_AuthSession
+
 from app.domains.characters.models import Character as _model_Character
+
 from app.domains.character_lore.models import CharacterLoreChunk as _model_CharacterLoreChunk
+
 from app.domains.character_lore.models import CharacterLoreSource as _model_CharacterLoreSource
+
 from app.domains.chat.models import CharacterMessageSetting as _model_CharacterMessageSetting
+
 from app.domains.characters.models import CharacterState as _model_CharacterState
+
 from app.domains.identity.models import LlmCredential as _model_LlmCredential
+
 from app.domains.chat.models import MessageMessage as _model_MessageMessage
+
 from app.domains.chat.models import MessageThread as _model_MessageThread
+
 from app.domains.social.models.posts import Notification as _model_Notification
+
 from app.domains.social.models.posts import Post as _model_Post
+
 from app.domains.social.models.posts import PostImageGenerationJob as _model_PostImageGenerationJob
+
 from app.domains.social.models.posts import PostImageQuotaReservation as _model_PostImageQuotaReservation
+
 from app.domains.social.models.posts import PostLike as _model_PostLike
+
 from app.domains.social.models.posts import PostReport as _model_PostReport
+
 from app.domains.social.models.posts import PostRepost as _model_PostRepost
+
 from app.domains.social.models.posts import ProfileFollow as _model_ProfileFollow
+
 from app.domains.characters.models import ProfileImageCandidate as _model_ProfileImageCandidate
+
 from app.domains.characters.models import ProfileImageQuotaReservation as _model_ProfileImageQuotaReservation
+
 from app.domains.social.models.subjective_context import SocialActionSubjectiveContext as _model_SocialActionSubjectiveContext
+
 from app.domains.identity.models import User as _model_User
+
 from app.domains.chat.models import UserMessagePreference as _model_UserMessagePreference
+
 from app.runtime.persistence.model_registration import register_models
-register_models()
 
 from app.config import settings
+
 from app.core.redaction import redact_secret_text
 
-
 from app.integrations.media import files as profile_media
-from app.services.runtime_boundary import (
-    OpenClawGatewayClient,
-    OpenClawGatewayError,
-    openclaw_auth_profiles,
-)
-from app.domains.identity.service import auth as auth_service
-from app.domains.identity.constants import (
-    DELETED_USER_DISPLAY_NAME,
-    DELETED_CHARACTER_NAME,
-    DELETED_CHARACTER_PLACEHOLDER,
-)
-from app.domains.identity.exceptions import (
-    AuthError,
-    AccountDeletionBusyError,
-    AccountDeletionCredentialSyncError,
-    AccountDeletionMediaCleanupError,
-)
 
+from app.runtime.extensions.resident_adapter import OpenClawGatewayClient
+
+from app.runtime.extensions.resident_adapter import OpenClawGatewayError
+
+from app.runtime.extensions.resident_adapter import openclaw_auth_profiles
+
+from app.domains.identity.service import auth as auth_service
+
+from app.domains.identity.constants import DELETED_USER_DISPLAY_NAME
+
+from app.domains.identity.constants import DELETED_CHARACTER_NAME
+
+from app.domains.identity.constants import DELETED_CHARACTER_PLACEHOLDER
+
+from app.domains.identity.exceptions import AuthError
+
+from app.domains.identity.exceptions import AccountDeletionBusyError
+
+from app.domains.identity.exceptions import AccountDeletionCredentialSyncError
+
+from app.domains.identity.exceptions import AccountDeletionMediaCleanupError
+
+from app.domains.routines import constants as routine_constants
+
+register_models()
 
 def delete_current_user_account(
     db: Session, user: _model_User
@@ -102,7 +152,6 @@ def delete_current_user_account(
     except profile_media.PrivateMediaCleanupError as exc:
         raise AccountDeletionMediaCleanupError("private_media_purge_failed") from exc
 
-
 def _quarantine_account_private_media(
     db: Session, user_id: str, character_ids: list[str]
 ) -> profile_media.PrivateMediaQuarantine:
@@ -118,7 +167,6 @@ def _quarantine_account_private_media(
     paths.extend(media_root / "drafts" / draft_id for draft_id in draft_ids)
     paths.append(media_root / "profile-candidates" / user_id)
     return profile_media.quarantine_private_media(paths)
-
 
 def _ensure_account_deletion_not_busy(
     db: Session, user_id: str, character_ids: list[str]
@@ -144,7 +192,6 @@ def _ensure_account_deletion_not_busy(
     )
     if running_slot_id is not None:
         raise AccountDeletionBusyError("Resident slot is running")
-
 
 def _release_openclaw_profiles_for_account(
     db: Session, user_id: str, character_ids: list[str]
@@ -186,7 +233,6 @@ def _release_openclaw_profiles_for_account(
     if released:
         _reload_openclaw_secrets_sync()
 
-
 def _reload_openclaw_secrets_sync() -> None:
     token = settings.openclaw_gateway_token
     if token is None:
@@ -199,7 +245,6 @@ def _reload_openclaw_secrets_sync() -> None:
         ).reload_secrets_sync()
     except OpenClawGatewayError as exc:
         raise AccountDeletionCredentialSyncError(redact_secret_text(str(exc))) from exc
-
 
 def _clear_resident_slots_for_account(
     db: Session, user_id: str, character_ids: list[str]
@@ -224,7 +269,6 @@ def _clear_resident_slots_for_account(
         slot.locked_by_run_id = None
         slot.lease_expires_at = None
         slot.last_error = None
-
 
 def _scrub_account_data(
     db: Session,
@@ -531,13 +575,11 @@ def _scrub_account_data(
     user.feed_content_filter = "all"
     user.deleted_at = now
 
-
 def _owned_agent_run_condition(user_id: str, character_ids: list[str]):
     return or_(
         _model_AgentRun.user_id == user_id,
         _character_id_condition(_model_AgentRun.character_id, character_ids),
     )
-
 
 def _owned_agent_slot_condition(user_id: str, character_ids: list[str]):
     return or_(
@@ -545,12 +587,10 @@ def _owned_agent_slot_condition(user_id: str, character_ids: list[str]):
         _character_id_condition(_model_AgentSlot.assigned_character_id, character_ids),
     )
 
-
 def _character_id_condition(column, character_ids: list[str]):
     if not character_ids:
         return false()
     return column.in_(character_ids)
-
 
 def _deleted_character_handle(db: Session, character_id: str) -> str:
     suffix = "".join(

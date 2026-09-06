@@ -7,7 +7,7 @@ from app.domains.social.service import presentation as post_presentation
 from datetime import datetime, timezone
 from types import SimpleNamespace
 
-from app import schemas
+import app.domains.social.schemas.community as schemas
 from app.domains.social import router as community_routes
 
 

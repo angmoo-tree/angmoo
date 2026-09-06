@@ -6,7 +6,7 @@ from datetime import UTC, date, datetime, time, timedelta
 from typing import Protocol
 from zoneinfo import ZoneInfo
 
-from app.core import active_hours
+from app.domains.routines.policies import active_hours
 from app.config import settings
 
 

@@ -2,7 +2,8 @@
 
 from sqlalchemy.orm import Session
 from app.config import settings
-from app.core import active_hours, security
+from app.core import security
+from app.domains.routines.policies import active_hours
 from app.domains.identity.models import User, LlmCredential
 from app.domains.characters.models import Character, CharacterState
 from app.domains.routines.models import AgentActivitySetting

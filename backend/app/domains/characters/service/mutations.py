@@ -71,3 +71,8 @@ def update_owned_persona(db: Session, user: CharacterOwner, character_id: str, d
 def set_activity_status(character: models.Character, *, status: str) -> None:
     """Only the original attached status assignment; caller owns its transaction."""
     character.status = status
+
+
+def set_character_status(db: Session, character: models.Character, status: str) -> None:
+    character.status = status
+    db.commit()

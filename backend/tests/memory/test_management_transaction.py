@@ -9,7 +9,7 @@ from app.domains.memory.models.items import MemoryItem
 from app.domains.memory.schemas import MemoryPinUpdate
 from app.domains.memory.service.management import update_memory_pin
 from app.runtime.memory_http import build_memory_workflows
-from test_p8_l_q_memory_read_inspector import _fixture, _seed
+from memory.test_p8_l_q_memory_read_inspector import _fixture, _seed
 
 
 def test_pin_rolls_back_when_related_profile_read_fails_before_commit():

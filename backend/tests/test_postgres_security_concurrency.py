@@ -1,3 +1,8 @@
+from app.domains.routines.service import plans as routine_plans
+import app.domains.characters.schemas as character_schemas
+import app.domains.chat.schemas as schema_chat_schemas
+import app.domains.routines.schemas as routine_schemas
+import app.domains.worlds.schemas as world_schemas
 import app.domains.social.repository.reactions as social_reactions_repository
 from app.domains.routines.service import activity_management, autonomy_management, manual_activity, feed_cues
 from app.domains.routines.service import first_greeting as first_greeting_service
@@ -19,24 +24,25 @@ from sqlalchemy import create_engine, delete, func, inspect, select, text
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import NullPool
 
-from app import schemas
-from tests.model_fixture_support import models
+
+from model_fixture_support import models
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.domains.chat import schemas as chat_schemas
 from app.config import settings
 from app.domains.routines import constants as agent_run_crud
+
 from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
-from app.services import community_abuse_quota
+from app.domains.social.service import abuse_quota as community_abuse_quota
 from app.domains.identity.service import external_verification as external_auth_verification
 from app.domains.local_bot.service import quota as local_bot_quota
 from app.domains.identity.service import login_throttle
 from app.domains.character_lore.service import parser_quota as lore_parser_quota
 from chat_service_support import messages as message_service
-from app.services import daily_activity_plans
+
 from app.domains.worlds import service as world_service
-from app.services import world_character_contracts
-from app.services.direct_llm import DirectLlmResponse
+from app.domains.world_characters.service import setup_validation as world_character_contracts
+from app.integrations.direct_llm import DirectLlmResponse
 
 
 DATABASE_URL = os.getenv("SECURITY_CONCURRENCY_DATABASE_URL")
@@ -393,13 +399,13 @@ def test_daily_activity_plan_is_singleton_across_twenty_postgres_sessions() -> N
             user = db.get(models.User, user_id)
             assert user is not None
             barrier.wait()
-            result = daily_activity_plans.prepare_activity_plan(
+            result = routine_plans.prepare_activity_plan(
                 db,
                 references=SqlAlchemyPlanReferences(db),
                 character_id=character_id,
                 world_id=world_id,
                 user=user,
-                data=schemas.DailyActivityPlanPrepareCreate(
+                data=routine_schemas.DailyActivityPlanPrepareCreate(
                     idempotency_key=f"p3-concurrent-{index}"
                 ),
                 now=now,
@@ -503,7 +509,7 @@ def test_world_row_version_serializes_concurrent_writers() -> None:
         created = world_service.create_world(
             db,
             user=owner,
-            data=schemas.WorldDraftCreate(
+            data=world_schemas.WorldDraftCreate(
                 name="동시성 검증 World",
                 tagline="두 작성자의 오래된 수정을 동시에 막는 검증 세계",
                 setting_description="세계" * 100,
@@ -526,7 +532,7 @@ def test_world_row_version_serializes_concurrent_writers() -> None:
                     db,
                     world_id=world_id,
                     user=owner,
-                    data=schemas.WorldUpdate(
+                    data=world_schemas.WorldUpdate(
                         row_version=row_version,
                         tagline=f"{label} 작성자가 저장한 충분히 긴 World 소개 문장",
                     ),
@@ -871,7 +877,7 @@ def test_message_response_lease_is_single_flight_across_postgres_sessions(
                         db,
                         user,
                         thread_id,
-                        schemas.MessageMessageCreate(content="synthetic"),
+                        schema_chat_schemas.MessageMessageCreate(content="synthetic"),
                     )
                 )
             except message_service.MessageInFlightError:
@@ -954,7 +960,7 @@ def test_message_response_lease_is_single_flight_across_postgres_sessions(
                                 db,
                                 user,
                                 thread_ids[1],
-                                schemas.MessageMessageCreate(content="cross send"),
+                                schema_chat_schemas.MessageMessageCreate(content="cross send"),
                             )
                         )
                     else:
@@ -1007,7 +1013,7 @@ def test_message_response_lease_is_single_flight_across_postgres_sessions(
                         db,
                         user,
                         thread_ids[0],
-                        schemas.MessageMessageCreate(content="provider failure"),
+                        schema_chat_schemas.MessageMessageCreate(content="provider failure"),
                     )
                 )
             thread = db.get(models.MessageThread, thread_ids[0])
@@ -1482,7 +1488,7 @@ def test_agent_creation_allows_concurrent_local_characters_without_a_saved_count
             agent_service.create_agent(
                 db,
                 user,
-                schemas.AgentCreate(
+                character_schemas.AgentCreate(
                     execution_mode="local",
                     name=f"local-{index}",
                     handle=f"local_{suffix[:12]}_{index}",
@@ -1691,7 +1697,7 @@ def test_message_thread_quota_is_atomic_across_postgres_sessions() -> None:
                 message_service.create_or_get_thread(
                     db,
                     requester,
-                    schemas.MessageThreadCreate(character_id=character_id),
+                    schema_chat_schemas.MessageThreadCreate(character_id=character_id),
                 )
             except message_service.MessageThreadLimitError:
                 return "limited"
@@ -1967,7 +1973,7 @@ def test_world_autonomy_capacity_is_atomic_across_postgres_sessions(
         assert selected is not None
         world_character = db.get(models.WorldCharacter, selected.world_character_id)
         assert world_character is not None
-        return schemas.AgentActivityProfileReadinessRead(
+        return character_schemas.AgentActivityProfileReadinessRead(
             ready=True,
             source="world_community_profile",
             world_id=world_character.world_id,

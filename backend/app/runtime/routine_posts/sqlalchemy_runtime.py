@@ -1,33 +1,62 @@
 from __future__ import annotations
-from app.domains.routines.repository import public_action_executions as public_action_queries
-from app.domains.routines.service import public_action_executions as public_action_executions
+
 from app.runtime.social.agent_tools import agent_tool_actions
 
 from app.runtime.routines.joint_references import SqlAlchemyJointReferences
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC
+
+from datetime import datetime
+
+from datetime import timedelta
+
 from hashlib import sha256
+
 import json
+
 import logging
 
 from sqlalchemy import select
+
 from sqlalchemy.exc import IntegrityError
+
 from sqlalchemy.orm import Session
 
-from app.compatibility.routine_posts import legacy
+from app.runtime.persistence.model_registration import register_models
+register_models()
+from app.domains.social.schemas.community import PostCreate
+from app.runtime.routines import activity_policy as agent_activity_policy
+from app.runtime.relationships import sqlalchemy_social_event as social_event_runtime
+
 from app.core import unit_of_work
+
 from app.domains.routine_posts.constants import ROUTINE_CONTRACT_VERSION
-from app.domains.routine_posts.contracts.generation import RoutineGeneration, RoutinePostProvider
+
+from app.domains.routine_posts.contracts.generation import RoutineGeneration
+
+from app.domains.routine_posts.contracts.generation import RoutinePostProvider
+
 from app.domains.routine_posts.service.evidence import validate_routine_generation
+
 from app.domains.routine_posts.service.generation import DirectRoutinePostProvider
+
 from app.domains.routine_posts.exceptions import RoutineContextUnavailable
+
 from app.domains.routine_posts.contracts.context import RoutineInteractionSource
+from app.domains.routine_posts.contracts.context import RoutineResidentContext
+
 from app.domains.routine_posts.service.context import assemble_routine_post_context
+
 from app.runtime.routine_posts.context_references import SqlAlchemyRoutineContextReferences
+
 from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routines
+
 from app.domains.routines.service.execution import claims as activity_claims
+
 from app.domains.routines.service.execution import lifecycle as activity_lifecycle
+
 from app.domains.routines import exceptions as activity_errors
+
 from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
 from app.runtime.social.manual_inbox import (
     ManualInboxRuntimeError,
@@ -44,30 +73,36 @@ from app.runtime.social.manual_inbox import (
 from app.runtime.social.observations import observe_source
 from app.domains.social.contracts.observations import SocialObservationError
 from app.domains.social.contracts.subjective_context import ActionSubjectiveContextV1
-from app.runtime.social.subjective_composition import record_declared_subjective_context
-from app.integrations.direct_llm import (
-    DirectLlmDeferred,
-    DirectLlmError,
-    DirectLlmJsonError,
-    RunLlmTracker,
-)
 
+from app.runtime.social.subjective_composition import record_declared_subjective_context
+
+from app.integrations.direct_llm import DirectLlmDeferred
+
+from app.integrations.direct_llm import DirectLlmError
+
+from app.integrations.direct_llm import DirectLlmJsonError
+
+from app.integrations.direct_llm import RunLlmTracker
 
 from app.domains.routines.models.plans import ActivityBeat as _model_ActivityBeat
-from app.domains.world_characters.models import CharacterActiveWorld as _model_CharacterActiveWorld
-from app.domains.routines.models.plans import JointActivity as _model_JointActivity
-from app.domains.social.models.posts import Post as _model_Post
-from app.domains.world_characters.models import WorldCharacter as _model_WorldCharacter
-agent_run_crud = legacy.agent_run_crud
-agent_activity_policy = legacy.agent_activity_policy
-from app.domains.routines.service import joint_activity as joint_activity_runtime
-social_event_runtime = legacy.social_event_runtime
-LangGraphResidentContext = legacy.LangGraphResidentContext
 
+from app.domains.world_characters.models import CharacterActiveWorld as _model_CharacterActiveWorld
+
+from app.domains.routines.models.plans import JointActivity as _model_JointActivity
+
+from app.domains.social.models.posts import Post as _model_Post
+
+from app.domains.world_characters.models import WorldCharacter as _model_WorldCharacter
+
+from app.domains.routines.service import joint_activity as joint_activity_runtime
+
+from app.domains.routines.repository import public_action_executions as public_action_queries
+
+from app.domains.routines.service import public_action_executions as public_action_executions
 
 logger = logging.getLogger(__name__)
-CLAIM_LEASE = timedelta(minutes=10)
 
+CLAIM_LEASE = timedelta(minutes=10)
 
 def routine_world_character_for_character(
     db: Session, *, character_id: str
@@ -84,7 +119,6 @@ def routine_world_character_for_character(
     ):
         return None
     return world_character
-
 
 def _safe_result(
     *,
@@ -103,7 +137,6 @@ def _safe_result(
         "llm_usage_summary": (tracker or RunLlmTracker(max_calls=3)).summary(),
     }
 
-
 def _beat_idempotency_key(
     *, world_character_id: str, episode_id: str, scheduled_for: datetime
 ) -> str:
@@ -117,7 +150,6 @@ def _beat_idempotency_key(
     )
     return sha256(value.encode("utf-8")).hexdigest()
 
-
 def _execution_signature(*, world_character_id: str, beat_id: str) -> str:
     value = "|".join(
         (
@@ -129,13 +161,11 @@ def _execution_signature(*, world_character_id: str, beat_id: str) -> str:
     )
     return sha256(value.encode("utf-8")).hexdigest()
 
-
 def _planner_hash(generation: RoutineGeneration) -> str:
     payload = generation.plan.model_dump(mode="json")
     return sha256(
         json.dumps(payload, ensure_ascii=False, sort_keys=True).encode("utf-8")
     ).hexdigest()
-
 
 def _retryable_provider_error(exc: BaseException) -> bool:
     if isinstance(exc, DirectLlmDeferred):
@@ -145,7 +175,6 @@ def _retryable_provider_error(exc: BaseException) -> bool:
         marker in value
         for marker in ("timeout", "temporar", "rate", "429", "500", "502", "503", "504")
     )
-
 
 def _failure_code(exc: BaseException) -> str:
     if isinstance(exc, DirectLlmJsonError):
@@ -158,11 +187,9 @@ def _failure_code(exc: BaseException) -> str:
         return "provider_failed"
     return "routine_generation_failed"
 
-
 def _runtime_error_code(exc: activity_errors.ActivityRuntimeError) -> str:
     value = str(exc).strip()
     return value.upper() if value else "ROUTINE_RUNTIME_CONFLICT"
-
 
 def _finish_failed_beat(
     db: Session,
@@ -201,9 +228,8 @@ def _finish_failed_beat(
             claim_run_id,
         )
 
-
 async def run_routine_post_runtime(
-    resident_context: LangGraphResidentContext,
+    resident_context: RoutineResidentContext,
     *,
     interaction_source: RoutineInteractionSource | None = None,
     provider: RoutinePostProvider | None = None,
@@ -555,7 +581,7 @@ async def run_routine_post_runtime(
             post_read = agent_tool_actions.create_agent_tool_post(
                 db,
                 resident_context.session_key,
-                legacy.PostCreate(
+                PostCreate(
                     title=generation.draft.title,
                     body=generation.draft.body,
                     author_character_id=resident_context.character.id,

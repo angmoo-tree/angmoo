@@ -1,5 +1,5 @@
 """Registry identity across the Social move and immutable migration imports."""
-from tests.model_fixture_support import models as registered
+from model_fixture_support import models as registered
 from app.models import Base
 from app.domains.social import contracts as public
 from app.domains.social.contracts import subjective_context, today_activity, writes

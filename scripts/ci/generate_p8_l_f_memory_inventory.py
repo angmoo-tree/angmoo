@@ -65,8 +65,8 @@ REQUIRED_FILES = (
     "backend/app/alembic/versions/20260831_0085_canonical_memory_schema.py",
     "backend/app/runtime/migrations/sqlite_versions/v4_to_v5_canonical_memory.py",
     "backend/app/runtime/migrations/sqlite_versions/manifests/v5.json",
-    "backend/tests/test_p8_l_f_memory_domain.py",
-    "backend/tests/test_p8_l_f_memory_migration.py",
+    "backend/tests/memory/test_p8_l_f_memory_domain.py",
+    "backend/tests/memory/test_p8_l_f_memory_migration.py",
 )
 
 

@@ -1,43 +1,80 @@
+import app.domains.social.schemas.community as social_schemas
+import app.domains.routines.constants as routines_constants
+import app.domains.routines.service.feed_history_notes as routines_feed_history_notes_service
+import app.domains.social.exceptions as social_errors
+import app.domains.social.service.activity_results as social_activity_results_service
+import app.runtime.social.agent_tool_reads as social_agent_tool_reads_runtime
+import app.runtime.social.agent_tools as social_agent_tools_runtime
+import app.runtime.social.feed_history as social_feed_history_runtime
+import app.runtime.social.feed_history_notes as social_feed_history_notes_runtime
 from app.domains.routines.repository import runs as routine_run_queries
-from app.domains.social import exceptions as social_exceptions
-from app.domains.routines import constants as social_constants
-from app.runtime.social.agent_tool_reads import agent_tool_reads
-from app.domains.social.service import activity_results as social_activity_results
-from app.runtime.social.agent_tools import agent_tool_actions
-from app.runtime.social import feed_history as social_feed_history
-from app.runtime.social import feed_history_notes as social_feed_history_notes
-from app.runtime.social import topic_metadata as social_topic_metadata
+from app.domains.character_lore import contracts as character_lore
+
 from app.domains.routines.service import feed_history_notes as note_service
+
 from app.runtime.social import feed_history_notes as note_runtime
+
 from app.domains.social.service import agent_tool_reads as tool_read_service
+
 from app.domains.social.service import agent_tool_actions as tool_action_service
+
 from app.runtime.social import agent_tools as tool_action_runtime
+
 from app.runtime.social import feed_history as history_runtime
 
 from app.domains.routines.service import feed_history as history_policy
+
 from app.domains.social.service import topic_metadata as topic_policy
+
 from app.domains.social.repository import posts as post_repository
-from app.domains.character_lore import contracts as character_lore
+
 import asyncio
+
 import json
+
 import inspect
-from datetime import UTC, datetime, timedelta
+
+from datetime import UTC
+
+from datetime import datetime
+
+from datetime import timedelta
+
 from types import SimpleNamespace
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException
+
+from fastapi import status
+
 import pytest
 
-from app import schemas
+
+
 from app.domains.characters import router as agent_routes
+
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
+
 from app.domains.routines.service import action_briefs as agent_briefs
-from app.domains.routines.service import autonomy_management, manual_activity, feed_cues, first_greeting
-from app.services import direct_llm
-from app.domains.routines.service import writing_prompts as agent_writing
-from app.runtime.resident import writing as writing_runtime
+
 from app.runtime.resident import execution as agent_runs
+
+from app.domains.routines.service import writing_prompts as agent_writing
+
+
+
+from app.integrations import direct_llm as direct_llm
+
 from app.runtime.characters import management as agent_service
 
+from app.domains.routines.service import autonomy_management
+
+from app.domains.routines.service import manual_activity
+
+from app.domains.routines.service import feed_cues
+
+from app.domains.routines.service import first_greeting
+
+from app.runtime.resident import writing as writing_runtime
 
 def _activity_policy() -> agent_activity_policy.ActivityPolicy:
     return agent_activity_policy.ActivityPolicy(
@@ -75,7 +112,6 @@ def _activity_policy() -> agent_activity_policy.ActivityPolicy:
         },
     )
 
-
 def test_activity_policy_prompt_uses_notes_without_ranges_or_observe_tendency():
     prompt = _activity_policy().to_prompt()
 
@@ -86,11 +122,11 @@ def test_activity_policy_prompt_uses_notes_without_ranges_or_observe_tendency():
     assert "Post only when there is a character-owned topic worth opening." in prompt
     assert "Like when quiet agreement is enough." in prompt
 
-
 def test_activity_setting_read_excludes_internal_planner_tendency_profile():
+    import app.domains.routines.schemas as schemas
     assert "planner_tendency_profile" not in schemas.AgentActivitySettingRead.model_fields
+    import app.domains.routines.schemas as schemas
     assert "tendency_analysis_ready" in schemas.AgentActivitySettingRead.model_fields
-
 
 def _tendency_setting_with_profile(profile: dict[str, object]) -> SimpleNamespace:
     return SimpleNamespace(
@@ -107,7 +143,6 @@ def _tendency_setting_with_profile(profile: dict[str, object]) -> SimpleNamespac
         planner_tendency_profile=profile,
     )
 
-
 def test_agent_service_tendency_readiness_requires_hidden_feed_seed_criteria():
     assert not agent_service._has_tendency_analysis(_tendency_setting_with_profile({}))
     assert not agent_service._has_tendency_analysis(
@@ -119,7 +154,6 @@ def test_agent_service_tendency_readiness_requires_hidden_feed_seed_criteria():
             {"feed_seed_interest_criteria": "Prefer feed posts that fit the persona."}
         )
     )
-
 
 def test_public_activity_entrypoints_use_lane_specific_profile_readiness():
     from app.runtime.characters import management
@@ -145,7 +179,6 @@ def test_public_activity_entrypoints_use_lane_specific_profile_readiness():
         agent_service.run_agent_now
     )
 
-
 def test_public_activity_entrypoints_require_tendency_readiness():
     """Keep the approved legacy readiness boundary while World lanes migrate."""
     from app.runtime.characters import management
@@ -162,7 +195,6 @@ def test_public_activity_entrypoints_require_tendency_readiness():
     assert "_ensure_tendency_analysis_ready(setting)" in inspect.getsource(
         agent_service.run_first_greeting
     )
-
 
 def test_tendency_payload_normalizes_internal_independent_post_profile():
     topics = [
@@ -209,7 +241,6 @@ def test_tendency_payload_normalizes_internal_independent_post_profile():
     assert profile["independent_post_topics"][0] == topics[0]
     assert "단순 유행어" in str(profile["feed_seed_interest_criteria"])
 
-
 @pytest.mark.parametrize("topic_count", [29, 31])
 def test_tendency_payload_requires_30_internal_independent_post_topics(
     topic_count: int,
@@ -241,13 +272,11 @@ def test_tendency_payload_requires_30_internal_independent_post_topics(
             }
         )
 
-
 def test_tendency_payload_requires_internal_planner_tendency_profile():
     with pytest.raises(agent_service.TendencyAnalysisParseError):
         agent_service._normalize_tendency_payload(
             {"summary": "공개 요약", "action_ranges": {}}
         )
-
 
 def test_tendency_payload_requires_hidden_feed_seed_interest_criteria():
     topics = [
@@ -273,7 +302,6 @@ def test_tendency_payload_requires_hidden_feed_seed_interest_criteria():
                 },
             }
         )
-
 
 def test_tendency_payload_rejects_prompt_injection_before_save():
     topics = [
@@ -306,7 +334,6 @@ def test_tendency_payload_rejects_prompt_injection_before_save():
             }
         )
 
-
 def test_tendency_payload_rejects_hidden_feed_seed_interest_injection():
     topics = [
         {
@@ -338,7 +365,6 @@ def test_tendency_payload_rejects_hidden_feed_seed_interest_injection():
             }
         )
 
-
 def test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term():
     prompt = agent_service._build_tendency_analysis_prompt(
         character=SimpleNamespace(
@@ -366,7 +392,6 @@ def test_tendency_prompt_uses_name_for_user_facing_text_and_angmoo_as_term():
     assert 'call this Angmoo persona "앵무" instead of "캐릭터"' not in prompt
     assert 'use "앵무" when referring to the Angmoo persona' not in prompt
 
-
 def test_tendency_analysis_uses_medium_thinking_and_larger_output_budget(
     monkeypatch,
 ) -> None:
@@ -391,7 +416,6 @@ def test_tendency_analysis_uses_medium_thinking_and_larger_output_budget(
     )
     assert agent_service.settings.tendency_analysis_thinking_level is None
 
-
 def _run_tendency_analysis_route_with_error(monkeypatch, exc: Exception) -> HTTPException:
     async def _raise_error(*_: object, **__: object) -> object:
         raise exc
@@ -407,7 +431,6 @@ def _run_tendency_analysis_route_with_error(monkeypatch, exc: Exception) -> HTTP
             )
         )
     return exc_info.value
-
 
 @pytest.mark.parametrize(
     "exc",
@@ -432,7 +455,6 @@ def test_tendency_analysis_route_hides_json_parse_details(monkeypatch, exc):
     assert http_exc.status_code == status.HTTP_502_BAD_GATEWAY
     assert http_exc.detail == agent_routes.TENDENCY_ANALYSIS_RETRY_DETAIL
 
-
 def test_tendency_analysis_route_maps_prompt_injection_to_422(monkeypatch):
     http_exc = _run_tendency_analysis_route_with_error(
         monkeypatch,
@@ -443,7 +465,6 @@ def test_tendency_analysis_route_maps_prompt_injection_to_422(monkeypatch):
 
     assert http_exc.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert http_exc.detail == "tendency_prompt_injection_detected"
-
 
 @pytest.mark.parametrize(
     ("exc", "expected_status", "expected_detail"),
@@ -473,7 +494,6 @@ def test_tendency_analysis_route_keeps_non_json_errors(
     assert http_exc.status_code == expected_status
     assert http_exc.detail == expected_detail
 
-
 def test_normalize_angmoo_terms_in_tendency_text_changes_persona_only():
     normalize = agent_service.normalize_angmoo_terms_in_tendency_text
 
@@ -483,7 +503,6 @@ def test_normalize_angmoo_terms_in_tendency_text_changes_persona_only():
     assert normalize("캐릭터 성향을 보여줍니다.") == "앵무 성향을 보여줍니다."
     assert normalize("최애 캐릭터 정보를 공유합니다.") == "최애 캐릭터 정보를 공유합니다."
     assert normalize("게임 캐릭터 이야기를 합니다.") == "게임 캐릭터 이야기를 합니다."
-
 
 def test_feed_scan_create_post_brief_requires_seed_or_owner_cue():
     no_seed = agent_briefs.build_feed_scan_create_post_brief({})
@@ -533,12 +552,10 @@ def test_feed_scan_create_post_brief_requires_seed_or_owner_cue():
     assert missing_intent == ""
     assert "source: owner_feed_cue" in owner_cue
 
-
 def test_feed_history_sanitize_uses_google_non_streaming_stream_params():
     assert agent_runs._feed_history_sanitize_stream_params() == {
         "googleResponseMode": "non_streaming"
     }
-
 
 def test_feed_scan_uses_google_non_streaming_stream_params():
     assert agent_runs._feed_scan_stream_params() == {
@@ -546,7 +563,6 @@ def test_feed_scan_uses_google_non_streaming_stream_params():
     }
     source = inspect.getsource(agent_runs._run_resident_individual_tool_flow)
     assert "stream_params=_feed_scan_stream_params()" in source
-
 
 def test_writing_composition_prompt_has_input_voice_boundary():
     prompt = agent_writing._build_composition_prompt(
@@ -575,7 +591,6 @@ def test_writing_composition_prompt_has_input_voice_boundary():
     assert "제공된 Final action brief, saved_state, recent_activity_summary, target/thread context" in prompt
     assert "title, body, reply를 쓸 때는 위 입력에 남아 있던 웃음소리" in prompt
     assert "현재 Character의 persona와 speech_style에 명시된 말투만 기준" in prompt
-
 
 def test_recent_feed_interest_history_formatter_limits_and_filters(monkeypatch):
     now = datetime(2026, 6, 2, 12, 0, tzinfo=UTC)
@@ -657,7 +672,7 @@ def test_recent_feed_interest_history_formatter_limits_and_filters(monkeypatch):
         lambda _db, post_id: posts.get(post_id),
     )
 
-    result = social_feed_history.format_recent_feed_interest_history_for_prompt(
+    result = social_feed_history_runtime.format_recent_feed_interest_history_for_prompt(
         None, character_id="char-1"
     )
 
@@ -675,7 +690,6 @@ def test_recent_feed_interest_history_formatter_limits_and_filters(monkeypatch):
     assert "topic post-1" in result
     assert "novelty post-1" in result
     assert "body_preview:" in result
-
 
 def test_agent_feed_post_summary_uses_topic_and_preview(monkeypatch):
     monkeypatch.setattr(
@@ -703,7 +717,7 @@ def test_agent_feed_post_summary_uses_topic_and_preview(monkeypatch):
         body="x" * 350,
     )
 
-    card = agent_tool_reads._agent_feed_post_summary(None, post)
+    card = social_agent_tool_reads_runtime.agent_tool_reads._agent_feed_post_summary(None, post)
 
     assert card.post_id == "post-1"
     assert card.author == "source author"
@@ -711,7 +725,6 @@ def test_agent_feed_post_summary_uses_topic_and_preview(monkeypatch):
     assert card.title == "원문 제목"
     assert len(card.body_preview) == 300
     assert card.body_preview.endswith("...")
-
 
 def test_agent_feed_post_summary_prefers_post_topic_columns(monkeypatch):
     monkeypatch.setattr(
@@ -741,10 +754,9 @@ def test_agent_feed_post_summary_prefers_post_topic_columns(monkeypatch):
         novelty_basis="column novelty",
     )
 
-    card = agent_tool_reads._agent_feed_post_summary(None, post)
+    card = social_agent_tool_reads_runtime.agent_tool_reads._agent_feed_post_summary(None, post)
 
     assert card.topic_signature == "column topic wins"
-
 
 def test_post_topic_signature_falls_back_to_activity_log_metadata(monkeypatch):
     import app.runtime.social.topic_metadata as community_service
@@ -769,7 +781,6 @@ def test_post_topic_signature_falls_back_to_activity_log_metadata(monkeypatch):
         community_service.post_topic_signature_for_prompt(None, post)
         == "log fallback topic"
     )
-
 
 def test_note_agent_tool_feed_interests_stores_topic_metadata(monkeypatch):
     run = SimpleNamespace(
@@ -805,12 +816,12 @@ def test_note_agent_tool_feed_interests_stores_topic_metadata(monkeypatch):
 
     monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = social_feed_history_notes.note_agent_tool_feed_interests(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_interests(
         None,
         "session-1",
-        schemas.AgentFeedInterestsCreate(
+        social_schemas.AgentFeedInterestsCreate(
             interests=[
-                schemas.AgentFeedInterestItem(
+                social_schemas.AgentFeedInterestItem(
                     post_id="post-1", summary="summary", reason="reason"
                 )
             ],
@@ -828,7 +839,6 @@ def test_note_agent_tool_feed_interests_stores_topic_metadata(monkeypatch):
     assert payload["novelty_basis"] == "새로운 진행이 있음"
     assert stored_payload["topic_signature"] == "큰 주제: 응원 루프"
     assert captured["action_type"] == "feed_interests_noted"
-
 
 def test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable(monkeypatch):
     monkeypatch.setattr(
@@ -866,12 +876,12 @@ def test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable(
 
     monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = social_feed_history_notes.note_agent_tool_feed_interests(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_interests(
         None,
         "session-1",
-        schemas.AgentFeedInterestsCreate(
+        social_schemas.AgentFeedInterestsCreate(
             interests=[
-                schemas.AgentFeedInterestItem(
+                social_schemas.AgentFeedInterestItem(
                     post_id="post-1", summary="summary", reason="reply fits better"
                 )
             ],
@@ -889,7 +899,6 @@ def test_note_agent_tool_feed_interests_marks_legacy_reaction_seed_not_writable(
     assert "legacy_reaction_seed_not_writable" in payload["warnings"]
     assert json.loads(str(captured["result"]))["post_seed_intent"] == "public_reaction"
 
-
 def test_note_agent_tool_feed_interests_drops_seed_without_interest(monkeypatch):
     monkeypatch.setattr(
         note_runtime,
@@ -906,10 +915,10 @@ def test_note_agent_tool_feed_interests_drops_seed_without_interest(monkeypatch)
 
     monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = social_feed_history_notes.note_agent_tool_feed_interests(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_interests(
         None,
         "session-1",
-        schemas.AgentFeedInterestsCreate(
+        social_schemas.AgentFeedInterestsCreate(
             interests=[],
             post_seed="이걸로 글을 쓰자",
             post_seed_intent="own_thought",
@@ -926,7 +935,6 @@ def test_note_agent_tool_feed_interests_drops_seed_without_interest(monkeypatch)
     assert payload["no_relevant_signal"] is True
     assert "post_seed_dropped_without_feed_interest" in payload["warnings"]
     assert stored_payload["post_seed"] == ""
-
 
 def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch):
     monkeypatch.setattr(
@@ -960,12 +968,12 @@ def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch)
 
     monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = social_feed_history_notes.note_agent_tool_feed_interests(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_interests(
         None,
         "session-1",
-        schemas.AgentFeedInterestsCreate(
+        social_schemas.AgentFeedInterestsCreate(
             interests=[
-                schemas.AgentFeedInterestItem(
+                social_schemas.AgentFeedInterestItem(
                     post_id="post-1",
                     summary="like-worthy summary",
                     reason="quiet agreement fits",
@@ -982,7 +990,6 @@ def test_note_agent_tool_feed_interests_keeps_interest_without_seed(monkeypatch)
     assert payload["post_seed"] == ""
     assert payload["no_relevant_signal"] is False
     assert captured["target_post_id"] == "post-1"
-
 
 def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch):
     import app.domains.routines.constants as community_service
@@ -1001,25 +1008,25 @@ def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch)
 
     monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = social_feed_history_notes.note_agent_tool_feed_history_sanitize(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_history_sanitize(
         None,
         "session-1",
-        schemas.AgentFeedHistorySanitizeCreate(
+        social_schemas.AgentFeedHistorySanitizeCreate(
             consumed_sources=[
-                schemas.AgentFeedHistorySanitizeItem(
+                social_schemas.AgentFeedHistorySanitizeItem(
                     topic_signature="lunch strategy",
                     source_title="source lunch",
                     seed_semantic_summary="냐하하! copied lunch strategy voice",
                 )
             ],
             recent_feed_interests=[
-                schemas.AgentFeedHistorySanitizeItem(
+                social_schemas.AgentFeedHistorySanitizeItem(
                     topic_signature="feed lunch",
                     interest_reason_summary="냐하하! cared about lunch timing",
                 )
             ],
             recent_own_root_topics=[
-                schemas.AgentFeedHistorySanitizeItem(
+                social_schemas.AgentFeedHistorySanitizeItem(
                     topic_signature="own lunch",
                     own_root_semantic_summary="냐하하! already posted lunch plan",
                 )
@@ -1042,9 +1049,8 @@ def test_note_agent_tool_feed_history_sanitize_removes_style_marker(monkeypatch)
         "copied lunch strategy voice"
     )
 
-
 def test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton(monkeypatch):
-    style_marker = social_constants.FEED_HISTORY_STYLE_MARKER_RE.pattern[
+    style_marker = routines_constants.FEED_HISTORY_STYLE_MARKER_RE.pattern[
         1:
     ].split("|")[0]
     monkeypatch.setattr(
@@ -1077,12 +1083,12 @@ def test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton(monkeypat
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
 
-    result = social_feed_history_notes.note_agent_tool_feed_history_sanitize(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_history_sanitize(
         SimpleNamespace(),
         "session-1",
-        schemas.AgentFeedHistorySanitizeCreate(
+        social_schemas.AgentFeedHistorySanitizeCreate(
             consumed_sources=[
-                schemas.AgentFeedHistorySanitizeItem(
+                social_schemas.AgentFeedHistorySanitizeItem(
                     post_id="post-locked",
                     topic_signature="wrong topic",
                     novelty_basis="wrong novelty",
@@ -1103,7 +1109,6 @@ def test_note_agent_tool_feed_history_sanitize_merges_backend_skeleton(monkeypat
     assert "style_marker_removed" in item["warnings"]
     assert "wrong topic" not in result.result
     assert "raw old source text" not in result.result
-
 
 def test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_metadata(
     monkeypatch,
@@ -1138,10 +1143,10 @@ def test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_meta
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
 
-    result = social_feed_history_notes.note_agent_tool_feed_history_sanitize(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_history_sanitize(
         SimpleNamespace(),
         "session-1",
-        schemas.AgentFeedHistorySanitizeCreate(),
+        social_schemas.AgentFeedHistorySanitizeCreate(),
     )
 
     payload = json.loads(result.result)
@@ -1151,7 +1156,6 @@ def test_note_agent_tool_feed_history_sanitize_fills_missing_llm_items_from_meta
         "locked topic / locked novelty / locked title"
     )
     assert "raw omitted source" not in result.result
-
 
 def test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_payload(
     monkeypatch,
@@ -1179,13 +1183,13 @@ def test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_
         lambda *args, **kwargs: SimpleNamespace(id=1),
     )
 
-    with caplog.at_level("INFO", logger=note_service.logger.name):
-        social_feed_history_notes.note_agent_tool_feed_history_sanitize(
+    with caplog.at_level("INFO", logger=routines_feed_history_notes_service.logger.name):
+        social_feed_history_notes_runtime.note_agent_tool_feed_history_sanitize(
             SimpleNamespace(),
             "session-secret-value",
-            schemas.AgentFeedHistorySanitizeCreate(
+            social_schemas.AgentFeedHistorySanitizeCreate(
                 consumed_sources=[
-                    schemas.AgentFeedHistorySanitizeItem(
+                    social_schemas.AgentFeedHistorySanitizeItem(
                         post_id="post-secret",
                         seed_semantic_summary="secret raw summary text",
                     )
@@ -1206,23 +1210,22 @@ def test_note_agent_tool_feed_history_sanitize_logs_endpoint_timing_without_raw_
     assert "secret raw summary text" not in joined
     assert "post-secret" not in joined
 
-
 def test_note_agent_tool_feed_history_sanitize_logs_authorization_error(
     monkeypatch,
     caplog,
 ):
     import app.domains.social.exceptions as community_service
     def reject(*args, **kwargs):
-        raise community_service.AgentRunAuthorizationError("no session")
+        raise social_errors.AgentRunAuthorizationError("no session")
 
     monkeypatch.setattr(note_runtime, "_get_agent_tool_run", reject)
 
-    with caplog.at_level("WARNING", logger=note_service.logger.name):
+    with caplog.at_level("WARNING", logger=routines_feed_history_notes_service.logger.name):
         with pytest.raises(community_service.AgentRunAuthorizationError):
-            social_feed_history_notes.note_agent_tool_feed_history_sanitize(
+            social_feed_history_notes_runtime.note_agent_tool_feed_history_sanitize(
                 SimpleNamespace(),
                 "session-secret-value",
-                schemas.AgentFeedHistorySanitizeCreate(),
+                social_schemas.AgentFeedHistorySanitizeCreate(),
             )
 
     joined = "\n".join(record.getMessage() for record in caplog.records)
@@ -1230,7 +1233,6 @@ def test_note_agent_tool_feed_history_sanitize_logs_authorization_error(
     assert "failureKind=authorization_error" in joined
     assert "errorCategory=AgentRunAuthorizationError" in joined
     assert "session-secret-value" not in joined
-
 
 def test_feed_history_metadata_fallback_excludes_raw_seed(monkeypatch):
     now = datetime(2026, 6, 6, 12, 0, tzinfo=UTC)
@@ -1269,7 +1271,7 @@ def test_feed_history_metadata_fallback_excludes_raw_seed(monkeypatch):
         lambda *args, **kwargs: "- none",
     )
 
-    sections = social_feed_history.format_feed_history_metadata_fallback_for_prompt(
+    sections = social_feed_history_runtime.format_feed_history_metadata_fallback_for_prompt(
         None, character_id="char-1"
     )
 
@@ -1280,7 +1282,6 @@ def test_feed_history_metadata_fallback_excludes_raw_seed(monkeypatch):
     assert "post_seed" not in consumed
     assert "raw old seed text" not in consumed
     assert "냐하하" not in consumed
-
 
 def test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic(
     monkeypatch,
@@ -1326,12 +1327,12 @@ def test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic(
 
     monkeypatch.setattr(note_service.agent_crud, "log_activity", log_activity)
 
-    result = social_feed_history_notes.note_agent_tool_feed_interests(
+    result = social_feed_history_notes_runtime.note_agent_tool_feed_interests(
         None,
         "session-1",
-        schemas.AgentFeedInterestsCreate(
+        social_schemas.AgentFeedInterestsCreate(
             interests=[
-                schemas.AgentFeedInterestItem(
+                social_schemas.AgentFeedInterestItem(
                     post_id="post-1",
                     summary="same broad topic",
                     reason="like can still fit",
@@ -1351,9 +1352,8 @@ def test_note_agent_tool_feed_interests_drops_seed_for_recent_own_topic(
     assert payload["no_relevant_signal"] is False
     assert "post_seed_topic_repeated_recent_own_root" in payload["warnings"]
 
-
 def test_post_created_activity_result_stores_topic_metadata():
-    result = social_activity_results.build_post_created_activity_result(
+    result = social_activity_results_service.build_post_created_activity_result(
         post_id="post-1",
         title="visible title",
         body="visible body",
@@ -1369,7 +1369,6 @@ def test_post_created_activity_result_stores_topic_metadata():
     assert payload["novelty_basis"] == "새 관점"
     assert payload["lore_chunk_ids"] == ["lore-chunk-1", "lore-chunk-2"]
     assert payload["retrieval_mode"] == "pgvector"
-
 
 def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
     run = SimpleNamespace(
@@ -1421,10 +1420,10 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
         lambda *args, **kwargs: None,
     )
 
-    agent_tool_actions.create_agent_tool_post(
+    social_agent_tools_runtime.agent_tool_actions.create_agent_tool_post(
         FakeDb(),
         "session-1",
-        schemas.PostCreate(
+        social_schemas.PostCreate(
             title="title",
             body="body",
             author_character_id="char-1",
@@ -1436,7 +1435,6 @@ def test_create_agent_tool_post_stores_post_topic_metadata(monkeypatch):
     assert stored["post_id"] == "post-1"
     assert stored["topic_signature"] == "큰 주제: 자기 생각"
     assert stored["novelty_basis"] == "새 관점"
-
 
 def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatch):
     run = SimpleNamespace(
@@ -1493,13 +1491,13 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
         lambda *args, **kwargs: consumed.append(kwargs),
     )
 
-    post_data = schemas.PostCreate(
+    post_data = social_schemas.PostCreate(
         title="title",
         body="body",
         author_character_id="char-1",
     )
-    agent_tool_actions.create_agent_tool_post(FakeDb(), "session-1", post_data)
-    agent_tool_actions.create_agent_tool_post(
+    social_agent_tools_runtime.agent_tool_actions.create_agent_tool_post(FakeDb(), "session-1", post_data)
+    social_agent_tools_runtime.agent_tool_actions.create_agent_tool_post(
         FakeDb(),
         "session-1",
         post_data,
@@ -1510,7 +1508,6 @@ def test_create_agent_tool_post_consumes_feed_cue_only_when_requested(monkeypatc
     assert consumed == [
         {"character_id": "char-1", "run_id": "run-1", "post_id": "post-1"}
     ]
-
 
 def test_recent_own_root_topic_exists_uses_post_topic_columns(monkeypatch):
     import app.runtime.social.feed_history as community_service
@@ -1553,11 +1550,6 @@ def test_recent_own_root_topic_exists_uses_post_topic_columns(monkeypatch):
         topic_signature="이미 쓴 큰 주제",
     )
 
-
-
-
-
-
 def test_v6_final_action_prompt_requires_menu_note_and_scan_match():
     prompt = agent_runs._build_v6_final_action_prompt(
         character=SimpleNamespace(id="char-1", name="quiet cat"),
@@ -1570,7 +1562,6 @@ def test_v6_final_action_prompt_requires_menu_note_and_scan_match():
     assert "They are not numeric quotas" in prompt
     assert "the selected inbox/feed/writing context supports it" in prompt
     assert "A visible candidate is not a command to act" in prompt
-
 
 def test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought(monkeypatch):
     monkeypatch.setattr(agent_writing, "_format_recent_activity", lambda *args, **kwargs: "- none")
@@ -1614,7 +1605,6 @@ def test_writing_composition_prompt_keeps_feed_seed_as_public_own_thought(monkey
     assert "Do not write final title/body as if the current character personally saw, did, or felt" in prompt
     assert "recast it as the current character's thought, empathy, question, or reflection" in prompt
 
-
 def test_self_update_composition_prompt_excludes_state_and_activity(monkeypatch):
     def fail_recent_activity(*args, **kwargs):
         raise AssertionError("self_update should not load recent activity logs")
@@ -1648,7 +1638,6 @@ def test_self_update_composition_prompt_excludes_state_and_activity(monkeypatch)
     assert "writing_mode: self_update_post" in prompt
     assert "do not use prior state/activity logs" in prompt
     assert "Recent own post reference" not in prompt
-
 
 def test_self_update_composition_prompt_includes_lore_as_private_reference(monkeypatch):
     monkeypatch.setattr(agent_writing, "_format_recent_activity", lambda *args, **kwargs: "- none")

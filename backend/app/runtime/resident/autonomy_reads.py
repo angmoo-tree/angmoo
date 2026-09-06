@@ -36,3 +36,21 @@ def count_effective_active_server_llm_autonomy_agents(
         )
     )
     return len((auto_enabled_ids | assigned_slot_ids) - excluded)
+
+
+def list_other_active_settings(
+    db: Session, *, user_id: str, keep_character_id: str
+) -> list[models.AgentActivitySetting]:
+    settings = list(
+        db.scalars(
+            select(models.AgentActivitySetting)
+            .join(Character)
+            .where(
+                Character.owner_id == user_id,
+                Character.deleted_at.is_(None),
+                Character.id != keep_character_id,
+                models.AgentActivitySetting.auto_enabled.is_(True),
+            )
+        )
+    )
+    return settings

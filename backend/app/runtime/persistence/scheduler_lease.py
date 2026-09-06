@@ -4,7 +4,8 @@ from __future__ import annotations
 from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
-from app.domains.identity.public import InstallationIdentity, LOCAL_INSTALLATION_KEY
+from app.domains.identity.models import InstallationIdentity
+from app.domains.identity.constants import LOCAL_INSTALLATION_KEY
 from app.domains.runtime.service.scheduler_lease import SchedulerLeaseService
 
 

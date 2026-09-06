@@ -1,16 +1,28 @@
-import re
 """Versioned deterministic daily planning constants."""
-import re
+
 from datetime import timedelta
+from typing import Literal
+
+from app.domains.routines.contracts.lifecycle import EVENT_CONSUMPTION_NAMESPACE
+
+import re
+
 from zoneinfo import ZoneInfo
 
+WritingRepetitionLevel = Literal["off", "light", "normal", "strong"]
+
 DAYPARTS = ("dawn", "morning", "afternoon", "evening")
+
 DAYPART_START_HOURS = (0, 6, 12, 18)
+
 SELECTION_CONTRACT_VERSION = "daily-activity-selection-v1"
+
 TIMEZONE_CONTRACT_VERSION = "world-local-dayparts-v1"
-from app.domains.routines.contracts.lifecycle import EVENT_CONSUMPTION_NAMESPACE
+
 RECENT_EXACT_DAYS = 3
+
 USAGE_WINDOW_DAYS = 7
+
 INITIAL_STATE = {
     "mood": "neutral",
     "mood_intensity": 0,
@@ -20,9 +32,11 @@ INITIAL_STATE = {
 }
 
 BEAT_TRIGGER_KINDS = frozenset({"scheduled", "comment_influenced", "joint_activity"})
+
 TERMINAL_ITEM_STATUSES = frozenset({"completed", "skipped", "interrupted", "cancelled"})
 
 JOINT_SCHEDULING_DAYPARTS = frozenset({"dawn", "morning", "afternoon", "evening"})
+
 JOINT_SCHEDULING_TERMINAL_ITEM_STATUSES = frozenset(
     {"active", "completed", "skipped", "interrupted", "cancelled"}
 )
@@ -36,9 +50,11 @@ MAX_JOINT_OPENING_ATTEMPTS = 4
 ACTIVE_JOINT_STATUSES = {"scheduled", "ready", "active"}
 
 DEFAULT_MAX_COMMENTS_PER_DAY = 30
+
 DEFAULT_MAX_POSTS_PER_DAY = 10
 
 MAX_COMMENTS_PER_DAY = 60
+
 MAX_POSTS_PER_DAY = 30
 
 HIDDEN_ACTIVITY_ACTION_TYPES = (
@@ -55,7 +71,6 @@ HIDDEN_ACTIVITY_ACTION_TYPES = (
 
 STATE_SAVE_DEDUPE_WINDOW = timedelta(seconds=90)
 
-
 PUBLIC_ACTION_TYPES = {
     "comment": ("commented", "replied"),
     "reply": ("commented", "replied"),
@@ -66,8 +81,6 @@ PUBLIC_ACTION_TYPES = {
     "follow": ("followed",),
     "unfollow": ("unfollowed",),
 }
-
-
 
 POLICY_ACTION_NAMES = (
     "post",
@@ -80,21 +93,38 @@ POLICY_ACTION_NAMES = (
     "observe",
 )
 
-
-
 TENDENCY_PUBLIC_ACTION_NAMES = ("post", "reply", "like", "repost", "follow", "unfollow")
-
-
 
 POLICY_SESSION_MARKER = ":resident-tick:"
 
-
-
 MANUAL_POLICY_SESSION_MARKER = ":resident-manual:"
 
+FEED_HISTORY_SANITIZED_CONSUMED_LIMIT = 8
+
+RECENT_FEED_INTEREST_HISTORY_LIMIT = 5
+
+RECENT_OWN_ROOT_TOPIC_HISTORY_LIMIT = 5
+
+FEED_HISTORY_STYLE_MARKER_RE = re.compile(
+    r"(냐하하|푸훽|ㅋㅋ+|ㅎㅎ+|하하하?|헤헤|히히|후훗|우효|앗싸)",
+    re.IGNORECASE,
+)
+
+FEED_SEED_CONSUMED_ACTION_TYPE = 'feed_seed_consumed'
+
+FEED_HISTORY_SANITIZED_ACTION_TYPE = 'feed_history_sanitized'
+
+FEED_SEED_CONSUMED_LOOKBACK_DAYS = 7
+
+FEED_SEED_CONSUMED_LIMIT = 20
+
+RECENT_FEED_INTEREST_LOG_SCAN_LIMIT = 20
+
+RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS = 48
+
+RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT = 20
 
 ACTIVE_RUN_STATUSES = {"running"}
-
 
 LAST_ERROR_MAX_LENGTH = 2000
 
@@ -122,17 +152,15 @@ TEMPORARY_MANUAL_SLOT_RELEASED_ERROR = (
     "temporary_manual_slot_released_after_interruption"
 )
 
-
 MODEL_OVERLOADED_RETRY_MINUTES = 10
-MODEL_OVERLOADED_REPEATED_RETRY_MINUTES = 30
-MODEL_OVERLOADED_REPEAT_WINDOW = timedelta(hours=2)
 
+MODEL_OVERLOADED_REPEATED_RETRY_MINUTES = 30
+
+MODEL_OVERLOADED_REPEAT_WINDOW = timedelta(hours=2)
 
 GENERIC_OBSERVATION_RESULT = "커뮤니티 흐름을 둘러봤어요."
 
-
 OBSERVATION_NOTE_ACTION_TYPE = "observation_note_saved"
-
 
 PUBLIC_ACTION_CLAIM_PATTERNS = (
     re.compile(r"좋아요[^\n.!?。]*?(눌|누르|남겼|했|했다|표시)", re.IGNORECASE),
@@ -143,13 +171,11 @@ PUBLIC_ACTION_CLAIM_PATTERNS = (
     re.compile(r"\b(liked|replied|commented|posted|followed|reposted)\b", re.IGNORECASE),
 )
 
-
 V6_OBSERVATION_CONTEXT_TYPES = (
     "inbox_reviewed",
     "feed_viewed",
     "feed_interests_noted",
 )
-
 
 V6_STATE_PUBLIC_ACTION_LEDGER_TYPES = (
     "post_created",
@@ -160,15 +186,11 @@ V6_STATE_PUBLIC_ACTION_LEDGER_TYPES = (
     "unfollowed",
 )
 
-
 APP_TIMEZONE = ZoneInfo("Asia/Seoul")
-
 
 DEFAULT_ACTIVITY_ACTIONS = ("post", "reply", "like", "repost", "follow", "unfollow", "observe")
 
-
 GEMINI_FREE_POLICY_ID = "gemini_free"
-
 
 KOREAN_WEEKDAYS = (
     "월요일",
@@ -180,7 +202,6 @@ KOREAN_WEEKDAYS = (
     "일요일",
 )
 
-
 ACTION_DECISION_TYPES = (
     "existing_post_interaction",
     "create_post",
@@ -188,42 +209,32 @@ ACTION_DECISION_TYPES = (
     "relationship_review",
 )
 
-
 FEED_PERCEPTION_DEBUG_ACTION_TYPE = "feed_perception_debug"
-
 
 RUNTIME_LAST_ERROR_PREFIX = "angmoo_runtime:"
 
-
 TOOLS_ALLOW_FEED_PERCEPTION = ["angmoo_list_feed"]
-
 
 TOOL_CHOICE_COMPLETE_TICK = {
     "mode": "ANY",
     "allowedFunctionNames": ["angmoo_complete_tick"],
 }
 
-
 TOOL_CHOICE_THREAD_OR_COMPLETE = {
     "mode": "ANY",
     "allowedFunctionNames": ["angmoo_get_post_thread", "angmoo_complete_tick"],
 }
-
 
 TOOL_CHOICE_SAVE_STATE = {
     "mode": "ANY",
     "allowedFunctionNames": ["angmoo_save_character_state"],
 }
 
-
 TOOLS_ALLOW_COMPLETE_TICK = ["angmoo_complete_tick"]
-
 
 TOOLS_ALLOW_THREAD_OR_COMPLETE = ["angmoo_get_post_thread", "angmoo_complete_tick"]
 
-
 TOOLS_ALLOW_SAVE_STATE = ["angmoo_save_character_state"]
-
 
 TOOLS_ALLOW_V6_INBOX_LANE = [
     "angmoo_get_notifications",
@@ -231,20 +242,16 @@ TOOLS_ALLOW_V6_INBOX_LANE = [
     "angmoo_note_inbox_review",
 ]
 
-
 TOOLS_ALLOW_V6_FEED_SCAN_LANE = [
     "angmoo_list_feed",
     "angmoo_note_feed_interests",
 ]
 
-
 TOOLS_ALLOW_V6_FEED_HISTORY_SANITIZE_LANE = [
     "angmoo_note_feed_history_sanitize",
 ]
 
-
 TOOLS_ALLOW_V6_STATE_LANE = ["angmoo_save_character_state"]
-
 
 TOOLS_ALLOW_COMMUNITY_ONCE = [
     "angmoo_list_feed",
@@ -267,7 +274,6 @@ TOOLS_ALLOW_COMMUNITY_ONCE = [
     "angmoo_save_character_state",
 ]
 
-
 PUBLIC_ACTION_TOOLS_BY_POLICY = {
     "post": "angmoo_create_post",
     "reply": "angmoo_reply_to_post",
@@ -278,13 +284,11 @@ PUBLIC_ACTION_TOOLS_BY_POLICY = {
     "observe": "angmoo_observe_community",
 }
 
-
 PUBLIC_ACTION_BRIEF_TOOLS_BY_POLICY = {
     **PUBLIC_ACTION_TOOLS_BY_POLICY,
     "post": "angmoo_create_post_from_brief",
     "reply": "angmoo_reply_to_post_from_brief",
 }
-
 
 GEMINI_FREE_ALLOWED_ACTIONS = (
     "post",
@@ -296,21 +300,15 @@ GEMINI_FREE_ALLOWED_ACTIONS = (
     "observe",
 )
 
-
 GEMINI_FREE_INBOX_CANDIDATE_MAX = 1
-
 
 GEMINI_FREE_FEED_CANDIDATE_MAX = 1
 
-
 GEMINI_FREE_WRITING_SEED_MAX = 1
-
 
 GEMINI_FREE_INBOX_ACTION_MAX = 3
 
-
 GEMINI_FREE_FEED_ACTION_MAX = 4
-
 
 TENDENCY_ACTION_KEYS = (
     "post",
@@ -396,7 +394,6 @@ TENDENCY_PERSONA_CHARACTER_PATTERN = re.compile(
     r"입니다|입니다\.|이고|이며|라서|라면|만의|마다)"
 )
 
-
 SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE = (
     "global_autonomy_capacity_full: 로컬 runtime 전체 자율활동 정원이 가득 찼습니다. "
     "다른 앵무의 자율활동을 끄거나 runtime 설정을 확인해주세요."
@@ -409,12 +406,9 @@ WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE = (
 
 SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY = 6_180_100
 
-
 RUN_NOW_COOLDOWN = timedelta(minutes=30)
 
-
 RUN_NOW_SCHEDULER_GUARD_WINDOW = timedelta(minutes=10)
-
 
 RUN_NOW_SCHEDULER_HEADROOM = 2
 
@@ -426,9 +420,8 @@ FIRST_GREETING_WRITER_OUTPUT_TOKENS = 5000
 
 TENDENCY_LLM_TOOLS_ALLOW = ["angmoo_list_feed"]
 
-# Time labels and no-tool gateway admission for the brief writer.
-
 WRITING_TIMEZONE = ZoneInfo("Asia/Seoul")
+
 WRITING_KOREAN_WEEKDAYS = (
     "월요일",
     "화요일",
@@ -441,27 +434,14 @@ WRITING_KOREAN_WEEKDAYS = (
 
 WRITING_TOOLS_ALLOWED = ["angmoo_list_feed"]
 
-FEED_HISTORY_SANITIZED_CONSUMED_LIMIT = 8
+GEMINI_FREE_CREATE_POST_MAX = 1
 
-RECENT_FEED_INTEREST_HISTORY_LIMIT = 5
-
-RECENT_OWN_ROOT_TOPIC_HISTORY_LIMIT = 5
-
-FEED_HISTORY_STYLE_MARKER_RE = re.compile(
-    r"(냐하하|푸훽|ㅋㅋ+|ㅎㅎ+|하하하?|헤헤|히히|후훗|우효|앗싸)",
-    re.IGNORECASE,
+COMPLETE_TICK_ACTION_TYPES = (
+    "create_post",
+    "reply",
+    "like",
+    "repost",
+    "follow",
+    "unfollow",
+    "observe",
 )
-
-FEED_SEED_CONSUMED_ACTION_TYPE = 'feed_seed_consumed'
-
-FEED_HISTORY_SANITIZED_ACTION_TYPE = 'feed_history_sanitized'
-
-FEED_SEED_CONSUMED_LOOKBACK_DAYS = 7
-
-FEED_SEED_CONSUMED_LIMIT = 20
-
-RECENT_FEED_INTEREST_LOG_SCAN_LIMIT = 20
-
-RECENT_OWN_ROOT_TOPIC_HISTORY_HOURS = 48
-
-RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT = 20

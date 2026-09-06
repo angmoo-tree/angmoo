@@ -1,4 +1,9 @@
 from __future__ import annotations
+from app.domains.routines.service import activity_settings as routines_settings
+from app.domains.routines.service import plans as routine_plans
+import app.domains.routine_posts.schemas as schema_routine_posts_schemas
+import app.domains.routines.schemas as routine_schemas
+import app.domains.social.schemas.community as social_schemas
 import app.domains.social.exceptions as social_errors
 import app.runtime.social.timeline as social_timeline_runtime
 from app.domains.routines.service import autonomy_management
@@ -18,11 +23,11 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import schemas
+
 from model_fixture_support import models
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.models import Base
-from app.cruds import agents as agent_crud
+
 from app.runtime.social.sqlalchemy_unit_of_work import (
     SqlAlchemySocialWriteUnitOfWork,
 )
@@ -30,11 +35,15 @@ from app.domains.social.contracts.writes import OwnerReplyCommand
 from app.runtime.social.sqlalchemy_unit_of_work import SqlAlchemySocialWriteUnitOfWork
 create_owner_reply = SqlAlchemySocialWriteUnitOfWork.create_owner_reply
 from app.providers.gemini import build_generate_content_config
-from app.services import activity_state_contracts, daily_activity_plans, routine_post_runtime, world_character_contracts
+from app.domains.routines.policies import activity_state as activity_state_contracts
+from app.runtime.routine_posts import sqlalchemy_runtime as routine_post_runtime
+from app.domains.world_characters.service import setup_validation as world_character_contracts
 from app.runtime.resident import langgraph as langgraph_resident
 from app.runtime.characters import management as agent_service
+
 from app.domains.routines.contracts.activity_policy import ActivityPolicy
-from app.services.direct_llm import DirectLlmCallContext, DirectLlmError
+from app.integrations.direct_llm import DirectLlmCallContext
+from app.integrations.direct_llm import DirectLlmError
 from app.runtime.resident.context import LangGraphResidentContext
 from app.domains.routine_posts.contracts.interaction import RoutineInteractionInput
 from app.domains.routine_posts.service.context import assemble_routine_post_context
@@ -214,18 +223,18 @@ class FakeRoutineProvider:
             )
         used_ids = routine_context.considered_source_event_ids[:1]
         effects = [
-            schemas.RoutineSourceEventEffect(
+            schema_routine_posts_schemas.RoutineSourceEventEffect(
                 source_event_id=event_id,
                 effect="acknowledge",
                 intensity=8,
-                state_change=schemas.RoutineStateChange(
+                state_change=schema_routine_posts_schemas.RoutineStateChange(
                     mood="curious",
                     mood_intensity_delta=8,
                 ),
             )
             for event_id in used_ids
         ]
-        plan = schemas.RoutineBeatPlan(
+        plan = schema_routine_posts_schemas.RoutineBeatPlan(
             episode_id=routine_context.episode.id,
             beat_id=beat.id,
             sequence_no=beat.sequence_no,
@@ -252,7 +261,7 @@ class FakeRoutineProvider:
         )
         return RoutineGeneration(
             plan=plan,
-            draft=schemas.RoutinePostDraft(
+            draft=schema_routine_posts_schemas.RoutinePostDraft(
                 title=f"Morning activity scene {beat.sequence_no}",
                 body=(
                     "The academy morning activity begins."
@@ -550,7 +559,7 @@ def test_world_profile_readiness_replaces_legacy_tendency_gate() -> None:
     engine = _engine()
     with Session(engine) as db:
         fixture = _seed(db)
-        setting = agent_crud.ensure_setting(db, fixture.character.id)
+        setting = routines_settings.ensure_setting(db, fixture.character.id)
 
         assert not agent_service._has_tendency_analysis(setting)
 
@@ -577,7 +586,7 @@ def test_world_profile_readiness_rejects_incomplete_repertoire() -> None:
     engine = _engine()
     with Session(engine) as db:
         fixture = _seed(db)
-        setting = agent_crud.ensure_setting(db, fixture.character.id)
+        setting = routines_settings.ensure_setting(db, fixture.character.id)
         candidate = db.get(models.WorldActivityCandidate, "candidate-morning-10")
         assert candidate is not None
         candidate.enabled = False
@@ -605,7 +614,7 @@ def test_legacy_runtime_still_requires_legacy_tendency_analysis() -> None:
     engine = _engine()
     with Session(engine) as db:
         fixture = _seed(db)
-        setting = agent_crud.ensure_setting(db, fixture.character.id)
+        setting = routines_settings.ensure_setting(db, fixture.character.id)
         fixture.world_character.activity_runtime_mode = "legacy_resident_v1"
         db.commit()
 
@@ -1328,13 +1337,13 @@ def test_runtime_mode_readiness_does_not_enable_autonomy() -> None:
         fixture.world_character.activity_runtime_mode = "legacy_resident_v1"
         db.commit()
 
-        updated = daily_activity_plans.update_activity_runtime_mode(
+        updated = routine_plans.update_activity_runtime_mode(
             db,
             references=SqlAlchemyPlanReferences(db),
             character_id=fixture.character.id,
             world_id=fixture.world.id,
             user=fixture.user,
-            data=schemas.WorldCharacterRuntimeModeUpdate(
+            data=routine_schemas.WorldCharacterRuntimeModeUpdate(
                 activity_runtime_mode="routine_resident_v1"
             ),
             now=now,
@@ -1561,7 +1570,7 @@ def test_scoped_post_pair_and_identity_are_validated_by_service() -> None:
             social_timeline_runtime.timeline_service.create_post(
                 db,
                 fixture.user,
-                schemas.PostCreate(
+                social_schemas.PostCreate(
                     title="Invalid scope",
                     body="Only one half of the scope was supplied.",
                     author_character_id=fixture.character.id,

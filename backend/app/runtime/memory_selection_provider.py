@@ -6,11 +6,11 @@ the Memory package must not depend back on Chat's credential composition.
 
 from dataclasses import replace
 
-from app.domains.identity.public import User
+from app.domains.identity.models import User
 from app.domains.memory.exceptions import MemoryValidationError
 from app.integrations.llm.memory_selection import DirectLlmMemorySelectionProvider
 from app.providers.registry import MESSAGE_GOOGLE_MODELS, get_model_spec
-from app.runtime.chat.sqlalchemy_service import resolve_message_credential_material
+from app.runtime.chat.message_composition import settings_service
 
 
 def memory_provider(session_factory, owner_id: str, model: str):
@@ -21,7 +21,7 @@ def memory_provider(session_factory, owner_id: str, model: str):
         if user is None:
             raise MemoryValidationError("memory_selection_settings_required")
         try:
-            _, material = resolve_message_credential_material(session, user)
+            _, material = settings_service.resolve_message_credential_material(session, user)
             get_model_spec(material.provider, model)
         except Exception:
             raise MemoryValidationError("memory_selection_settings_required") from None

@@ -6,7 +6,7 @@ import pytest
 
 from app.domains.chat.contracts import CanonicalRetrievalScope, RetrievalContractError
 from app.domains.chat.service.retrieval_policy import RetrievalPolicyResolver
-from test_p8_l_k_retrieval_router import _command
+from chat.test_p8_l_k_retrieval_router import _command
 
 
 @pytest.mark.parametrize(

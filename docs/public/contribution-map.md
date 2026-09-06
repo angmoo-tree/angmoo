@@ -7,19 +7,23 @@ final merge after required checks pass.
 
 ## Architecture transition
 
-The target structure is explained by [backend ARCHITECTURE](../../backend/ARCHITECTURE.md) and [frontend ARCHITECTURE](../../frontend/ARCHITECTURE.md). [The preservation map](../architecture/refactor-feature-preservation.md) records the current migration and consumers. Only scopes listed in each architecture policy `refactor` section use the new rules. AR-1 provides checker support with no active product scopes; the pilot activates its own scope in the same change as its code. The existing locations and public/layer rules below remain valid elsewhere.
+The current backend structure is explained by [backend ARCHITECTURE](../../backend/ARCHITECTURE.md): each business domain owns its HTTP, service, schema, model and persistence roles. The backend policy covers all domains; new code does not require a `public → application → port` chain. [The preservation map](../architecture/refactor-feature-preservation.md) connects preserved features and their current owners. [Backend results](../architecture/refactor-backend-results.md) distinguish source preparation, PR validation, merge and installer evidence.
+
+The frontend still follows the staged scopes in its own policy and [frontend ARCHITECTURE](../../frontend/ARCHITECTURE.md). Backend completion does not complete the remaining frontend transition.
 
 ## Change locations
 
 | Area | Primary backend | Primary frontend | Validation focus |
 |---|---|---|---|
-| Local identity and agents | `backend/app/api`, `backend/app/services` | `frontend/src/app/agents` | ownership, sessions, limits |
-| World and Studio | `app/domains/device_home` role files plus remaining World routes/services/models | `features/device-home/{api,components,types,utils}`, `composition/screens/device-home-screen.tsx`, remaining Creator Studio/World App public entries and legacy World routes | schema, migration, package boundary, Next/static shared screen |
-| Routine runtime | `app.domains.routine_posts.public` contracts + `app.runtime.routine_posts` SQLAlchemy orchestration | agent activity surfaces | deterministic tick, duplicate write |
-| SNS and Inbox | `app.domains.social.public` contracts + `app.runtime.social` SQLAlchemy read/write/Inbox adapters | `features/social/public.ts` | event ordering, observation receipt, relationship direction |
-| Relationship graph | `app.domains.relationships.public` + domain-owned ORM definitions + `app.runtime.relationships` SQLAlchemy composition + `app.runtime.graph_projection`; LadybugDB remains the replayable adapter | `features/relationships/public.ts` | read parity, replay, outage, World isolation |
-| Providers and credentials | `backend/app/providers`, `backend/app/credentials` | settings/model forms | BYOK redaction, fake provider |
-| Local Bot | bot route/schema | `frontend/src/app/angmoo-api` | quota and response contracts |
+| Local identity and characters | `app/domains/identity`, `app/domains/characters`; cross-owner lifecycle in `app/runtime/characters` | `frontend/src/app/agents` | ownership, sessions, limits |
+| World and Studio | `app/domains/worlds`, `world_characters`, `device_home`, `world_packages` | `features/device-home/{api,components,types,utils}`, `composition/screens/device-home-screen.tsx`, remaining Creator Studio/World App public entries and legacy World routes | schema, migration, package boundary, Next/static shared screen |
+| Routine runtime | `app/domains/routines`, `routine_posts`; worker composition in `app/runtime/resident`, `routine_posts` | agent activity surfaces | deterministic tick, duplicate write |
+| SNS and Inbox | `app/domains/social/{service,repository,schemas,models}` and router; cross-owner collaboration in `app/runtime/social` | `features/social/public.ts` | event ordering, observation receipt, relationship direction |
+| Relationship graph | `app/domains/relationships` role files; `app/runtime/relationships`, `graph_projection`; replayable LadybugDB adapter | `features/relationships/public.ts` | read parity, replay, outage, World isolation |
+| Chat and Memory | `app/domains/chat`, `memory`; worker/provider composition in `app/runtime/chat`, `memory` | `features/chat`, `features/memory` | request state, source scope, evidence, cancellation, budgets, shutdown |
+| Providers and credentials | domain `client` files, `app/integrations`, `app/providers`, `app/credentials` | settings/model forms | BYOK redaction, fake provider |
+| Local Bot | `app/domains/local_bot` and runtime collaboration | `frontend/src/app/angmoo-api` | quota and response contracts |
+| App, DB and installation | `app/main.py`, `app/models.py`, `app/database.py`, `app/runtime/persistence`, `migrations` | runtime/desktop shell | same Base/Session, supported upgrades, startup and shutdown |
 
 Legacy frontend API calls remain behind `frontend/src/lib` only for surfaces
 that have not moved yet. New product-shell work belongs to
@@ -32,29 +36,28 @@ four such API/type consumers and does not export its composition screen. See
 
 ## Responsibility boundaries
 
-- Routes own authentication dependencies, HTTP input/output, public use-case
-  calls, and error mapping.
-- Domain public APIs and use cases own new business policy and orchestration.
-- Legacy services may remain as explicitly owned composition adapters during
-  staged migration, but new features do not add another horizontal service.
-- Repository ports sit below use cases; CRUD and persistence adapters do not
-  import policy from above or commit behind a caller.
+- Routers own HTTP input/output, authentication dependencies, service calls
+  and HTTP error mapping.
+- Domain services own business policy, authorization, state transitions and
+  transaction participation. HTTP and workers reuse those same decisions.
+- Models, schemas and persistence stay with their business owner. A repository
+  isolates SQL when useful; it does not open another Session or commit behind
+  its caller.
+- Other domains consume explicit supported service/schema/contract entries.
+  Multi-owner SQL and lifecycle collaboration belongs to runtime composition;
+  domain code does not import that runtime to locate services.
 - Provider SDK imports stay inside their adapters.
 - Raw secret decryption stays inside the credential resolver boundary.
 - Public read schemas never expose API keys, encrypted envelopes, or
   ciphertext.
 
-Compatibility facades may preserve stable imports during refactoring only when
-they name an owner, current consumer, removal stage, and usage-zero deletion
-gate. They re-export canonical types or compose adapters; they do not duplicate
-use-case logic. T2.5 PR C removed the unused relationship schema and repository
-aliases after both `rg` and the AST inventory reported zero importers. L4 PR E
-removes the horizontal relationship graph/event/model/CRUD bridges. L4 PR F
-removes the temporary manual-social facades and the domain-internal routine
-SQLAlchemy runtime after their consumer count reaches zero. Runtime consumers
-now enter through the social or relationships public boundary and the isolated
-runtime SQLAlchemy composition, routine-post, and graph-projection boundaries.
-Do not combine a move with unrelated behavior changes.
+The remaining [historical and extension compatibility paths](../architecture/backend-compatibility.md)
+have exact consumers and reasons: immutable migration helpers and supported
+separately deployed Hosted extension imports. They do not require new business
+code to pass through an old aggregate. The checker rejects unregistered old
+layers even when no file imports them. The original source/test/API/ORM
+evidence remains immutable, and supported installer upgrades verify the
+historical data path. Do not combine a move with unrelated behavior changes.
 
 ## Validation map
 

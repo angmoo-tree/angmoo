@@ -1,7 +1,7 @@
 from sqlalchemy import event, select
 from sqlalchemy.orm import Session
 
-from tests.model_fixture_support import models
+from model_fixture_support import models
 from app.core.unit_of_work import deferred_commits
 from app.domains.social.schemas.community import PostCreate
 from app.runtime.social.agent_tools import agent_tool_actions

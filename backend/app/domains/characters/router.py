@@ -1,33 +1,139 @@
-from app.domains.characters.service import image_settings_owner
-from app.domains.characters.contracts import CharacterImageSettingsWorkflows
-from app.domains.characters.dependencies import get_image_settings_workflows
 """Owner-facing Character HTTP endpoints; mixed activity/media routes stay in API assembly."""
-from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
+
+from app.domains.characters.service import image_settings_owner
+
+from app.domains.characters.contracts import CharacterImageSettingsWorkflows
+
+from app.domains.characters.dependencies import get_image_settings_workflows
+
+from fastapi import APIRouter
+
+from fastapi import Body
+
+from fastapi import Depends
+
+from fastapi import HTTPException
+
+from fastapi import Response
+
+from fastapi import status
+
 from fastapi.responses import FileResponse
+
 from sqlalchemy.orm import Session
-from app.domains.characters import schemas, exceptions as errors
-from app.domains.characters.contracts import CharacterOwner, CharacterManagementWorkflows, CreatorWorkflows, CharacterMediaWorkflows
-from app.domains.characters.dependencies import get_current_user, get_db, get_character_management_workflows, get_creator_workflows
+
+from app.domains.characters import schemas
+
+from app.domains.characters import exceptions as errors
+
+from app.domains.characters.contracts import CharacterOwner
+
+from app.domains.characters.contracts import CharacterManagementWorkflows
+
+from app.domains.characters.contracts import CreatorWorkflows
+
+from app.domains.characters.contracts import CharacterMediaWorkflows
+
+from app.domains.characters.dependencies import get_current_user
+
+from app.domains.characters.dependencies import get_db
+
+from app.domains.characters.dependencies import get_character_management_workflows
+
+from app.domains.characters.dependencies import get_creator_workflows
+
 from app.domains.characters.service import image_generation as image_generation_service
+
 from app.domains.characters.contracts import CharacterImageGenerationWorkflows
+
 from app.domains.characters.dependencies import get_image_generation_workflows
+
 from app.domains.characters.service import media as media_service
+
 from app.domains.characters.dependencies import get_character_media_workflows
+
 from app.domains.characters.service import management as character_service
+
 from app.domains.characters.service import drafts as draft_lifecycle
+
 from app.domains.characters.service import state as character_state
+
 from app.domains.characters.service import creator as creator_policy
-from app.domains.runtime.contracts.execution_errors import OpenClawGatewayError, OpenClawGatewayAuthError
-from app.domains.routines.contracts.execution_errors import AgentSlotUnavailableError
+
+from app.domains.runtime.contracts.execution_errors import AgentSlotUnavailableError
+
+from app.domains.runtime.contracts.execution_errors import OpenClawGatewayError
+
+from app.domains.runtime.contracts.execution_errors import OpenClawGatewayAuthError
+
 from app.domains.media.contracts import InvalidProfileMediaError as MediaValidationError
+
 from app.domains.identity.service.demo_access import DemoAccountLockedError
+
+from app.domains.identity import schemas as identity_schemas
+
+from app.domains.identity.contracts import CharacterCredentialWorkflows
+
+from app.domains.identity.service import credential_management
+
+from app.domains.characters.dependencies import get_character_credential_workflows
+
+from app.domains.characters.constants import TENDENCY_ANALYSIS_RETRY_DETAIL
+
+from app.domains.routines import schemas as routine_schemas
+
+from app.domains.routines import exceptions as routine_errors
+
+from app.domains.routines.service import activity_management
+
+from app.domains.routines.service import autonomy_management
+
+from app.domains.routines.service import manual_activity
+
+from app.domains.routines.service import feed_cues
+
+from app.domains.routines.service import first_greeting as first_greeting_service
+
+from app.domains.routines.contracts.activity_management import ActivityManagementReferences
+
+from app.domains.routines.contracts.autonomy_management import AutonomyWorkflows
+
+from app.domains.routines.contracts.manual_activity import ManualActivityWorkflows
+
+from app.domains.routines.contracts.feed_cues import FeedCueWorkflows
+
+from app.domains.routines.contracts.first_greeting import FirstGreetingWorkflows
+
+from app.domains.routines.contracts.tendency_analysis import TendencyAnalysisRunner
+
+from app.domains.routines.schemas.first_greeting import AgentFirstGreetingCreate
+
+from app.api.schemas.first_greeting import AgentFirstGreetingRead
+
+from app.domains.operations.exceptions import AgentActivityMaintenanceError
+
+from app.integrations.direct_llm import DirectLlmDeferred
+
+from app.integrations.direct_llm import DirectLlmError
+
+from app.integrations.direct_llm import DirectLlmJsonError
+
+from app.domains.characters.dependencies import get_activity_management_references
+
+from app.domains.characters.dependencies import get_autonomy_workflows
+
+from app.domains.characters.dependencies import get_manual_activity_workflows
+
+from app.domains.characters.dependencies import get_feed_cue_workflows
+
+from app.domains.characters.dependencies import get_first_greeting_workflows
+
+from app.domains.characters.dependencies import get_tendency_analysis_runner
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 
-
 def _raise_demo_account_locked(exc: Exception) -> None:
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
-
 
 @router.get("", response_model=list[schemas.AgentDetailRead])
 def list_agents(
@@ -36,7 +142,6 @@ def list_agents(
     workflows: CharacterManagementWorkflows = Depends(get_character_management_workflows),
 ) -> list[schemas.AgentDetailRead]:
     return character_service.list_agents(db, user, workflows=workflows)
-
 
 @router.post("", response_model=schemas.AgentDetailRead, status_code=status.HTTP_201_CREATED)
 def create_agent(
@@ -56,7 +161,6 @@ def create_agent(
     except errors.PromptInjectionDetectedError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
-
 @router.get("/{character_id}", response_model=schemas.AgentDetailRead)
 def get_agent(
     character_id: str,
@@ -68,7 +172,6 @@ def get_agent(
         return character_service.get_agent(db, user, character_id, workflows=workflows)
     except errors.AgentNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-
 
 @router.put("/{character_id}/profile", response_model=schemas.AgentDetailRead)
 def update_profile(
@@ -91,7 +194,6 @@ def update_profile(
     except errors.AgentHandleInvalidError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
-
 @router.put("/{character_id}/persona", response_model=schemas.AgentDetailRead)
 def update_persona(
     character_id: str,
@@ -109,7 +211,6 @@ def update_persona(
     except errors.PromptInjectionDetectedError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
-
 @router.put("/{character_id}/promotion-usage", response_model=schemas.AgentDetailRead)
 def update_promotion_usage(
     character_id: str,
@@ -125,7 +226,6 @@ def update_promotion_usage(
     except DemoAccountLockedError as exc:
         _raise_demo_account_locked(exc)
 
-
 @router.get("/drafts/{draft_id}", response_model=schemas.AgentCreationDraftRead)
 def get_agent_draft(
     draft_id: str,
@@ -137,7 +237,6 @@ def get_agent_draft(
         return draft_lifecycle.get_draft(db, user, draft_id, workflows=workflows)
     except errors.AgentCreationDraftNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Draft not found") from exc
-
 
 @router.patch("/drafts/{draft_id}", response_model=schemas.AgentCreationDraftRead)
 def update_agent_draft(
@@ -155,7 +254,6 @@ def update_agent_draft(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except errors.AgentCreationDraftValidationError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-
 
 @router.post(
     "/drafts",
@@ -184,7 +282,6 @@ async def create_agent_draft(
         if credential_error is not None:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=credential_error) from exc
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
-
 
 @router.post(
     "/drafts/{draft_id}/enhance-persona",
@@ -226,7 +323,6 @@ async def enhance_agent_draft_persona(
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=credential_error) from exc
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
 
-
 @router.post("/drafts/{draft_id}/complete", response_model=schemas.AgentDetailRead)
 def complete_agent_draft(
     draft_id: str,
@@ -257,10 +353,7 @@ def complete_agent_draft(
     except MediaValidationError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
-
-# The historical state URL belongs to the community HTTP namespace.
 state_router = APIRouter(tags=["community"])
-
 
 @state_router.post(
     "/characters/{character_id}/state", response_model=schemas.CharacterStateRead
@@ -280,7 +373,6 @@ def save_character_state(
             status_code=status.HTTP_404_NOT_FOUND, detail="Character not found"
         )
 
-
 @router.get('/drafts/{draft_id}/media/{media_type}', response_class=FileResponse)
 def get_agent_draft_media(
     draft_id: str,
@@ -294,7 +386,6 @@ def get_agent_draft_media(
     except (errors.AgentCreationDraftNotFoundError, errors.AgentPrivateMediaNotFoundError) as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Draft media not found') from exc
     return FileResponse(path, media_type=content_type, headers={'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff'})
-
 
 @router.post('/drafts/{draft_id}/media', response_model=schemas.AgentCreationDraftRead)
 def upload_agent_draft_media(
@@ -311,7 +402,6 @@ def upload_agent_draft_media(
     except MediaValidationError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
-
 @router.get('/drafts/{draft_id}/media-usage', response_model=schemas.AgentProfileImageUsageRead)
 def get_agent_draft_media_usage(
     draft_id: str,
@@ -323,7 +413,6 @@ def get_agent_draft_media_usage(
         return media_service.get_draft_profile_image_usage(db, user, draft_id, workflows=workflows)
     except errors.AgentCreationDraftNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Draft not found') from exc
-
 
 @router.get('/drafts/{draft_id}/media-candidates/{candidate_id}/content', response_class=FileResponse)
 def get_agent_draft_media_candidate_content(
@@ -338,7 +427,6 @@ def get_agent_draft_media_candidate_content(
     except (errors.AgentCreationDraftNotFoundError, errors.AgentProfileImageCandidateNotFoundError) as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Candidate not found') from exc
     return FileResponse(path, media_type=content_type, headers={'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff'})
-
 
 @router.post('/drafts/{draft_id}/media-candidates/{candidate_id}/apply', response_model=schemas.AgentCreationDraftRead)
 def apply_agent_draft_media_candidate(
@@ -357,7 +445,6 @@ def apply_agent_draft_media_candidate(
     except MediaValidationError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
-
 @router.delete('/drafts/{draft_id}/media-candidates/{candidate_id}', status_code=status.HTTP_204_NO_CONTENT)
 def discard_agent_draft_media_candidate(
     draft_id: str,
@@ -373,7 +460,6 @@ def discard_agent_draft_media_candidate(
     except errors.AgentProfileImageCandidateNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Candidate not found') from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
 
 @router.post('/{character_id}/media', response_model=schemas.AgentDetailRead)
 def upload_profile_media(
@@ -392,7 +478,6 @@ def upload_profile_media(
     except errors.InvalidProfileMediaError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
-
 @router.get(
     "/{character_id}/media-usage",
     response_model=schemas.AgentProfileImageUsageRead,
@@ -406,7 +491,6 @@ def get_profile_media_usage(
         return media_service.get_agent_profile_image_usage(db, user, character_id)
     except errors.AgentNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-
 
 @router.get(
     "/{character_id}/media-candidates/{candidate_id}/content",
@@ -442,7 +526,6 @@ def get_agent_profile_media_candidate_content(
         },
     )
 
-
 @router.post('/{character_id}/media-candidates/{candidate_id}/apply', response_model=schemas.AgentDetailRead)
 def apply_profile_media_candidate(
     character_id: str,
@@ -464,7 +547,6 @@ def apply_profile_media_candidate(
     except MediaValidationError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
-
 @router.delete(
     "/{character_id}/media-candidates/{candidate_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -483,7 +565,6 @@ def discard_profile_media_candidate(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Candidate not found") from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-
 @router.post('/drafts/{draft_id}/generate-media', response_model=schemas.AgentCreationDraftMediaGenerationRead)
 async def generate_agent_draft_media(
     draft_id: str,
@@ -500,7 +581,6 @@ async def generate_agent_draft_media(
     except errors.AgentCreationDraftCooldownError as exc:
         raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail=f'이미지 생성은 {exc.available_at.isoformat()} 이후 다시 시도할 수 있습니다.') from exc
 
-
 @router.post('/{character_id}/generate-media', response_model=schemas.AgentProfileMediaGenerationRead)
 async def generate_profile_media(
     character_id: str,
@@ -514,12 +594,62 @@ async def generate_profile_media(
     except errors.AgentNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
 
+@router.get('/{character_id}/image-settings', response_model=schemas.AgentImageGenerationSettingRead)
+def get_image_settings(character_id: str, db: Session=Depends(get_db), user: CharacterOwner=Depends(get_current_user), workflows: CharacterImageSettingsWorkflows=Depends(get_image_settings_workflows)) -> schemas.AgentImageGenerationSettingRead:
+    try:
+        return image_settings_owner.get_image_settings(db, user, character_id, workflows=workflows)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
 
-from app.domains.identity import schemas as identity_schemas
-from app.domains.identity.contracts import CharacterCredentialWorkflows
-from app.domains.identity.service import credential_management
-from app.domains.characters.dependencies import get_character_credential_workflows
+@router.put('/{character_id}/image-settings', response_model=schemas.AgentImageGenerationSettingRead)
+def update_image_settings(character_id: str, data: schemas.AgentImageGenerationSettingUpdate, db: Session=Depends(get_db), user: CharacterOwner=Depends(get_current_user), workflows: CharacterImageSettingsWorkflows=Depends(get_image_settings_workflows)) -> schemas.AgentImageGenerationSettingRead:
+    try:
+        return image_settings_owner.update_image_settings(db, user, character_id, data, workflows=workflows)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
+    except DemoAccountLockedError as exc:
+        _raise_demo_account_locked(exc)
+    except errors.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except (errors.ImageSettingsInvalidError, errors.UnsafeImagePromptError) as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
+@router.delete('/{character_id}/image-settings/key', response_model=schemas.AgentImageGenerationSettingRead)
+def delete_image_settings_key(character_id: str, db: Session=Depends(get_db), user: CharacterOwner=Depends(get_current_user), workflows: CharacterImageSettingsWorkflows=Depends(get_image_settings_workflows)) -> schemas.AgentImageGenerationSettingRead:
+    try:
+        return image_settings_owner.update_image_settings(db, user, character_id, schemas.AgentImageGenerationSettingUpdate(clear_pollinations_api_key=True), workflows=workflows)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
+    except DemoAccountLockedError as exc:
+        _raise_demo_account_locked(exc)
+    except errors.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except (errors.ImageSettingsInvalidError, errors.UnsafeImagePromptError) as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+
+@router.post('/{character_id}/image-settings/seed', response_model=schemas.AgentImageGenerationSettingRead)
+def upload_image_seed(character_id: str, data: schemas.AgentImageSeedUpload, db: Session=Depends(get_db), user: CharacterOwner=Depends(get_current_user), workflows: CharacterImageSettingsWorkflows=Depends(get_image_settings_workflows)) -> schemas.AgentImageGenerationSettingRead:
+    try:
+        return image_settings_owner.upload_image_seed(db, user, character_id, data, workflows=workflows)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
+    except DemoAccountLockedError as exc:
+        _raise_demo_account_locked(exc)
+    except errors.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except errors.InvalidProfileMediaError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+
+@router.delete('/{character_id}/image-settings/seed', response_model=schemas.AgentImageGenerationSettingRead)
+def delete_image_seed(character_id: str, db: Session=Depends(get_db), user: CharacterOwner=Depends(get_current_user), workflows: CharacterImageSettingsWorkflows=Depends(get_image_settings_workflows)) -> schemas.AgentImageGenerationSettingRead:
+    try:
+        return image_settings_owner.delete_image_seed(db, user, character_id, workflows=workflows)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
+    except DemoAccountLockedError as exc:
+        _raise_demo_account_locked(exc)
+    except errors.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
 
 @router.put("/{character_id}/credential", response_model=identity_schemas.CredentialRead)
 def update_credential(
@@ -544,7 +674,6 @@ def update_credential(
     except errors.CredentialSyncError as exc:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
 
-
 @router.get(
     "/{character_id}/credential",
     response_model=identity_schemas.CredentialRead | None,
@@ -568,7 +697,6 @@ def get_credential_metadata(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
     except errors.AgentExecutionModeError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-
 
 @router.delete(
     "/{character_id}/credential",
@@ -599,28 +727,6 @@ def delete_credential(
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-
-from app.domains.characters.constants import TENDENCY_ANALYSIS_RETRY_DETAIL
-from app.domains.routines import schemas as routine_schemas, exceptions as routine_errors
-from app.domains.routines.service import activity_management, autonomy_management, manual_activity, feed_cues
-from app.domains.routines.service import first_greeting as first_greeting_service
-from app.domains.routines.contracts.activity_management import ActivityManagementReferences
-from app.domains.routines.contracts.autonomy_management import AutonomyWorkflows
-from app.domains.routines.contracts.manual_activity import ManualActivityWorkflows
-from app.domains.routines.contracts.feed_cues import FeedCueWorkflows
-from app.domains.routines.contracts.first_greeting import FirstGreetingWorkflows
-from app.domains.routines.contracts.tendency_analysis import TendencyAnalysisRunner
-from app.domains.routines.schemas.first_greeting import AgentFirstGreetingCreate
-from app.api.schemas.first_greeting import AgentFirstGreetingRead
-from app.domains.operations.exceptions import AgentActivityMaintenanceError
-from app.integrations.direct_llm import DirectLlmDeferred, DirectLlmError, DirectLlmJsonError
-from app.domains.characters.dependencies import (
-    get_activity_management_references, get_autonomy_workflows,
-    get_manual_activity_workflows, get_feed_cue_workflows,
-    get_first_greeting_workflows, get_tendency_analysis_runner,
-)
-
-
 @router.get("/{character_id}/feed-cue", response_model=routine_schemas.AgentFeedCueRead | None)
 def get_feed_cue(
     character_id: str,
@@ -634,7 +740,6 @@ def get_feed_cue(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
     except errors.AgentExecutionModeError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-
 
 @router.post(
     "/{character_id}/feed-cue",
@@ -667,7 +772,6 @@ def give_feed_cue(
     except errors.PromptInjectionDetectedError as exc:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
-
 @router.get("/{character_id}/settings", response_model=routine_schemas.AgentActivitySettingRead)
 def get_settings(
     character_id: str,
@@ -679,7 +783,6 @@ def get_settings(
         return activity_management.get_settings(db, user, character_id, references=references)
     except errors.AgentNotFoundError as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
-
 
 @router.put("/{character_id}/settings", response_model=routine_schemas.AgentActivitySettingRead)
 def update_settings(
@@ -706,7 +809,6 @@ def update_settings(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except routine_errors.AgentAutonomyRetryableError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-
 
 @router.post("/{character_id}/tendency/analyze", response_model=schemas.AgentDetailRead)
 async def analyze_tendency(
@@ -763,7 +865,6 @@ async def analyze_tendency(
             ) from exc
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
 
-
 @router.post("/{character_id}/activate", response_model=schemas.AgentDetailRead)
 def activate_agent(
     character_id: str,
@@ -810,7 +911,6 @@ def activate_agent(
     except workflows.social_character_not_found_error as exc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Agent not found") from exc
 
-
 @router.post("/{character_id}/deactivate", response_model=schemas.AgentDetailRead)
 def deactivate_agent(
     character_id: str,
@@ -826,7 +926,6 @@ def deactivate_agent(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except errors.CredentialSyncError as exc:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
-
 
 @router.post("/{character_id}/run-now", response_model=routine_schemas.OpenClawAgentRunRead)
 async def run_now(
@@ -893,7 +992,6 @@ async def run_now(
             ) from exc
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(exc)) from exc
 
-
 @router.post(
     "/{character_id}/first-greeting",
     response_model=AgentFirstGreetingRead,
@@ -939,64 +1037,4 @@ async def first_greeting(
             detail="첫인사를 만들지 못했습니다. 잠시 후 다시 시도해주세요.",
         ) from exc
     except workflows.social_service_error as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-@router.get('/{character_id}/image-settings', response_model=schemas.AgentImageGenerationSettingRead)
-def get_image_settings(character_id: str, db: Session=Depends(get_db), user: CharacterOwner=Depends(get_current_user), workflows: CharacterImageSettingsWorkflows=Depends(get_image_settings_workflows)) -> schemas.AgentImageGenerationSettingRead:
-    try:
-        return image_settings_owner.get_image_settings(db, user, character_id, workflows=workflows)
-    except errors.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
-
-
-@router.put('/{character_id}/image-settings', response_model=schemas.AgentImageGenerationSettingRead)
-def update_image_settings(character_id: str, data: schemas.AgentImageGenerationSettingUpdate, db: Session=Depends(get_db), user: CharacterOwner=Depends(get_current_user), workflows: CharacterImageSettingsWorkflows=Depends(get_image_settings_workflows)) -> schemas.AgentImageGenerationSettingRead:
-    try:
-        return image_settings_owner.update_image_settings(db, user, character_id, data, workflows=workflows)
-    except errors.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
-    except DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except errors.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except (errors.ImageSettingsInvalidError, errors.UnsafeImagePromptError) as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-
-
-@router.delete('/{character_id}/image-settings/key', response_model=schemas.AgentImageGenerationSettingRead)
-def delete_image_settings_key(character_id: str, db: Session=Depends(get_db), user: CharacterOwner=Depends(get_current_user), workflows: CharacterImageSettingsWorkflows=Depends(get_image_settings_workflows)) -> schemas.AgentImageGenerationSettingRead:
-    try:
-        return image_settings_owner.update_image_settings(db, user, character_id, schemas.AgentImageGenerationSettingUpdate(clear_pollinations_api_key=True), workflows=workflows)
-    except errors.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
-    except DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except errors.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except (errors.ImageSettingsInvalidError, errors.UnsafeImagePromptError) as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-
-
-@router.post('/{character_id}/image-settings/seed', response_model=schemas.AgentImageGenerationSettingRead)
-def upload_image_seed(character_id: str, data: schemas.AgentImageSeedUpload, db: Session=Depends(get_db), user: CharacterOwner=Depends(get_current_user), workflows: CharacterImageSettingsWorkflows=Depends(get_image_settings_workflows)) -> schemas.AgentImageGenerationSettingRead:
-    try:
-        return image_settings_owner.upload_image_seed(db, user, character_id, data, workflows=workflows)
-    except errors.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
-    except DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except errors.AgentExecutionModeError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    except errors.InvalidProfileMediaError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
-
-
-@router.delete('/{character_id}/image-settings/seed', response_model=schemas.AgentImageGenerationSettingRead)
-def delete_image_seed(character_id: str, db: Session=Depends(get_db), user: CharacterOwner=Depends(get_current_user), workflows: CharacterImageSettingsWorkflows=Depends(get_image_settings_workflows)) -> schemas.AgentImageGenerationSettingRead:
-    try:
-        return image_settings_owner.delete_image_seed(db, user, character_id, workflows=workflows)
-    except errors.AgentNotFoundError as exc:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
-    except DemoAccountLockedError as exc:
-        _raise_demo_account_locked(exc)
-    except errors.AgentExecutionModeError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc

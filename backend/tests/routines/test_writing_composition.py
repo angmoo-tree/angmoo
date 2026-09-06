@@ -1,3 +1,8 @@
+import app.domains.social.service.agent_tool_authorization as _actual_social_service_agent_tool_authorization
+import app.domains.social.service.resident_affordances as _actual_social_service_resident_affordances
+import app.runtime.social.agent_tool_authorization as _actual_social_agent_tool_authorization
+import app.runtime.social.agent_tools as _actual_social_agent_tools
+import app.domains.social.repository.posts as social_posts_actual
 import asyncio
 import hashlib
 from types import SimpleNamespace
@@ -254,19 +259,19 @@ def test_writer_admits_before_composition_and_records_memory_after_social_write(
 
         return invoke
 
-    monkeypatch.setattr(writing.social_agent_tool_authorization, "_session_fingerprint", lambda _: "redacted")
-    monkeypatch.setattr(writing.runtime_agent_tool_authorization, "_get_agent_tool_run", step("run", run))
+    monkeypatch.setattr(_actual_social_service_agent_tool_authorization, "_session_fingerprint", lambda _: "redacted")
+    monkeypatch.setattr(_actual_social_agent_tool_authorization, "_get_agent_tool_run", step("run", run))
     monkeypatch.setattr(
-        writing.social_agent_tool_authorization, "_agent_tool_character_id", lambda *args, **kwargs: "character"
+        _actual_social_service_agent_tool_authorization, "_agent_tool_character_id", lambda *args, **kwargs: "character"
     )
-    monkeypatch.setattr(writing.runtime_agent_tool_authorization, "_agent_tool_user", step("user"))
-    monkeypatch.setattr(writing.runtime_agent_tool_authorization, "_ensure_tick_action_allowed", step("gate"))
+    monkeypatch.setattr(_actual_social_agent_tool_authorization, "_agent_tool_user", step("user"))
+    monkeypatch.setattr(_actual_social_agent_tool_authorization, "_ensure_tick_action_allowed", step("gate"))
     monkeypatch.setattr(
-        writing.social_post_queries,
+        social_posts_actual,
         "get_post",
         step("target", SimpleNamespace(author_character_id="other")),
     )
-    monkeypatch.setattr(writing.social_resident_affordances, "_ensure_agent_can_reply_to_thread", step("thread"))
+    monkeypatch.setattr(_actual_social_service_resident_affordances, "_ensure_agent_can_reply_to_thread", step("thread"))
     monkeypatch.setattr(
         writing,
         "_compose_writing_from_brief",
@@ -279,8 +284,8 @@ def test_writer_admits_before_composition_and_records_memory_after_social_write(
             ),
         ),
     )
-    monkeypatch.setattr(writing.agent_tool_actions, "create_agent_tool_post", step("social", post))
-    monkeypatch.setattr(writing.agent_tool_actions, "reply_agent_tool_post", step("social", post))
+    monkeypatch.setattr(_actual_social_agent_tools.agent_tool_actions, "create_agent_tool_post", step("social", post))
+    monkeypatch.setattr(_actual_social_agent_tools.agent_tool_actions, "reply_agent_tool_post", step("social", post))
     monkeypatch.setattr(
         writing.character_lore_service, "mark_lore_chunks_used", step("lore")
     )
@@ -323,7 +328,7 @@ def test_writer_admits_before_composition_and_records_memory_after_social_write(
 
 
 def test_existing_daypart_writer_keeps_event_identity_and_single_commit():
-    from app.services.agent_writing import _record_daypart_action_memory
+    from app.domains.memory.service.daypart import record_action_memory as _record_daypart_action_memory
 
     events = []
 

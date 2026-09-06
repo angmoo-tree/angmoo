@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from tests.model_fixture_support import models as _registered_models
+from model_fixture_support import models as _registered_models
 from app.api.identity_dependencies import get_current_user
 from app.api.v1.routes.agents import router
 from app.database import get_db

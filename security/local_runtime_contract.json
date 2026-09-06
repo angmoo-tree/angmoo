@@ -25,14 +25,8 @@
   "contract_id": "angmoo-l0-docker-runtime-v1",
   "core_modules": [
     {
-      "disposition": "migrate",
-      "module": "app.core.active_hours",
-      "owner_stage": "L3",
-      "removal_condition": "Move active-hour policy behind the activities domain public API."
-    },
-    {
-      "disposition": "keep",
       "module": "app.core.bounded_text",
+      "disposition": "keep",
       "owner_stage": "AR-B5",
       "removal_condition": null
     },
@@ -61,10 +55,11 @@
       "removal_condition": null
     },
     {
-      "disposition": "migrate",
+      "disposition": "keep",
       "module": "app.core.image_generation",
-      "owner_stage": "L6",
-      "removal_condition": "Move media generation policy behind the media domain public API."
+      "owner_stage": "AR-B8",
+      "removal_condition": null,
+      "reason": "Shared provider model catalogue, common image configuration/defaults and encoding values used by Character, Social, credentials and provider transport. No generation workflow, domain SQL or provider call is owned here."
     },
     {
       "disposition": "keep",
@@ -73,8 +68,8 @@
       "removal_condition": null
     },
     {
-      "disposition": "keep",
       "module": "app.core.json_objects",
+      "disposition": "keep",
       "owner_stage": "AR-B5",
       "removal_condition": null
     },
@@ -91,10 +86,11 @@
       "removal_condition": null
     },
     {
-      "disposition": "migrate",
+      "disposition": "keep",
       "module": "app.core.public_media",
-      "owner_stage": "L6",
-      "removal_condition": "Move public media mounting behind the media domain composition API."
+      "owner_stage": "AR-B8",
+      "removal_condition": null,
+      "reason": "Application-level FastAPI StaticFiles mounting for existing public directories; main composition owns the invocation. Upload validation and private preview policy remain in their actual domains."
     },
     {
       "disposition": "keep",
@@ -115,10 +111,11 @@
       "removal_condition": null
     },
     {
-      "disposition": "migrate",
+      "disposition": "keep",
       "module": "app.core.search_text",
-      "owner_stage": "L4",
-      "removal_condition": "Move search normalization behind the social feed domain public API."
+      "owner_stage": "AR-B8",
+      "removal_condition": null,
+      "reason": "Only shared NFKC/control/space normalization and LIKE escaping/term helpers remain. Social Post fields/order/limits are owned by domains.social.service.search_documents."
     },
     {
       "disposition": "keep",

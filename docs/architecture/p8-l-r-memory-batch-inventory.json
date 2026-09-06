@@ -304,19 +304,19 @@
     },
     {
       "path": "backend/app/integrations/llm/memory_selection.py",
-      "sha256": "1de42b7c01d84860bbe19ca8676ba5113cf0a308ddea1c8d3a9f080d01b1c8eb"
+      "sha256": "f263367f9594f1ab8bce8d11dc9fb3d23054efbbb79e63463bbfa7729603cf78"
     },
     {
       "path": "backend/app/main.py",
-      "sha256": "a90f495bbcaae4b516f39c3e85ee6aa563c0d15ecdd632183d2a829efc5b3697"
+      "sha256": "ae68dae69b4829d3570b5c425e3ed3a64c3ecbd29e7fd6db76ad169621a385b8"
     },
     {
       "path": "backend/app/runtime/account_deletion.py",
-      "sha256": "a2c6325332235874663e0397dc4bf8fbc3bbcea8b60eeba26d7de75acdea60cf"
+      "sha256": "17d52db0eb096015de43b852c7318b99ba234baaeb7a88cadbad2e8ce1b54558"
     },
     {
       "path": "backend/app/runtime/characters/management.py",
-      "sha256": "9ed18ba62845eebee197fc73c64616ef453dab908fbe187308f516915b7ef2d1"
+      "sha256": "686bad354c71b74386ca91fb571fce80305d329c592fcec0416d8458098594bf"
     },
     {
       "path": "backend/app/runtime/desktop_sidecar.py",
@@ -337,6 +337,10 @@
     {
       "path": "backend/app/runtime/memory/composition.py",
       "sha256": "ffc8b259e43241295d4e2c73d9968d72f7569eab89047de75d8f2f69aaaab57b"
+    },
+    {
+      "path": "backend/app/runtime/memory/daypart_observations.py",
+      "sha256": "8056b65f141166381a18aeeafb16bb942a74d5182fb7fa9a14f8a57985de2587"
     },
     {
       "path": "backend/app/runtime/memory/recall_composition.py",
@@ -388,7 +392,7 @@
     },
     {
       "path": "backend/app/runtime/memory_selection_provider.py",
-      "sha256": "547c1efa2c6fdc52b171e4af0e6120d80db8c167b6f57b66493ba59811024caf"
+      "sha256": "b9be0e1ec1276f021d15deb17ec45fa6c31bfa4d2e45f2f48b5a3eed208c69eb"
     },
     {
       "path": "backend/app/runtime/migrations/sqlite_versions/manifests/v9.json",
@@ -407,24 +411,24 @@
       "sha256": "2eeb2d6850f68232168ac34147e5736d31101eaa817b7693ebb4869d0c3b5cc7"
     },
     {
-      "path": "backend/tests/test_p8_l_r_memory_batch_api.py",
-      "sha256": "e394ff12284c91eee82b0706ee004f65b3ab48b370710c7402d0c17e852131a6"
+      "path": "backend/tests/memory/test_p8_l_r_memory_batch_api.py",
+      "sha256": "02d786ca251f158ba02aaf711340d64899fd998763cc98c4f139f40166c80cdb"
     },
     {
-      "path": "backend/tests/test_p8_l_r_memory_batch_migration.py",
+      "path": "backend/tests/memory/test_p8_l_r_memory_batch_migration.py",
       "sha256": "7937e69639032e03ebb967e53e11b3a89b6b5e0d77e598b9d6cf087624f169a3"
     },
     {
-      "path": "backend/tests/test_p8_l_r_memory_batch_policy.py",
+      "path": "backend/tests/memory/test_p8_l_r_memory_batch_policy.py",
       "sha256": "efa4f7e7e36cd4078de16872d0cdd5f55be18ce148f0543d8e1be27bf4c1d047"
     },
     {
-      "path": "backend/tests/test_p8_l_r_memory_batch_runtime.py",
-      "sha256": "10e6fd780527947c4eba8069b0747c2c7d52452e7ee930c19d70e5b5b0ecdccc"
+      "path": "backend/tests/memory/test_p8_l_r_memory_batch_runtime.py",
+      "sha256": "5c537f79f8d552c7b110e4714e52e7bf1a7b8d7c02eadfb6275400c4e69a24d9"
     },
     {
-      "path": "backend/tests/test_p8_l_r_memory_batch_safety.py",
-      "sha256": "41546b8d36277772ecea23012c1235505e1b7422dcd2eeb8a9b833c9d0b7c5ff"
+      "path": "backend/tests/memory/test_p8_l_r_memory_batch_safety.py",
+      "sha256": "d32a25c9b64b024f059c8a263d8ec1494bff5deb42b554f12ccaa2f82ffeea82"
     },
     {
       "path": "browser-tests/memory-batch-fixture.ts",
@@ -504,7 +508,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_r_memory_batch_inventory.py",
-      "sha256": "b372b7b356d04f4791eab6ff4f8ba4ae6a7723a052d89123661cde34bdad2cc5"
+      "sha256": "69292086997b6cb42da6c48cd12c5a8e04d7dbd21ffaf6d889305da8d53c3bbb"
     },
     {
       "path": "scripts/ci/run_windows_installer_supported_upgrade.ps1",

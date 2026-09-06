@@ -13,7 +13,7 @@ from app.domains.chat.repository.response_lifecycle import (
 )
 from app.runtime.chat import generation_workflows
 from app.runtime.chat.message_composition import generation_service
-from test_p8_l_j_response_generation_lifecycle import _command, response_session
+from chat.test_p8_l_j_response_generation_lifecycle import _command, response_session
 
 
 def test_runtime_builder_keeps_provider_order_material_and_session(monkeypatch):

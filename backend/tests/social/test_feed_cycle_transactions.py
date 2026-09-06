@@ -3,7 +3,7 @@ import asyncio
 from sqlalchemy import event, func, select
 from sqlalchemy.orm import Session
 
-from tests.model_fixture_support import models
+from model_fixture_support import models
 from app.domains.social.schemas.feed import FeedReactionDecision
 from app.domains.social.service import feed_cycle
 from app.runtime.social.feed_cycle import RuntimeWorldFeedWorkflows

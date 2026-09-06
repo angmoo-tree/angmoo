@@ -11,7 +11,7 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import schemas
+import app.domains.social.schemas.feed as schemas
 from model_fixture_support import models
 from app.runtime.social.observations import observe_source
 from app.models import Base
@@ -20,7 +20,7 @@ from app.runtime.relationships import (
 )
 from app.domains.social.contracts.observations import SocialObservationError
 from app.runtime.social import langgraph_actions as langgraph_social_apply
-from app.services import world_character_contracts
+from app.domains.world_characters.service import setup_validation as world_character_contracts
 from app.runtime.graph_projection.sqlalchemy_commands import (
     RelationshipStateProjectionCommand,
     build_projection_command,

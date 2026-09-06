@@ -40,7 +40,7 @@ def test_broad_scope_and_missing_review_metadata_are_rejected(tmp_path: Path) ->
 def test_checkpoint_exception_matches_only_the_existing_frozen_synthetic_fixture() -> None:
     payload = json.loads(checker.DEFAULT_PATH.read_text(encoding="utf-8"))
     entry = next(item for item in payload["entries"] if item["path"] == checker.CHECKPOINT_PATH)
-    original = next(item for item in payload["entries"] if item["path"] == checker.CHECKPOINT_EVIDENCE["evidence_path"] and item["rule"] == entry["rule"])
+    original = next(item for item in payload["entries"] if item["path"] == "backend/tests/integrations/test_direct_llm.py" and item["rule"] == entry["rule"])
     assert entry["value"] == original["value"]
     assert hashlib.sha256(entry["value"].encode()).hexdigest() == checker.CHECKPOINT_FIXTURE_SHA256
     checkpoint_bytes = (REPO_ROOT / checker.CHECKPOINT_PATH).read_bytes().replace(b"\r\n", b"\n")

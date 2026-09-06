@@ -8,10 +8,8 @@ from app.domains.chat.models import (
     MessageThread,
     UserMessagePreference,
 )
-from app.domains.identity.public import (
-    InstallationIdentity,
-    LOCAL_INSTALLATION_KEY,
-)
+from app.domains.identity.models import InstallationIdentity
+from app.domains.identity.constants import LOCAL_INSTALLATION_KEY
 from app.domains.identity.models import LlmCredential
 from app.domains.identity.models import User
 from app.domains.world_characters.models import WorldCharacter

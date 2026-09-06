@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy import create_engine, select, event
 from sqlalchemy.orm import Session
 
-from tests.model_fixture_support import models as _registered_models
+from model_fixture_support import models as _registered_models
 from app.domains.identity.models import User
 from app.domains.characters.models import Character
 from app.domains.routines.models import AgentActivitySetting, AgentActivityLog

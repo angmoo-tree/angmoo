@@ -12,7 +12,7 @@ from app.models import Base
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )
-from app.services import world_character_contracts
+from app.domains.world_characters.service import setup_validation as world_character_contracts
 
 
 @dataclass(frozen=True)

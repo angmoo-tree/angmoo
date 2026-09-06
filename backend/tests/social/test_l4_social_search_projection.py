@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from tests.model_fixture_support import models
+from model_fixture_support import models
 from app.models import Base
 from app.domains.social.contracts.search_state import SocialSearchState
 from app.runtime.search.binding import current_social_search

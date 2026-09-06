@@ -212,4 +212,3 @@ def _block_actions(
 ) -> None:
     for action in actions:
         blocked[action] = reason
-
