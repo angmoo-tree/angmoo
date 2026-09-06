@@ -1,7 +1,7 @@
 import { AppShell } from "@/composition/shells/app-shell";
-import { CharacterActivityClient } from "@/components/character-activity-client";
+import { CharacterActivityClient } from "@/features/characters/components/character-activity-client";
 import { fetchBackendJson } from "@/lib/server/backend";
-import type { CharacterActivityRead } from "@/lib/community";
+import type { CharacterActivityRead } from "@/features/characters/types/activity";
 
 export const dynamic = "force-dynamic";
 

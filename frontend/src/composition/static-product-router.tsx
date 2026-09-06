@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
-import { AgentCreateClient } from "@/components/agent-create-client";
-import { AgentDetailClient } from "@/components/agent-detail-client";
-import { AgentsDashboardClient } from "@/features/characters/public";
+import { AgentCreateClient } from "@/features/characters/components/agent-create-client";
+import { AgentDetailClient } from "@/composition/screens/agent-detail-screen";
+import { AgentsDashboardClient } from "@/features/characters/components/agents-dashboard-client";
 import { AppShell } from "@/composition/shells/app-shell";
 import { LocalOwnerClient } from "@/features/identity/components/local-owner-client";
 import { PostDetailClient } from "@/components/post-detail-client";
@@ -21,7 +21,7 @@ import {
   RelationshipGraphFrame,
 } from "@/features/relationships/public";
 import { SettingsClient } from "@/composition/screens/settings-screen";
-import { WorldCharacterAutonomySetupClient } from "@/components/world-character-autonomy-setup-client";
+import { WorldCharacterAutonomySetupClient } from "@/composition/screens/world-character-autonomy-setup-screen";
 import { WorldCreatorClient } from "@/components/world-creator-client";
 import { DeviceHomeScreen } from "@/composition/screens/device-home-screen";
 import { StudioImportRouteClient } from "@/composition/screens/studio-import-screen";

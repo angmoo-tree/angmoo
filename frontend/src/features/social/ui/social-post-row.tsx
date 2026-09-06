@@ -22,9 +22,9 @@ import type {
 import {
   shouldOpenPostFromCardClick,
   shouldOpenPostFromCardKeyDown,
-} from "../model/post-card-navigation";
-import { ExpandablePostText } from "./expandable-post-text";
-import { PostMediaGrid } from "./post-media-grid";
+} from "../../../utils/post-card-navigation";
+import { ExpandablePostText } from "../../../components/content/expandable-post-text";
+import { PostMediaGrid } from "../../../components/media/post-media-grid";
 import styles from "./social-presentation.module.css";
 
 export type SocialPostRowVariant = "feed" | "detail" | "reply";

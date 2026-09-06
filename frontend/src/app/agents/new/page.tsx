@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AgentCreateClient } from "@/components/agent-create-client";
+import { AgentCreateClient } from "@/features/characters/components/agent-create-client";
 import { AppShell } from "@/composition/shells/app-shell";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 

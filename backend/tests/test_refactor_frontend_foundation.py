@@ -189,3 +189,15 @@ def test_frontend_only_change_reaches_each_host_event(event, missing):
     document[True][event]["paths"].remove(missing)
     errors = check_workflow_triggers(yaml.safe_dump(document))
     assert f"Hosted Windows {event} paths must include {missing}" in errors
+
+
+def test_browser_relative_source_move_preserves_assertions_and_rejects_weakened_expectation(tmp_path):
+    path = "browser-tests/flow.spec.ts"
+    old = "frontend/src/features/characters/model/presentation.ts"
+    new = "frontend/src/features/characters/utils/presentation.ts"
+    original = b'import { present } from "../frontend/src/features/characters/model/presentation"; expect(present()).toBe(2);'
+    moved = 'import { present } from "../frontend/src/features/characters/utils/presentation"; expect(present()).toBe(2);'
+    write(tmp_path, path, moved)
+    assert verify(tmp_path, {path: original}, {old: new}) == []
+    write(tmp_path, path, moved.replace("toBe(2)", "toBe(0)"))
+    assert any("frontend_oracle_changed" in error for error in verify(tmp_path, {path: original}, {old: new}))

@@ -1,7 +1,9 @@
 # Frontend refactor execution results
 
-Current: **AR-F2-0 COMPLETE; AR-F2-A PR #292 MERGED, post-merge checks pending;
-AR-F2-B PR preparation and validation; AR-F2-C through AR-F5-B NOT STARTED**.
+Current: **AR-F2-0 and AR-F2-A COMPLETE; AR-F2-B #293 MERGED with installer
+post-merge validation running; AR-F2-C #294 passed 23 pre-merge checks, awaiting
+predecessor gate; AR-F3-A #295 draft CI and full local preservation PASS;
+AR-F3-B implemented locally, validation running; AR-F3-C through AR-F5-B NOT STARTED**.
 The user delegated implementation, validation, PRs and merges. AR-X, P8-L-S,
 real-provider product verification, Release and Production remain separate.
 
@@ -242,3 +244,27 @@ committed history were deleted.
   `e67e0385fd77f1d3a62f3e877ca41f71a0102920` at 2026-09-07 04:05:46 KST.
   Its post-merge workflows and AR-F2-C #294 remain separate integration gates.
 
+
+## AR-F3-B Character ownership — local validation
+
+- Preserve Character/WorldCharacter identifiers, request paths and bodies, media
+  generation/apply/discard flow, autonomy storage and notification order. Forty-five
+  Character endpoints, three failure paths and onboarding/autonomy storage events
+  match the immutable pre-extraction implementation in the new differential test.
+- Separate Character API/types/config/stores/utils/components from upper screens
+  combining Character with Chat and Social. World profile retains its lifecycle,
+  abort, retry and in-flight guard; feature cards receive presentation slots.
+- Shared text/media rendering accepts presentation shapes; identical styles move
+  with the components. The 1408 raw-color occurrences are unchanged; splitting the
+  detail screen changes the physical file count from 33 to 34. No screenshot,
+  browser expectation, fixture payload, asset, dependency or lock is refreshed.
+- Web 21 PASS (52.0s), Local Settings 2 PASS (7.7s), TypeScript/ESLint PASS;
+  34 focused contracts and 44 foundation guard tests PASS. The 486-test source suite
+  found six old one-file assumptions; update them to the actual split source and
+  verify the original assertion protection. Historical facade-import checks remain
+  pinned; current imports, capability and behavior checks remain live.
+- Browser source imports now point to the moved real modules. The guard permits
+  only exact reviewed relative path replacements and rejects changed expectations;
+  324 frozen frontend files and browser/fixture/asset/lock protection PASS.
+- Next/static builds, static browser, source-introduction capture, full preservation,
+  CI, installer/visual checks and sequential merge remain required for completion.

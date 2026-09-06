@@ -50,7 +50,7 @@
       "path": "frontend/src/app/agents/[characterId]/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/agents/[characterId]",
-      "source_sha256": "f2b7f5dfb91bac9ec38a37073d07d87e7d700af8d559663ae4fa882e51957fa1",
+      "source_sha256": "0d42f2a0e7ba655ab0d1234bc15bbc7ca5ccd0924aa1fecdfccf0596858708a8",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -60,7 +60,7 @@
       "path": "frontend/src/app/agents/new/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/agents/new",
-      "source_sha256": "6a5ae92bfd755e996792d65fd46f7c6c7a6c7dada06cff11a979deee7c92285d",
+      "source_sha256": "a757bc39a688bae630d0eced28b98a5110c820b30c0396edd8dc2e8d129747d2",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -70,7 +70,7 @@
       "path": "frontend/src/app/agents/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/agents",
-      "source_sha256": "9947dda943ada336b6fb8d992d2c479e4ef0485ae9bbcb6ad6931aa50b40ff3f",
+      "source_sha256": "69b5c24af75253b3d1f417013af0c416883bd02f4364f0b961515175c3c25e62",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -140,7 +140,7 @@
       "path": "frontend/src/app/characters/[characterId]/activity/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/characters/[characterId]/activity",
-      "source_sha256": "4f31305f45194827bb77c251de9628d96aa9b69f1743a1fdd2ec2ccde9513f14",
+      "source_sha256": "626cf3ef01228a68aadae9c3ed6fcd633461d377a8e570d66bd175d1cff8006f",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -150,7 +150,7 @@
       "path": "frontend/src/app/characters/[characterId]/worlds/[worldId]/autonomy-setup/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/characters/[characterId]/worlds/[worldId]/autonomy-setup",
-      "source_sha256": "9dba173de266a2c5ea69a613b65fdb194d6376c697fb7bfe097a683cdb38c93e",
+      "source_sha256": "c3046c8a95e3a639c8a8b85f34db94bbe58145b8f1dd5bc81019f90233a0f446",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -292,7 +292,7 @@
       "path": "frontend/src/app/profiles/characters/[characterId]/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/profiles/characters/[characterId]",
-      "source_sha256": "73d83072a7550b3846d57ff8b8b4f330c044e6ace60633f2993e98471462e81e",
+      "source_sha256": "5bd3a0a29f8a8ef951212ebba6babe2f3b5c5598a223342037efa7a620262d8e",
       "transition_pr": "ER5 PR K"
     },
     {

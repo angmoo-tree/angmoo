@@ -89,7 +89,7 @@ def test_studio_world_character_surface_owns_fixture_lifecycle_orchestration() -
     surface = _read(
         "features/creator-studio/ui/studio-world-character-list.tsx"
     )
-    create_client = _read("components/agent-create-client.tsx")
+    create_client = _read("features/characters/components/agent-create-client.tsx")
     browser_create_page = _read("app/agents/new/page.tsx")
     client = _read(
         "features/creator-studio/api/studio-world-character-client.ts"
@@ -133,8 +133,8 @@ def test_studio_world_character_surface_owns_fixture_lifecycle_orchestration() -
 
 
 def test_local_character_creation_ui_has_no_hosted_saved_count_gate() -> None:
-    create_client = _read("components/agent-create-client.tsx")
-    dashboard = _read("features/characters/ui/agents-dashboard-client.tsx")
+    create_client = _read("features/characters/components/agent-create-client.tsx")
+    dashboard = _read("features/characters/components/agents-dashboard-client.tsx")
     dashboard_compatibility = _read("components/agents-dashboard-client.tsx")
     agents_lib = _read("lib/agents.ts")
     combined = "\n".join((create_client, dashboard, agents_lib))
@@ -168,8 +168,8 @@ def test_local_character_creation_ui_has_no_hosted_saved_count_gate() -> None:
 
 
 def test_local_multi_autonomy_dashboard_uses_shared_utc_instant_contract() -> None:
-    dashboard = _read("features/characters/ui/agents-dashboard-client.tsx")
-    detail = _read("components/agent-detail-client.tsx")
+    dashboard = _read("features/characters/components/agents-dashboard-client.tsx")
+    detail = _read("composition/screens/agent-detail-screen.tsx") + _read("features/characters/components/agent-detail-parts.tsx")
     social_summary = _read("features/social/ui/active-agent-summary.tsx")
     presentation = _read("utils/profile-presentation.ts")
     shared_public = _read("shared/ui/public.ts")
@@ -192,7 +192,7 @@ def test_local_multi_autonomy_dashboard_uses_shared_utc_instant_contract() -> No
 
 
 def test_local_character_delete_copy_keeps_exact_character_scope() -> None:
-    detail = _read("components/agent-detail-client.tsx")
+    detail = _read("composition/screens/agent-detail-screen.tsx") + _read("features/characters/components/agent-detail-parts.tsx")
 
     assert "이 Character 하나에 연결된 private 프로필 미디어" in detail
     assert "현재 local owner, 다른 Character, 다른 owner 데이터는 삭제하지 않습니다." in detail
@@ -202,8 +202,8 @@ def test_local_character_delete_copy_keeps_exact_character_scope() -> None:
 
 
 def test_world_character_setup_distinguishes_routine_and_feed_lane_states() -> None:
-    setup = _read("components/world-character-autonomy-setup-client.tsx")
-    contract = _read("lib/world-character-setup.ts")
+    setup = _read("composition/screens/world-character-autonomy-setup-screen.tsx")
+    contract = _read("features/characters/api/world-character-setup.ts")
 
     assert 'data-feed-runtime-state={feedStatus.runtime_state}' in setup
     assert 'data-feed-lane-state="routine-only"' in setup

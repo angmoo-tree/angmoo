@@ -2,10 +2,17 @@
   "adoption_targets": [
     {
       "classifications": [
-        "ADAPTED"
+        "DIRECT"
       ],
-      "path": "frontend/src/components/character-profile-client.tsx",
-      "sha256": "d3b7b6e98ecf13be749b45653a281fcfa0aa3b59216723292b0a3c8c0367ee03"
+      "path": "frontend/src/components/content/expandable-post-text.tsx",
+      "sha256": "14d44808a689e2fce47339a8335297b8f65b5291e1ae6d5876ae4e65711369ee"
+    },
+    {
+      "classifications": [
+        "DIRECT"
+      ],
+      "path": "frontend/src/components/content/mentioned-text.tsx",
+      "sha256": "7742d8d9a03247f7852e37f5d0506103a197613890e2b7ca198de8336c0fe880"
     },
     {
       "classifications": [
@@ -13,6 +20,13 @@
       ],
       "path": "frontend/src/components/layout/device-shell.tsx",
       "sha256": "b279540c61cca9976d9ebceb9f6f13c6dab156a5a117edf40e88469569ea89f6"
+    },
+    {
+      "classifications": [
+        "ADAPTED"
+      ],
+      "path": "frontend/src/components/media/post-media-grid.tsx",
+      "sha256": "44a81a0d44e7086e1eb352c71d00c23d244b50c02717284424a73d95539fead7"
     },
     {
       "classifications": [
@@ -30,10 +44,17 @@
     },
     {
       "classifications": [
+        "ADAPTED"
+      ],
+      "path": "frontend/src/composition/screens/character-profile-screen.tsx",
+      "sha256": "af78a459057cd670bfcecf3df2c1d8576e5da1e66c90c088c3e63093b0dd2b2a"
+    },
+    {
+      "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/composition/screens/world-app.tsx",
-      "sha256": "0b22c540423487cbf4fea3479d88fc103b69f660d07ec1aac6a67e2dbbcce1e8"
+      "sha256": "f9223ca14a30279b840901f77ae4a1ffe5c300965f6eb895255ba7c45f05e137"
     },
     {
       "classifications": [
@@ -51,17 +72,17 @@
     },
     {
       "classifications": [
-        "LOCAL"
+        "ADAPTED"
       ],
-      "path": "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
-      "sha256": "2dde010a2adacbfeb0da8df300a72454e93c1c1bddbf7f91a9a39fbada703c74"
+      "path": "frontend/src/features/characters/components/agents-dashboard-client.tsx",
+      "sha256": "761b48f129242697e5ca8c012f7667ebd3fe460c1e657ee670fa4d5708bc9f8b"
     },
     {
       "classifications": [
-        "ADAPTED"
+        "LOCAL"
       ],
-      "path": "frontend/src/features/characters/ui/agents-dashboard-client.tsx",
-      "sha256": "7558cdb0e06229e87ce28e82bc9f484e874d37bfe7eb5e5f285b3fba29acfaea"
+      "path": "frontend/src/features/characters/utils/character-recent-activity-presentation.ts",
+      "sha256": "10156f28f462af622f31d6472a08883ab54a9064576156a7258a548a8c2ba0fd"
     },
     {
       "classifications": [
@@ -86,13 +107,6 @@
     },
     {
       "classifications": [
-        "DIRECT"
-      ],
-      "path": "frontend/src/features/social/model/post-card-navigation.ts",
-      "sha256": "326fd7efcca17ea9ac5db55909dc242a5441ac3be8bd32bc56fb9210ba5837f2"
-    },
-    {
-      "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/social/model/social-presentation-contract.ts",
@@ -102,43 +116,22 @@
       "classifications": [
         "DIRECT"
       ],
-      "path": "frontend/src/features/social/ui/expandable-post-text.tsx",
-      "sha256": "7add3d46005c10fb7b6b92421032abc89ca75759229a9e49b0635632e1711a37"
-    },
-    {
-      "classifications": [
-        "DIRECT"
-      ],
-      "path": "frontend/src/features/social/ui/mentioned-text.tsx",
-      "sha256": "f02064771cbfb9f2ac4942b15724c1b818fd6989904f72ecb21fc7ee4779c1d4"
-    },
-    {
-      "classifications": [
-        "DIRECT"
-      ],
       "path": "frontend/src/features/social/ui/post-list-client.tsx",
-      "sha256": "1a451b2f93f380fe417edb3dc581ea17f19efc0d499b90d5b204a2cf1bce17b3"
-    },
-    {
-      "classifications": [
-        "ADAPTED"
-      ],
-      "path": "frontend/src/features/social/ui/post-media-grid.tsx",
-      "sha256": "c3d0419500ab77ebd048848aeea74f28337da3d74b4ab6a29ba72bb95e504e25"
+      "sha256": "6a993bf7974ca71d39efeb0d869e41632cde081db5fac6f4fd645b2947f60459"
     },
     {
       "classifications": [
         "DIRECT"
       ],
       "path": "frontend/src/features/social/ui/social-post-row.tsx",
-      "sha256": "0e0de56ac3b05c2c08eba83e92f98faad560653a16226ad6a5d1d73bd277fe25"
+      "sha256": "af36024ea7af77f00a421ac4186a11e699d89389840bda399f95d036000522b6"
     },
     {
       "classifications": [
         "DIRECT"
       ],
       "path": "frontend/src/features/social/ui/social-presentation.module.css",
-      "sha256": "d24b5e775f25a7bb7cb6ec019995af77bc9aa7328fcd7ccdb13a30d229195897"
+      "sha256": "2e4b743e1dbb4fc0f05ff04bcc7aa8ea0870acd8dba86562093123ec7e87162d"
     },
     {
       "classifications": [
@@ -153,6 +146,13 @@
       ],
       "path": "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
       "sha256": "524a906d423a0f4cc2eeb54ee5f3c762bfc3016f6268520b2055a6bb4d4e1590"
+    },
+    {
+      "classifications": [
+        "DIRECT"
+      ],
+      "path": "frontend/src/utils/post-card-navigation.ts",
+      "sha256": "326fd7efcca17ea9ac5db55909dc242a5441ac3be8bd32bc56fb9210ba5837f2"
     }
   ],
   "browser_harness": {
@@ -180,7 +180,7 @@
     "specs": [
       {
         "path": "browser-tests/product-shell.spec.ts",
-        "sha256": "a14714bcde5d4e91a275523623b4b903f26909d5bfc4e6c29239bad74b9f3626"
+        "sha256": "bf567259a82d5580860f085cac4485ffcd2f98241260cd54b520d3eb310e00a1"
       },
       {
         "path": "browser-tests/product-surfaces.visual.spec.ts",
@@ -269,7 +269,7 @@
       "frontend/src/composition/shells/app-shell.tsx",
       "frontend/src/components/post-detail-client.tsx",
       "frontend/src/composition/static-product-router.tsx",
-      "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
+      "frontend/src/features/characters/utils/character-recent-activity-presentation.ts",
       "frontend/src/lib/navigation/device-navigation.ts",
       "frontend/src/features/device-shell/public.ts",
       "frontend/src/components/layout/device-shell.module.css",
@@ -288,9 +288,9 @@
       "frontend/src/features/social/model/social-feed-contract.ts",
       "frontend/src/features/social/model/social-presentation-contract.ts",
       "frontend/src/features/social/public.ts",
-      "frontend/src/features/social/ui/expandable-post-text.tsx",
+      "frontend/src/components/content/expandable-post-text.tsx",
       "frontend/src/features/social/ui/post-list-client.tsx",
-      "frontend/src/features/social/ui/post-media-grid.tsx",
+      "frontend/src/components/media/post-media-grid.tsx",
       "frontend/src/features/social/ui/social-post-row.tsx",
       "frontend/src/features/social/ui/social-presentation.module.css",
       "frontend/src/features/social/ui/world-social-feed.module.css",
@@ -308,7 +308,7 @@
     "forbidden_matches": []
   },
   "raw_colors": {
-    "files": 33,
+    "files": 34,
     "occurrences": 1408,
     "pattern": "#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{5}|[0-9A-Fa-f]{3}|[0-9A-Fa-f])?\\b",
     "per_extension": {
@@ -321,7 +321,7 @@
         "occurrences": 2
       },
       ".tsx": {
-        "files": 31,
+        "files": 32,
         "occurrences": 1368
       }
     },
@@ -406,133 +406,10 @@
         }
       },
       {
-        "occurrences": 163,
-        "path": "frontend/src/components/agent-create-client.tsx",
+        "occurrences": 2,
+        "path": "frontend/src/components/content/mentioned-text.tsx",
         "values": {
-          "#101828": 23,
-          "#166534": 1,
-          "#17834b": 1,
-          "#344054": 20,
-          "#52606d": 2,
-          "#667085": 27,
-          "#98a2b3": 4,
-          "#b7e4c7": 1,
-          "#c24141": 7,
-          "#d0d5dd": 2,
-          "#e1e5eb": 7,
-          "#eaedf2": 2,
-          "#edf0f5": 1,
-          "#eef1f5": 8,
-          "#f2f4f7": 1,
-          "#f2fbf5": 1,
-          "#f6f7f9": 9,
-          "#f9fafb": 9,
-          "#fbfcfd": 1,
-          "#ff5252": 1,
-          "#ff6b6b": 13,
-          "#ff8a8a": 1,
-          "#ffb4b4": 1,
-          "#ffcccc": 1,
-          "#ffd7d7": 6,
-          "#ffe2e2": 3,
-          "#fff1f1": 2,
-          "#fff5f5": 6,
-          "#fff8f8": 1,
-          "#fffafa": 1
-        }
-      },
-      {
-        "occurrences": 344,
-        "path": "frontend/src/components/agent-detail-client.tsx",
-        "values": {
-          "#027a48": 1,
-          "#101828": 41,
-          "#344054": 38,
-          "#475467": 4,
-          "#52610f": 1,
-          "#667085": 56,
-          "#98a2b3": 11,
-          "#9a3412": 1,
-          "#9a5b13": 1,
-          "#b22f2f": 1,
-          "#b45309": 2,
-          "#c24141": 8,
-          "#d0d5dd": 3,
-          "#d92d20": 2,
-          "#d9e0ea": 4,
-          "#e1e5eb": 19,
-          "#eaedf2": 14,
-          "#ecfdf3": 1,
-          "#eef1f5": 20,
-          "#f2f4f7": 11,
-          "#f2f8df": 1,
-          "#f6f7f9": 17,
-          "#f9fafb": 12,
-          "#fbfcfd": 2,
-          "#ff5252": 5,
-          "#ff6b6b": 36,
-          "#ff8f8f": 1,
-          "#ffb4b4": 2,
-          "#ffb5b5": 3,
-          "#ffd7d7": 7,
-          "#ffe2e2": 3,
-          "#ffe4bf": 1,
-          "#fff0ef": 3,
-          "#fff5f5": 5,
-          "#fff7ed": 1,
-          "#fff8ec": 2,
-          "#fff8ed": 1,
-          "#fff8f7": 1,
-          "#fffafa": 2
-        }
-      },
-      {
-        "occurrences": 26,
-        "path": "frontend/src/components/character-activity-client.tsx",
-        "values": {
-          "#101828": 3,
-          "#475467": 3,
-          "#667085": 4,
-          "#c24141": 1,
-          "#e1e5eb": 1,
-          "#eaedf2": 2,
-          "#eef1f5": 3,
-          "#f9fafb": 1,
-          "#ff6b6b": 4,
-          "#ffd7d7": 1,
-          "#fff0ef": 2,
-          "#fff5f5": 1
-        }
-      },
-      {
-        "occurrences": 34,
-        "path": "frontend/src/components/character-profile-client.tsx",
-        "values": {
-          "#101828": 8,
-          "#1f2937": 1,
-          "#667085": 8,
-          "#c24141": 1,
-          "#d0d5dd": 1,
-          "#eaedf2": 5,
-          "#f2f4f7": 3,
-          "#f6f7f9": 1,
-          "#f9fafb": 1,
-          "#ff6b6b": 3,
-          "#ffd7d7": 1,
-          "#fff5f5": 1
-        }
-      },
-      {
-        "occurrences": 11,
-        "path": "frontend/src/components/generated-media-preview-card.tsx",
-        "values": {
-          "#101828": 2,
-          "#344054": 2,
-          "#667085": 2,
-          "#e1e5eb": 1,
-          "#eaedf2": 1,
-          "#f2f4f7": 2,
-          "#f9fafb": 1
+          "#ff6b6b": 2
         }
       },
       {
@@ -618,23 +495,6 @@
           "#7a808b": 1,
           "#eaedf2": 1,
           "#f9fafb": 1,
-          "#ff6b6b": 3
-        }
-      },
-      {
-        "occurrences": 22,
-        "path": "frontend/src/components/profile-media-uploader.tsx",
-        "values": {
-          "#101828": 3,
-          "#344054": 4,
-          "#667085": 2,
-          "#98a2b3": 1,
-          "#c24141": 1,
-          "#e1e5eb": 2,
-          "#eaedf2": 1,
-          "#eef1f5": 1,
-          "#f2f4f7": 2,
-          "#f9fafb": 2,
           "#ff6b6b": 3
         }
       },
@@ -742,6 +602,176 @@
           "#ffe2e2": 2,
           "#fff0f0": 1,
           "#fff5f5": 2
+        }
+      },
+      {
+        "occurrences": 97,
+        "path": "frontend/src/composition/screens/agent-detail-screen.tsx",
+        "values": {
+          "#101828": 13,
+          "#344054": 7,
+          "#667085": 20,
+          "#98a2b3": 2,
+          "#9a5b13": 1,
+          "#c24141": 1,
+          "#d0d5dd": 2,
+          "#d92d20": 1,
+          "#e1e5eb": 2,
+          "#eaedf2": 6,
+          "#eef1f5": 6,
+          "#f2f4f7": 3,
+          "#f6f7f9": 5,
+          "#f9fafb": 3,
+          "#ff5252": 3,
+          "#ff6b6b": 12,
+          "#ffd7d7": 4,
+          "#ffe4bf": 1,
+          "#fff5f5": 2,
+          "#fff8ed": 1,
+          "#fffafa": 2
+        }
+      },
+      {
+        "occurrences": 34,
+        "path": "frontend/src/composition/screens/character-profile-screen.tsx",
+        "values": {
+          "#101828": 8,
+          "#1f2937": 1,
+          "#667085": 8,
+          "#c24141": 1,
+          "#d0d5dd": 1,
+          "#eaedf2": 5,
+          "#f2f4f7": 3,
+          "#f6f7f9": 1,
+          "#f9fafb": 1,
+          "#ff6b6b": 3,
+          "#ffd7d7": 1,
+          "#fff5f5": 1
+        }
+      },
+      {
+        "occurrences": 163,
+        "path": "frontend/src/features/characters/components/agent-create-client.tsx",
+        "values": {
+          "#101828": 23,
+          "#166534": 1,
+          "#17834b": 1,
+          "#344054": 20,
+          "#52606d": 2,
+          "#667085": 27,
+          "#98a2b3": 4,
+          "#b7e4c7": 1,
+          "#c24141": 7,
+          "#d0d5dd": 2,
+          "#e1e5eb": 7,
+          "#eaedf2": 2,
+          "#edf0f5": 1,
+          "#eef1f5": 8,
+          "#f2f4f7": 1,
+          "#f2fbf5": 1,
+          "#f6f7f9": 9,
+          "#f9fafb": 9,
+          "#fbfcfd": 1,
+          "#ff5252": 1,
+          "#ff6b6b": 13,
+          "#ff8a8a": 1,
+          "#ffb4b4": 1,
+          "#ffcccc": 1,
+          "#ffd7d7": 6,
+          "#ffe2e2": 3,
+          "#fff1f1": 2,
+          "#fff5f5": 6,
+          "#fff8f8": 1,
+          "#fffafa": 1
+        }
+      },
+      {
+        "occurrences": 247,
+        "path": "frontend/src/features/characters/components/agent-detail-parts.tsx",
+        "values": {
+          "#027a48": 1,
+          "#101828": 28,
+          "#344054": 31,
+          "#475467": 4,
+          "#52610f": 1,
+          "#667085": 36,
+          "#98a2b3": 9,
+          "#9a3412": 1,
+          "#b22f2f": 1,
+          "#b45309": 2,
+          "#c24141": 7,
+          "#d0d5dd": 1,
+          "#d92d20": 1,
+          "#d9e0ea": 4,
+          "#e1e5eb": 17,
+          "#eaedf2": 8,
+          "#ecfdf3": 1,
+          "#eef1f5": 14,
+          "#f2f4f7": 8,
+          "#f2f8df": 1,
+          "#f6f7f9": 12,
+          "#f9fafb": 9,
+          "#fbfcfd": 2,
+          "#ff5252": 2,
+          "#ff6b6b": 24,
+          "#ff8f8f": 1,
+          "#ffb4b4": 2,
+          "#ffb5b5": 3,
+          "#ffd7d7": 3,
+          "#ffe2e2": 3,
+          "#fff0ef": 3,
+          "#fff5f5": 3,
+          "#fff7ed": 1,
+          "#fff8ec": 2,
+          "#fff8f7": 1
+        }
+      },
+      {
+        "occurrences": 26,
+        "path": "frontend/src/features/characters/components/character-activity-client.tsx",
+        "values": {
+          "#101828": 3,
+          "#475467": 3,
+          "#667085": 4,
+          "#c24141": 1,
+          "#e1e5eb": 1,
+          "#eaedf2": 2,
+          "#eef1f5": 3,
+          "#f9fafb": 1,
+          "#ff6b6b": 4,
+          "#ffd7d7": 1,
+          "#fff0ef": 2,
+          "#fff5f5": 1
+        }
+      },
+      {
+        "occurrences": 11,
+        "path": "frontend/src/features/characters/components/generated-media-preview-card.tsx",
+        "values": {
+          "#101828": 2,
+          "#344054": 2,
+          "#667085": 2,
+          "#e1e5eb": 1,
+          "#eaedf2": 1,
+          "#f2f4f7": 2,
+          "#f9fafb": 1
+        }
+      },
+      {
+        "occurrences": 22,
+        "path": "frontend/src/features/characters/components/profile-media-uploader.tsx",
+        "values": {
+          "#101828": 3,
+          "#344054": 4,
+          "#667085": 2,
+          "#98a2b3": 1,
+          "#c24141": 1,
+          "#e1e5eb": 2,
+          "#eaedf2": 1,
+          "#eef1f5": 1,
+          "#f2f4f7": 2,
+          "#f9fafb": 2,
+          "#ff6b6b": 3
         }
       },
       {
@@ -868,13 +898,6 @@
           "#ff6b6b": 3,
           "#fff0ef": 1,
           "#fff7e6": 1
-        }
-      },
-      {
-        "occurrences": 2,
-        "path": "frontend/src/features/social/ui/mentioned-text.tsx",
-        "values": {
-          "#ff6b6b": 2
         }
       },
       {
@@ -1125,7 +1148,7 @@
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
     "next_static_inventory_route_count": 44,
-    "next_static_inventory_sha256": "9b1219c0d62f4c7131d14e801d4889a25da61888a5b8bd2f54d6fca2c213cae0",
+    "next_static_inventory_sha256": "19048efdc2d04a4489fbe5a6a355574d23c323001a3defe7249471fdf93f7ded",
     "reviewed_surface_count": 18
   },
   "schema_version": 1,
@@ -1211,7 +1234,7 @@
       {
         "path": "frontend/src/composition/static-product-router.tsx",
         "present": true,
-        "sha256": "eb055b7a8d7da96cd21bf9ffc42f1fd89babb01cc73a8a89a6bb95f61730d423"
+        "sha256": "5fa0b1f551ae278870d37ac20dc1389cfb33fdbebe5caaffeb6185dac7d3f53b"
       },
       {
         "path": "frontend/src/features/ui-foundation/public.ts",

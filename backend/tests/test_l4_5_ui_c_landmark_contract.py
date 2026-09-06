@@ -20,7 +20,7 @@ def test_phone_shell_is_the_only_main_landmark_owner_for_nested_routes() -> None
 
     for relative_path, content_marker in (
         (
-            "frontend/src/components/world-character-autonomy-setup-client.tsx",
+            "frontend/src/composition/screens/world-character-autonomy-setup-screen.tsx",
             'data-product-content="autonomy-setup"',
         ),
         (

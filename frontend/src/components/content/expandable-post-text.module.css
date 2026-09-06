@@ -1,0 +1,31 @@
+.expandButton {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--spacing-micro);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--color-brand-accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--text-body);
+  font-weight: 800;
+  padding-inline: var(--spacing-compact);
+  transition: background-color var(--motion-fast) ease;
+}
+
+.expandButton:hover {
+  background: var(--color-brand-soft);
+}
+
+.expandButton:focus-visible {
+  outline: 2px solid var(--focus-ring-color);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expandButton { transition-duration: 1ms; }
+}
