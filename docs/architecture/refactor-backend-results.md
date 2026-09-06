@@ -2160,3 +2160,12 @@ HTTP Request 기반 service 주입·두 앱 factory와 standalone route 테스�
 | chat/infrastructure의 model alias와 migration helpers | 과거 Alembic/embedded migration과 baseline rebuild의 실제 소비가 있다. G5/B8의 정확한 등록/역사적 helper 승계와 별개이며 파일명 정리 때문에 migration 본문/DDL을 바꾸지 않는다. |
 
 이 source는 Chat 자체의 역할 이전과 HTTP 연결을 준비한 상태다. B4/B5/B7 합류·G5·G06·B8 호환 제거·Hosted CI·신규 installer·설치 데이터 업그레이드 및 전체 백엔드 종료는 완료로 표시하지 않는다.
+
+
+### PR #283 첫 원격 Gate와 실행 경로 검사 보완
+
+Head `39efec7`의 Security 전체는 PASS였으나 Core backend는 pytest 전 현재 Memory batch inventory hash 5개에서, Local autonomy는 옛 `tests/test_activity_proposal_runtime.py` 실행 인자에서 실패했다. 제품 소스/원래 테스트 단언을 추가 수정하지 않고 검토된 실제 `tests/relationships/test_activity_proposals.py`를 실행하도록 연결하고 현재 inventory만 원래 generator로 갱신했다. immutable Today predecessor와 모든 schema/budget 계약은 유지했다.
+
+전체 pytest 수집만으로 별도 smoke 명령의 사라진 파일을 발견하지 못했던 점을 보완했다. 기존 CI policy가 실제 workflow pytest step의 literal Python 테스트 경로를 읽어 파일 존재를 확인하며, POSIX/Windows·backend 상대 경로를 지원한다. 실제 새 위치가 존재해도 옛 위치를 거절하고, 유효했던 파일을 삭제하면 거절하는5개 신규 사례와 기존 CI/활동/Memory inventory 관련 검증은 **18 PASS /9.59초**다. 동적 shell 표현과 실제 실행 결과는 해당 workflow가 계속 검증하며 이 정적 검사가 대신하지 않는다. 초기 집중 명령의 존재하지 않는 inventory 테스트 인자는 실행 전 오류로 별도 남기며, 수정 명령의18개 결과만 PASS로 계산했다.
+
+Custom history도 후보 `0108a3a`의 전체786 ancestor만 가진 별도 bare 저장소에서 **8,718 blobs /치명0**을 확인했다. 공유 저장소의 미합류 B8 경로3건과 구분했으며 원래 scanner·exact allowlist25·검사 범위 규칙은 변경하지 않았다. 원격 backend 전체·Local/Host/installer는 수정 head에서 다시 확인한다.
