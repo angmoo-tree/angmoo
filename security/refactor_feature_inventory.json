@@ -14599,7 +14599,7 @@
   },
   "frontend_transition": {
     "checkpoint_commit": "33e9df8593272f6c81236c477ae73ef057d0d3dd",
-    "status": "AR-F2-0 COMPLETE; AR-F2-A PR #292 VALIDATION; AR-F2-B ISOLATED PREPARATION",
+    "status": "AR-F2-0 COMPLETE; AR-F2-A #292 MERGED / POST-MERGE PENDING; AR-F2-B PR VALIDATION",
     "documentation": "docs/architecture/refactor-frontend-results.md",
     "scope_note": "Backend completion and existing per-item state are unchanged. These stages track frontend consumers independently. AR-F1 product remains preserved.",
     "items": {

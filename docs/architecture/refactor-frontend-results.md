@@ -1,7 +1,7 @@
 # Frontend refactor execution results
 
-Current: **AR-F2-0 COMPLETE; AR-F2-A PR #292 awaiting final Windows checks;
-AR-F2-B isolated preparation and validation; AR-F2-C through AR-F5-B NOT STARTED**.
+Current: **AR-F2-0 COMPLETE; AR-F2-A PR #292 MERGED, post-merge checks pending;
+AR-F2-B PR preparation and validation; AR-F2-C through AR-F5-B NOT STARTED**.
 The user delegated implementation, validation, PRs and merges. AR-X, P8-L-S,
 real-provider product verification, Release and Production remain separate.
 
@@ -113,6 +113,14 @@ protects files/consumer oracles; actual browser/native runs prove behavior.
   all 18 tests in those three files pass locally. The latest commit must pass
   the full CI suite again before merge; earlier frontend success is historical.
 
+### AR-F2-A integration
+
+- PR #292 final head `76d09e6f16f974c9168f5c57620c76993c042dc5`: 23/23
+  checks SUCCESS, including all five Windows Installer jobs and Host Tauri.
+- Local full backend: 2720 passed, 22 skipped, 28 warnings, 757.97 seconds.
+- Merge `5c967a87cb4b72a51146d15f525a1eec3627a5a3`, 2026-09-07 03:08:15 KST.
+  Post-merge workflows are checked separately before AR-F2-B integration.
+
 ## Temporary-file cleanup
 
 User authorized cleanup of obsolete backend-refactor temporary files. Check
@@ -160,4 +168,6 @@ committed history were deleted.
   moves. Preserve frozen Today/P8-L-Q predecessors, source and visual oracles.
 - Source commit `f9fe45d338e86d88bf54e373f438fcd67b0168ad` introduces two new
   files and no new backend test nodes. Append its first-introduction record;
-  the full preservation guard is being run before PR integration.
+  the full preservation guard passes: 2742 protected/current nodes, 37 contracts.
+  The AR-F2-A merge is an ancestor of this branch; no introduction commit or
+  frozen checkpoint was rewritten while preparing the sequential integration.
