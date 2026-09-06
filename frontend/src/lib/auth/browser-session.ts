@@ -185,3 +185,24 @@ function htmlErrorMessage(text: string) {
   }
   return "요청 처리 중 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
 }
+
+export function storeAuth(auth: AuthRead) {
+  window.sessionStorage.setItem(USER_KEY, JSON.stringify(auth.user));
+  window.sessionStorage.removeItem(PENDING_GOOGLE_SIGNUP_KEY);
+  removeLegacyAuthTokens();
+  window.localStorage.removeItem(USER_KEY);
+  notifyAuthChanged();
+}
+
+export function clearAuth() {
+  window.sessionStorage.removeItem(USER_KEY);
+  window.sessionStorage.removeItem(PENDING_GOOGLE_SIGNUP_KEY);
+  removeLegacyAuthTokens();
+  window.localStorage.removeItem(USER_KEY);
+  notifyAuthChanged();
+}
+
+export function removeLegacyAuthTokens() {
+  window.sessionStorage.removeItem(LEGACY_TOKEN_KEY);
+  window.localStorage.removeItem(LEGACY_TOKEN_KEY);
+}

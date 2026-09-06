@@ -10,19 +10,14 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
-import { useAuth } from "@/shared/auth/public";
-import { useRuntimeRouter as useRouter } from "@/shared/navigation/public";
-import {
-  Button,
-  Card,
-  Field,
-  InlineError,
-  Input,
-  PageHeader,
-  Select,
-  StatusChip,
-  Toast,
-} from "@/shared/ui/public";
+import { useAuth } from "@/hooks/use-auth";
+import { useRuntimeRouter as useRouter } from "@/hooks/use-runtime-navigation";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/surfaces";
+import { Field, Input, Select } from "@/components/ui/form-controls";
+import { InlineError, Toast } from "@/components/ui/feedback";
+import { PageHeader } from "@/components/ui/navigation";
+import { StatusChip } from "@/components/ui/status";
 import {
   DEFAULT_MESSAGE_GOOGLE_MODEL,
   getMessageSettings,
@@ -32,13 +27,10 @@ import {
   type MessageGoogleGeminiModel,
   type MessageSettingsRead,
 } from "@/features/chat/public";
-import {
-  clearAuth,
-  getLocalBootstrapStatus,
-  logoutCurrentSession,
-  type LocalBootstrapRead,
-} from "@/lib/agents";
-import { safeSettingsReturnTo } from "@/lib/safe-navigation";
+import { clearAuth } from "@/lib/auth/browser-session";
+import { getLocalBootstrapStatus, logoutCurrentSession } from "@/features/identity/api/identity";
+import { type LocalBootstrapRead } from "@/features/identity/types/identity";
+import { safeSettingsReturnTo } from "@/utils/safe-navigation";
 
 import styles from "./settings-client.module.css";
 

@@ -55,7 +55,7 @@ def test_canonical_world_chat_route_is_shared_by_next_static_and_tauri_phone() -
     capability = _read(
         "frontend/src/lib/navigation/device-navigation.ts"
     )
-    safe_navigation = _read("frontend/src/lib/safe-navigation.ts")
+    safe_navigation = _read("frontend/src/utils/safe-navigation.ts")
     rust = _read("desktop/src-tauri/src/product_windows.rs")
 
     assert 'sectionId="chat"' in page

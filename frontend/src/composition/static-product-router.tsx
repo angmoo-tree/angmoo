@@ -7,20 +7,20 @@ import { AgentCreateClient } from "@/components/agent-create-client";
 import { AgentDetailClient } from "@/components/agent-detail-client";
 import { AgentsDashboardClient } from "@/features/characters/public";
 import { AppShell } from "@/composition/shells/app-shell";
-import { LocalOwnerClient } from "@/components/local-owner-client";
+import { LocalOwnerClient } from "@/features/identity/components/local-owner-client";
 import { PostDetailClient } from "@/components/post-detail-client";
 import {
   getSocialPostThread,
   listSocialFeed,
-  PostListClient,
   type FeedPage,
   type PostThreadRead,
 } from "@/features/social/public";
+import { PostFeedScreen as PostListClient } from "@/composition/screens/post-feed-screen";
 import {
   RelationshipGraphClient,
   RelationshipGraphFrame,
 } from "@/features/relationships/public";
-import { SettingsClient } from "@/components/settings-client";
+import { SettingsClient } from "@/composition/screens/settings-screen";
 import { WorldCharacterAutonomySetupClient } from "@/components/world-character-autonomy-setup-client";
 import { WorldCreatorClient } from "@/components/world-creator-client";
 import { DeviceHomeScreen } from "@/composition/screens/device-home-screen";
@@ -33,7 +33,7 @@ import { SemanticFoundationFixture } from "@/features/ui-foundation/public";
 import { canonicalProductRoute, currentDesktopRoute, desktopWindowKindForRoute, getDesktopWindowState, subscribeDesktopRoute } from "@/lib/desktop/product-window";
 import { useRuntimeRouter } from "@/hooks/use-runtime-navigation";
 import { worldAppSectionFromSegment, type WorldAppSectionId } from "@/composition/shells/world-app-navigation";
-import { safeLoginReturnTo } from "@/lib/safe-navigation";
+import { safeLoginReturnTo } from "@/utils/safe-navigation";
 import { DesktopRuntimeGate } from "@/composition/providers/desktop-runtime-gate";
 import { getRuntimeConfig } from "@/lib/runtime/runtime-config";
 

@@ -720,7 +720,18 @@
     "frontend/src/features/creator-studio/model/creator-studio-contract.ts": "frontend/src/composition/shells/creator-studio-navigation.ts",
     "frontend/src/features/runtime-status/ui/runtime-status-summary.tsx": "frontend/src/features/runtime-status/components/runtime-status-summary.tsx",
     "frontend/src/features/runtime-status/model/runtime-status-contract.ts": "frontend/src/features/runtime-status/utils/runtime-status-presentation.ts",
-    "frontend/src/features/world-app/public.ts": "frontend/src/composition/screens/world-app.tsx"
+    "frontend/src/features/world-app/public.ts": "frontend/src/composition/screens/world-app.tsx",
+    "frontend/src/components/local-owner-client.tsx": "frontend/src/features/identity/components/local-owner-client.tsx",
+    "frontend/src/components/local-owner-client.module.css": "frontend/src/features/identity/components/local-owner-client.module.css",
+    "frontend/src/components/login-client.tsx": "frontend/src/features/identity/components/login-client.tsx",
+    "frontend/src/components/profile-setup-client.tsx": "frontend/src/features/identity/components/profile-setup-client.tsx",
+    "frontend/src/components/user-profile-client.tsx": "frontend/src/features/identity/components/user-profile-client.tsx",
+    "frontend/src/components/turnstile-widget.tsx": "frontend/src/features/identity/components/turnstile-widget.tsx",
+    "frontend/src/components/settings-client.tsx": "frontend/src/composition/screens/settings-screen.tsx",
+    "frontend/src/components/settings-client.module.css": "frontend/src/composition/screens/settings-client.module.css",
+    "frontend/src/shared/auth/auth-session.ts": "frontend/src/features/identity/api/session.ts",
+    "frontend/src/lib/safe-navigation.ts": "frontend/src/utils/safe-navigation.ts",
+    "frontend/src/lib/policy-links.ts": "frontend/src/config/policy-links.ts"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -135497,6 +135508,41 @@
         "scripts/ci/generate_p8_l_r_memory_batch_inventory.py"
       ],
       "status": "IMPLEMENTED - isolated validation pending prior stage integration"
+    },
+    "AR-F3-A": {
+      "scope": "Identity components/session/endpoints and mixed installation/Chat Settings composition",
+      "files": {
+        "frontend/src/components/local-owner-client.tsx": "frontend/src/features/identity/components/local-owner-client.tsx",
+        "frontend/src/components/local-owner-client.module.css": "frontend/src/features/identity/components/local-owner-client.module.css",
+        "frontend/src/components/login-client.tsx": "frontend/src/features/identity/components/login-client.tsx",
+        "frontend/src/components/profile-setup-client.tsx": "frontend/src/features/identity/components/profile-setup-client.tsx",
+        "frontend/src/components/user-profile-client.tsx": "frontend/src/features/identity/components/user-profile-client.tsx",
+        "frontend/src/components/turnstile-widget.tsx": "frontend/src/features/identity/components/turnstile-widget.tsx",
+        "frontend/src/components/settings-client.tsx": "frontend/src/composition/screens/settings-screen.tsx",
+        "frontend/src/components/settings-client.module.css": "frontend/src/composition/screens/settings-client.module.css",
+        "frontend/src/shared/auth/auth-session.ts": "frontend/src/features/identity/api/session.ts",
+        "frontend/src/lib/safe-navigation.ts": "frontend/src/utils/safe-navigation.ts",
+        "frontend/src/lib/policy-links.ts": "frontend/src/config/policy-links.ts"
+      },
+      "status": "IMPLEMENTED - isolated validation",
+      "source_contract_consumers": [
+        "backend/tests/test_navigation_media_security.py"
+      ],
+      "frontend_extractions": {
+        "frontend/src/lib/agents.ts": {
+          "identity": "frontend/src/features/identity/api/identity.ts",
+          "types": "frontend/src/features/identity/types/identity.ts",
+          "signup": "frontend/src/features/identity/utils/pending-signup.ts",
+          "transport": "frontend/src/lib/http/api-request.ts",
+          "session": "frontend/src/lib/auth/browser-session.ts",
+          "preserved": "Same request bodies, method, cookies, error messages, storage operations and notification order; old callers forward to the actual owner."
+        },
+        "frontend/src/components/profile-setup-client.tsx": {
+          "component": "frontend/src/features/identity/components/profile-setup-client.tsx",
+          "onboarding_composition": "frontend/src/composition/screens/profile-setup-screen.tsx",
+          "preserved": "Successful signup/profile update invokes the same onboarding handoff before the same route navigation."
+        }
+      }
     }
   },
   "asgi_exports": {

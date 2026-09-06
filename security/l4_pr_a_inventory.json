@@ -2466,7 +2466,7 @@
       "policy_allowed_cycle_count": 0
     },
     "frontend": {
-      "candidate_consumer_edge_count": 27,
+      "candidate_consumer_edge_count": 26,
       "candidate_consumers": {
         "frontend/src/app/api/community/characters/[characterId]/activity/route.ts": [],
         "frontend/src/app/api/community/posts/[postId]/comments/route.ts": [],
@@ -2511,7 +2511,6 @@
           "frontend/src/components/search-results-client.tsx",
           "frontend/src/components/tree-community-client.tsx",
           "frontend/src/components/tree-post-detail-client.tsx",
-          "frontend/src/components/user-profile-client.tsx",
           "frontend/src/lib/agents.ts"
         ]
       },
@@ -2574,12 +2573,13 @@
             "FeedPage"
           ],
           "imports": [
+            "@/composition/screens/post-feed-screen",
             "@/composition/shells/app-shell",
             "@/features/social/api/social-feed-server",
             "@/features/social/public"
           ],
           "path": "frontend/src/app/feed-page.tsx",
-          "sha256": "00687eaefd4b789164abd376a8b2a83cd4de61a22337ca4dea6d150edb574e00"
+          "sha256": "6b037f6dd9a932a95462d337a937abb5b6ea9f1c23f73dacd13ca29ff7b75f0a"
         },
         {
           "exports": [
@@ -2673,7 +2673,7 @@
             "react-dom"
           ],
           "path": "frontend/src/features/social/ui/post-list-client.tsx",
-          "sha256": "53798a02038ad48894920f027d4135ff436f69d49af71b6c2de7fad3a026c6ed"
+          "sha256": "1a451b2f93f380fe417edb3dc581ea17f19efc0d499b90d5b204a2cf1bce17b3"
         },
         {
           "exports": [

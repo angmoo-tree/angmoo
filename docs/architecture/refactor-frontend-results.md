@@ -164,6 +164,27 @@ committed history were deleted.
 
 ## AR-F2-B runtime and server/client transport
 
+## AR-F3-A isolated Identity and Settings preparation
+
+- Identity owns login, Local owner bootstrap/claim, profile setup, user-profile
+  editing, Turnstile and their session/API/type/pending-signup modules.
+- Extract Identity endpoints from the mixed agents client, retaining all request
+  bodies, cookies, status handling and storage/event ordering. Existing callers
+  use forwarding exports until their own feature migration.
+- Settings is an upper composition of installation/session and Chat key APIs.
+  Feed preference saving and successful profile onboarding use callbacks wired
+  by common screens, avoiding new Identity-to-Character or Social-to-Identity
+  feature imports. The same screens remain in Next/static entry paths.
+- A new Node differential test executes the pinned pre-extraction implementation
+  and the current modules with identical fixture transport/storage: 14 request
+  contracts, 5 failure cases and 4 storage/event transitions match. CI runs it
+  with full Git history so the immutable comparison source is available.
+- Local Identity/source contracts: 48 passed, 14 existing warnings. Web 21 PASS
+  (1.3m), Settings 2 PASS (11.9s); builds/static/full guards and integration are
+  still pending. Preparation does not mark AR-F2-C or AR-F3-A complete.
+
+## AR-F2-B runtime and server/client transport (continued)
+
 - Prepare in an isolated worktree while PR #292's fixed HEAD finishes Windows
   checks. Integrate in sequence only after AR-F2-A merge and post-merge gates.
 - Move server proxy to `lib/server/backend.ts`, native window commands to

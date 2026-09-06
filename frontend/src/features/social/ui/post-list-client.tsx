@@ -16,7 +16,6 @@ import {
   AUTH_CHANGED_EVENT,
   getStoredUser,
   storeUser,
-  updateUserFeedPreferences,
   type UserRead,
 } from "@/shared/auth/public";
 import {
@@ -82,10 +81,12 @@ function mergeUniquePosts(
 }
 
 export function PostListClient({
+  updateUserFeedPreferences,
   initialFeed,
   initialError,
   suppressFeedSnippet = false,
 }: {
+  updateUserFeedPreferences: (data: { feed_content_filter: FeedContentFilter }) => Promise<UserRead>;
   initialFeed: FeedPage;
   initialError: string | null;
   suppressFeedSnippet?: boolean;
@@ -324,7 +325,7 @@ export function PostListClient({
         );
       }
     },
-    [feedContentFilter, feedMode, loadFeed, loading],
+    [feedContentFilter, feedMode, loadFeed, loading, updateUserFeedPreferences],
   );
 
   const viewerId = viewer?.id ?? null;

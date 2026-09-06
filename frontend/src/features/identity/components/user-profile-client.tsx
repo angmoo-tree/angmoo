@@ -5,17 +5,13 @@ import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import type { FormEvent } from "react";
 
-import { ProfileAvatar } from "@/components/profile-avatar";
-import {
-  AUTH_CHANGED_EVENT,
-  getStoredUser,
-  storeUser,
-  updateMe,
-  type UserRead,
-} from "@/lib/agents";
-import type { ProfileRead } from "@/lib/community";
-import { safeSameOriginMediaUrl } from "@/lib/safe-media-url";
-import { useRuntimeMediaUrl } from "@/shared/media/public";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
+import { AUTH_CHANGED_EVENT, getStoredUser, storeUser } from "@/lib/auth/browser-session";
+import { updateMe } from "@/features/identity/api/identity";
+import { type UserRead } from "@/lib/auth/browser-session";
+import type { UserProfileRead as ProfileRead } from "@/features/identity/types/identity";
+import { safeSameOriginMediaUrl } from "@/lib/media/safe-media-url";
+import { useRuntimeMediaUrl } from "@/hooks/use-runtime-media-url";
 
 export function UserProfileClient({
   userId,

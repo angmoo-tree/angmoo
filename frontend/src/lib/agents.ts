@@ -1,7 +1,7 @@
+import { apiRequest } from "@/lib/http/api-request";
 import type {
   CharacterRead,
   CharacterStateRead,
-  FeedContentFilter,
   PostDetail,
 } from "@/lib/community";
 import {
@@ -9,13 +9,10 @@ import {
   cacheUser as cacheSharedUser,
   clearLegacyAuthStorage as clearSharedLegacyAuthStorage,
   clearStoredUser as clearSharedStoredUser,
-  getCurrentUser,
   getStoredUser as getSharedStoredUser,
   isAuthError as isSharedAuthError,
-  issueLocalSession as issueSharedLocalSession,
   notifyAuthChanged as notifySharedAuthChanged,
   storeUser as storeSharedUser,
-  updateUserFeedPreferences,
   type UserRead as SharedUserRead,
 } from "@/shared/auth/public";
 import { runtimeFetch } from "@/shared/runtime/public";
@@ -95,35 +92,13 @@ export type AuthRead = {
   profile_setup_required: boolean;
 };
 
-export type LocalOwnerCandidateRead = {
-  user_id: string;
-  display_name: string;
-  character_count: number;
-  world_count: number;
-  credential_count: number;
-  suggested: boolean;
-};
 
-export type LocalBootstrapRead = {
-  state: "unclaimed" | "claimed" | "recovery_required";
-  installation_id: string | null;
-  local_label: string | null;
-  owner: UserRead | null;
-  candidates: LocalOwnerCandidateRead[];
-};
 
-export type GoogleLoginRead = {
-  user: UserRead | null;
-  profile_setup_required: boolean;
-  signup_required: boolean;
-  expires_at: string | null;
-  email: string | null;
-};
 
-export type PendingGoogleSignup = {
-  expires_at: string;
-  email: string;
-};
+
+
+
+
 
 export type CredentialRead = {
   id: string;
@@ -539,9 +514,6 @@ export type AgentSettingsInput = Partial<
   >
 >;
 
-const LEGACY_TOKEN_KEY = ["angmoo", "authToken"].join(".");
-const USER_KEY = "angmoo.user";
-const PENDING_GOOGLE_SIGNUP_KEY = "angmoo.pendingGoogleSignup";
 const FIRST_AGENT_WELCOME_PROMPT_KEY = "angmoo.firstAgentWelcomePromptPending";
 export const AUTH_CHANGED_EVENT = SHARED_AUTH_CHANGED_EVENT;
 export const AGENTS_CHANGED_EVENT = "angmoo:agents-changed";
@@ -556,126 +528,29 @@ export type AgentAutonomyMutationEventDetail = {
   state: AgentAutonomyMutationState | null;
 };
 
-type RequestOptions = Omit<RequestInit, "body"> & {
-  body?: unknown | FormData;
-  anonymous?: boolean;
-  suppressAuthFailureEvent?: boolean;
-};
 
-function getErrorMessage(payload: unknown, fallback: string) {
-  if (
-    payload &&
-    typeof payload === "object" &&
-    "detail" in payload &&
-    typeof payload.detail === "string"
-  ) {
-    return payload.detail;
-  }
-  if (
-    payload &&
-    typeof payload === "object" &&
-    "detail" in payload &&
-    Array.isArray(payload.detail)
-  ) {
-    return getValidationMessage(payload.detail) ?? fallback;
-  }
-  return fallback;
-}
 
-function getValidationMessage(detail: unknown[]) {
-  const first = detail.find((item) => item && typeof item === "object");
-  if (!first || typeof first !== "object") return null;
-  const loc = "loc" in first && Array.isArray(first.loc) ? first.loc : [];
-  if (loc.includes("handle")) {
-    return "핸들은 영문 소문자, 숫자, 밑줄(_)만 사용할 수 있습니다.";
-  }
-  const field = typeof loc.at(-1) === "string" ? loc.at(-1) : null;
-  const type = "type" in first && typeof first.type === "string" ? first.type : "";
-  const msg = "msg" in first && typeof first.msg === "string" ? first.msg : "";
-  if (field === "activity_interval_minutes") {
-    if (type.includes("greater") || msg.includes("greater than or equal")) {
-      return "목표 활동 간격은 최소 30분 이상으로 설정해주세요.";
-    }
-    if (type.includes("less") || msg.includes("less than or equal")) {
-      return "목표 활동 간격은 하루 1440분 이하로 설정해주세요.";
-    }
-    return "목표 활동 간격 값을 확인해주세요.";
-  }
-  if (field === "max_comments_per_day") {
-    return "하루 리플 작성 상한은 0개 이상 60개 이하로 설정해주세요.";
-  }
-  if (field === "max_posts_per_day") {
-    return "하루 글 쓰기 상한은 0개 이상 30개 이하로 설정해주세요.";
-  }
-  if ("msg" in first && typeof first.msg === "string") {
-    return first.msg;
-  }
-  return null;
-}
+
+
+
 
 export function getStoredUser() {
   return getSharedStoredUser();
 }
 
-export function getPendingGoogleSignup(): PendingGoogleSignup | null {
-  if (typeof window === "undefined") return null;
-  const raw = window.sessionStorage.getItem(PENDING_GOOGLE_SIGNUP_KEY);
-  if (!raw) return null;
-  try {
-    const parsed = JSON.parse(raw) as Partial<PendingGoogleSignup>;
-    if (
-      typeof parsed.expires_at !== "string" ||
-      typeof parsed.email !== "string"
-    ) {
-      return null;
-    }
-    return {
-      expires_at: parsed.expires_at,
-      email: parsed.email,
-    };
-  } catch {
-    return null;
-  }
-}
 
-export function hasPendingGoogleSignup() {
-  return Boolean(getPendingGoogleSignup());
-}
+
+
 
 export function notifyAuthChanged() {
   notifySharedAuthChanged();
 }
 
-export function storePendingGoogleSignup(auth: GoogleLoginRead) {
-  if (!auth.expires_at || !auth.email) {
-    throw new Error("Google signup information is missing.");
-  }
-  window.sessionStorage.setItem(
-    PENDING_GOOGLE_SIGNUP_KEY,
-    JSON.stringify({
-      expires_at: auth.expires_at,
-      email: auth.email,
-    }),
-  );
-  window.sessionStorage.removeItem(USER_KEY);
-  removeLegacyAuthTokens();
-  window.localStorage.removeItem(USER_KEY);
-  notifyAuthChanged();
-}
 
-export function clearPendingGoogleSignup() {
-  if (typeof window === "undefined") return;
-  window.sessionStorage.removeItem(PENDING_GOOGLE_SIGNUP_KEY);
-  notifyAuthChanged();
-}
 
-export function storeAuth(auth: AuthRead) {
-  window.sessionStorage.setItem(USER_KEY, JSON.stringify(auth.user));
-  window.sessionStorage.removeItem(PENDING_GOOGLE_SIGNUP_KEY);
-  removeLegacyAuthTokens();
-  window.localStorage.removeItem(USER_KEY);
-  notifyAuthChanged();
-}
+
+
+
 
 export function storeUser(user: UserRead) {
   storeSharedUser(user);
@@ -685,13 +560,7 @@ export function cacheUser(user: UserRead) {
   cacheSharedUser(user);
 }
 
-export function clearAuth() {
-  window.sessionStorage.removeItem(USER_KEY);
-  window.sessionStorage.removeItem(PENDING_GOOGLE_SIGNUP_KEY);
-  removeLegacyAuthTokens();
-  window.localStorage.removeItem(USER_KEY);
-  notifyAuthChanged();
-}
+
 
 export function clearStoredUser() {
   clearSharedStoredUser();
@@ -701,10 +570,7 @@ export function clearLegacyAuthStorage() {
   clearSharedLegacyAuthStorage();
 }
 
-function removeLegacyAuthTokens() {
-  window.sessionStorage.removeItem(LEGACY_TOKEN_KEY);
-  window.localStorage.removeItem(LEGACY_TOKEN_KEY);
-}
+
 
 export function markFirstAgentWelcomePromptPending() {
   if (typeof window === "undefined") return;
@@ -802,56 +668,7 @@ export function isAuthError(err: unknown) {
   return isSharedAuthError(err);
 }
 
-async function apiRequest<T>(path: string, options: RequestOptions = {}) {
-  const {
-    body,
-    headers,
-    anonymous = false,
-    suppressAuthFailureEvent = false,
-    ...rest
-  } = options;
-  const isFormDataBody = typeof FormData !== "undefined" && body instanceof FormData;
-  const response = await runtimeFetch(`/api/backend${path}`, {
-    ...rest,
-    body:
-      body === undefined
-        ? undefined
-        : isFormDataBody
-          ? body
-          : JSON.stringify(body),
-    cache: "no-store",
-    credentials: anonymous ? "omit" : "same-origin",
-    headers: {
-      ...(isFormDataBody ? {} : { "Content-Type": "application/json" }),
-      ...(headers ?? {}),
-    },
-  });
 
-  const text = await response.text();
-  let payload: unknown = null;
-  try {
-    payload = text ? JSON.parse(text) : null;
-  } catch (err) {
-    if (!response.ok) {
-      throw new Error(
-        htmlErrorMessage(text) ?? (text.trim() || `Request failed with ${response.status}`),
-      );
-    }
-    throw err;
-  }
-
-  if (!response.ok) {
-    if (response.status === 401 && !anonymous && !suppressAuthFailureEvent) {
-      clearStoredUser();
-      notifyAuthChanged();
-    }
-    throw new Error(
-      getErrorMessage(payload, `Request failed with ${response.status}`),
-    );
-  }
-
-  return payload as T;
-}
 
 
 export async function fetchAuthenticatedMediaObjectUrl(apiPath: string) {
@@ -869,99 +686,29 @@ export async function fetchAuthenticatedMediaObjectUrl(apiPath: string) {
 }
 
 
-function htmlErrorMessage(text: string) {
-  const trimmed = text.trim().toLowerCase();
-  if (!trimmed.startsWith("<!doctype html") && !trimmed.startsWith("<html")) {
-    return null;
-  }
-  return "요청 처리 중 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
-}
 
-export function signup(data: {
-  email: string;
-  password: string;
-  display_name: string;
-  privacy_policy_agreed: boolean;
-  terms_agreed: boolean;
-  turnstile_token?: string;
-}) {
-  return apiRequest<AuthRead>("/auth/signup", {
-    method: "POST",
-    body: data,
-  });
-}
 
-export function getLocalBootstrapStatus() {
-  return apiRequest<LocalBootstrapRead>("/auth/local/bootstrap", {
-    anonymous: true,
-  });
-}
 
-export function createLocalBootstrapChallenge() {
-  return apiRequest<{ expires_at: string }>("/auth/local/bootstrap/challenge", {
-    method: "POST",
-  });
-}
 
-export function claimLocalOwner(data: {
-  owner_user_id: string | null;
-  display_name: string | null;
-  local_label: string | null;
-  privacy_acknowledged: boolean;
-}) {
-  return apiRequest<AuthRead>("/auth/local/bootstrap/claim", {
-    method: "POST",
-    body: data,
-  });
-}
 
-export function issueLocalSession() {
-  return issueSharedLocalSession();
-}
 
-export function login(data: { email: string; password: string }) {
-  return apiRequest<AuthRead>("/auth/login", {
-    method: "POST",
-    body: data,
-  });
-}
 
-export function logoutCurrentSession() {
-  return apiRequest<void>("/auth/logout", {
-    method: "POST",
-  });
-}
 
-export function googleLogin(data: { credential: string }) {
-  return apiRequest<GoogleLoginRead>("/auth/google", {
-    method: "POST",
-    body: data,
-  });
-}
 
-export function completeGoogleSignup(data: {
-  display_name: string;
-  privacy_policy_agreed: boolean;
-  terms_agreed: boolean;
-  turnstile_token?: string;
-}) {
-  return apiRequest<AuthRead>("/auth/google/complete", {
-    method: "POST",
-    body: data,
-    anonymous: false,
-  });
-}
 
-export function linkGoogleAccount(data: { credential: string }) {
-  return apiRequest<AuthRead>("/auth/google/link", {
-    method: "POST",
-    body: data,
-  });
-}
 
-export function getMe(options: { suppressAuthFailureEvent?: boolean } = {}) {
-  return getCurrentUser(options);
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 export function getAgentActivityMaintenance() {
   return apiRequest<AgentActivityMaintenanceRead>("/maintenance/agent-activity", {
@@ -969,27 +716,11 @@ export function getAgentActivityMaintenance() {
   });
 }
 
-export function updateMe(data: {
-  display_name: string;
-  privacy_policy_agreed?: boolean;
-  terms_agreed?: boolean;
-}) {
-  return apiRequest<UserRead>("/auth/me", {
-    method: "PATCH",
-    body: data,
-  });
-}
 
-export function updateMePreferences(data: { feed_content_filter: FeedContentFilter }) {
-  return updateUserFeedPreferences(data);
-}
 
-export function deleteCurrentAccount(data: { confirmation: string }) {
-  return apiRequest<void>("/auth/me", {
-    method: "DELETE",
-    body: data,
-  });
-}
+
+
+
 
 export function listAgents() {
   return apiRequest<AgentDetailRead[]>("/agents");
@@ -1459,3 +1190,8 @@ export function likeCommunityPost(postId: string, characterId: string) {
     body: { character_id: characterId },
   });
 }
+
+export { signup, getLocalBootstrapStatus, createLocalBootstrapChallenge, claimLocalOwner, issueLocalSession, login, logoutCurrentSession, googleLogin, completeGoogleSignup, linkGoogleAccount, getMe, updateMe, updateMePreferences, deleteCurrentAccount } from "@/features/identity/api/identity";
+export { getPendingGoogleSignup, hasPendingGoogleSignup, storePendingGoogleSignup, clearPendingGoogleSignup } from "@/features/identity/utils/pending-signup";
+export type { LocalOwnerCandidateRead, LocalBootstrapRead, GoogleLoginRead, PendingGoogleSignup } from "@/features/identity/types/identity";
+export { storeAuth, clearAuth } from "@/lib/auth/browser-session";
