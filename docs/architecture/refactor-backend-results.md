@@ -2712,3 +2712,10 @@ G5의 고정 후보 `e46f6e4c` 전체 backend는 **2,485 PASS / 22 SKIP / 28 war
 ### AR-B8-A Runtime/G06 PR #288: current inventory correction
 
 The first exact-head PR run at `849e6bc0` failed the deferred runtime inventory check after the preceding CI policy, OSS, allowlist, launcher, installer, Host and architecture checks passed. The original Runtime/G06 source ledger now contains the supported extension type marker; the current inventory had 23 entries and omitted that one existing ledger file. The correction adds only `security/refactor_backend_additions.json` to the generated current inventory (24 entries), preserving all 23 previous rows. Product code, tests, assertion/suppression contracts, the original source ledger184 and frozen checkpoints are unchanged. The initial failure remains recorded separately from the corrected-head CI rerun.
+
+
+### AR-G5 PR #289: current Memory inventory correction
+
+The first PR head `ed40f1fb` passed collection of all 2,507 nodes, the L4 current inventory and embedded migration, but Core backend stopped before the whole pytest suite at the Memory batch current inventory check (run `34027168148`, job `101470090058`). The original log is retained; this run is not recorded as a backend-suite pass.
+
+The unchanged generator updates exactly 17 source hashes already changed by G5 Base/database/model imports. Each old hash matches the pre-G5 source `576d3119`, and every new hash matches the existing signed `ed40f1fb` Git blob after the generator's existing newline normalization. All file paths, other current-inventory fields and the frozen Today predecessor remain identical. Product code, tests, assertions, suppressions, checkers, CI, the 185-record ledger and frozen checkpoints are unchanged. The original Memory, L4, deferred, architecture and public-route current checks are rerun on this metadata correction; the new exact PR head must complete Core's whole backend suite and every remaining remote gate.
