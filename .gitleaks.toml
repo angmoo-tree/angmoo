@@ -254,3 +254,11 @@ condition = "AND"
 regexTarget = "line"
 paths = ['''(^|/)security/refactor_backend_additions\.json$''']
 regexes = ['''^\s*"frontend/src/lib/media/authenticated\-media\.ts": "b4ecc8f86e5da489f5cf31368f5704b599471659",?\s*$''']
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact F3-G API documentation Git blob verified at signed source d54cbfae8d33084a9b87655d9a9008ff3db3ec0a; not a credential"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)security/refactor_backend_additions\.json$''']
+regexes = ['''^\s*"frontend/src/features/support/components/angmoo-api-content\.tsx": "20e056fefedc439508f501b4fccf59832d9cb8e7",?\s*$''']

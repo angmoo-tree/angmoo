@@ -1807,7 +1807,7 @@
         "backend/app/runtime/resident/writing.py",
         "backend/tests/routines/test_activity_limits.py",
         "backend/tests/routines/test_scheduler_singleton.py",
-        "frontend/src/components/active-agent-card.tsx",
+        "frontend/src/features/characters/components/active-agent-card.tsx",
         "frontend/src/features/characters/components/agent-activity-list.tsx",
         "frontend/src/features/characters/components/active-agent-summary.tsx",
         "frontend/src/features/social/components/world-character-social-profile-activity.tsx",
@@ -2504,8 +2504,8 @@
         "frontend/src/features/social/components/notifications-client.tsx",
         "frontend/src/composition/screens/post-detail-screen.tsx",
         "frontend/src/components/post-media-grid.tsx",
-        "frontend/src/components/tree-community-client.tsx",
-        "frontend/src/components/tree-post-detail-client.tsx",
+        "frontend/src/features/tree/components/tree-community-client.tsx",
+        "frontend/src/features/tree/components/tree-post-detail-client.tsx",
         "frontend/src/features/characters/api/feed-actor.ts",
         "frontend/src/features/social/api/social-feed-client.ts",
         "frontend/src/features/social/api/social-write-client.ts",
@@ -3329,7 +3329,6 @@
         "frontend/src/features/relationships/api/relationship-graph.ts",
         "frontend/src/features/relationships/types/relationship-graph.ts",
         "frontend/src/features/relationships/components/relationship-graph-client.tsx",
-        "frontend/src/features/relationships/components/relationship-graph-client.tsx",
         "frontend/src/features/relationships/components/relationship-graph-frame.module.css",
         "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
         "backend/app/domains/routines/service/joint_scheduling.py",
@@ -3413,7 +3412,6 @@
         "backend/app/runtime/relationships",
         "frontend/src/features/relationships/components/relationship-graph-client.tsx",
         "frontend/src/features/relationships/api/relationship-graph.ts",
-        "frontend/src/features/relationships/components/relationship-graph-client.tsx",
         "frontend/src/features/relationships/components/relationship-graph-frame.module.css",
         "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
         "frontend/src/features/relationships/types/relationship-graph.ts"
@@ -3791,7 +3789,6 @@
         "backend/app/runtime/relationships/observation_references.py",
         "frontend/src/features/relationships/components/relationship-graph-client.tsx",
         "frontend/src/features/relationships/api/relationship-graph.ts",
-        "frontend/src/features/relationships/components/relationship-graph-client.tsx",
         "frontend/src/features/relationships/components/relationship-graph-frame.module.css",
         "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
         "frontend/src/features/relationships/types/relationship-graph.ts"
@@ -3802,7 +3799,6 @@
         "backend/app/domains/relationships",
         "frontend/src/features/relationships/components/relationship-graph-client.tsx",
         "frontend/src/features/relationships/api/relationship-graph.ts",
-        "frontend/src/features/relationships/components/relationship-graph-client.tsx",
         "frontend/src/features/relationships/components/relationship-graph-frame.module.css",
         "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
         "frontend/src/features/relationships/types/relationship-graph.ts"
@@ -5746,7 +5742,7 @@
         "frontend/src/features/ui-foundation/public.ts",
         "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.module.css",
         "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
-        "frontend/src/lib/angmoo-api-docs.ts",
+        "frontend/src/features/support/api/documents-server.ts",
         "frontend/src/config/features.ts",
         "frontend/src/lib/navigation/product-routes.ts",
         "frontend/src/config/policy-links.ts",
@@ -13965,14 +13961,14 @@
         "frontend/src/composition/shells/app-shell.tsx",
         "frontend/src/features/characters/components/character-activity-client.tsx",
         "frontend/src/features/social/components/nest-search-form.tsx",
-        "frontend/src/components/right-rail-insights.tsx",
+        "frontend/src/features/social/components/right-rail-insights.tsx",
         "frontend/src/components/ui/app-icon.module.css",
         "frontend/src/components/ui/app-icon.tsx",
         "frontend/src/components/ui/button.tsx",
         "frontend/src/components/ui/semantic-foundation.module.css",
         "frontend/src/lib/backend.ts",
         "frontend/src/utils/safe-navigation.ts",
-        "frontend/src/lib/tree.ts",
+        "frontend/src/features/tree/api/tree.ts",
         "frontend/src/lib/use-mobile-pull-to-refresh.ts",
         "frontend/src/features/characters/api/world-activity-runtime.ts",
         "frontend/src/features/worlds/api/worlds.ts",
@@ -14012,7 +14008,14 @@
         "frontend/src/hooks/use-auth.ts",
         "frontend/src/lib/auth/auth-context.ts",
         "frontend/src/features/worlds/types/world-app.ts",
-        "frontend/src/features/runtime-status/types/runtime-status.ts"
+        "frontend/src/features/runtime-status/types/runtime-status.ts",
+        "frontend/src/features/tree/components/tree-community-client.tsx",
+        "frontend/src/features/tree/components/tree-post-detail-client.tsx",
+        "frontend/src/features/tree/types/tree.ts",
+        "frontend/src/features/support/api/documents-server.ts",
+        "frontend/src/features/support/components/angmoo-api-content.tsx",
+        "frontend/src/features/support/components/licenses-content.tsx",
+        "frontend/src/composition/screens/tree-community-screen.tsx"
       ],
       "target_paths": [
         "backend/app/domains/tree",
@@ -14029,7 +14032,15 @@
         "frontend/src/hooks/use-auth.ts",
         "frontend/src/lib/auth/auth-context.ts",
         "frontend/src/features/worlds/types/world-app.ts",
-        "frontend/src/features/runtime-status/types/runtime-status.ts"
+        "frontend/src/features/runtime-status/types/runtime-status.ts",
+        "frontend/src/features/tree/api/tree.ts",
+        "frontend/src/features/tree/components/tree-community-client.tsx",
+        "frontend/src/features/tree/components/tree-post-detail-client.tsx",
+        "frontend/src/features/tree/types/tree.ts",
+        "frontend/src/features/support/api/documents-server.ts",
+        "frontend/src/features/support/components/angmoo-api-content.tsx",
+        "frontend/src/features/support/components/licenses-content.tsx",
+        "frontend/src/composition/screens/tree-community-screen.tsx"
       ],
       "entrypoints": [
         "GET/POST Tree community routes; existing app/router/packaging and UI entrypoints; see frozen import graph"
@@ -14794,7 +14805,7 @@
   },
   "frontend_transition": {
     "checkpoint_commit": "33e9df8593272f6c81236c477ae73ef057d0d3dd",
-    "status": "AR-F2-C PRE-INTEGRATION VALIDATION; AR-F3-F ISOLATED PREPARATION",
+    "status": "AR-F2 COMPLETE; AR-F3-A POST-MERGE; AR-F3-B~E CI; AR-F3-F/G LOCAL VALIDATION",
     "documentation": "docs/architecture/refactor-frontend-results.md",
     "scope_note": "Backend completion and existing per-item state are unchanged. These stages track frontend consumers independently. AR-F1 product remains preserved.",
     "items": {
@@ -15003,6 +15014,11 @@
       "AR-F3-F": {
         "status": "IMPLEMENTED - isolated validation",
         "source_map": "security/refactor_path_map.json#details.AR-F3-F",
+        "scope": "Relationship graph ownership"
+      },
+      "AR-F3-G": {
+        "status": "IMPLEMENTED - isolated validation",
+        "source_map": "security/refactor_path_map.json#details.AR-F3-G",
         "scope": "Relationship graph ownership"
       }
     }

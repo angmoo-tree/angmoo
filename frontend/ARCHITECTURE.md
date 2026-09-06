@@ -86,6 +86,17 @@ Social의 게시물·댓글·신고·검색·알림·프로필 활동 API는 `fe
 유지한다. Next route와 static router가 동일한 frame/client를 연결하며, World와 owner
 route 및 원본 사건 근거를 바꾸지 않는다. 네이티브 창 생성은 공용 desktop 구현을 사용한다.
 
+Tree 커뮤니티는 `features/tree`의 API·응답 타입·목록/상세 컴포넌트로 구성한다.
+버그 제보 폼의 관련 캐릭터 선택은 표시할 id/name만 요구하며,
+`composition/screens/tree-community-screen.tsx`가 실제 Character 조회 함수를 전달한다.
+같은 인증 상태에서 같은 요청을 실행하며 Tree가 Characters를 직접 import하지 않는다.
+
+API 안내와 라이선스 본문은 `features/support/components`가 소유한다. Next의 route는
+metadata·dynamic 설정·AppShell 연결을 유지한다. 안내 원문을 읽는 `api/documents-server.ts`는
+웹 서버 전용으로, 정적 앱이나 브라우저 컴포넌트에서 import하지 않는다. 기존 정적 미지원
+경계와 라이선스 전문은 그대로 유지한다. 우측 피드 인사이트는 Social, 활성 캐릭터 카드는
+Characters의 컴포넌트이며 공용 UI에 업무 구현을 남기지 않는다.
+
 Social의 서버 초기 조회는 `features/social/api/social-feed-server.ts`를 웹 서버 화면에서
 직접 사용한다. 브라우저 요청 파일이나 공용 feature export를 통해 서버 초기 조회를 가져오지
 않는다. 파일 위치만 구분하지 않고 client·정적 화면의 전이 의존도 확인한다.

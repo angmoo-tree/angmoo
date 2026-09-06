@@ -1,4 +1,4 @@
-import { readAgentGuide } from "@/lib/angmoo-api-docs";
+import { readAgentGuide } from "@/features/support/api/documents-server";
 
 export async function GET() {
   const markdown = await readAgentGuide();

@@ -9718,6 +9718,20 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "d54cbfae8d33084a9b87655d9a9008ff3db3ec0a",
+      "feature_id": "K24",
+      "reason": "AR-F3-G Tree API types and Character loader composition plus server-only API documentation and license content owners",
+      "tracked_files": {
+        "frontend/src/composition/screens/tree-community-screen.tsx": "b0fc163647b323890e4fa22121268b8a6cfbc104",
+        "frontend/src/features/support/components/angmoo-api-content.tsx": "20e056fefedc439508f501b4fccf59832d9cb8e7",
+        "frontend/src/features/support/components/licenses-content.tsx": "bd4d01bcf23ca1a9a6c94501d7553fc33ec5897c",
+        "frontend/src/features/tree/types/tree.ts": "29f65d798826421f6ad6955673b5423bfdca7766"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }

@@ -7,18 +7,10 @@ import type { FormEvent } from "react";
 
 import { useAuth } from "@/hooks/use-auth";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
-import { listAgents } from "@/features/characters/api/agents";
-import { type AgentDetailRead } from "@/features/characters/types/agents";
-import { type UserRead } from "@/lib/agents";
+import { type UserRead } from "@/lib/auth/browser-session";
 import { formatDate } from "@/utils/profile-presentation";
-import {
-  createTreePost,
-  listTreePosts,
-  type TreeCategory,
-  type TreeFeedPage,
-  type TreePostDetail,
-  type TreePostSummary,
-} from "@/lib/tree";
+import { createTreePost, listTreePosts } from "@/features/tree/api/tree";
+import { type TreeCategory, type TreeFeedPage, type TreePostDetail, type TreePostSummary } from "@/features/tree/types/tree";
 import { isOfficialOperatorName } from "@/utils/profile-presentation";
 import { useMobilePullToRefresh } from "@/hooks/use-mobile-pull-to-refresh";
 
@@ -44,12 +36,16 @@ const BUTTON_BY_CATEGORY: Record<Exclude<TreeCategory, "notice">, string> = {
   free: "글쓰기",
 };
 
+export type TreeRelatedCharacterOption = {character: {id: string; name: string}};
+
 export function TreeCommunityClient({
+  loadRelatedCharacters,
   initialPage,
   initialCategory,
   initialQuery,
   initialError,
 }: {
+  loadRelatedCharacters: () => Promise<TreeRelatedCharacterOption[]>;
   initialPage: TreeFeedPage;
   initialCategory: TreeCategory;
   initialQuery: string;
@@ -63,7 +59,7 @@ export function TreeCommunityClient({
   const [composerText, setComposerText] = useState("");
   const [composerError, setComposerError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
-  const [agents, setAgents] = useState<AgentDetailRead[]>([]);
+  const [agents, setAgents] = useState<TreeRelatedCharacterOption[]>([]);
   const [relatedCharacterId, setRelatedCharacterId] = useState("");
 
   const loadPage = useCallback(async () => {
@@ -91,10 +87,10 @@ export function TreeCommunityClient({
 
   useEffect(() => {
     if (authStatus !== "authenticated") return;
-    listAgents()
+    loadRelatedCharacters()
       .then(setAgents)
       .catch(() => setAgents([]));
-  }, [authStatus]);
+  }, [authStatus, loadRelatedCharacters]);
 
   async function loadMore() {
     if (!nextCursor || loading) return;
@@ -248,7 +244,7 @@ function TreeComposer({
   category: Exclude<TreeCategory, "notice">;
   text: string;
   user: UserRead | null;
-  agents: AgentDetailRead[];
+  agents: TreeRelatedCharacterOption[];
   relatedCharacterId: string;
   saving: boolean;
   error: string | null;

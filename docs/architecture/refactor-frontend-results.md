@@ -3,7 +3,7 @@
 Current: **AR-F2-0~AR-F2-C #291~#294 COMPLETE; AR-F3-A #295 MERGED,
 post-merge validation running; AR-F3-B #296, AR-F3-C #297 and AR-F3-D #298
 local full preservation PASS and CI running; AR-F3-E Social local implementation
-and validation in progress; AR-F3-F local implementation/validation; AR-F3-G~AR-F5-B NOT STARTED**.
+and validation in progress; AR-F3-F local implementation/validation; AR-F3-G local implementation/validation; AR-F4-A~AR-F5-B NOT STARTED**.
 The user delegated implementation, validation, PRs and merges. AR-X, P8-L-S,
 real-provider product verification, Release and Production remain separate.
 
@@ -368,3 +368,17 @@ committed history were deleted.
 - Typecheck, architecture boundary and 324-file frontend preservation PASS.
   Web/static graph, builds, local source contracts, full preservation and
   sequential CI/merge/post-merge remain required before completion.
+
+## AR-F3-G Tree and support — local implementation
+
+- Tree API/types/components retain list/category/search/cursor, post and comment
+  requests. The upper Tree screen injects the actual stable Character loader;
+  Tree uses only the id/name fields it displays in its related-character input.
+- API documentation and license content move to support components; route
+  metadata, dynamic rendering, AppShell, exact notices and static unsupported
+  boundaries remain. Filesystem reads stay in the server-only document loader.
+- Remaining sidebar implementations now belong to Social and Characters.
+  No new generic public facade, provider behavior or backend feature is added.
+- Typecheck, architecture boundary and 324-source preservation PASS. Runtime,
+  source contracts, builds, capture/full preservation and sequential CI gates
+  remain required. This is not completion of AR-F3-G or AR-F5-B.
