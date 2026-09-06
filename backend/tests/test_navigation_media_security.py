@@ -44,7 +44,7 @@ def test_frontend_uses_allowlisted_return_and_profile_media_helpers() -> None:
     login_page = (root / "app" / "login" / "page.tsx").read_text(
         encoding="utf-8"
     )
-    login_client = (root / "features" / "identity" / "features" / "identity" / "features" / "identity" / "features" / "identity" / "components" / "login-client.tsx").read_text(
+    login_client = (root / "features" / "identity" / "components" / "login-client.tsx").read_text(
         encoding="utf-8"
     )
     avatar = (root / "components" / "ui" / "profile-avatar.tsx").read_text(
