@@ -2643,3 +2643,11 @@ Tree/Lore 순차 후보의 첫 공식 보존 검사는 보호 대상과 현재 *
 최종860개 반복 증거 행에서 사라진 consumer만 제거하고 기존 유효 탐색 경로와 actual use 위치를 연결했다. 변경 필드는 direct consumer766행, 현재 destination260행, 기존 exact node/symbol map에 따른 test 참조70행이며 겹치는 행이 있다. split-file 집합14개는 해당 원본의 모든 현재 symbol destination과 일치시켰다. 원래 old symbol·행 수·기타 source evidence는 유지했다. `_ReferenceImage`는 원본734492bf와 전체 AST가 같은 concrete runtime 정의를 사용하며 별도의 read-only Protocol을 실제 객체로 바꾸어 기록하지 않는다. 호출0인 보존 상수 `SERVICE_IMAGE_ACTIVE_RESERVATION_STATUSES`와 helper `_daily_image_count`는 기존 같은-symbol navigation을 승계하되 실제 신규 호출자는 없다고 별도 근거에 명시했다.
 
 현재 feature 경로는 기존 exact file map을 따라 LocalBot·Character Image·Identity credential·Operations로 연결했다. K13은 Activity와 Image 모델의 실제 두 소유자를 함께 유지하며 Maintenance 값은 Operations로 분류한다. **원래 production current inventory/split 검사 오류0**, 기존166 prefix 동일/현재176, 제품·테스트·검사·CI·frozen 변경0을 확인했다. 이 metadata를 고정한 뒤 공식 전체 stock 및 전체 pytest를 이어가며, 이 국소 통과를 전체 backend/Hosted/installer/병합 완료로 기록하지 않는다.
+
+### AR-B8-A Runtime·G06 순차 통합 전체 검증
+
+고정 `ec72adaa1fb7e1fd6ea43864f749c9871b503e73`의 전체 backend는 **2456 PASS / 기존22 SKIP /28 warnings /912.53초**다. 실제 Runtime 진단·lease·같은 Session의 Identity 접근과 `main.py` 단일 factory 및 임시 public export를 합친 후보이며, 기존 40개 초기화 연결과 factory/lifespan/health 본문, full/public 각각196개 HTTP operation 및102 ORM 계약을 유지한다. G5와 `public_main.py` 삭제 전 검증으로 기록하며 최종 제거 완료를 뜻하지 않는다.
+
+선행 Residual의 검토된 현재 지도를 합친 `d9f9fac6`에서 제품·테스트·검사기·원장184개는 달라지지 않았다. 첫 공식 stock의 보호2478=현재2478과 원본 계약·단언·suppression 보존은 일치했으나, Runtime 오류의 현재 경로7개와 해당 split 목적지 집합1개가 아직 이전 `contracts.py`를 가리켰다. 실제 동일 오류 정의를 소유한 Runtime/Routines의 `exceptions.py`로 현재 목적지만 연결하고 원본 source·symbol·행위 검증을 유지했다.
+
+같은 후보의 CI·OSS·launcher·desktop installer·Host Tauri 계약과 DCO·구조 경계 검사가 통과했고 custom 현재 보안 검사는2226files/치명0이다. Gitleaks가 원장의 Git blob14개를 generic key로 분류한 첫 실패를 보존한다. 각각 원래 signed commit의 정확한 경로와 실제 Git blob 일치를 확인한 뒤 Residual12개와 Runtime2개를 exact 경로·행·값 조합으로만 구분했다. 실제 Gitleaks8.30.1에서 검토 값은 통과하고 값 변경 및 다른 파일은 각각 검출되는 것을 확인했다. 원장 내용과 비밀 탐지 규칙은 그대로이며 이 보정 후 전체 stock·보안·순차 PR/Hosted/설치/병합 Gate를 이어간다.
