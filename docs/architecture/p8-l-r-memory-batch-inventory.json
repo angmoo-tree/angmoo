@@ -412,7 +412,7 @@
     },
     {
       "path": "backend/tests/memory/test_p8_l_r_memory_batch_api.py",
-      "sha256": "c1e315cf2ca00c0669d1890242bbb447b9ee385255fc0180061762793ed98b36"
+      "sha256": "02d786ca251f158ba02aaf711340d64899fd998763cc98c4f139f40166c80cdb"
     },
     {
       "path": "backend/tests/memory/test_p8_l_r_memory_batch_migration.py",

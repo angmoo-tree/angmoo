@@ -7,6 +7,8 @@ the English guide is canonical if translations differ.
 ## Before opening a change
 
 - Read `docs/public/architecture.md` and `docs/public/contribution-map.md`.
+- Use `backend/ARCHITECTURE.md` for backend roles and `frontend/ARCHITECTURE.md`
+  for the frontend's current and target scopes.
 - Start from the latest `main` in a branch or fork.
 - Use synthetic data and fake providers. Never submit credentials, personal
   data, raw logs, backups, or a local user's World Package.

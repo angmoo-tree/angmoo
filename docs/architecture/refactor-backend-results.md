@@ -2829,3 +2829,13 @@ ChatService·ChatRuntimePort·GenerationLifecycleService와 runtime/chat/world_g
 원래 호환·구조 검사22개는 전체 함수 AST를 signed 원문과 비교하고 정확한 import/identity 경로만 승계한다. 업무 assert·with raises·fixture·provider monkeypatch·동일 Session 동작은 유지한다. 기존 split의 임시 alias 소비582개를 실제 현재 소비자로 정리하고 stale bridge75개를 제거했으며 신규 경계 예외0이다. baseline/checkpoint/additions와 동결자료는 변경하지 않았다.
 
 검증은 영향 **194 PASS / 4 warnings / 43.34초**, 마지막 class/decorator/default 실행 guard 보강 뒤 엄격 음성·원문함수검사 **53 PASS / 20.13초**다. 실제 옛 경로 소비0, 경계 **1074 modules / 3986 edges / 기존 legacy5 PASS**. 원본 전체 source/split/assertion/suppression 진단은0이며 PR258/263 API/schema/ORM도PASS다. 최초 신규 검사 가정 및 current inventory와 원래 __all__ 문장 형태를 정정한 이력은 [호환 종료 기록](ar-b8-compatibility-retirement.md)에 남긴다. 새 회귀 node53개 최초 도입과 source capture, stock/전체/Hosted/설치 및 post-merge 검증은 부모 선형 통합의 별도 Gate다.
+
+## AR-B8 통합 후보 — 전체 역할 정책과 기여 문서
+
+2026-09-06 KST의 root 준비 후보에서 실제 전달 계층과 순수 호환 종료를 합쳤다. Chat.public의118개 export는 기존 실제 역할의 같은 binding이며 제품 소비자는0, 테스트4개는 local alias를 유지한 import만 변경했다. 기존64개 함수/class AST가 동일하고 해당48개 테스트 PASS다. 이때 사용되지 않는 docstring-only namespace5개를 제거했다. Core2 source를 합친 활동/검색/Package/OSS/L4 회귀103개 PASS, pure17과 Chat forwarder 증명을 함께 합친 회귀201개 PASS다.
+
+최종 정책은 실제18개 도메인 모두에 새 역할 규칙을 적용한다. 부분 module scope를 없애고, 이제 실제 runtime 조립 경로를 연결하는 옛 예외5개도 제거했다. 역사 migration·같은 Base·지원 외부 확장15개와 그 package marker5개만 정확한 소비자/유지 이유로 기록했다. 비어 있는 cruds/repositories marker2개는 실제 도메인 소유 marker로 source 지도를 연결하고 제거했다. 현재1064modules/3964edges/legacy0/cycle0 경계 PASS, 완료 정책의 유지와 소유권/호환 문서 연결을 포함한88개 회귀 PASS다. 실제 옛 구현을 빈 파일이나 새 전달 서비스로 대체하지 않았다.
+
+Backend ARCHITECTURE는 기여자가 업무와 역할, 실제 호출자, Session/원본/AI/앱 생성/설치 경계를 찾도록 다시 정리했다. 현재 도메인 지도·공개 기여 지도·구조 개요도 같은 설명으로 연결하고, 이전 T2.5 도메인 지도는 별도 역사 문서에 원문을 보관했다. 공통 Gemini adapter, 업무별 client, 다중 업무 HTTP 응답 조립의 실제 위치를 명시했다. 한국어 기여 가이드의 SQLite 개발 container에 과거 PostgreSQL Alembic 전체를 실행하는 명령은 제거해 영문/공식 embedded 실행 경로와 맞췄다.
+
+현재 Memory batch hash와 ER0 목록도 실제 source로 갱신했다. ER0의92→91은 제거한 runtime.chat.sqlalchemy_service의 옛 URL 문자열 행이 사라진 결과이며, 실제 모델/SQL 또는 역사 migration을 삭제한 결과가 아니다. Public docs/OSS/current inventory/CI policy 검사를 통과했다. 전체 백엔드·순차 PR별 원본 도입 원장/stock·최종 실행/설치 및 post-merge 종료는 아직 진행 중이며, 이 준비 결과를 AR-B8-B 전체 완료로 표시하지 않는다.

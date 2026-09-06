@@ -647,7 +647,7 @@
       "owner": "ER2-ER7 legacy evidence",
       "path": "backend/app/domains/routines/models/resident.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "6c1c9f261e58c4dfb2c84e8a35e2c3b2a52d2c30f7aae85b89623ee2e7dce9c5",
+      "source_sha256": "2cc4db5071959dfbea16e6b076c4ebbd5c4ba2d1bed2fab71466b8525c23fd9e",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1194,18 +1194,6 @@
     {
       "markers": {
         "driver_or_url": [
-          69
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/runtime/chat/sqlalchemy_service.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "4fff3808e339c1015e205bb51977319e5fb848f7f37ef6b81355fec496a48cb0",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "driver_or_url": [
           3
         ]
       },
@@ -1384,10 +1372,10 @@
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],
-  "entry_count": 92,
+  "entry_count": 91,
   "marker_counts": {
     "advisory_lock": 11,
-    "driver_or_url": 52,
+    "driver_or_url": 51,
     "jsonb": 11,
     "pgvector": 5,
     "row_lock": 41,

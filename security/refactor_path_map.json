@@ -661,7 +661,9 @@
     "backend/app/domains/characters/public.py": "backend/app/domains/characters/service/seed.py",
     "backend/app/domains/identity/public.py": "backend/app/domains/identity/models.py",
     "backend/app/domains/world_characters/public.py": "backend/app/domains/world_characters/service/autonomous_setup.py",
-    "backend/app/domains/worlds/public.py": "backend/app/domains/worlds/service/creator.py"
+    "backend/app/domains/worlds/public.py": "backend/app/domains/worlds/service/creator.py",
+    "backend/app/cruds/__init__.py": "backend/app/domains/__init__.py",
+    "backend/app/repositories/__init__.py": "backend/app/domains/__init__.py"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -135134,6 +135136,46 @@
         "new_test_nodes": 53,
         "remaining": "Parent original source introduction capture, linear stock/full/Hosted CI/installer/post-merge gates; frozen baseline/checkpoint/additions unchanged"
       }
+    },
+    "AR-B8-complete-backend-layout": {
+      "base_commit": "7ada864c5a3a77ddd601d0faed81577615b5af0f",
+      "scope": "All 18 actual domains; no partial module scopes; exact retained historical/extension contracts only.",
+      "empty_package_markers_removed": {
+        "backend/app/cruds/__init__.py": "backend/app/domains/__init__.py",
+        "backend/app/repositories/__init__.py": "backend/app/domains/__init__.py"
+      },
+      "obsolete_legacy_exception_groups": [
+        {
+          "edges": [
+            {
+              "importer": "app.api.v1.routes.agents",
+              "imported": "app.runtime.characters.creator"
+            },
+            {
+              "importer": "app.api.v1.routes.agents",
+              "imported": "app.runtime.characters.management"
+            },
+            {
+              "importer": "app.runtime.characters.creator",
+              "imported": "app.runtime.characters.management"
+            },
+            {
+              "importer": "app.runtime.characters.management",
+              "imported": "app.runtime.social.image_generation"
+            },
+            {
+              "importer": "app.runtime.social.image_job_worker",
+              "imported": "app.runtime.social.image_generation"
+            }
+          ],
+          "id": "pre-t2-5-horizontal-layer-imports",
+          "owner_stage": "L6",
+          "reason": "Exact edges present before the domain-first contract; no wider prefix or new edge is allowed.",
+          "removal_condition": "Remove each edge when its owning domain/runtime stage adopts a canonical public API; remove all remaining edges at L6.",
+          "review_date": "2026-11-14"
+        }
+      ],
+      "preservation": "No product function, HTTP operation, ORM model, existing assertion, source checkpoint or supported migration is changed by scope completion."
     }
   },
   "asgi_exports": {

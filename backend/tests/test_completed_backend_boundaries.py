@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
@@ -106,3 +107,25 @@ def test_incomplete_or_broad_final_scope_is_rejected(mutation):
         policy["refactor"]["modules"] = ["app.domains.sample.service"]
     assert any("refactor_invalid_scope" in error for error in
                b.checker.check_inventory(b._inventory(), policy))
+
+
+def test_repository_keeps_complete_backend_policy_enabled():
+    policy = json.loads((ROOT / "security/architecture_import_policy.json").read_text(encoding="utf-8"))
+    inventory = json.loads((ROOT / "security/architecture_import_baseline.json").read_text(encoding="utf-8"))
+    scope = policy["refactor"]
+    assert scope["complete"] is True
+    assert scope["modules"] == []
+    assert set(scope["globals"]) == {"app.config", "app.models", "app.database", "app.exceptions", "app.pagination"}
+    assert policy["legacy_exception_groups"] == []
+    assert b.checker.check_inventory(inventory, policy) == []
+
+
+def test_repository_retained_modules_have_readable_contracts():
+    policy = json.loads((ROOT / "security/architecture_import_policy.json").read_text(encoding="utf-8"))
+    retained = policy["refactor"]["retained_modules"]
+    assert retained
+    for item in retained:
+        contract = (ROOT / item["contract"]).resolve()
+        assert contract.is_relative_to(ROOT.resolve())
+        assert contract.is_file(), item["module"]
+        assert contract.read_text(encoding="utf-8").strip()

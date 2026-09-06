@@ -1,7 +1,7 @@
 {
   "edge_count": 3964,
   "external_import_count": 3099,
-  "module_count": 1066,
+  "module_count": 1064,
   "modules": [
     {
       "external_imports": [],
@@ -587,13 +587,6 @@
       ],
       "module": "app.credentials.service_images",
       "path": "backend/app/credentials/service_images.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.cruds",
-      "path": "backend/app/cruds/__init__.py",
       "wildcard_imports": []
     },
     {
@@ -12465,13 +12458,6 @@
       ],
       "module": "app.providers.registry",
       "path": "backend/app/providers/registry.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [],
-      "module": "app.repositories",
-      "path": "backend/app/repositories/__init__.py",
       "wildcard_imports": []
     },
     {

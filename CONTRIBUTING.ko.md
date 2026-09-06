@@ -9,6 +9,8 @@ Angmoo 개선에 참여해 주셔서 감사합니다. 공식 저장소는
 ## Issue와 작업 범위
 
 - `docs/public/architecture.md`와 `docs/public/contribution-map.md`를 읽습니다.
+- 백엔드 역할은 `backend/ARCHITECTURE.md`, 프론트엔드의 현재·목표 범위는
+  `frontend/ARCHITECTURE.md`를 참고합니다.
 - 최신 `main`에서 branch 또는 fork를 만듭니다.
 - synthetic data와 fake provider만 사용합니다. credential, 개인정보, 원문
   log, backup, 실제 사용자의 World Package를 제출하지 않습니다.
@@ -44,7 +46,6 @@ host Python, uv, Node.js, pnpm version 차이를 막기 위해 같은 개발 con
 
 ```powershell
 docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python -m pytest -q
-docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run alembic upgrade head
 docker compose -f compose.yml -f compose.dev.yml exec -T backend uv run python ../scripts/check_ci_policy.py
 docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm lint
 docker compose -f compose.yml -f compose.dev.yml exec -T frontend pnpm typecheck
