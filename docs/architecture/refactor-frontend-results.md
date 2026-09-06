@@ -171,3 +171,7 @@ committed history were deleted.
   the full preservation guard passes: 2742 protected/current nodes, 37 contracts.
   The AR-F2-A merge is an ancestor of this branch; no introduction commit or
   frozen checkpoint was rewritten while preparing the sequential integration.
+- PR #293 first backend CI found the current Next/static compatibility inventory
+  still contained 13 pre-move route hashes. Regenerate with the existing embedded
+  inventory tool: only those current hashes change, with 44 routes and all
+  capability classifications retained. This is not a frozen-oracle refresh.
