@@ -61,7 +61,9 @@ class CharacterLoreSource(Base):
 
     id: Mapped[str] = mapped_column(String(64), primary_key=True)
     owner_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
-    character_id: Mapped[str] = mapped_column(ForeignKey("characters.id"), nullable=False)
+    character_id: Mapped[str] = mapped_column(
+        ForeignKey("characters.id"), nullable=False
+    )
     filename: Mapped[str] = mapped_column(String(240), nullable=False)
     extension: Mapped[str] = mapped_column(String(12), nullable=False)
     content_type: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
@@ -101,7 +103,9 @@ class CharacterLoreChunk(Base):
         ForeignKey("character_lore_sources.id", ondelete="CASCADE"), nullable=False
     )
     owner_id: Mapped[str] = mapped_column(ForeignKey("users.id"), nullable=False)
-    character_id: Mapped[str] = mapped_column(ForeignKey("characters.id"), nullable=False)
+    character_id: Mapped[str] = mapped_column(
+        ForeignKey("characters.id"), nullable=False
+    )
     chunk_index: Mapped[int] = mapped_column(Integer, nullable=False)
     section_hint: Mapped[Optional[str]] = mapped_column(String(200), nullable=True)
     text: Mapped[str] = mapped_column(Text, nullable=False)

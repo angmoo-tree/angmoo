@@ -112,6 +112,25 @@ backend/
 
 ## 2. 도메인 안에서 코드 찾기
 
+### Character lore의 기반 소유
+
+업로드한 캐릭터 참고 문서는 `character_lore/models.py`의 source/chunk/parser lease 모델과 JSON 임베딩 타입을 사용합니다. Memory의 사건 기억과 별도 업무입니다. HTTP 입출력은 `schemas.py`, chunk·검색 결과·embedding credential 값은 `contracts.py`, 제한과 오류는 `constants.py`·`exceptions.py`가 실제 정의를 소유합니다.
+
+`service/parser_quota.py`는 실제 parser 수용량 판단과 SQL·lock·lease 저장/해제를 담당합니다. SQLite 프로세스 lock, PostgreSQL advisory transaction lock, 전역/사용자 한도, HMAC subject hash와 commit/rollback 순서가 원래와 같습니다. `parser.py`는 업로드 바이트·확장자·MIME·ZIP 검증, 제한된 자식 프로세스의 PDF/DOCX 추출과 종료를 실제 소유합니다. `policies/chunking.py`는 문장·섹션 경계를 보존하는 청크 분할, `service/presentation.py`는 검색 결과와 임베딩 입력의 텍스트 표현, `utils.py`는 정규화와 해시를 담당합니다.
+
+`service/documents.py`는 소유자 확인, 업로드·교체·재생성·삭제와 검색 실패/fallback 판단을 실제 소유합니다. 조회·집계·재사용 embedding 조회는 `repository.py`, 코사인 거리와 사용 이력·섹션 다양성을 고려한 순위는 `policies/ranking.py`로 구분합니다. 정책은 ORM 대신 읽기 계약을 받아 같은 값을 판단합니다. 문서 transaction의 commit/flush/refresh와 호출자의 같은 Session은 유지합니다.
+
+`LoreWorkflows`는 캐릭터 조회·자격 증명·최근 글 문맥·임베딩/추적 호출만 전달합니다. `runtime/character_lore.py`가 기존 실제 구현과 provider transport를 조립하며 도메인 서비스가 runtime을 import하지 않습니다. `router.py`는 원래 다섯 HTTP 경로·인증·오류를 연결하고, 두 앱 factory가 등록한 의존성을 `dependencies.py`에서 받습니다. 기존 lore service와 HTTP 파일은 제거했습니다. 남은 전역 모델/schema 집합 등록은 G5, 주민 실행 소비자는 B4, runtime의 기존 자격 증명 query와 최근 글 helper 연결은 각각 B8 Identity 및 B5 전환 범위입니다.
+
+### Tree 게시판의 소유
+
+Tree 글·댓글은 `tree/models.py`, 공개 HTTP 형식은 `schemas.py`, 조회/저장은 `repository.py`, 공지·연결 캐릭터 권한 및 응답 조립은 `service.py`에 있습니다. `router.py`는 기존 공개 읽기와 인증 쓰기의 URL·오류를 유지하고 같은 인증/Session dependency를 사용합니다.
+
+작성자 이름 검색의 correlated SQL 조건과 캐릭터 nullable 조회는 `TreeReferences`로 연결합니다. `runtime/tree.py`가 원래 Identity SQL predicate와 Character의 실제 조회 함수를 조립하며 Session을 새로 만들거나 미리 조회하지 않습니다. 업무 순서와 권한은 Tree service에 있고 runtime으로 옮기지 않습니다. create post/comment의 commit→refresh, created_at DESC/id ASC 및 동일 시각 다음 페이지의 id > cursor 규칙은 그대로입니다.
+
+전역 모델·schema 집합은 G5 전환까지 같은 클래스 객체를 노출합니다. 기존 Tree의 services/cruds/model/schema/HTTP 파일은 실제 소비자 전환 후 제거했고 새 구현은 그 경로를 사용하지 않습니다. 다른 B8 업무와 G5·최종 배포 검증의 상태는 별도로 남습니다.
+
+
 ### Character 정체성 기반의 현재 위치
 
 AR-B2-B의 첫 전환 범위는 캐릭터 자체의 ORM·입력 schema·handle/프로필 저장·상태 저장·Package seed입니다. `characters/models.py`, `schemas.py`, `exceptions.py`, `contracts.py`, `service/profile.py`, `service/state.py`, `service/seed.py`가 실제 구현을 소유합니다. 관리 화면 전체, Creator workflow, 자율활동과 Local Bot은 아직 뒤이은 전환 범위입니다.

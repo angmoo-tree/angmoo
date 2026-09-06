@@ -53,30 +53,6 @@
           "imported": "app.services.local_bot"
         },
         {
-          "importer": "app.api.v1.routes.character_lore",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.api.v1.routes.character_lore",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.api.v1.routes.character_lore",
-          "imported": "app.services.character_lore"
-        },
-        {
-          "importer": "app.api.v1.routes.tree",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.api.v1.routes.tree",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.api.v1.routes.tree",
-          "imported": "app.services.tree"
-        },
-        {
           "importer": "app.api.v1.routes.world_character_setup",
           "imported": "app.models"
         },
@@ -95,10 +71,6 @@
         {
           "importer": "app.cruds.agents",
           "imported": "app.schemas"
-        },
-        {
-          "importer": "app.cruds.tree",
-          "imported": "app.models"
         },
         {
           "importer": "app.main",
@@ -122,15 +94,7 @@
         },
         {
           "importer": "app.models",
-          "imported": "app.models.character_lore"
-        },
-        {
-          "importer": "app.models",
           "imported": "app.models.local_bot_quotas"
-        },
-        {
-          "importer": "app.models",
-          "imported": "app.models.tree"
         },
         {
           "importer": "app.models",
@@ -147,6 +111,10 @@
         {
           "importer": "app.public_main",
           "imported": "app.services.hosted_configuration"
+        },
+        {
+          "imported": "app.cruds.agents",
+          "importer": "app.runtime.character_lore"
         },
         {
           "importer": "app.runtime.characters.creator",
@@ -242,10 +210,6 @@
         },
         {
           "importer": "app.runtime.resident.langgraph",
-          "imported": "app.services.character_lore"
-        },
-        {
-          "importer": "app.runtime.resident.langgraph",
           "imported": "app.services.direct_llm"
         },
         {
@@ -294,10 +258,6 @@
         },
         {
           "importer": "app.schemas",
-          "imported": "app.schemas.character_lore"
-        },
-        {
-          "importer": "app.schemas",
           "imported": "app.schemas.characters"
         },
         {
@@ -307,10 +267,6 @@
         {
           "importer": "app.schemas",
           "imported": "app.schemas.social_memory"
-        },
-        {
-          "importer": "app.schemas",
-          "imported": "app.schemas.tree"
         },
         {
           "importer": "app.schemas",
@@ -339,26 +295,6 @@
         {
           "importer": "app.services.agent_runs",
           "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.character_lore",
-          "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.services.character_lore",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.services.character_lore",
-          "imported": "app.schemas"
-        },
-        {
-          "importer": "app.services.character_lore",
-          "imported": "app.services.direct_llm"
-        },
-        {
-          "importer": "app.services.character_lore",
-          "imported": "app.services.lore_parser_quota"
         },
         {
           "importer": "app.services.community_abuse_quota",
@@ -393,10 +329,6 @@
           "imported": "app.models"
         },
         {
-          "importer": "app.services.lore_parser_quota",
-          "imported": "app.models"
-        },
-        {
           "importer": "app.services.maintenance",
           "imported": "app.models"
         },
@@ -407,18 +339,6 @@
         {
           "importer": "app.services.operation_settings",
           "imported": "app.models"
-        },
-        {
-          "importer": "app.services.tree",
-          "imported": "app.cruds.tree"
-        },
-        {
-          "importer": "app.services.tree",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.services.tree",
-          "imported": "app.schemas"
         },
         {
           "importer": "app.services.world_foundation",
@@ -564,19 +484,6 @@
         {
           "importer": "app.runtime.resident.writing",
           "imported": "app.cruds.agent_runs"
-        }
-      ]
-    },
-    {
-      "id": "ar-b4-writer-character_lore",
-      "owner_stage": "L6",
-      "reason": "Existing writer collaboration relocated to actual runtime; no added policy or wider namespace. Pending owner: AR-B8 signed Lore source integration.",
-      "removal_condition": "Use existing signed Lore read/use services and preserve best-effort mark-used behavior.",
-      "review_date": "2026-09-06",
-      "edges": [
-        {
-          "importer": "app.runtime.resident.writing",
-          "imported": "app.services.character_lore"
         }
       ]
     },
@@ -1246,7 +1153,31 @@
       "app.domains.world_characters.service.event_scope",
       "app.domains.world_characters.service.projection_scope",
       "app.domains.worlds.repository.credential_scope",
-      "app.domains.worlds.service.projection_sources"
+      "app.domains.worlds.service.projection_sources",
+      "app.domains.character_lore.constants",
+      "app.domains.character_lore.contracts",
+      "app.domains.character_lore.dependencies",
+      "app.domains.character_lore.exceptions",
+      "app.domains.character_lore.models",
+      "app.domains.character_lore.parser",
+      "app.domains.character_lore.policies.chunking",
+      "app.domains.character_lore.policies.ranking",
+      "app.domains.character_lore.repository",
+      "app.domains.character_lore.router",
+      "app.domains.character_lore.schemas",
+      "app.domains.character_lore.service.documents",
+      "app.domains.character_lore.service.parser_quota",
+      "app.domains.character_lore.service.presentation",
+      "app.domains.character_lore.utils",
+      "app.domains.tree.constants",
+      "app.domains.tree.contracts",
+      "app.domains.tree.dependencies",
+      "app.domains.tree.exceptions",
+      "app.domains.tree.models",
+      "app.domains.tree.repository",
+      "app.domains.tree.router",
+      "app.domains.tree.schemas",
+      "app.domains.tree.service"
     ],
     "entries": [
       "app.domains.characters.contracts",
@@ -1666,7 +1597,15 @@
       "app.domains.world_characters.service.action_scope",
       "app.domains.world_characters.service.event_scope",
       "app.domains.world_characters.service.projection_scope",
-      "app.domains.worlds.service.projection_sources"
+      "app.domains.worlds.service.projection_sources",
+      "app.domains.character_lore.contracts",
+      "app.domains.character_lore.schemas",
+      "app.domains.character_lore.service.documents",
+      "app.domains.character_lore.service.parser_quota",
+      "app.domains.character_lore.service.presentation",
+      "app.domains.tree.contracts",
+      "app.domains.tree.schemas",
+      "app.domains.tree.service"
     ],
     "bridges": [
       {
@@ -2942,22 +2881,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.services.character_lore",
-        "target": "app.domains.characters.service.profile",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
-        "reason": "This pre-integration caller now consumes the actual owner after zero-body Community CRUD aggregate removal; exact query and caller body remain unchanged.",
-        "removal_condition": "Transfer these exact consumer imports to already signed actual Resident/Tree/Lore runtime during parent integration and remove the old caller module.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.services.tree",
-        "target": "app.domains.characters.service.profile",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
-        "reason": "This pre-integration caller now consumes the actual owner after zero-body Community CRUD aggregate removal; exact query and caller body remain unchanged.",
-        "removal_condition": "Transfer these exact consumer imports to already signed actual Resident/Tree/Lore runtime during parent integration and remove the old caller module.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.services.agent_runs",
         "target": "app.domains.routines.constants",
         "owner_stage": "AR-B5 / AR-B4 / AR-B8 / AR-B4-C",
@@ -3075,6 +2998,38 @@
         "owner_stage": "AR-B8-A",
         "reason": "Immutable Alembic 0088 imports the exact two schema-builder functions from this historical path; no ORM classes or duplicate implementations are exported.",
         "removal_condition": "Keep while immutable supported Alembic revision 0088 imports this path; product consumers use the actual model owner directly.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.tree.models",
+        "owner_stage": "AR-B8-A / AR-G5",
+        "removal_condition": "Replace global aggregate model/schema imports and explicit registration in G5; no new Tree business implementation in the legacy path.",
+        "reason": "Existing aggregate exposes the same actual Tree class/schema objects during registration and consumer transition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.tree.schemas",
+        "owner_stage": "AR-B8-A / AR-G5",
+        "removal_condition": "Replace global aggregate model/schema imports and explicit registration in G5; no new Tree business implementation in the legacy path.",
+        "reason": "Existing aggregate exposes the same actual Tree class/schema objects during registration and consumer transition.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.models",
+        "target": "app.domains.character_lore.models",
+        "owner_stage": "AR-B8-A / AR-G5",
+        "removal_condition": "G5 explicit model registration and retirement of global business schema aggregate.",
+        "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.schemas",
+        "target": "app.domains.character_lore.schemas",
+        "owner_stage": "AR-B8-A / AR-G5",
+        "removal_condition": "G5 explicit model registration and retirement of global business schema aggregate.",
+        "reason": "Existing consumers use the single actual definition or parser lease implementation with unchanged Session/lock/commit behavior.",
         "review_date": "2026-09-06"
       }
     ]

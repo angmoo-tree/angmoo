@@ -1,13 +1,18 @@
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.orm import Session, selectinload
 
-from app import models
+from collections.abc import Callable
+from sqlalchemy.sql.elements import ColumnElement
+
+from app.domains.tree import models
+from app.domains.tree.contracts import TreeAuthor
 
 
 def list_tree_posts(
     db: Session,
     *,
     category: str,
+    author_name_matches: Callable[[str], ColumnElement[bool]],
     limit: int,
     cursor: str | None = None,
     query: str | None = None,
@@ -30,7 +35,7 @@ def list_tree_posts(
             or_(
                 models.TreePost.title.ilike(pattern),
                 models.TreePost.body.ilike(pattern),
-                models.TreePost.author.has(models.User.display_name.ilike(pattern)),
+                author_name_matches(pattern),
                 models.TreePost.comments.any(models.TreeComment.content.ilike(pattern)),
             )
         )
@@ -75,7 +80,7 @@ def create_tree_post(
     db: Session,
     *,
     post_id: str,
-    user: models.User,
+    user: TreeAuthor,
     category: str,
     title: str,
     body: str,
@@ -96,7 +101,7 @@ def create_tree_post(
 
 
 def create_tree_comment(
-    db: Session, *, post: models.TreePost, user: models.User, content: str
+    db: Session, *, post: models.TreePost, user: TreeAuthor, content: str
 ) -> models.TreeComment:
     comment = models.TreeComment(
         post_id=post.id,

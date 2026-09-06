@@ -273,6 +273,49 @@
     },
     {
       "markers": {
+        "driver_or_url": [
+          26
+        ],
+        "pgvector": [
+          26
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/character_lore/models.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "4c462fb18c1becad6628b980ac41d33f0e20ab63ffb387f976415887521fefa0",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "pgvector": [
+          340
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/character_lore/service/documents.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "1fa5eace2826ca86f1b0f160cb7d2c93804605223e39ba3c5943b4790af87f5e",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
+        "advisory_lock": [
+          49
+        ],
+        "driver_or_url": [
+          42,
+          47
+        ]
+      },
+      "owner": "ER2-ER7 legacy evidence",
+      "path": "backend/app/domains/character_lore/service/parser_quota.py",
+      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
+      "source_sha256": "8071a4adb230a974c6bf0fa46e55c9daa1d5178e3add2099550606a189a24c39",
+      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
+    },
+    {
+      "markers": {
         "advisory_lock": [
           160
         ],
@@ -1094,21 +1137,6 @@
     {
       "markers": {
         "driver_or_url": [
-          26
-        ],
-        "pgvector": [
-          26
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/models/character_lore.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "ec8e38b4ca6404eebf4d880b03c7a51420233878366f443765b4a85142f4e8b6",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "driver_or_url": [
           11,
           44,
           52,
@@ -1231,22 +1259,6 @@
     },
     {
       "markers": {
-        "driver_or_url": [
-          464
-        ],
-        "pgvector": [
-          464,
-          504
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/services/character_lore.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "04d7892eaf0397fac977e9e01b1ec55c47ddcecb1dfb9a005ab0ea3f0bebc14e",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
         "row_lock": [
           61
         ]
@@ -1268,22 +1280,6 @@
       "path": "backend/app/services/local_bot_quota.py",
       "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
       "source_sha256": "ddd94036fab73990b8c7c805c780d777e43f08e6cc3704c8923274a10226c7ec",
-      "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
-    },
-    {
-      "markers": {
-        "advisory_lock": [
-          53
-        ],
-        "driver_or_url": [
-          46,
-          51
-        ]
-      },
-      "owner": "ER2-ER7 legacy evidence",
-      "path": "backend/app/services/lore_parser_quota.py",
-      "removal_condition": "historical revision, serialized compatibility value, or negative reintroduction guard only",
-      "source_sha256": "181d4ce325f93d1086860eae06eed5aa16a116b0d4c6fba3b269e98df3fbe7cc",
       "transition_pr": "ER2 PR D/E/G; Legacy Removal PR"
     },
     {
@@ -1381,7 +1377,7 @@
   "entry_count": 91,
   "marker_counts": {
     "advisory_lock": 11,
-    "driver_or_url": 53,
+    "driver_or_url": 52,
     "jsonb": 11,
     "pgvector": 5,
     "row_lock": 40,

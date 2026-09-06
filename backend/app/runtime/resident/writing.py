@@ -51,7 +51,9 @@ from app.domains.routines.service.writing_results import (
     _writing_stream_params,
 )
 from app.domains.social.schemas import community as schemas
-from app.services import character_lore as character_lore_service
+from app.domains.character_lore.service import documents as character_lore_service
+from app.domains.character_lore.service import presentation as lore_presentation
+from app.runtime.character_lore import build_lore_workflows
 from app.domains.memory.service.daypart import record_action_memory as _record_daypart_action_memory
 from app.services.runtime_boundary import OpenClawGatewayClient, OpenClawGatewayError
 
@@ -68,7 +70,7 @@ def prompt_workflows() -> WritingPromptWorkflows:
                 activity_result_text=social_feed_history_values.activity_result_text_for_prompt,
             )
         ),
-        format_lore_prompt_context=character_lore_service.format_lore_prompt_context,
+        format_lore_prompt_context=lore_presentation.format_lore_prompt_context,
     )
 
 
@@ -257,7 +259,7 @@ def _compose_writing_from_brief(
     setting = activity_settings.ensure_setting(db, character_id)
     state = character_state.get_character_state(db, character_id)
     lore_retrieval = (
-        character_lore_service.retrieve_lore_for_self_update(db, character=character)
+        character_lore_service.retrieve_lore_for_self_update(db, character=character, workflows=build_lore_workflows())
         if kind == "create_post" and _is_self_update_create_post_brief(brief)
         else None
     )

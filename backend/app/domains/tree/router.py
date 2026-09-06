@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from app import models, schemas
-from app.domains.identity.dependencies import get_current_user
-from app.core.db import get_db
-from app.services import tree as tree_service
+from app.domains.tree import schemas
+from app.domains.tree import service as tree_service
+from app.domains.tree.contracts import TreeAuthor, TreeReferences
+from app.domains.tree.dependencies import get_current_user, get_db, get_tree_references
 
 
 router = APIRouter(prefix="/tree", tags=["tree"])
@@ -16,11 +16,17 @@ def list_tree_posts(
     q: str | None = Query(default=None, max_length=80),
     limit: int = Query(default=20, ge=1, le=100),
     cursor: str | None = None,
+    references: TreeReferences = Depends(get_tree_references),
     db: Session = Depends(get_db),
 ) -> schemas.TreeFeedPage:
     try:
         return tree_service.list_posts(
-            db, category=category, query=q, limit=limit, cursor=cursor
+            db,
+            category=category,
+            query=q,
+            limit=limit,
+            cursor=cursor,
+            references=references,
         )
     except tree_service.TreeCategoryError as exc:
         raise HTTPException(
@@ -34,13 +40,16 @@ def list_tree_posts(
 )
 def create_tree_post(
     data: schemas.TreePostCreate,
+    references: TreeReferences = Depends(get_tree_references),
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: TreeAuthor = Depends(get_current_user),
 ) -> schemas.TreePostDetail:
     try:
-        return tree_service.create_post(db, user, data)
+        return tree_service.create_post(db, user, data, references=references)
     except tree_service.TreeNoticeWriteForbiddenError as exc:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)
+        ) from exc
     except tree_service.TreeRelatedCharacterError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Related character not found"
@@ -64,7 +73,7 @@ def create_tree_comment(
     post_id: str,
     data: schemas.TreeCommentCreate,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: TreeAuthor = Depends(get_current_user),
 ) -> schemas.TreePostDetail:
     try:
         return tree_service.create_comment(db, user, post_id, data)

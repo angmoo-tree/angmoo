@@ -2328,3 +2328,62 @@ Memory가 소유하는 실제 repository/service와 명시적인 source/scope/re
 첫 수집은 옛 Social 모델 집합과 Memory router import 때문에 중단됐고 실제 경로 연결 뒤 **2428개 collection PASS**다. 고정67파일 검사는 **608 PASS / 2 FAIL / 5 warnings / 523.58초**였으며 두 실패는 기존 테스트의 concrete repository 생성에 필요한 same-Session factory와 inspector inventory generator의 옛 Memory contract import였다. 단언/fixture의 업무 의미를 바꾸지 않고 두 import를 연결한 뒤 실패 파일과 Memory scope/source/daypart 회귀는 **29 PASS / 32.43초**다. 존재하지 않는 보조 테스트 경로를 포함한 중간 명령은 수집 전에 종료됐으며 결과에서 제외했다.
 
 별도 읽기 진단의 첫 입력 구성 오류도 기록한다. archive의 전체 test 목록을 희소 assertion 자료에 직접 붙이거나 assertion 자료가 없는 #258 source baseline을 단언 비교에 포함한 진단은 중단했다. 제품 checker와 같은 원래 #263/additions 구성 및 원래 수집기 방식으로9개 signed source의 신규 증거를 메모리에서 계산한 최종 진단은 **assertions0 / split0**이다. baseline/checkpoint/원장·원래 test assertion/skip은 변경하지 않았다. 현재 구조 **1036 modules / 3872 edges / legacy124**, API public196·현재 L4/ER0/Memory batch inventory도 확인했다. 다음 metadata commit에서 B6 원장153개를 불변 prefix로 유지해 원래9개 도입을 append한 뒤 공식 stock·backend 전체·PR Gate를 수행한다. 이 상태를 B7 최종 완료나 전체 backend 종료로 표시하지 않는다.
+
+
+
+## AR-B8 Tree 실제 역할 전환 준비 — 2026-09-06
+
+기준 Memory `16f70f3`의 Tree 모델 2개·schema 8개·SQL 5개·업무 함수 12개·오류 5개·HTTP 4개를 실제 도메인 역할 파일로 옮겼다. 글/댓글 권한·공개 읽기·공지 작성 금지·삭제 캐릭터 표기와 같은 Session의 commit→refresh를 유지한다. foreign 작성자 검색 predicate와 Character nullable lookup만 typed `TreeReferences`로 연결하며 두 factory가 같은 실제 callback을 등록한다. 최초 등록은 G5 전까지 기존 전역 집합의 same-class export를 유지한다.
+
+고정 전 Tree 및 기존 M3 삭제 회귀 **15 passed / 기존 warning 1**이다. 원래 모델/schema/오류 전체 정의와 service/repository/HTTP의 정확한 callback 인자 변경을 제외한 본문 **36개 AST 비교가 동일**하다. 기존 Tree 테스트 3 node를 `tests/tree/test_public_contract.py`로 일대일 추적하고 새 검색·transaction 실패·HTTP 두 factory 회귀를 추가했다. API/ORM·전체 보존과 현재 inventory 검사는 이어서 확인하며, source capture·CI·G5·G06 호환 제거·설치 검증은 순차 통합 단계에 남는다. lore/LocalBot/image-setting/operations는 이번 slice에 포함하지 않았다.
+
+
+Tree 확대 검증은 **133 passed / 기존 warning 1 / 88.92s**다. stock 전체 보존은 선행 signed `869bae55`의 Routines models/schema 최초 도입 원장 연결이 남아 FAIL/PENDING이다. 원장을 변경하지 않은 읽기 진단은 protected 2,201/current 2,251의 원래 node·assertion·suppression·API/ORM·source 손실이 0이다. 이동한 Tree 테스트를 여전히 옛 위치로 가리키던 Character 선행 split 증거 7개는 동일 node의 새 경로로 갱신하고 재검사한다. G5 전 모델 등록은 실제 동일 Base table 객체로 검증하며, 새 테스트로 임시 전역 업무 export의 잔존을 강제하지 않는다.
+
+
+최종 Tree 재검사 **8 passed / 기존 warning 1 / 12.32s**, 정확 split 증거 진단 **0 errors**, 경계 **729 modules / 2,431 edges / legacy212**, L4 현재 inventory **729/14/97**, 공개 route inventory **196 operations**를 확인했다. 최종 source는 이 독립 준비 범위이며 root가 선형 원장·후속 source 합류·Hosted CI를 수행한다.
+
+별도 역사적 `scripts/verify_m4_contracts.py` 실행은 M4 당시 expected148 operations/120 paths/182 schemas와 현재196/160/266의 차이로 FAIL이다. 해당 파일과 상수는 수정하지 않았고 현재 workflow가 호출하지 않음을 확인했다. 이번 전환의 frozen API/ORM 비교는 손실 0이며, 역사적 verifier의 현재 지원 여부는 B8 종료 정리에서 별도로 판정한다.
+
+
+## AR-B8 Lore A1 실제 모델·계약·파서 수용량 준비 — 2026-09-06
+
+Tree `f52dbdb` 다음 source에서 `character_lore/models.py`로 실제 ORM3개와 EmbeddingJsonText를, schemas/contracts/constants/exceptions로 실제 정의를 이전했다. `service/parser_quota.py`는 기존 lock·HMAC subject·SQL·전역/사용자 한도·commit/rollback·yield 후 lease 해제 본문을 소유한다. errors의 retry 상수는 동일 값의 canonical 상수를 직접 참조한다. 기존 parser/doc upload/retrieval/HTTP와 provider 조립은 다음 slice로 명시하고, 기존 lore service는 정확히 필요한 동일 정의를 사용한다.
+
+모델/schema 및 원래 서비스의 정의 **113개 AST 동일**, 기존 lore3파일 **34 test nodes 일대일 이동**, Lore/Tree/M3삭제/LangGraph resident **245 passed / 기존 warning1 / 21.20s**다. 경계 **734 modules/2,438 edges/legacy208**, 현재 L4 **734/14/97**, deferred22를 확인했다. 원장을 수정하지 않은 signed869bae55 경로 supplement 진단에서 protected2,201/current2,251, source/assertion/suppression/APIORM/node 손실0이다. 첫 split 검사에서 남아 있는 원래 Windows parser job handle의 AnnAssign 한 줄을 지도에서 빠뜨린 것을 확인하고, 실제 남은 기존 파일/동일 symbol/기존 isolated parser 회귀로 정확히 추가하여 재검사한다. 제품 로직과 검사 규칙은 바꾸지 않는다.
+
+이 단계에 새 test node는 없다. 실제 모델/정의 최초 도입 source와 source capture는 구분하며, G5 전역 등록 및 aggregate 제거·G06/B8-B·Hosted CI/설치는 아직 별도 단계다.
+
+
+Lore A1의 정확 split symbol 재검사는 **0 errors**로 종료했다. 정의/행동 보존과 부분 scope 근거를 고정하며, pending 원장을 재생성하거나 검사 대상에서 제외하지 않았다.
+
+## AR-B8 Lore A2 문서 파서·청크·텍스트 표현 준비 — 2026-09-06
+
+Lore A1 `f7f303d`의 실제 문서 파서·청크 분할·정규화·해시·입력/결과 표현 28개 정의와 Windows parser job handle을 역할 파일로 옮겼다. 정의 전체 AST는 원래와 동일하다. 파일/MIME/ZIP 한도와 PDF/DOCX 자식 프로세스의 timeout·terminate/join/kill·리소스 제한, 섹션/문장 경계, 임베딩 prefix와 프롬프트 문자열을 유지한다. 기존 문서 서비스는 같은 함수 객체를 사용하고, parser 보안 회귀는 실제 canonical parser를 직접 검사한다.
+
+Lore/Tree/M3삭제/LangGraph resident **245 passed / 기존 warning1 / 14.74s**, 경계 **739 modules/2,450 edges/legacy208**, 현재 L4 **739/14/97**, deferred22다. 원장을 수정하지 않은 signed869bae55 두 source의 읽기 전용 supplement 진단은 protected2,201/current2,251이며 source/split/assertion/suppression/APIORM/node 손실 **0**이다. stock gate는 선행 source 도입 원장의 순차 통합 대기 상태로 남는다.
+
+새 실제 source 파일은 parser.py, policies/__init__.py·chunking.py, utils.py, service/presentation.py의 5개이며 새 test node는 없다. 문서 저장·검색·provider 추적·HTTP 소유 이전과 G5/G06/B8-B 및 Hosted CI/설치는 아직 다음 범위다.
+
+## AR-B8 Lore A3 문서 서비스·조회·검색 정책·HTTP 준비 — 2026-09-06
+
+실제 문서 저장/교체/재생성/삭제·검색 admission/fallback은 service/documents.py, 자체 조회/집계/embedding 재사용은 repository.py, 코사인 및 사용 이력/섹션 순위는 policies/ranking.py로 이전했다. runtime/character_lore.py는 원래 네 credential/provider helper와 typed LoreWorkflows 조립을 소유한다. 기존 service 및 HTTP 파일은 제거했고 원래 다섯 URL·인증 callable·오류·UploadFile.close finally와 두 factory의 같은 Session 의존성을 연결했다. 순위 입력은 ORM을 직접 import하지 않는 실제 attached view 계약이다.
+
+실제 30개 원래 정의와 HTTP5개/주민 실행3개 변경의 전체 AST는 정확한 callback/인자·역할 type/import 이름만 정규화하면 **38개 모두 동일**하다. 원래 Lore/주민 실행/삭제/쓰기 선택 회귀 **306 passed / 기존 warnings2 / 8.94s**, 새 실제 DB 중복 업로드/재생성 embedding 재사용·실패 저장·scope provider 생략·두 factory 동일 Session 회귀 **4 passed / 기존 warning1 / 5.49s**다. 새 source/node의 최초 도입 고정 전 최종 보존·APIORM·경계를 재검사한다.
+
+원래 plaintext credential reveal 검사의 정확 파일 허용은 실제 네 credential/provider 본문이 위치한 runtime/character_lore.py로 이동한다. 파일 primary map도 해당 실제 구현이며, 원래 모든 정의의 각 최종 목적지는 split 증거로 별도 기록했다. 함수 허용 목록과 assertion 자체를 완화하지 않았다. 남은 두 legacy helper는 runtime의 Identity credential query 및 B5 최근 자기 글 문맥 소비이고, 도메인 코드가 해당 legacy service를 import하지 않는다. G5 global registry·B4 주민 실행 자체·후속 B8 Identity/helper 정리·선형 capture/CI/G06/G8-B는 별도 단계다.
+
+Lore A3 최종 확대 묶음은 **326 passed / 기존 warnings3 / 23.51s**다. 경계743modules/2475edges/legacy199, L4 743/14/97, 공개 inventory196operations가 통과했다. signed869bae55 두 원본 source를 읽기 메모리에서만 보충한 진단은 protected2201/current2255의 source/assertion/suppression/APIORM/node 손실0이다. 첫 split 검사에 남아 있던 parser quota 선행 symbol의 옛 Lore service 소비 경로11개를 실제 현재 호출 파일로 연결했고, 원래 split 검사 재실행은 **0 errors**다. 검사 규칙/동결 원장은 수정하지 않았다. 선행 원장 연결을 포함한 stock 전체 보존은 root 순차 통합 단계의 pending Gate다.
+
+새 회귀는 tests/character_lore/test_lore_role_contracts.py의 4 nodes다. 기존 Tree 회귀 파일과 동일 basename이어서 발생한 pytest 수집 충돌은 새 파일의 최초 source 고정 전에 고유 basename으로 정리했다. 기존 테스트 node/본문은 퇴역시키지 않았으며 최종 확대 묶음에서 함께 실행했다.
+
+
+## AR-B8-A 순차 후보 — Tree·Character Lore 실제 소유 통합
+
+B7 실제 업무 source `274f90e7` 이후 원본 signed `f52dbdbc`→`f7f303d9`→`c4a0a6a2`→`9cd5eb14`를 합쳤다. Tree 게시판과 Lore의 모델·계약·조회·입력/문서 정책·서비스·HTTP를 실제 소유 파일로 옮기고, 외부 Character 조회·기존 credential/provider·최근 활동 조립은 runtime에 연결했다. G06 factory 및 G5 Base/database는 이 후보에 포함하지 않는다.
+
+앞서 이전된 Routines writer/LangGraph 소비자는 기존 실제 경로에 Lore service·presentation·동일 Session workflows를 연결했다. 이미 제거된 옛 LangGraph 구현이나 두 줄의 역사적 Memory action alias에 옛 업무 본문을 되살리지 않았다. main/public_main은 기존 B7의 Character/Chat/Memory 연결을 보존하면서 Tree/Lore 연결만 함께 등록한다.
+
+관련 검사 첫 실행은 **292 PASS / 기존 PG18 SKIP / 2 FAIL / 59.76초**였다. 실패는 Lore workflows 인자가 추가됐는데 이전된 Resident 테스트의 두 fake가 옛 함수 인자를 유지하던 부분이다. fake의 같은 실제 인자를 명시하고 원래 query·fallback·provider 호출·결과 단언을 유지한 재검증은 해당3개 모두 **PASS / 9.31초**다. 현재 Tree/Lore의 옛 source 활성 import0, 경계 **1056 modules / 3925 edges / legacy103 PASS**를 확인했다. 이미 사라진3개 legacy edge와8개 임시 bridge만 제거했고 신규 예외를 추가하지 않았다.
+
+현재 L4·ER0·Memory batch 자료는 실제 소스와 맞췄다. 원래 first-introduction과 B7의 원장 prefix는 변경하지 않았다. 순차 후보의 원장4개 원본 연결, 전체 backend, stock/API/ORM/node, Hosted·installer·post-merge는 별도로 진행한다. 최종 AR-B8-B·G01~G13 및 후속 frontend/제품 단계가 끝났다는 의미는 아니다.

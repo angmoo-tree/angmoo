@@ -6,11 +6,11 @@ from app.api.v1.routes import agent_runs
 from app.api.v1.routes import agents
 from app.domains.identity.router import auth
 from app.api.v1.routes import bot
-from app.api.v1.routes import character_lore
+from app.domains.character_lore import router as character_lore
 from app.api.v1.routes import community
 from app.domains.chat.router import messages
 from app.domains.memory import router as memory
-from app.api.v1.routes import tree
+from app.domains.tree import router as tree
 from app.domains.world_characters.router import entry as worlds
 from app.domains.worlds import router as world_creator
 from app.api.v1.routes import world_character_setup
