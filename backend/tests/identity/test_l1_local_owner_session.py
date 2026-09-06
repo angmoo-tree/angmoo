@@ -10,11 +10,12 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import models
+from model_fixture_support import models
 from app.domains.identity.router import auth as auth_routes
 from app.domains.identity import browser_session
 from app.core import security
-from app.core.db import Base, get_db
+from app.models import Base
+from app.database import get_db
 from app.domains.identity.router.local import router
 from app.domains.identity.constants import LOCAL_INSTALLATION_KEY
 from app.domains.identity.models import InstallationIdentity

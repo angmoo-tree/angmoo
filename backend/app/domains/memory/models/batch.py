@@ -18,7 +18,7 @@ from sqlalchemy import (
 from sqlalchemy.engine import Connection
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.core.db import Base
+from app.models import Base
 
 
 MEMORY_BATCH_TABLES = (

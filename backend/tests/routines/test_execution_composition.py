@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
-from app.core.db import Base
+from app.models import Base
 from app.domains.routines import models
 from app.domains.routines.policies.activity_state import initial_state
 from app.domains.routines.service.execution import claims

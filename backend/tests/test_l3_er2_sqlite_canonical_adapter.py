@@ -12,7 +12,7 @@ from sqlalchemy import create_engine, inspect, select, text
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.domains.identity.service.local_owner import LocalIdentityService as SqlAlchemyIdentityRepository
 from app.domains.runtime.contracts.transaction import UnitOfWorkPort
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath

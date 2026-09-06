@@ -3,7 +3,7 @@
 from datetime import date, datetime
 from typing import Any, Optional
 
-from app.core.db import Base
+from app.models import Base
 from sqlalchemy import JSON, Date, DateTime, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

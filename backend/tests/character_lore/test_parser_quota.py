@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import models
+from model_fixture_support import models
 from app.domains.character_lore.service import parser_quota as lore_parser_quota
 
 

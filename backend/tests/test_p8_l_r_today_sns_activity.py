@@ -8,8 +8,8 @@ import pytest
 from sqlalchemy import create_engine, event, select
 from sqlalchemy.orm import Session
 
-from app import models
-from app.core.db import Base
+from model_fixture_support import models
+from app.models import Base
 from app.domains.chat.service.evidence_assembly import EvidenceBundleAssembler
 from app.domains.chat.service.retrieval_routing import (
     _apply_today_sns_sufficiency_guard,

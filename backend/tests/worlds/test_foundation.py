@@ -8,8 +8,8 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app import models
-from app.core.db import Base
+from model_fixture_support import models
+from app.models import Base
 from app.core.ids import uuid7_string
 from app.domains.worlds import service as world_service
 from app.runtime.worlds import foundation as world_foundation

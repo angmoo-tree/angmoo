@@ -9,7 +9,14 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import func, inspect, select
 from sqlalchemy.orm import Session
 
-from app import models
+from app.domains.routines.models.resident import AgentActivityLog as _model_AgentActivityLog
+from app.domains.routines.models.resident import AgentRun as _model_AgentRun
+from app.domains.world_characters.models import CharacterActiveWorld as _model_CharacterActiveWorld
+from app.domains.worlds.models import World as _model_World
+from app.domains.world_characters.models import WorldCharacter as _model_WorldCharacter
+from app.domains.world_packages.models import WorldPackageImport as _model_WorldPackageImport
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.domains.routines.service import tick_schedule as agent_activity_schedule
 from app.cruds import agents as agent_crud
 
@@ -33,19 +40,19 @@ def activity_timezone(db: Session, *, character_id: str) -> ZoneInfo:
     """Resolve the selected World's IANA timezone, falling back to KST."""
 
     inspector = inspect(db.get_bind())
-    if not inspector.has_table(models.CharacterActiveWorld.__tablename__):
+    if not inspector.has_table(_model_CharacterActiveWorld.__tablename__):
         return APP_TIMEZONE
-    active_world = db.get(models.CharacterActiveWorld, character_id)
+    active_world = db.get(_model_CharacterActiveWorld, character_id)
     if active_world is None:
         return APP_TIMEZONE
-    if not inspector.has_table(models.WorldCharacter.__tablename__):
+    if not inspector.has_table(_model_WorldCharacter.__tablename__):
         return APP_TIMEZONE
-    world_character = db.get(models.WorldCharacter, active_world.world_character_id)
+    world_character = db.get(_model_WorldCharacter, active_world.world_character_id)
     if world_character is None or world_character.character_id != character_id:
         return APP_TIMEZONE
-    if not inspector.has_table(models.World.__tablename__):
+    if not inspector.has_table(_model_World.__tablename__):
         return APP_TIMEZONE
-    world = db.get(models.World, world_character.world_id)
+    world = db.get(_model_World, world_character.world_id)
     if world is None:
         return APP_TIMEZONE
     try:
@@ -64,7 +71,7 @@ def activity_timezone_name(db: Session, *, character_id: str) -> str:
 
 def is_imported_world_runtime_locked(
     db: Session,
-    world_character: models.WorldCharacter,
+    world_character: _model_WorldCharacter,
 ) -> bool:
     """Return whether package lineage still requires explicit autonomy enable.
 
@@ -76,15 +83,15 @@ def is_imported_world_runtime_locked(
     if world_character.autonomous_enabled:
         return False
     bind = db.get_bind()
-    if not inspect(bind).has_table(models.WorldPackageImport.__tablename__):
+    if not inspect(bind).has_table(_model_WorldPackageImport.__tablename__):
         # Focused service fixtures may intentionally omit the v1 package
         # registry. Migrated production runtimes always have this table.
         return False
     return (
         db.scalar(
-            select(models.WorldPackageImport.import_id)
+            select(_model_WorldPackageImport.import_id)
             .where(
-                models.WorldPackageImport.imported_world_id
+                _model_WorldPackageImport.imported_world_id
                 == world_character.world_id
             )
             .limit(1)
@@ -101,32 +108,32 @@ def is_imported_world_runtime_locked_for_character(
     """Apply the import activation gate before an active World exists, too."""
 
     bind = db.get_bind()
-    if not inspect(bind).has_table(models.WorldPackageImport.__tablename__):
+    if not inspect(bind).has_table(_model_WorldPackageImport.__tablename__):
         return False
-    active_world = db.get(models.CharacterActiveWorld, character_id)
+    active_world = db.get(_model_CharacterActiveWorld, character_id)
     if active_world is not None:
         world_character = db.get(
-            models.WorldCharacter, active_world.world_character_id
+            _model_WorldCharacter, active_world.world_character_id
         )
     else:
         world_character = db.scalar(
-            select(models.WorldCharacter)
+            select(_model_WorldCharacter)
             .join(
-                models.WorldPackageImport,
-                models.WorldPackageImport.imported_world_id
-                == models.WorldCharacter.world_id,
+                _model_WorldPackageImport,
+                _model_WorldPackageImport.imported_world_id
+                == _model_WorldCharacter.world_id,
             )
-            .where(models.WorldCharacter.character_id == character_id)
-            .order_by(models.WorldCharacter.created_at.desc())
+            .where(_model_WorldCharacter.character_id == character_id)
+            .order_by(_model_WorldCharacter.created_at.desc())
             .limit(1)
         )
     return bool(
         world_character is not None
         and not world_character.autonomous_enabled
         and db.scalar(
-            select(models.WorldPackageImport.import_id)
+            select(_model_WorldPackageImport.import_id)
             .where(
-                models.WorldPackageImport.imported_world_id
+                _model_WorldPackageImport.imported_world_id
                 == world_character.world_id
             )
             .limit(1)
@@ -249,7 +256,7 @@ def build_activity_policy(
     )
 
 
-def assert_action_allowed(db: Session, *, run: models.AgentRun, action: str) -> None:
+def assert_action_allowed(db: Session, *, run: _model_AgentRun, action: str) -> None:
     if not is_policy_enforced_session(run.session_key):
         return
     policy = build_activity_policy(
@@ -268,10 +275,10 @@ def count_public_actions_since(
 ) -> int:
     return (
         db.scalar(
-            select(func.count(models.AgentActivityLog.id)).where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type.in_(_public_action_log_types()),
-                models.AgentActivityLog.created_at >= since,
+            select(func.count(_model_AgentActivityLog.id)).where(
+                _model_AgentActivityLog.character_id == character_id,
+                _model_AgentActivityLog.action_type.in_(_public_action_log_types()),
+                _model_AgentActivityLog.created_at >= since,
             )
         )
         or 0
@@ -348,10 +355,10 @@ def _count_action_today(
     action_type_values = _normalize_action_types(action_types)
     return (
         db.scalar(
-            select(func.count(models.AgentActivityLog.id)).where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type.in_(action_type_values),
-                models.AgentActivityLog.created_at >= day_start.astimezone(UTC),
+            select(func.count(_model_AgentActivityLog.id)).where(
+                _model_AgentActivityLog.character_id == character_id,
+                _model_AgentActivityLog.action_type.in_(action_type_values),
+                _model_AgentActivityLog.created_at >= day_start.astimezone(UTC),
             )
         )
         or 0
@@ -363,12 +370,12 @@ def _latest_action_at(
 ) -> datetime | None:
     action_type_values = _normalize_action_types(action_types)
     return db.scalar(
-        select(models.AgentActivityLog.created_at)
+        select(_model_AgentActivityLog.created_at)
         .where(
-            models.AgentActivityLog.character_id == character_id,
-            models.AgentActivityLog.action_type.in_(action_type_values),
+            _model_AgentActivityLog.character_id == character_id,
+            _model_AgentActivityLog.action_type.in_(action_type_values),
         )
-        .order_by(models.AgentActivityLog.created_at.desc(), models.AgentActivityLog.id.desc())
+        .order_by(_model_AgentActivityLog.created_at.desc(), _model_AgentActivityLog.id.desc())
         .limit(1)
     )
 

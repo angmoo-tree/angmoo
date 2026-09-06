@@ -15,9 +15,10 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import models, schemas
+from app import schemas
+from model_fixture_support import models
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
-from app.core.db import Base
+from app.models import Base
 from app.cruds import agents as agent_crud
 from app.runtime.social.sqlalchemy_unit_of_work import (
     SqlAlchemySocialWriteUnitOfWork,

@@ -29,11 +29,26 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import delete, or_, select
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from app.domains.routines.models.resident import AgentActivityLog as _model_AgentActivityLog
+from app.domains.routines.models.resident import AgentActivitySetting as _model_AgentActivitySetting
+from app.domains.routines.models.resident import AgentFeedCue as _model_AgentFeedCue
+from app.domains.routines.models.resident import AgentRun as _model_AgentRun
+from app.domains.routines.models.resident import AgentSlot as _model_AgentSlot
+from app.domains.characters.models import Character as _model_Character
+from app.domains.characters.models import CharacterState as _model_CharacterState
+from app.domains.identity.models import LlmCredential as _model_LlmCredential
+from app.domains.social.models.posts import Notification as _model_Notification
+from app.domains.social.models.posts import Post as _model_Post
+from app.domains.social.models.posts import PostLike as _model_PostLike
+from app.domains.social.models.posts import PostRepost as _model_PostRepost
+from app.domains.social.models.posts import ProfileFollow as _model_ProfileFollow
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.domains.routines.service import tick_schedule as agent_activity_schedule
 from app.config import settings
 from app.core.redaction import redact_secret_text, redact_secrets
-from app.core.db import SessionLocal
+from app.database import SessionLocal
 from app.credentials import (
     CredentialPurpose,
     CredentialResolutionError,
@@ -288,7 +303,7 @@ def _format_comments(comments: list[schemas.CommentRead]) -> str:
     )
 
 
-def _format_feed_cue(cue: models.AgentFeedCue | None) -> str:
+def _format_feed_cue(cue: _model_AgentFeedCue | None) -> str:
     if cue is None:
         return "- none"
     first_greeting_rule = ""
@@ -339,10 +354,10 @@ def _format_complete_tick_action_types(allowed_actions: tuple[str, ...]) -> str:
 def _has_character_like(db: Session, *, post_id: str, character_id: str) -> bool:
     return (
         db.scalar(
-            select(models.PostLike.id)
+            select(_model_PostLike.id)
             .where(
-                models.PostLike.post_id == post_id,
-                models.PostLike.character_id == character_id,
+                _model_PostLike.post_id == post_id,
+                _model_PostLike.character_id == character_id,
             )
             .limit(1)
         )
@@ -353,10 +368,10 @@ def _has_character_like(db: Session, *, post_id: str, character_id: str) -> bool
 def _has_character_repost(db: Session, *, post_id: str, character_id: str) -> bool:
     return (
         db.scalar(
-            select(models.PostRepost.id)
+            select(_model_PostRepost.id)
             .where(
-                models.PostRepost.post_id == post_id,
-                models.PostRepost.character_id == character_id,
+                _model_PostRepost.post_id == post_id,
+                _model_PostRepost.character_id == character_id,
             )
             .limit(1)
         )
@@ -378,10 +393,10 @@ def _profile_following_status(
         if target_character is None or target_character.deleted_at is not None:
             return "not_applicable_deleted"
         exists = db.scalar(
-            select(models.ProfileFollow.id)
+            select(_model_ProfileFollow.id)
             .where(
-                models.ProfileFollow.follower_character_id == follower_character_id,
-                models.ProfileFollow.target_character_id == target_character_id,
+                _model_ProfileFollow.follower_character_id == follower_character_id,
+                _model_ProfileFollow.target_character_id == target_character_id,
             )
             .limit(1)
         )
@@ -668,13 +683,13 @@ def _latest_v6_feed_interest_payload(
     db: Session, *, character_id: str, since: datetime
 ) -> dict[str, Any]:
     log = db.scalar(
-        select(models.AgentActivityLog)
+        select(_model_AgentActivityLog)
         .where(
-            models.AgentActivityLog.character_id == character_id,
-            models.AgentActivityLog.action_type == "feed_interests_noted",
-            models.AgentActivityLog.created_at >= since,
+            _model_AgentActivityLog.character_id == character_id,
+            _model_AgentActivityLog.action_type == "feed_interests_noted",
+            _model_AgentActivityLog.created_at >= since,
         )
-        .order_by(models.AgentActivityLog.created_at.desc(), models.AgentActivityLog.id.desc())
+        .order_by(_model_AgentActivityLog.created_at.desc(), _model_AgentActivityLog.id.desc())
         .limit(1)
     )
     if log is None:
@@ -690,14 +705,14 @@ def _latest_v6_feed_history_sanitize_payload(
     db: Session, *, character_id: str, since: datetime
 ) -> dict[str, Any] | None:
     log = db.scalar(
-        select(models.AgentActivityLog)
+        select(_model_AgentActivityLog)
         .where(
-            models.AgentActivityLog.character_id == character_id,
-            models.AgentActivityLog.action_type
+            _model_AgentActivityLog.character_id == character_id,
+            _model_AgentActivityLog.action_type
             == community_service.FEED_HISTORY_SANITIZED_ACTION_TYPE,
-            models.AgentActivityLog.created_at >= since,
+            _model_AgentActivityLog.created_at >= since,
         )
-        .order_by(models.AgentActivityLog.created_at.desc(), models.AgentActivityLog.id.desc())
+        .order_by(_model_AgentActivityLog.created_at.desc(), _model_AgentActivityLog.id.desc())
         .limit(1)
     )
     if log is None:
@@ -713,13 +728,13 @@ def _latest_v6_inbox_review_payload(
     db: Session, *, character_id: str, since: datetime
 ) -> dict[str, Any]:
     log = db.scalar(
-        select(models.AgentActivityLog)
+        select(_model_AgentActivityLog)
         .where(
-            models.AgentActivityLog.character_id == character_id,
-            models.AgentActivityLog.action_type == "inbox_reviewed",
-            models.AgentActivityLog.created_at >= since,
+            _model_AgentActivityLog.character_id == character_id,
+            _model_AgentActivityLog.action_type == "inbox_reviewed",
+            _model_AgentActivityLog.created_at >= since,
         )
-        .order_by(models.AgentActivityLog.created_at.desc(), models.AgentActivityLog.id.desc())
+        .order_by(_model_AgentActivityLog.created_at.desc(), _model_AgentActivityLog.id.desc())
         .limit(1)
     )
     if log is None:
@@ -742,10 +757,10 @@ def _v6_inbox_candidates_from_review(
     except (TypeError, ValueError):
         return []
     notification = db.scalar(
-        select(models.Notification).where(
-            models.Notification.id == notification_id,
-            models.Notification.recipient_character_id == character_id,
-            models.Notification.notification_type == "reply",
+        select(_model_Notification).where(
+            _model_Notification.id == notification_id,
+            _model_Notification.recipient_character_id == character_id,
+            _model_Notification.notification_type == "reply",
         )
     )
     if notification is None:
@@ -872,7 +887,7 @@ def _build_daypart_memory_note(
     db: Session,
     activity_daypart: str,
     daypart_start_date: date,
-    character: models.Character,
+    character: _model_Character,
     run_id: str,
     inbox_candidates: list[dict[str, Any]],
     feed_interest_payload: dict[str, Any],
@@ -927,7 +942,7 @@ def _format_v6_action_menu(
     inbox_candidates: list[dict[str, Any]],
     feed_interest_payload: dict[str, Any],
     relationship_review_candidate: str = "- none",
-    feed_cue: models.AgentFeedCue | None = None,
+    feed_cue: _model_AgentFeedCue | None = None,
 ) -> str:
     allowed = set(allowed_actions)
     sections: list[str] = [
@@ -1107,7 +1122,7 @@ def _format_v6_action_menu_table(
     inbox_candidates: list[dict[str, Any]],
     feed_interest_payload: dict[str, Any],
     relationship_review_candidate: str = "- none",
-    feed_cue: models.AgentFeedCue | None = None,
+    feed_cue: _model_AgentFeedCue | None = None,
     prepared_create_post_brief: str | None = None,
 ) -> str:
     allowed = set(allowed_actions)
@@ -1352,10 +1367,10 @@ def _thread_reply_post_ids_for_action_gate(db: Session, root_post_id: str) -> li
     while frontier:
         children = list(
             db.scalars(
-                select(models.Post.id).where(
-                    models.Post.reply_to_post_id.in_(frontier),
-                    models.Post.deleted_at.is_(None),
-                    models.Post.report_hidden_at.is_(None),
+                select(_model_Post.id).where(
+                    _model_Post.reply_to_post_id.in_(frontier),
+                    _model_Post.deleted_at.is_(None),
+                    _model_Post.report_hidden_at.is_(None),
                 )
             )
         )
@@ -1376,12 +1391,12 @@ def _has_character_replied_to_thread(
         return False
     return (
         db.scalar(
-            select(models.Post.id)
+            select(_model_Post.id)
             .where(
-                models.Post.id.in_(reply_ids),
-                models.Post.author_character_id == character_id,
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
+                _model_Post.id.in_(reply_ids),
+                _model_Post.author_character_id == character_id,
+                _model_Post.deleted_at.is_(None),
+                _model_Post.report_hidden_at.is_(None),
             )
             .limit(1)
         )
@@ -1766,8 +1781,8 @@ def _format_feed_perception_tendency(
 
 def _build_feed_perception_prompt(
     *,
-    character: models.Character,
-    state: models.CharacterState | None,
+    character: _model_Character,
+    state: _model_CharacterState | None,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
     recent_feed_roots: str,
     recent_activity_summary: str,
@@ -1833,8 +1848,8 @@ Limits:
 
 def _build_v6_inbox_lane_prompt(
     *,
-    character: models.Character,
-    state: models.CharacterState | None,
+    character: _model_Character,
+    state: _model_CharacterState | None,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
     inbox_scan_context: str,
     recent_activity_summary: str,
@@ -1883,7 +1898,7 @@ angmoo_note_inbox_review candidate fields:
 
 def _build_v6_feed_history_sanitize_lane_prompt(
     *,
-    character: models.Character,
+    character: _model_Character,
     consumed_seed_sources: str,
     recent_feed_interest_history: str,
     recent_own_root_topic_history: str,
@@ -1950,8 +1965,8 @@ Output fields:
 
 def _build_v6_feed_scan_lane_prompt(
     *,
-    character: models.Character,
-    state: models.CharacterState | None,
+    character: _model_Character,
+    state: _model_CharacterState | None,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
     recent_activity_summary: str,
     consumed_seed_sources: str,
@@ -2059,7 +2074,7 @@ def _format_korean_daypart(value: datetime) -> str:
 
 def _build_v6_final_action_prompt(
     *,
-    character: models.Character,
+    character: _model_Character,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
     inbox_threads: str,
     feed_interests: str,
@@ -2138,7 +2153,7 @@ Reply brief rules:
 """
 
 
-def _build_v6_state_lane_message(*, character: models.Character) -> str:
+def _build_v6_state_lane_message(*, character: _model_Character) -> str:
     return (
         f"{character.name}의 이번 resident tick 결과를 페르소나에 맞게 해석하고 "
         "angmoo_save_character_state 하나만 실제 tool로 호출하세요."
@@ -2147,8 +2162,8 @@ def _build_v6_state_lane_message(*, character: models.Character) -> str:
 
 def _build_v6_state_lane_prompt(
     *,
-    character: models.Character,
-    state: models.CharacterState | None,
+    character: _model_Character,
+    state: _model_CharacterState | None,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
     public_action_ledger: str,
     tick_activity: str,
@@ -2222,11 +2237,11 @@ async def _run_feed_perception(
     agent_id: str,
     session_key: str,
     run_id: str,
-    character: models.Character,
-    state: models.CharacterState | None,
-    credential: models.LlmCredential | None,
+    character: _model_Character,
+    state: _model_CharacterState | None,
+    credential: _model_LlmCredential | None,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
-    feed_cue: models.AgentFeedCue | None,
+    feed_cue: _model_AgentFeedCue | None,
     recent_feed_roots: str,
     recent_activity_summary: str,
 ) -> tuple[str, dict[str, Any]]:
@@ -2280,7 +2295,7 @@ async def _run_feed_perception(
 def _fallback_action_decision(
     *,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
-    feed_cue: models.AgentFeedCue | None,
+    feed_cue: _model_AgentFeedCue | None,
     allow_thread_tool: bool,
 ) -> str:
     allowed_actions = (
@@ -2306,7 +2321,7 @@ def _normalize_action_decision_text(
     text: str,
     *,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
-    feed_cue: models.AgentFeedCue | None,
+    feed_cue: _model_AgentFeedCue | None,
     allow_thread_tool: bool,
 ) -> dict[str, Any]:
     payload = _parse_json_object(text) or {}
@@ -2370,10 +2385,10 @@ def _action_decision_allows_thread(
 
 def _build_action_decision_prompt(
     *,
-    character: models.Character,
-    state: models.CharacterState | None,
+    character: _model_Character,
+    state: _model_CharacterState | None,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
-    feed_cue: models.AgentFeedCue | None,
+    feed_cue: _model_AgentFeedCue | None,
     inbox_threads: str,
     recent_feed_roots: str,
     feed_perception: str,
@@ -2482,11 +2497,11 @@ async def _run_action_decision(
     agent_id: str,
     session_key: str,
     run_id: str,
-    character: models.Character,
-    state: models.CharacterState | None,
-    credential: models.LlmCredential | None,
+    character: _model_Character,
+    state: _model_CharacterState | None,
+    credential: _model_LlmCredential | None,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
-    feed_cue: models.AgentFeedCue | None,
+    feed_cue: _model_AgentFeedCue | None,
     inbox_threads: str,
     recent_feed_roots: str,
     feed_perception: str,
@@ -2669,8 +2684,8 @@ def _has_recent_feed_roots(recent_feed_roots: str) -> bool:
 def _format_self_post_opportunity(
     *,
     current_kst: str,
-    character: models.Character,
-    feed_cue: models.AgentFeedCue | None,
+    character: _model_Character,
+    feed_cue: _model_AgentFeedCue | None,
     allowed_actions: tuple[str, ...],
     has_inbox: bool,
     recent_feed_roots: str,
@@ -2737,7 +2752,7 @@ def _format_self_post_opportunity(
 
 def _should_allow_resident_thread_tool(
     *,
-    feed_cue: models.AgentFeedCue | None,
+    feed_cue: _model_AgentFeedCue | None,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
     has_inbox: bool,
     recent_feed_roots: str,
@@ -2752,13 +2767,13 @@ def _should_allow_resident_thread_tool(
 def _format_recent_own_posts_to_avoid(db: Session, *, character_id: str) -> str:
     posts = list(
         db.scalars(
-            select(models.Post)
+            select(_model_Post)
             .where(
-                models.Post.author_character_id == character_id,
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
+                _model_Post.author_character_id == character_id,
+                _model_Post.deleted_at.is_(None),
+                _model_Post.report_hidden_at.is_(None),
             )
-            .order_by(models.Post.created_at.desc(), models.Post.id.asc())
+            .order_by(_model_Post.created_at.desc(), _model_Post.id.asc())
             .limit(8)
         )
     )
@@ -2812,20 +2827,20 @@ def _format_inbox_threads(
 ) -> tuple[str, bool]:
     notifications = list(
         db.scalars(
-            select(models.Notification)
+            select(_model_Notification)
             .where(
-                models.Notification.recipient_character_id == character_id,
-                models.Notification.notification_type == "reply",
-                models.Notification.read_at.is_(None),
+                _model_Notification.recipient_character_id == character_id,
+                _model_Notification.notification_type == "reply",
+                _model_Notification.read_at.is_(None),
             )
             .order_by(
-                models.Notification.created_at.desc(),
-                models.Notification.id.desc(),
+                _model_Notification.created_at.desc(),
+                _model_Notification.id.desc(),
             )
             .limit(30)
         )
     )
-    grouped: dict[str, list[models.Notification]] = {}
+    grouped: dict[str, list[_model_Notification]] = {}
     for notification in notifications:
         anchor_post_id = notification.source_post_id or notification.post_id
         if anchor_post_id is None:
@@ -2896,7 +2911,7 @@ def _format_social_connection_candidate(
     db: Session,
     *,
     character_id: str,
-    feed_cue: models.AgentFeedCue | None,
+    feed_cue: _model_AgentFeedCue | None,
     allowed_actions: tuple[str, ...],
 ) -> str:
     if feed_cue is not None:
@@ -2911,15 +2926,15 @@ def _format_social_connection_candidate(
 
     notifications = list(
         db.scalars(
-            select(models.Notification)
+            select(_model_Notification)
             .where(
-                models.Notification.recipient_character_id == character_id,
-                models.Notification.notification_type == "reply",
-                models.Notification.read_at.is_(None),
+                _model_Notification.recipient_character_id == character_id,
+                _model_Notification.notification_type == "reply",
+                _model_Notification.read_at.is_(None),
             )
             .order_by(
-                models.Notification.created_at.desc(),
-                models.Notification.id.desc(),
+                _model_Notification.created_at.desc(),
+                _model_Notification.id.desc(),
             )
             .limit(20)
         )
@@ -3039,7 +3054,7 @@ def _format_strong_social_connection_candidate(
     db: Session,
     *,
     character_id: str,
-    feed_cue: models.AgentFeedCue | None,
+    feed_cue: _model_AgentFeedCue | None,
     allowed_actions: tuple[str, ...],
 ) -> str:
     if feed_cue is not None:
@@ -3052,14 +3067,14 @@ def _format_strong_social_connection_candidate(
     since = datetime.now(UTC) - timedelta(days=3)
     reply_posts = list(
         db.scalars(
-            select(models.Post)
+            select(_model_Post)
             .where(
-                models.Post.reply_to_post_id.is_not(None),
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-                models.Post.created_at >= since,
+                _model_Post.reply_to_post_id.is_not(None),
+                _model_Post.deleted_at.is_(None),
+                _model_Post.report_hidden_at.is_(None),
+                _model_Post.created_at >= since,
             )
-            .order_by(models.Post.created_at.desc(), models.Post.id.desc())
+            .order_by(_model_Post.created_at.desc(), _model_Post.id.desc())
             .limit(200)
         )
     )
@@ -3190,7 +3205,7 @@ def _format_strong_social_connection_candidate(
     )
     context_lines = []
     for post in candidate["context_posts"]:
-        assert isinstance(post, models.Post)
+        assert isinstance(post, _model_Post)
         author_label = "self" if post.author_character_id == character_id else display_name
         context_lines.append(
             f"  - {author_label}: {_clip_text(neutralize_context_text(post.body), 220)}"
@@ -3223,14 +3238,14 @@ def _format_relationship_review_candidate(
         return "- none"
     now = datetime.now(UTC)
     last_review = db.scalar(
-        select(models.AgentActivityLog.created_at)
+        select(_model_AgentActivityLog.created_at)
         .where(
-            models.AgentActivityLog.character_id == character_id,
-            models.AgentActivityLog.action_type == "relationship_reviewed",
+            _model_AgentActivityLog.character_id == character_id,
+            _model_AgentActivityLog.action_type == "relationship_reviewed",
         )
         .order_by(
-            models.AgentActivityLog.created_at.desc(),
-            models.AgentActivityLog.id.desc(),
+            _model_AgentActivityLog.created_at.desc(),
+            _model_AgentActivityLog.id.desc(),
         )
         .limit(1)
     )
@@ -3247,17 +3262,17 @@ def _format_relationship_review_candidate(
             continue
         target_character = community_crud.get_character(db, target_id)
         target_name = target_character.name if target_character is not None else target_id
-        post_filter = models.Post.author_character_id == target_id
+        post_filter = _model_Post.author_character_id == target_id
         recent_posts = list(
             db.scalars(
-                select(models.Post)
+                select(_model_Post)
                 .where(
                     post_filter,
-                    models.Post.deleted_at.is_(None),
-                    models.Post.report_hidden_at.is_(None),
-                    models.Post.created_at >= since,
+                    _model_Post.deleted_at.is_(None),
+                    _model_Post.report_hidden_at.is_(None),
+                    _model_Post.created_at >= since,
                 )
-                .order_by(models.Post.created_at.desc(), models.Post.id.asc())
+                .order_by(_model_Post.created_at.desc(), _model_Post.id.asc())
                 .limit(5)
             )
         )
@@ -3292,15 +3307,15 @@ def _format_observation_result(
     db.expire_all()
     logs = list(
         db.scalars(
-            select(models.AgentActivityLog)
+            select(_model_AgentActivityLog)
             .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.created_at >= since,
-                models.AgentActivityLog.action_type == OBSERVATION_NOTE_ACTION_TYPE,
+                _model_AgentActivityLog.character_id == character_id,
+                _model_AgentActivityLog.created_at >= since,
+                _model_AgentActivityLog.action_type == OBSERVATION_NOTE_ACTION_TYPE,
             )
             .order_by(
-                models.AgentActivityLog.created_at.desc(),
-                models.AgentActivityLog.id.desc(),
+                _model_AgentActivityLog.created_at.desc(),
+                _model_AgentActivityLog.id.desc(),
             )
             .limit(5)
         )
@@ -3326,7 +3341,7 @@ def _has_public_action_claim(text: str) -> bool:
     return any(pattern.search(text) for pattern in PUBLIC_ACTION_CLAIM_PATTERNS)
 
 
-def _format_state_for_llm_context(state: models.CharacterState | None) -> str:
+def _format_state_for_llm_context(state: _model_CharacterState | None) -> str:
     if state is None:
         return "no saved state"
     return (
@@ -3349,13 +3364,13 @@ def _has_state_saved_since(
     db.expire_all()
     return (
         db.scalar(
-            select(models.AgentActivityLog.id)
+            select(_model_AgentActivityLog.id)
             .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type.in_(
+                _model_AgentActivityLog.character_id == character_id,
+                _model_AgentActivityLog.action_type.in_(
                     ("state_saved", "state_save_suppressed")
                 ),
-                models.AgentActivityLog.created_at >= since,
+                _model_AgentActivityLog.created_at >= since,
             )
             .limit(1)
         )
@@ -3369,11 +3384,11 @@ def _has_activity_since(
     db.expire_all()
     return (
         db.scalar(
-            select(models.AgentActivityLog.id)
+            select(_model_AgentActivityLog.id)
             .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type.in_(action_types),
-                models.AgentActivityLog.created_at >= since,
+                _model_AgentActivityLog.character_id == character_id,
+                _model_AgentActivityLog.action_type.in_(action_types),
+                _model_AgentActivityLog.created_at >= since,
             )
             .limit(1)
         )
@@ -3413,17 +3428,17 @@ def _format_tick_public_action_ledger_since(
     db.expire_all()
     logs = list(
         db.scalars(
-            select(models.AgentActivityLog)
+            select(_model_AgentActivityLog)
             .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.created_at >= since,
-                models.AgentActivityLog.action_type.in_(
+                _model_AgentActivityLog.character_id == character_id,
+                _model_AgentActivityLog.created_at >= since,
+                _model_AgentActivityLog.action_type.in_(
                     V6_STATE_PUBLIC_ACTION_LEDGER_TYPES
                 ),
             )
             .order_by(
-                models.AgentActivityLog.created_at.asc(),
-                models.AgentActivityLog.id.asc(),
+                _model_AgentActivityLog.created_at.asc(),
+                _model_AgentActivityLog.id.asc(),
             )
             .limit(20)
         )
@@ -3449,15 +3464,15 @@ def _format_tick_activity_since(
     db.expire_all()
     logs = list(
         db.scalars(
-            select(models.AgentActivityLog)
+            select(_model_AgentActivityLog)
             .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.created_at >= since,
-                models.AgentActivityLog.action_type.not_in(
+                _model_AgentActivityLog.character_id == character_id,
+                _model_AgentActivityLog.created_at >= since,
+                _model_AgentActivityLog.action_type.not_in(
                     agent_crud.HIDDEN_ACTIVITY_ACTION_TYPES
                 ),
             )
-            .order_by(models.AgentActivityLog.created_at.asc(), models.AgentActivityLog.id.asc())
+            .order_by(_model_AgentActivityLog.created_at.asc(), _model_AgentActivityLog.id.asc())
             .limit(20)
         )
     )
@@ -3486,15 +3501,15 @@ def _format_tick_observation_context_since(
     db.expire_all()
     logs = list(
         db.scalars(
-            select(models.AgentActivityLog)
+            select(_model_AgentActivityLog)
             .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.created_at >= since,
-                models.AgentActivityLog.action_type.in_(V6_OBSERVATION_CONTEXT_TYPES),
+                _model_AgentActivityLog.character_id == character_id,
+                _model_AgentActivityLog.created_at >= since,
+                _model_AgentActivityLog.action_type.in_(V6_OBSERVATION_CONTEXT_TYPES),
             )
             .order_by(
-                models.AgentActivityLog.created_at.asc(),
-                models.AgentActivityLog.id.asc(),
+                _model_AgentActivityLog.created_at.asc(),
+                _model_AgentActivityLog.id.asc(),
             )
             .limit(10)
         )
@@ -3576,17 +3591,17 @@ def _has_recent_model_overloaded_run(
         return False
     filters = []
     if character_id:
-        filters.append(models.AgentRun.character_id == character_id)
+        filters.append(_model_AgentRun.character_id == character_id)
     if credential_id:
-        filters.append(models.AgentRun.credential_id == credential_id)
+        filters.append(_model_AgentRun.credential_id == credential_id)
     rows = db.scalars(
-        select(models.AgentRun)
+        select(_model_AgentRun)
         .where(
             or_(*filters),
-            models.AgentRun.created_at >= now - MODEL_OVERLOADED_REPEAT_WINDOW,
-            models.AgentRun.created_at < now,
+            _model_AgentRun.created_at >= now - MODEL_OVERLOADED_REPEAT_WINDOW,
+            _model_AgentRun.created_at < now,
         )
-        .order_by(models.AgentRun.created_at.desc(), models.AgentRun.id.desc())
+        .order_by(_model_AgentRun.created_at.desc(), _model_AgentRun.id.desc())
         .limit(30)
     )
     return any(_gateway_result_indicates_model_overloaded(run.gateway_result) for run in rows)
@@ -3858,7 +3873,7 @@ def _aware_utc(value: datetime) -> datetime:
     return value.astimezone(UTC)
 
 
-def _build_tool_recovery_message(*, character: models.Character) -> str:
+def _build_tool_recovery_message(*, character: _model_Character) -> str:
     return (
         f"{character.name}의 직전 응답은 실제 Angmoo tool 실행 없이 끝났습니다. "
         "지금은 설명, 계획, 공개 행동 없이 angmoo_save_character_state 하나만 실제 tool로 호출하세요."
@@ -3867,7 +3882,7 @@ def _build_tool_recovery_message(*, character: models.Character) -> str:
 
 def _build_tool_recovery_prompt(
     *,
-    character: models.Character,
+    character: _model_Character,
     post: schemas.PostDetail | None,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
 ) -> str:
@@ -3908,7 +3923,7 @@ Call angmoo_save_character_state with:
 After the real tool call, finish with one short Korean sentence."""
 
 
-def _build_complete_tick_followup_message(*, character: models.Character) -> str:
+def _build_complete_tick_followup_message(*, character: _model_Character) -> str:
     return (
         f"{character.name}의 thread 조회가 끝났습니다. "
         "이제 설명 없이 angmoo_complete_tick 하나를 실제 tool로 호출해 tick을 완료하세요."
@@ -3917,9 +3932,9 @@ def _build_complete_tick_followup_message(*, character: models.Character) -> str
 
 def _build_complete_tick_followup_prompt(
     *,
-    character: models.Character,
+    character: _model_Character,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
-    feed_cue: models.AgentFeedCue | None,
+    feed_cue: _model_AgentFeedCue | None,
 ) -> str:
     allowed = (
         ", ".join(activity_policy.allowed_actions)
@@ -3972,7 +3987,7 @@ If you reply, use the exact target_post_id from the thread. You may combine repl
 After angmoo_complete_tick succeeds, finish with one short Korean sentence."""
 
 
-def _build_memory_note_refine_message(*, character: models.Character) -> str:
+def _build_memory_note_refine_message(*, character: _model_Character) -> str:
     return (
         f"{character.name}의 이번 활동 카드 문구를 다듬습니다. "
         "새 행동 없이 angmoo_save_character_state 하나만 실제 tool로 호출하세요."
@@ -3981,8 +3996,8 @@ def _build_memory_note_refine_message(*, character: models.Character) -> str:
 
 def _build_memory_note_refine_prompt(
     *,
-    character: models.Character,
-    state: models.CharacterState | None,
+    character: _model_Character,
+    state: _model_CharacterState | None,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
     tick_activity: str,
 ) -> str:
@@ -4029,7 +4044,7 @@ User-facing summary and memory_note should describe the final successful action 
 After the tool call, finish with one short Korean sentence."""
 
 
-def _build_v6_state_recovery_message(*, character: models.Character) -> str:
+def _build_v6_state_recovery_message(*, character: _model_Character) -> str:
     return (
         f"{character.name}'s previous state lane ended without a registered tool call. "
         "Execute angmoo_save_character_state now."
@@ -4038,8 +4053,8 @@ def _build_v6_state_recovery_message(*, character: models.Character) -> str:
 
 def _build_v6_state_recovery_prompt(
     *,
-    character: models.Character,
-    state: models.CharacterState | None,
+    character: _model_Character,
+    state: _model_CharacterState | None,
     activity_policy: agent_activity_policy.ActivityPolicy | None,
     public_action_ledger: str,
     tick_activity: str,
@@ -4088,7 +4103,7 @@ After the tool call, finish with one short Korean sentence."""
 
 
 def _build_selected_mode_completion_message(
-    *, character: models.Character, action_decision: dict[str, Any]
+    *, character: _model_Character, action_decision: dict[str, Any]
 ) -> str:
     decision_type = action_decision.get("decision_type") or "existing_post_interaction"
     return (
@@ -4099,11 +4114,11 @@ def _build_selected_mode_completion_message(
 
 def _build_selected_mode_completion_prompt(
     *,
-    character: models.Character,
-    state: models.CharacterState | None,
+    character: _model_Character,
+    state: _model_CharacterState | None,
     require_public_action: bool = False,
     activity_policy: agent_activity_policy.ActivityPolicy | None = None,
-    feed_cue: models.AgentFeedCue | None = None,
+    feed_cue: _model_AgentFeedCue | None = None,
     inbox_threads: str = "- none",
     recent_feed_roots: str = "- none",
     feed_perception: str = "- none",
@@ -4262,12 +4277,12 @@ After angmoo_complete_tick succeeds, finish with one short Korean sentence."""
 
 def _build_extra_system_prompt(
     *,
-    character: models.Character,
+    character: _model_Character,
     post: schemas.PostDetail | None,
-    state: models.CharacterState | None,
+    state: _model_CharacterState | None,
     require_public_action: bool = False,
     activity_policy: agent_activity_policy.ActivityPolicy | None = None,
-    feed_cue: models.AgentFeedCue | None = None,
+    feed_cue: _model_AgentFeedCue | None = None,
     inbox_threads: str = "- none",
     recent_feed_roots: str = "- none",
     feed_perception: str = "- none",
@@ -4616,7 +4631,7 @@ Rules for this PoC:
 
 
 def _build_agent_message(
-    *, character: models.Character, post: schemas.PostDetail | None
+    *, character: _model_Character, post: schemas.PostDetail | None
 ) -> str:
     if post is None:
         return (
@@ -4638,7 +4653,7 @@ def _validate_character_and_credential(
     user_id: str,
     character_id: str,
     credential_id: str,
-) -> tuple[models.Character, models.LlmCredential]:
+) -> tuple[_model_Character, _model_LlmCredential]:
     character = community_crud.get_character(db, character_id)
     if character is None or character.deleted_at is not None:
         raise community_service.CharacterNotFoundError(character_id)
@@ -4669,8 +4684,8 @@ async def _ensure_slot_auth_profile(
     client: OpenClawGatewayClient,
     agent_id: str,
     user_id: str,
-    character: models.Character,
-    credential: models.LlmCredential,
+    character: _model_Character,
+    credential: _model_LlmCredential,
 ) -> bool:
     try:
         profile = openclaw_auth_profiles.inspect_credential_slot(
@@ -4723,7 +4738,7 @@ async def _release_slot_auth_profile(
     agent_id: str,
     user_id: str,
     character_id: str,
-    credential: models.LlmCredential,
+    credential: _model_LlmCredential,
 ) -> None:
     try:
         openclaw_auth_profiles.release_credential_from_slot(
@@ -5012,7 +5027,7 @@ def _stored_gateway_result(value: dict[str, object]) -> dict[str, object]:
 def _persist_agent_run_gateway_snapshot(
     db: Session, *, run_id: str, payload: dict[str, object]
 ) -> None:
-    run = db.get(models.AgentRun, run_id)
+    run = db.get(_model_AgentRun, run_id)
     if run is None:
         return
     current = run.gateway_result if isinstance(run.gateway_result, dict) else {}
@@ -5173,7 +5188,7 @@ def _build_llm_usage_summary(gateway_result: dict[str, Any]) -> dict[str, Any] |
 
 
 def _pending_writing_composition_lanes(db: Session, run_id: str) -> list[dict[str, Any]]:
-    run = db.get(models.AgentRun, run_id)
+    run = db.get(_model_AgentRun, run_id)
     if run is None or not isinstance(run.gateway_result, dict):
         return []
     lanes = run.gateway_result.get("writing_composition_lanes")
@@ -5316,7 +5331,7 @@ def claim_temporary_resident_slot(
     credential_id: str,
     heartbeat_interval_seconds: int,
     timeout_seconds: int,
-) -> models.AgentSlot:
+) -> _model_AgentSlot:
     maintenance_service.ensure_run_now_available(db)
     _validate_character_and_credential(
         db,
@@ -5360,7 +5375,7 @@ def release_temporary_resident_slot(
 def _scheduled_retry_next_tick_at(
     db: Session,
     *,
-    setting: models.AgentActivitySetting | None,
+    setting: _model_AgentActivitySetting | None,
     character_id: str,
     retry_at: datetime,
     manual_next_tick_at: datetime | None,
@@ -5434,7 +5449,7 @@ async def run_community_once(
                 f"No enabled credential is assigned to character {character.id}"
             )
 
-    state = db.get(models.CharacterState, character.id)
+    state = db.get(_model_CharacterState, character.id)
 
     run_id = str(uuid4())
     timeout_seconds = data.timeout_seconds or settings.openclaw_timeout_seconds
@@ -5892,11 +5907,11 @@ async def _run_resident_individual_tool_flow(
     tool_auth_key: str,
     run_id: str,
     user_id: str,
-    character: models.Character,
-    credential: models.LlmCredential,
-    state: models.CharacterState | None,
+    character: _model_Character,
+    credential: _model_LlmCredential,
+    state: _model_CharacterState | None,
     activity_policy: agent_activity_policy.ActivityPolicy,
-    feed_cue: models.AgentFeedCue | None,
+    feed_cue: _model_AgentFeedCue | None,
     run_started_at: datetime,
     recent_activity_summary: str,
     memory_session_key: str | None = None,
@@ -6385,7 +6400,7 @@ async def _run_resident_individual_tool_flow(
     writing_composition_lanes = _pending_writing_composition_lanes(db, run_id)
     if writing_composition_lanes:
         result["writing_composition_lanes"] = writing_composition_lanes
-    state_before_memory_lane = db.get(models.CharacterState, character.id)
+    state_before_memory_lane = db.get(_model_CharacterState, character.id)
     state_public_action_ledger = _format_tick_public_action_ledger_since(
         db, character_id=character.id, since=run_started_at
     )
@@ -6439,7 +6454,7 @@ async def _run_resident_individual_tool_flow(
         result["state_recovery_attempted"] = True
         try:
             db.expire_all()
-            recovery_state = db.get(models.CharacterState, character.id)
+            recovery_state = db.get(_model_CharacterState, character.id)
             result["state_recovery_lane"] = await client.run_agent(
                 message=_build_v6_state_recovery_message(character=character),
                 agent_id=agent_id,
@@ -6523,7 +6538,7 @@ async def _run_resident_individual_tool_flow(
 async def _run_resident_slot_once(
     db: Session,
     *,
-    slot: models.AgentSlot,
+    slot: _model_AgentSlot,
     post_id: str | None,
     timeout_seconds: int,
     message: str | None,
@@ -6591,9 +6606,9 @@ async def _run_resident_slot_once(
     manual_next_tick_at = None
     run_created = False
     run_started_at = datetime.now(UTC)
-    character: models.Character | None = None
-    credential: models.LlmCredential | None = None
-    setting: models.AgentActivitySetting | None = None
+    character: _model_Character | None = None
+    credential: _model_LlmCredential | None = None
+    setting: _model_AgentActivitySetting | None = None
     selected_post_id = post_id
     try:
         character, credential = _validate_character_and_credential(
@@ -6615,7 +6630,7 @@ async def _run_resident_slot_once(
             else f"agent:{slot.agent_id}:resident-manual:{slot.assigned_user_id}:{character.id}:{run_id}"
         )
         tool_auth_key = _tool_auth_key(session_key, run_id=run_id)
-        setting = db.get(models.AgentActivitySetting, character.id)
+        setting = db.get(_model_AgentActivitySetting, character.id)
         now = datetime.now(UTC)
         cooldown_until = (
             _aware_utc(credential.cooldown_until)
@@ -6755,7 +6770,7 @@ async def _run_resident_slot_once(
                 post_id=selected_post_id,
                 gateway_result=gateway_payload,
             )
-        state = db.get(models.CharacterState, character.id)
+        state = db.get(_model_CharacterState, character.id)
         activity_policy = (
             agent_activity_policy.build_activity_policy(
                 db,
@@ -7569,7 +7584,7 @@ async def _run_resident_slot_once(
             refine_started_at = datetime.now(UTC)
             try:
                 db.expire_all()
-                refined_state = db.get(models.CharacterState, character.id)
+                refined_state = db.get(_model_CharacterState, character.id)
                 refine_client = OpenClawGatewayClient(
                     url=settings.openclaw_gateway_url,
                     token=token,
@@ -7802,7 +7817,7 @@ async def run_claimed_temporary_resident_slot_once(
 ) -> schemas.OpenClawAgentRunRead:
     maintenance_service.ensure_run_now_available(db)
     timeout = timeout_seconds or settings.openclaw_timeout_seconds
-    slot = db.get(models.AgentSlot, agent_id)
+    slot = db.get(_model_AgentSlot, agent_id)
     if (
         slot is None
         or slot.status != agent_run_crud.SLOT_STATUS_RUNNING
@@ -7830,10 +7845,10 @@ async def tick_resident_slots(
 ) -> schemas.ResidentSlotTickRead:
     timeout_seconds = data.timeout_seconds or settings.openclaw_timeout_seconds
     now = datetime.now(UTC)
-    def _recovery_next_tick_at(slot: models.AgentSlot, recovered_at: datetime) -> datetime:
+    def _recovery_next_tick_at(slot: _model_AgentSlot, recovered_at: datetime) -> datetime:
         if not slot.assigned_character_id:
             return recovered_at
-        setting = db.get(models.AgentActivitySetting, slot.assigned_character_id)
+        setting = db.get(_model_AgentActivitySetting, slot.assigned_character_id)
         if setting is None:
             return recovered_at
         return agent_activity_policy.recovery_tick_schedule(
@@ -7929,7 +7944,7 @@ async def tick_resident_slots(
     )
 
 
-def _resident_slot_is_due(slot: models.AgentSlot, *, now: datetime) -> bool:
+def _resident_slot_is_due(slot: _model_AgentSlot, *, now: datetime) -> bool:
     if slot.next_tick_at is None:
         return False
     return agent_activity_schedule.aware_utc(
@@ -7948,7 +7963,7 @@ async def _run_claimed_resident_slot_once(
     if start_delay_seconds > 0:
         await asyncio.sleep(start_delay_seconds)
     with SessionLocal() as db:
-        slot = db.get(models.AgentSlot, agent_id)
+        slot = db.get(_model_AgentSlot, agent_id)
         if slot is None:
             raise AgentSlotUnavailableError(f"slot {agent_id} does not exist")
         return await _run_resident_slot_once(
@@ -7968,29 +7983,29 @@ def _select_tick_post_id(
     if preferred_post_id:
         return preferred_post_id
     post_id = db.scalar(
-        select(models.Post.id)
+        select(_model_Post.id)
         .where(
-            models.Post.deleted_at.is_(None),
-            models.Post.report_hidden_at.is_(None),
-            models.Post.reply_to_post_id.is_(None),
+            _model_Post.deleted_at.is_(None),
+            _model_Post.report_hidden_at.is_(None),
+            _model_Post.reply_to_post_id.is_(None),
             or_(
-                models.Post.author_character_id.is_(None),
-                models.Post.author_character_id != character_id,
+                _model_Post.author_character_id.is_(None),
+                _model_Post.author_character_id != character_id,
             )
         )
-        .order_by(models.Post.created_at.desc(), models.Post.id.desc())
+        .order_by(_model_Post.created_at.desc(), _model_Post.id.desc())
         .limit(1)
     )
     if post_id:
         return post_id
     post_id = db.scalar(
-        select(models.Post.id)
+        select(_model_Post.id)
         .where(
-            models.Post.deleted_at.is_(None),
-            models.Post.report_hidden_at.is_(None),
-            models.Post.reply_to_post_id.is_(None),
+            _model_Post.deleted_at.is_(None),
+            _model_Post.report_hidden_at.is_(None),
+            _model_Post.reply_to_post_id.is_(None),
         )
-        .order_by(models.Post.created_at.desc(), models.Post.id.desc())
+        .order_by(_model_Post.created_at.desc(), _model_Post.id.desc())
         .limit(1)
     )
     if post_id:
@@ -8058,7 +8073,7 @@ def _combined_runtime_evidence_post_id(
     return None
 
 
-def _has_tendency_analysis(setting: models.AgentActivitySetting | None) -> bool:
+def _has_tendency_analysis(setting: _model_AgentActivitySetting | None) -> bool:
     if not setting:
         return False
     profile = (

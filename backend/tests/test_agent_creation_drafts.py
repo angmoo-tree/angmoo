@@ -8,7 +8,8 @@ import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from model_fixture_support import models
 from app.runtime.characters import creator as draft_service
 
 

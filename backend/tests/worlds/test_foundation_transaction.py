@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.runtime.worlds.foundation import ensure_angmoo_global_foundation
 from tests.worlds.test_foundation import _character, _engine, _user
 

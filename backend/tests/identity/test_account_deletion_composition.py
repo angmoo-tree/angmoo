@@ -5,9 +5,10 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 from starlette.requests import Request
 
-from app import main, models
+from app import main
+from model_fixture_support import models
 from app.config import settings
-from app.core.db import Base
+from app.models import Base
 from app.domains.identity import dependencies, schemas
 from app.domains.identity.service import auth
 from app.runtime import account_deletion

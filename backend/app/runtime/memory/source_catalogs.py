@@ -5,7 +5,7 @@ in Memory's repository, with the same caller Session and original predicates.
 """
 
 from sqlalchemy import or_
-from app.core.db import Base
+from app.models import Base
 
 
 def build_source_catalogs():

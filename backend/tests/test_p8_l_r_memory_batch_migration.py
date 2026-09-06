@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-from app import models as _models
+from model_fixture_support import models as _models
 from app.runtime.persistence.sqlite_schema import (
     build_sqlite_v8_metadata,
     create_schema_version_table,

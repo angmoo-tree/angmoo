@@ -9,9 +9,9 @@ import pytest
 from sqlalchemy import create_engine, event, select
 from sqlalchemy.orm import Session
 
-from app import models as registered_models
+from model_fixture_support import models as registered_models
 from app.config import settings
-from app.core.db import Base
+from app.models import Base
 from app.domains.worlds import contracts, models, schemas, service
 from app.domains.worlds.service import creator, definition, reserved_roles
 
@@ -177,7 +177,7 @@ def test_resident_leave_still_translates_errors_from_the_world_service(world_ses
     from fastapi.testclient import TestClient
     from app.domains.world_characters.router import entry as resident_routes
     from app.api.identity_dependencies import get_current_user
-    from app.core.db import get_db
+    from app.database import get_db
 
     db, owner, world = world_session
     world_id = world.id

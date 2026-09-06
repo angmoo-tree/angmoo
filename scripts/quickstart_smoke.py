@@ -77,7 +77,12 @@ def _bootstrap_local_session(
     if str(backend_root) not in sys.path:
         sys.path.insert(0, str(backend_root))
 
-    from app import models
+    from app.domains.identity.models import AuthSession as _model_AuthSession
+    from app.domains.identity.models import InstallationIdentity as _model_InstallationIdentity
+    from app.domains.social.models.posts import Post as _model_Post
+    from app.domains.identity.models import User as _model_User
+    from app.runtime.persistence.model_registration import register_models
+    register_models()
     from app.core import security
     from app.domains.identity.constants import LOCAL_INSTALLATION_KEY
     from app.runtime.contributor_backend import CONTRIBUTOR_GENERATION
@@ -103,7 +108,7 @@ def _bootstrap_local_session(
     try:
         with database.session() as db:
             db.add(
-                models.User(
+                _model_User(
                     id=user_id,
                     email=f"{marker}@example.test",
                     google_sub=f"quickstart-{uuid4().hex}",
@@ -118,11 +123,11 @@ def _bootstrap_local_session(
                 )
             )
             installation = db.get(
-                models.InstallationIdentity,
+                _model_InstallationIdentity,
                 LOCAL_INSTALLATION_KEY,
             )
             if installation is None:
-                installation = models.InstallationIdentity(
+                installation = _model_InstallationIdentity(
                     singleton_key=LOCAL_INSTALLATION_KEY,
                     installation_id=f"installation-{uuid4().hex}",
                     bootstrap_state="unclaimed",
@@ -140,7 +145,7 @@ def _bootstrap_local_session(
             installation.claimed_at = now
             installation.updated_at = now
             db.add(
-                models.AuthSession(
+                _model_AuthSession(
                     token_hash=security.hash_token(token),
                     user_id=user_id,
                     auth_method="local_owner",
@@ -149,7 +154,7 @@ def _bootstrap_local_session(
                 )
             )
             db.add(
-                models.Post(
+                _model_Post(
                     id=post_id,
                     author_name="Quickstart fixture",
                     title="Synthetic embedded runtime smoke",

@@ -309,7 +309,7 @@ class Base(DeclarativeBase):
 # from app.models import Base
 ```
 
-공통 `models.py`에 업무 table을 모두 다시 모으거나 engine를 생성하지 않습니다. 도메인 ORM을 읽어 metadata를 채우는 등록 함수는 `runtime/persistence`가 소유하고, 앱 시작과 `alembic/env.py`가 필요 시 호출합니다. 공통 Base가 등록 함수를 역으로 import하면 순환 의존이 생기므로 방향을 유지합니다. 별도 필수 `model_registry.py`는 두지 않습니다.
+공통 `models.py`에 업무 table을 모두 다시 모으거나 engine를 생성하지 않습니다. [`runtime/persistence/model_registration.py`](app/runtime/persistence/model_registration.py)의 `register_models()`는 각 도메인의 실제 ORM 모듈을 명시적으로 import하고 하나의 `Base.metadata`를 반환합니다. 앱 구성, `alembic/env.py`, 독립적인 `SqliteCanonicalDatabase.open()`이 필요한 시점에 호출하며 반복 호출해도 같은 class·metadata를 사용합니다. 등록 자체는 engine나 앱을 생성하지 않습니다. 공통 Base는 도메인이나 등록 함수를 역으로 import하지 않습니다.
 
 ### Transaction은 하나의 업무 변경을 묶습니다
 
@@ -357,7 +357,7 @@ ORM과 응답 schema는 같은 객체가 아닙니다. ORM의 내부 필드·암
 
 ### `async def`는 호출하는 도구에 맞춥니다
 
-현재 [DB 기반](app/core/db.py)은 동기 SQLAlchemy `Session`·`create_engine`을 사용합니다. 폴더를 바꾸는 작업에 `AsyncSession` 전환을 포함하지 않습니다. 비동기 I/O는 `await`로 호출하고, 동기 DB·파일·SDK 호출이 event loop를 막지 않도록 기존 실행 경계를 확인합니다. `async def` 안에서 보통의 동기 helper를 호출한다고 FastAPI가 자동으로 thread pool에 옮겨 주지는 않습니다. [FastAPI 동시성 설명](https://fastapi.tiangolo.com/async/)
+현재 [DB 기반](app/database.py)은 동기 SQLAlchemy `Session`·`create_engine`을 사용합니다. 폴더를 바꾸는 작업에 `AsyncSession` 전환을 포함하지 않습니다. 비동기 I/O는 `await`로 호출하고, 동기 DB·파일·SDK 호출이 event loop를 막지 않도록 기존 실행 경계를 확인합니다. `async def` 안에서 보통의 동기 helper를 호출한다고 FastAPI가 자동으로 thread pool에 옮겨 주지는 않습니다. [FastAPI 동시성 설명](https://fastapi.tiangolo.com/async/)
 
 Session은 변경 가능한 transaction 상태입니다. 같은 Session을 동시에 실행되는 thread·task·worker가 공유하지 않습니다. 작업을 다른 실행 문맥으로 옮길 때도 session의 생성·사용·종료와 transaction 범위가 맞아야 합니다. 요청 session을 종료 후 background 작업에 재사용하지 않습니다. [SQLAlchemy Session 동시성](https://docs.sqlalchemy.org/en/20/orm/session_basics.html#is-the-session-thread-safe-is-asyncsession-safe-to-share-in-concurrent-tasks)
 
@@ -472,16 +472,16 @@ Import inventory는 현재 사실을 기록하고 import policy는 허용 경계
 | `ports`, `public.py` | 실제 교체 경계·지원 타입·호환 alias만 필요한 동안 유지 |
 | 전역 `services/cruds/schemas`의 업무 구현 | 해당 업무 도메인 |
 | `app/config.py` | AR-G1에서 전역 설정 구현·소비자 이전, `app/core/config.py` 제거 |
-| `app/core/db.py` | 목표 전역 `app/models.py`, `app/database.py` |
+| `app/core/db.py` | Base 정의는 `app/models.py`, DB 구현은 `app/database.py`; 역사 migration용 동일 Base alias만 유지 |
 | 기존 `app/models/`의 업무 ORM | 소유 도메인 모델, 등록은 실행 조립 |
 
 `core`의 나머지 유틸리티와 기존 runtime·provider 코드는 각각의 실제 역할에 따라 유지하거나 옮깁니다. 모든 파일을 여섯 전역 파일에 합치지 않습니다. 사용 중인 구현과 위임만 남은 alias를 구분하고 import·동적 등록·migration·패키징 소비자가 없어진 뒤 옛 파일을 제거합니다.
 
 ### `app/models/`와 `app/models.py`는 한 번에 공존시키지 않습니다
 
-현재 [`app/models/__init__.py`](app/models/__init__.py)는 업무 ORM export·등록을 포함하고, [`app/core/db.py`](app/core/db.py)가 Base를 정의합니다. 목표 `app/models.py`는 이 업무 모델 집합의 새 이름이 아니라 공통 기반입니다.
+G5 준비 구현은 옛 업무 모델 export 패키지를 제거하고 [`app/models.py`](app/models.py)에 공통 Base만 둡니다. 업무 코드는 실제 소유 도메인의 모델을 사용하고, 여러 도메인 조회는 runtime에서 조립합니다. 기존 테스트에서 함께 쓰는 ORM fixture는 `tests/model_fixture_support.py`에만 있으며 제품 코드는 이를 import하지 않습니다. 현재 branch의 준비 결과와 병합·설치 Gate는 전환 결과 문서에서 구분합니다.
 
-먼저 업무 모델과 `app.models.<하위모듈>` 소비자를 옮기고, 이전 기간에는 하나의 기존 Base와 같은 ORM class identity를 공유합니다. 미전환 하위 import와 필요한 역사적 호환 경로가 해결된 뒤, 패키지→모듈 전환 및 Base·database import 변경을 함께 적용합니다. `models/`와 `models.py`를 동시에 남겨 Python의 선택 순서에 의존하거나 같은 table을 두 class로 등록하지 않습니다.
+102개 실제 도메인 class는 같은 Base와 metadata에 한 번 등록됩니다. `app/core/db.py`는 내용이 동결된 역사 migration이 사용하는 동일 Base 객체의 import만 유지합니다. 새 코드의 Base는 `app.models`, 연결·Session은 `app.database`에서 가져옵니다. `models/` Python 패키지와 `models.py`를 동시에 남기거나 같은 table을 두 class로 등록하지 않습니다.
 
 ### 목표 문서와 현재 검사의 관계
 

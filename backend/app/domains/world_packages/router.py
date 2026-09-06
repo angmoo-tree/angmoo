@@ -33,7 +33,7 @@ from sqlalchemy.orm import Session
 
 from app.api.identity_dependencies import get_current_user
 from app.api.identity_dependencies import browser_session
-from app.core.db import get_db
+from app.database import get_db
 from app.core.ids import uuid7_string
 from app.domains.world_packages.schemas.http import (
     WorldPackageExportPreviewRead,

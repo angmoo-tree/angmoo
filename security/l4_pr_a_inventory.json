@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2691,
-      "internal_edge_count": 3330,
+      "external_import_count": 2688,
+      "internal_edge_count": 3402,
       "legacy_import_exception_count": 0,
-      "module_count": 948,
+      "module_count": 940,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -151,7 +151,7 @@
             "imports": [
               "app.api.identity_dependencies",
               "app.config",
-              "app.core.db",
+              "app.database",
               "app.domains.relationships.contracts.diagnostics"
             ],
             "module": "app.domains.relationships.dependencies",
@@ -173,22 +173,22 @@
           },
           {
             "imports": [
-              "app.core.db"
+              "app.models"
             ],
             "module": "app.domains.relationships.models.points",
             "path": "backend/app/domains/relationships/models/points.py"
           },
           {
             "imports": [
-              "app.core.db"
+              "app.models"
             ],
             "module": "app.domains.relationships.models.projection",
             "path": "backend/app/domains/relationships/models/projection.py"
           },
           {
             "imports": [
-              "app.core.db",
-              "app.domains.relationships.constants"
+              "app.domains.relationships.constants",
+              "app.models"
             ],
             "module": "app.domains.relationships.models.social",
             "path": "backend/app/domains/relationships/models/social.py"
@@ -801,7 +801,7 @@
           {
             "imports": [
               "app.api.identity_dependencies",
-              "app.core.db",
+              "app.database",
               "app.domains.social.contracts.manual_feed",
               "app.domains.social.contracts.write_execution",
               "app.domains.social.service.discovery",
@@ -832,29 +832,29 @@
           },
           {
             "imports": [
-              "app.core.db"
+              "app.models"
             ],
             "module": "app.domains.social.models.feed",
             "path": "backend/app/domains/social/models/feed.py"
           },
           {
             "imports": [
-              "app.core.db"
+              "app.models"
             ],
             "module": "app.domains.social.models.manual_writes",
             "path": "backend/app/domains/social/models/manual_writes.py"
           },
           {
             "imports": [
-              "app.core.db"
+              "app.models"
             ],
             "module": "app.domains.social.models.posts",
             "path": "backend/app/domains/social/models/posts.py"
           },
           {
             "imports": [
-              "app.core.db",
-              "app.domains.social.contracts.subjective_context"
+              "app.domains.social.contracts.subjective_context",
+              "app.models"
             ],
             "module": "app.domains.social.models.subjective_context",
             "path": "backend/app/domains/social/models/subjective_context.py"
@@ -1700,18 +1700,25 @@
           {
             "imports": [
               "app.config",
+              "app.domains.characters.models",
+              "app.domains.identity.models",
               "app.domains.relationships.contracts.graph_query",
               "app.domains.relationships.contracts.graph_read",
               "app.domains.relationships.contracts.projection",
               "app.domains.relationships.exceptions",
+              "app.domains.relationships.models.social",
               "app.domains.relationships.public",
               "app.domains.relationships.repository.projection_state",
               "app.domains.relationships.schemas",
+              "app.domains.social.models.feed",
+              "app.domains.social.models.posts",
+              "app.domains.world_characters.models",
+              "app.domains.worlds.models",
               "app.integrations.ladybug_projection",
               "app.integrations.relationship_graph_read",
-              "app.models",
               "app.runtime.graph_projection.metrics",
-              "app.runtime.graph_projection.process_client"
+              "app.runtime.graph_projection.process_client",
+              "app.runtime.persistence.model_registration"
             ],
             "module": "app.runtime.graph_projection.relationship_graph_read",
             "path": "backend/app/runtime/graph_projection/relationship_graph_read.py"
@@ -1812,12 +1819,15 @@
               "app.domains.routine_posts.service.evidence",
               "app.domains.routine_posts.service.generation",
               "app.domains.routines.exceptions",
+              "app.domains.routines.models.plans",
               "app.domains.routines.service.execution.claims",
               "app.domains.routines.service.execution.lifecycle",
               "app.domains.routines.service.joint_activity",
               "app.domains.routines.service.lifecycle",
               "app.domains.social.contracts.subjective_context",
+              "app.domains.social.models.posts",
               "app.domains.social.public",
+              "app.domains.world_characters.models",
               "app.integrations.direct_llm",
               "app.runtime.routine_posts.context_references",
               "app.runtime.routines.activity_references",
@@ -1935,7 +1945,7 @@
           {
             "imports": [
               "app.config",
-              "app.core.db",
+              "app.database",
               "app.domains.characters.service.profile",
               "app.domains.social.service.image_attachment",
               "app.domains.social.service.image_jobs",
@@ -2051,8 +2061,12 @@
           {
             "imports": [
               "app.domains.social.contracts.inbox",
+              "app.domains.social.models.feed",
               "app.domains.social.models.manual_writes",
-              "app.models"
+              "app.domains.social.models.posts",
+              "app.domains.world_characters.models",
+              "app.domains.worlds.models",
+              "app.runtime.persistence.model_registration"
             ],
             "module": "app.runtime.social.sqlalchemy_inbox",
             "path": "backend/app/runtime/social/sqlalchemy_inbox.py"
@@ -2189,12 +2203,16 @@
               "app.core.security",
               "app.core.unit_of_work",
               "app.domains.characters.exceptions",
+              "app.domains.characters.models",
               "app.domains.characters.service.profile",
               "app.domains.characters.service.search",
               "app.domains.characters.service.state",
+              "app.domains.identity.models",
               "app.domains.identity.service.profile",
               "app.domains.routines.constants",
+              "app.domains.routines.models.resident",
               "app.domains.social.constants",
+              "app.domains.social.models.posts",
               "app.domains.social.repository.inbox",
               "app.domains.social.repository.media",
               "app.domains.social.repository.posts",
@@ -2206,7 +2224,7 @@
               "app.domains.social.service.source_posts",
               "app.domains.social.utils.cursors",
               "app.domains.social.utils.text",
-              "app.models",
+              "app.runtime.persistence.model_registration",
               "app.runtime.social.discovery",
               "app.runtime.social.inbox",
               "app.runtime.social.profile_activity",
@@ -2620,19 +2638,19 @@
     "parity_test_files": [
       {
         "path": "backend/tests/test_embedded_data_migration.py",
-        "sha256": "a5ca8ef522da5c3028792e74a569819d8b910324e9d0d3ccefa185d3424e0838"
+        "sha256": "c68d2311f9e7dfc6d0e8d5c5cf62b4fb8655021372f914ffdbdecf6b22d72e12"
       },
       {
         "path": "backend/tests/test_feed_reaction_intent.py",
-        "sha256": "f3139611ecbd398542b1d63d94973dd596393fae8d9c1abc0860b3af808d3209"
+        "sha256": "32b6e908f0dd45b3924810a48280ae0a8d9f739e441ff7485912c46ff213dfb8"
       },
       {
         "path": "backend/tests/relationships/test_projection_replay.py",
-        "sha256": "ac461ee04eab201b93159af90e7c24fe6d5549037e0342331c2b58011efb1b2a"
+        "sha256": "1ddeb0c4c9fdbbe8efcc5bf17ab7d853c7a84ddbaeb473d62e578cd1b671f7ad"
       },
       {
         "path": "backend/tests/test_graph_projection_worker.py",
-        "sha256": "1b569fec873e22b9d41fadc1bf6a509e31c3c0c9bd7ead1f491b472f5e3ab7da"
+        "sha256": "fdaaca7f280e98d13e95f94a773100bb6259e0c0358f3ba9e5e754a3cee15810"
       },
       {
         "path": "backend/tests/test_l2_5_frontend_architecture_boundaries.py",
@@ -2640,19 +2658,19 @@
       },
       {
         "path": "backend/tests/world_packages/test_import_commit.py",
-        "sha256": "0fac56b7da1351f3a5668d9a4b2c566ece167300bb9a4da8627290138ef5c94a"
+        "sha256": "a1e1550a22701a54dd19a22e00a00b2761cf4a947723ca3fa9fe3eba3c81b082"
       },
       {
         "path": "backend/tests/test_l3_er3_graph_query_parity.py",
-        "sha256": "0c727169947658b98cc202fb009038161601ff593e8bad0d53489ee8d1082ccf"
+        "sha256": "820ba03d39c8b688ef1f66a459c73c1f6393730b73bb2cffffeddba777e78205"
       },
       {
         "path": "backend/tests/test_l3_owner_manual_social_inbox.py",
-        "sha256": "1dc2ceffec762140b717a330a5af24b9802a476ff7c6035ec70df157547a5259"
+        "sha256": "c1710db5bc9bba15345580f2bd3edd68c5ae9c7f85ea6cd2a75d3e3128b63d24"
       },
       {
         "path": "backend/tests/test_l4_social_search_projection.py",
-        "sha256": "02f8d39e9922cb720b81fe994176991464c1bf78ece3cd05b14b4cf30a07c07d"
+        "sha256": "0a54e106ea9fde112ea552ca6f044f154e5ec9ccb229f65233169d4732ee1e8b"
       },
       {
         "path": "backend/tests/test_relationship_graph_api.py",
@@ -2664,7 +2682,7 @@
       },
       {
         "path": "backend/tests/test_social_event_runtime.py",
-        "sha256": "6e233f9b4c902e33207a9f7ed876a96c271bb64137740b46e4383086fa1c537b"
+        "sha256": "cebdbeb9fbaec295f767feefc2e18b3a7e33b16a868cd9b50b3b58f16a0bd0a9"
       },
       {
         "path": "backend/tests/test_t2_architecture_inventory.py",
@@ -2672,11 +2690,11 @@
       },
       {
         "path": "backend/tests/worlds/test_definition_contract.py",
-        "sha256": "659ba64ba063fb5ef8dfba5a03c950f8f870964dd8aa5a78a52083682b9957b2"
+        "sha256": "1164e69bdb46fad84ddd44662f7ef22ccad08e4b6e7de6dc3ce8432dee63687d"
       },
       {
         "path": "backend/tests/test_world_feed_search.py",
-        "sha256": "953a2d07824108154409f3247cb7ef162a0ebd9ee98d7eab458db8a82a3ddeb6"
+        "sha256": "67243411d62411cb0ea71b6c374afcf9b94b895929421845437f97d364c804b1"
       }
     ],
     "parity_test_node_count": 99,

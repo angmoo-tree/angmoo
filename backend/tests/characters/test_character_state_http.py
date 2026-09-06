@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
-from app import models as registered_models
+from model_fixture_support import models as registered_models
 from app.api.v1.routes import community as community_routes
 from app.core.unit_of_work import deferred_commits
 from app.domains.characters import dependencies, exceptions, models, router, schemas

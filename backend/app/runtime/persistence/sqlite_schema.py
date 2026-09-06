@@ -8,7 +8,7 @@ import re
 
 from sqlalchemy import Connection, MetaData, text
 
-from app.core.db import Base
+from app.models import Base
 
 
 SQLITE_SCHEMA_VERSION = 9

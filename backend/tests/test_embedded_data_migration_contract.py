@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy import URL, create_engine
 
-from app import models as _models  # noqa: F401 - register canonical metadata
+from model_fixture_support import models as _models  # noqa: F401 - register canonical metadata
 from app.runtime.migrations.ladybug_versions.registry import (
     GRAPH_REBUILDS,
     LadybugVersionContractError,

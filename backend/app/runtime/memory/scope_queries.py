@@ -7,7 +7,7 @@ commit, rollback, ownership decision or alternate authorization cache is added.
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core.db import Base
+from app.models import Base
 from app.domains.memory.contracts.scope import MemoryScope
 
 

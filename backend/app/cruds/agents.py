@@ -8,7 +8,14 @@ from uuid import uuid4
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from app.domains.routines.models.resident import AgentActivitySetting as _model_AgentActivitySetting
+from app.domains.routines.models.resident import AgentFeedCue as _model_AgentFeedCue
+from app.domains.routines.models.resident import AgentSlot as _model_AgentSlot
+from app.domains.characters.models import Character as _model_Character
+from app.domains.identity.models import User as _model_User
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.core.image_generation import (
     DEFAULT_USER_IMAGE_MODEL,
     DEFAULT_MAX_IMAGES_PER_DAY,
@@ -60,22 +67,22 @@ from app.core import unit_of_work
 
 
 
-def get_pending_feed_cue(db: Session, character_id: str) -> models.AgentFeedCue | None:
+def get_pending_feed_cue(db: Session, character_id: str) -> _model_AgentFeedCue | None:
     return db.scalar(
-        select(models.AgentFeedCue)
+        select(_model_AgentFeedCue)
         .where(
-            models.AgentFeedCue.character_id == character_id,
-            models.AgentFeedCue.status == "pending",
+            _model_AgentFeedCue.character_id == character_id,
+            _model_AgentFeedCue.status == "pending",
         )
-        .order_by(models.AgentFeedCue.created_at.asc(), models.AgentFeedCue.id.asc())
+        .order_by(_model_AgentFeedCue.created_at.asc(), _model_AgentFeedCue.id.asc())
         .limit(1)
     )
 
 
 def create_feed_cue(
-    db: Session, *, user: models.User, character: models.Character, topic: str
-) -> models.AgentFeedCue:
-    cue = models.AgentFeedCue(
+    db: Session, *, user: _model_User, character: _model_Character, topic: str
+) -> _model_AgentFeedCue:
+    cue = _model_AgentFeedCue(
         user_id=user.id,
         character_id=character.id,
         topic=topic.strip(),
@@ -89,7 +96,7 @@ def create_feed_cue(
 
 def mark_pending_feed_cue_used(
     db: Session, *, character_id: str, run_id: str | None, post_id: str
-) -> models.AgentFeedCue | None:
+) -> _model_AgentFeedCue | None:
     cue = get_pending_feed_cue(db, character_id)
     if cue is None:
         return None
@@ -106,20 +113,20 @@ def mark_pending_feed_cue_used(
 
 def get_assigned_slot(
     db: Session, character_id: str
-) -> models.AgentSlot | None:
+) -> _model_AgentSlot | None:
     return db.scalar(
-        select(models.AgentSlot)
-        .where(models.AgentSlot.assigned_character_id == character_id)
+        select(_model_AgentSlot)
+        .where(_model_AgentSlot.assigned_character_id == character_id)
         .order_by(
-            (models.AgentSlot.status == "running").desc(),
-            models.AgentSlot.last_run_at.desc().nullslast(),
-            models.AgentSlot.updated_at.desc(),
-            models.AgentSlot.agent_id.asc(),
+            (_model_AgentSlot.status == "running").desc(),
+            _model_AgentSlot.last_run_at.desc().nullslast(),
+            _model_AgentSlot.updated_at.desc(),
+            _model_AgentSlot.agent_id.asc(),
         )
     )
 
 
-def set_character_status(db: Session, character: models.Character, status: str) -> None:
+def set_character_status(db: Session, character: _model_Character, status: str) -> None:
     character.status = status
     db.commit()
 
@@ -130,7 +137,7 @@ def disable_other_active_settings(
     user_id: str,
     keep_character_id: str,
     commit: bool = True,
-) -> list[models.AgentActivitySetting]:
+) -> list[_model_AgentActivitySetting]:
     settings = list_other_active_settings(
         db, user_id=user_id, keep_character_id=keep_character_id
     )
@@ -147,16 +154,16 @@ def disable_other_active_settings(
 
 def list_other_active_settings(
     db: Session, *, user_id: str, keep_character_id: str
-) -> list[models.AgentActivitySetting]:
+) -> list[_model_AgentActivitySetting]:
     settings = list(
         db.scalars(
-            select(models.AgentActivitySetting)
-            .join(models.Character)
+            select(_model_AgentActivitySetting)
+            .join(_model_Character)
             .where(
-                models.Character.owner_id == user_id,
-                models.Character.deleted_at.is_(None),
-                models.Character.id != keep_character_id,
-                models.AgentActivitySetting.auto_enabled.is_(True),
+                _model_Character.owner_id == user_id,
+                _model_Character.deleted_at.is_(None),
+                _model_Character.id != keep_character_id,
+                _model_AgentActivitySetting.auto_enabled.is_(True),
             )
         )
     )
@@ -169,28 +176,28 @@ def count_effective_active_server_llm_autonomy_agents(
     excluded = exclude_character_ids or set()
     auto_enabled_ids = set(
         db.scalars(
-            select(models.Character.id)
-            .join(models.AgentActivitySetting)
+            select(_model_Character.id)
+            .join(_model_AgentActivitySetting)
             .where(
-                models.Character.execution_mode == "llm",
-                models.Character.deleted_at.is_(None),
-                models.Character.moderation_status != "suspended",
-                models.AgentActivitySetting.auto_enabled.is_(True),
+                _model_Character.execution_mode == "llm",
+                _model_Character.deleted_at.is_(None),
+                _model_Character.moderation_status != "suspended",
+                _model_AgentActivitySetting.auto_enabled.is_(True),
             )
         )
     )
     assigned_slot_ids = set(
         db.scalars(
-            select(models.AgentSlot.assigned_character_id)
+            select(_model_AgentSlot.assigned_character_id)
             .join(
-                models.Character,
-                models.Character.id == models.AgentSlot.assigned_character_id,
+                _model_Character,
+                _model_Character.id == _model_AgentSlot.assigned_character_id,
             )
             .where(
-                models.AgentSlot.assigned_character_id.is_not(None),
-                models.Character.execution_mode == "llm",
-                models.Character.deleted_at.is_(None),
-                models.Character.moderation_status != "suspended",
+                _model_AgentSlot.assigned_character_id.is_not(None),
+                _model_Character.execution_mode == "llm",
+                _model_Character.deleted_at.is_(None),
+                _model_Character.moderation_status != "suspended",
             )
         )
     )

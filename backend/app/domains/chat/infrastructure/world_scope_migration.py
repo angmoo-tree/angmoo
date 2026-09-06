@@ -22,7 +22,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.schema import CreateIndex, CreateTable
 
-from app.core.db import Base
+from app.models import Base
 
 
 logger = logging.getLogger(__name__)

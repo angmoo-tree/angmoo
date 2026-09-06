@@ -8,7 +8,7 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
 )

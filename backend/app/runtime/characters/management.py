@@ -76,7 +76,36 @@ from pydantic import BaseModel, Field
 from sqlalchemy import delete, or_, select, text, update
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from app.domains.routines.models.resident import AgentActivityLog as _model_AgentActivityLog
+from app.domains.routines.models.resident import AgentActivitySetting as _model_AgentActivitySetting
+from app.domains.memory.models.daypart import AgentDaypartMemoryEvent as _model_AgentDaypartMemoryEvent
+from app.domains.routines.models.resident import AgentFeedCue as _model_AgentFeedCue
+from app.domains.characters.models import AgentImageGenerationSetting as _model_AgentImageGenerationSetting
+from app.domains.local_bot.models import AgentLocalKey as _model_AgentLocalKey
+from app.domains.routines.models.resident import AgentPublicActionExecution as _model_AgentPublicActionExecution
+from app.domains.relationships.models.points import AgentRelationshipPoint as _model_AgentRelationshipPoint
+from app.domains.routines.models.resident import AgentRun as _model_AgentRun
+from app.domains.routines.models.resident import AgentSlot as _model_AgentSlot
+from app.domains.character_lore.models import CharacterLoreChunk as _model_CharacterLoreChunk
+from app.domains.character_lore.models import CharacterLoreSource as _model_CharacterLoreSource
+from app.domains.chat.models import CharacterMessageSetting as _model_CharacterMessageSetting
+from app.domains.identity.models import LlmCredential as _model_LlmCredential
+from app.domains.chat.models import MessageMessage as _model_MessageMessage
+from app.domains.chat.models import MessageThread as _model_MessageThread
+from app.domains.social.models.posts import Notification as _model_Notification
+from app.domains.social.models.posts import Post as _model_Post
+from app.domains.social.models.posts import PostImageGenerationJob as _model_PostImageGenerationJob
+from app.domains.social.models.posts import PostImageQuotaReservation as _model_PostImageQuotaReservation
+from app.domains.social.models.posts import PostLike as _model_PostLike
+from app.domains.social.models.posts import PostRepost as _model_PostRepost
+from app.domains.social.models.posts import ProfileFollow as _model_ProfileFollow
+from app.domains.identity.models import User as _model_User
+from app.domains.chat.models import UserMessagePreference as _model_UserMessagePreference
+from app.domains.world_characters.models import WorldCharacter as _model_WorldCharacter
+from app.domains.worlds.models import WorldMembership as _model_WorldMembership
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.domains.characters import models as character_models
 from app.domains.characters.service import profile as character_profile
 from app.core import active_hours, security, unit_of_work
@@ -394,7 +423,7 @@ class RunNowSoonScheduledError(AgentServiceError):
         super().__init__("곧 자율활동이 예정되어 있어요. 잠시 기다리면 앵무가 스스로 활동합니다.")
 
 
-def list_agents(db: Session, user: models.User) -> list[schemas.AgentDetailRead]:
+def list_agents(db: Session, user: _model_User) -> list[schemas.AgentDetailRead]:
     return character_management.list_agents(db, user, workflows=build_character_management_workflows())
 
 
@@ -431,7 +460,7 @@ def _ensure_tendency_prompt_safety(
 
 
 def create_agent(
-    db: Session, user: models.User, data: schemas.AgentCreate
+    db: Session, user: _model_User, data: schemas.AgentCreate
 ) -> schemas.AgentDetailRead:
     return character_management.create_agent(db, user, data, workflows=build_character_management_workflows())
 
@@ -484,7 +513,7 @@ def _validate_initial_activity_settings(data: schemas.AgentCreate) -> None:
 
 def _apply_initial_activity_settings(
     db: Session,
-    setting: models.AgentActivitySetting,
+    setting: _model_AgentActivitySetting,
     data: schemas.AgentCreate,
 ) -> None:
     changed = False
@@ -567,26 +596,26 @@ def _log_autonomy_activation_rejection(
     )
 
 
-def get_agent(db: Session, user: models.User, character_id: str) -> schemas.AgentDetailRead:
+def get_agent(db: Session, user: _model_User, character_id: str) -> schemas.AgentDetailRead:
     return character_management.get_agent(db, user, character_id, workflows=build_character_management_workflows())
 
 
 
 
-def get_local_connection(db: Session, user: models.User, character_id: str) -> schemas.AgentLocalConnectionRead:
+def get_local_connection(db: Session, user: _model_User, character_id: str) -> schemas.AgentLocalConnectionRead:
     return local_key_management.get_local_connection(db, user, character_id)
 
 
-def issue_local_key(db: Session, user: models.User, character_id: str) -> schemas.AgentLocalKeyCreateRead:
+def issue_local_key(db: Session, user: _model_User, character_id: str) -> schemas.AgentLocalKeyCreateRead:
     return local_key_management.issue_local_key(db, user, character_id, workflows=build_local_key_workflows())
 
 
-def revoke_local_key(db: Session, user: models.User, character_id: str) -> None:
+def revoke_local_key(db: Session, user: _model_User, character_id: str) -> None:
     return local_key_management.revoke_local_key(db, user, character_id, workflows=build_local_key_workflows())
 
 
 def get_feed_cue(
-    db: Session, user: models.User, character_id: str
+    db: Session, user: _model_User, character_id: str
 ) -> schemas.AgentFeedCueRead | None:
     character = _get_owned_character(db, user, character_id)
     _ensure_llm_mode(character)
@@ -595,7 +624,7 @@ def get_feed_cue(
 
 
 def give_feed_cue(
-    db: Session, user: models.User, character_id: str, data: schemas.AgentFeedCueCreate
+    db: Session, user: _model_User, character_id: str, data: schemas.AgentFeedCueCreate
 ) -> schemas.AgentFeedCueRead:
     character = _get_owned_character(db, user, character_id)
     _ensure_not_suspended(character)
@@ -629,7 +658,7 @@ def give_feed_cue(
 
 async def run_first_greeting(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     data: schemas.AgentFirstGreetingCreate,
 ) -> schemas.AgentFirstGreetingRead:
@@ -788,8 +817,8 @@ async def _run_first_greeting_writer(
     *,
     api_key: str,
     character: character_models.Character,
-    setting: models.AgentActivitySetting,
-    credential: models.LlmCredential,
+    setting: _model_AgentActivitySetting,
+    credential: _model_LlmCredential,
     run_id: str,
     tracker: RunLlmTracker,
     topic: str,
@@ -857,7 +886,7 @@ async def _attach_first_greeting_image(
     *,
     db: Session,
     character: character_models.Character,
-    credential: models.LlmCredential,
+    credential: _model_LlmCredential,
     run_id: str,
     tracker: RunLlmTracker,
     topic: str,
@@ -893,7 +922,7 @@ async def _attach_first_greeting_image(
 
 def update_profile(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     data: schemas.AgentProfileUpdate,
 ) -> schemas.AgentDetailRead:
@@ -918,7 +947,7 @@ def _after_character_profile_updated(db, user, character, media_changed) -> sche
 
 def update_promotion_usage(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     data: schemas.AgentPromotionUsageUpdate,
 ) -> schemas.AgentDetailRead:
@@ -929,7 +958,7 @@ def update_promotion_usage(
 
 def update_persona(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     data: schemas.AgentPersonaUpdate,
 ) -> schemas.AgentDetailRead:
@@ -955,32 +984,32 @@ def _after_character_persona_updated(db, user, character) -> schemas.AgentDetail
 
 def upload_profile_media(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     data: schemas.AgentProfileMediaUpload,
 ) -> schemas.AgentDetailRead:
     return media_service.upload_profile_media(db, user, character_id, data, workflows=build_character_media_workflows())
 
 
-def get_image_settings(db: Session, user: models.User, character_id: str) -> schemas.AgentImageGenerationSettingRead:
+def get_image_settings(db: Session, user: _model_User, character_id: str) -> schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.get_image_settings(db, user, character_id, workflows=build_image_settings_workflows())
 
 
-def update_image_settings(db: Session, user: models.User, character_id: str, data: schemas.AgentImageGenerationSettingUpdate) -> schemas.AgentImageGenerationSettingRead:
+def update_image_settings(db: Session, user: _model_User, character_id: str, data: schemas.AgentImageGenerationSettingUpdate) -> schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.update_image_settings(db, user, character_id, data, workflows=build_image_settings_workflows())
 
 
-def upload_image_seed(db: Session, user: models.User, character_id: str, data: schemas.AgentImageSeedUpload) -> schemas.AgentImageGenerationSettingRead:
+def upload_image_seed(db: Session, user: _model_User, character_id: str, data: schemas.AgentImageSeedUpload) -> schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.upload_image_seed(db, user, character_id, data, workflows=build_image_settings_workflows())
 
 
-def delete_image_seed(db: Session, user: models.User, character_id: str) -> schemas.AgentImageGenerationSettingRead:
+def delete_image_seed(db: Session, user: _model_User, character_id: str) -> schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.delete_image_seed(db, user, character_id, workflows=build_image_settings_workflows())
 
 
 def update_credential(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     data: schemas.CredentialUpsert,
 ) -> schemas.CredentialRead:
@@ -1058,7 +1087,7 @@ def update_credential(
 
 def get_credential_metadata(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     *,
     world_id: str | None = None,
@@ -1081,7 +1110,7 @@ def get_credential_metadata(
 
 def delete_credential(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     *,
     world_id: str | None = None,
@@ -1127,7 +1156,7 @@ def delete_credential(
             character_id=character.id,
             commit=False,
         )
-        setting = db.get(models.AgentActivitySetting, character.id)
+        setting = db.get(_model_AgentActivitySetting, character.id)
         if setting is not None:
             setting.auto_enabled = False
         set_active_world_character_autonomy(
@@ -1149,27 +1178,27 @@ def delete_credential(
 def _ensure_credential_world_scope(
     db: Session,
     *,
-    user: models.User,
+    user: _model_User,
     character: character_models.Character,
     world_id: str | None,
 ) -> None:
     if world_id is None:
         return
     membership_id = db.scalar(
-        select(models.WorldMembership.id).where(
-            models.WorldMembership.world_id == world_id,
-            models.WorldMembership.user_id == user.id,
-            models.WorldMembership.status == "active",
+        select(_model_WorldMembership.id).where(
+            _model_WorldMembership.world_id == world_id,
+            _model_WorldMembership.user_id == user.id,
+            _model_WorldMembership.status == "active",
         )
     )
     if membership_id is None:
         raise AgentNotFoundError(character.id)
     world_character_id = db.scalar(
-        select(models.WorldCharacter.id).where(
-            models.WorldCharacter.world_id == world_id,
-            models.WorldCharacter.character_id == character.id,
-            models.WorldCharacter.membership_id == membership_id,
-            models.WorldCharacter.status.in_(("pending", "inactive", "active")),
+        select(_model_WorldCharacter.id).where(
+            _model_WorldCharacter.world_id == world_id,
+            _model_WorldCharacter.character_id == character.id,
+            _model_WorldCharacter.membership_id == membership_id,
+            _model_WorldCharacter.status.in_(("pending", "inactive", "active")),
         )
     )
     if world_character_id is None:
@@ -1177,7 +1206,7 @@ def _ensure_credential_world_scope(
 
 
 def get_settings(
-    db: Session, user: models.User, character_id: str
+    db: Session, user: _model_User, character_id: str
 ) -> schemas.AgentActivitySettingRead:
     character = _get_owned_character(db, user, character_id)
     return schemas.AgentActivitySettingRead.model_validate(
@@ -1187,7 +1216,7 @@ def get_settings(
 
 def update_settings(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     data: schemas.AgentActivitySettingUpdate,
 ) -> schemas.AgentActivitySettingRead:
@@ -1245,7 +1274,7 @@ def update_settings(
 
 
 async def analyze_tendency(
-    db: Session, user: models.User, character_id: str
+    db: Session, user: _model_User, character_id: str
 ) -> schemas.AgentDetailRead:
     character = _get_owned_character(db, user, character_id)
     demo_lock.ensure_demo_user_mutable(user)
@@ -1444,7 +1473,7 @@ async def analyze_tendency(
 
 
 def activate_agent(
-    db: Session, user: models.User, character_id: str
+    db: Session, user: _model_User, character_id: str
 ) -> schemas.AgentDetailRead:
     user_id = user.id
     try:
@@ -1493,7 +1522,7 @@ def _activate_agent_uow(
     character_id: str,
     commit: bool,
 ) -> str:
-    user = db.get(models.User, user_id)
+    user = db.get(_model_User, user_id)
     if user is None:
         raise AgentNotFoundError(character_id)
     character = _get_owned_character(db, user, character_id)
@@ -1639,7 +1668,7 @@ def _activate_agent_uow(
 
 
 def deactivate_agent(
-    db: Session, user: models.User, character_id: str
+    db: Session, user: _model_User, character_id: str
 ) -> schemas.AgentDetailRead:
     character = _get_owned_character(db, user, character_id)
     current_setting = agent_crud.ensure_setting(db, character.id)
@@ -1701,7 +1730,7 @@ def deactivate_agent(
 
 
 def delete_agent(
-    db: Session, user: models.User, character_id: str, data: schemas.AgentDeleteCreate
+    db: Session, user: _model_User, character_id: str, data: schemas.AgentDeleteCreate
 ) -> None:
     character = _get_owned_character(db, user, character_id)
     demo_lock.ensure_demo_user_mutable(user)
@@ -2076,13 +2105,13 @@ def _clamped_tendency_int(value: Any, default: int) -> int:
 
 
 def _mark_tendency_error(
-    db: Session, setting: models.AgentActivitySetting, message: str
+    db: Session, setting: _model_AgentActivitySetting, message: str
 ) -> None:
     setting.tendency_error = message[:1000]
     db.commit()
 
 
-def _has_tendency_analysis(setting: models.AgentActivitySetting) -> bool:
+def _has_tendency_analysis(setting: _model_AgentActivitySetting) -> bool:
     profile = (
         setting.planner_tendency_profile
         if isinstance(setting.planner_tendency_profile, dict)
@@ -2098,7 +2127,7 @@ def _has_tendency_analysis(setting: models.AgentActivitySetting) -> bool:
     )
 
 
-def _ensure_tendency_analysis_ready(setting: models.AgentActivitySetting) -> None:
+def _ensure_tendency_analysis_ready(setting: _model_AgentActivitySetting) -> None:
     if _has_tendency_analysis(setting):
         return
     raise TendencyAnalysisRequiredError(
@@ -2110,7 +2139,7 @@ def _activity_profile_readiness(
     db: Session,
     *,
     character: character_models.Character,
-    setting: models.AgentActivitySetting,
+    setting: _model_AgentActivitySetting,
 ) -> schemas.AgentActivityProfileReadinessRead:
     return activity_profile_readiness.evaluate(
         db,
@@ -2123,7 +2152,7 @@ def _ensure_activity_profile_ready(
     db: Session,
     *,
     character: character_models.Character,
-    setting: models.AgentActivitySetting,
+    setting: _model_AgentActivitySetting,
 ) -> schemas.AgentActivityProfileReadinessRead:
     readiness = _activity_profile_readiness(
         db,
@@ -2141,7 +2170,7 @@ def _ensure_activity_profile_ready(
     )
 
 
-def _clear_tendency_analysis(setting: models.AgentActivitySetting) -> None:
+def _clear_tendency_analysis(setting: _model_AgentActivitySetting) -> None:
     setting.tendency_summary = ""
     setting.tendency_action_ranges = {}
     setting.planner_tendency_profile = {}
@@ -2158,7 +2187,7 @@ def _bind_slot_auth_profile(
     *,
     user_id: str,
     character: character_models.Character,
-    credential: models.LlmCredential,
+    credential: _model_LlmCredential,
 ) -> None:
     try:
         material = CredentialResolver.resolve_llm_credential(
@@ -2181,11 +2210,11 @@ def _bind_slot_auth_profile(
 
 
 def _release_slot_auth_profile(
-    slot: models.AgentSlot,
+    slot: _model_AgentSlot,
     *,
     user_id: str,
     character_id: str,
-    credential: models.LlmCredential,
+    credential: _model_LlmCredential,
 ) -> None:
     try:
         openclaw_auth_profiles.release_credential_from_slot(
@@ -2218,21 +2247,21 @@ def _aware_utc(value: datetime) -> datetime:
     return value.astimezone(UTC)
 
 
-def _slot_has_live_lease(slot: models.AgentSlot, now: datetime) -> bool:
+def _slot_has_live_lease(slot: _model_AgentSlot, now: datetime) -> bool:
     lease_expires_at = slot.lease_expires_at
     if lease_expires_at is None:
         return False
     return _aware_utc(lease_expires_at) > now
 
 
-def _slot_is_live_running(slot: models.AgentSlot, now: datetime) -> bool:
+def _slot_is_live_running(slot: _model_AgentSlot, now: datetime) -> bool:
     return (
         slot.status == agent_run_crud.SLOT_STATUS_RUNNING
         and _slot_has_live_lease(slot, now)
     )
 
 
-def _slot_is_assigned_resident(slot: models.AgentSlot) -> bool:
+def _slot_is_assigned_resident(slot: _model_AgentSlot) -> bool:
     return (
         slot.assigned_user_id is not None
         and slot.assigned_character_id is not None
@@ -2246,13 +2275,13 @@ def _allowed_existing_running_resident_slots() -> int:
     return max(0, settings.resident_tick_max_runs - RUN_NOW_SCHEDULER_HEADROOM - 1)
 
 
-def _slot_is_due(slot: models.AgentSlot, now: datetime) -> bool:
+def _slot_is_due(slot: _model_AgentSlot, now: datetime) -> bool:
     if slot.next_tick_at is None:
         return False
     return _aware_utc(slot.next_tick_at) <= now
 
 
-def _slot_is_imminent(slot: models.AgentSlot, now: datetime) -> bool:
+def _slot_is_imminent(slot: _model_AgentSlot, now: datetime) -> bool:
     if slot.next_tick_at is None:
         return False
     return _aware_utc(slot.next_tick_at) <= now + RUN_NOW_SCHEDULER_GUARD_WINDOW
@@ -2261,8 +2290,8 @@ def _slot_is_imminent(slot: models.AgentSlot, now: datetime) -> bool:
 def _ensure_run_now_scheduler_safe(
     db: Session,
     *,
-    target_slot: models.AgentSlot,
-    setting: models.AgentActivitySetting,
+    target_slot: _model_AgentSlot,
+    setting: _model_AgentActivitySetting,
     now: datetime,
 ) -> None:
     if _slot_is_live_running(target_slot, now):
@@ -2284,7 +2313,7 @@ def _ensure_run_now_scheduler_safe(
 def _ensure_claimed_temporary_run_now_scheduler_safe(
     db: Session,
     *,
-    target_slot: models.AgentSlot,
+    target_slot: _model_AgentSlot,
     now: datetime,
 ) -> None:
     live_other_running_count = sum(
@@ -2322,7 +2351,7 @@ def _ensure_imported_world_runtime_enabled(
 
 
 async def run_agent_now(
-    db: Session, user: models.User, character_id: str
+    db: Session, user: _model_User, character_id: str
 ) -> schemas.OpenClawAgentRunRead:
     character = _get_owned_character(db, user, character_id)
     _ensure_not_suspended(character)
@@ -2457,15 +2486,15 @@ def _local_key_token_prefix(token: str) -> str:
 def _agent_deletion_slot_condition(db: Session, *, user_id: str, character_id: str):
     credential_ids = list(
         db.scalars(
-            select(models.LlmCredential.id).where(
-                models.LlmCredential.owner_id == user_id,
-                models.LlmCredential.character_id == character_id,
+            select(_model_LlmCredential.id).where(
+                _model_LlmCredential.owner_id == user_id,
+                _model_LlmCredential.character_id == character_id,
             )
         )
     )
-    conditions = [models.AgentSlot.assigned_character_id == character_id]
+    conditions = [_model_AgentSlot.assigned_character_id == character_id]
     if credential_ids:
-        conditions.append(models.AgentSlot.assigned_credential_id.in_(credential_ids))
+        conditions.append(_model_AgentSlot.assigned_credential_id.in_(credential_ids))
     return or_(*conditions) if len(conditions) > 1 else conditions[0]
 
 
@@ -2473,11 +2502,11 @@ def _ensure_agent_deletion_not_busy(
     db: Session, *, user_id: str, character_id: str
 ) -> None:
     active_run_id = db.scalar(
-        select(models.AgentRun.id)
+        select(_model_AgentRun.id)
         .where(
-            models.AgentRun.user_id == user_id,
-            models.AgentRun.character_id == character_id,
-            models.AgentRun.status.in_(agent_run_crud.ACTIVE_RUN_STATUSES),
+            _model_AgentRun.user_id == user_id,
+            _model_AgentRun.character_id == character_id,
+            _model_AgentRun.status.in_(agent_run_crud.ACTIVE_RUN_STATUSES),
         )
         .limit(1)
     )
@@ -2487,12 +2516,12 @@ def _ensure_agent_deletion_not_busy(
         )
 
     running_slot_id = db.scalar(
-        select(models.AgentSlot.agent_id)
+        select(_model_AgentSlot.agent_id)
         .where(
             _agent_deletion_slot_condition(
                 db, user_id=user_id, character_id=character_id
             ),
-            models.AgentSlot.status == agent_run_crud.SLOT_STATUS_RUNNING,
+            _model_AgentSlot.status == agent_run_crud.SLOT_STATUS_RUNNING,
         )
         .limit(1)
     )
@@ -2507,13 +2536,13 @@ def _release_openclaw_profile_for_agent(
 ) -> None:
     slots = list(
         db.scalars(
-            select(models.AgentSlot)
+            select(_model_AgentSlot)
             .where(
                 _agent_deletion_slot_condition(
                     db, user_id=user_id, character_id=character_id
                 )
             )
-            .order_by(models.AgentSlot.agent_id.asc())
+            .order_by(_model_AgentSlot.agent_id.asc())
         )
     )
     released = False
@@ -2524,7 +2553,7 @@ def _release_openclaw_profile_for_agent(
             )
         if slot.assigned_credential_id is None:
             continue
-        credential = db.get(models.LlmCredential, slot.assigned_credential_id)
+        credential = db.get(_model_LlmCredential, slot.assigned_credential_id)
         if credential is None:
             continue
         try:
@@ -2549,13 +2578,13 @@ def _clear_resident_slots_for_agent(
 ) -> None:
     slots = list(
         db.scalars(
-            select(models.AgentSlot)
+            select(_model_AgentSlot)
             .where(
                 _agent_deletion_slot_condition(
                     db, user_id=user_id, character_id=character_id
                 )
             )
-            .order_by(models.AgentSlot.agent_id.asc())
+            .order_by(_model_AgentSlot.agent_id.asc())
         )
     )
     for slot in slots:
@@ -2615,108 +2644,108 @@ def _scrub_agent_data(db: Session, character: character_models.Character) -> Non
             )
         )
 
-    message_thread_ids = select(models.MessageThread.id).where(
-        models.MessageThread.character_id == character_id
+    message_thread_ids = select(_model_MessageThread.id).where(
+        _model_MessageThread.character_id == character_id
     )
     db.execute(
-        delete(models.MessageMessage).where(
-            models.MessageMessage.thread_id.in_(message_thread_ids)
+        delete(_model_MessageMessage).where(
+            _model_MessageMessage.thread_id.in_(message_thread_ids)
         )
     )
     db.execute(
-        delete(models.MessageThread).where(
-            models.MessageThread.character_id == character_id
+        delete(_model_MessageThread).where(
+            _model_MessageThread.character_id == character_id
         )
     )
     db.execute(
-        update(models.UserMessagePreference)
-        .where(models.UserMessagePreference.source_character_id == character_id)
+        update(_model_UserMessagePreference)
+        .where(_model_UserMessagePreference.source_character_id == character_id)
         .values(credential_source="message_key", source_character_id=None)
     )
     db.execute(
-        delete(models.CharacterMessageSetting).where(
-            models.CharacterMessageSetting.character_id == character_id
+        delete(_model_CharacterMessageSetting).where(
+            _model_CharacterMessageSetting.character_id == character_id
         )
     )
 
-    lore_source_ids = select(models.CharacterLoreSource.id).where(
-        models.CharacterLoreSource.character_id == character_id
+    lore_source_ids = select(_model_CharacterLoreSource.id).where(
+        _model_CharacterLoreSource.character_id == character_id
     )
     db.execute(
-        delete(models.CharacterLoreChunk).where(
+        delete(_model_CharacterLoreChunk).where(
             or_(
-                models.CharacterLoreChunk.character_id == character_id,
-                models.CharacterLoreChunk.source_id.in_(lore_source_ids),
+                _model_CharacterLoreChunk.character_id == character_id,
+                _model_CharacterLoreChunk.source_id.in_(lore_source_ids),
             )
         )
     )
     db.execute(
-        delete(models.CharacterLoreSource).where(
-            models.CharacterLoreSource.character_id == character_id
-        )
-    )
-
-    db.execute(
-        delete(models.PostImageGenerationJob).where(
-            models.PostImageGenerationJob.character_id == character_id
-        )
-    )
-    db.execute(
-        delete(models.PostImageQuotaReservation).where(
-            models.PostImageQuotaReservation.character_id == character_id
-        )
-    )
-    db.execute(
-        delete(models.AgentPublicActionExecution).where(
-            models.AgentPublicActionExecution.character_id == character_id
-        )
-    )
-    db.execute(
-        delete(models.AgentDaypartMemoryEvent).where(
-            models.AgentDaypartMemoryEvent.character_id == character_id
-        )
-    )
-    db.execute(
-        delete(models.AgentRelationshipPoint).where(
-            or_(
-                models.AgentRelationshipPoint.recipient_character_id == character_id,
-                models.AgentRelationshipPoint.source_character_id == character_id,
-            )
+        delete(_model_CharacterLoreSource).where(
+            _model_CharacterLoreSource.character_id == character_id
         )
     )
 
     db.execute(
-        delete(models.AgentFeedCue).where(models.AgentFeedCue.character_id == character_id)
-    )
-    db.execute(
-        delete(models.AgentActivityLog).where(
-            models.AgentActivityLog.character_id == character_id
+        delete(_model_PostImageGenerationJob).where(
+            _model_PostImageGenerationJob.character_id == character_id
         )
     )
-    db.execute(delete(models.AgentRun).where(models.AgentRun.character_id == character_id))
-    db.execute(delete(models.PostLike).where(models.PostLike.character_id == character_id))
     db.execute(
-        delete(models.PostRepost).where(models.PostRepost.character_id == character_id)
+        delete(_model_PostImageQuotaReservation).where(
+            _model_PostImageQuotaReservation.character_id == character_id
+        )
     )
     db.execute(
-        delete(models.ProfileFollow).where(
+        delete(_model_AgentPublicActionExecution).where(
+            _model_AgentPublicActionExecution.character_id == character_id
+        )
+    )
+    db.execute(
+        delete(_model_AgentDaypartMemoryEvent).where(
+            _model_AgentDaypartMemoryEvent.character_id == character_id
+        )
+    )
+    db.execute(
+        delete(_model_AgentRelationshipPoint).where(
             or_(
-                models.ProfileFollow.follower_character_id == character_id,
-                models.ProfileFollow.target_character_id == character_id,
+                _model_AgentRelationshipPoint.recipient_character_id == character_id,
+                _model_AgentRelationshipPoint.source_character_id == character_id,
+            )
+        )
+    )
+
+    db.execute(
+        delete(_model_AgentFeedCue).where(_model_AgentFeedCue.character_id == character_id)
+    )
+    db.execute(
+        delete(_model_AgentActivityLog).where(
+            _model_AgentActivityLog.character_id == character_id
+        )
+    )
+    db.execute(delete(_model_AgentRun).where(_model_AgentRun.character_id == character_id))
+    db.execute(delete(_model_PostLike).where(_model_PostLike.character_id == character_id))
+    db.execute(
+        delete(_model_PostRepost).where(_model_PostRepost.character_id == character_id)
+    )
+    db.execute(
+        delete(_model_ProfileFollow).where(
+            or_(
+                _model_ProfileFollow.follower_character_id == character_id,
+                _model_ProfileFollow.target_character_id == character_id,
             )
         )
     )
     db.execute(
-        delete(models.Notification).where(
+        delete(_model_Notification).where(
             or_(
-                models.Notification.recipient_character_id == character_id,
-                models.Notification.actor_character_id == character_id,
+                _model_Notification.recipient_character_id == character_id,
+                _model_Notification.actor_character_id == character_id,
             )
         )
     )
     db.execute(
-        update(models.Post)
-        .where(models.Post.author_character_id == character_id)
+        update(_model_Post)
+        .where(_model_Post.author_character_id == character_id)
         .values(author_name=DELETED_CHARACTER_NAME)
     )
     db.execute(
@@ -2725,23 +2754,23 @@ def _scrub_agent_data(db: Session, character: character_models.Character) -> Non
         )
     )
     db.execute(
-        delete(models.AgentActivitySetting).where(
-            models.AgentActivitySetting.character_id == character_id
+        delete(_model_AgentActivitySetting).where(
+            _model_AgentActivitySetting.character_id == character_id
         )
     )
     db.execute(
-        delete(models.AgentImageGenerationSetting).where(
-            models.AgentImageGenerationSetting.character_id == character_id
+        delete(_model_AgentImageGenerationSetting).where(
+            _model_AgentImageGenerationSetting.character_id == character_id
         )
     )
     db.execute(
-        delete(models.LlmCredential).where(
-            models.LlmCredential.character_id == character_id
+        delete(_model_LlmCredential).where(
+            _model_LlmCredential.character_id == character_id
         )
     )
     db.execute(
-        delete(models.AgentLocalKey).where(
-            models.AgentLocalKey.character_id == character_id
+        delete(_model_AgentLocalKey).where(
+            _model_AgentLocalKey.character_id == character_id
         )
     )
 
@@ -2803,13 +2832,13 @@ def _first_greeting_available_at(db: Session, user_id: str) -> datetime | None:
 def _claim_first_greeting_run(
     db: Session,
     *,
-    user: models.User,
+    user: _model_User,
     character: character_models.Character,
-    credential: models.LlmCredential,
+    credential: _model_LlmCredential,
     run_id: str,
     session_key: str,
     now: datetime | None = None,
-) -> models.AgentRun:
+) -> _model_AgentRun:
     current = now or datetime.now(UTC)
     if db.bind is not None and db.bind.dialect.name == "postgresql":
         lock_key = int.from_bytes(
@@ -2919,7 +2948,7 @@ def _build_agent_detail(
     )
 
 
-def _image_generation_setting_read(db: Session, setting: models.AgentImageGenerationSetting) -> schemas.AgentImageGenerationSettingRead:
+def _image_generation_setting_read(db: Session, setting: _model_AgentImageGenerationSetting) -> schemas.AgentImageGenerationSettingRead:
     return image_settings_owner._image_generation_setting_read(db, setting, workflows=build_image_settings_workflows())
 
 
@@ -2934,7 +2963,7 @@ def _invalidate_image_visual_identity_if_present(db: Session, character_id: str)
 
 
 def _activity_log_read(
-    db: Session, log: models.AgentActivityLog
+    db: Session, log: _model_AgentActivityLog
 ) -> schemas.AgentActivityLogRead:
     data = schemas.AgentActivityLogRead.model_validate(log).model_dump()
     target = _activity_log_target_profile(db, log)
@@ -2944,7 +2973,7 @@ def _activity_log_read(
 
 
 def _activity_log_target_profile(
-    db: Session, log: models.AgentActivityLog
+    db: Session, log: _model_AgentActivityLog
 ) -> dict[str, str | None] | None:
     if log.action_type not in {"followed", "unfollowed"}:
         return None
@@ -2963,7 +2992,7 @@ def _activity_log_target_profile(
             "target_profile_handle": character.handle,
             "target_profile_avatar_url": character.avatar_url,
         }
-    user = db.get(models.User, profile_id)
+    user = db.get(_model_User, profile_id)
     if user is None:
         return None
     return {

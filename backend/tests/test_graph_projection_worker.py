@@ -7,7 +7,7 @@ import time
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app import models
+from model_fixture_support import models
 from app.domains.relationships.contracts.projection import (RelationshipProjectionBackendError)
 from app.runtime.graph_projection.worker import GraphProjectionWorker
 from p7_graph_support import seed_projection_fixture, sqlite_engine

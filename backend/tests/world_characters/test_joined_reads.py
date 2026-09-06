@@ -1,7 +1,7 @@
 """Joined reads retain SQL shape, membership scope and caller attachment."""
 from sqlalchemy import event, inspect
 from sqlalchemy.orm import Session
-from app import models
+from model_fixture_support import models
 from app.runtime.world_characters.queries import SqlAlchemyWorldCharacterQueries
 from test_lifecycle import _fixture, _seed_world, _character, _world_character
 

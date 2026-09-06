@@ -13,7 +13,14 @@ from pydantic import ValidationError
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from app.domains.routines.models.resident import AgentActivitySetting as _model_AgentActivitySetting
+from app.domains.routines.models.resident import AgentRun as _model_AgentRun
+from app.domains.characters.models import Character as _model_Character
+from app.domains.characters.models import CharacterState as _model_CharacterState
+from app.domains.identity.models import LlmCredential as _model_LlmCredential
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.config import settings
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
@@ -150,7 +157,7 @@ def create_agent_tool_post_from_brief(
     )
 
 
-def _resolve_create_post_brief(run: models.AgentRun, brief: str) -> str:
+def _resolve_create_post_brief(run: _model_AgentRun, brief: str) -> str:
     if brief.strip() != PREPARED_CREATE_POST_BRIEF_SENTINEL:
         return brief
     gateway_result = run.gateway_result if isinstance(run.gateway_result, dict) else {}
@@ -302,7 +309,7 @@ def _compose_writing_from_brief(
     db: Session,
     *,
     session_key: str,
-    run: models.AgentRun,
+    run: _model_AgentRun,
     character_id: str,
     kind: WritingKind,
     brief: str,
@@ -317,7 +324,7 @@ def _compose_writing_from_brief(
         raise community_service.CharacterNotFoundError(character_id)
     credential = _run_credential(db, run)
     setting = agent_crud.ensure_setting(db, character_id)
-    state = db.get(models.CharacterState, character_id)
+    state = db.get(_model_CharacterState, character_id)
     lore_retrieval = (
         character_lore_service.retrieve_lore_for_self_update(
             db, workflows=build_lore_workflows(), character=character
@@ -361,7 +368,7 @@ def _compose_writing_from_brief(
     return payload, usage, lore_retrieval
 
 
-def _run_credential(db: Session, run: models.AgentRun) -> models.LlmCredential:
+def _run_credential(db: Session, run: _model_AgentRun) -> _model_LlmCredential:
     if not run.credential_id:
         raise WritingCompositionError("active run has no credential")
     credential = agent_run_crud.get_credential(db, run.credential_id)
@@ -372,8 +379,8 @@ def _run_credential(db: Session, run: models.AgentRun) -> models.LlmCredential:
 
 def _run_composition_gateway(
     *,
-    run: models.AgentRun,
-    credential: models.LlmCredential,
+    run: _model_AgentRun,
+    credential: _model_LlmCredential,
     session_key: str,
     kind: WritingKind,
     brief: str,
@@ -432,7 +439,7 @@ def _run_composition_gateway(
 
 
 def _writing_scratch_base_session_key(
-    run: models.AgentRun, *, fallback_session_key: str
+    run: _model_AgentRun, *, fallback_session_key: str
 ) -> str:
     gateway_result = run.gateway_result if isinstance(run.gateway_result, dict) else {}
     session_context = gateway_result.get("session_context")
@@ -443,15 +450,15 @@ def _writing_scratch_base_session_key(
     return community_service._agent_tool_lookup_session_key(run.session_key or fallback_session_key)
 
 
-def _writing_stream_params(setting: models.AgentActivitySetting) -> dict[str, Any]:
+def _writing_stream_params(setting: _model_AgentActivitySetting) -> dict[str, Any]:
     return {}
 
 
 def _build_composition_prompt(
     db: Session,
     *,
-    character: models.Character,
-    state: models.CharacterState | None,
+    character: _model_Character,
+    state: _model_CharacterState | None,
     kind: WritingKind,
     brief: str,
     target_post_id: str | None,
@@ -590,7 +597,7 @@ def _format_daypart(value: datetime) -> str:
     return "밤"
 
 
-def _format_state(state: models.CharacterState | None) -> str:
+def _format_state(state: _model_CharacterState | None) -> str:
     if state is None:
         return "- none"
     return "\n".join(
@@ -830,7 +837,7 @@ def _append_writing_composition_lane(
     kind: WritingKind,
     gateway_result: dict[str, Any],
 ) -> None:
-    run = db.get(models.AgentRun, run_id)
+    run = db.get(_model_AgentRun, run_id)
     if run is None:
         return
     usage = _extract_gateway_llm_usage(gateway_result)

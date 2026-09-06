@@ -12,7 +12,7 @@ from uuid import uuid4
 
 from sqlalchemy import exists, func, insert, or_, select, update
 
-from app.core.db import Base
+from app.models import Base
 from app.domains.memory.repository.delivery import sync_epoch
 from app.domains.memory.policies.batch import (
     MAX_SELECTION_CANDIDATES,

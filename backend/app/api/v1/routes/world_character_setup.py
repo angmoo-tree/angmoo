@@ -3,9 +3,12 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from app.domains.identity.models import User as _model_User
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app.domains.identity.dependencies import get_current_user
-from app.core.db import get_db
+from app.database import get_db
 from app.runtime.social import world_feed_search
 from app.domains.social.exceptions import WorldFeedStatusNotFoundError, WorldFeedStatusForbiddenError
 
@@ -20,7 +23,7 @@ router = APIRouter(prefix="/world-characters", tags=["world-character-setup"])
 def get_world_feed_status(
     world_character_id: str,
     db: Session = Depends(get_db),
-    user: models.User = Depends(get_current_user),
+    user: _model_User = Depends(get_current_user),
 ) -> schemas.WorldFeedCycleStatusRead:
     try:
         return world_feed_search.owner_world_feed_cycle_status(

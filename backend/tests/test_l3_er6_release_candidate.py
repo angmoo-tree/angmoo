@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy import select
 
-from app import models as _models  # noqa: F401 - register canonical metadata
+from model_fixture_support import models as _models  # noqa: F401 - register canonical metadata
 from app.core import security
 from app.runtime.desktop_sidecar import (
     _build_local_embedded_runtime_config,

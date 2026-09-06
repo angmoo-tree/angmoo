@@ -7,8 +7,8 @@ import pytest
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session, sessionmaker
 
-from app import models
-from app.core.db import Base
+from model_fixture_support import models
+from app.models import Base
 from app.runtime.memory.composition import (
     memory_repository as SqlAlchemyMemoryRepository,
 )

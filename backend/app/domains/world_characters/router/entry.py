@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.domains.world_characters.schemas import setup as schemas
 from app.api.identity_dependencies import get_current_user
-from app.core.db import get_db
+from app.database import get_db
 from app.api.identity_dependencies import browser_session
 from app.domains.world_characters.service import autonomous_setup as world_character_setup
 from app.domains.world_characters import exceptions as wc_errors

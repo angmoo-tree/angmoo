@@ -90,7 +90,8 @@ import json
 import sys
 from app import config, main
 from app import main as public_main
-from app.core import db, security
+from app import database as db
+from app.core import security
 from app.runtime import configuration
 print(json.dumps({
     'shared': config.settings is db.settings is security.settings is main.settings is public_main.settings,

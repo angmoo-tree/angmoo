@@ -1,8 +1,8 @@
 """The cross-owner Character write keeps the caller transaction boundary."""
 from sqlalchemy import create_engine, event, inspect
 from sqlalchemy.orm import Session
-from app import models
-from app.core.db import Base
+from model_fixture_support import models
+from app.models import Base
 from app.domains.characters.service.owner_controlled import (
     seed_owner_controlled_character, update_owner_controlled_character,
 )

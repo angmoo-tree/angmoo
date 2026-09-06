@@ -10,9 +10,10 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app import models, schemas
+from app import schemas
+from model_fixture_support import models
 from app.config import settings
-from app.core.db import Base
+from app.models import Base
 from app.credentials import (
     CredentialPurpose,
     CredentialResolutionError,

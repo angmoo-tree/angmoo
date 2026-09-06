@@ -165,7 +165,7 @@ def guarded_import(name, *args, **kwargs):
 
 builtins.__import__ = guarded_import
 import app.main  # noqa: F401
-from app.core import db
+from app import database as db
 
 assert db._default_engine is None
 assert db._default_session_factory is None

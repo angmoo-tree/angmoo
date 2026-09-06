@@ -8,8 +8,8 @@ import pytest
 from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 
-from app import models
-from app.core.db import Base
+from model_fixture_support import models
+from app.models import Base
 from app.domains.chat.schemas import (
     MessageSettingsUpdate,
     WorldChatMessageCreate,

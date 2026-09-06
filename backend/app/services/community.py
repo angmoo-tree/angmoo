@@ -142,7 +142,14 @@ from uuid import uuid4
 from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
-from app import models
+from app.domains.routines.models.resident import AgentActivityLog as _model_AgentActivityLog
+from app.domains.routines.models.resident import AgentRun as _model_AgentRun
+from app.domains.characters.models import CharacterState as _model_CharacterState
+from app.domains.social.models.posts import Notification as _model_Notification
+from app.domains.social.models.posts import Post as _model_Post
+from app.domains.identity.models import User as _model_User
+from app.runtime.persistence.model_registration import register_models
+register_models()
 from app import schemas
 from app.core import unit_of_work
 from app.core.search_text import build_post_search_document
@@ -225,7 +232,7 @@ def _elapsed_ms(started_at: float) -> int:
 def _reject_complete_tick(
     db: Session,
     *,
-    run: models.AgentRun,
+    run: _model_AgentRun,
     message: str,
     target_post_id: str | None = None,
 ) -> None:
@@ -278,7 +285,7 @@ def _topic_metadata_from_result(value: str | None) -> dict[str, str]:
     }
 
 
-def _topic_metadata_from_post_columns(post: models.Post | None) -> dict[str, str]:
+def _topic_metadata_from_post_columns(post: _model_Post | None) -> dict[str, str]:
     if post is None:
         return {"topic_signature": "", "novelty_basis": ""}
     return {
@@ -300,7 +307,7 @@ def _store_post_topic_metadata(
     novelty = _safe_topic_text(novelty_basis, 500)
     if not topic and not novelty:
         return
-    post = db.get(models.Post, post_id)
+    post = db.get(_model_Post, post_id)
     if post is None:
         return
     post.topic_signature = topic or None
@@ -337,20 +344,20 @@ def list_recent_feed_seed_consumed_logs(
     character_id: str,
     lookback_days: int = FEED_SEED_CONSUMED_LOOKBACK_DAYS,
     limit: int = FEED_SEED_CONSUMED_LIMIT,
-) -> list[models.AgentActivityLog]:
+) -> list[_model_AgentActivityLog]:
     return list(
         db.scalars(
-            select(models.AgentActivityLog)
+            select(_model_AgentActivityLog)
             .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type == FEED_SEED_CONSUMED_ACTION_TYPE,
-                models.AgentActivityLog.target_post_id.is_not(None),
-                models.AgentActivityLog.created_at
+                _model_AgentActivityLog.character_id == character_id,
+                _model_AgentActivityLog.action_type == FEED_SEED_CONSUMED_ACTION_TYPE,
+                _model_AgentActivityLog.target_post_id.is_not(None),
+                _model_AgentActivityLog.created_at
                 >= _feed_seed_consumed_cutoff(lookback_days=lookback_days),
             )
             .order_by(
-                models.AgentActivityLog.created_at.desc(),
-                models.AgentActivityLog.id.desc(),
+                _model_AgentActivityLog.created_at.desc(),
+                _model_AgentActivityLog.id.desc(),
             )
             .limit(max(1, limit))
         )
@@ -366,12 +373,12 @@ def feed_seed_source_already_consumed(
 ) -> bool:
     return (
         db.scalar(
-            select(models.AgentActivityLog.id)
+            select(_model_AgentActivityLog.id)
             .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type == FEED_SEED_CONSUMED_ACTION_TYPE,
-                models.AgentActivityLog.target_post_id == source_post_id,
-                models.AgentActivityLog.created_at
+                _model_AgentActivityLog.character_id == character_id,
+                _model_AgentActivityLog.action_type == FEED_SEED_CONSUMED_ACTION_TYPE,
+                _model_AgentActivityLog.target_post_id == source_post_id,
+                _model_AgentActivityLog.created_at
                 >= _feed_seed_consumed_cutoff(lookback_days=lookback_days),
             )
             .limit(1)
@@ -420,20 +427,20 @@ def list_recent_feed_interest_logs(
     character_id: str,
     lookback_days: int = FEED_SEED_CONSUMED_LOOKBACK_DAYS,
     limit: int = RECENT_FEED_INTEREST_LOG_SCAN_LIMIT,
-) -> list[models.AgentActivityLog]:
+) -> list[_model_AgentActivityLog]:
     return list(
         db.scalars(
-            select(models.AgentActivityLog)
+            select(_model_AgentActivityLog)
             .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type == "feed_interests_noted",
-                models.AgentActivityLog.result.is_not(None),
-                models.AgentActivityLog.created_at
+                _model_AgentActivityLog.character_id == character_id,
+                _model_AgentActivityLog.action_type == "feed_interests_noted",
+                _model_AgentActivityLog.result.is_not(None),
+                _model_AgentActivityLog.created_at
                 >= _feed_seed_consumed_cutoff(lookback_days=lookback_days),
             )
             .order_by(
-                models.AgentActivityLog.created_at.desc(),
-                models.AgentActivityLog.id.desc(),
+                _model_AgentActivityLog.created_at.desc(),
+                _model_AgentActivityLog.id.desc(),
             )
             .limit(max(1, limit))
         )
@@ -441,7 +448,7 @@ def list_recent_feed_interest_logs(
 
 
 def _recent_feed_interest_post_is_eligible(
-    db: Session, *, character_id: str, post: models.Post
+    db: Session, *, character_id: str, post: _model_Post
 ) -> bool:
     if post.author_character_id == character_id:
         return False
@@ -456,22 +463,22 @@ def _latest_post_created_topic_metadata(
     db: Session, *, character_id: str | None, post_id: str
 ) -> dict[str, str]:
     if db is not None:
-        column_metadata = _topic_metadata_from_post_columns(db.get(models.Post, post_id))
+        column_metadata = _topic_metadata_from_post_columns(db.get(_model_Post, post_id))
         if column_metadata["topic_signature"] or column_metadata["novelty_basis"]:
             return column_metadata
     if db is None or character_id is None:
         return {"topic_signature": "", "novelty_basis": ""}
     log = db.scalar(
-        select(models.AgentActivityLog)
+        select(_model_AgentActivityLog)
         .where(
-            models.AgentActivityLog.character_id == character_id,
-            models.AgentActivityLog.action_type == "post_created",
-            models.AgentActivityLog.target_post_id == post_id,
-            models.AgentActivityLog.result.is_not(None),
+            _model_AgentActivityLog.character_id == character_id,
+            _model_AgentActivityLog.action_type == "post_created",
+            _model_AgentActivityLog.target_post_id == post_id,
+            _model_AgentActivityLog.result.is_not(None),
         )
         .order_by(
-            models.AgentActivityLog.created_at.desc(),
-            models.AgentActivityLog.id.desc(),
+            _model_AgentActivityLog.created_at.desc(),
+            _model_AgentActivityLog.id.desc(),
         )
         .limit(1)
     )
@@ -481,7 +488,7 @@ def _latest_post_created_topic_metadata(
 
 
 def _topic_metadata_for_post(
-    db: Session, *, post: models.Post, character_id: str | None = None
+    db: Session, *, post: _model_Post, character_id: str | None = None
 ) -> dict[str, str]:
     column_metadata = _topic_metadata_from_post_columns(post)
     if column_metadata["topic_signature"] or column_metadata["novelty_basis"]:
@@ -493,7 +500,7 @@ def _topic_metadata_for_post(
     )
 
 
-def post_topic_signature_for_prompt(db: Session, post: models.Post) -> str:
+def post_topic_signature_for_prompt(db: Session, post: _model_Post) -> str:
     metadata = _topic_metadata_for_post(db, post=post)
     return metadata["topic_signature"] or _fallback_topic_signature(
         title=post.title, body=post.body
@@ -605,17 +612,17 @@ def format_recent_own_root_topic_history_for_prompt(
     )
     posts = list(
         db.scalars(
-            select(models.Post)
+            select(_model_Post)
             .where(
-                models.Post.author_character_id == character_id,
-                models.Post.reply_to_post_id.is_(None),
-                models.Post.post_type != "repost",
-                models.Post.repost_of_post_id.is_(None),
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-                models.Post.created_at >= cutoff,
+                _model_Post.author_character_id == character_id,
+                _model_Post.reply_to_post_id.is_(None),
+                _model_Post.post_type != "repost",
+                _model_Post.repost_of_post_id.is_(None),
+                _model_Post.deleted_at.is_(None),
+                _model_Post.report_hidden_at.is_(None),
+                _model_Post.created_at >= cutoff,
             )
-            .order_by(models.Post.created_at.desc(), models.Post.id.desc())
+            .order_by(_model_Post.created_at.desc(), _model_Post.id.desc())
             .limit(RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT)
         )
     )
@@ -746,17 +753,17 @@ def _build_recent_own_root_topics_sanitize_skeleton(
     )
     posts = list(
         db.scalars(
-            select(models.Post)
+            select(_model_Post)
             .where(
-                models.Post.author_character_id == character_id,
-                models.Post.reply_to_post_id.is_(None),
-                models.Post.post_type != "repost",
-                models.Post.repost_of_post_id.is_(None),
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-                models.Post.created_at >= cutoff,
+                _model_Post.author_character_id == character_id,
+                _model_Post.reply_to_post_id.is_(None),
+                _model_Post.post_type != "repost",
+                _model_Post.repost_of_post_id.is_(None),
+                _model_Post.deleted_at.is_(None),
+                _model_Post.report_hidden_at.is_(None),
+                _model_Post.created_at >= cutoff,
             )
-            .order_by(models.Post.created_at.desc(), models.Post.id.desc())
+            .order_by(_model_Post.created_at.desc(), _model_Post.id.desc())
             .limit(RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT)
         )
     )
@@ -927,17 +934,17 @@ def _format_recent_own_roots_metadata_only(
     )
     posts = list(
         db.scalars(
-            select(models.Post)
+            select(_model_Post)
             .where(
-                models.Post.author_character_id == character_id,
-                models.Post.reply_to_post_id.is_(None),
-                models.Post.post_type != "repost",
-                models.Post.repost_of_post_id.is_(None),
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-                models.Post.created_at >= cutoff,
+                _model_Post.author_character_id == character_id,
+                _model_Post.reply_to_post_id.is_(None),
+                _model_Post.post_type != "repost",
+                _model_Post.repost_of_post_id.is_(None),
+                _model_Post.deleted_at.is_(None),
+                _model_Post.report_hidden_at.is_(None),
+                _model_Post.created_at >= cutoff,
             )
-            .order_by(models.Post.created_at.desc(), models.Post.id.desc())
+            .order_by(_model_Post.created_at.desc(), _model_Post.id.desc())
             .limit(RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT)
         )
     )
@@ -977,17 +984,17 @@ def recent_own_root_topic_exists(
     )
     posts = list(
         db.scalars(
-            select(models.Post)
+            select(_model_Post)
             .where(
-                models.Post.author_character_id == character_id,
-                models.Post.reply_to_post_id.is_(None),
-                models.Post.post_type != "repost",
-                models.Post.repost_of_post_id.is_(None),
-                models.Post.deleted_at.is_(None),
-                models.Post.report_hidden_at.is_(None),
-                models.Post.created_at >= cutoff,
+                _model_Post.author_character_id == character_id,
+                _model_Post.reply_to_post_id.is_(None),
+                _model_Post.post_type != "repost",
+                _model_Post.repost_of_post_id.is_(None),
+                _model_Post.deleted_at.is_(None),
+                _model_Post.report_hidden_at.is_(None),
+                _model_Post.created_at >= cutoff,
             )
-            .order_by(models.Post.created_at.desc(), models.Post.id.desc())
+            .order_by(_model_Post.created_at.desc(), _model_Post.id.desc())
             .limit(RECENT_OWN_ROOT_TOPIC_SCAN_LIMIT)
         )
     )
@@ -1008,11 +1015,11 @@ def _feed_seed_consumed_log_exists(
 ) -> bool:
     return (
         db.scalar(
-            select(models.AgentActivityLog.id)
+            select(_model_AgentActivityLog.id)
             .where(
-                models.AgentActivityLog.character_id == character_id,
-                models.AgentActivityLog.action_type == FEED_SEED_CONSUMED_ACTION_TYPE,
-                models.AgentActivityLog.target_post_id == source_post_id,
+                _model_AgentActivityLog.character_id == character_id,
+                _model_AgentActivityLog.action_type == FEED_SEED_CONSUMED_ACTION_TYPE,
+                _model_AgentActivityLog.target_post_id == source_post_id,
             )
             .limit(1)
         )
@@ -1021,7 +1028,7 @@ def _feed_seed_consumed_log_exists(
 
 
 def _extract_feed_seed_source_from_run(
-    run: models.AgentRun,
+    run: _model_AgentRun,
 ) -> tuple[str, str, str, str] | None:
     gateway_result = run.gateway_result if isinstance(run.gateway_result, dict) else {}
     action_gate = gateway_result.get("action_gate")
@@ -1049,8 +1056,8 @@ def _extract_feed_seed_source_from_run(
 
 
 def maybe_log_feed_seed_consumed_for_created_post(
-    db: Session, *, run: models.AgentRun, created_post_id: str
-) -> models.AgentActivityLog | None:
+    db: Session, *, run: _model_AgentRun, created_post_id: str
+) -> _model_AgentActivityLog | None:
     seed_source = _extract_feed_seed_source_from_run(run)
     if seed_source is None:
         return None
@@ -1277,7 +1284,7 @@ def create_agent_tool_post(
             run=run,
             requested_character_id=author_character_id,
         )
-    user = db.get(models.User, run.user_id)
+    user = db.get(_model_User, run.user_id)
     if user is None:
         _raise_agent_tool_authorization_error(
             action="post",
@@ -1421,7 +1428,7 @@ def list_agent_tool_feed(
 def _list_resident_feed_scan_page(
     db: Session,
     *,
-    run: models.AgentRun,
+    run: _model_AgentRun,
     limit: int,
     cursor: str | None = None,
 ) -> schemas.AgentFeedPage:
@@ -1430,7 +1437,7 @@ def _list_resident_feed_scan_page(
             db, character_id=run.character_id
         ).allowed_actions
     )
-    items: list[models.Post] = []
+    items: list[_model_Post] = []
     page_cursor = cursor
     last_scanned_id: str | None = cursor
     scanned = 0
@@ -1506,7 +1513,7 @@ def list_agent_tool_following_feed(
 
 
 def _agent_feed_post_summary(
-    db: Session, post: models.Post
+    db: Session, post: _model_Post
 ) -> schemas.AgentFeedPostSummary:
     author = _post_author_identity(db, post)
     return schemas.AgentFeedPostSummary(
@@ -1772,9 +1779,9 @@ def get_agent_tool_profile(
 def _log_inbox_notifications_provided(
     db: Session,
     *,
-    run: models.AgentRun,
+    run: _model_AgentRun,
     session_key: str,
-    notifications: list[models.Notification],
+    notifications: list[_model_Notification],
 ) -> None:
     payload = {
         "session_fingerprint": _session_fingerprint(session_key),
@@ -1793,21 +1800,21 @@ def _log_inbox_notifications_provided(
 
 
 def _latest_inbox_delivery_notification_ids(
-    db: Session, *, run: models.AgentRun, session_key: str
+    db: Session, *, run: _model_AgentRun, session_key: str
 ) -> list[int]:
     fingerprint = _session_fingerprint(session_key)
     logs = list(
         db.scalars(
-            select(models.AgentActivityLog)
+            select(_model_AgentActivityLog)
             .where(
-                models.AgentActivityLog.user_id == run.user_id,
-                models.AgentActivityLog.character_id == run.character_id,
-                models.AgentActivityLog.action_type == "inbox_notifications_provided",
-                models.AgentActivityLog.created_at >= run.created_at,
+                _model_AgentActivityLog.user_id == run.user_id,
+                _model_AgentActivityLog.character_id == run.character_id,
+                _model_AgentActivityLog.action_type == "inbox_notifications_provided",
+                _model_AgentActivityLog.created_at >= run.created_at,
             )
             .order_by(
-                models.AgentActivityLog.created_at.desc(),
-                models.AgentActivityLog.id.desc(),
+                _model_AgentActivityLog.created_at.desc(),
+                _model_AgentActivityLog.id.desc(),
             )
             .limit(5)
         )
@@ -1837,7 +1844,7 @@ def _latest_inbox_delivery_notification_ids(
 
 
 def _mark_provided_inbox_notifications_read(
-    db: Session, *, run: models.AgentRun, session_key: str
+    db: Session, *, run: _model_AgentRun, session_key: str
 ) -> None:
     for notification_id in _latest_inbox_delivery_notification_ids(
         db, run=run, session_key=session_key
@@ -2095,7 +2102,7 @@ def _single_post_id_hint(value: str | None) -> str | None:
 
 
 def _resolve_inbox_review_target_post_id(
-    db: Session, *, run: models.AgentRun, data: schemas.AgentInboxReviewCreate
+    db: Session, *, run: _model_AgentRun, data: schemas.AgentInboxReviewCreate
 ) -> tuple[str | None, str, list[str]]:
     warnings: list[str] = []
     raw_candidate_post_id = data.candidate_post_id or ""
@@ -2210,10 +2217,10 @@ def observe_agent_tool_community(
 def _complete_tick_target_post(
     db: Session,
     *,
-    run: models.AgentRun,
+    run: _model_AgentRun,
     action_type: str,
     post_id: str | None,
-) -> models.Post:
+) -> _model_Post:
     if not post_id:
         _reject_complete_tick(
             db,
@@ -2237,7 +2244,7 @@ def _complete_tick_target_post(
 
 
 def _ensure_complete_tick_reply_target_is_not_self(
-    db: Session, *, run: models.AgentRun, post: models.Post
+    db: Session, *, run: _model_AgentRun, post: _model_Post
 ) -> None:
     if post.author_character_id == run.character_id:
         _reject_complete_tick(
@@ -2254,7 +2261,7 @@ def _ensure_complete_tick_reply_target_is_not_self(
 def _complete_tick_follow_status(
     db: Session,
     *,
-    run: models.AgentRun,
+    run: _model_AgentRun,
     target_type: str | None,
     target_id: str | None,
     action_type: str,
@@ -2317,7 +2324,7 @@ def _resident_action_candidate_id(
 def _put_candidate_action(
     candidate_actions: dict[str, schemas.AgentCompleteTickAction],
     *,
-    run: models.AgentRun,
+    run: _model_AgentRun,
     action_type: str,
     target_key: str,
     action: schemas.AgentCompleteTickAction,
@@ -2334,7 +2341,7 @@ def _put_candidate_action(
 def _build_complete_tick_candidate_actions(
     db: Session,
     *,
-    run: models.AgentRun,
+    run: _model_AgentRun,
     policy: agent_activity_policy.ActivityPolicy | None,
 ) -> dict[str, schemas.AgentCompleteTickAction]:
     allowed_actions = (
@@ -2406,15 +2413,15 @@ def _build_complete_tick_candidate_actions(
     if "follow" in allowed:
         notifications = list(
             db.scalars(
-                select(models.Notification)
+                select(_model_Notification)
                 .where(
-                    models.Notification.recipient_character_id == run.character_id,
-                    models.Notification.notification_type == "reply",
-                    models.Notification.read_at.is_(None),
+                    _model_Notification.recipient_character_id == run.character_id,
+                    _model_Notification.notification_type == "reply",
+                    _model_Notification.read_at.is_(None),
                 )
                 .order_by(
-                    models.Notification.created_at.desc(),
-                    models.Notification.id.desc(),
+                    _model_Notification.created_at.desc(),
+                    _model_Notification.id.desc(),
                 )
                 .limit(30)
             )
@@ -2457,7 +2464,7 @@ def _build_complete_tick_candidate_actions(
 def _resolve_complete_tick_candidate_actions(
     db: Session,
     *,
-    run: models.AgentRun,
+    run: _model_AgentRun,
     data: schemas.AgentCompleteTickCreate,
     policy: agent_activity_policy.ActivityPolicy | None,
 ) -> list[schemas.AgentCompleteTickAction]:
@@ -2490,7 +2497,7 @@ def _resolve_complete_tick_candidate_actions(
 
 
 def _validate_complete_tick_decision_type(
-    db: Session, *, run: models.AgentRun, data: schemas.AgentCompleteTickCreate
+    db: Session, *, run: _model_AgentRun, data: schemas.AgentCompleteTickCreate
 ) -> None:
     decision_type = data.decision_type
     if decision_type is None:
@@ -2542,7 +2549,7 @@ def _validate_complete_tick_decision_type(
 
 
 def _validate_complete_tick_actions_before_execution(
-    db: Session, *, run: models.AgentRun, data: schemas.AgentCompleteTickCreate
+    db: Session, *, run: _model_AgentRun, data: schemas.AgentCompleteTickCreate
 ) -> None:
     seen_likes: set[str] = set()
     seen_reposts: set[str] = set()
@@ -2580,12 +2587,12 @@ def _validate_complete_tick_actions_before_execution(
                 )
             root_post_id = _thread_root_post_id(db, post.id)
             thread_viewed = db.scalar(
-                select(models.AgentActivityLog.id)
+                select(_model_AgentActivityLog.id)
                 .where(
-                    models.AgentActivityLog.character_id == run.character_id,
-                    models.AgentActivityLog.action_type == "thread_viewed",
-                    models.AgentActivityLog.target_post_id == root_post_id,
-                    models.AgentActivityLog.created_at >= run.created_at,
+                    _model_AgentActivityLog.character_id == run.character_id,
+                    _model_AgentActivityLog.action_type == "thread_viewed",
+                    _model_AgentActivityLog.target_post_id == root_post_id,
+                    _model_AgentActivityLog.created_at >= run.created_at,
                 )
                 .limit(1)
             )
@@ -2887,12 +2894,12 @@ def complete_agent_tool_tick(
             _ensure_complete_tick_reply_target_is_not_self(db, run=run, post=post)
             root_post_id = _thread_root_post_id(db, post.id)
             thread_viewed = db.scalar(
-                select(models.AgentActivityLog.id)
+                select(_model_AgentActivityLog.id)
                 .where(
-                    models.AgentActivityLog.character_id == run.character_id,
-                    models.AgentActivityLog.action_type == "thread_viewed",
-                    models.AgentActivityLog.target_post_id == root_post_id,
-                    models.AgentActivityLog.created_at >= run.created_at,
+                    _model_AgentActivityLog.character_id == run.character_id,
+                    _model_AgentActivityLog.action_type == "thread_viewed",
+                    _model_AgentActivityLog.target_post_id == root_post_id,
+                    _model_AgentActivityLog.created_at >= run.created_at,
                 )
                 .limit(1)
             )
@@ -3142,7 +3149,7 @@ def save_character_state(
 
 def save_character_state_for_user(
     db: Session,
-    user: models.User,
+    user: _model_User,
     character_id: str,
     data: schemas.CharacterStateWrite,
 ) -> schemas.CharacterStateRead:
@@ -3157,7 +3164,7 @@ def _normalize_state_memory_note(value: str) -> str:
 
 
 def _is_duplicate_memory_note(
-    state: models.CharacterState | None, data: schemas.CharacterStateWrite
+    state: _model_CharacterState | None, data: schemas.CharacterStateWrite
 ) -> bool:
     if state is None:
         return False
@@ -3188,7 +3195,7 @@ def save_agent_tool_character_state(
             run=run,
             requested_character_id=character_id,
         )
-    existing_state = db.get(models.CharacterState, character_id)
+    existing_state = db.get(_model_CharacterState, character_id)
     observation_note = _state_observation_note(data)
     if observation_note:
         agent_crud.log_activity(
@@ -3242,7 +3249,7 @@ def _get_agent_tool_run(
     action: str,
     requested_post_id: str | None = None,
     requested_character_id: str | None = None,
-) -> models.AgentRun:
+) -> _model_AgentRun:
     run = agent_run_crud.get_active_run_for_tool_auth_key(db, session_key)
     if run is not None:
         return run
@@ -3274,7 +3281,7 @@ def _get_agent_tool_run(
 
 
 def _agent_tool_character_id(
-    run: models.AgentRun,
+    run: _model_AgentRun,
     requested_character_id: str | None,
     *,
     action: str,
@@ -3295,9 +3302,9 @@ def _agent_tool_character_id(
 
 
 def _agent_tool_user(
-    db: Session, run: models.AgentRun, *, action: str, session_key: str
-) -> models.User:
-    user = db.get(models.User, run.user_id)
+    db: Session, run: _model_AgentRun, *, action: str, session_key: str
+) -> _model_User:
+    user = db.get(_model_User, run.user_id)
     if user is None:
         _raise_agent_tool_authorization_error(
             action=action,
@@ -3310,7 +3317,7 @@ def _agent_tool_user(
 
 
 def _ensure_tick_action_allowed(
-    db: Session, *, session_key: str, run: models.AgentRun, action: str
+    db: Session, *, session_key: str, run: _model_AgentRun, action: str
 ) -> None:
     try:
         agent_activity_policy.assert_action_allowed(db, run=run, action=action)
