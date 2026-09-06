@@ -8,7 +8,7 @@
 
 Device Home의 기존 `VERIFIED` 파일럿 증거는 유지한다. 프론트엔드의 AR-F2 이후 전환과 AR-X는 별도 단계다. 백엔드가 이전돼도 해당 기능의 `frontend_status`가 `MAPPED`이면 전체 `status`도 `MAPPED`로 남긴다. P8-L-S의 실제 AI 품질·인과·사용자 closeout 또한 이 문서의 코드 이전 판정과 구분한다.
 
-현재 G07에서 별도 source로 준비하는 테스트 6개는 이 기준에 아직 합류하지 않았다. LocalBot 응답·rate limit·atomic quota는 `tests/local_bot`, profile media는 `tests/media`, prompt safety와 context text는 `tests/common`으로 옮기는 후속이다. 현재 inventory는 이 파일들이 실제 존재하는 기준 경로를 유지하며, 부모 통합에서 그 source의 정확한 이동을 연결한다.
+G07의 테스트 6개는 원본 source `e7241d74`에서 합류했다. LocalBot 응답·rate limit·atomic quota는 `tests/local_bot`, profile media는 `tests/media`, prompt safety와 context text는 `tests/common`에 있다. 65개 node의 기존 단언을 보존하고 이전 후 모두 통과했으며, inventory의 현재 경로도 이 위치를 가리킨다. 최종 후보의 전체 CI·실행 경로 검증은 별도로 기록한다.
 
 ## 현재 경로와 역사적 증거를 읽는 방법
 
