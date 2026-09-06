@@ -268,13 +268,13 @@ from app.runtime.extensions.resident_adapter import OpenClawGatewayError
 
 from app.runtime.extensions.resident_adapter import openclaw_auth_profiles
 
-from app.domains.world_characters.public import is_owner_controlled_character
+from app.domains.world_characters.service.owner_identity import is_owner_controlled_character
 
-from app.domains.world_characters.public import lock_world_autonomy_capacity
+from app.domains.world_characters.service.autonomous_setup import lock_world_autonomy_capacity
 
-from app.domains.world_characters.public import selected_autonomous_world_character
+from app.domains.world_characters.service.autonomous_setup import selected_autonomous_world_character
 
-from app.domains.world_characters.public import set_active_world_character_autonomy
+from app.domains.world_characters.service.autonomous_setup import set_active_world_character_autonomy
 
 from app.domains.routines.contracts.activity_presentation import ActivityPresentationReads
 

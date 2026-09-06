@@ -2730,3 +2730,6 @@ B5 준비 branch의 실제 업무 이전·옛 Social/Relationships 계층·Commu
 Secret scanner의 현재 exact tuple 하나는 옮긴 원본 fixture 경로를 사용한다. 체크포인트 예외의 원본 signed d7037625 경로·commit·Git blob·값 해시와 검토 메타데이터는 유지한다. 기존 allowlist 회귀는 현재 fixture와 동결 fixture의 값 동일성·해시·원본 체크포인트를 계속 검증한다. 실행·수집 및 원래 보존 검사 결과는 source 고정 전에 추가한다.
 
 검증: 기존 이동 19개와 metadata·scanner 회귀를 합쳐 **42 passed / 4.49s**다. 원본 전체 함수·decorator AST 19개와 단언 95개가 동일하며 수집은 **2509 → 2509**, 기존 19개 경로 치환 외 추가·누락·중복이 없다. 실제 scanner도 정확한 새 경로/원래 값만 허용하며 다른 경로·다른 값은 거절한다. 원래 보존 검사 7종 read-only 진단은 모두 오류 0(protected 2311/current 2509)이고, 원래 signed869 도입 2경로의 임시 읽기 증거만 사용했다. 원장 append와 stock 전체 gate·Hosted CI는 부모의 선형 통합 단계에서 진행한다. L4 1094/14/99 및 Memory batch 현재 inventory는 재생성 없이 통과했다.
+## B8 통합 준비 — 남은 공개 집합의 실제 제품 소비자 전환
+
+Characters·Identity·Routines·WorldCharacter·Worlds의 옛 public5는 실제 함수·class 정의 없이 explicit import와 export 선언만 담는다. 165개 binding을 원문 Git source와 대조해, Identity11/WC2 제품 소비자13개를 실제 역할 모듈로 연결했다. 89개 전체 함수·class AST는 동일하다. 관련 검색 planner·Memory consolidation·Resident 실행 검사는 **66 passed / 11.61초**, 경계 검사는1091modules/4079edges/기존예외5 PASS다. 실제 파일과 역사 identity 검사의 제거는 원래 binding과 현재 소유 객체를 검증하는 별도 종료 절차에서 처리한다.

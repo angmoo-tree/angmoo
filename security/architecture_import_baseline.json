@@ -1,5 +1,5 @@
 {
-  "edge_count": 4075,
+  "edge_count": 4079,
   "external_import_count": 3116,
   "module_count": 1091,
   "modules": [
@@ -12264,7 +12264,7 @@
       ],
       "imports": [
         "app.domains.chat.policies",
-        "app.domains.identity.public",
+        "app.domains.identity.contracts",
         "app.domains.memory.contracts.planner_provider",
         "app.domains.memory.policies.retrieval_planner",
         "app.integrations.direct_llm"
@@ -12282,7 +12282,7 @@
         "app.core.prompt_safety",
         "app.domains.chat.contracts.character_response_generator",
         "app.domains.chat.policies",
-        "app.domains.identity.public",
+        "app.domains.identity.contracts",
         "app.integrations.direct_llm"
       ],
       "module": "app.integrations.llm.character_response_generator",
@@ -12296,7 +12296,7 @@
       ],
       "imports": [
         "app.domains.chat.policies",
-        "app.domains.identity.public",
+        "app.domains.identity.contracts",
         "app.domains.relationships.contracts.graph_planner",
         "app.domains.relationships.policies.graph_plan_schema",
         "app.integrations.direct_llm"
@@ -12313,7 +12313,7 @@
         "time"
       ],
       "imports": [
-        "app.domains.identity.public",
+        "app.domains.identity.contracts",
         "app.domains.memory.contracts.consolidation_provider",
         "app.domains.memory.exceptions",
         "app.domains.memory.policies.consolidation_output",
@@ -12330,7 +12330,7 @@
         "json"
       ],
       "imports": [
-        "app.domains.identity.public",
+        "app.domains.identity.contracts",
         "app.domains.memory.exceptions",
         "app.domains.memory.policies.batch",
         "app.domains.memory.policies.selection_output",
@@ -12350,7 +12350,7 @@
         "app.domains.chat.contracts.retrieval_router",
         "app.domains.chat.contracts.retrieval_router_provider",
         "app.domains.chat.policies",
-        "app.domains.identity.public",
+        "app.domains.identity.contracts",
         "app.integrations.direct_llm"
       ],
       "module": "app.integrations.llm.retrieval_router",
@@ -12941,8 +12941,9 @@
         "app.domains.social.service.image_attachment",
         "app.domains.social.service.posts",
         "app.domains.world_characters.models",
-        "app.domains.world_characters.public",
         "app.domains.world_characters.repository.credential_scope",
+        "app.domains.world_characters.service.autonomous_setup",
+        "app.domains.world_characters.service.owner_identity",
         "app.domains.world_characters.service.readiness",
         "app.domains.worlds.models",
         "app.domains.worlds.repository.credential_scope",
@@ -13072,8 +13073,8 @@
       "imports": [
         "app.domains.characters.models",
         "app.domains.chat.models",
+        "app.domains.identity.constants",
         "app.domains.identity.models",
-        "app.domains.identity.public",
         "app.domains.world_characters.models",
         "app.domains.worlds.models"
       ],
@@ -13103,7 +13104,8 @@
       "imports": [
         "app.domains.characters.models",
         "app.domains.chat.contracts.retrieval_policy",
-        "app.domains.identity.public",
+        "app.domains.identity.constants",
+        "app.domains.identity.models",
         "app.domains.memory.models.items",
         "app.domains.world_characters.models",
         "app.domains.worlds.models"
@@ -13979,7 +13981,7 @@
         "dataclasses"
       ],
       "imports": [
-        "app.domains.identity.public",
+        "app.domains.identity.models",
         "app.domains.memory.exceptions",
         "app.integrations.llm.memory_selection",
         "app.providers.registry",
@@ -14410,7 +14412,8 @@
         "typing"
       ],
       "imports": [
-        "app.domains.identity.public",
+        "app.domains.identity.constants",
+        "app.domains.identity.models",
         "app.domains.runtime.service.scheduler_lease"
       ],
       "module": "app.runtime.persistence.scheduler_lease",
@@ -14477,7 +14480,8 @@
       ],
       "imports": [
         "app.core.sqlite_concurrency",
-        "app.domains.identity.public",
+        "app.domains.identity.constants",
+        "app.domains.identity.models",
         "app.domains.runtime.policies.lease",
         "app.domains.runtime.service.sqlite_lease"
       ],
@@ -14743,7 +14747,7 @@
         "app.domains.routines.service.tick_schedule",
         "app.domains.routines.service.tool_policy",
         "app.domains.social.service.posts",
-        "app.domains.world_characters.public",
+        "app.domains.world_characters.service.owner_identity",
         "app.domains.world_characters.service.readiness",
         "app.integrations.direct_llm",
         "app.runtime.extensions.resident_adapter",

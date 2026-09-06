@@ -5,7 +5,8 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
 from sqlalchemy import Engine, select
-from app.domains.identity.public import InstallationIdentity, LOCAL_INSTALLATION_KEY
+from app.domains.identity.models import InstallationIdentity
+from app.domains.identity.constants import LOCAL_INSTALLATION_KEY
 from app.domains.runtime.service.sqlite_lease import SqliteSchedulerLeaseService
 from app.domains.runtime.policies.lease import aware_utc
 from app.core.sqlite_concurrency import SqliteRetryPolicy, run_sqlite_immediate

@@ -122,8 +122,8 @@ from app.domains.routines.service.tool_policy import _policy_allows_observe
 from app.domains.routines.service.tool_policy import _resident_public_tools_allow
 from app.domains.routines.service.tool_policy import _should_allow_resident_thread_tool
 from app.runtime.search.binding import current_social_search
-from app.domains.world_characters.public import is_owner_controlled_character
-from app.domains.world_characters.public import owner_controlled_character_ids
+from app.domains.world_characters.service.owner_identity import is_owner_controlled_character
+from app.domains.world_characters.service.owner_identity import owner_controlled_character_ids
 from app.domains.world_characters.service import readiness as activity_profile_readiness
 from app.runtime.routines import activity_policy as agent_activity_policy
 from app.runtime.resident import slots as resident_slots
