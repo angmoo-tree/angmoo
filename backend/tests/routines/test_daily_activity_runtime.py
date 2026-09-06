@@ -1,4 +1,10 @@
 from __future__ import annotations
+import app.domains.routines.contracts.lifecycle as _actual_domains_routines_contracts_lifecycle
+import app.domains.routines.exceptions as _actual_domains_routines_exceptions
+import app.domains.routines.service.lifecycle as _actual_domains_routines_service_lifecycle
+import app.domains.routines.service.plans as _actual_domains_routines_service_plans
+import app.domains.routines.utils.clock as _actual_domains_routines_utils_clock
+
 from app.domains.routines.policies import planning as routine_planning
 from app.domains.routines.service import plans as routine_plans
 
@@ -23,7 +29,6 @@ from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.domains.identity import dependencies as api_deps
 from app.api.v1.routes import world_activity_runtime as runtime_routes
 from app.models import Base
-from app.domains.routines import public as routines
 from app.domains.routines.service import execution as activity_runtime
 from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
 from app.domains.routines.policies import activity_state as activity_state_contracts
@@ -354,27 +359,8 @@ def test_routines_public_uses_frozen_clock_and_writes_no_public_action() -> None
     now = _utc(datetime(2026, 8, 9, 0, 30))
     with Session(engine, expire_on_commit=False) as db:
         _world_row, fixture, _other = _seed(db)
-
-        created = routines.prepare_activity_plan(
-            db,
-            references=SqlAlchemyPlanReferences(db),
-            character_id=fixture.character.id,
-            world_id=fixture.world_character.world_id,
-            user=fixture.user,
-            data=schemas.DailyActivityPlanPrepareCreate(
-                idempotency_key="domain-clock-plan"
-            ),
-            clock=routines.FrozenClock(now),
-        )
-        replay = routines.get_activity_plan(
-            db,
-            references=SqlAlchemyPlanReferences(db),
-            character_id=fixture.character.id,
-            world_id=fixture.world_character.world_id,
-            user=fixture.user,
-            clock=routines.FrozenClock(now),
-        )
-
+        created = _actual_domains_routines_service_plans.prepare_activity_plan(db, references=SqlAlchemyPlanReferences(db), character_id=fixture.character.id, world_id=fixture.world_character.world_id, user=fixture.user, data=schemas.DailyActivityPlanPrepareCreate(idempotency_key='domain-clock-plan'), clock=_actual_domains_routines_utils_clock.FrozenClock(now))
+        replay = _actual_domains_routines_service_plans.get_activity_plan(db, references=SqlAlchemyPlanReferences(db), character_id=fixture.character.id, world_id=fixture.world_character.world_id, user=fixture.user, clock=_actual_domains_routines_utils_clock.FrozenClock(now))
         assert created.id == replay.id
         assert replay.reused is True
         assert db.scalar(select(func.count(models.AgentRun.id))) == 0
@@ -389,31 +375,14 @@ def test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan() -> N
     now = _utc(datetime(2026, 8, 9, 0, 30))
     with Session(engine, expire_on_commit=False) as db:
         _world_row, fixture, _other = _seed(db)
-        fixture.world_character.control_mode = "owner_controlled"
+        fixture.world_character.control_mode = 'owner_controlled'
         fixture.world_character.owner_user_id = fixture.user.id
         fixture.world_character.autonomous_enabled = False
         db.commit()
-
-        with pytest.raises(
-            routines.DailyActivityPlanValidationError,
-            match="owner_controlled_automation_disabled",
-        ):
-            routines.prepare_activity_plan(
-                db,
-                references=SqlAlchemyPlanReferences(db),
-                character_id=fixture.character.id,
-                world_id=fixture.world_character.world_id,
-                user=fixture.user,
-                data=schemas.DailyActivityPlanPrepareCreate(
-                    idempotency_key="forged-owner-plan"
-                ),
-                clock=routines.FrozenClock(now),
-            )
-
-        transition = routines.reconcile_all_elapsed_routines(
-            db, references=SqlAlchemyLifecycleReferences(db), clock=routines.FrozenClock(now + timedelta(days=1))
-        )
-        assert transition == routines.DaypartTransitionCounts(0, 0)
+        with pytest.raises(_actual_domains_routines_exceptions.DailyActivityPlanValidationError, match='owner_controlled_automation_disabled'):
+            _actual_domains_routines_service_plans.prepare_activity_plan(db, references=SqlAlchemyPlanReferences(db), character_id=fixture.character.id, world_id=fixture.world_character.world_id, user=fixture.user, data=schemas.DailyActivityPlanPrepareCreate(idempotency_key='forged-owner-plan'), clock=_actual_domains_routines_utils_clock.FrozenClock(now))
+        transition = _actual_domains_routines_service_lifecycle.reconcile_all_elapsed_routines(db, references=SqlAlchemyLifecycleReferences(db), clock=_actual_domains_routines_utils_clock.FrozenClock(now + timedelta(days=1)))
+        assert transition == _actual_domains_routines_contracts_lifecycle.DaypartTransitionCounts(0, 0)
         assert db.scalar(select(func.count(models.DailyActivityPlan.id))) == 0
         assert db.scalar(select(func.count(models.DailyActivityPlanItem.id))) == 0
         assert db.scalar(select(func.count(models.ActivityEpisode.id))) == 0

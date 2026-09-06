@@ -1,7 +1,7 @@
 {
-  "edge_count": 4054,
-  "external_import_count": 3110,
-  "module_count": 1082,
+  "edge_count": 3964,
+  "external_import_count": 3099,
+  "module_count": 1066,
   "modules": [
     {
       "external_imports": [],
@@ -954,17 +954,6 @@
       ],
       "module": "app.domains.characters.models",
       "path": "backend/app/domains/characters/models.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.characters.contracts",
-        "app.domains.characters.models",
-        "app.domains.characters.service.seed"
-      ],
-      "module": "app.domains.characters.public",
-      "path": "backend/app/domains/characters/public.py",
       "wildcard_imports": []
     },
     {
@@ -2566,20 +2555,6 @@
       ],
       "module": "app.domains.identity.policies",
       "path": "backend/app/domains/identity/policies.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.identity.constants",
-        "app.domains.identity.contracts",
-        "app.domains.identity.exceptions",
-        "app.domains.identity.models",
-        "app.domains.identity.schemas",
-        "app.domains.identity.service.credential_resolution"
-      ],
-      "module": "app.domains.identity.public",
-      "path": "backend/app/domains/identity/public.py",
       "wildcard_imports": []
     },
     {
@@ -6288,26 +6263,6 @@
       "imports": [],
       "module": "app.domains.routines.policies.writing_contract",
       "path": "backend/app/domains/routines/policies/writing_contract.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "__future__"
-      ],
-      "imports": [
-        "app.domains.routines.constants",
-        "app.domains.routines.contracts.clock",
-        "app.domains.routines.contracts.lifecycle",
-        "app.domains.routines.contracts.plans",
-        "app.domains.routines.exceptions",
-        "app.domains.routines.policies.planning",
-        "app.domains.routines.service.lifecycle",
-        "app.domains.routines.service.plans",
-        "app.domains.routines.service.scheduling",
-        "app.domains.routines.utils.clock"
-      ],
-      "module": "app.domains.routines.public",
-      "path": "backend/app/domains/routines/public.py",
       "wildcard_imports": []
     },
     {
@@ -10645,25 +10600,6 @@
     },
     {
       "external_imports": [],
-      "imports": [
-        "app.domains.world_characters.contracts.owner_identity",
-        "app.domains.world_characters.contracts.public_profile",
-        "app.domains.world_characters.contracts.runtime_modes",
-        "app.domains.world_characters.contracts.seed",
-        "app.domains.world_characters.contracts.studio_lifecycle",
-        "app.domains.world_characters.models",
-        "app.domains.world_characters.service.autonomous_setup",
-        "app.domains.world_characters.service.owner_identity",
-        "app.domains.world_characters.service.runtime_modes",
-        "app.domains.world_characters.service.seed",
-        "app.domains.world_characters.service.setup_validation"
-      ],
-      "module": "app.domains.world_characters.public",
-      "path": "backend/app/domains/world_characters/public.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
       "imports": [],
       "module": "app.domains.world_characters.repository",
       "path": "backend/app/domains/world_characters/repository/__init__.py",
@@ -11802,21 +11738,6 @@
       ],
       "module": "app.domains.worlds.models",
       "path": "backend/app/domains/worlds/models.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.worlds.contracts",
-        "app.domains.worlds.models",
-        "app.domains.worlds.schemas",
-        "app.domains.worlds.service.creator",
-        "app.domains.worlds.service.definition",
-        "app.domains.worlds.service.generation_context",
-        "app.domains.worlds.service.reserved_roles"
-      ],
-      "module": "app.domains.worlds.public",
-      "path": "backend/app/domains/worlds/public.py",
       "wildcard_imports": []
     },
     {
@@ -13041,23 +12962,6 @@
       ],
       "module": "app.runtime.chat.scope_queries",
       "path": "backend/app/runtime/chat/scope_queries.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "sqlalchemy.exc"
-      ],
-      "imports": [
-        "app.core.security",
-        "app.domains.chat.exceptions",
-        "app.domains.chat.policies",
-        "app.domains.chat.service.profiles",
-        "app.domains.chat.service.threads",
-        "app.integrations.direct_llm",
-        "app.runtime.chat.message_composition"
-      ],
-      "module": "app.runtime.chat.sqlalchemy_service",
-      "path": "backend/app/runtime/chat/sqlalchemy_service.py",
       "wildcard_imports": []
     },
     {
@@ -16305,99 +16209,6 @@
     },
     {
       "external_imports": [],
-      "imports": [
-        "app.api.schemas.first_greeting",
-        "app.domains.character_lore.schemas",
-        "app.domains.characters.schemas",
-        "app.domains.chat.schemas",
-        "app.domains.identity.schemas",
-        "app.domains.local_bot.schemas",
-        "app.domains.operations.schemas",
-        "app.domains.relationships.schemas",
-        "app.domains.routine_posts.schemas",
-        "app.domains.routines.schemas",
-        "app.domains.routines.schemas.first_greeting",
-        "app.domains.routines.schemas.runs",
-        "app.domains.social.schemas.activity",
-        "app.domains.social.schemas.community",
-        "app.domains.social.schemas.feed",
-        "app.domains.tree.schemas",
-        "app.domains.world_characters.schemas.setup",
-        "app.domains.worlds.schemas"
-      ],
-      "module": "app.schemas",
-      "path": "backend/app/schemas/__init__.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "datetime",
-        "pydantic",
-        "typing"
-      ],
-      "imports": [
-        "app.api.schemas.first_greeting",
-        "app.core.image_generation",
-        "app.domains.characters.constants",
-        "app.domains.characters.schemas",
-        "app.domains.identity.schemas",
-        "app.domains.local_bot.schemas",
-        "app.domains.media.schemas",
-        "app.domains.routines.constants",
-        "app.domains.routines.schemas",
-        "app.domains.routines.schemas.first_greeting",
-        "app.domains.routines.schemas.runs",
-        "app.domains.social.schemas.community",
-        "app.providers.registry"
-      ],
-      "module": "app.schemas.agents",
-      "path": "backend/app/schemas/agents.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.identity.schemas"
-      ],
-      "module": "app.schemas.auth",
-      "path": "backend/app/schemas/auth.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "datetime",
-        "pydantic",
-        "typing"
-      ],
-      "imports": [
-        "app.domains.characters.schemas",
-        "app.domains.social.schemas.activity",
-        "app.domains.social.schemas.community"
-      ],
-      "module": "app.schemas.characters",
-      "path": "backend/app/schemas/characters.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.media.schemas"
-      ],
-      "module": "app.schemas.media_security",
-      "path": "backend/app/schemas/media_security.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.chat.schemas"
-      ],
-      "module": "app.schemas.messages",
-      "path": "backend/app/schemas/messages.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
       "imports": [],
       "module": "app.services",
       "path": "backend/app/services/__init__.py",
@@ -16413,59 +16224,12 @@
       "wildcard_imports": []
     },
     {
-      "external_imports": [
-        "sys"
-      ],
-      "imports": [
-        "app.runtime.chat.sqlalchemy_service"
-      ],
-      "module": "app.services.messages",
-      "path": "backend/app/services/messages.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [],
-      "imports": [
-        "app.domains.characters.service.media_storage",
-        "app.domains.media.contracts",
-        "app.domains.social.service.media_storage",
-        "app.domains.worlds.storage",
-        "app.integrations.media.files",
-        "app.integrations.media.images"
-      ],
-      "module": "app.services.profile_media",
-      "path": "backend/app/services/profile_media.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "sys"
-      ],
-      "imports": [
-        "app.core.prompt_safety"
-      ],
-      "module": "app.services.prompt_safety",
-      "path": "backend/app/services/prompt_safety.py",
-      "wildcard_imports": []
-    },
-    {
       "external_imports": [],
       "imports": [
         "app.runtime.extensions.resident_adapter"
       ],
       "module": "app.services.runtime_boundary",
       "path": "backend/app/services/runtime_boundary.py",
-      "wildcard_imports": []
-    },
-    {
-      "external_imports": [
-        "sys"
-      ],
-      "imports": [
-        "app.domains.world_characters.client"
-      ],
-      "module": "app.services.world_character_provider",
-      "path": "backend/app/services/world_character_provider.py",
       "wildcard_imports": []
     }
   ],

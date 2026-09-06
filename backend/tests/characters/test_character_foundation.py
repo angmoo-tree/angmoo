@@ -1,5 +1,7 @@
 """Character role moves preserve identities and distinct write contracts."""
 from __future__ import annotations
+from compatibility_retirement_support import export_matches
+
 
 from types import SimpleNamespace
 
@@ -7,18 +9,16 @@ import pytest
 from sqlalchemy import create_engine, event, select
 from sqlalchemy.orm import Session
 
-from app import schemas as registered_schemas
 from model_fixture_support import models as registered_models
 from app.models import Base
 from app.core.unit_of_work import deferred_commits
 
-from app.domains.characters import contracts, models, public, schemas
+from app.domains.characters import contracts
+from app.domains.characters import models
+from app.domains.characters import schemas
 from app.domains.characters.service import profile, seed, state
 from app.domains.media import schemas as media_schemas
 from app.domains.characters import models as legacy_models
-from app.schemas import agents as legacy_agent_schemas
-from app.schemas import characters as legacy_character_schemas
-from app.schemas import media_security as legacy_media_schemas
 
 
 @pytest.fixture
@@ -48,23 +48,23 @@ def seed_data(**changes):
 
 
 def test_model_and_schema_compatibility_exports_have_one_identity():
-    for name in ("Character", "CharacterState"):
+    for name in ('Character', 'CharacterState'):
         canonical = getattr(models, name)
         assert canonical is getattr(registered_models, name)
         assert canonical is getattr(legacy_models, name)
-        assert canonical is getattr(public, name)
+        assert export_matches('app.domains.characters.public', name, canonical)
         assert canonical.metadata is Base.metadata
-    for name in ("CharacterRead", "CharacterStateRead", "CharacterStateWrite", "AgentCharacterStateWrite"):
-        assert getattr(schemas, name) is getattr(registered_schemas, name)
-        assert getattr(schemas, name) is getattr(legacy_character_schemas, name)
-    for name in ("AgentCreate", "AgentDeleteCreate", "AgentProfileUpdate", "AgentPersonaUpdate"):
-        assert getattr(schemas, name) is getattr(legacy_agent_schemas, name)
-    assert public.seed_autonomous_character is seed.seed_autonomous_character
+    for name in ('CharacterRead', 'CharacterStateRead', 'CharacterStateWrite', 'AgentCharacterStateWrite'):
+        assert export_matches('app.schemas', name, getattr(schemas, name))
+        assert export_matches('app.schemas.characters', name, getattr(schemas, name))
+    for name in ('AgentCreate', 'AgentDeleteCreate', 'AgentProfileUpdate', 'AgentPersonaUpdate'):
+        assert export_matches('app.schemas.agents', name, getattr(schemas, name))
+    assert export_matches('app.domains.characters.public', 'seed_autonomous_character', seed.seed_autonomous_character)
     import app.domains.characters.service.profile as legacy_repository
     assert legacy_repository.create_character is profile.create_character
     import app.domains.characters.service.state as legacy_repository
     assert legacy_repository.upsert_character_state is state.upsert_character_state
-    assert legacy_media_schemas.validate_profile_media_reference is media_schemas.validate_profile_media_reference
+    assert export_matches('app.schemas.media_security', 'validate_profile_media_reference', media_schemas.validate_profile_media_reference)
 
 
 def test_seed_flushes_in_the_callers_transaction_and_rolls_back(engine):

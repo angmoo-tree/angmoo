@@ -1,3 +1,5 @@
+import app.domains.worlds.service.scheduling as _actual_domains_worlds_service_scheduling
+
 from app.domains.routines.repository import slots as routines_slots
 from app.domains.routines.service import activity_settings as routines_settings
 import app.domains.characters.schemas as character_schemas
@@ -35,7 +37,6 @@ from app.domains.routines.service import tick_schedule as agent_activity_schedul
 from app.config import settings
 from app.domains.routines import constants as agent_run_crud
 
-from app.domains.worlds import public as world_service
 from app.runtime.routines import activity_policy as agent_activity_policy
 from app.runtime.resident import execution as agent_run_service
 from app.runtime.resident import scheduler as resident_tick_scheduler
@@ -771,57 +772,26 @@ def test_activity_timezone_comes_from_selected_world() -> None:
         )
 
 
-def test_world_timezone_change_reschedules_enabled_idle_slots(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    expected = datetime.fromisoformat("2026-08-29T14:15:00+00:00")
-    engine = create_engine("sqlite:///:memory:")
+def test_world_timezone_change_reschedules_enabled_idle_slots(monkeypatch: pytest.MonkeyPatch) -> None:
+    expected = datetime.fromisoformat('2026-08-29T14:15:00+00:00')
+    engine = create_engine('sqlite:///:memory:')
     _create_autonomy_capacity_tables(engine)
-
     with Session(engine) as db:
         user = _add_capacity_user(db)
-        world = _add_capacity_world(
-            db,
-            owner_user_id=user.id,
-            timezone="Asia/Seoul",
-        )
-        character = _add_capacity_agent(
-            db,
-            user_id=user.id,
-            character_id="char-world-timezone-reschedule",
-            auto_enabled=True,
-            slot_id="angmoo-1",
-        )
-        _add_active_routine_world_character(
-            db,
-            character_id=character.id,
-            autonomous_enabled=True,
-        )
+        world = _add_capacity_world(db, owner_user_id=user.id, timezone='Asia/Seoul')
+        character = _add_capacity_agent(db, user_id=user.id, character_id='char-world-timezone-reschedule', auto_enabled=True, slot_id='angmoo-1')
+        _add_active_routine_world_character(db, character_id=character.id, autonomous_enabled=True)
         db.commit()
-        world.timezone = "America/New_York"
+        world.timezone = 'America/New_York'
         db.commit()
 
-        def _schedule(
-            setting,
-            *,
-            character_id: str,
-            now: datetime,
-            within_active_hours: bool,
-            timezone: ZoneInfo,
-        ):
+        def _schedule(setting, *, character_id: str, now: datetime, within_active_hours: bool, timezone: ZoneInfo):
             assert character_id == character.id
-            assert timezone.key == "America/New_York"
+            assert timezone.key == 'America/New_York'
             return SimpleNamespace(next_tick_at=expected)
-
-        monkeypatch.setattr(agent_activity_schedule, "next_tick_schedule", _schedule)
-
-        changed = world_service.reschedule_world_autonomy_slots(
-            db,
-            world_id=world.id,
-            timezone_name=world.timezone,
-        )
+        monkeypatch.setattr(agent_activity_schedule, 'next_tick_schedule', _schedule)
+        changed = _actual_domains_worlds_service_scheduling.reschedule_world_autonomy_slots(db, world_id=world.id, timezone_name=world.timezone)
         db.commit()
-
         slot = routines_slots.get_assigned_slot(db, character.id)
         assert changed == 1
         assert slot is not None and slot.next_tick_at is not None

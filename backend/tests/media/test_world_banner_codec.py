@@ -1,4 +1,7 @@
 """World errors and file placement stay distinct over the common image codec."""
+import app.domains.worlds.storage as _actual_domains_worlds_storage
+from compatibility_retirement_support import export_matches
+
 import base64
 from io import BytesIO
 
@@ -9,7 +12,6 @@ from app.config import settings
 from app.domains.media.contracts import InvalidProfileMediaError
 from app.domains.worlds import storage
 from app.integrations.media import images
-from app.services import profile_media
 
 
 @pytest.mark.parametrize(
@@ -36,31 +38,22 @@ def test_world_upload_keeps_world_error_and_writes_no_file(
     assert list(tmp_path.iterdir()) == []
 
 
-def test_world_banner_uses_shared_sanitized_bytes_and_legacy_exception_contract(
-    tmp_path, monkeypatch,
-):
-    monkeypatch.setattr(settings, "MEDIA_ROOT", str(tmp_path))
+def test_world_banner_uses_shared_sanitized_bytes_and_legacy_exception_contract(tmp_path, monkeypatch):
+    monkeypatch.setattr(settings, 'MEDIA_ROOT', str(tmp_path))
     output = BytesIO()
-    Image.new("RGBA", (1600, 800), (50, 90, 140, 0)).save(output, format="PNG")
+    Image.new('RGBA', (1600, 800), (50, 90, 140, 0)).save(output, format='PNG')
     content = output.getvalue()
-    url = storage.save_world_banner(
-        world_id="world", content_type=" IMAGE/PNG ",
-        data_base64=base64.b64encode(content).decode("ascii"),
-    )
-    path = tmp_path / url.removeprefix("/media/")
-    assert path.parent == tmp_path / "worlds" / "world"
-    assert path.read_bytes() == images.encode_profile_media_webp(
-        media_type="banner", content=content,
-    )
+    url = storage.save_world_banner(world_id='world', content_type=' IMAGE/PNG ', data_base64=base64.b64encode(content).decode('ascii'))
+    path = tmp_path / url.removeprefix('/media/')
+    assert path.parent == tmp_path / 'worlds' / 'world'
+    assert path.read_bytes() == images.encode_profile_media_webp(media_type='banner', content=content)
     with Image.open(path) as image:
         assert image.size == (768, 384)
-        assert image.mode == "RGB"
+        assert image.mode == 'RGB'
         assert image.getpixel((0, 0)) == (255, 255, 255)
-    assert profile_media.save_world_banner is storage.save_legacy_world_banner
-    with pytest.raises(InvalidProfileMediaError, match="Invalid image payload"):
-        profile_media.save_world_banner(
-            world_id="world", content_type="image/png", data_base64="!",
-        )
+    assert export_matches('app.services.profile_media', 'save_world_banner', storage.save_legacy_world_banner)
+    with pytest.raises(InvalidProfileMediaError, match='Invalid image payload'):
+        _actual_domains_worlds_storage.save_legacy_world_banner(world_id='world', content_type='image/png', data_base64='!')
 
 
 def test_world_delete_ignores_paths_outside_the_configured_media_root(tmp_path, monkeypatch):

@@ -20,7 +20,8 @@ from app.domains.chat.contracts.character_response_generator import (
     CharacterResponseGeneratorRequest,
     CharacterResponseProfile,
 )
-from app.domains.identity.public import CredentialMaterial, CredentialPurpose
+from app.domains.identity.contracts import CredentialMaterial
+from app.domains.identity.contracts import CredentialPurpose
 from app.integrations import direct_llm
 from app.integrations.llm.canonical_retrieval_planner import (
     CANONICAL_PLANNER_MAX_OUTPUT_TOKENS,

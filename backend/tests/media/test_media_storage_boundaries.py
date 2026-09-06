@@ -1,3 +1,5 @@
+from compatibility_retirement_support import export_matches
+
 from io import BytesIO
 from pathlib import Path
 
@@ -9,7 +11,6 @@ from app.domains.characters.service import media_storage as character_media
 from app.domains.media.contracts import InvalidProfileMediaError
 from app.domains.social.service import media_storage as post_media
 from app.integrations.media import files, images
-from app.services import profile_media
 
 
 def _png_bytes() -> bytes:
@@ -64,9 +65,9 @@ def test_quarantine_partial_move_failure_restores_preceding_file(tmp_path, monke
 
 
 def test_compatibility_exports_use_owner_implementations_and_same_error_classes():
-    assert profile_media.save_profile_media is character_media.save_profile_media
-    assert profile_media.save_generated_post_image_bytes is post_media.save_generated_post_image_bytes
-    assert profile_media.encode_profile_media_webp is images.encode_profile_media_webp
-    assert profile_media.quarantine_private_media is files.quarantine_private_media
-    assert profile_media.PrivateMediaCleanupError is files.PrivateMediaCleanupError
-    assert profile_media.InvalidProfileMediaError is InvalidProfileMediaError
+    assert export_matches('app.services.profile_media', 'save_profile_media', character_media.save_profile_media)
+    assert export_matches('app.services.profile_media', 'save_generated_post_image_bytes', post_media.save_generated_post_image_bytes)
+    assert export_matches('app.services.profile_media', 'encode_profile_media_webp', images.encode_profile_media_webp)
+    assert export_matches('app.services.profile_media', 'quarantine_private_media', files.quarantine_private_media)
+    assert export_matches('app.services.profile_media', 'PrivateMediaCleanupError', files.PrivateMediaCleanupError)
+    assert export_matches('app.services.profile_media', 'InvalidProfileMediaError', InvalidProfileMediaError)

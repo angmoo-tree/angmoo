@@ -21,7 +21,8 @@ from app.domains.chat.contracts import (
     RouteAwareCallTracker,
     parse_retrieval_intent_payload,
 )
-from app.domains.identity.public import CredentialMaterial, CredentialPurpose
+from app.domains.identity.contracts import CredentialMaterial
+from app.domains.identity.contracts import CredentialPurpose
 from app.domains.memory.service.recall import CANONICAL_PRIMITIVE_REGISTRY
 from app.domains.memory.contracts.retrieval_plan import CanonicalPlanContractError
 from app.domains.memory.service.retrieval_plan import CanonicalPlanExecutionContext

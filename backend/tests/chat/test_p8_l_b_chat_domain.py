@@ -1,4 +1,7 @@
 from __future__ import annotations
+import app.runtime.chat.message_composition as _actual_runtime_chat_message_composition
+from compatibility_retirement_support import alias_retired, export_matches
+
 
 import asyncio
 import importlib
@@ -6,28 +9,23 @@ import importlib
 from app.domains.chat import schemas as chat
 from app.domains.chat import policies
 from app.domains.chat import models as sqlalchemy_models
-from app.runtime.chat import sqlalchemy_service
 
 
 def test_legacy_message_service_is_the_canonical_runtime_module() -> None:
-    legacy = importlib.import_module("app.services.messages")
-
-    assert legacy is sqlalchemy_service
-    assert legacy.generate_text is sqlalchemy_service.generate_text
-    assert legacy._acquire_response_lease is sqlalchemy_service._acquire_response_lease
+    assert alias_retired('app.services.messages', 'app.runtime.chat.sqlalchemy_service')
+    assert export_matches('app.services.messages', 'generate_text', _actual_runtime_chat_message_composition.message_service.generate_text) and export_matches('app.runtime.chat.sqlalchemy_service', 'generate_text', _actual_runtime_chat_message_composition.message_service.generate_text)
+    assert export_matches('app.services.messages', '_acquire_response_lease', _actual_runtime_chat_message_composition.message_service._acquire_response_lease) and export_matches('app.runtime.chat.sqlalchemy_service', '_acquire_response_lease', _actual_runtime_chat_message_composition.message_service._acquire_response_lease)
 
 
 def test_legacy_model_and_schema_exports_are_canonical_objects() -> None:
-    legacy_models = importlib.import_module("app.domains.chat.models")
-    legacy_schemas = importlib.import_module("app.schemas.messages")
-
+    legacy_models = importlib.import_module('app.domains.chat.models')
     assert legacy_models.CharacterMessageSetting is sqlalchemy_models.CharacterMessageSetting
     assert legacy_models.UserMessagePreference is sqlalchemy_models.UserMessagePreference
     assert legacy_models.MessageThread is sqlalchemy_models.MessageThread
     assert legacy_models.MessageMessage is sqlalchemy_models.MessageMessage
-    assert legacy_schemas.MessageThreadRead is chat.MessageThreadRead
-    assert legacy_schemas.MessageSendRead is chat.MessageSendRead
-    assert legacy_schemas.ProfileRef is chat.ProfileRef
+    assert export_matches('app.schemas.messages', 'MessageThreadRead', chat.MessageThreadRead)
+    assert export_matches('app.schemas.messages', 'MessageSendRead', chat.MessageSendRead)
+    assert export_matches('app.schemas.messages', 'ProfileRef', chat.ProfileRef)
 
 
 def test_chat_v1_policy_values_remain_frozen() -> None:

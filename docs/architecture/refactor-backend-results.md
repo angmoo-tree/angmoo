@@ -2737,6 +2737,7 @@ Characters·Identity·Routines·WorldCharacter·Worlds의 옛 public5는 실제 
 
 `refactor_boundaries`에 완료 범위의 파일 배치 검사 지원을 추가했다. 새로 생긴 미등록 업무, import edge가 없는 옛 계층/전역 집합/compatibility 파일, 삭제 후 남은 정책 항목을 거부한다. 필요한 역사 migration·외부 확장 경로는 정확한 module·분류·이유·계약으로 등록하며 기존 import/DB/pure-role/cycle 검사를 우회하지 않는다. 부분 전환용 기존 규칙은 그대로 유지하고 최종 순수 호환 제거 후 `complete` 범위를 적용한다. 신규 음성 사례와 기존 구조 회귀 **68 passed / 0.52초**다. 이 지원 추가 자체가 AR-B8 전체 검증 완료를 뜻하지 않는다.
 
+
 ## AR-B8 — Chat·RoutinePost 실제 소비자 연결
 
 Memory selection의 자격 증명 호출을 기존 `message_composition.settings_service`에 직접 연결했다. RoutinePost legacy export 집합의 마지막 실제 소비자는 Social PostCreate, Routines 활동 정책, Relationships 이벤트 조립, Resident context를 실제 소유 경로에서 가져오며, 원래 import-time model registration을 같은 위치에서 실행한다. 이전 interaction 실제 소유 이동표는 그대로 두고 residual export 파일만 제거했다. 기존 Chat test support는 bound service를 우선하는 기존 순서와 실제 error/security 객체를 유지한다. 원래 identity·delegation·antiwrapper tests와 보존 검사기는 수정하지 않았다. 신규 cold import 회귀는 같은 ORM102개와 미생성 engine/session/app 상태를 확인한다.
@@ -2820,3 +2821,11 @@ ChatService·ChatRuntimePort·GenerationLifecycleService와 runtime/chat/world_g
 공통 image 모델/설정값과 FastAPI 미디어 연결은 실제 공통 지원 역할이므로 `core/image_generation.py`·`core/public_media.py`를 유지한다. current local runtime contract의 오래된 L3/L4/L6 migrate 표기는 실제 이전/keep 사유로 정리했다. 원래 이미지 상수의 schema facade terminal identity 두 개와 정적 파일 디렉터리·check_dir 동작은 변경하지 않았다.
 
 검증: 업무/공유 15개 정의 AST와 소비자 파일 243개 정의 AST가 원문과 동일하다. 기존 활동 시간·설정·검색·Package·private preview·L0/L4 회귀 107개 PASS(기존 경고3)다. 원래 source·assertion·suppression·API/ORM·ASGI·node 진단은 오류0(protected2313/current2596)이며, LIKE2의 원래 Community 출처를 유지하도록 새 core split 기록을 맞춘 뒤 원래 split 검사도 오류0이다. 경계1092 modules/4077 edges/5 exact legacy edges/cycle0, L0 services2/core19를 확인했다. 새로운 test node 없이 원본 baseline/checkpoint/additions와 승인 목록을 보존했으며 source capture·Hosted·전체 B8 통합은 부모 단계에 남긴다.
+
+## AR-B8 — 순수 스키마·서비스·public 집합의 최종 종료
+
+제품 소비자를 실제 역할로 연결한 뒤 남은 import-only 16파일을 제거했다. 이미 제거된 Daily Plan 파일의 원래 구조 검사까지 17개 signed Git 입력으로 보호한다. 모든 802 binding(원래 future binding 3 포함), public5의 165 binding과 실제 정의를 재귀적으로 대조하며 과거 Python을 실행하거나 가짜 module을 만들지 않는다. 원래 Literal5와 실제 class/function, Chat bound method의 receiver/function은 유지한다.
+
+원래 호환·구조 검사22개는 전체 함수 AST를 signed 원문과 비교하고 정확한 import/identity 경로만 승계한다. 업무 assert·with raises·fixture·provider monkeypatch·동일 Session 동작은 유지한다. 기존 split의 임시 alias 소비582개를 실제 현재 소비자로 정리하고 stale bridge75개를 제거했으며 신규 경계 예외0이다. baseline/checkpoint/additions와 동결자료는 변경하지 않았다.
+
+검증은 영향 **194 PASS / 4 warnings / 43.34초**, 마지막 class/decorator/default 실행 guard 보강 뒤 엄격 음성·원문함수검사 **53 PASS / 20.13초**다. 실제 옛 경로 소비0, 경계 **1074 modules / 3986 edges / 기존 legacy5 PASS**. 원본 전체 source/split/assertion/suppression 진단은0이며 PR258/263 API/schema/ORM도PASS다. 최초 신규 검사 가정 및 current inventory와 원래 __all__ 문장 형태를 정정한 이력은 [호환 종료 기록](ar-b8-compatibility-retirement.md)에 남긴다. 새 회귀 node53개 최초 도입과 source capture, stock/전체/Hosted/설치 및 post-merge 검증은 부모 선형 통합의 별도 Gate다.
