@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -19,6 +20,15 @@ def test_creator_studio_canonical_routes_use_public_feature_shell() -> None:
 
     for source in (dashboard_page, new_page, edit_page, import_page):
         assert 'from "@/composition/shells/creator-studio-frame"' in source
+    # Preserve the old entry topology as historical evidence, while the loop
+    # above requires all current routes to call the actual shared frame.
+    for relative in ("app/studio/page.tsx", "app/studio/worlds/new/page.tsx",
+                     "app/studio/worlds/[worldId]/page.tsx", "app/studio/import/page.tsx"):
+        source = subprocess.check_output(
+            ["git", "show", "33e9df8593272f6c81236c477ae73ef057d0d3dd:frontend/src/" + relative],
+            cwd=REPO_ROOT, text=True, encoding="utf-8",
+        )
+        assert 'from "@/features/creator-studio/public"' in source
     assert 'activeSection="worlds"' in dashboard_page
     assert 'activeSection="new-world"' in new_page
     assert "WorldCreatorClient" in new_page
