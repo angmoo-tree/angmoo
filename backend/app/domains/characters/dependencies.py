@@ -1,3 +1,4 @@
+from app.domains.characters.contracts import CharacterImageSettingsWorkflows
 """HTTP connection to the application-composed Character runtime callbacks."""
 from fastapi import Request
 from app.api.identity_dependencies import get_current_user
@@ -92,4 +93,11 @@ def get_tendency_analysis_runner(request: Request) -> TendencyAnalysisRunner[sch
     factory = getattr(request.app.state, "tendency_analysis_runner", None)
     if not callable(factory):
         raise RuntimeError("tendency analysis runner are not configured")
+    return factory()
+
+
+def get_image_settings_workflows(request: Request) -> CharacterImageSettingsWorkflows:
+    factory = getattr(request.app.state, "image_settings_workflows", None)
+    if not callable(factory):
+        raise RuntimeError("image settings workflows are not configured")
     return factory()

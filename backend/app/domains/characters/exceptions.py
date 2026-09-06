@@ -96,3 +96,11 @@ class CharacterStateNotFoundError(AgentServiceError):
 
 class ActiveSlotBusyError(AgentServiceError):
     pass
+
+
+class ImageSettingsInvalidError(AgentServiceError):
+    pass
+
+
+class UnsafeImagePromptError(AgentServiceError):
+    pass

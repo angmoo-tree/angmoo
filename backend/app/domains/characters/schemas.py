@@ -306,3 +306,44 @@ class AgentDetailRead(BaseModel):
     activity_profile_readiness: AgentActivityProfileReadinessRead
     activity_summary: AgentActivitySummaryRead
     recent_activity: list[AgentActivityLogRead]
+
+
+from app.core.image_generation import IMAGE_MODEL_OPTIONS, MAX_IMAGES_PER_DAY
+
+PollinationsImageModel = Literal[
+    "klein",
+    "flux",
+    "zimage",
+    "p-image-edit",
+    "sana",
+    "replicate-zimage-turbo-lora",
+    "replicate-p-image-edit",
+]
+
+class AgentImageSeedUpload(BaseModel):
+    filename: str = Field(min_length=1, max_length=240)
+    content_type: str = Field(min_length=1, max_length=80)
+    data_base64: str = Field(min_length=1, max_length=8_000_000)
+
+class AgentImageGenerationSettingUpdate(BaseModel):
+    image_key_mode: ImageKeyMode | None = None
+    image_generation_enabled: bool | None = None
+    max_images_per_day: int | None = Field(
+        default=None, ge=0, le=MAX_IMAGES_PER_DAY
+    )
+    pollinations_image_model: PollinationsImageModel | None = None
+    pollinations_api_key: str | None = Field(default=None, min_length=1, max_length=4000)
+    clear_pollinations_api_key: bool = False
+    replicate_api_key: str | None = Field(default=None, min_length=1, max_length=4000)
+    clear_replicate_api_key: bool = False
+    visual_identity_prompt: str | None = Field(default=None, max_length=1200)
+    clear_visual_identity_prompt: bool = False
+
+    @model_validator(mode="after")
+    def validate_image_model(self) -> "AgentImageGenerationSettingUpdate":
+        if (
+            self.pollinations_image_model is not None
+            and self.pollinations_image_model not in IMAGE_MODEL_OPTIONS
+        ):
+            raise ValueError("Unsupported image model.")
+        return self

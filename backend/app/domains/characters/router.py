@@ -1,3 +1,6 @@
+from app.domains.characters.service import image_settings_owner
+from app.domains.characters.contracts import CharacterImageSettingsWorkflows
+from app.domains.characters.dependencies import get_image_settings_workflows
 """Owner-facing Character HTTP endpoints; mixed activity/media routes stay in API assembly."""
 from fastapi import APIRouter, Body, Depends, HTTPException, Response, status
 from fastapi.responses import FileResponse
@@ -936,4 +939,64 @@ async def first_greeting(
             detail="첫인사를 만들지 못했습니다. 잠시 후 다시 시도해주세요.",
         ) from exc
     except workflows.social_service_error as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+@router.get('/{character_id}/image-settings', response_model=schemas.AgentImageGenerationSettingRead)
+def get_image_settings(character_id: str, db: Session=Depends(get_db), user: CharacterOwner=Depends(get_current_user), workflows: CharacterImageSettingsWorkflows=Depends(get_image_settings_workflows)) -> schemas.AgentImageGenerationSettingRead:
+    try:
+        return image_settings_owner.get_image_settings(db, user, character_id, workflows=workflows)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
+
+
+@router.put('/{character_id}/image-settings', response_model=schemas.AgentImageGenerationSettingRead)
+def update_image_settings(character_id: str, data: schemas.AgentImageGenerationSettingUpdate, db: Session=Depends(get_db), user: CharacterOwner=Depends(get_current_user), workflows: CharacterImageSettingsWorkflows=Depends(get_image_settings_workflows)) -> schemas.AgentImageGenerationSettingRead:
+    try:
+        return image_settings_owner.update_image_settings(db, user, character_id, data, workflows=workflows)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
+    except DemoAccountLockedError as exc:
+        _raise_demo_account_locked(exc)
+    except errors.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except (errors.ImageSettingsInvalidError, errors.UnsafeImagePromptError) as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+
+
+@router.delete('/{character_id}/image-settings/key', response_model=schemas.AgentImageGenerationSettingRead)
+def delete_image_settings_key(character_id: str, db: Session=Depends(get_db), user: CharacterOwner=Depends(get_current_user), workflows: CharacterImageSettingsWorkflows=Depends(get_image_settings_workflows)) -> schemas.AgentImageGenerationSettingRead:
+    try:
+        return image_settings_owner.update_image_settings(db, user, character_id, schemas.AgentImageGenerationSettingUpdate(clear_pollinations_api_key=True), workflows=workflows)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
+    except DemoAccountLockedError as exc:
+        _raise_demo_account_locked(exc)
+    except errors.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except (errors.ImageSettingsInvalidError, errors.UnsafeImagePromptError) as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+
+
+@router.post('/{character_id}/image-settings/seed', response_model=schemas.AgentImageGenerationSettingRead)
+def upload_image_seed(character_id: str, data: schemas.AgentImageSeedUpload, db: Session=Depends(get_db), user: CharacterOwner=Depends(get_current_user), workflows: CharacterImageSettingsWorkflows=Depends(get_image_settings_workflows)) -> schemas.AgentImageGenerationSettingRead:
+    try:
+        return image_settings_owner.upload_image_seed(db, user, character_id, data, workflows=workflows)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
+    except DemoAccountLockedError as exc:
+        _raise_demo_account_locked(exc)
+    except errors.AgentExecutionModeError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    except errors.InvalidProfileMediaError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+
+
+@router.delete('/{character_id}/image-settings/seed', response_model=schemas.AgentImageGenerationSettingRead)
+def delete_image_seed(character_id: str, db: Session=Depends(get_db), user: CharacterOwner=Depends(get_current_user), workflows: CharacterImageSettingsWorkflows=Depends(get_image_settings_workflows)) -> schemas.AgentImageGenerationSettingRead:
+    try:
+        return image_settings_owner.delete_image_seed(db, user, character_id, workflows=workflows)
+    except errors.AgentNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Agent not found') from exc
+    except DemoAccountLockedError as exc:
+        _raise_demo_account_locked(exc)
+    except errors.AgentExecutionModeError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc

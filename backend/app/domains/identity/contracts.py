@@ -105,6 +105,7 @@ from typing import Callable
 
 class CredentialCharacter(Protocol):
     id: str
+    name: str
 
 class CredentialSlot(Protocol):
     status: str

@@ -7,7 +7,7 @@ from sqlalchemy.orm import object_session
 from app.domains.characters.models import Character
 from app.domains.social.models.posts import Post, PostImageGenerationJob
 from app.domains.social.schemas.community import BotImageRequestRead
-from app.models.agent_settings import AgentImageGenerationSetting
+from app.domains.characters.models import AgentImageGenerationSetting
 from app.runtime.social import image_generation as post_image_generation
 from social.test_l4_social_write_uow import _session_factory
 
@@ -32,7 +32,7 @@ def test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai
         db.commit()
         character = db.get(Character, setting.character_id)
         reads, commits = [], []
-        original = post_image_generation.agent_crud.get_image_generation_setting
+        original = post_image_generation.image_setting_repository.get_image_generation_setting
 
         def get_setting(session, character_id):
             assert session is db
@@ -44,7 +44,7 @@ def test_local_image_request_uses_same_setting_and_counts_queued_jobs_without_ai
         def forbidden(**_kwargs):
             raise AssertionError("request admission must not call LLM or image provider")
 
-        monkeypatch.setattr(post_image_generation.agent_crud, "get_image_generation_setting", get_setting)
+        monkeypatch.setattr(post_image_generation.image_setting_repository, "get_image_generation_setting", get_setting)
         monkeypatch.setattr(image_identity, "_ensure_visual_identity", forbidden)
         monkeypatch.setattr(image_identity, "_refine_image_prompt", forbidden)
         monkeypatch.setattr(post_image_generation.image_provider, "generate_image", forbidden)

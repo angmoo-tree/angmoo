@@ -1,5 +1,6 @@
 from app.domains.routines import constants as routine_constants
 from uuid import uuid4
+from app.domains.operations import repository as operation_repository
 
 
 from sqlalchemy import delete, false, or_, select, update
@@ -459,21 +460,7 @@ def _scrub_account_data(
             )
         )
     )
-    db.execute(
-        update(models.AdminAuditLog)
-        .where(models.AdminAuditLog.admin_user_id == user.id)
-        .values(note=None, metadata_json=None, request_ip=None, user_agent=None)
-    )
-    db.execute(
-        update(models.SiteOperationBanner)
-        .where(models.SiteOperationBanner.updated_by_user_id == user.id)
-        .values(updated_by_user_id=None)
-    )
-    db.execute(
-        update(models.SiteOperationSetting)
-        .where(models.SiteOperationSetting.updated_by_user_id == user.id)
-        .values(updated_by_user_id=None)
-    )
+    operation_repository.scrub_user_attribution(db, user.id)
     db.execute(
         update(models.Character)
         .where(models.Character.moderation_updated_by_user_id == user.id)

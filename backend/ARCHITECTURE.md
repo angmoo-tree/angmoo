@@ -1108,3 +1108,27 @@ World 대화 생성의 tuple/quota lock, preference 생성의 flush-only 경로,
 두 앱 factory는 `runtime/chat/message_composition.configure_chat_services`로 기존의 같은 인스턴스를 등록합니다. 요청마다 provider나 Session을 다시 만들지 않습니다. DB와 인증 dependency는 원래 동일 함수이므로 기존 override 및 사용자 검증 경계가 유지됩니다. Standalone router 실행도 같은 명시적 구성을 사용합니다. 서비스 미등록 상태에서는 숨은 기본 인스턴스를 생성하지 않습니다.
 
 이전 HTTP 모듈 3개는 A2 구조 검사 한 곳을 위한 동일 함수/router alias로만 남습니다. 실제 API 조립과 동작 테스트는 canonical router를 사용하고, 이 alias는 B8에서 원래 구조 node를 실제 서비스·전송 회귀와 대응해 제거합니다. Generation의 NDJSON 이벤트 필드·UTF-8 직렬화·no-store/nosniff, route 등록 순서와 operation ID는 변경하지 않습니다.
+
+Operations는 `domains/operations/models.py`의 설정·공지·감사 모델, `service/settings.py`의 DB/환경/기본값 선택, `service/maintenance.py`의 실행 허용·공지 우선순위, `repository.py`의 실제 조회·개인정보 정리를 소유한다. 계정 삭제 조립은 호출자의 같은 Session으로 감사 정보 정리를 요청하고 기존 외부 트랜잭션이 완료를 결정한다. 설정 읽기나 repository가 임의로 commit하지 않는다.
+
+
+### Character 이미지 설정의 책임
+
+`characters/service/image_settings_owner.py`는 소유자 검증, 공유/개인/비활성 키 모드, 외형 설명의 수동·자동 상태, 기준 이미지 교체·삭제 및 quota 응답을 결정합니다. 실제 저장은 `repository/image_settings.py`, 키 암호화·설정 갱신은 `service/image_settings.py`가 소유합니다. 다섯 이미지 설정 HTTP 경로는 Character router를 사용합니다.
+
+Runtime은 기존 서비스 키 가용성과 Social quota 조회를 같은 Session으로 연결합니다. 공통 텍스트 검증 `core/image_prompt_safety.py`는 외부 통신 없이 Character와 Social에서 같은 정의를 사용합니다. 기준 이미지 저장→기존 파일 삭제→setting 변경→commit/refresh 순서와 사용자가 직접 작성한 외형 설명의 보존 조건은 그대로입니다. 남은 management caller의 짧은 runtime 연결은 해당 업무 이동과 함께 종료합니다.
+### LocalBot 인증과 공개 응답
+
+`local_bot/service/authentication.py`는 토큰 형식과 활성 키, 캐릭터의 삭제·실행 모드, 소유자의 삭제·demo 제한을 순서대로 확인한 뒤 기존 키 사용 기록을 저장합니다. Character와 Identity 조회는 `contracts/authentication.py`에 필요한 nullable 조회로 표현하며 runtime은 실제 소유 서비스를 같은 Session으로 연결합니다. 인증에서 캐릭터나 소유자의 상태를 복제하거나 새 Session을 만들지 않습니다.
+
+`local_bot/service/presentation.py`는 Social 응답을 Bot의 공개 필드로 변환합니다. Bot의 입력·공개 응답 형식은 `local_bot/schemas.py`가 소유하고, Social 이미지 작업 결과인 `BotImageRequestRead`와 공유 글 미디어·댓글은 원래 Social 형식을 사용합니다. 비공개 Character 상태·개인 credential을 공개 projection에 추가하지 않습니다. `policies/rate_limit_clock.py`는 원래의 지역 날짜 경계와 양수 Retry-After 계산을 유지합니다.
+
+Bot의 실제 읽기·행동은 `local_bot/service/actions.py`, 18개 HTTP 경로는 `router/bot.py`에서 찾습니다. `dependencies.py`는 요청의 같은 DB Session, Bot 인증과 app.state에 등록된 협력 구성을 연결합니다. `runtime/local_bot/composition.py`는 Social 업무, 활동 로그, 이미지 요청과 필요한 복합 조회를 구성하며 서비스는 runtime을 직접 import하지 않습니다. 옛 `services/local_bot.py`와 Bot의 옛 HTTP 파일은 제거했습니다. 다른 업무의 최종 소비자 연결과 모델 등록은 B5/G5 통합에서 검증합니다.
+
+LocalBot의 Social 게시물·반응·follow, Routines 활동 이력, Character 상태 읽기는 `runtime/local_bot/queries.py`가 현재 Session에서 연결합니다. 각 조회의 다른 작성자·삭제·시간·개수·정렬 조건과 non-Session fallback을 유지하며 해당 조회에서 commit/flush를 추가하지 않습니다. 할당량·행동 판단은 이 SQL 조립과 구분합니다.
+
+`local_bot/service/rate_limits.py`는 게시·답글·반응·상태·읽기의 실제 제한을 판단하고 사용량 응답과 Retry-After를 만듭니다. `contracts/rate_limits.py`의 필요한 조회·활동기록만 runtime에서 연결합니다. 실제 Session의 quota lock과 원래 synthetic fallback을 구분하며, 읽기 횟수는 원래 자체 commit, 행동은 원래 완료 후 commit·실패 rollback을 유지합니다. rate-limit 로그의 중복 방지 조회와 저장도 같은 Session 및 원래 호출 순서입니다.
+
+공통 HTTP Authorization 문법은 `app/api/authorization.py`에서 해석합니다. Identity와 LocalBot의 권한 정책은 각자의 서비스에 남아 있습니다. 다른 업무의 실제 오류 클래스를 처리할 때는 검사 정책에 정확한 `exceptions` 모듈을 공개 entry로 등록할 수 있습니다. 이것은 하위 모듈·router·models·repository 접근을 허용하지 않으며, 오류 모듈의 DB·프레임워크 의존도 계속 금지합니다.
+
+Bot 쓰기에서 할당량 잠금, 지연 commit 구간, 성공 기록과 실패 rollback의 순서는 업무 계약입니다. 이미지 생성 요청은 원래 게시 성공 후 위치를 유지합니다. 상태 저장은 일일 사용량을 늘리지 않고 마지막 성공 시각으로 재호출 간격을 제한합니다. 반환 DTO는 소유자 id·토큰·private persona를 포함하지 않습니다.

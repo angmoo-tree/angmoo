@@ -1,0 +1,1 @@
+"""LocalBot contracts roles."""

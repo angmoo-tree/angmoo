@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date, tzinfo
 from typing import Awaitable, Callable, Protocol, TYPE_CHECKING
 from sqlalchemy.orm import Session
 
@@ -40,6 +41,7 @@ __all__ = [
     "CreatorWorkflows",
     "CharacterMediaWorkflows",
     "CharacterImageGenerationWorkflows",
+    "CharacterImageSettingsWorkflows",
 ]
 
 
@@ -119,3 +121,17 @@ class CharacterImageGenerationWorkflows:
     image_key_available: Callable[[str], bool]
     resolve_api_key: Callable[[str], str | None]
     translate_prompt: Callable[[str], str]
+
+
+class ServiceImageQuotaRead(Protocol):
+    def __call__(self, db: Session, *, user_id: str, quota_date: date) -> int: ...
+
+
+@dataclass(frozen=True)
+class CharacterImageSettingsWorkflows:
+    """Shared key availability and Social quota reads in the caller Session."""
+
+    service_image_available: Callable[[], bool]
+    service_image_available_for_model: Callable[[str], bool]
+    count_service_image_quota_used: ServiceImageQuotaRead
+    app_timezone: tzinfo

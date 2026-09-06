@@ -6,7 +6,7 @@ from sqlalchemy import event
 from sqlalchemy.orm import object_session
 
 from app.domains.characters.models import Character
-from app.models.agent_settings import AgentImageGenerationSetting
+from app.domains.characters.models import AgentImageGenerationSetting
 from app.runtime.social import image_generation as post_image_generation
 from social.test_l4_social_write_uow import _session_factory
 

@@ -1,7 +1,7 @@
+from app.api.authorization import AuthorizationHeader, _bearer_token
 from dataclasses import dataclass
-from typing import Annotated
 
-from fastapi import Depends, Header, HTTPException, Request, status
+from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.domains.identity import (
@@ -17,7 +17,6 @@ from app.domains.identity.service import (
 )
 
 
-AuthorizationHeader = Annotated[str | None, Header(alias="Authorization")]
 
 
 @dataclass(frozen=True)
@@ -28,17 +27,6 @@ class AuthenticatedSessionContext:
     auth_method: str
 
 
-def _bearer_token(authorization: str | None) -> str:
-    if not authorization:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization required"
-        )
-    scheme, _, token = authorization.partition(" ")
-    if scheme.lower() != "bearer" or not token.strip():
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Bearer token required"
-        )
-    return token.strip()
 
 
 def get_current_user(

@@ -12,7 +12,10 @@ import pytest
 from pydantic import ValidationError
 
 from app import schemas
-from app.services import local_bot
+from tests.local_bot.support import bound_bot_actions
+from app.domains.local_bot.service import actions
+from app.runtime.local_bot import composition as bot_composition
+local_bot = bound_bot_actions()
 
 
 NOW = datetime(2026, 6, 2, tzinfo=UTC)
@@ -106,7 +109,7 @@ class _FakeScalarResult:
 
 
 def test_bot_me_hides_owner_and_token_management_fields(monkeypatch):
-    monkeypatch.setattr(local_bot, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
+    monkeypatch.setattr(actions.rate_limits, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
 
     response = local_bot.get_me(object(), _context()).model_dump()
 
@@ -118,7 +121,7 @@ def test_bot_me_hides_owner_and_token_management_fields(monkeypatch):
 
 
 def test_bot_state_read_and_save_contract(monkeypatch):
-    monkeypatch.setattr(local_bot, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
+    monkeypatch.setattr(actions.rate_limits, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
     state = SimpleNamespace(
         character_id="char-local",
         mood="calm",
@@ -149,9 +152,9 @@ def test_bot_state_read_and_save_contract(monkeypatch):
     def fake_log_activity(db, **kwargs):
         calls.append(("log_activity", kwargs))
 
-    monkeypatch.setattr(local_bot, "_ensure_activity_rate_limit", fake_limit)
-    monkeypatch.setattr(local_bot.social_state, "save_character_state", fake_save_state)
-    monkeypatch.setattr(local_bot.agent_crud, "log_activity", fake_log_activity)
+    monkeypatch.setattr(actions.rate_limits, "_ensure_activity_rate_limit", fake_limit)
+    monkeypatch.setattr(bot_composition.social_state, "save_character_state", fake_save_state)
+    monkeypatch.setattr(bot_composition.activity_logs, "log_activity", fake_log_activity)
 
     saved = local_bot.save_state(
         object(),
@@ -184,7 +187,7 @@ def test_bot_state_read_and_save_contract(monkeypatch):
 
 
 def test_bot_feed_and_thread_hide_author_user_id(monkeypatch):
-    monkeypatch.setattr(local_bot, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
+    monkeypatch.setattr(actions.rate_limits, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
     monkeypatch.setattr(
         social_feed_actual,
         "list_feed",
@@ -218,7 +221,7 @@ def test_bot_feed_and_thread_hide_author_user_id(monkeypatch):
 
 
 def test_bot_following_feed_hides_author_user_id(monkeypatch):
-    monkeypatch.setattr(local_bot, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
+    monkeypatch.setattr(actions.rate_limits, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
     captured = {}
 
     def fake_following_feed(db, user, character_id, *, limit, cursor, content):
@@ -253,7 +256,7 @@ def test_bot_following_feed_hides_author_user_id(monkeypatch):
 
 
 def test_bot_character_profile_hides_owner_and_persona(monkeypatch):
-    monkeypatch.setattr(local_bot, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
+    monkeypatch.setattr(actions.rate_limits, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
     monkeypatch.setattr(
         social_profiles_actual,
         "get_character_profile",
@@ -292,9 +295,9 @@ def test_bot_character_profile_hides_owner_and_persona(monkeypatch):
 
 
 def test_bot_activity_hides_internal_result_fields(monkeypatch):
-    monkeypatch.setattr(local_bot, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
+    monkeypatch.setattr(actions.rate_limits, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
     monkeypatch.setattr(
-        local_bot,
+        actions.rate_limits,
         "_bot_activity_limits",
         lambda *args, **kwargs: [
             schemas.BotActivityLimitRead(
@@ -389,8 +392,8 @@ def test_bot_post_create_image_prompt_requires_request_image():
 def test_bot_create_post_does_not_store_metadata(monkeypatch):
     captured = {}
 
-    monkeypatch.setattr(local_bot, "_ensure_post_rate_limit", lambda *args, **kwargs: None)
-    monkeypatch.setattr(local_bot.agent_crud, "log_activity", lambda *args, **kwargs: None)
+    monkeypatch.setattr(actions.rate_limits, "_ensure_post_rate_limit", lambda *args, **kwargs: None)
+    monkeypatch.setattr(bot_composition.activity_logs, "log_activity", lambda *args, **kwargs: None)
 
     def fake_create_post(db, user, data, *, log_manual_activity, post_info):
         captured["data"] = data
@@ -415,8 +418,8 @@ def test_bot_create_post_does_not_store_metadata(monkeypatch):
 def test_bot_create_post_queues_image_request(monkeypatch):
     captured = {}
 
-    monkeypatch.setattr(local_bot, "_ensure_post_rate_limit", lambda *args, **kwargs: None)
-    monkeypatch.setattr(local_bot.agent_crud, "log_activity", lambda *args, **kwargs: None)
+    monkeypatch.setattr(actions.rate_limits, "_ensure_post_rate_limit", lambda *args, **kwargs: None)
+    monkeypatch.setattr(bot_composition.activity_logs, "log_activity", lambda *args, **kwargs: None)
 
     def fake_create_post(db, user, data, *, log_manual_activity, post_info):
         return _post_detail()
@@ -427,7 +430,7 @@ def test_bot_create_post_queues_image_request(monkeypatch):
 
     monkeypatch.setattr(social_timeline_actual.timeline_service, "create_post", fake_create_post)
     monkeypatch.setattr(
-        local_bot.post_image_generation,
+        bot_composition.post_image_generation,
         "create_local_api_post_image_request",
         fake_image_request,
     )
@@ -454,7 +457,7 @@ def test_bot_create_post_queues_image_request(monkeypatch):
 
 
 def test_bot_notifications_hide_user_and_recipient_fields(monkeypatch):
-    monkeypatch.setattr(local_bot, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
+    monkeypatch.setattr(actions.rate_limits, "_ensure_read_rate_limit", lambda *args, **kwargs: None)
     notification = schemas.NotificationRead(
         id=1,
         notification_type="reply",
@@ -501,8 +504,8 @@ def test_bot_notifications_hide_user_and_recipient_fields(monkeypatch):
 
 
 def test_bot_follow_response_is_character_profile_only(monkeypatch):
-    monkeypatch.setattr(local_bot, "_ensure_reaction_rate_limit", lambda *args, **kwargs: None)
-    monkeypatch.setattr(local_bot.agent_crud, "log_activity", lambda *args, **kwargs: None)
+    monkeypatch.setattr(actions.rate_limits, "_ensure_reaction_rate_limit", lambda *args, **kwargs: None)
+    monkeypatch.setattr(bot_composition.activity_logs, "log_activity", lambda *args, **kwargs: None)
     monkeypatch.setattr(
         social_profiles_actual,
         "follow_profile",

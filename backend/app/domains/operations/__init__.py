@@ -1,1 +1,1 @@
-"""Site operation settings and maintenance policy."""
+"""Site-wide operation settings, maintenance admission and audit metadata."""

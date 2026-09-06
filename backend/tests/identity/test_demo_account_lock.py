@@ -15,7 +15,10 @@ from app.cruds import agents as agent_crud
 from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
 from app.domains.identity.service import demo_access as demo_lock
-from app.services import local_bot as local_bot_service
+from app.domains.local_bot.service import authentication as local_bot_service
+from app.runtime.local_bot.authentication import build_authentication_workflows
+from app.domains.local_bot.repository import keys as local_key_repository
+from app.domains.local_bot.service import key_records
 from app.public_main import app as public_app
 
 
@@ -277,7 +280,7 @@ def test_locked_demo_local_bot_is_blocked_before_last_used_update(monkeypatch):
             return None
 
     monkeypatch.setattr(
-        agent_crud,
+        local_key_repository,
         "get_active_local_key_by_hash",
         lambda _db, _token_hash: local_key,
     )
@@ -287,7 +290,7 @@ def test_locked_demo_local_bot_is_blocked_before_last_used_update(monkeypatch):
         marked_used = True
         return local_key
 
-    monkeypatch.setattr(agent_crud, "mark_local_key_used", mark_used)
+    monkeypatch.setattr(key_records, "mark_local_key_used", mark_used)
 
     with pytest.raises(
         local_bot_service.LocalBotForbiddenError,
@@ -296,6 +299,7 @@ def test_locked_demo_local_bot_is_blocked_before_last_used_update(monkeypatch):
         local_bot_service.authenticate_local_bot(
             FakeDb(),
             f"{agent_service.LOCAL_KEY_PREFIX}synthetic",
+            workflows=build_authentication_workflows(),
         )
 
     assert marked_used is False
@@ -324,7 +328,7 @@ def test_normal_local_bot_authentication_still_updates_last_used(monkeypatch):
             return None
 
     monkeypatch.setattr(
-        agent_crud,
+        local_key_repository,
         "get_active_local_key_by_hash",
         lambda _db, _token_hash: local_key,
     )
@@ -334,11 +338,12 @@ def test_normal_local_bot_authentication_still_updates_last_used(monkeypatch):
         marked_used = True
         return local_key
 
-    monkeypatch.setattr(agent_crud, "mark_local_key_used", mark_used)
+    monkeypatch.setattr(key_records, "mark_local_key_used", mark_used)
 
     context = local_bot_service.authenticate_local_bot(
         FakeDb(),
         f"{agent_service.LOCAL_KEY_PREFIX}synthetic",
+            workflows=build_authentication_workflows(),
     )
 
     assert context.user is user

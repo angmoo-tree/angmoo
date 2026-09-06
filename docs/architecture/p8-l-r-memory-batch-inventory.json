@@ -308,15 +308,15 @@
     },
     {
       "path": "backend/app/public_main.py",
-      "sha256": "4c01160a9f125b0aee416e4ec82e15f6960d528b407359acd89780662c80c380"
+      "sha256": "fcfea744b7521126f8b9b4674d52df9a7672b6eb2e74661be28a36e1fe0e96ea"
     },
     {
       "path": "backend/app/runtime/account_deletion.py",
-      "sha256": "a602ccc22ba27b855254de9b9bf5a1487ed7abd4f9a29021f89caa7ab95342c3"
+      "sha256": "1c97cae038ea86f70279b8dcfd6bb96b2b8821c0de93c84579ae82c1acb0afa8"
     },
     {
       "path": "backend/app/runtime/characters/management.py",
-      "sha256": "64f9a7795c666f2f7530b0dc5e7aa9cbe10bb2c12cbb1ded5040a087c831138c"
+      "sha256": "cd489c0bfa0acc62ddad540228cbf4da4560f1df6d1c9b76d9707833e2f5b0dc"
     },
     {
       "path": "backend/app/runtime/desktop_sidecar.py",

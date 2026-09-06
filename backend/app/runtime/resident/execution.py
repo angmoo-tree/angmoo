@@ -147,7 +147,7 @@ from app.runtime.resident.request_options import _feed_history_sanitize_stream_p
 from app.runtime.resident.request_options import _feed_scan_stream_params
 from app.runtime.resident.request_options import _tool_choice_any
 from app.runtime.resident.slots import build_slot_request_workflows
-from app.services import maintenance as maintenance_service
+from app.domains.operations.service import maintenance as maintenance_service
 from app.services.agent_runs import _build_daypart_memory_note
 from app.services.agent_runs import _filter_daypart_duplicate_feed_interest
 from app.services.agent_runs import _filter_daypart_duplicate_inbox_candidates
