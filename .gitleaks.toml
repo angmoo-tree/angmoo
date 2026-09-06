@@ -58,6 +58,7 @@ paths = [
   '''backend/app/alembic/versions/20260807_0072_angmoo_global_foundation_backfill\.py''',
   '''backend/alembic/versions/20260807_0072_angmoo_global_foundation_backfill\.py''',
   '''backend/app/services/world_foundation\.py''',
+  '''backend/app/domains/worlds/service/foundation\.py''',
 ]
 regexes = ['''^\s*create_idempotency_key="p1-angmoo-global-foundation",\s*$''']
 
