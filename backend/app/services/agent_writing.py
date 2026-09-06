@@ -1,3 +1,5 @@
+import app.domains.characters.service.profile as characters_profile_service
+import app.domains.social.repository.posts as social_posts_repository
 import app.domains.routines.service.feed_history_values as routines_feed_history_values_service
 import app.domains.social.exceptions as social_errors
 import app.domains.social.service.agent_tool_authorization as social_agent_tool_authorization_service
@@ -23,7 +25,7 @@ from app import models, schemas
 from app.config import settings
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
-from app.cruds import community as community_crud
+
 from app.services.agent_briefs import PREPARED_CREATE_POST_BRIEF_SENTINEL
 from app.services import character_lore as character_lore_service
 
@@ -285,7 +287,7 @@ def reply_agent_tool_post_from_brief(
     social_agent_tool_authorization_runtime._ensure_tick_action_allowed(
         db, session_key=session_key, run=run, action="reply"
     )
-    target_post = community_crud.get_post(db, post_id)
+    target_post = social_posts_repository.get_post(db, post_id)
     if target_post is None:
         raise social_errors.PostNotFoundError(post_id)
     if target_post.author_character_id == character_id:
@@ -349,7 +351,7 @@ def _compose_writing_from_brief(
     dict[str, Any] | None,
     character_lore_service.LoreRetrievalResult | None,
 ]:
-    character = community_crud.get_character(db, character_id)
+    character = characters_profile_service.get_character(db, character_id)
     if character is None or character.deleted_at is not None:
         raise social_errors.CharacterNotFoundError(character_id)
     credential = _run_credential(db, run)
@@ -658,7 +660,7 @@ def _format_recent_activity(character_id: str, db: Session) -> str:
 
 
 def _format_reply_context(db: Session, post_id: str) -> str:
-    target = community_crud.get_post(db, post_id)
+    target = social_posts_repository.get_post(db, post_id)
     if target is None:
         raise social_errors.PostNotFoundError(post_id)
     root_id = resident_affordances._thread_root_post_id(db, post_id)
@@ -673,7 +675,7 @@ def _format_reply_context(db: Session, post_id: str) -> str:
         f"target_body: {neutralize_context_text(target.body)[:1000]}",
     ]
     if target.reply_to_post_id:
-        parent = community_crud.get_post(db, target.reply_to_post_id)
+        parent = social_posts_repository.get_post(db, target.reply_to_post_id)
         if parent is not None:
             lines.extend(
                 [

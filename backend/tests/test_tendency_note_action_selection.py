@@ -1,3 +1,4 @@
+import app.domains.social.repository.posts as social_posts_actual
 import app.domains.social.service.visibility as social_visibility_service
 import app.domains.routines.constants as routines_constants
 import app.domains.routines.service.feed_history_notes as routines_feed_history_notes_service
@@ -2219,7 +2220,7 @@ def test_v6_action_menu_keeps_feed_actions_without_post_seed(monkeypatch):
         title="quiet agreement",
         body="a post worth liking",
     )
-    monkeypatch.setattr(agent_runs.community_crud, "get_post", lambda *args, **kwargs: post)
+    monkeypatch.setattr(social_posts_actual, "get_post", lambda *args, **kwargs: post)
     monkeypatch.setattr(
         social_visibility_service,
         "is_post_public_context_visible",

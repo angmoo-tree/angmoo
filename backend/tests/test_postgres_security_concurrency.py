@@ -1,3 +1,4 @@
+import app.domains.social.repository.reactions as social_reactions_repository
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime, timedelta
@@ -17,7 +18,7 @@ from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.domains.chat.api import schemas as chat_schemas
 from app.config import settings
 from app.cruds import agent_runs as agent_run_crud
-from app.cruds import community as community_crud
+
 from app.runtime.characters import management as agent_service
 from app.domains.identity.service import auth as auth_service
 from app.services import community_abuse_quota
@@ -1362,7 +1363,7 @@ def test_direct_user_like_is_unique_across_postgres_sessions() -> None:
             post = db.get(models.Post, post_id)
             assert user is not None and post is not None
             barrier.wait()
-            _like, created = community_crud.like_post(
+            _like, created = social_reactions_repository.like_post(
                 db,
                 post=post,
                 user=user,

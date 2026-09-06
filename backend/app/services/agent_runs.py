@@ -1,3 +1,7 @@
+import app.domains.characters.service.profile as characters_profile_service
+import app.domains.identity.service.profile as identity_profile_service
+import app.domains.social.repository.posts as social_posts_repository
+import app.domains.social.repository.profiles as social_profiles_repository
 import app.domains.routines.constants as routines_constants
 import app.domains.routines.service.feed_history_values as routines_feed_history_values_service
 import app.domains.social.exceptions as social_errors
@@ -38,7 +42,7 @@ from app.credentials import (
 )
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
-from app.cruds import community as community_crud
+
 from app.runtime.routine_posts import routine_world_character_for_character
 from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routines
 from app.runtime.search.binding import current_social_search
@@ -371,7 +375,7 @@ def _profile_following_status(
     if target_character_id:
         if target_character_id == follower_character_id:
             return "self"
-        target_character = community_crud.get_character(db, target_character_id)
+        target_character = characters_profile_service.get_character(db, target_character_id)
         if target_character is None or target_character.deleted_at is not None:
             return "not_applicable_deleted"
         exists = db.scalar(
@@ -599,11 +603,11 @@ def _collect_v6_inbox_candidates(
         source_post_id = notification.source_post_id or notification.post_id
         if source_post_id is None:
             continue
-        source = community_crud.get_post(db, source_post_id)
+        source = social_posts_repository.get_post(db, source_post_id)
         root_post_id = _thread_root_post_id_for_prompt(db, source_post_id)
         if source is None or root_post_id is None:
             continue
-        root = community_crud.get_post(db, root_post_id)
+        root = social_posts_repository.get_post(db, root_post_id)
         actor_target_type, actor_target_id = _profile_target_parts(
             user_id=notification.actor_user_id,
             character_id=notification.actor_character_id,
@@ -659,12 +663,12 @@ def _profile_display_name_for_action_menu(
     db: Session, *, user_id: str | None = None, character_id: str | None = None
 ) -> str:
     if character_id:
-        character = community_crud.get_character(db, character_id)
+        character = characters_profile_service.get_character(db, character_id)
         if character is not None:
             return f"{character.name} (@{character.handle})"
         return f"character:{character_id}"
     if user_id:
-        user = community_crud.get_user(db, user_id)
+        user = identity_profile_service.get_user(db, user_id)
         if user is not None:
             return user.display_name
         return f"user:{user_id}"
@@ -760,11 +764,11 @@ def _v6_inbox_candidates_from_review(
     source_post_id = notification.source_post_id or notification.post_id
     if source_post_id is None:
         return []
-    source = community_crud.get_post(db, source_post_id)
+    source = social_posts_repository.get_post(db, source_post_id)
     root_post_id = _thread_root_post_id_for_prompt(db, source_post_id)
     if source is None or root_post_id is None:
         return []
-    root = community_crud.get_post(db, root_post_id)
+    root = social_posts_repository.get_post(db, root_post_id)
     actor_target_type, actor_target_id = _profile_target_parts(
         user_id=notification.actor_user_id,
         character_id=notification.actor_character_id,
@@ -837,7 +841,7 @@ def _format_v6_feed_interests(
         post_id = str(item.get("post_id") or "").strip()
         if not post_id:
             continue
-        post = community_crud.get_post(db, post_id)
+        post = social_posts_repository.get_post(db, post_id)
         if post is None or not social_visibility_service.is_post_public_context_visible(db, post):
             continue
         topic_signature = _clip_text(
@@ -1015,7 +1019,7 @@ def _build_daypart_memory_note(
     if isinstance(interests, list) and interests and isinstance(interests[0], dict):
         item = interests[0]
         source_post_id = str(item.get("post_id") or "").strip()
-        post = community_crud.get_post(db, source_post_id) if source_post_id else None
+        post = social_posts_repository.get_post(db, source_post_id) if source_post_id else None
         seen_person = (
             _profile_display_name_for_action_menu(
                 db, user_id=post.author_user_id, character_id=post.author_character_id
@@ -1132,7 +1136,7 @@ def _record_provided_daypart_observations(
     if isinstance(interests, list) and interests and isinstance(interests[0], dict):
         item = interests[0]
         source_post_id = str(item.get("post_id") or "").strip() or None
-        post = community_crud.get_post(db, source_post_id) if source_post_id else None
+        post = social_posts_repository.get_post(db, source_post_id) if source_post_id else None
         seen_person = (
             _profile_display_name_for_action_menu(
                 db, user_id=post.author_user_id, character_id=post.author_character_id
@@ -1228,7 +1232,7 @@ def _format_v6_action_menu(
             post_id = str(item.get("post_id") or "").strip()
             if not post_id:
                 continue
-            post = community_crud.get_post(db, post_id)
+            post = social_posts_repository.get_post(db, post_id)
             if post is None or not social_visibility_service.is_post_public_context_visible(db, post):
                 continue
             has_feed_interest_context = True
@@ -1424,7 +1428,7 @@ def _format_v6_action_menu_table(
             post_id = str(item.get("post_id") or "").strip()
             if not post_id:
                 continue
-            post = community_crud.get_post(db, post_id)
+            post = social_posts_repository.get_post(db, post_id)
             if post is None or not social_visibility_service.is_post_public_context_visible(db, post):
                 continue
             has_feed_interest_context = True
@@ -1631,10 +1635,10 @@ def _has_character_replied_to_thread(
 def _is_direct_reply_to_character_post_for_action_gate(
     db: Session, *, post_id: str, character_id: str
 ) -> bool:
-    post = community_crud.get_post(db, post_id)
+    post = social_posts_repository.get_post(db, post_id)
     if post is None or post.reply_to_post_id is None:
         return False
-    parent = community_crud.get_post(db, post.reply_to_post_id)
+    parent = social_posts_repository.get_post(db, post.reply_to_post_id)
     return parent is not None and parent.author_character_id == character_id
 
 
@@ -1649,7 +1653,7 @@ def _v6_possible_post_actions(
     reply_root_post_id: str,
     reply_label: str,
 ) -> list[str]:
-    post = community_crud.get_post(db, post_id)
+    post = social_posts_repository.get_post(db, post_id)
     if post is None or not social_visibility_service.is_post_public_context_visible(db, post):
         return []
     actions: list[str] = []
@@ -1733,7 +1737,7 @@ def _v6_allowed_tool_calls(
     reply_root_post_id: str,
     reply_label: str,
 ) -> list[str]:
-    post = community_crud.get_post(db, post_id)
+    post = social_posts_repository.get_post(db, post_id)
     if post is None or not social_visibility_service.is_post_public_context_visible(db, post):
         return []
     actions: list[str] = []
@@ -1811,7 +1815,7 @@ def _v6_unavailable_post_actions(
     author_target_id: str | None,
     reply_root_post_id: str,
 ) -> list[str]:
-    post = community_crud.get_post(db, post_id)
+    post = social_posts_repository.get_post(db, post_id)
     if post is None or not social_visibility_service.is_post_public_context_visible(db, post):
         return []
     unavailable: list[str] = []
@@ -3028,12 +3032,12 @@ def _format_recent_activity_summary(db: Session, *, character_id: str) -> str:
 
 
 def _thread_root_post_id_for_prompt(db: Session, post_id: str) -> str | None:
-    post = community_crud.get_post(db, post_id)
+    post = social_posts_repository.get_post(db, post_id)
     if post is None:
         return None
     seen = {post.id}
     while post.reply_to_post_id is not None:
-        parent = community_crud.get_post(db, post.reply_to_post_id)
+        parent = social_posts_repository.get_post(db, post.reply_to_post_id)
         if parent is None or parent.id in seen:
             return None
         post = parent
@@ -3079,7 +3083,7 @@ def _format_inbox_threads(
     lines: list[str] = []
     follow_allowed = "follow" in set(allowed_actions)
     for root_post_id, items in list(grouped.items())[:5]:
-        root_post = community_crud.get_post(db, root_post_id)
+        root_post = social_posts_repository.get_post(db, root_post_id)
         root_title = _clip_text(
             neutralize_context_text(root_post.title if root_post else ""), 160
         )
@@ -3089,7 +3093,7 @@ def _format_inbox_threads(
         )
         for item in items[:5]:
             source = (
-                community_crud.get_post(db, item.source_post_id)
+                social_posts_repository.get_post(db, item.source_post_id)
                 if item.source_post_id
                 else None
             )
@@ -3181,7 +3185,7 @@ def _format_social_connection_candidate(
         if status != "no":
             continue
         source = (
-            community_crud.get_post(db, item.source_post_id)
+            social_posts_repository.get_post(db, item.source_post_id)
             if item.source_post_id
             else None
         )
@@ -3264,11 +3268,11 @@ def _format_profile_display_name(
     db: Session, *, target_type: str, target_id: str
 ) -> str:
     if target_type == "character":
-        character = community_crud.get_character(db, target_id)
+        character = characters_profile_service.get_character(db, target_id)
         if character is None:
             return f"character:{target_id}"
         return f"{character.name} (@{character.handle})"
-    user = community_crud.get_user(db, target_id)
+    user = identity_profile_service.get_user(db, target_id)
     if user is None:
         return f"user:{target_id}"
     return user.display_name
@@ -3310,7 +3314,7 @@ def _format_strong_social_connection_candidate(
     for post in reply_posts:
         if post.reply_to_post_id is None:
             continue
-        parent = community_crud.get_post(db, post.reply_to_post_id)
+        parent = social_posts_repository.get_post(db, post.reply_to_post_id)
         if parent is None:
             continue
         post_target_type, post_target_id = _profile_target_parts(
@@ -3476,7 +3480,7 @@ def _format_relationship_review_candidate(
     if last_review is not None and _aware_utc(last_review) > now - timedelta(hours=24):
         return "- none"
 
-    follows, _cursor = community_crud.list_profile_following(
+    follows, _cursor = social_profiles_repository.list_profile_following(
         db, character_id=character_id, limit=20
     )
     since = now - timedelta(days=14)
@@ -3484,7 +3488,7 @@ def _format_relationship_review_candidate(
         target_id = follow.target_character_id
         if target_id is None or target_id == character_id:
             continue
-        target_character = community_crud.get_character(db, target_id)
+        target_character = characters_profile_service.get_character(db, target_id)
         target_name = target_character.name if target_character is not None else target_id
         post_filter = models.Post.author_character_id == target_id
         recent_posts = list(
@@ -4878,7 +4882,7 @@ def _validate_character_and_credential(
     character_id: str,
     credential_id: str,
 ) -> tuple[models.Character, models.LlmCredential]:
-    character = community_crud.get_character(db, character_id)
+    character = characters_profile_service.get_character(db, character_id)
     if character is None or character.deleted_at is not None:
         raise social_errors.CharacterNotFoundError(character_id)
     if character.owner_id != user_id:
@@ -5634,7 +5638,7 @@ async def run_community_once(
     if not use_langgraph_resident and token is None:
         raise OpenClawNotConfiguredError("OPENCLAW_GATEWAY_TOKEN is missing")
 
-    character = community_crud.get_character(db, data.character_id)
+    character = characters_profile_service.get_character(db, data.character_id)
     if character is None or character.deleted_at is not None:
         raise social_errors.CharacterNotFoundError(data.character_id)
     if character.moderation_status == "suspended":
@@ -7999,7 +8003,7 @@ async def run_assigned_resident_slot_once(
     enforce_activity_policy: bool = False,
 ) -> schemas.OpenClawAgentRunRead:
     maintenance_service.ensure_run_now_available(db)
-    character = community_crud.get_character(db, character_id)
+    character = characters_profile_service.get_character(db, character_id)
     if character is None or character.deleted_at is not None:
         raise social_errors.CharacterNotFoundError(character_id)
     if character.moderation_status == "suspended":

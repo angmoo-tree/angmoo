@@ -1,4 +1,6 @@
 from __future__ import annotations
+import app.domains.social.repository.media as social_media_repository
+import app.domains.social.repository.posts as social_posts_repository
 import app.domains.social.service.activity_results as social_activity_results_service
 import app.domains.social.service.posts as social_posts_service
 import app.runtime.social.timeline as social_timeline_runtime
@@ -86,7 +88,7 @@ from app.credentials import (
 )
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
-from app.cruds import community as community_crud
+
 from app.policies import name_policy
 from app.services import agent_activity_policy
 from app.domains.world_characters.service import readiness as activity_profile_readiness
@@ -693,7 +695,7 @@ async def run_first_greeting(
     if "post" not in policy.allowed_actions:
         reason = policy.blocked_reasons.get("post", "post writing is blocked")
         raise FirstGreetingUnavailableError(f"지금은 첫인사를 만들 수 없습니다: {reason}")
-    if community_crud.character_has_authored_post(db, character.id):
+    if social_posts_repository.character_has_authored_post(db, character.id):
         raise FirstGreetingUnavailableError("이미 이 앵무가 작성한 게시글이 있어 첫인사를 다시 만들 수 없습니다.")
     available_at = _first_greeting_available_at(db, user.id)
     if available_at is not None and available_at > datetime.now(UTC):
@@ -2974,7 +2976,7 @@ def _claim_first_greeting_run(
             text("select pg_advisory_xact_lock(:lock_key)"),
             {"lock_key": lock_key},
         )
-    if community_crud.character_has_authored_post(db, character.id):
+    if social_posts_repository.character_has_authored_post(db, character.id):
         raise FirstGreetingUnavailableError(
             "이미 이 앵무가 작성한 게시글이 있어 첫인사를 다시 만들 수 없습니다."
         )
@@ -3128,7 +3130,7 @@ def _service_image_quota_read(db: Session, character_id: str) -> dict[str, int |
     limit = settings.pollinations_service_free_images_per_user_day
     character = db.get(character_models.Character, character_id)
     used = (
-        community_crud.count_service_image_quota_used(
+        social_media_repository.count_service_image_quota_used(
             db,
             user_id=character.owner_id,
             quota_date=quota_date,

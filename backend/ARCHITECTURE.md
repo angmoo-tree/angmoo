@@ -21,7 +21,7 @@ Angmoo 백엔드는 **업무별 도메인 안에 HTTP 처리, 업무 흐름, 데
 
 > **Social timeline 업무 흐름:** `service/timeline.py::SocialTimelineService`가 원본 글·대꾸·인용·반응·신고·삭제의 실제 권한/흐름/저장 순서를 소유합니다. `runtime/social/timeline.py`는 이미 존재하던 활동 로그·quota·관계 이벤트 처리만 같은 Session으로 연결합니다. WorldCharacter의 현재 World와 멤버십 판단은 `world_characters/service/social_scope.py`에서 수행하며 캐릭터 값을 복사하거나 먼저 읽지 않고 원래 읽기 순서를 보존합니다. 순수 문맥 정제는 `core/context_text.py`, 제한된 topic/게시 결과 표현은 `social/service/activity_results.py`에 있습니다. Identity quota 모델의 역사적 공개 별칭은 G5/B8에서 종료 조건을 검토합니다.
 
-Social의 SQL은 `repository/posts.py`, `profiles.py`, `inbox.py`, `media.py`에서 읽습니다. 다른 업무 ORM을 사용하는 복합 조회는 아직 남은 runtime 전환 범위입니다. `service/notifications.py`는 수신자 없음·자기 자신 알림 제외와 실제 저장 순서를 함께 소유하고, `utils/text.py`·`cursors.py`는 IO 없는 변환만 담당합니다. 기존 SQL helper가 호출하는 `finish_write`는 caller의 지연 commit 구간에서 flush만 하므로, 새 위치를 이유로 commit을 추가하거나 제거하지 않습니다. Community/World Feed의 HTTP DTO는 `schemas/community.py`·`feed.py`에 있습니다. `cruds/community.py`에는 아직 이전하지 않은 여러 업무 조회와 정확한 같은 함수 export가 남으며 B5/B4/G5에서 각 실제 소비자를 전환합니다.
+Social의 SQL은 `repository/posts.py`, `profiles.py`, `inbox.py`, `media.py`에서 읽습니다. 다른 업무 ORM을 사용하는 복합 조회는 아직 남은 runtime 전환 범위입니다. `service/notifications.py`는 수신자 없음·자기 자신 알림 제외와 실제 저장 순서를 함께 소유하고, `utils/text.py`·`cursors.py`는 IO 없는 변환만 담당합니다. 기존 SQL helper가 호출하는 `finish_write`는 caller의 지연 commit 구간에서 flush만 하므로, 새 위치를 이유로 commit을 추가하거나 제거하지 않습니다. Community/World Feed의 HTTP DTO는 `schemas/community.py`·`feed.py`에 있습니다. `cruds/community.py` 집합은 제거했으며, 현재 소비자는 실제 소유 서비스·repository를 사용합니다. 이미 별도 branch에서 이전된 Resident·Tree·Lore의 최종 소비자 연결은 부모 통합에서 같은 기능을 이어받습니다.
 
 > **AR-B5-C1 Relationships 기반과 후보 처리:** 관계 event/evidence/state/change/proposal/outbox는 `relationships/models/social.py`, replay는 `models/projection.py`, 관계 응답 후보는 `models/points.py`가 실제 ORM을 소유합니다. 후보 입력 판단·생성·선택/소비/실패는 `service/points.py`, 해당 SQL은 `repository/points.py`, 결정적 식별자는 `utils/points.py`에 있습니다. 후보의 기존 명시적 commit과 중복 충돌 rollback→winner 조회를 유지합니다. Graph 읽기·회상·계획 실행은 `service/graph_read.py`·`graph_recall.py`·`graph_planning.py`, 응답은 `schemas.py`, 값·실행/조회 callback 계약은 `contracts/`가 소유합니다. `policies/`는 strict plan 파싱, 방향·근거·범위의 IO 없는 규칙을 소유합니다. 성공 source의 값은 `contracts/events.py`, 변화량/시간대/snapshot은 `policies/events.py`, 방향별 상태와 상한은 `service/state.py`, outbox 선택·원본 제외는 `service/projection_events.py`·`events.py`가 소유합니다. 이 흐름의 SQL은 `repository/events.py`·`state.py`에 있으며 caller Session의 flush/commit 순서를 보존합니다. 최종 Event 생성·다른 업무 검증·proposal·projection 실행의 나머지 실제 업무 분리는 다음 B5 단계입니다.
 
@@ -783,3 +783,6 @@ Social의 옛 `services/community.py` 집합은 제거했다. HTTP와 다른 실
 
 
 선택적 데모 데이터 준비는 `runtime/bootstrap/demo_seed.py`가 담당한다. 앱 factory는 기존 설정이 허용할 때만 같은 함수를 실행한다. 이 함수는 실제 각 업무의 ORM을 명시적으로 사용하여 초기 데이터를 조립하며, 기존 데이터 보완과 신규 초기화의 commit 순서를 유지한다. 일반 Social 기능이나 공개 업로드에서 이 초기화를 호출하지 않는다.
+
+
+옛 `cruds/community.py` 집합도 제거했다. Character 조회는 Character 서비스, Post 조회는 Social repository, 여러 업무의 초기 데이터 조립은 bootstrap이 소유한다. 소비자는 필요한 실제 기능을 직접 선택하며, 공개 Post 조회와 필터 없는 내부 근거 조회는 서로 다른 계약으로 유지한다.

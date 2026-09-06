@@ -1,10 +1,10 @@
 {
   "architecture": {
     "backend": {
-      "external_import_count": 2500,
-      "internal_edge_count": 3059,
+      "external_import_count": 2494,
+      "internal_edge_count": 3037,
       "legacy_import_exception_count": 0,
-      "module_count": 849,
+      "module_count": 848,
       "module_cycles": [],
       "ownership": {
         "canonical_boundaries": [
@@ -2435,41 +2435,6 @@
           }
         ],
         "legacy_horizontal": [
-          {
-            "imports": [
-              "app.config",
-              "app.core.active_hours",
-              "app.core.search_text",
-              "app.core.security",
-              "app.core.unit_of_work",
-              "app.domains.characters.exceptions",
-              "app.domains.characters.service.profile",
-              "app.domains.characters.service.search",
-              "app.domains.characters.service.state",
-              "app.domains.identity.service.profile",
-              "app.domains.routines.constants",
-              "app.domains.social.constants",
-              "app.domains.social.repository.inbox",
-              "app.domains.social.repository.media",
-              "app.domains.social.repository.posts",
-              "app.domains.social.repository.profiles",
-              "app.domains.social.repository.reactions",
-              "app.domains.social.service.image_jobs",
-              "app.domains.social.service.notifications",
-              "app.domains.social.service.profile_activity",
-              "app.domains.social.service.source_posts",
-              "app.domains.social.utils.cursors",
-              "app.domains.social.utils.text",
-              "app.models",
-              "app.runtime.bootstrap.demo_seed",
-              "app.runtime.social.discovery",
-              "app.runtime.social.inbox",
-              "app.runtime.social.profile_activity",
-              "app.schemas"
-            ],
-            "module": "app.cruds.community",
-            "path": "backend/app/cruds/community.py"
-          },
           {
             "imports": [
               "app.domains.relationships.schemas"

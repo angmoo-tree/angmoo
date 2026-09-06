@@ -105,14 +105,6 @@
           "imported": "app.schemas"
         },
         {
-          "importer": "app.cruds.community",
-          "imported": "app.models"
-        },
-        {
-          "importer": "app.cruds.community",
-          "imported": "app.schemas"
-        },
-        {
           "importer": "app.cruds.tree",
           "imported": "app.models"
         },
@@ -215,10 +207,6 @@
         {
           "importer": "app.runtime.characters.management",
           "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.runtime.characters.management",
-          "imported": "app.cruds.community"
         },
         {
           "importer": "app.runtime.characters.management",
@@ -362,10 +350,6 @@
         },
         {
           "importer": "app.services.agent_runs",
-          "imported": "app.cruds.community"
-        },
-        {
-          "importer": "app.services.agent_runs",
           "imported": "app.models"
         },
         {
@@ -406,10 +390,6 @@
         },
         {
           "importer": "app.services.agent_writing",
-          "imported": "app.cruds.community"
-        },
-        {
-          "importer": "app.services.agent_writing",
           "imported": "app.models"
         },
         {
@@ -431,10 +411,6 @@
         {
           "importer": "app.services.character_lore",
           "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.services.character_lore",
-          "imported": "app.cruds.community"
         },
         {
           "importer": "app.services.character_lore",
@@ -463,10 +439,6 @@
         {
           "importer": "app.services.langgraph_resident",
           "imported": "app.cruds.agents"
-        },
-        {
-          "importer": "app.services.langgraph_resident",
-          "imported": "app.cruds.community"
         },
         {
           "importer": "app.services.langgraph_resident",
@@ -547,10 +519,6 @@
         {
           "importer": "app.services.operation_settings",
           "imported": "app.models"
-        },
-        {
-          "importer": "app.services.tree",
-          "imported": "app.cruds.community"
         },
         {
           "importer": "app.services.tree",
@@ -1449,30 +1417,6 @@
     ],
     "bridges": [
       {
-        "importer": "app.cruds.community",
-        "target": "app.domains.characters.exceptions",
-        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
-        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
-        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.characters.service.profile",
-        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
-        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
-        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.characters.service.state",
-        "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
-        "removal_condition": "Move the recorded Character consumers to supported role services and finish aggregate model/schema registration before removing this one-way compatibility import.",
-        "reason": "Character foundation implementation moved; this existing aggregate or unmigrated source keeps exactly the same class/function object for its remaining consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.domains.characters.public",
         "target": "app.domains.characters.contracts",
         "owner_stage": "AR-B2-B / AR-B5 / AR-B8-A / AR-G5",
@@ -2161,54 +2105,6 @@
         "review_date": "2026-09-05"
       },
       {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.repository.inbox",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.repository.media",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.repository.posts",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.repository.profiles",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.utils.cursors",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.utils.text",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
         "importer": "app.schemas",
         "target": "app.domains.social.schemas.community",
         "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
@@ -2235,14 +2131,6 @@
       {
         "importer": "app.schemas.characters",
         "target": "app.domains.social.schemas.community",
-        "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
-        "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
-        "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.service.notifications",
         "owner_stage": "AR-B5 / AR-B4 / AR-B8-A",
         "reason": "Actual Social SQL/schema definitions moved; this named consumer uses exactly the same function or class until its own service/runtime transition.",
         "removal_condition": "Replace the remaining Community CRUD and shared schema aggregate consumers with their canonical owner and remove this exact import; no new Social implementation imports legacy consumers.",
@@ -2278,30 +2166,6 @@
         "owner_stage": "AR-G5",
         "removal_condition": "Move aggregate model registration to runtime.persistence while installing the single app.models Base in G5.",
         "reason": "Existing aggregate imports the same four ORM classes; no alternate implementation or reverse edge.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.identity.service.profile",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The actual Social read/response/error or nullable Identity lookup now has one owner; this named legacy consumer uses the same object while its workflow transition remains pending.",
-        "removal_condition": "Switch the exact legacy Community consumer to its canonical service and remove this bridge; no new owner imports the legacy aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.repository.reactions",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "Temporary same-object alias exposes the actual owned Social source/reaction persistence to remaining named callers.",
-        "removal_condition": "Migrate the remaining canonical consumers and remove the old Community CRUD aggregate.",
-        "review_date": "2026-09-05"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.service.source_posts",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "Temporary same-object alias exposes the actual owned Social source/reaction persistence to remaining named callers.",
-        "removal_condition": "Migrate the remaining canonical consumers and remove the old Community CRUD aggregate.",
         "review_date": "2026-09-05"
       },
       {
@@ -2465,14 +2329,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.cruds.community",
-        "target": "app.domains.routines.constants",
-        "owner_stage": "AR-B5",
-        "reason": "Existing mixed consumer uses the same canonical activity model/type/function/default during C1 actual ownership transition. No new legacy operation or domain-to-runtime import is introduced.",
-        "removal_condition": "Move remaining mixed activity/agent-run/Character operations in B4-C and social quota in B5; model/schema aggregate registration retires G5. Remove this exact consumer when its remaining role transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.models",
         "target": "app.domains.routines.models",
         "owner_stage": "AR-G5",
@@ -2566,30 +2422,6 @@
         "owner_stage": "AR-B4-C",
         "reason": "Exact existing mixed consumer now imports the same actual Run/policy value and session rule owner, with no new legacy implementation.",
         "removal_condition": "Move remaining activity policy/runtime in C3b+ and global schema aggregate in G5; remove this exact edge when its source owner transitions.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.characters.service.search",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The old CRUD name is the same original Character-owned text search; its remaining caller migration is tracked explicitly.",
-        "removal_condition": "Migrate exact legacy CRUD search callers and remove the alias.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.constants",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The named old export preserves the original public activity function/class identity after actual Social ownership moves.",
-        "removal_condition": "Move remaining aggregate and legacy test consumers and remove this exact old export.",
-        "review_date": "2026-09-06"
-      },
-      {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.service.profile_activity",
-        "owner_stage": "AR-B5 / AR-B8-A",
-        "reason": "The named old export preserves the original public activity function/class identity after actual Social ownership moves.",
-        "removal_condition": "Move remaining aggregate and legacy test consumers and remove this exact old export.",
         "review_date": "2026-09-06"
       },
       {
@@ -2825,14 +2657,6 @@
         "review_date": "2026-09-06"
       },
       {
-        "importer": "app.cruds.community",
-        "target": "app.domains.social.service.image_jobs",
-        "owner_stage": "AR-B5",
-        "reason": "The old worker/CRUD surface binds the actual Social job policy and nullable Character lookup during the bounded image workflow transition.",
-        "removal_condition": "Retire the exact old worker/CRUD consumer after provider/Character bindings and image source workflow use canonical runtime composition.",
-        "review_date": "2026-09-06"
-      },
-      {
         "importer": "app.services.langgraph_resident",
         "target": "app.domains.social.service.image_attachment",
         "owner_stage": "AR-B5",
@@ -2982,6 +2806,94 @@
         "owner_stage": "AR-B5 / AR-B4 / AR-B8",
         "reason": "Remaining pre-integration caller now uses the actual owner directly after Community facade removal; original caller body and same-Session behavior are unchanged.",
         "removal_condition": "Map these exact calls onto signed runtime/resident or runtime/local_bot composition in parent integration and remove the obsolete caller module/bridge.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.characters.service.profile",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "This pre-integration caller now consumes the actual owner after zero-body Community CRUD aggregate removal; exact query and caller body remain unchanged.",
+        "removal_condition": "Transfer these exact consumer imports to already signed actual Resident/Tree/Lore runtime during parent integration and remove the old caller module.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.identity.service.profile",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "This pre-integration caller now consumes the actual owner after zero-body Community CRUD aggregate removal; exact query and caller body remain unchanged.",
+        "removal_condition": "Transfer these exact consumer imports to already signed actual Resident/Tree/Lore runtime during parent integration and remove the old caller module.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.social.repository.posts",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "This pre-integration caller now consumes the actual owner after zero-body Community CRUD aggregate removal; exact query and caller body remain unchanged.",
+        "removal_condition": "Transfer these exact consumer imports to already signed actual Resident/Tree/Lore runtime during parent integration and remove the old caller module.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_runs",
+        "target": "app.domains.social.repository.profiles",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "This pre-integration caller now consumes the actual owner after zero-body Community CRUD aggregate removal; exact query and caller body remain unchanged.",
+        "removal_condition": "Transfer these exact consumer imports to already signed actual Resident/Tree/Lore runtime during parent integration and remove the old caller module.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_writing",
+        "target": "app.domains.characters.service.profile",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "This pre-integration caller now consumes the actual owner after zero-body Community CRUD aggregate removal; exact query and caller body remain unchanged.",
+        "removal_condition": "Transfer these exact consumer imports to already signed actual Resident/Tree/Lore runtime during parent integration and remove the old caller module.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.agent_writing",
+        "target": "app.domains.social.repository.posts",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "This pre-integration caller now consumes the actual owner after zero-body Community CRUD aggregate removal; exact query and caller body remain unchanged.",
+        "removal_condition": "Transfer these exact consumer imports to already signed actual Resident/Tree/Lore runtime during parent integration and remove the old caller module.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.character_lore",
+        "target": "app.domains.characters.service.profile",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "This pre-integration caller now consumes the actual owner after zero-body Community CRUD aggregate removal; exact query and caller body remain unchanged.",
+        "removal_condition": "Transfer these exact consumer imports to already signed actual Resident/Tree/Lore runtime during parent integration and remove the old caller module.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.characters.service.profile",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "This pre-integration caller now consumes the actual owner after zero-body Community CRUD aggregate removal; exact query and caller body remain unchanged.",
+        "removal_condition": "Transfer these exact consumer imports to already signed actual Resident/Tree/Lore runtime during parent integration and remove the old caller module.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.social.repository.inbox",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "This pre-integration caller now consumes the actual owner after zero-body Community CRUD aggregate removal; exact query and caller body remain unchanged.",
+        "removal_condition": "Transfer these exact consumer imports to already signed actual Resident/Tree/Lore runtime during parent integration and remove the old caller module.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.langgraph_resident",
+        "target": "app.domains.social.repository.posts",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "This pre-integration caller now consumes the actual owner after zero-body Community CRUD aggregate removal; exact query and caller body remain unchanged.",
+        "removal_condition": "Transfer these exact consumer imports to already signed actual Resident/Tree/Lore runtime during parent integration and remove the old caller module.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.tree",
+        "target": "app.domains.characters.service.profile",
+        "owner_stage": "AR-B5 / AR-B4 / AR-B8",
+        "reason": "This pre-integration caller now consumes the actual owner after zero-body Community CRUD aggregate removal; exact query and caller body remain unchanged.",
+        "removal_condition": "Transfer these exact consumer imports to already signed actual Resident/Tree/Lore runtime during parent integration and remove the old caller module.",
         "review_date": "2026-09-06"
       }
     ]

@@ -1,3 +1,4 @@
+import app.domains.social.repository.posts as social_posts_actual
 import asyncio
 import inspect
 from datetime import UTC, date, datetime, timedelta
@@ -7356,7 +7357,7 @@ def test_unfollow_conflict_suppression_only_removes_target_related_actions(
         "post-seed": SimpleNamespace(author_character_id="char-target"),
     }
     monkeypatch.setattr(
-        langgraph_resident.community_crud,
+        social_posts_actual,
         "get_post",
         lambda _db, post_id: posts.get(post_id),
     )

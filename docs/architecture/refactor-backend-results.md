@@ -1398,3 +1398,12 @@ CRUD의 마지막 실제 seed 함수는 runtime/bootstrap으로 옮겼다. 실�
 초기22 PASS 뒤 factory/runtime/logging는45 PASS/1 FAIL이었다. 실패는 선행 Relationships router 이동의 옛 mock 대상으로, 실제 router·runtime gateway 및 같은 request/db DI를 연결하고 원래 단언을 유지했다. 최종 **46 PASS /44.97초 /기존 warning1개**, 같은 DB object 명시 후 해당1개도 PASS다. CRUD별칭/Relationships public/G07/full B5/capture/Hosted는 후속이다.
 
 C31 PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence0을 확인했다. 남아 있는 public_main도 같은 실제 seed 콜백으로 연결했으며 parent G06 최종 통합에서는 main의 동일 콜백을 보존한다. 실제 initializer 새 경로 외에 데모 활성 설정이나 factory 본문은 변경하지 않았다.
+
+
+## AR-B5-C32 — Community CRUD 집합 제거
+
+실제 함수/class0인 CRUD 집합을 삭제하고11개 소비자의68참조를 실제 소유 서비스·조회에 연결했다. 제품660개 전체 정의는 import 해석 후 동일하며, Post의 원래 공개 필터/댓글 eager-load 조회를 다른 내부 조회로 바꾸지 않았다. 기존 assertion 표현은 실제 owner import로 유지하고 LG/Resident mock2개도 실제 Post repository를 향한다.
+
+집중 회귀는 **342 PASS /기존 PostgreSQL skip18 /29.97초 /기존 warning3개**다. 신규 테스트 노드는 없고 부모의 이미 전환한 Resident/Tree/Lore 실제 소비자에 연결할 정확한 지도와 임시 bridge 종료 조건을 남겼다. Relationships 집합/G07/full B5/capture/Hosted는 후속이다.
+
+C32 최종 보존은 PR #258/#263 API/schema/ORM·보호 변경7파일 assertion·전체 split evidence0, 경계848 module/3037 edge/legacy154 및 L4 parity99·ER0 PASS다. 실제 도입 원본과 역사 pilot 기록은 유지했으며 새 테스트 노드를 추가하지 않았다.

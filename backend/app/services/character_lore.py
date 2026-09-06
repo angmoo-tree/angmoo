@@ -1,4 +1,5 @@
 from __future__ import annotations
+import app.domains.characters.service.profile as characters_profile_service
 
 from app.runtime.social import feed_history as resident_feed_history
 
@@ -26,7 +27,7 @@ from sqlalchemy.orm import Session
 
 from app import models, schemas
 from app.cruds import agents as agent_crud
-from app.cruds import community as community_crud
+
 from app.credentials import (
     CredentialPurpose,
     CredentialResolutionError,
@@ -642,7 +643,7 @@ def _store_chunks_with_embeddings(
 def _get_owned_character(
     db: Session, user: models.User, character_id: str
 ) -> models.Character:
-    character = community_crud.get_character(db, character_id)
+    character = characters_profile_service.get_character(db, character_id)
     if character is None or character.deleted_at is not None or character.owner_id != user.id:
         raise CharacterLoreNotFoundError(character_id)
     return character

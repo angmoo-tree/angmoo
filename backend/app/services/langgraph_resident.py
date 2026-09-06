@@ -1,4 +1,7 @@
 from __future__ import annotations
+import app.domains.characters.service.profile as characters_profile_service
+import app.domains.social.repository.inbox as social_inbox_repository
+import app.domains.social.repository.posts as social_posts_repository
 from app.runtime.social.agent_tool_state import agent_tool_state
 from app.runtime.social.agent_tool_reads import agent_tool_reads
 from app.runtime.social.agent_tools import agent_tool_actions
@@ -34,7 +37,7 @@ from app.credentials import (
 )
 from app.cruds import agent_runs as agent_run_crud
 from app.cruds import agents as agent_crud
-from app.cruds import community as community_crud
+
 from app.domains.world_characters.contracts.runtime_modes import (
     AUTONOMOUS_ACTIVITY_RUNTIME_MODE,
     AUTONOMOUS_FEED_RUNTIME_MODE,
@@ -2038,7 +2041,7 @@ def _inbox_conversation_context(
         return None
     try:
         root_post = _thread_root_post_for_conversation_context(db, source_post)
-        replies = community_crud.list_post_thread_replies(
+        replies = social_posts_repository.list_post_thread_replies(
             db, root_post.id, limit=20
         )
     except Exception:
@@ -2460,7 +2463,7 @@ def _finalize_closed_dayparts(ctx: LangGraphResidentContext) -> dict[str, Any]:
 def _character_handle_by_id(ctx: LangGraphResidentContext, character_id: str | None) -> str | None:
     if not character_id:
         return None
-    character = community_crud.get_character(ctx.db, character_id)
+    character = characters_profile_service.get_character(ctx.db, character_id)
     if character is None:
         return None
     return _clip(getattr(character, "handle", ""), 80) or None
@@ -2511,7 +2514,7 @@ def _relationship_point_to_state(
         except Exception:
             ctx.db.rollback()
         return None
-    source_character = community_crud.get_character(ctx.db, point.source_character_id)
+    source_character = characters_profile_service.get_character(ctx.db, point.source_character_id)
     if (
         source_character is None
         or source_character.deleted_at is not None
@@ -5490,7 +5493,7 @@ def _post_author_character_id(ctx: LangGraphResidentContext, post_id: str | None
     source_post_id = str(post_id or "").strip()
     if not source_post_id:
         return None
-    post = community_crud.get_post(ctx.db, source_post_id)
+    post = social_posts_repository.get_post(ctx.db, source_post_id)
     return getattr(post, "author_character_id", None) if post is not None else None
 
 
@@ -6652,10 +6655,10 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
         for item in feed_page.items:
             if item.post_id in seen_post_ids:
                 continue
-            post = community_crud.get_post(ctx.db, item.post_id)
+            post = social_posts_repository.get_post(ctx.db, item.post_id)
             author_character_id = getattr(post, "author_character_id", None)
             author_character = (
-                community_crud.get_character(ctx.db, author_character_id)
+                characters_profile_service.get_character(ctx.db, author_character_id)
                 if author_character_id
                 else None
             )
@@ -6890,7 +6893,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
             }:
                 continue
             source_post_id = notification.source_post_id or notification.post_id
-            raw_notification = community_crud.get_notification_for_agent(
+            raw_notification = social_inbox_repository.get_notification_for_agent(
                 ctx.db,
                 user_id=ctx.user_id,
                 character_id=ctx.character.id,
@@ -6899,7 +6902,7 @@ def _build_graph(ctx: LangGraphResidentContext, tracker: RunLlmTracker):
             observation_receipt = None
             if inbox_lane_only:
                 source_post = (
-                    community_crud.get_post(ctx.db, source_post_id)
+                    social_posts_repository.get_post(ctx.db, source_post_id)
                     if source_post_id
                     else None
                 )
@@ -8320,7 +8323,7 @@ def _execute_planned_action(
             "failure_class": "missing_post_id",
         }
     if action_type == "follow" and target_id is None and post_id is not None:
-        post = community_crud.get_post(ctx.db, post_id)
+        post = social_posts_repository.get_post(ctx.db, post_id)
         if post is not None and post.author_character_id:
             target_type = "character"
             target_id = post.author_character_id
@@ -8860,7 +8863,7 @@ def _create_relationship_point_from_post(
 ) -> dict[str, Any]:
     if not recipient_character_id:
         return {"created": False, "reason": "recipient_not_character"}
-    recipient = community_crud.get_character(ctx.db, recipient_character_id)
+    recipient = characters_profile_service.get_character(ctx.db, recipient_character_id)
     if recipient is None or recipient.deleted_at is not None:
         return {"created": False, "reason": "recipient_unavailable"}
     if recipient.moderation_status == "suspended":
@@ -8990,7 +8993,7 @@ def _record_relationship_points_after_publish(
         result = action.get("result") if isinstance(action.get("result"), dict) else {}
         reply_post_id = str(result.get("post_id") or "").strip()
         parent_post_id = str(result.get("reply_to_post_id") or "").strip()
-        parent = community_crud.get_post(ctx.db, parent_post_id) if parent_post_id else None
+        parent = social_posts_repository.get_post(ctx.db, parent_post_id) if parent_post_id else None
         if parent is None or not parent.author_character_id:
             skipped.append(
                 {

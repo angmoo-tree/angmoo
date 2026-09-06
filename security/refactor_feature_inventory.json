@@ -1581,7 +1581,6 @@
         "backend/app/api/v1/routes/community.py",
         "backend/app/domains/social/router.py",
         "backend/app/core/context_text.py",
-        "backend/app/cruds/community.py",
         "backend/app/domains/social/__init__.py",
         "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
         "backend/app/domains/social/service/world_profile.py",
@@ -1771,7 +1770,8 @@
         "backend/app/domains/social/repository/interaction_context.py",
         "backend/app/domains/relationships/contracts/routine_interactions.py",
         "backend/app/runtime/routine_posts/interactions.py",
-        "backend/app/runtime/bootstrap/demo_seed.py"
+        "backend/app/runtime/bootstrap/demo_seed.py",
+        "backend/app/domains/characters/service/profile.py"
       ],
       "target_paths": [
         "backend/app/domains/social/service",
