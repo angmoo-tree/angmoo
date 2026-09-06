@@ -26,7 +26,8 @@ import { StatusChip } from "@/components/ui/status";
 import { formatDate, formatHandle } from "@/utils/profile-presentation";
 
 import { activateCharacterAutonomy, deactivateCharacterAutonomy, listCharacterDashboardItems } from "@/features/characters/api/character-dashboard-client";
-import { presentCharacterAutonomy, sortCharactersForDashboard, summarizeCharacterAutonomy, type CharacterAutonomyMutationState, type CharacterDashboardItem } from "@/features/characters/utils/character-dashboard-presentation";
+import { presentCharacterAutonomy, sortCharactersForDashboard, summarizeCharacterAutonomy } from "@/features/characters/utils/character-dashboard-presentation";
+import { type CharacterAutonomyMutationState, type CharacterDashboardItem } from "@/features/characters/types/character";
 import { presentCharacterRecentActivity } from "@/features/characters/utils/character-recent-activity-presentation";
 import { CHARACTER_AUTONOMY_MUTATION_EVENT, CHARACTERS_CHANGED_EVENT, clearCharacterAutonomyMutationState, clearFirstCharacterWelcomePending, getCharacterAutonomyMutationStates, hasFirstCharacterWelcomePending, setCharacterAutonomyMutationState, type CharacterAutonomyMutationEventDetail } from "@/features/characters/stores/character-dashboard-session";
 import styles from "./characters-dashboard.module.css";

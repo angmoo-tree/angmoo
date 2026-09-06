@@ -5,7 +5,7 @@ export const CHARACTER_AUTONOMY_MUTATION_EVENT =
 const AUTONOMY_MUTATION_KEY = "angmoo.agentAutonomyMutation";
 const FIRST_CHARACTER_WELCOME_KEY = "angmoo.firstAgentWelcomePromptPending";
 
-import type { CharacterAutonomyMutationState } from "@/features/characters/utils/character-dashboard-presentation";
+import type { CharacterAutonomyMutationState } from "@/features/characters/types/character";
 
 export type CharacterAutonomyMutationEventDetail = {
   characterId: string;

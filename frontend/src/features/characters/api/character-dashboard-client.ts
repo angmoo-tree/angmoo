@@ -1,7 +1,7 @@
 import { clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
 import { runtimeFetch } from "@/lib/runtime/runtime-config";
 
-import type { CharacterDashboardItem } from "@/features/characters/utils/character-dashboard-presentation";
+import type { CharacterDashboardItem } from "@/features/characters/types/character";
 import { notifyCharactersChanged } from "@/features/characters/stores/character-dashboard-session";
 
 type CharacterRequestOptions = Omit<RequestInit, "body" | "credentials"> & {

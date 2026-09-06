@@ -1,4 +1,4 @@
-import type { CharacterDashboardItem } from "@/features/characters/utils/character-dashboard-presentation";
+import type { CharacterDashboardItem } from "@/features/characters/types/character";
 
 export type CharacterRecentActivityPresentation = {
   actionLabel: string;
