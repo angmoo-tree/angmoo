@@ -1,4 +1,4 @@
-"""Enforce the L2.5 frontend product-shell public boundaries."""
+"""Enforce frontend ownership, with whole-tree rules after the refactor."""
 
 from __future__ import annotations
 

@@ -271,7 +271,7 @@ def check_frontend_edges(edges: list[tuple[str, str]], policy: dict) -> list[str
     def visit(node: str) -> None:
         if node in active:
             cycle = active[active.index(node):]
-            if any(member in common or feature(member) in moved for member in cycle):
+            if policy.get("complete") or any(member in common or feature(member) in moved for member in cycle):
                 errors.append("[refactor_module_cycle] " + " -> ".join(cycle + [node]))
             return
         if node in visited:
@@ -282,7 +282,7 @@ def check_frontend_edges(edges: list[tuple[str, str]], policy: dict) -> list[str
             visit(target)
         active.pop()
 
-    if moved or common:
+    if policy.get("complete") or moved or common:
         for node in sorted(graph):
             visit(node)
     return sorted(set(errors))
