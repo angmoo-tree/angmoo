@@ -326,37 +326,6 @@
     },
     "per_file": [
       {
-        "occurrences": 34,
-        "path": "frontend/src/app/angmoo-api/page.tsx",
-        "values": {
-          "#101828": 4,
-          "#344054": 4,
-          "#667085": 1,
-          "#7a4b00": 1,
-          "#e1e5eb": 2,
-          "#eaedf2": 4,
-          "#eef1f5": 5,
-          "#f9fafb": 4,
-          "#ff5252": 1,
-          "#ff6b6b": 5,
-          "#ffe1e1": 1,
-          "#fff0ef": 1,
-          "#fff8e8": 1
-        }
-      },
-      {
-        "occurrences": 17,
-        "path": "frontend/src/app/licenses/page.tsx",
-        "values": {
-          "#101828": 5,
-          "#475467": 2,
-          "#667085": 1,
-          "#eaedf2": 1,
-          "#eef1f5": 3,
-          "#ff6b6b": 5
-        }
-      },
-      {
         "occurrences": 2,
         "path": "frontend/src/app/manifest.ts",
         "values": {
@@ -391,83 +360,10 @@
         }
       },
       {
-        "occurrences": 13,
-        "path": "frontend/src/components/active-agent-card.tsx",
-        "values": {
-          "#101828": 2,
-          "#667085": 2,
-          "#c24141": 1,
-          "#eef1f5": 3,
-          "#f9fafb": 2,
-          "#ff6b6b": 1,
-          "#ffd7d7": 1,
-          "#fff5f5": 1
-        }
-      },
-      {
         "occurrences": 2,
         "path": "frontend/src/components/content/mentioned-text.tsx",
         "values": {
           "#ff6b6b": 2
-        }
-      },
-      {
-        "occurrences": 34,
-        "path": "frontend/src/components/right-rail-insights.tsx",
-        "values": {
-          "#101828": 5,
-          "#667085": 8,
-          "#c24141": 1,
-          "#eef1f5": 6,
-          "#f9fafb": 4,
-          "#ff6b6b": 5,
-          "#ffb5b5": 1,
-          "#ffd7d7": 1,
-          "#fff0ef": 1,
-          "#fff5f5": 1,
-          "#fffafa": 1
-        }
-      },
-      {
-        "occurrences": 50,
-        "path": "frontend/src/components/tree-community-client.tsx",
-        "values": {
-          "#101828": 8,
-          "#1d2939": 1,
-          "#667085": 8,
-          "#98a2b3": 3,
-          "#c24141": 1,
-          "#c9ced6": 1,
-          "#e1e5eb": 6,
-          "#eaedf2": 4,
-          "#f3f4f6": 2,
-          "#f9fafb": 5,
-          "#ff6b6b": 6,
-          "#ff8a8a": 2,
-          "#ffb5b5": 1,
-          "#fff0ef": 2
-        }
-      },
-      {
-        "occurrences": 37,
-        "path": "frontend/src/components/tree-post-detail-client.tsx",
-        "values": {
-          "#101828": 6,
-          "#1d2939": 1,
-          "#475467": 1,
-          "#667085": 7,
-          "#98a2b3": 2,
-          "#c24141": 2,
-          "#c9ced6": 1,
-          "#e1e5eb": 3,
-          "#eaedf2": 5,
-          "#f3f4f6": 1,
-          "#f9fafb": 2,
-          "#ff6b6b": 2,
-          "#ff8a8a": 1,
-          "#ffd7d7": 1,
-          "#fff0ef": 1,
-          "#fff5f5": 1
         }
       },
       {
@@ -548,6 +444,20 @@
           "#eaedf2": 1,
           "#f0fbf5": 1,
           "#f9fafb": 1
+        }
+      },
+      {
+        "occurrences": 13,
+        "path": "frontend/src/features/characters/components/active-agent-card.tsx",
+        "values": {
+          "#101828": 2,
+          "#667085": 2,
+          "#c24141": 1,
+          "#eef1f5": 3,
+          "#f9fafb": 2,
+          "#ff6b6b": 1,
+          "#ffd7d7": 1,
+          "#fff5f5": 1
         }
       },
       {
@@ -932,6 +842,23 @@
         }
       },
       {
+        "occurrences": 34,
+        "path": "frontend/src/features/social/components/right-rail-insights.tsx",
+        "values": {
+          "#101828": 5,
+          "#667085": 8,
+          "#c24141": 1,
+          "#eef1f5": 6,
+          "#f9fafb": 4,
+          "#ff6b6b": 5,
+          "#ffb5b5": 1,
+          "#ffd7d7": 1,
+          "#fff0ef": 1,
+          "#fff5f5": 1,
+          "#fffafa": 1
+        }
+      },
+      {
         "occurrences": 24,
         "path": "frontend/src/features/social/components/search-results-client.tsx",
         "values": {
@@ -941,6 +868,79 @@
           "#f6f7f9": 1,
           "#f9fafb": 2,
           "#ff6b6b": 5
+        }
+      },
+      {
+        "occurrences": 34,
+        "path": "frontend/src/features/support/components/angmoo-api-content.tsx",
+        "values": {
+          "#101828": 4,
+          "#344054": 4,
+          "#667085": 1,
+          "#7a4b00": 1,
+          "#e1e5eb": 2,
+          "#eaedf2": 4,
+          "#eef1f5": 5,
+          "#f9fafb": 4,
+          "#ff5252": 1,
+          "#ff6b6b": 5,
+          "#ffe1e1": 1,
+          "#fff0ef": 1,
+          "#fff8e8": 1
+        }
+      },
+      {
+        "occurrences": 17,
+        "path": "frontend/src/features/support/components/licenses-content.tsx",
+        "values": {
+          "#101828": 5,
+          "#475467": 2,
+          "#667085": 1,
+          "#eaedf2": 1,
+          "#eef1f5": 3,
+          "#ff6b6b": 5
+        }
+      },
+      {
+        "occurrences": 50,
+        "path": "frontend/src/features/tree/components/tree-community-client.tsx",
+        "values": {
+          "#101828": 8,
+          "#1d2939": 1,
+          "#667085": 8,
+          "#98a2b3": 3,
+          "#c24141": 1,
+          "#c9ced6": 1,
+          "#e1e5eb": 6,
+          "#eaedf2": 4,
+          "#f3f4f6": 2,
+          "#f9fafb": 5,
+          "#ff6b6b": 6,
+          "#ff8a8a": 2,
+          "#ffb5b5": 1,
+          "#fff0ef": 2
+        }
+      },
+      {
+        "occurrences": 37,
+        "path": "frontend/src/features/tree/components/tree-post-detail-client.tsx",
+        "values": {
+          "#101828": 6,
+          "#1d2939": 1,
+          "#475467": 1,
+          "#667085": 7,
+          "#98a2b3": 2,
+          "#c24141": 2,
+          "#c9ced6": 1,
+          "#e1e5eb": 3,
+          "#eaedf2": 5,
+          "#f3f4f6": 1,
+          "#f9fafb": 2,
+          "#ff6b6b": 2,
+          "#ff8a8a": 1,
+          "#ffd7d7": 1,
+          "#fff0ef": 1,
+          "#fff5f5": 1
         }
       },
       {
@@ -1190,7 +1190,7 @@
     "known_gap_count": 0,
     "next_static_inventory": "docs/architecture/next-static-compatibility.json",
     "next_static_inventory_route_count": 44,
-    "next_static_inventory_sha256": "e25cdce64e959c8acb6e3bd1bf9681371221c8a90ce59259ad46023ef438ab1c",
+    "next_static_inventory_sha256": "cfe32dbcf3ee724615ea2b3edf24d9ba1154dfdb465eb150ff72e02e1f4ab022",
     "reviewed_surface_count": 18
   },
   "schema_version": 1,
@@ -1374,13 +1374,13 @@
         "license_expression": "ISC",
         "name": "Lucide Icons",
         "notice_marker": "Lucide Icons - ISC License",
-        "path": "frontend/src/app/licenses/page.tsx"
+        "path": "frontend/src/features/support/components/licenses-content.tsx"
       },
       {
         "license_expression": "MIT",
         "name": "Feather Icons",
         "notice_marker": "Feather Icons - MIT License",
-        "path": "frontend/src/app/licenses/page.tsx"
+        "path": "frontend/src/features/support/components/licenses-content.tsx"
       }
     ],
     "remote_font_markers": [],

@@ -152,15 +152,6 @@
     },
     {
       "markers": [
-        "product-host"
-      ],
-      "owner_phases": [
-        "L0-L4 product URL, privacy UX, provider referer"
-      ],
-      "path": "frontend/src/app/angmoo-api/page.tsx"
-    },
-    {
-      "markers": [
         "private-admin-flag"
       ],
       "owner_phases": [
@@ -176,6 +167,15 @@
         "L0-L4 product URL, privacy UX, provider referer"
       ],
       "path": "frontend/src/features/characters/components/agent-detail-parts.tsx"
+    },
+    {
+      "markers": [
+        "product-host"
+      ],
+      "owner_phases": [
+        "L0-L4 product URL, privacy UX, provider referer"
+      ],
+      "path": "frontend/src/features/support/components/angmoo-api-content.tsx"
     },
     {
       "markers": [

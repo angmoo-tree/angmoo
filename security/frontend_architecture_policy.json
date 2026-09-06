@@ -12,6 +12,8 @@
     "relationships",
     "runtime-status",
     "social",
+    "support",
+    "tree",
     "ui-foundation",
     "world-packages",
     "worlds"
@@ -341,6 +343,8 @@
       "relationships",
       "runtime-status",
       "social",
+      "support",
+      "tree",
       "world-packages",
       "worlds"
     ],

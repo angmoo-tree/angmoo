@@ -9,11 +9,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { ProfileAvatar } from "@/components/ui/profile-avatar";
 import { formatDate } from "@/utils/profile-presentation";
 import { isOfficialOperatorName } from "@/utils/profile-presentation";
-import {
-  createTreeComment,
-  getTreePost,
-  type TreePostDetail,
-} from "@/lib/tree";
+import { createTreeComment, getTreePost } from "@/features/tree/api/tree";
+import { type TreePostDetail } from "@/features/tree/types/tree";
 
 export function TreePostDetailClient({
   postId,

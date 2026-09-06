@@ -797,7 +797,13 @@
     "frontend/src/features/relationships/ui/relationship-graph-frame.tsx": "frontend/src/features/relationships/components/relationship-graph-frame.tsx",
     "frontend/src/features/relationships/ui/relationship-graph-frame.module.css": "frontend/src/features/relationships/components/relationship-graph-frame.module.css",
     "frontend/src/features/relationships/model/relationship-graph.ts": "frontend/src/features/relationships/types/relationship-graph.ts",
-    "frontend/src/features/relationships/public.ts": "frontend/src/features/relationships/components/relationship-graph-client.tsx"
+    "frontend/src/features/relationships/public.ts": "frontend/src/features/relationships/components/relationship-graph-client.tsx",
+    "frontend/src/lib/tree.ts": "frontend/src/features/tree/api/tree.ts",
+    "frontend/src/components/tree-community-client.tsx": "frontend/src/features/tree/components/tree-community-client.tsx",
+    "frontend/src/components/tree-post-detail-client.tsx": "frontend/src/features/tree/components/tree-post-detail-client.tsx",
+    "frontend/src/lib/angmoo-api-docs.ts": "frontend/src/features/support/api/documents-server.ts",
+    "frontend/src/components/right-rail-insights.tsx": "frontend/src/features/social/components/right-rail-insights.tsx",
+    "frontend/src/components/active-agent-card.tsx": "frontend/src/features/characters/components/active-agent-card.tsx"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -135936,6 +135942,43 @@
           "types": "frontend/src/features/relationships/types/relationship-graph.ts",
           "presentation": "frontend/src/features/relationships/utils/relationship-graph.ts",
           "preserved": "Same status precedence and canonical fallback interpretation"
+        }
+      }
+    },
+    "AR-F3-G": {
+      "scope": "Tree and support screen/API ownership; remaining actual sidebar feature components",
+      "files": {
+        "frontend/src/lib/tree.ts": "frontend/src/features/tree/api/tree.ts",
+        "frontend/src/components/tree-community-client.tsx": "frontend/src/features/tree/components/tree-community-client.tsx",
+        "frontend/src/components/tree-post-detail-client.tsx": "frontend/src/features/tree/components/tree-post-detail-client.tsx",
+        "frontend/src/lib/angmoo-api-docs.ts": "frontend/src/features/support/api/documents-server.ts",
+        "frontend/src/components/right-rail-insights.tsx": "frontend/src/features/social/components/right-rail-insights.tsx",
+        "frontend/src/components/active-agent-card.tsx": "frontend/src/features/characters/components/active-agent-card.tsx"
+      },
+      "status": "IMPLEMENTED - isolated validation",
+      "source_contract_consumers": [
+        "backend/tests/test_frontend_browser_session_security.py"
+      ],
+      "frontend_extractions": {
+        "frontend/src/lib/tree.ts": {
+          "api": "frontend/src/features/tree/api/tree.ts",
+          "types": "frontend/src/features/tree/types/tree.ts",
+          "preserved": "Original four request implementations and Tree response fields"
+        },
+        "frontend/src/components/tree-community-client.tsx": {
+          "component": "frontend/src/features/tree/components/tree-community-client.tsx",
+          "composition": "frontend/src/composition/screens/tree-community-screen.tsx",
+          "preserved": "Same Character loader supplied as stable prop; auth-state trigger, selection and posting unchanged"
+        },
+        "frontend/src/app/angmoo-api/page.tsx": {
+          "route": "frontend/src/app/angmoo-api/page.tsx",
+          "content": "frontend/src/features/support/components/angmoo-api-content.tsx",
+          "preserved": "Same dynamic metadata, server file reads, AppShell and DOM; unsupported static route unchanged"
+        },
+        "frontend/src/app/licenses/page.tsx": {
+          "route": "frontend/src/app/licenses/page.tsx",
+          "content": "frontend/src/features/support/components/licenses-content.tsx",
+          "preserved": "Exact license notices, links, dynamic route and AppShell; unsupported static route unchanged"
         }
       }
     }

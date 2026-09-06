@@ -83,7 +83,7 @@
         "forbidden": []
       },
       {
-        "path": "frontend/src/app/licenses/page.tsx",
+        "path": "frontend/src/features/support/components/licenses-content.tsx",
         "required": [
           "GPL-3.0-only",
           "World Package",
@@ -393,14 +393,14 @@
     },
     {
       "name": "Lucide Icons",
-      "path": "frontend/src/app/licenses/page.tsx",
+      "path": "frontend/src/features/support/components/licenses-content.tsx",
       "notice_marker": "Lucide Icons - ISC License",
       "license_expression": "ISC",
       "source": "https://lucide.dev/license"
     },
     {
       "name": "Feather Icons",
-      "path": "frontend/src/app/licenses/page.tsx",
+      "path": "frontend/src/features/support/components/licenses-content.tsx",
       "notice_marker": "Feather Icons - MIT License",
       "license_expression": "MIT",
       "source": "https://github.com/feathericons/feather/blob/main/LICENSE"

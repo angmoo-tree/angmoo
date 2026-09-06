@@ -40,7 +40,7 @@
       "path": "frontend/src/app/agent_guide.md/route.ts",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/agent_guide.md",
-      "source_sha256": "d66f47a761351a5bc0dc802b1fb97a3b835c8c43b7222301ba83afa869332568",
+      "source_sha256": "de62c426e447f3b87249e5de288836825aaf0aa3be0775c3fa4338a11624e512",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -80,7 +80,7 @@
       "path": "frontend/src/app/angmoo-api/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/angmoo-api",
-      "source_sha256": "dc7e85618de6e2a37cab8ef88b07987c7c48711c4bc04acb9990873fdb2f4085",
+      "source_sha256": "3e9535b640a8367ff78309fa3523b0c5a5bd39bddbd6b8a49d8c126fcfbbdda0",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -170,7 +170,7 @@
       "path": "frontend/src/app/licenses/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/licenses",
-      "source_sha256": "828be3bc89cc2e2862e661b025c588950b83c7573de33f147be536870359d7c4",
+      "source_sha256": "fcf815e8ca5a879413630697e48c40ac7cfaf25b6265b1760c5bfb0ac15c18ae",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -382,7 +382,7 @@
       "path": "frontend/src/app/tree/[postId]/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/tree/[postId]",
-      "source_sha256": "0424fac81b9f6800d0dd647d954402224f46519878feb8aea6f3e367b47bfa32",
+      "source_sha256": "1a8ed2bbc78e166a38406c1d0fa16dae357ee4d9c90caf4cd17df03ea7477a35",
       "transition_pr": "ER5 PR K"
     },
     {
@@ -392,7 +392,7 @@
       "path": "frontend/src/app/tree/page.tsx",
       "removal_condition": "same frontend source passes browser dev and Tauri static release",
       "route": "/tree",
-      "source_sha256": "2ba0accfea6b2a14eb0eee0265cf89d8d827ed511a7fc082116602c8488512b7",
+      "source_sha256": "ff7d8a452d94dbcbf776f3d5f3c8bbb9de3b737168a288b063ee09d5db78af33",
       "transition_pr": "ER5 PR K"
     },
     {

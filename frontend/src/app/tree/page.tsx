@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 import { AppShell } from "@/composition/shells/app-shell";
-import { TreeCommunityClient } from "@/components/tree-community-client";
+import { TreeCommunityScreen } from "@/composition/screens/tree-community-screen";
 import { fetchBackendJson } from "@/lib/server/backend";
-import type { TreeCategory, TreeFeedPage } from "@/lib/tree";
+import type { TreeCategory, TreeFeedPage } from "@/features/tree/types/tree";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +44,7 @@ export default async function TreePage({ searchParams }: PageProps) {
 
   return (
     <AppShell>
-      <TreeCommunityClient
+      <TreeCommunityScreen
         key={`${category}:${query}`}
         initialPage={page}
         initialCategory={category}
