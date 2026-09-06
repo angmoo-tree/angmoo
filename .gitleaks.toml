@@ -222,3 +222,15 @@ regexes = [
   '''^\s*"backend/app/runtime/local_bot/authentication\.py":\ "8af351caaec6f4e6bc1b04dbe1c67ae126542283",?\s*$''',
   '''^\s*"backend/tests/local_bot/test_authentication\.py":\ "a39cbbdf8f8d1a45883d9dd2e3d4840fd634dca2",?\s*$''',
 ]
+
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact runtime original source Git blobs; verified against signed commits and Git objects, not runtime credentials; reviewed 2026-09-06"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)security/refactor_backend_additions\.json$''']
+regexes = [
+  '''^\s*"backend/app/domains/identity/repository/runtime_access\.py":\ "e3742dabf3a5751622c6da6baf04bfb529eb469a",?\s*$''',
+  '''^\s*"backend/app/domains/identity/service/runtime_access\.py":\ "20ce8cb7076f65aecfb3b30a68af1e0a250c44fb",?\s*$''',
+]

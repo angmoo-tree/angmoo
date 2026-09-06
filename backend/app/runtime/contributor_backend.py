@@ -36,7 +36,7 @@ def _register_canonical_models() -> None:
     small set of models imported by the runtime module itself.
     """
 
-    importlib.import_module("app.public_main")
+    importlib.import_module("app.main")
 
 
 def _parse_args() -> argparse.Namespace:
@@ -102,7 +102,7 @@ def create_contributor_runtime_app(
     # every canonical SQLAlchemy model is registered in Base.metadata. This is
     # the same fail-closed ordering used by the packaged desktop sidecar.
     _register_canonical_models()
-    from app.public_main import create_app
+    from app.main import create_public_app as create_app
 
     data_root = data_root.resolve()
     upgraded = _prepare_contributor_data_root(data_root)
@@ -158,11 +158,9 @@ def contributor_runtime_status_payload(
     _register_canonical_models()
 
     from app.core.redaction import sanitize_support_bundle_metadata
-    from app.domains.runtime.public import (
-        ReadApplicationRuntimeStatus,
-        SqlAlchemyApplicationRuntimeProbe,
-        runtime_status_read,
-    )
+    from app.domains.runtime.service.status import ReadApplicationRuntimeStatus
+    from app.domains.runtime.schemas import runtime_status_read
+    from app.runtime.diagnostics.status_composition import create_runtime_status_reader as SqlAlchemyApplicationRuntimeProbe
     from app.runtime.configuration import compose_runtime
 
     data_root = data_root.resolve()

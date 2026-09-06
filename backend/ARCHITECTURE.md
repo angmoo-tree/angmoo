@@ -108,7 +108,7 @@ backend/
 
 `runtime`, `integrations`, `credentials`는 Angmoo 실행에 필요한 영역입니다. 참조 저장소와 폴더 이름을 맞추기 위해 실행 기능을 없애지 않습니다. `templates`와 `requirements`는 조건부이며, 이번 구조 전환에서 현재 `pyproject.toml`·`uv.lock`을 다른 의존성 관리 방식으로 교체하지 않습니다.
 
-현재 존재하는 `public_main.py`는 G06 전환 중에만 호환 경로로 유지합니다. Local의 명시적 `RuntimeConfig`, 복구, Memory 시작·종료와 각 지원 profile의 계약을 `main.py`의 단일 앱 생성 구현으로 통합한 뒤, 실행·테스트·CI·패키징 소비자를 옮깁니다. 검증 후 호환 파일을 제거하고 그 파일이 없는 후보에서 다시 실행을 확인합니다. 이 목표를 현재 구현 완료로 읽지 않으며, scheduler·DB·Memory의 세부 처리는 소유 runtime과 도메인에 둡니다.
+`main.py`의 실제 `create_app`·`create_lifespan`이 Local RuntimeConfig, 복구, Memory 시작·종료와 현재 B7 업무 연결을 함께 소유합니다. `main.app`은 원래 full health·component 기본값을, `main.public_app`은 원래 public readiness·미구성 component 기본값을 선택합니다. `create_public_app`은 같은 factory의 public profile을 선택하는 partial입니다. 공식 contributor/sidecar와 개발 ASGI는 main의 public export를 사용합니다. `public_main.py`에는 원래 15개 이름의 단방향 임시 export만 남습니다. G5의 단일 Base·DB 등록과 B8-B의 검증 후 호환 제거·새 bundle 실행은 별도 단계이며, scheduler·DB·Memory의 세부 처리는 소유 runtime과 도메인에 둡니다.
 
 ## 2. 도메인 안에서 코드 찾기
 
@@ -359,7 +359,7 @@ Angmoo는 Docker의 브라우저 실행과 Windows 설치 앱에서 같은 백�
 
 | 영역 | 담당하는 일 |
 | --- | --- |
-| `main.py` | 목표 단일 앱 생성과 지원 profile의 router·오류·startup/shutdown 연결. 현재 `public_main.py`의 Local 구현은 G06에서 통합·임시 호환·검증 후 제거 |
+| `main.py` | 실제 단일 앱 생성과 full/public profile의 router·오류·startup/shutdown 연결. `public_main.py`는 같은 객체의 임시 export이며 G5와 B8-B 검증 후 제거는 별도 단계 |
 | `runtime` | 설정·DB·서비스 구성, scheduler·worker·lease·종료·복구 |
 | `domains/runtime` | 현재 runtime 상태·진단 등 업무 계약; worker를 실행하는 폴더와 구분 |
 | `integrations`, `providers` | 실제 통신, SDK별 요청·응답·오류·usage 변환, fake 제공 |
@@ -1132,3 +1132,11 @@ LocalBot의 Social 게시물·반응·follow, Routines 활동 이력, Character 
 공통 HTTP Authorization 문법은 `app/api/authorization.py`에서 해석합니다. Identity와 LocalBot의 권한 정책은 각자의 서비스에 남아 있습니다. 다른 업무의 실제 오류 클래스를 처리할 때는 검사 정책에 정확한 `exceptions` 모듈을 공개 entry로 등록할 수 있습니다. 이것은 하위 모듈·router·models·repository 접근을 허용하지 않으며, 오류 모듈의 DB·프레임워크 의존도 계속 금지합니다.
 
 Bot 쓰기에서 할당량 잠금, 지연 commit 구간, 성공 기록과 실패 rollback의 순서는 업무 계약입니다. 이미지 생성 요청은 원래 게시 성공 후 위치를 유지합니다. 상태 저장은 일일 사용량을 늘리지 않고 마지막 성공 시각으로 재호출 간격을 제한합니다. 반환 DTO는 소유자 id·토큰·private persona를 포함하지 않습니다.
+
+### Runtime 진단과 실행 잠금의 소유권
+
+`domains/runtime/router.py`는 소유자용 `/runtime/status` HTTP와 응답 형식을 담당합니다. InstallationIdentity의 같은 Session 조회와 claimed-owner 판단은 `identity/repository/runtime_access.py` 및 `identity/service/runtime_access.py`에 있습니다. 상태의 privacy-safe 분류와 component overlay는 Runtime `service/status.py`, `service/components.py`에서 읽을 수 있습니다. 다른 업무의 실제 상태 조회와 reader 생성은 `runtime/diagnostics`가 연결하며, 두 앱 생성 profile은 이 reader factory를 한 번 등록합니다.
+
+`RuntimeSchedulerLease` ORM은 Runtime의 `models.py`에 있습니다. 잠금 획득·heartbeat·tick·해제·오래된 실행자 거부 규칙은 `service/scheduler_lease.py`와 `service/sqlite_lease.py`, 실제 SQL과 compare-and-set 조건은 같은 이름의 `repository` 파일이 담당합니다. `runtime/persistence/scheduler_lease.py`는 SQLAlchemy Session factory와 Identity 조회를 연결하고, `sqlite_scheduler_lease.py`는 SQLite engine·읽기 connection·BEGIN IMMEDIATE 재시도·시계를 연결합니다. `scheduler_fence.py`는 실행 context와 단일 before-commit hook의 수명을 담당합니다.
+
+도메인 밖에서 필요한 Runtime 값과 callback 계약은 `contracts/status.py`, `lease.py`, `lease_store.py`, `search.py`, `transaction.py` 등 실제 정의 파일에서 import합니다. 기존 `public.py`와 `api/application/domain/infrastructure/ports` 집합 export는 제거했습니다. 옛 assertion을 보존하는 두 테스트의 local namespace는 동일한 실제 타입과 함수만 묶으며 제품 코드가 사용하지 않습니다. 공통 Base·DB·모델 등록의 G5 통합과 G06 진입점 최종 정리는 이 역할 배치와 구분하여 검증합니다.

@@ -263,7 +263,7 @@ def _build_embedded_runtime_config(
     # contributor entrypoint and is required for an exact v1/v2 manifest.
     import importlib
 
-    importlib.import_module("app.public_main")
+    importlib.import_module("app.main")
     from app.runtime.migrations.embedded_data import (
         EmbeddedDataUpgradeCoordinator,
     )
@@ -521,7 +521,7 @@ def main() -> int:
     # Import the public composition root only after the launcher environment is
     # complete. Its normal route/service composition registers the canonical
     # model metadata without creating a new runtime -> legacy models edge.
-    from app.public_main import create_app
+    from app.main import create_public_app as create_app
     from app.runtime.configuration import initialize_local_installation_identity
 
     listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

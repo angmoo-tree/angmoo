@@ -307,8 +307,8 @@
       "sha256": "1de42b7c01d84860bbe19ca8676ba5113cf0a308ddea1c8d3a9f080d01b1c8eb"
     },
     {
-      "path": "backend/app/public_main.py",
-      "sha256": "fcfea744b7521126f8b9b4674d52df9a7672b6eb2e74661be28a36e1fe0e96ea"
+      "path": "backend/app/main.py",
+      "sha256": "ea8dcddaaafdd8480be2a52445e2ec74cf942a4348ffcf82e69ec18c774ed735"
     },
     {
       "path": "backend/app/runtime/account_deletion.py",
@@ -320,7 +320,7 @@
     },
     {
       "path": "backend/app/runtime/desktop_sidecar.py",
-      "sha256": "202d5af6af0a90076c87c9d915ba675a50b7c620beb877fd024ded83f8420a54"
+      "sha256": "bceafa6aded212af6b5481e8f47883027ef3256dc391dab4d1f0cd3735545d1a"
     },
     {
       "path": "backend/app/runtime/memory/__init__.py",
@@ -376,7 +376,7 @@
     },
     {
       "path": "backend/app/runtime/memory/sqlite_fts5_recall.py",
-      "sha256": "8fe5cc0923eb59d20c876882c8ac7316425d5993f63015b282d95a7c6081a281"
+      "sha256": "86f0b12a1a9fbcb3c5f33983158e3bae55a71ce76a3c625c124bbfa6b1727aac"
     },
     {
       "path": "backend/app/runtime/memory/subjective_source.py",
@@ -404,7 +404,7 @@
     },
     {
       "path": "backend/app/runtime/single_backend_components.py",
-      "sha256": "8da1ec46358cc86f07709458a33ed98234e643e6b0e903d5fcd7e71ed160bf08"
+      "sha256": "2eeb2d6850f68232168ac34147e5736d31101eaa817b7693ebb4869d0c3b5cc7"
     },
     {
       "path": "backend/tests/test_p8_l_r_memory_batch_api.py",
@@ -504,7 +504,7 @@
     },
     {
       "path": "scripts/ci/generate_p8_l_r_memory_batch_inventory.py",
-      "sha256": "a3b90e3b624c63a22d28883af06e5fbdd04d146623242d07424045596090e5e3"
+      "sha256": "b372b7b356d04f4791eab6ff4f8ba4ae6a7723a052d89123661cde34bdad2cc5"
     },
     {
       "path": "scripts/ci/run_windows_installer_supported_upgrade.ps1",

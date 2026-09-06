@@ -12,7 +12,7 @@ PRIVATE_INVENTORY = BACKEND_ROOT / "security" / "route_security_inventory.json"
 PUBLIC_INVENTORY = BACKEND_ROOT / "security" / "public_route_security_inventory.json"
 sys.path.insert(0, str(BACKEND_ROOT))
 
-from app.public_main import app  # noqa: E402
+from app.main import public_app as app  # noqa: E402
 
 
 def render_inventory(private_path: Path = PRIVATE_INVENTORY) -> str:

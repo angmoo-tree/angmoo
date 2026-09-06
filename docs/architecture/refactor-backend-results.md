@@ -2491,6 +2491,133 @@ LocalBot의 Social 협력은 현재 B5의 실제 Feed/Profile/Inbox/Post/Timelin
 
 Python source/test의 문법과 전체 수집 **2451 nodes / 87.89초**, 경계 **1093 modules / 4053 edges / legacy72 PASS**, L4·ER0·현재 Memory batch·deferred inventory를 확인했다. 합쳐진 현재 reference만 맞추고 사라진 legacy9개/bridge11개를 제거했으며 새 예외를 추가하지 않았다. 현재 이 source의 focused·전체 backend·stock/API/ORM/node·원본 도입 원장·Hosted·설치·병합은 **검증 진행 전 또는 진행 중**이다. 수집과 구조 검사만으로 기능/AR-B8 완료로 기록하지 않는다.
 
+### AR-B8 Runtime A1 실제 값·오류·component 판정 소유
+
+Source `849d65968ec815353febdd50b6e975940ab81a8f`는 진단 코드·오류·상태/lease DTO·저장/검색 실행 계약·HTTP schema와 process-local component 관찰 판정을 각 constants/exceptions/contracts/schemas/service/policies 역할로 옮겼다. 최종 실제 클래스/함수 **65개 전체 AST가 원본과 동일**하다. Character가 받는 실행 오류는 세 이름의 명시적 계약을 통해 같은 실제 예외 class를 참조한다. 임시 Runtime 소비자24개는 실제 edge별 AR-B8-A 소유/제거 조건으로 추적하며 최종 B8 완료 시 제거해야 한다.
+
+최초 수집에서 옛 module namespace로 오류를 가져오던 기존 테스트 한 곳을 발견해 실제 exceptions 모듈에 같은 local alias로 연결했다. 이후 SQLite lease·FTS·single-backend·ER6 업그레이드·ER7 조립·Character 오류 회귀는 **89 passed/1 failed**였다. 실패한 테스트가 실제 파일을 옛 ports 경로로 읽고 있어 새 contracts 경로로 옮겼고, launcher diagnostic 코드 위치 및 기존 의존 방향 검사에도 새 계약 파일을 포함했다. 수정한 검사와 기존 Runtime 진단·HTTP 오류를 포함한 최종 묶음 **37 passed/2 warnings/7.26초**다. 기존 assertion이나 금지 import 규칙은 그대로다.
+
+경계 **727 modules/2434 edges/legacy222 PASS**, L4 parity97 및 L2 launcher6commands/2services PASS다. 원래 보존 함수의 읽기 진단은 source/split/assertion/억제/APIORM/기존 node 모두 **0 errors**, protected2201/current2246이다. Routines 최초 signed source의 두 blob을 메모리에서만 연결한 진단이며 frozen/checkpoint/additions를 갱신하거나 stock 전체 PASS를 선언하지 않았다. 실제 Runtime lease 저장/상태 판정과 외부 canonical 조회, aggregate 종료·G5·G06 제거는 후속 전환 범위다.
+
+
+### AR-B8 Runtime A2 진단 판정과 canonical 조회
+
+Source `7f27efcf4c22dfcaa748d1708774ab54592bf564`는 privacy-safe Runtime 상태/성공활동/provider 실패 분류를 실제 `service/status.py`로 이전했다. Runtime schema/lease 조회2개는 repository, Identity·World·관계 outbox·Routines 조회6개는 runtime query 조립에 둔다. named query9개(조회8/rollback1)는 동일한 요청 Session에 묶이며 생성 때 DB를 읽지 않는다. 기존 설정·시계·200행/1시간 제한·owner predicate·migration 실패 rollback과 metadata 제한을 보존했다.
+
+최종 formatted source의 실제 SQL 함수 본문에 **실제 호출 인수**를 대입하면 6개 상태 서비스 메서드가 원래 AST와 동일하며 모든 원본 helper 본문도 동일하다. 첫 composition 연결에서 domain aggregate가 외부 factory를 역참조하여 경계 검사가 거부했다. 실제 API·contributor·CLI 세 소비자가 외부 조립을 직접 참조하도록 바꾸고 집합 export를 제거해 경계를 복구했다. 규칙을 예외로 우회하지 않았다.
+
+최종 Runtime 진단·HTTP·single-backend·ER7·새 same-Session SQLite 회귀 **37 passed/1 warning/28.96초**다. 새 테스트2nodes는 미커밋 Identity/World/Character 사실을 읽고 caller rollback과 migration 조회 실패 rollback이 같은 Session의 행을 제거하는지 검증한다. 기존 active assignment 조회에 새로운 membership-status 조건을 추가하지 않았다. 경계 **731/2442/legacy222**, L4 parity97, ER0 **81/87/24/44/7 PASS**. 읽기 보존 진단은 source/split/assertion/억제/APIORM/node 모두0, protected2201/current2248이며 stock source/node 도입 원장의 순차 합류는 계속 남아 있다.
+
+
+### AR-B8 Runtime A3 실행 잠금·fence 실제 책임 이전
+
+Source `904be5193f671590c51c061e0206cb312ed05459`는 RuntimeSchedulerLease 실제 ORM을 `domains/runtime/models.py`, 실제 lease 상태 전이를 `service/scheduler_lease.py`, 자체 조회/DB clock/advisory SQL을 `repository/scheduler_lease.py`로 분리했다. Identity row lock은 `runtime/persistence/scheduler_lease.py`에서 원래 Session으로 수행한다. 생성 signature를 유지하는 SQLAlchemy binding은 실제 service를 상속하며 자체 업무 구현을 복제하지 않는다. fence ContextVar와 before-commit 등록은 `runtime/persistence/scheduler_fence.py`에 한 번 정의한다.
+
+중복 실행·stale commit 거부·lease heartbeat·SQLite 경쟁·단일 backend·migration/installer 계약은 **63 PASS/기존 PostgreSQL skip1/49.19초**다. 실제 새 SQL 함수/인수/Identity callback을 펼쳐 원본 모델·메서드·helper·hook **16개 전체 AST**가 동일함을 확인했다. 현재 source/split/assertion/억제/APIORM/node 읽기 진단0(protected2201/current2248), 경계735/2454/legacy222와 L4 parity97 PASS다. 분리 후 A1 소비자10개가 삭제된 구현을 가리키던 지도는 실제 읽는 symbol을 기준으로 새 소비자에 연결했다.
+
+ER0 generator의 실제 scheduler coupling 참조를 service로 바꿔 생성/일치 검사는 PASS다. 다만 기존 ER0 pytest는 **3 PASS/1 FAIL**이다. 업무/SQL 분리로 PostgreSQL marker를 포함한 물리 파일이81→82가 되어 옛 `entry_count < 82` assertion에 걸렸다. SQL 추가나 driver 활성화가 아니며 원문 SQL은 동일하다. 이를 숨기려고 marker/대상을 제외하거나 frozen assertion을 완화하지 않았다. 물리 파일 수에 묶인 기존 구조 검증을 올바른 소유/잔재 기준으로 전환하는 작업을 B8 통합 전 해결해야 한다. 이 source 준비를 전체/merge PASS로 기록하지 않는다. SQLite 실제 CAS 책임 전환·Runtime HTTP/집합 export 제거·G5 등록·G06 삭제 및 순차 도입 원장 합류는 남아 있다.
+
+### AR-B8 ER0 물리 파일 수 검사 보완
+
+위 ER0 실패는 과거 물리 파일 수 조건을 고정 checkpoint `d7037625a19071eb279ad2ea35c3ace6fe5b5289`의 원본 Git inventory에 적용하여 보존하고, 현재 inventory는 별도 실제 전체 source scan과 entries/entry_count/각 marker·줄·hash·owner·조건이 모두 일치하도록 검증해 해결했다. 현재 entry_count82를 축소하거나 제외하지 않는다. 고정 API/ORM/실행 계약은 바꾸지 않았다.
+
+새4개 negative nodes는 실제 임시 source와 대조하여 잘못된 count, 누락한 entry, 조작 hash, 나중에 추가된 marker source를 모두 거부한다. 원래 ER7 driver 의존성·poisoned environment·실행 검사와 함께 **20 PASS/1 warning/28.68초**다. 원래 source/split/assertion/억제/APIORM/node 보존 진단도0오류(protected2201/current2252)다. 과거 threshold를 현재 검증으로 오인하지 않도록 test helper·주석에 구분을 명시했다. 전체 stock source/node 원장은 선행 단계 순차 합류가 여전히 필요하다.
+
+
+### AR-B8 Runtime A4 SQLite lease 실제 정책·SQL 분리
+
+Source `763375b69e10810743dc9bbad1f76d5d3bf340d6`는 SQLite acquire/heartbeat/begin/finish/release/current 판정과 snapshot을 `service/sqlite_lease.py`, 원래5개 read/write/CAS SQL을 `repository/sqlite_lease.py`로 분리했다. `runtime/persistence/sqlite_scheduler_lease.py`는 기존 engine·clock·bounded BEGIN IMMEDIATE executor·읽기 connection과 같은 connection의 Identity 조회를 연결한다. 원래 constructor 입력/검증과 `_write`/`_now` 본문을 보존했다. Callback은 실제 트랜잭션 안의 원래 시점에 실행된다.
+
+새 SQL에 실제 호출 인수를 대입하고 동일 ORM Table 상수 참조를 펼쳐 **16개 workflow/helper/executor 전체 AST**가 원본과 동일함을 확인했다. 생성 후 실제4개 callback, 읽기 with-context/행 조회/None 처리도 원래 구현과 대조했다. 10개 동시 claim·만료 재획득·오래된 epoch 거부·heartbeat/실패 유지·tick·BEGIN IMMEDIATE/복구·single-backend·ER7 회귀는 **42 PASS/1 warning/37.13초**다. 새 node는 없다.
+
+현재 경계737/2458/legacy222·L4 parity97·ER0 전체82/87/24/44/7 PASS, 원래 source/split/assertion/억제/APIORM/node 읽기 진단0(protected2201/current2252)이다. 앞선 지도 소비자9개를 실제 새 값 참조로 연결했다. Runtime HTTP/집합 export 제거, G5 등록, G06 파일 제거 및 선행 source/node 원장 합류/최종 통합은 남아 있다.
+
+### AR-B8 Runtime A5 소유자 진단 HTTP
+
+Runtime `/runtime/status`의 실제 handler는 `domains/runtime/router.py`가 소유한다. 기존 같은 Session의 InstallationIdentity 조회는 Identity repository, claimed-owner 판정은 Identity service에서 수행한다. 원래 origin/auth dependency와403 detail은 그대로이며 reader factory는 두 앱 생성 함수에서 DB 조회 없이 각각1회 설정한다. config가 있을 때만 명시 settings를 넘기는 분기, overlay/privacy/schema/profile/generation 표현을 보존했다. 기존 fake probe fixture는 동일 fake class를 test app의 주입 factory로 연결하고 assertion은 유지한다.
+
+실제 owner SQL·인수·predicate를 펼쳐 handler 전체 AST가 원본과 동일하며 기존 reader/coordinator 두 클래스도 실제 새 service의 전체 AST와 일치한다. Runtime diagnostics/domain/single-backend/ER7 **35 PASS/1 warning/25.91초**, 경계741/2469/legacy222·public196·L4 parity97·ER0 PASS다. 읽기 보존 진단은 source/split/assertion/억제/APIORM/node 모두0(protected2201/current2252). 새 node는 없다. 집합 import 제거와 G5/G06·순차 통합은 계속 남는다.
+
+### AR-B8 Runtime A6 실제 역할 import와 집합 파일 종료
+
+Source `e18f5e5e764ac1774a5ee1ff770b69aedd6289d8`는 기존 export51개가 같은 실제 타입/값/함수임을 확인한 뒤 소비자15파일을 실제 정의로 연결했다. 제품의 public/api/application/domain/infrastructure/ports 집합6파일과 해당 임시 bridge18개를 제거했다. 원래 테스트 두 namespace의29값은 같은 실제 정의를 명시적으로 묶어 기존 assertion을 유지한다. 새 제품 facade나 가짜 ORM은 만들지 않았다. source 지도는 실제 내부 사용과 외부 named import를 대조하며, 옛 aggregate만 소비자로 기록됐던 항목은 실제 사용처로 정정했다.
+
+집중 Runtime/lease/SQL 동시성/HTTP/ER0/ER7 회귀는 **73 PASS/기존PG skip1/43.32초**, 경계735/2457/legacy222·L4 parity97·ER0 PASS다. 원래 source/split/assertion/억제/APIORM/node 읽기 진단0(protected2201/current2252). 현재 contributor navigation87개를 실제 경로로 검토했다. 순차 source/node 원장·다른 업무 후속 import 합류, global ORM 등록/단일Base의 G5, G06 진입점 통합과 검증 후 파일 제거는 별도 미완료 단계다.
+
+
+## AR-B8-A 순차 준비 — Runtime 진단·lease 실제 소유
+
+이전 residual 후보 `57a3c8bf`의 고정 소스에서 LocalBot·Image·credential·공통 오류 집중 검사는 **112 PASS / 2 warning / 43.80초**였다. `b8a-residual-focused.log`에 원본 결과를 보존한다. 이는 해당 후보의 집중 검증이며 전체/Hosted/설치 Gate를 대체하지 않는다.
+
+이 후보는 Runtime 원본 `105ae145`까지의 진단 query/workflow/HTTP, component 정책, SQLAlchemy·SQLite lease repository와 판단·fence/transaction 책임을 현재 B7 및 Tree/Lore·Image·LocalBot 소유 코드에 연결한다. `RuntimeSchedulerLease`의 실제 ORM 소유는 `domains/runtime/models.py`이며 아직 기존 단일 `app.core.db.Base`를 사용한다. G5의 공통 models/database 전환 및 G06 factory 통합은 후속 단계다.
+
+이미 추출된 B7 호출부 두 곳의 옛 `runtime.contracts` import가 수집 오류를 일으켰다. `credential_profiles`와 `read_only_lanes`를 동일한 실제 Runtime exception 클래스에 연결한 뒤 원래 집중 검사를 재실행했다. 초기 실패 로그를 보존하고 최종 **114 PASS / 1 PostgreSQL 환경 skip / 2 warning / 122.05초**를 확인했다. 진단과 같은 session의 query, scheduler singleton/fencing, SQLite canonical/concurrency/search, Social 검색과 World import, Character HTTP 오류, single-backend runtime 조립이 포함된다. 테스트 단언·시간 제한을 변경하지 않았다.
+
+현재 경계 **1105 modules / 4090 edges / legacy72 PASS**, launcher 6명령/2서비스, L4 parity99, ER0 postgres92/migration87/neo4j24/next44/parity7 및 현재 Memory batch/deferred inventory를 확인했다. 기존 Social protocol과 B5 실제 검색 binding, Routines의 error 소유와 B7 execution 조립을 유지하고 두 기존 factory에 Runtime 진단 callback을 추가했다. 옛 service의 업무 본문은 재생성하지 않았다. 사라진 bridge 1개만 제거했으며 새 경계 예외는 없다. 원본 추가 원장, 전체 stock/API/ORM/node·전체 pytest·Hosted·installer·병합은 아직 후속 검증 대상이다.
+
+## AR-B8 G06-A — B7 순차 후보의 실제 factory 통합
+
+기준은 signed B7 `274f90e7bd811d1715f4e6dc2c1e423115ec4671`이다. 원래 G06 준비 `90d7fd7f2332b2b27cf2f1bd92ed0e206427e6f7`·`cc513f4bc078f0547d626d97bbf2210e424b27cb`의 실제 factory와 실행 참조 변경만 현재 B7에 적용했다. 미래 Runtime·Tree·Lore·LocalBot callback이나 G5 Base/database를 앞당기지 않았다.
+
+실제 제품 변경은 `main.py`, `public_main.py`, `runtime/contributor_backend.py`, `runtime/desktop_sidecar.py` 네 파일이다. `main.create_app`과 `main.create_lifespan`이 실제 구현 하나를 소유하고 `main.app`·`main.public_app`은 원래 full/public health와 lifecycle 기본값을 선택한다. 임시 `public_main.py`는 원래 53줄·15개 export의 바이트를 유지하며 public partial 및 동일 객체만 가져온다. 두 launcher는 기존 모델 등록→upgrade→설정→앱 생성 순서를 유지하고 실제 public factory를 import한다.
+
+현재 B7의 Character·World Package·Routines·Chat·Memory·Social·Relationships 연결 26문장의 순서와 내용이 그대로다. 원문 비교 15항목에서 정의7개, lifespan 본문·기존 인자, 명시 profile 선택 외 factory 전체, CLI의 exact ASGI 문자열 외 본문, launcher 두 파일 전체 AST가 같음을 확인했다. 기존 19개 테스트 파일의 155함수/509단언·예외 기대와 suppression은 보존되며 새 3개 테스트 파일(21 nodes)은 원래 `cc513f4` 소스와 바이트가 같다.
+
+초기 집중 검증은 **230 PASS / 3 timeout / 1 warning / 388.53초**다. 같은 제한으로 직접 관련 15개를 재실행해 **13 PASS / 2 timeout / 216.60초**였고 contributor·sidecar의 실제 DB 초기화(기존 60초)는 통과했다. 남은 lazy import·sidecar HTTP의 기존 30초 probe만 단독 재실행한 결과도 처음에는 **2 timeout / 87.54초**였다. 실패 뒤 해당 probe 자식 프로세스 잔존은 없었다.
+
+저장소 코드와 timeout을 바꾸지 않고 외부에서 정확한 cold 입력을 실행하면 16.74초, 시스템 임시 폴더에서는 18.28초에 정상 종료했다. 25초 stack dump를 예약한 진단 실행도 dump 없이 두 검사가 통과했다. 진단 삽입을 제거한 **원래 두 검사의 최종 실행은 2 PASS / 30.82초**이며 각 case는 10.93초·11.15초다. 이 기록은 앞선 시간 초과를 없던 결과로 바꾸지 않으며, 원인을 특정 제품 결함이나 단순 동시 부하라고 단정하지 않는다. 별도 실행들의 PASS를 합쳐 동일 후보 전체 suite PASS로 표시하지 않는다.
+
+최종 읽기 delta 검증은 기존 단언·suppression, G5 미변경, frozen 문서 미변경, ASGI profile, API/ORM 모두 오류0이다. full/public 각 **196 operations**, ORM **102 tables**가 #258/#263 계약과 같다. Public 승인 **604 / 현재 2449 nodes** 검사가 통과했다. 현재 구조는 **1036 modules / 3854 edges / legacy123 PASS**이며 ER0·L4·deferred·public route·현재 Memory batch inventory를 실제 후보로 연결했다. frozen predecessor inventory, baseline/checkpoint/additions는 바꾸지 않았다.
+
+이 단계는 G06-A source 준비다. 원본 source/node의 append-only capture·공식 stock·순차 PR/CI는 부모 통합에서 수행한다. G5 이후 alias가 있는 고정 후보의 삭제 전 검사, AR-B8-B의 실제 alias 제거·엄격 원문 증명과 제거 후 fresh bundle/installer·전체 backend 검증은 별도 완료 조건으로 남는다.
+
+
+## AR-B8-A 순차 준비 — 실제 잔여 업무 합류 후 G06-A
+
+Runtime `6635bb14`에 독립 G06-A `5d5762a0`를 합류했다. app 생성 구현을 main으로 모으고 임시 public_main은 원본15export의 동일한 위임 파일로 유지했다. main의 full/public 두 profile이 기존 health와 기본 component lifecycle 차이를 보존한다. Tree/Lore·Image·LocalBot·Runtime까지 실제 **40개 업무 연결문이 순서/AST까지 동일**하다. Runtime health의 실제 이전한 component 계약도 현재 본문을 그대로 사용한다. factory/lifespan/오류/type/health 본문은 명시적인 profile 선택을 제외하고 현재 선행 소스와 같다.
+
+`g06-runtime-body-proof.json`의11개 비교가 모두 참이며 `g06-runtime-delta-validation.json`에서 변경된 기존22test파일의170함수/583단언·예외 기대 및 suppression 변화0을 확인했다. 새 factory/ASGI/cold-bootstrap3파일은 원본cc513f4의 동일한 내용이다. full/public196개 API와102개 ORM table은 frozen #258/#263 계약과 같고, 실제 옛 ASGI의 새main.public_app 연결 검증도 차이0이다. baseline/checkpoint/additions 및 G5 core.db/models는 수정하지 않았다.
+
+집중 결과는 factory/ASGI/cold/bootstrap·Runtime 진단/조립·Identity demo·LocalBot HTTP **74 PASS / 1 warning / 94.05초**, 추가 Tree/Lore의 두 profile·같은 Session·기존 인증 **9 PASS / 1 warning / 17.61초**다. 새로 합류한 Tree/Lore·LocalBot 검사도 실제 main factory를 선택하도록 연결했으며 기존 node IDs/단언을 유지했다. 원래 compatibility 자체를 검사하는 dedicated test는 삭제 전 검증을 위해 임시 public_main을 계속 읽는다.
+
+현재 경계 **1105 modules / 4066 edges / legacy71 PASS**, 공개 route196 및 L4/ER0/Memory inventory를 확인했다. G5는 실제 모든 모델 소유자가 갖춰진 이 소스에서 단일 Base·database·등록 소비자를 통합한다. 최종 B8-B의 public_main 제거·최종 호환 정리·전체 보존 원장·전체 suite·Hosted·installer·병합은 아직 완료되지 않았다. 준비 결과를 AR-B8-B 종료로 승격하지 않는다.
+
+## AR-B8-G06-A1 — 단일 앱 생성과 지원 profile 호환
+
+Chat HTTP source `74f6c06f9e5501ab3556fed1f3cbd4d5d5546217`에서 독립 준비했다. `main.py`의 실제 `create_app`·`create_lifespan`에 public의 typed RuntimeConfig·같은 Session override·설정 복원·World Package 복구·Memory 시작/종료·readiness를 통합했다. `full`/`public`은 원래 `/health`의 operation ID·응답 schema와 미구성 component 기본값 차이를 명시한다. `public_main.py`에는 같은 class/function과 public profile partial/app을 제공하는 단방향 export만 남긴다.
+
+기존 public의 오류·dataclass·검증·health·CLI 실제 정의와 lifecycle 본문, dispose/recovery/DB dependency의 **13개 AST 비교가 PASS**다. factory는 새 profile 인자·설명·입장 검사와 선택 분기를 원래 public 값으로 복원하고 같은 from-import 이름 순서를 정렬하면 전체 AST가 동일하다. 모델 등록 전 upgrade, 요청 Session·환경 설정·rollback/복구·provider 실행은 기존 runtime 연결을 그대로 사용한다.
+
+기존 ER4/ER7·공개 runtime·M3 보안·logging·설정·Identity/Character/Chat HTTP와 신규 회귀는 **152 passed / 기존 1 skipped / 1 warning / 62.84초**다. 새 6 nodes는 두 health 계약과 동일 type/factory, public의 기본 component 없음, Memory 시작 실패를 포함한 복구→extension→component→Memory→역순 정리, cold import의 DB/미디어/로그 부작용 없음과 명시적 media 준비를 검증한다. M3의 실제 health module을 public_main으로 바꾸던 옛 정규화 helper만 실제 main 소유에 맞춰 제거했고 기존 assertion/node는 유지했다. 새 공통 factory에는 HTTP/API 정책을 복제하지 않았다.
+
+현재 source 지도는 public_main 실제 구현 전체를 main으로 대응하고 G06 bridge의 소유·종료 단계를 명시한다. CLI ASGI 문자열·sidecar/contributor의 동적 모델 등록 import·검사별 full/public 참조는 다음 source에서 전환하며, G5와 최신 B4/B5/B7 callback 합류는 root의 순차 통합 범위다. 불변 baseline/checkpoint와 append-only additions는 변경하지 않는다. B8-B 호환 제거·삭제 후 실행·CI/패키징/설치 및 G06 완료는 미완료다.
+
+고정 전 전체 보존 검사에서 public factory가 partial로 바뀌며 Identity factory 검사의 자동 생성 case ID 두 개가 달라진 것을 확인했다. 원래 두 case의 `create_app0`·`create_app1` ID를 명시해 같은 입력·assertion·수집 node를 보존했다. source/split/assertion/억제 표시/API/ORM 계약에는 오류가 없으며 보호 **2,129 / 현재 2,189**다. 선행 committed source/node의 append-only capture는 아직 root 순차 통합에 남아 있어 명령 전체는 exit 1이다. 현재 경계 **656 modules / 2,158 edges / exact legacy 263 PASS**, L4 parity **97**, ER0 **78/87/24/44/7**, Memory batch current, public **196**을 확인했다. 같은 설정·logging·복구 consumer를 main으로 대응했고 더 이상 존재하지 않는 public_main의 실제 업무 import 예외 두 개를 제거했다. 독립 읽기 리뷰에서도 profile·같은 Session·partial·단방향 export에 추가 차단 문제를 발견하지 못했다.
+
+최종 재검사에서 원래 node ID를 포함한 source/split/assertion/억제 표시/API/ORM/기존 node 오류 **0**, 보호 **2,129 / 현재 2,189**를 확인했다. 미캡처된 선행 source **51개 / nodes 54개**만 전체 명령의 exit 1 원인이며, ID 보정 후 관련 실제 회귀도 **9 passed / 23.25초**다. 이번 첫 도입은 `backend/tests/runtime/test_app_factory_ownership.py` 한 파일·6 nodes이며 source commit에서 원본을 고정한다.
+
+
+## AR-B8-G06-A2 — 실제 실행·ASGI export·검사 참조 전환
+
+첫 factory source `90d7fd7f2332b2b27cf2f1bd92ed0e206427e6f7` 뒤 실제 contributor/sidecar의 모델 등록용 동적 import와 public factory 호출을 `app.main`으로 옮겼다. 두 실행기의 전체 모듈 AST는 정확한 import 및 factory alias만 복원하면 원래와 동일하다. 등록→기존 데이터 upgrade→typed RuntimeConfig→같은 Session app 생성 순서, sidecar ready/fatal·stdout/stderr·silent stream·shutdown과 log 설정을 바꾸지 않았다.
+
+개발 ASGI 경로는 `app.main:public_app`이다. `main.app`은 원래 full `/health` 계약을, `main.public_app`은 원래 public readiness 계약을 유지하며 실제 생성 함수는 하나다. 공개 inventory와 full/public 계약 검사는 두 실제 객체를 구분해서 읽는다. 일반 기존 테스트의 import/fixture도 실제 main factory로 전환했고, Chat의 두 pytest case ID와 Identity factory ID는 기존 값을 유지한다.
+
+보존 검사는 임의 assertion 허용 목록을 추가하지 않는다. 보호된 두 앱 namespace의 원본 Git source/export와 파일 map, 새 export의 실제 단일 FastAPI factory 또는 같은 factory partial/name alias를 확인한 경우에만 정확한 ASGI 문자열 상수의 이동을 인정한다. 새 실제 export의 OpenAPI도 원래 full/public frozen 계약에 직접 비교하므로 같은 factory에서 잘못된 profile을 골라도 실패한다. 다른 문자열·없는 export·다른 factory·중복/cycle·미보호 source·행위 assertion 변경을 거부하는 회귀를 추가했다.
+
+첫 집중 검증은 새 ASGI 검사 14 nodes, 호환 module import를 차단한 fresh contributor/sidecar 데이터 준비 1 node와 기존 G0/로그/ER6/ER7/Chat을 합쳐 **93 passed / 기존 1 warning / 66.27초**다. 기존 G3 CLI assertion의 앱 import 문자열 한 개만 실제 ASGI export 이동과 대응하고, 나머지 host/port/reload/logging·호출 횟수·행위 assertion은 유지했다.
+
+Docker의 실제 contributor entrypoint와 PyInstaller의 실제 sidecar entrypoint는 이미 독립 runtime 파일을 지정하므로 빌드 정의에 직접 public_main 경로가 없었다. 바뀐 static import가 main을 포함하며 logging.ini, onefile/onedir 자원 구성을 그대로 유지한다. current runtime inventory는 main을 가리키고 frozen H predecessor의 과거 경로는 재생성하지 않는다. 실제 새 bundle/installer 검증은 B8-B에 남는다.
+
+제품·일반 검사에서 public_main import는 제거했고 임시 호환 파일과 삭제 전 비교용 factory 검사만 남는다. frozen ASGI 원본 경로·negative fixture·과거 pytest ID·기존 logger 이름·역사 문서는 활성 import와 구분한다. B4/B5/B7의 최종 callback, G5, B8-B 파일 제거·삭제 후 최종 후보 실행과 전체 종료는 아직 미완료다.
+
+최종 확장 회귀는 **351 passed / 기존 1 skipped / 1 warning / 104.72초**다. stock 전체 보존 검사는 source/split/assertion/억제 표시/기존 node·full/public API/ORM 및 실제 새 ASGI export의 frozen public 계약 오류 **0**, 보호 **2,129 / 현재 2,204**다. 첫 G06 source를 포함한 현 작업트리에서 확인되는 미캡처 **52 files / 45 committed nodes**만 명령 전체의 exit 1 원인이다. 독립 검토에서도 차단 문제를 발견하지 못했다. 같은 factory 이름을 따라가는 AST는 구조 근거이며, 실제 새 target의 frozen OpenAPI 비교가 행위 gate라는 구분을 유지한다.
+
+검토 후 실제 Python source path literal map과 ASGI export map을 함께 적용한 경우도 같은 negative node에서 확인했다. 접두 문자열은 기존 파일명 정규화의 `app.main:app`까지만 변환되고 `app.main:public_app`으로 확대되지 않는다. 해당 최종 ASGI 회귀 **14 passed**를 확인했으며, 임의 문자열이나 숫자 행위 assertion을 허용하는 예외는 추가하지 않았다. 신규 첫 도입 파일은 `tests/runtime/test_asgi_preservation.py` 14 nodes와 `tests/runtime/test_canonical_bootstrap.py` 1 node다.
+
+
+G06 원본 계보 보완: 현재 실제 소유 준비 `9aafe289`와 원래 `cc513f4`의 미합류 비-merge commit은 `90d7fd7`·`cc513f4` 두 개뿐임을 Git로 확인했다. 따라서 미래 G5/호환 제거 구현을 앞당기지 않고 이 두 원래 source ancestry를 지금 합류했다. 현재 소스에서 이미 보존·실행 검증한 main/profile·40개 업무 조립·15export·실제 caller·원래 test·보존 checker·frozen/current inventory·추가 원장은 모두 동일하다. 변경은 ER7 문서의 현재 ASGI 경로 한 줄과 기존 G06 결과 이력 추가뿐이며 `g06-original-ancestry-proof.json`에 목록을 보존했다. 원래90d/cc의 immutable snapshot을 현재 최초 도입 원장으로 직접 연결할 수 있으며 ancestry 검사를 완화하거나 대체 source를 최초 도입으로 기록하지 않는다.
+
 Tree/Lore의 원래 signed source 네 개를 기존 committed snapshot으로 연결했다. `f52dbdbc`는 파일13개·신규5 nodes, `f7f303d9`는 파일11개·신규0 nodes, `c4a0a6a2`는 파일5개·신규0 nodes, `9cd5eb14`는 파일7개·신규4 nodes다. 원래 수집기의 도입 판정과 변경하지 않은 `addition_errors`로 각 Git blob·최초 도입·단언·suppression·ancestor를 검증한 뒤 **162개 불변 prefix → 166개**로 append했다. `d8f5b446`과 후보 `7bc89bf0`의 기존 원장도 동일하다. 현재 후보에서 기준 자료를 재수집하거나 원본 단언을 변경하지 않았다.
 
 현재 소스 목록 **1056 modules / 3925 internal edges / 3018 external imports**, 구조 경계 **legacy103**, deferred22, L4 parity99, OSS·secret allowlist metadata25·launcher6명령/2서비스·desktop installer 계약은 통과했다. 공식 stock/API·ORM/node와 전체 backend는 이 metadata를 고정한 후보에서 이어서 수행한다. Hosted CI·설치·post-merge 및 G5/G06/B8-B 최종 판정은 아직 별도 단계다.
@@ -2502,6 +2629,10 @@ Tree/Lore signed `ac8829f1cfa3f7b92ab9f80d020c449f7e14f299`의 기존166개 원�
 
 `runtime/local_bot/composition.py`는 원래 `55d1c2f9e373a5b42b1ddafc0ac04ee12fd3e8b0`와 Git bytes가 같고, 파일 자체의 최초 도입은 `1565688ffa8095b37ec8fb843f5547c6c87705ae`다. 미래G06을 포함한55d 전체 ancestry를 이번 후보에 합류하지 않았다. Visual identity 원본734492bf는 기존파일 수정만 있으며 새로운 test/file 도입이 없어 추가record로 중복 등록하지 않는다. 제품·테스트·frozen 기준·검사 변경0이며 현재 navigation/stock·전체backend·CI/PR Gate는 다음 metadata 후보에서 별도로 확인한다.
 
+
+### AR-B8-A Runtime·G06 원본 도입 기록
+
+선행 residual 원장 `e485608e`의176개 기록을 정확한 불변 prefix로 유지하고 Runtime의 원본6개 source와 G06의 원래90d/cc 두 source를 추가했다. 새로 보호하는 원본 파일39개와 node27개는 각각 실제 signed commit의 immutable archive snapshot에서 파생한 값이다. Runtime 소비자 경로만 전환한e18f5e5e는 신규 파일/테스트 함수 도입0을 확인해 중복 record를 만들지 않았다. 원래 helper 및 production checkpoint/addition 검사를 쓰기 전후 그대로 실행하여 source 최초 도입·blob·단언·suppression·node·현재 ancestry 및 과거 원장 prefix 오류0, 최종184개를 확인했다. 제품·테스트·frozen 기준·검사기는 이 기록에서 변경하지 않았다. 전체 stock/current navigation·전체 backend·Hosted·installer·순차 PR/병합 Gate는 계속 후속이다.
 Tree/Lore 순차 후보의 첫 공식 보존 검사는 보호 대상과 현재 **2,437 nodes**가 일치했고 API·ORM·원본 source·단언·suppression 손실이 없었다. 실패 항목은 삭제된 옛 파일과 테스트를 가리키는 현재 지도였다. 실제 정의·import·호출 위치를 대조해 split symbol 34개 행의 사라진 소비 경로를 현재 경로로 연결하고, 기존 node map에 따라 Tree 검사 참조 7개와 K03의 Lore HTTP 경로 1개를 수정했다. 기존 유효한 탐색 경로와 원본 source/symbol/node 이전 증거는 보존했고, 호출되지 않는 보존 함수에 새 소비자를 만들어 넣지 않았다.
 
 고정한 `ac8829f1`에서 backend 전체 첫 실행은 **2,413 PASS / 22 SKIP / 2 FAIL / 기존 warnings27 / 1,197.78초**다. 실패는 sidecar health/shutdown subprocess의 원래 30초 제한 초과와 B7에서 빠진 `app.core.context_clipping`의 현재 core 목록 한 항목이었다. 후자는 선행 보정 `ef0fac3f`와 동일한 `keep / AR-B7-DAYPART` 항목만 추가했다. sidecar 제품 코드·원래 30초 제한·15초 watchdog·검사 단언을 변경하지 않은 재검증에서 sidecar/L0/Daypart **11 PASS / 15.59초**를 확인했다. 시간 초과의 구체 원인을 확정하거나 최초 전체 실행을 전부 통과한 것으로 바꾸어 기록하지 않는다.
@@ -2536,3 +2667,18 @@ Tree/Lore metadata를 합치며 기존 `app.core.context_clipping`의 AR-B4 행�
 부모의 원본 Git 객체 독립 검증을 거친 exact12 hash 보정 `ce9b31d1`만 cherry-pick해 `d7f551a0`으로 고정했다. 원장에 기록된 실제 Git blob 해시가 generic-api-key로 탐지된 경우이며, 원장 파일 경로·JSON source key·정확한 hash·전체 행과 해당 rule을 함께 제한한다. 파일이나 regex 규칙 전체를 제외하지 않았다. 실제 Gitleaks8.30.1의 일치 사례 탐지0/값 변경 탐지1/다른 파일 탐지1 근거가 있고, 이 후보의 추적 tree **28.93MB /7.84초** 및 HEAD 이력 **592 commits /36.50MB /7.93초**를 `--redact`로 검사한 결과는 모두 탐지0/exit0이다.
 
 보정 후 제품·테스트·checker·CI와 전체 stock 입력(source 및 baseline/checkpoint/additions/path map/feature inventory)은 검증한 cc5a8d67과 동일하다. 기존166 prefix와 최종176 원장도 그대로다. XML에서도 유일한 실패가 해당 metadata 중복임을 확인했다. 이 단계의 로컬 보존/전체 실행 및 실패 항목 재검증 근거를 갖춘 순차 후보이며 Hosted CI·installer·post-merge·병합 및 후속 Runtime/G5/G06/B8-B 완료는 별도 Gate로 이어간다.
+
+### AR-B8-A Runtime·G06 순차 통합 전체 검증
+
+고정 `ec72adaa1fb7e1fd6ea43864f749c9871b503e73`의 전체 backend는 **2456 PASS / 기존22 SKIP /28 warnings /912.53초**다. 실제 Runtime 진단·lease·같은 Session의 Identity 접근과 `main.py` 단일 factory 및 임시 public export를 합친 후보이며, 기존 40개 초기화 연결과 factory/lifespan/health 본문, full/public 각각196개 HTTP operation 및102 ORM 계약을 유지한다. G5와 `public_main.py` 삭제 전 검증으로 기록하며 최종 제거 완료를 뜻하지 않는다.
+
+선행 Residual의 검토된 현재 지도를 합친 `d9f9fac6`에서 제품·테스트·검사기·원장184개는 달라지지 않았다. 첫 공식 stock의 보호2478=현재2478과 원본 계약·단언·suppression 보존은 일치했으나, Runtime 오류의 현재 경로7개와 해당 split 목적지 집합1개가 아직 이전 `contracts.py`를 가리켰다. 실제 동일 오류 정의를 소유한 Runtime/Routines의 `exceptions.py`로 현재 목적지만 연결하고 원본 source·symbol·행위 검증을 유지했다.
+
+같은 후보의 CI·OSS·launcher·desktop installer·Host Tauri 계약과 DCO·구조 경계 검사가 통과했고 custom 현재 보안 검사는2226files/치명0이다. Gitleaks가 원장의 Git blob14개를 generic key로 분류한 첫 실패를 보존한다. 각각 원래 signed commit의 정확한 경로와 실제 Git blob 일치를 확인한 뒤 Residual12개와 Runtime2개를 exact 경로·행·값 조합으로만 구분했다. 실제 Gitleaks8.30.1에서 검토 값은 통과하고 값 변경 및 다른 파일은 각각 검출되는 것을 확인했다. 원장 내용과 비밀 탐지 규칙은 그대로이며 이 보정 후 전체 stock·보안·순차 PR/Hosted/설치/병합 Gate를 이어간다.
+
+보정한 signed `d82db1cc`에서 원래 공식 stock **보호2478=현재2478 /37항목 PASS**, 실제 Gitleaks tree/history 탐지0을 확인했다. Residual의 `core_modules` 중복 정정을 합친 `7cd71f43`은 해당 목록6줄 제거만 다르며 제품·테스트·원장184개는 동일하다. 이 후보의 원래 L0 **6 PASS /0.18초**, 후보 조상만 연결한 격리 Git 저장소의 custom history **10170 blobs/치명0**을 확인했다. 첫 navigation/Gitleaks 실패와 보정 후 결과를 구분하며, 전체 backend2456 PASS는 같은 제품·테스트의 ec72 원본 실행에 근거한다. 순차 PR·원격 Core 전체·Windows/installer·병합 후 검증 및 G5/최종 public_main 제거는 후속 단계다.
+
+
+### AR-B8-A Runtime/G06 PR #288: current inventory correction
+
+The first exact-head PR run at `849e6bc0` failed the deferred runtime inventory check after the preceding CI policy, OSS, allowlist, launcher, installer, Host and architecture checks passed. The original Runtime/G06 source ledger now contains the supported extension type marker; the current inventory had 23 entries and omitted that one existing ledger file. The correction adds only `security/refactor_backend_additions.json` to the generated current inventory (24 entries), preserving all 23 previous rows. Product code, tests, assertion/suppression contracts, the original source ledger184 and frozen checkpoints are unchanged. The initial failure remains recorded separately from the corrected-head CI rerun.

@@ -462,10 +462,10 @@ def _runtime_coupling() -> list[dict[str, Any]]:
         ("compose.dev.yml", "shared", ["frontend HMR", "backend reload", "contributor logs"]),
         ("backend/app/runtime/single_backend_components.py", "shared", ["in-process scheduler/projector ownership", "bounded drain"]),
         ("backend/app/runtime/resident/scheduler.py", "scheduler", ["singleton process lock", "database lease", "heartbeat", "bounded drain"]),
-        ("backend/app/domains/runtime/infrastructure/sqlalchemy_scheduler_lease.py", "scheduler", ["lease repository", "fencing epoch"]),
+        ("backend/app/domains/runtime/service/scheduler_lease.py", "scheduler", ["lease workflow", "fencing epoch"]),
         ("backend/app/runtime/graph_projection/worker.py", "projector", ["outbox claim", "thread pool", "bounded drain", "degraded state"]),
         ("backend/app/runtime/graph_projection/process_client.py", "projector", ["graph client construction"]),
-        ("backend/app/public_main.py", "api", ["typed RuntimeConfig", "FastAPI lifespan", "component ownership"]),
+        ("backend/app/main.py", "api", ["typed RuntimeConfig", "FastAPI lifespan", "component ownership"]),
         ("backend/app/runtime/shutdown.py", "shared", ["cooperative signal bridge"]),
     )
     return [_coupling_entry(*entry) for entry in entries]

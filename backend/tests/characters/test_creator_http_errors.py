@@ -10,7 +10,7 @@ from app.api.v1.routes import agents as mixed
 from app.domains.characters import dependencies, exceptions, router, schemas
 from app.domains.characters.service import drafts
 from app.domains.media import contracts as media_contracts
-from app.domains.runtime import contracts as runtime_contracts
+from app.domains.runtime import exceptions as runtime_contracts
 from app.runtime.characters import management
 from app.services import profile_media, runtime_boundary
 from app.domains.routines import exceptions as agent_runs

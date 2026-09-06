@@ -41,8 +41,7 @@ def _route_key(route, method: str) -> str:
 
 
 def _canonical_inventory_module(module: str) -> str:
-    if module == "app.main":
-        return "app.public_main"
+    # Both health endpoints now have their actual implementation in app.main.
     return module
 
 

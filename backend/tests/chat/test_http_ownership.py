@@ -17,15 +17,10 @@ from app.domains.chat.router import messages, world_chat, world_chat_response
 from app.runtime.chat import message_composition
 
 
-@pytest.mark.parametrize("module_name", ["app.main", "app.public_main"])
+@pytest.mark.parametrize("module_name", ["full", "public"], ids=["app.main", "app.public_main"])
 def test_both_factories_register_the_same_actual_chat_services(module_name):
-    factory = importlib.import_module(module_name).create_app
-    options = (
-        {"prepare_media_directories": False}
-        if module_name.endswith("public_main")
-        else {}
-    )
-    app = factory(**options)
+    factory = importlib.import_module("app.main").create_app
+    app = factory(profile=module_name, prepare_media_directories=False)
     request = Request({"type": "http", "app": app})
     for name in (
         "thread_service",

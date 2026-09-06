@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.config import Settings
 from app.core.db import create_database_engine, create_session_factory
 from app.domains.memory.service.recall import CanonicalRecallService
-from app.domains.runtime.ports.runtime_data_path import RuntimeDataPaths
+from app.domains.runtime.contracts.data_paths import RuntimeDataPaths
 from app.runtime.memory.recall_projection import EmbeddedMemoryRecallProjection
 from app.runtime.memory.recall_composition import canonical_recall_repository as SqlAlchemyCanonicalRecallRepository
 from app.runtime.memory.sqlite_fts5_recall import SqliteMemoryRecallIndex

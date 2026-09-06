@@ -9,28 +9,26 @@ from types import SimpleNamespace
 import pytest
 import yaml
 
-from app.domains.runtime.public import (
-    ActivityRuntimeStatus,
-    ApplicationRuntimeStatus,
-    InstallationState,
-    MigrationRuntimeStatus,
-    OwnerRuntimeStatus,
-    ProjectorRuntimeStatus,
-    ProviderUsageRuntimeStatus,
-    RuntimeComponentState,
-    RuntimeComponentStatus,
-    RuntimeDiagnosticCode,
-    SchedulerLeaseHeldError,
-    SchedulerLeaseLostError,
-    SchedulerRuntimeStatus,
-    ComponentObservationRegistry,
-    overlay_in_process_component_status,
-    runtime_status_read,
-)
+from app.domains.runtime.contracts.status import ActivityRuntimeStatus
+from app.domains.runtime.contracts.status import ApplicationRuntimeStatus
+from app.domains.runtime.contracts.status import InstallationState
+from app.domains.runtime.contracts.status import MigrationRuntimeStatus
+from app.domains.runtime.contracts.status import OwnerRuntimeStatus
+from app.domains.runtime.contracts.status import ProjectorRuntimeStatus
+from app.domains.runtime.contracts.status import ProviderUsageRuntimeStatus
+from app.domains.runtime.contracts.status import RuntimeComponentState
+from app.domains.runtime.contracts.status import RuntimeComponentStatus
+from app.domains.runtime.constants import RuntimeDiagnosticCode
+from app.domains.runtime.exceptions import SchedulerLeaseHeldError
+from app.domains.runtime.exceptions import SchedulerLeaseLostError
+from app.domains.runtime.contracts.status import SchedulerRuntimeStatus
+from app.domains.runtime.service.components import ComponentObservationRegistry
+from app.domains.runtime.service.components import overlay_in_process_component_status
+from app.domains.runtime.schemas import runtime_status_read
 from app.main import create_app, create_lifespan
-from app.public_main import (
-    create_app as create_embedded_app,
-    create_lifespan as create_embedded_lifespan,
+from app.main import (
+    create_public_app as create_embedded_app,
+    create_public_lifespan as create_embedded_lifespan,
 )
 from app.runtime.single_backend_components import (
     SingleBackendRuntimeComponents,

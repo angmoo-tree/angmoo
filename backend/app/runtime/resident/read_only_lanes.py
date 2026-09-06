@@ -9,7 +9,7 @@ from typing import Any, Awaitable, Callable
 
 from app.core.redaction import redact_secret_text
 from app.domains.routines.exceptions import ReadOnlyLaneRetryExhausted
-from app.domains.runtime.contracts import OpenClawGatewayError
+from app.domains.runtime.exceptions import OpenClawGatewayError
 
 # Keep the established diagnostic category while moving the actual executor.
 logger = logging.getLogger("app.services.agent_runs")

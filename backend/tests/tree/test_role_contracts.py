@@ -198,16 +198,16 @@ def test_repository_commit_failure_does_not_refresh_or_swallow(db, monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "module_name", ["app.main", "app.public_main"], ids=["full", "public"]
+    "profile", ["full", "public"], ids=["full", "public"]
 )
-def test_both_factories_wire_tree_http_with_original_dependencies(db, module_name):
-    import importlib
+def test_both_factories_wire_tree_http_with_original_dependencies(db, profile):
+    from app import main
 
-    module = importlib.import_module(module_name)
-    application = module.create_app(
+    factory = main.create_app if profile == "full" else main.create_public_app
+    application = factory(
         **(
             {"prepare_media_directories": False}
-            if module_name == "app.public_main"
+            if profile == "public"
             else {}
         )
     )

@@ -354,7 +354,7 @@
     },
     "GET /api/v1/runtime/status": {
       "access": "owner-only",
-      "module": "app.api.v1.routes.runtime_status",
+      "module": "app.domains.runtime.router",
       "endpoint": "get_runtime_status"
     },
     "GET /api/v1/search": {
@@ -519,7 +519,7 @@
     },
     "GET /health": {
       "access": "public",
-      "module": "app.public_main",
+      "module": "app.main",
       "endpoint": "health"
     },
     "PATCH /api/v1/agents/drafts/{draft_id}": {
