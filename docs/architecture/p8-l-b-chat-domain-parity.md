@@ -44,7 +44,12 @@ repository root에서 다음을 실행한다.
 ```powershell
 python scripts/ci/generate_architecture_inventory.py --check
 python scripts/ci/generate_p8_l_b_chat_domain_inventory.py --check
-backend\.venv\Scripts\python.exe -m pytest -q backend/tests/test_p8_l_b_chat_domain_inventory.py backend/tests/test_messages_service.py backend/tests/test_prompt_safety.py
+Push-Location backend
+try {
+    .\.venv\Scripts\python.exe -m pytest -q tests/test_p8_l_b_chat_domain_inventory.py tests/chat/test_messages_service.py tests/common/test_prompt_safety.py
+} finally {
+    Pop-Location
+}
 ```
 
 PostgreSQL concurrency test environment가 연결되지 않은 실행에서는 concurrency parity를 `NOT VERIFIED`로 유지한다. SQLite 또는 import inventory PASS를 PostgreSQL advisory lock·lease concurrency의 실행 증거로 대체하지 않는다.

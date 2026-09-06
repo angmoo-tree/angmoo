@@ -2829,3 +2829,11 @@ ChatService·ChatRuntimePort·GenerationLifecycleService와 runtime/chat/world_g
 원래 호환·구조 검사22개는 전체 함수 AST를 signed 원문과 비교하고 정확한 import/identity 경로만 승계한다. 업무 assert·with raises·fixture·provider monkeypatch·동일 Session 동작은 유지한다. 기존 split의 임시 alias 소비582개를 실제 현재 소비자로 정리하고 stale bridge75개를 제거했으며 신규 경계 예외0이다. baseline/checkpoint/additions와 동결자료는 변경하지 않았다.
 
 검증은 영향 **194 PASS / 4 warnings / 43.34초**, 마지막 class/decorator/default 실행 guard 보강 뒤 엄격 음성·원문함수검사 **53 PASS / 20.13초**다. 실제 옛 경로 소비0, 경계 **1074 modules / 3986 edges / 기존 legacy5 PASS**. 원본 전체 source/split/assertion/suppression 진단은0이며 PR258/263 API/schema/ORM도PASS다. 최초 신규 검사 가정 및 current inventory와 원래 __all__ 문장 형태를 정정한 이력은 [호환 종료 기록](ar-b8-compatibility-retirement.md)에 남긴다. 새 회귀 node53개 최초 도입과 source capture, stock/전체/Hosted/설치 및 post-merge 검증은 부모 선형 통합의 별도 Gate다.
+
+## AR-B8-G07 — 남은 LocalBot·Media·공통 정책 테스트 소유
+
+기준 `7ada864c5a3a77ddd601d0faed81577615b5af0f`의 실제 업무 테스트 여섯 파일을 기존 소유 폴더로 이전했다. LocalBot의 응답·rate limit·원자적 quota는 `tests/local_bot/{test_response_contract,test_rate_limit,test_atomic_quota}.py`, 이미지 파일 저장·정제는 `tests/media/test_profile_media.py`, 공통 prompt 안전성과 텍스트 정제는 `tests/common/{test_prompt_safety,test_context_text}.py`에서 찾는다. 빈 옛 파일이나 새 검증 함수를 만들지 않았다.
+
+다섯 파일은 byte-identical 이동이다. LocalBot OpenAPI 검사는 폴더 깊이에 따라 `Path(__file__).resolve().parents[2]`만 `parents[3]`으로 변경해 같은 저장소의 `frontend/public/openapi.json`을 읽는다. 이 정확한 물리 경로 보정을 복원하면 여섯 전체 모듈 AST가 원본과 같으며, 최상위 함수·class55개와 기존 assertion107개·decorator·fixture·provider/Session 호출은 모두 유지된다.
+
+이동 전후 실제 수집은 **65 → 65**, 일대일이며 신규·누락·중복0이다. 새 위치의 전체 영향 **65 passed / 5.52초**, 원래 체크포인트/후속 증거의 해당 assertion·suppression 검사0, 승인 public604 보존과 현재 전체 public2683 수집도 통과했다. 기존 split의 직접 소비자29개·행위 node381개는 정확한 새 경로로 연결했다. CI의 현재 literal 소비는 없고 backend 전체 suite가 새 파일을 수집한다. P8-L-B의 현행 검증 명령은 실제 Chat/Common 테스트 경로와 backend 실행 디렉터리를 사용한다. 제품 코드·feature inventory·원본 baseline/checkpoint/additions·동결 자료는 변경하지 않았으며 최종 통합/stock/Hosted Gate는 부모가 진행한다.

@@ -540,7 +540,7 @@ def test_bot_follow_response_is_character_profile_only(monkeypatch):
 
 
 def test_public_openapi_omits_bot_user_and_token_management_fields():
-    openapi_path = Path(__file__).resolve().parents[2] / "frontend" / "public" / "openapi.json"
+    openapi_path = Path(__file__).resolve().parents[3] / "frontend" / "public" / "openapi.json"
     text = openapi_path.read_text(encoding="utf-8")
     spec = json.loads(text)
 
