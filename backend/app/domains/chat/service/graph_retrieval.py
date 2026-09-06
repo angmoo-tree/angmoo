@@ -24,11 +24,18 @@ from app.domains.chat.contracts.workflow_recipe import (
     WorkflowAxis,
     WorkflowDependencyBinding,
 )
-from app.domains.relationships.contracts.graph_plan import GraphPlanContractError, GraphRetrievalPlan
-from app.domains.relationships.contracts.graph_execution import GraphPlanExecutionContext, GraphPlanExecutionResult
-from app.domains.relationships.contracts.graph_planner import GraphPlannerEntity, GraphPlannerOutputError, GraphPlannerProviderPort, GraphPlannerRelationship, GraphPlannerRequest
+from app.domains.relationships.contracts.graph_plan import GraphPlanContractError
+from app.domains.relationships.contracts.graph_execution import GraphPlanExecutionContext
+from app.domains.relationships.contracts.graph_execution import GraphPlanExecutionResult
+from app.domains.relationships.contracts.graph_planner import GraphPlannerEntity
+from app.domains.relationships.contracts.graph_planner import GraphPlannerOutputError
+from app.domains.relationships.contracts.graph_planner import GraphPlannerProviderPort
+from app.domains.relationships.contracts.graph_planner import GraphPlannerRelationship
+from app.domains.relationships.contracts.graph_planner import GraphPlannerRequest
 from app.domains.relationships.contracts.graph_recall import GraphRecallScope
-from app.domains.relationships.service.graph_planning import GraphRetrievalPlanExecutor, GraphRetrievalPlanValidator
+from app.domains.relationships.contracts.graph_plan import GraphRetrievalPlan
+from app.domains.relationships.service.graph_planning import GraphRetrievalPlanExecutor
+from app.domains.relationships.service.graph_planning import GraphRetrievalPlanValidator
 
 
 @dataclass(frozen=True, slots=True)

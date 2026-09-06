@@ -4,7 +4,7 @@ import pytest
 from sqlalchemy import event
 from sqlalchemy.orm import Session
 
-from tests.model_fixture_support import models
+from model_fixture_support import models
 from app.domains.social.contracts.inbox import ManualInboxRuntimeError
 from app.runtime.social.manual_inbox import manual_inbox_service, source_id
 from routine_posts.test_runtime import _engine, _seed

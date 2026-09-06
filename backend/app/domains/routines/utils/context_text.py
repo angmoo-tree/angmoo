@@ -6,4 +6,3 @@ def _clip_text(value: str | None, limit: int) -> str:
     if len(text) <= limit:
         return text
     return f"{text[: max(0, limit - 3)]}..."
-

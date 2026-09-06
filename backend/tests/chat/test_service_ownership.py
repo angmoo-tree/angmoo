@@ -13,7 +13,7 @@ from app.domains.chat.service.settings import MessageSettingsService
 from app.domains.chat.service.threads import ThreadService
 from app.domains.identity.service import message_credentials
 from app.runtime.chat import scope_queries
-from test_p8_l_d_world_chat_identity import (
+from chat.test_p8_l_d_world_chat_identity import (
     _character,
     _create_tables,
     _installation,
@@ -219,13 +219,16 @@ def test_message_credentials_keep_envelope_scope_flush_only_and_caller_rollback(
 
 def test_routes_call_actual_owner_services_without_runtime_port_chain():
     from app.api.v1.routes import messages, world_chat, world_chat_response
-    from app.runtime.chat import message_composition, world_generation
+    from app.runtime.chat import message_composition
+    from app.domains.chat.service.generation import GenerationService
 
     assert messages.thread_service is message_composition.thread_service
     assert messages.settings_service is message_composition.settings_service
     assert messages.message_service is message_composition.message_service
     assert world_chat.chat_service is message_composition.thread_service
-    assert world_chat_response.chat_service is world_generation
+    assert world_chat_response.generation_service is message_composition.generation_service
+    assert world_chat_response.evidence_service is message_composition.evidence_service
+    assert type(world_chat_response.generation_service) is GenerationService
     assert type(messages.thread_service) is ThreadService
     assert type(messages.settings_service) is MessageSettingsService
     assert type(messages.message_service) is MessageService

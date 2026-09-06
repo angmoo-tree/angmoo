@@ -1,4 +1,6 @@
 from __future__ import annotations
+from compatibility_retirement_support import historical_function_names, historical_imports, module_retired
+
 
 import ast
 from pathlib import Path
@@ -134,49 +136,33 @@ def test_activity_plan_route_and_scheduler_use_routines_public_boundary() -> Non
 
 
 def test_daily_plan_legacy_path_is_a_thin_domain_facade() -> None:
-    facade = APP_ROOT / "services" / "daily_activity_plans.py"
-    imports = _imports(facade)
-
-    assert imports == {"app.domains.routines.public"}
-    assert not _function_names(facade)
+    assert module_retired('app.services.daily_activity_plans')
+    imports = historical_imports('app.services.daily_activity_plans')
+    assert imports == {'app.domains.routines.public'}
+    assert not historical_function_names('app.services.daily_activity_plans')
 
 
 def test_l3_public_package_anchors_have_no_reverse_dependencies() -> None:
-    forbidden_prefixes = (
-        "app.api",
-        "app.integrations",
-        "app.models",
-        "app.runtime",
-        "app.schemas",
-        "app.services",
-        "fastapi",
-        "sqlalchemy",
-    )
-
+    forbidden_prefixes = ('app.api', 'app.integrations', 'app.models', 'app.runtime', 'app.schemas', 'app.services', 'fastapi', 'sqlalchemy')
     paths: list[Path] = []
     for boundary in (*PUBLIC_BOUNDARIES, *L3_5_PUBLIC_BOUNDARIES):
-        if boundary == "routine_posts":
-            relatives = (
-                Path("contracts/__init__.py"),
-                Path("contracts/interaction.py"),
-                Path("contracts/context.py"),
-                Path("contracts/generation.py"),
-            )
-        elif boundary == "world_packages":
-            relatives = (Path("contracts/__init__.py"),)
+        if boundary in ('worlds', 'world_characters', 'routines'):
+            module = 'app.domains.' + boundary + '.public'
+            assert module_retired(module)
+            imports = historical_imports(module)
+            assert not {imported for imported in imports if imported in forbidden_prefixes or imported.startswith(tuple((f'{prefix}.' for prefix in forbidden_prefixes)))}
+            continue
+        if boundary == 'routine_posts':
+            relatives = (Path('contracts/__init__.py'), Path('contracts/interaction.py'), Path('contracts/context.py'), Path('contracts/generation.py'))
+        elif boundary == 'world_packages':
+            relatives = (Path('contracts/__init__.py'),)
         else:
-            relatives = (Path("public.py"),)
-        paths.extend(APP_ROOT / "domains" / boundary / relative for relative in relatives)
-
+            relatives = (Path('public.py'),)
+        paths.extend((APP_ROOT / 'domains' / boundary / relative for relative in relatives))
     for path in paths:
         assert path.is_file(), path
         imports = _imports(path)
-        assert not {
-            imported
-            for imported in imports
-            if imported in forbidden_prefixes
-            or imported.startswith(tuple(f"{prefix}." for prefix in forbidden_prefixes))
-        }
+        assert not {imported for imported in imports if imported in forbidden_prefixes or imported.startswith(tuple((f'{prefix}.' for prefix in forbidden_prefixes)))}
 
 
 def test_l3_5_world_package_boundary_is_documented_and_pure() -> None:

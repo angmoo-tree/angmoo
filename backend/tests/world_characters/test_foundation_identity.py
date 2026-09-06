@@ -1,4 +1,7 @@
 """Compatibility identities used by frozen migration and provider substitution."""
+import app.domains.world_characters.client as _actual_domains_world_characters_client
+from compatibility_retirement_support import module_matches
+
 from model_fixture_support import models as registered_models
 from app.models import Base
 from app.domains.world_characters import client, models
@@ -24,13 +27,11 @@ def test_frozen_migration_and_registry_use_the_same_six_model_classes() -> None:
 
 
 def test_provider_compatibility_keeps_monkeypatch_target_and_accounting_types(monkeypatch) -> None:
-    from app.services import world_character_provider as old_provider
-
-    assert old_provider is client
+    assert module_matches('app.services.world_character_provider', client)
     assert client.WorldCharacterProviderResult is provider.WorldCharacterProviderResult
     assert client.WorldCharacterSetupProvider is provider.WorldCharacterSetupProvider
     original = client.DirectLlmWorldCharacterSetupProvider
     sentinel = object()
-    monkeypatch.setattr(old_provider, "DirectLlmWorldCharacterSetupProvider", sentinel)
+    monkeypatch.setattr(_actual_domains_world_characters_client, 'DirectLlmWorldCharacterSetupProvider', sentinel)
     assert client.DirectLlmWorldCharacterSetupProvider is sentinel
     assert original is not sentinel

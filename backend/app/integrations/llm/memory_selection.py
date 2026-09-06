@@ -3,7 +3,7 @@
 from dataclasses import asdict
 import json
 
-from app.domains.identity.public import CredentialMaterial, CredentialPurpose
+from app.domains.identity.contracts import CredentialMaterial, CredentialPurpose
 from app.domains.memory.policies.batch import (
     MAX_SELECTION_INPUT_CHARACTERS,
     MAX_SELECTION_OUTPUT_TOKENS,

@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy import event
 from sqlalchemy.orm import Session
 
-from tests.model_fixture_support import models
+from model_fixture_support import models
 from app.domains.social.exceptions import AgentRunAuthorizationError
 from app.domains.social.service import agent_tool_authorization as service
 from app.runtime.social.agent_tool_authorization import RuntimeAgentToolReferences

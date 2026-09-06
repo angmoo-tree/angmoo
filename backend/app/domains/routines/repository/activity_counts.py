@@ -61,4 +61,3 @@ def _latest_action_at(
         .order_by(models.AgentActivityLog.created_at.desc(), models.AgentActivityLog.id.desc())
         .limit(1)
     )
-

@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 from starlette.requests import Request
 
-from app import schemas
+import app.domains.identity.schemas as schemas
 from model_fixture_support import models
 from app.domains.identity.router import auth as auth_routes
 from app.domains.identity.service import auth as auth_service

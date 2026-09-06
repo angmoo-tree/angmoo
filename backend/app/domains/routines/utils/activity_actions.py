@@ -17,4 +17,3 @@ def _public_action_log_types() -> tuple[str, ...]:
             for action_type in action_types
         )
     )
-

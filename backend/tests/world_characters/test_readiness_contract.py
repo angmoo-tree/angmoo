@@ -1,4 +1,6 @@
 """Readiness preserves the shared DTO, readonly evaluation and error precedence."""
+from compatibility_retirement_support import export_matches
+
 from types import SimpleNamespace
 from datetime import UTC, datetime
 from sqlalchemy import create_engine, event
@@ -11,35 +13,32 @@ from test_runtime_mode_repair import _user, _seed_world_scope, _seed_ready_entry
 
 
 def test_readiness_keeps_shared_dto_and_world_scope_before_stale_profile():
-    from app.schemas.agents import AgentActivityProfileReadinessRead as old_response
-    assert old_response is AgentActivityProfileReadinessRead
+    assert export_matches('app.schemas.agents', 'AgentActivityProfileReadinessRead', AgentActivityProfileReadinessRead)
     from app.domains.characters.schemas import AgentActivityProfileReadinessRead as character_response
     assert character_response is AgentActivityProfileReadinessRead
-    engine = create_engine("sqlite://")
+    engine = create_engine('sqlite://')
     Base.metadata.create_all(engine)
     with Session(engine) as db:
         db.add(_user())
         db.flush()
-        _seed_world_scope(db, "world-local")
-        target = _seed_ready_entry(db, world_id="world-local", suffix="readiness")
-        db.add(models.CharacterActiveWorld(character_id=target.character_id,
-                    world_character_id=target.id, version=1,
-                    selected_at=datetime.now(UTC), idempotency_key="select-readiness"))
+        _seed_world_scope(db, 'world-local')
+        target = _seed_ready_entry(db, world_id='world-local', suffix='readiness')
+        db.add(models.CharacterActiveWorld(character_id=target.character_id, world_character_id=target.id, version=1, selected_at=datetime.now(UTC), idempotency_key='select-readiness'))
         db.commit()
         character = db.get(models.Character, target.character_id)
-        world = db.get(models.World, "world-local")
-        world.status = "archived"
-        target.character_contract_hash = "stale"
+        world = db.get(models.World, 'world-local')
+        world.status = 'archived'
+        target.character_contract_hash = 'stale'
         db.commit()
-        statements, writes = [], []
-        event.listen(engine, "before_cursor_execute", lambda _c, _cu, statement, *_: statements.append(statement))
-        event.listen(db, "after_flush", lambda *_: writes.append("flush"))
-        event.listen(db, "after_commit", lambda *_: writes.append("commit"))
+        statements, writes = ([], [])
+        event.listen(engine, 'before_cursor_execute', lambda _c, _cu, statement, *_: statements.append(statement))
+        event.listen(db, 'after_flush', lambda *_: writes.append('flush'))
+        event.listen(db, 'after_commit', lambda *_: writes.append('commit'))
         result = evaluate(db, character=character, setting=SimpleNamespace())
-        assert result.reason_code == "world_scope_not_ready"
-        assert result.world_id == "world-local" and result.world_character_id == target.id
-        assert result.source == "world_community_profile" and not result.ready
-        assert all(statement.lstrip().upper().startswith("SELECT") for statement in statements)
+        assert result.reason_code == 'world_scope_not_ready'
+        assert result.world_id == 'world-local' and result.world_character_id == target.id
+        assert result.source == 'world_community_profile' and (not result.ready)
+        assert all((statement.lstrip().upper().startswith('SELECT') for statement in statements))
         assert writes == []
 
 

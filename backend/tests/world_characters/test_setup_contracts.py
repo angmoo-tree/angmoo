@@ -1,13 +1,15 @@
 from __future__ import annotations
+import app.domains.world_characters.schemas.setup as world_setup_schemas
+import app.domains.worlds.schemas as world_schemas
 
 from types import SimpleNamespace
 
 import pytest
 
-from app import schemas
+
 from app.providers.gemini import build_generate_content_config
-from app.services import world_character_contracts as contracts
-from app.services import world_character_provider
+from app.domains.world_characters.service import setup_validation as contracts
+from app.domains.world_characters import client as world_character_provider
 
 
 def _character(**overrides):
@@ -36,8 +38,8 @@ def _world_character(**overrides):
     return SimpleNamespace(**values)
 
 
-def _world_context() -> schemas.WorldGenerationContextRead:
-    return schemas.WorldGenerationContextRead(
+def _world_context() -> world_schemas.WorldGenerationContextRead:
+    return world_schemas.WorldGenerationContextRead(
         world_id="world-a",
         name="아르카나 마법학교",
         tagline="마법을 배우는 기숙학교",
@@ -52,7 +54,7 @@ def _world_context() -> schemas.WorldGenerationContextRead:
         contract_hash="a" * 64,
         additional_generation_guidance="",
         places=[
-            schemas.WorldPlaceInput(
+            world_schemas.WorldPlaceInput(
                 key="alchemy-lab",
                 name="연금술 실습실",
                 available_dayparts=["morning", "afternoon", "evening", "dawn"],
@@ -60,7 +62,7 @@ def _world_context() -> schemas.WorldGenerationContextRead:
             )
         ],
         roles=[
-            schemas.WorldRoleInput(
+            world_schemas.WorldRoleInput(
                 key="student",
                 name="학생",
                 autonomous_allowed=True,
@@ -68,7 +70,7 @@ def _world_context() -> schemas.WorldGenerationContextRead:
         ],
         daypart_profiles=[],
         rules=[
-            schemas.WorldRuleInput(
+            world_schemas.WorldRuleInput(
                 key="no-dangerous-spells",
                 rule_kind="forbid",
                 description="감독 없이 위험한 주문 사용",
@@ -97,7 +99,7 @@ def _profile_payload() -> dict:
         ],
         "action_profile": {
             key: {"weight": 50, "note": f"{key} 행동 기준"}
-            for key in schemas.WORLD_COMMUNITY_ACTION_KEYS
+            for key in world_setup_schemas.WORLD_COMMUNITY_ACTION_KEYS
         },
     }
 
@@ -163,6 +165,7 @@ def test_character_contract_hash_is_stable_and_excludes_unrelated_fields() -> No
 def test_community_profile_contract_normalizes_and_requires_exact_keys() -> None:
     profile = contracts.validate_community_profile(_profile_payload())
     assert len(profile.search_keywords) == 8
+    import app.domains.world_characters.schemas.setup as schemas
     assert set(profile.action_profile.model_dump()) == schemas.WORLD_COMMUNITY_ACTION_KEYS
 
     duplicate = _profile_payload()
@@ -202,7 +205,9 @@ def test_gemini_transport_schemas_use_only_fixed_properties() -> None:
     for repertoire_schema in repertoire_schemas:
         assert_supported(repertoire_schema)
     action_schema = profile_schema["properties"]["action_profile"]
+    import app.domains.world_characters.schemas.setup as schemas
     assert set(action_schema["properties"]) == schemas.WORLD_COMMUNITY_ACTION_KEYS
+    import app.domains.world_characters.schemas.setup as schemas
     assert set(action_schema["required"]) == schemas.WORLD_COMMUNITY_ACTION_KEYS
     for repertoire_schema in repertoire_schemas:
         assert len(repertoire_schema["properties"]) == 2

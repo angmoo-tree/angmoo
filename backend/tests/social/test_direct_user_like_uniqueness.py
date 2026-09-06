@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from tests.model_fixture_support import models
+from model_fixture_support import models
 
 
 

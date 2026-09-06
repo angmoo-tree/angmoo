@@ -10,10 +10,10 @@ from sqlalchemy import create_engine, event, func, select
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import schemas
+import app.domains.social.schemas.feed as schemas
 from model_fixture_support import models
 from app.models import Base
-from app.core.search_text import build_post_search_document
+from app.domains.social.service.search_documents import build_post_search_document
 from app.domains.runtime.contracts.search import SearchIndexHit
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,
@@ -21,8 +21,9 @@ from app.runtime.relationships import (
 from app.domains.social.contracts.search_state import SocialSearchState
 from app.runtime.search import CallbackSearchIndexAdapter
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
-from app.services import world_character_contracts
-from app.services.direct_llm import DirectLlmError, RunLlmTracker
+from app.domains.world_characters.service import setup_validation as world_character_contracts
+from app.integrations.direct_llm import DirectLlmError
+from app.integrations.direct_llm import RunLlmTracker
 from app.domains.social.service.feed_reaction_validation import validate_reaction_decision
 from app.runtime.resident.context import LangGraphResidentContext
 from app.runtime.social.feed_cycle import run_world_keyword_feed

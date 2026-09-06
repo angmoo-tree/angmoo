@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
-from tests.model_fixture_support import models as _registered_models
+from model_fixture_support import models as _registered_models
 from app.domains.routines import models
 from app.domains.routines.service import run_backoff as agent_runs
 from routine_posts.test_runtime import _seed

@@ -46,7 +46,7 @@ def build_inventory():
         "backend/app/domains/memory/router.py",
         "backend/app/runtime/account_deletion.py",
         "backend/app/runtime/characters/management.py",
-        "backend/tests/test_p8_l_r_memory_batch*.py",
+        "backend/tests/memory/test_p8_l_r_memory_batch*.py",
         "desktop/src-tauri/src/shutdown_runtime.rs",
         "desktop/src-tauri/src/lib.rs",
         "desktop/src-tauri/src/desktop_runtime.rs",

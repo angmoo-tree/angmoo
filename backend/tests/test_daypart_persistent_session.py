@@ -1,4 +1,5 @@
 import app.runtime.social.agent_tool_authorization as social_agent_tool_authorization_runtime
+from app.domains.routines.repository import runs as routine_run_queries
 from datetime import datetime
 import inspect
 from types import SimpleNamespace
@@ -7,7 +8,7 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from app.runtime.resident import writing as agent_writing
-from app.domains.social import exceptions as community
+
 from app.runtime.resident import execution as agent_runs
 
 
@@ -46,12 +47,12 @@ def test_agent_tool_auth_rejects_daypart_session_key(monkeypatch) -> None:
         raise AssertionError("daypart session key must not fall back to session lookup")
 
     monkeypatch.setattr(
-        social_agent_tool_authorization_runtime.agent_run_crud,
+        routine_run_queries,
         "get_active_run_for_tool_auth_key",
         lambda db, key: None,
     )
     monkeypatch.setattr(
-        social_agent_tool_authorization_runtime.agent_run_crud,
+        routine_run_queries,
         "get_active_run_for_session",
         fail_session_lookup,
     )
@@ -76,12 +77,12 @@ def test_agent_tool_auth_keeps_run_scoped_session_fallback(monkeypatch) -> None:
     )
 
     monkeypatch.setattr(
-        social_agent_tool_authorization_runtime.agent_run_crud,
+        routine_run_queries,
         "get_active_run_for_tool_auth_key",
         lambda db, key: None,
     )
     monkeypatch.setattr(
-        social_agent_tool_authorization_runtime.agent_run_crud,
+        routine_run_queries,
         "get_active_run_for_session",
         lambda db, key: run if key == "agent:angmoo-8:resident-tick:user-a:char-a:run-1" else None,
     )

@@ -1,1 +1,0 @@
-"""Pure WorldCharacter identity contracts."""

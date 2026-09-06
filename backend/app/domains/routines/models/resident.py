@@ -4,7 +4,7 @@ from typing import Any, Optional
 from sqlalchemy import Boolean, CheckConstraint, DateTime, Float, ForeignKey, Index, Integer, JSON, String, Text, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models import Base
-from app.core import active_hours
+from app.domains.routines.policies import active_hours
 from app.domains.routines.constants import DEFAULT_MAX_COMMENTS_PER_DAY, DEFAULT_MAX_POSTS_PER_DAY
 
 

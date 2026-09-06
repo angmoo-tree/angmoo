@@ -1,4 +1,13 @@
 from __future__ import annotations
+import app.domains.routines.contracts.lifecycle as _actual_domains_routines_contracts_lifecycle
+import app.domains.routines.exceptions as _actual_domains_routines_exceptions
+import app.domains.routines.service.lifecycle as _actual_domains_routines_service_lifecycle
+import app.domains.routines.service.plans as _actual_domains_routines_service_plans
+import app.domains.routines.utils.clock as _actual_domains_routines_utils_clock
+
+from app.domains.routines.policies import planning as routine_planning
+from app.domains.routines.service import plans as routine_plans
+
 
 import asyncio
 from dataclasses import dataclass
@@ -14,21 +23,20 @@ from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
 from app.runtime.routines.lifecycle_references import SqlAlchemyLifecycleReferences
-from app import schemas
+import app.domains.routines.schemas as schemas
 from model_fixture_support import models
 from app.runtime.routines.plan_references import SqlAlchemyPlanReferences
 from app.domains.identity import dependencies as api_deps
 from app.api.v1.routes import world_activity_runtime as runtime_routes
 from app.models import Base
-from app.domains.routines import public as routines
 from app.domains.routines.service import execution as activity_runtime
 from app.runtime.routines.activity_references import SqlAlchemyActivityReferences
-from app.services import activity_state_contracts
-from app.services import daily_activity_plans
+from app.domains.routines.policies import activity_state as activity_state_contracts
+
 from app.domains.routines.service import joint_scheduling as joint_activity_scheduling
-from app.services import routine_post_runtime
+from app.runtime.routine_posts import sqlalchemy_runtime as routine_post_runtime
 from app.runtime.world_characters import cleanup as world_character_setup
-from app.services import world_character_contracts
+from app.domains.world_characters.service import setup_validation as world_character_contracts
 
 
 DAYPARTS = ("dawn", "morning", "afternoon", "evening")
@@ -301,7 +309,7 @@ def _prepare(
     now: datetime,
     key: str = "prepare-activity-plan-a",
 ):
-    return daily_activity_plans.prepare_activity_plan(
+    return routine_plans.prepare_activity_plan(
         db,
         references=SqlAlchemyPlanReferences(db),
         character_id=fixture.character.id,
@@ -351,27 +359,8 @@ def test_routines_public_uses_frozen_clock_and_writes_no_public_action() -> None
     now = _utc(datetime(2026, 8, 9, 0, 30))
     with Session(engine, expire_on_commit=False) as db:
         _world_row, fixture, _other = _seed(db)
-
-        created = routines.prepare_activity_plan(
-            db,
-            references=SqlAlchemyPlanReferences(db),
-            character_id=fixture.character.id,
-            world_id=fixture.world_character.world_id,
-            user=fixture.user,
-            data=schemas.DailyActivityPlanPrepareCreate(
-                idempotency_key="domain-clock-plan"
-            ),
-            clock=routines.FrozenClock(now),
-        )
-        replay = routines.get_activity_plan(
-            db,
-            references=SqlAlchemyPlanReferences(db),
-            character_id=fixture.character.id,
-            world_id=fixture.world_character.world_id,
-            user=fixture.user,
-            clock=routines.FrozenClock(now),
-        )
-
+        created = _actual_domains_routines_service_plans.prepare_activity_plan(db, references=SqlAlchemyPlanReferences(db), character_id=fixture.character.id, world_id=fixture.world_character.world_id, user=fixture.user, data=schemas.DailyActivityPlanPrepareCreate(idempotency_key='domain-clock-plan'), clock=_actual_domains_routines_utils_clock.FrozenClock(now))
+        replay = _actual_domains_routines_service_plans.get_activity_plan(db, references=SqlAlchemyPlanReferences(db), character_id=fixture.character.id, world_id=fixture.world_character.world_id, user=fixture.user, clock=_actual_domains_routines_utils_clock.FrozenClock(now))
         assert created.id == replay.id
         assert replay.reused is True
         assert db.scalar(select(func.count(models.AgentRun.id))) == 0
@@ -386,31 +375,14 @@ def test_owner_controlled_identity_cannot_prepare_or_reconcile_daily_plan() -> N
     now = _utc(datetime(2026, 8, 9, 0, 30))
     with Session(engine, expire_on_commit=False) as db:
         _world_row, fixture, _other = _seed(db)
-        fixture.world_character.control_mode = "owner_controlled"
+        fixture.world_character.control_mode = 'owner_controlled'
         fixture.world_character.owner_user_id = fixture.user.id
         fixture.world_character.autonomous_enabled = False
         db.commit()
-
-        with pytest.raises(
-            routines.DailyActivityPlanValidationError,
-            match="owner_controlled_automation_disabled",
-        ):
-            routines.prepare_activity_plan(
-                db,
-                references=SqlAlchemyPlanReferences(db),
-                character_id=fixture.character.id,
-                world_id=fixture.world_character.world_id,
-                user=fixture.user,
-                data=schemas.DailyActivityPlanPrepareCreate(
-                    idempotency_key="forged-owner-plan"
-                ),
-                clock=routines.FrozenClock(now),
-            )
-
-        transition = routines.reconcile_all_elapsed_routines(
-            db, references=SqlAlchemyLifecycleReferences(db), clock=routines.FrozenClock(now + timedelta(days=1))
-        )
-        assert transition == routines.DaypartTransitionCounts(0, 0)
+        with pytest.raises(_actual_domains_routines_exceptions.DailyActivityPlanValidationError, match='owner_controlled_automation_disabled'):
+            _actual_domains_routines_service_plans.prepare_activity_plan(db, references=SqlAlchemyPlanReferences(db), character_id=fixture.character.id, world_id=fixture.world_character.world_id, user=fixture.user, data=schemas.DailyActivityPlanPrepareCreate(idempotency_key='forged-owner-plan'), clock=_actual_domains_routines_utils_clock.FrozenClock(now))
+        transition = _actual_domains_routines_service_lifecycle.reconcile_all_elapsed_routines(db, references=SqlAlchemyLifecycleReferences(db), clock=_actual_domains_routines_utils_clock.FrozenClock(now + timedelta(days=1)))
+        assert transition == _actual_domains_routines_contracts_lifecycle.DaypartTransitionCounts(0, 0)
         assert db.scalar(select(func.count(models.DailyActivityPlan.id))) == 0
         assert db.scalar(select(func.count(models.DailyActivityPlanItem.id))) == 0
         assert db.scalar(select(func.count(models.ActivityEpisode.id))) == 0
@@ -437,10 +409,10 @@ def test_selection_avoids_exact_repeat_for_three_recent_local_dates() -> None:
 
 
 def test_daypart_windows_are_contiguous_across_dst_and_late_access_skips() -> None:
-    spring = daily_activity_plans.daypart_windows(
+    spring = routine_planning.daypart_windows(
         date(2026, 3, 8), "America/New_York"
     )
-    fall = daily_activity_plans.daypart_windows(
+    fall = routine_planning.daypart_windows(
         date(2026, 11, 1), "America/New_York"
     )
     spring_windows = list(spring.values())
@@ -484,6 +456,7 @@ def test_invalid_repertoire_is_rejected_without_partial_plan() -> None:
         db.delete(candidate)
         db.commit()
 
+        from app.domains.routines import exceptions as daily_activity_plans
         with pytest.raises(
             daily_activity_plans.DailyActivityPlanValidationError,
             match="repertoire_candidate_count_invalid",

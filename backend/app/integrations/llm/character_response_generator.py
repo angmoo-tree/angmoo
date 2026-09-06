@@ -14,7 +14,7 @@ from app.domains.chat.contracts.character_response_generator import (
     CharacterResponseGeneratorRequest,
     CharacterResponseGeneratorResult,
 )
-from app.domains.identity.public import CredentialMaterial, CredentialPurpose
+from app.domains.identity.contracts import CredentialMaterial, CredentialPurpose
 from app.integrations import direct_llm
 
 

@@ -6,7 +6,7 @@ import pytest
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from tests.model_fixture_support import models as registered_models
+from model_fixture_support import models as registered_models
 from app.core import unit_of_work
 from app.models import Base
 from app.domains.routines import models

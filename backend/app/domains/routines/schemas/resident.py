@@ -2,9 +2,8 @@
 from datetime import datetime
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
-from app.domains.routines.constants import MAX_COMMENTS_PER_DAY, MAX_POSTS_PER_DAY
+from app.domains.routines.constants import MAX_COMMENTS_PER_DAY, MAX_POSTS_PER_DAY, WritingRepetitionLevel
 from app.core.response_schemas import UtcInstantResponseModel
-WritingRepetitionLevel = Literal["off", "light", "normal", "strong"]
 
 
 class AgentActionRangeRead(BaseModel):

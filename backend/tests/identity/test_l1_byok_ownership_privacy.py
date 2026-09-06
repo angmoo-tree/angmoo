@@ -10,7 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from sqlalchemy.pool import StaticPool
 
-from app import schemas
+import app.domains.identity.schemas as schemas
 from model_fixture_support import models
 from app.domains.identity.dependencies import get_current_user
 from app.api.v1.routes.agents import router

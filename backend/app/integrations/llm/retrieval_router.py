@@ -18,7 +18,7 @@ from app.domains.chat.contracts.retrieval_router_provider import (
     RetrievalRouterProviderResult,
     RetrievalRouterRequest,
 )
-from app.domains.identity.public import CredentialMaterial, CredentialPurpose
+from app.domains.identity.contracts import CredentialMaterial, CredentialPurpose
 from app.integrations import direct_llm
 
 

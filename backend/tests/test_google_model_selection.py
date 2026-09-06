@@ -1,10 +1,13 @@
+import app.domains.characters.schemas as character_schemas
+import app.domains.chat.schemas as schema_chat_schemas
+import app.domains.identity.schemas as schema_identity_schemas
 from datetime import UTC, datetime
 from types import SimpleNamespace
 
 import pytest
 from pydantic import ValidationError
 
-from app import schemas
+
 from app.domains.routines import constants as agent_run_crud
 from app.runtime.characters import management as agent_service
 from app.domains.identity.service import credential_management
@@ -16,17 +19,17 @@ def test_agent_google_models_are_allowed_in_agent_model_schemas():
         "gemma-4-31b-it",
         "gemini-3.1-flash-lite",
     ):
-        create = schemas.AgentCreate(
+        create = character_schemas.AgentCreate(
             name="Gemma Bird",
             personality="curious",
             model=model,
             api_key="test-key",
         )
-        draft = schemas.AgentCreationDraftCreate(
+        draft = character_schemas.AgentCreationDraftCreate(
             model=model,
             api_key="test-key",
         )
-        credential = schemas.CredentialUpsert(model=model)
+        credential = schema_identity_schemas.CredentialUpsert(model=model)
 
         assert create.model == model
         assert draft.model == model
@@ -44,16 +47,16 @@ def test_agent_google_models_are_allowed_in_agent_model_schemas():
 )
 def test_agent_model_schemas_reject_removed_or_message_only_models(model):
     with pytest.raises(ValidationError):
-        schemas.AgentCreate(
+        character_schemas.AgentCreate(
             name="Gemma Bird",
             personality="curious",
             model=model,
             api_key="test-key",
         )
     with pytest.raises(ValidationError):
-        schemas.AgentCreationDraftCreate(model=model, api_key="test-key")
+        character_schemas.AgentCreationDraftCreate(model=model, api_key="test-key")
     with pytest.raises(ValidationError):
-        schemas.CredentialUpsert(model=model)
+        schema_identity_schemas.CredentialUpsert(model=model)
 
 
 def test_message_model_schemas_allow_gemini25_models():
@@ -64,9 +67,9 @@ def test_message_model_schemas_allow_gemini25_models():
         "gemma-4-26b-a4b-it",
         "gemma-4-31b-it",
     ):
-        settings = schemas.MessageSettingsUpdate(default_model=model)
-        create = schemas.MessageThreadCreate(character_id="char-1", selected_model=model)
-        update = schemas.MessageThreadUpdate(selected_model=model)
+        settings = schema_chat_schemas.MessageSettingsUpdate(default_model=model)
+        create = schema_chat_schemas.MessageThreadCreate(character_id="char-1", selected_model=model)
+        update = schema_chat_schemas.MessageThreadUpdate(selected_model=model)
 
         assert settings.default_model == model
         assert create.selected_model == model
@@ -75,19 +78,19 @@ def test_message_model_schemas_allow_gemini25_models():
 
 def test_message_model_schemas_reject_gemini35_flash():
     with pytest.raises(ValidationError):
-        schemas.MessageSettingsUpdate(default_model="gemini-3.5-flash")
+        schema_chat_schemas.MessageSettingsUpdate(default_model="gemini-3.5-flash")
     with pytest.raises(ValidationError):
-        schemas.MessageThreadCreate(
+        schema_chat_schemas.MessageThreadCreate(
             character_id="char-1",
             selected_model="gemini-3.5-flash",
         )
     with pytest.raises(ValidationError):
-        schemas.MessageThreadUpdate(selected_model="gemini-3.5-flash")
+        schema_chat_schemas.MessageThreadUpdate(selected_model="gemini-3.5-flash")
 
 
 def test_unknown_google_model_is_rejected():
     with pytest.raises(ValidationError):
-        schemas.CredentialUpsert(model="unknown-google-model")
+        schema_identity_schemas.CredentialUpsert(model="unknown-google-model")
 
 
 def test_model_only_credential_update_preserves_existing_key(monkeypatch):
@@ -131,12 +134,12 @@ def test_model_only_credential_update_preserves_existing_key(monkeypatch):
     monkeypatch.setattr(agent_service, "_get_owned_character", lambda *_: character)
     monkeypatch.setattr(agent_service.slot_queries, "get_assigned_slot", lambda *_: None)
     monkeypatch.setattr(
-        agent_service.agent_crud,
+        agent_service.identity_credentials,
         "get_character_credential",
         lambda *_: credential,
     )
     monkeypatch.setattr(
-        agent_service.agent_crud,
+        agent_service.identity_credential_records,
         "upsert_credential",
         lambda *_, **__: (_ for _ in ()).throw(
             AssertionError("upsert_credential should not be called")
@@ -148,7 +151,7 @@ def test_model_only_credential_update_preserves_existing_key(monkeypatch):
         db,
         user,
         character.id,
-        schemas.CredentialUpsert(model="gemma-4-31b-it"),
+        schema_identity_schemas.CredentialUpsert(model="gemma-4-31b-it"),
         workflows=agent_service.build_character_credential_workflows(),
     )
 
@@ -190,7 +193,7 @@ def test_api_key_credential_update_without_slot_commits_in_upsert(monkeypatch):
     monkeypatch.setattr(agent_service, "_get_owned_character", lambda *_: character)
     monkeypatch.setattr(agent_service.slot_queries, "get_assigned_slot", lambda *_: None)
     monkeypatch.setattr(
-        agent_service.agent_crud, "upsert_credential", fake_upsert_credential
+        agent_service.identity_credential_records, "upsert_credential", fake_upsert_credential
     )
     monkeypatch.setattr(agent_service.agent_crud, "log_activity", lambda *_, **__: None)
 
@@ -198,7 +201,7 @@ def test_api_key_credential_update_without_slot_commits_in_upsert(monkeypatch):
         db,
         user,
         character.id,
-        schemas.CredentialUpsert(api_key="new-key"),
+        schema_identity_schemas.CredentialUpsert(api_key="new-key"),
         workflows=agent_service.build_character_credential_workflows(),
     )
 
@@ -267,7 +270,7 @@ def test_api_key_credential_update_with_idle_slot_syncs_profile(monkeypatch):
     monkeypatch.setattr(agent_service, "_get_owned_character", lambda *_: character)
     monkeypatch.setattr(agent_service.slot_queries, "get_assigned_slot", lambda *_: slot)
     monkeypatch.setattr(
-        agent_service.agent_crud, "upsert_credential", fake_upsert_credential
+        agent_service.identity_credential_records, "upsert_credential", fake_upsert_credential
     )
     monkeypatch.setattr(agent_service.agent_crud, "log_activity", lambda *_, **__: None)
     monkeypatch.setattr(agent_service, "_resident_openclaw_sync_enabled", lambda: True)
@@ -282,7 +285,7 @@ def test_api_key_credential_update_with_idle_slot_syncs_profile(monkeypatch):
         db,
         user,
         character.id,
-        schemas.CredentialUpsert(api_key="new-key"),
+        schema_identity_schemas.CredentialUpsert(api_key="new-key"),
         workflows=agent_service.build_character_credential_workflows(),
     )
 
@@ -308,7 +311,7 @@ def test_model_only_credential_update_requires_existing_key(monkeypatch):
     monkeypatch.setattr(agent_service, "_get_owned_character", lambda *_: character)
     monkeypatch.setattr(agent_service.slot_queries, "get_assigned_slot", lambda *_: None)
     monkeypatch.setattr(
-        agent_service.agent_crud,
+        agent_service.identity_credentials,
         "get_character_credential",
         lambda *_: None,
     )
@@ -318,7 +321,7 @@ def test_model_only_credential_update_requires_existing_key(monkeypatch):
             db,
             user,
             character.id,
-            schemas.CredentialUpsert(model="gemma-4-31b-it"),
+            schema_identity_schemas.CredentialUpsert(model="gemma-4-31b-it"),
             workflows=agent_service.build_character_credential_workflows(),
         )
 
@@ -337,6 +340,6 @@ def test_running_slot_blocks_credential_model_update(monkeypatch):
             db,
             user,
             character.id,
-            schemas.CredentialUpsert(model="gemma-4-31b-it"),
+            schema_identity_schemas.CredentialUpsert(model="gemma-4-31b-it"),
             workflows=agent_service.build_character_credential_workflows(),
         )

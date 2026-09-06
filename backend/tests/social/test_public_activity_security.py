@@ -59,7 +59,7 @@ def test_public_activity_event_normalizes_unknown_actions_without_raw_fallback()
 
 
 def test_public_character_activity_schema_excludes_private_character_and_state_fields() -> None:
-    from app import schemas
+    import app.domains.social.schemas.activity as schemas
 
     canary = "M01-MEMORY-CANARY"
     payload = schemas.CharacterActivityRead(

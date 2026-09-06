@@ -25,7 +25,7 @@ from app.core.public_media import mount_public_media
 from app.runtime.startup_security import validate_startup_security
 from app.runtime.bootstrap.demo_seed import seed_demo_data
 from app.runtime.world_characters.recovery import reconcile_local_autonomous_runtime_modes
-from app.services.hosted_configuration import (
+from app.runtime.extensions.hosted_configuration import (
     HostedConfigurationRegistrationError,
     HostedPromptProvider,
     HostedSettingsProvider,

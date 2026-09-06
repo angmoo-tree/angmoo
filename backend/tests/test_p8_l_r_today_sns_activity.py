@@ -789,7 +789,7 @@ def test_router_view_is_bounded_even_with_maximum_labels_and_content(today_sessi
 
 @pytest.mark.parametrize("change", ("source_edit", "subjective_invalidation"))
 def test_today_inspector_revalidates_exact_revision_after_edit(today_session, change):
-    from app.runtime.chat.world_generation import _chat_evidence_item
+    from app.runtime.chat.message_composition import evidence_service
     from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
     from app.domains.memory.contracts.scope import MemoryScope
     db, fixture = today_session
@@ -804,7 +804,7 @@ def test_today_inspector_revalidates_exact_revision_after_edit(today_session, ch
         owner_id=fixture["owner"].id, world_id=fixture["world"].id,
         subject_world_character_id=fixture["subject"].id,
     )
-    read = _chat_evidence_item(db, scope, raw, source_reader=SqlAlchemyMemorySourceEvidenceReader(db))
+    read = evidence_service._chat_evidence_item(db, scope, raw, source_reader=SqlAlchemyMemorySourceEvidenceReader(db))
     assert read.label == "오늘 SNS 활동"
     assert read.availability == "available"
     source_id = raw["locator"]["source_id"]
@@ -818,7 +818,7 @@ def test_today_inspector_revalidates_exact_revision_after_edit(today_session, ch
         assert declaration is not None
         declaration.invalidated_at = NOW
     db.commit()
-    read = _chat_evidence_item(db, scope, raw, source_reader=SqlAlchemyMemorySourceEvidenceReader(db))
+    read = evidence_service._chat_evidence_item(db, scope, raw, source_reader=SqlAlchemyMemorySourceEvidenceReader(db))
     assert read.availability == "unavailable"
     assert read.excerpt is None
 

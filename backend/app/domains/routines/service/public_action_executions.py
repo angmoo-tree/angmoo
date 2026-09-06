@@ -1,12 +1,31 @@
+"""Execution evidence reads and links in the caller-owned transaction."""
+
 from __future__ import annotations
 
-from datetime import UTC, datetime
-from typing import Any
 from sqlalchemy.orm import Session
 
 from app.domains.routines import models
+
+from datetime import UTC
+
+from datetime import datetime
+
+from typing import Any
+
 from app.core import unit_of_work
 
+def get_execution(db: Session, execution_id: int) -> models.AgentPublicActionExecution | None:
+    return db.get(models.AgentPublicActionExecution, execution_id)
+
+def set_social_event_id(execution: models.AgentPublicActionExecution, *, social_event_id: str) -> None:
+    execution.social_event_id = social_event_id
+
+def set_social_scope(execution: models.AgentPublicActionExecution, *, world_id: str, actor_world_character_id: str) -> None:
+    execution.world_id = world_id
+    execution.actor_world_character_id = actor_world_character_id
+
+def set_interaction_intent(execution: models.AgentPublicActionExecution, *, interaction_intent: str | None) -> None:
+    execution.interaction_intent = interaction_intent
 
 def create_public_action_execution(
     db: Session,
@@ -47,7 +66,6 @@ def create_public_action_execution(
     unit_of_work.finish_write(db, execution)
     return execution
 
-
 def mark_public_action_execution_finished(
     db: Session,
     execution: models.AgentPublicActionExecution,
@@ -62,20 +80,3 @@ def mark_public_action_execution_finished(
     execution.completed_at = datetime.now(UTC)
     unit_of_work.finish_write(db, execution)
     return execution
-
-
-def get_execution(db: Session, execution_id: int) -> models.AgentPublicActionExecution | None:
-    return db.get(models.AgentPublicActionExecution, execution_id)
-
-
-def set_social_event_id(execution: models.AgentPublicActionExecution, *, social_event_id: str) -> None:
-    execution.social_event_id = social_event_id
-
-
-def set_social_scope(execution: models.AgentPublicActionExecution, *, world_id: str, actor_world_character_id: str) -> None:
-    execution.world_id = world_id
-    execution.actor_world_character_id = actor_world_character_id
-
-
-def set_interaction_intent(execution: models.AgentPublicActionExecution, *, interaction_intent: str | None) -> None:
-    execution.interaction_intent = interaction_intent

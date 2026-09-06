@@ -12,7 +12,7 @@ import pytest
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app import schemas
+import app.domains.social.schemas.feed as schemas
 from model_fixture_support import models
 from app.runtime.relationships import (
     sqlalchemy_social_event as social_event_runtime,

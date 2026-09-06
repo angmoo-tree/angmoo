@@ -1,355 +1,508 @@
 from __future__ import annotations
-from app.domains.social.repository import media as social_media_repository
-from app.domains.routines.contracts.activity_presentation import ActivityPresentationReads
-from app.domains.routines.service import activity_presentation, activity_logs, runtime_guards
-from app.domains.characters.service import profile as character_profile
-from app.domains.routines.contracts.tendency_analysis import TendencyAnalysisRunner
-from app.domains.characters.exceptions import ActiveSlotBusyError
-from app.domains.identity.contracts import CharacterCredentialWorkflows
-from app.domains.worlds.repository import credential_scope as credential_worlds
-from app.domains.world_characters.repository import credential_scope as credential_world_characters
-from app.domains.routines.service import activity_settings
-from app.domains.routines.exceptions import LlmCredentialInvalidError
-from app.domains.routines.contracts.tendency_analysis import TendencyAnalysisWorkflows
-from app.domains.routines.constants import TENDENCY_LLM_TOOLS_ALLOW
-from app.runtime.resident import tendency_analysis
-from app.domains.routines.service import first_greeting
-from app.domains.routines.service.first_greeting import _first_greeting_available_at
-from app.domains.routines.schemas.first_greeting import _FirstGreetingWriterPayload
-from app.domains.routines.constants import FIRST_GREETING_COOLDOWN, FIRST_GREETING_SESSION_MARKER, FIRST_GREETING_WRITER_OUTPUT_TOKENS
-from app.domains.routines.contracts.first_greeting import FirstGreetingWorkflows
-from app.domains.social.repository import posts as social_post_queries
-from app.runtime.resident.first_greeting import resolve_first_greeting_key, _run_first_greeting_writer, _attach_first_greeting_image
-from app.domains.routines.contracts.manual_activity import ManualActivityWorkflows
-from app.domains.routines.contracts.feed_cues import FeedCueWorkflows
-from app.domains.routines.service import manual_activity
-from app.domains.routines.service.manual_activity import _manual_run_available_at
-from app.domains.routines.service.tick_schedule import aware_utc as _aware_utc
-from app.domains.routines.constants import RUN_NOW_COOLDOWN, RUN_NOW_SCHEDULER_GUARD_WINDOW, RUN_NOW_SCHEDULER_HEADROOM
-from app.domains.routines.contracts.autonomy_management import AutonomyWorkflows
-from app.domains.routines.service import autonomy_management
-from app.domains.routines.repository.autonomy import _lock_server_llm_autonomy_capacity
-from app.domains.routines.service.autonomy_management import _reject_server_llm_autonomy_capacity, _reject_world_autonomy_capacity, _log_autonomy_activation_rejection
-from app.runtime.resident.autonomy_reads import count_effective_active_server_llm_autonomy_agents as _effective_server_llm_autonomy_count
-from app.domains.identity.service import profile as identity_profile
-from app.domains.routines.constants import SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE, WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE, SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY
-from app.domains.routines.schemas.tendency import _TendencyRangePayload
-from app.domains.routines.schemas.tendency import _TendencyActionRangesPayload
-from app.domains.routines.schemas.tendency import _IndependentPostInitiativePayload
-from app.domains.routines.schemas.tendency import _IndependentPostTopicPayload
-from app.domains.routines.schemas.tendency import _PlannerTendencyProfilePayload
-from app.domains.routines.schemas.tendency import _TendencyAnalysisPayload
-from app.domains.routines.service.tendency import _ensure_tendency_prompt_safety
-from app.domains.routines.service.tendency import _build_tendency_analysis_prompt
-from app.domains.routines.service.tendency import _extract_gateway_result_text
-from app.domains.routines.service.tendency import _parse_tendency_json
-from app.domains.routines.service.tendency import _normalize_tendency_payload
-from app.domains.routines.service.tendency import _normalize_planner_tendency_profile
-from app.domains.routines.service.tendency import _calibrated_independent_post_probability
-from app.domains.routines.service.tendency import _slug_tendency_topic_key
-from app.domains.routines.service.tendency import normalize_angmoo_terms_in_tendency_text
-from app.domains.routines.service.tendency import _safe_tendency_text
-from app.domains.routines.service.tendency import _clamped_tendency_int
-from app.domains.routines.service.tendency_settings import _mark_tendency_error
-from app.domains.routines.service.tendency_settings import _has_tendency_analysis
-from app.domains.routines.service.tendency_settings import _ensure_tendency_analysis_ready
-from app.domains.routines.service.tendency_settings import _clear_tendency_analysis
-from app.domains.routines.service.activity_management import _apply_initial_activity_settings
-from app.domains.routines.exceptions import AgentAutonomyCapacityError
-from app.domains.routines.exceptions import AgentAutonomyRetryableError
-from app.domains.routines.exceptions import TendencyAnalysisParseError
-from app.domains.routines.exceptions import TendencyPromptInjectionDetectedError
-from app.domains.routines.exceptions import TendencyAnalysisRequiredError
-from app.domains.routines.exceptions import ActivityProfileRequiredError
-from app.domains.routines.exceptions import AgentFeedCueConflictError
-from app.domains.routines.exceptions import AgentFeedCueUnavailableError
-from app.domains.routines.exceptions import RunNowCooldownError
-from app.domains.routines.exceptions import FirstGreetingCooldownError
-from app.domains.routines.exceptions import FirstGreetingUnavailableError
-from app.domains.routines.exceptions import RunNowSlotUnavailableError
-from app.domains.routines.exceptions import RunNowSlotBusyError
-from app.domains.routines.exceptions import RunNowSchedulerBusyError
-from app.domains.routines.exceptions import RunNowSoonScheduledError
-from app.domains.routines.constants import TENDENCY_ACTION_KEYS
-from app.domains.routines.constants import TENDENCY_INDEPENDENT_TOPIC_COUNT
-from app.domains.routines.constants import TENDENCY_ANALYSIS_MAX_OUTPUT_TOKENS
-from app.domains.routines.constants import FEED_SEED_INTEREST_CRITERIA_MAX_LENGTH
-from app.domains.routines.constants import TENDENCY_ACTION_DEFAULTS
-from app.domains.routines.constants import INDEPENDENT_POST_PROBABILITY_RANGES
-from app.domains.routines.constants import TENDENCY_CONTENT_CHARACTER_PHRASES
-from app.domains.routines.constants import TENDENCY_PERSONA_CHARACTER_PATTERN
-from functools import partial
-from app.domains.routines.contracts.activity_management import ActivityManagementReferences
-from app.domains.routines.service import activity_management
-from app.domains.routines import constants as routine_constants
-from app.domains.routines.repository import slots as slot_queries
-from app.domains.routines.service import slot_assignments as slot_assignments
-from app.domains.routines.service import slot_pool as slot_pool
-from app.domains.routines.repository import feed_cues as feed_cue_queries
-from app.domains.routines.repository import runs as routine_run_queries
-from app.domains.routines.service import feed_cues as feed_cues
-from app.domains.routines.service import runs as routine_runs
+from app.domains.identity.repository import credentials as identity_credentials
+from app.domains.identity.service import character_credentials as identity_credential_records
+from app.domains.routines.service import activity_logs as agent_crud
+import app.api.schemas.first_greeting as schema_api_schemas_first_greeting
+import app.domains.characters.schemas as character_schemas
+import app.domains.identity.schemas as schema_identity_schemas
+import app.domains.local_bot.schemas as bot_schemas
+import app.domains.routines.schemas as routine_schemas
+import app.domains.routines.schemas.runs as routine_schemas_runs
+import app.domains.social.schemas.community as social_schemas
+import app.domains.social.exceptions as social_errors
+import app.domains.social.service.activity_results as social_activity_results_service
+import app.domains.social.service.posts as social_posts_service
+import app.runtime.social.timeline as social_timeline_runtime
+
 from app.domains.local_bot.constants import LOCAL_KEY_PREFIX
+
 from app.domains.local_bot.service import key_management as local_key_management
+
 from app.runtime.local_bot.keys import build_local_key_workflows
+
 from app.domains.identity.repository import credentials as credential_repository
+
 from app.domains.identity.service import character_credentials as character_credential_service
+
 from app.domains.characters.service import image_settings_owner
-from app.domains.characters.exceptions import ImageSettingsInvalidError, UnsafeImagePromptError
+
+from app.domains.characters.exceptions import ImageSettingsInvalidError
+
+from app.domains.characters.exceptions import UnsafeImagePromptError
+
 from app.domains.characters.repository import image_settings as image_setting_repository
+
 from app.domains.characters.service import image_settings as image_setting_service
 
 from app.runtime.world_characters.queries import count_enabled_autonomous_world_characters
+
 from app.domains.characters.service import media as media_service
 
-from app.domains.characters.service.creator import (
-    llm_credential_error_message,
-)
+from app.domains.characters.service.creator import llm_credential_error_message
 
-from app.domains.characters.exceptions import (
-    CredentialRequiredError,
-    CredentialSyncError,
-)
+from app.domains.characters.exceptions import CredentialRequiredError
+
+from app.domains.characters.exceptions import CredentialSyncError
 
 from app.domains.characters.contracts import CharacterManagementWorkflows
-from app.domains.characters.service import management as character_management
-from app.domains.characters.service.management import (
-    _agent_list_sort_key,
-)
 
-from app.domains.characters.exceptions import (
-    AgentActiveHoursInvalidError,
-)
+from app.domains.characters.service import management as character_management
+
+from app.domains.characters.service.management import _agent_list_sort_key
+
+from app.domains.characters.exceptions import AgentActiveHoursInvalidError
 
 from app.domains.characters.service import mutations as character_mutations
-from datetime import UTC, datetime, timedelta
+
+from datetime import UTC
+
+from datetime import datetime
+
+from datetime import timedelta
+
 import hashlib
+
 import json
+
 import re
-from typing import Any, Iterable, Literal
+
+from typing import Any
+
+from typing import Iterable
+
+from typing import Literal
+
 from uuid import uuid4
 
-from app.domains.characters.service.promotion import (
-    PROMOTION_USAGE_POLICY_VERSION,
-    _set_promotion_usage,
-    _promotion_usage_read,
-)
+from app.domains.characters.service.promotion import PROMOTION_USAGE_POLICY_VERSION
 
-from app.domains.characters.service.access import (
-    LOCAL_MODE_LLM_BLOCKED_MESSAGE,
-    _get_owned_character,
-    _ensure_not_suspended,
-    _is_local_mode,
-    _ensure_llm_mode,
-    _ensure_local_mode,
-)
+from app.domains.characters.service.promotion import _set_promotion_usage
 
-from app.domains.characters.service.persona import (
-    PERSONA_PROMPT_SAFETY_FIELDS,
-    ensure_persona_prompt_safety,
-    _field_value,
-)
+from app.domains.characters.service.promotion import _promotion_usage_read
 
-from app.domains.characters.exceptions import (
-    AgentServiceError,
-    AgentNotFoundError,
-    AgentHandleConflictError,
-    AgentHandleInvalidError,
-    AgentProfileNameInvalidError,
-    InvalidProfileMediaError,
-    PromptInjectionDetectedError,
-    AgentExecutionModeError,
-    AgentSuspendedError,
-)
+from app.domains.characters.service.access import LOCAL_MODE_LLM_BLOCKED_MESSAGE
 
-from pydantic import BaseModel, Field
-from sqlalchemy import delete, or_, select, text, update
+from app.domains.characters.service.access import _get_owned_character
+
+from app.domains.characters.service.access import _ensure_not_suspended
+
+from app.domains.characters.service.access import _is_local_mode
+
+from app.domains.characters.service.access import _ensure_llm_mode
+
+from app.domains.characters.service.access import _ensure_local_mode
+
+from app.domains.characters.service.persona import PERSONA_PROMPT_SAFETY_FIELDS
+
+from app.domains.characters.service.persona import ensure_persona_prompt_safety
+
+from app.domains.characters.service.persona import _field_value
+
+from app.domains.characters.exceptions import AgentServiceError
+
+from app.domains.characters.exceptions import AgentNotFoundError
+
+from app.domains.characters.exceptions import AgentHandleConflictError
+
+from app.domains.characters.exceptions import AgentHandleInvalidError
+
+from app.domains.characters.exceptions import AgentProfileNameInvalidError
+
+from app.domains.characters.exceptions import InvalidProfileMediaError
+
+from app.domains.characters.exceptions import PromptInjectionDetectedError
+
+from app.domains.characters.exceptions import AgentExecutionModeError
+
+from app.domains.characters.exceptions import AgentSuspendedError
+
+from pydantic import BaseModel
+
+from pydantic import Field
+
+from sqlalchemy import delete
+
+from sqlalchemy import or_
+
+from sqlalchemy import select
+
+from sqlalchemy import text
+
+from sqlalchemy import update
+
 from sqlalchemy.orm import Session
 
-from app import schemas
+
+
 from app.domains.routines.models.resident import AgentActivityLog as _model_AgentActivityLog
+
 from app.domains.routines.models.resident import AgentActivitySetting as _model_AgentActivitySetting
+
 from app.domains.memory.models.daypart import AgentDaypartMemoryEvent as _model_AgentDaypartMemoryEvent
+
 from app.domains.routines.models.resident import AgentFeedCue as _model_AgentFeedCue
+
 from app.domains.characters.models import AgentImageGenerationSetting as _model_AgentImageGenerationSetting
+
 from app.domains.local_bot.models import AgentLocalKey as _model_AgentLocalKey
+
 from app.domains.routines.models.resident import AgentPublicActionExecution as _model_AgentPublicActionExecution
+
 from app.domains.relationships.models.points import AgentRelationshipPoint as _model_AgentRelationshipPoint
+
 from app.domains.routines.models.resident import AgentRun as _model_AgentRun
+
 from app.domains.routines.models.resident import AgentSlot as _model_AgentSlot
+
 from app.domains.character_lore.models import CharacterLoreChunk as _model_CharacterLoreChunk
+
 from app.domains.character_lore.models import CharacterLoreSource as _model_CharacterLoreSource
+
 from app.domains.chat.models import CharacterMessageSetting as _model_CharacterMessageSetting
+
 from app.domains.identity.models import LlmCredential as _model_LlmCredential
+
 from app.domains.chat.models import MessageMessage as _model_MessageMessage
+
 from app.domains.chat.models import MessageThread as _model_MessageThread
+
 from app.domains.social.models.posts import Notification as _model_Notification
+
 from app.domains.social.models.posts import Post as _model_Post
+
 from app.domains.social.models.posts import PostImageGenerationJob as _model_PostImageGenerationJob
+
 from app.domains.social.models.posts import PostImageQuotaReservation as _model_PostImageQuotaReservation
+
 from app.domains.social.models.posts import PostLike as _model_PostLike
+
 from app.domains.social.models.posts import PostRepost as _model_PostRepost
+
 from app.domains.social.models.posts import ProfileFollow as _model_ProfileFollow
+
 from app.domains.identity.models import User as _model_User
+
 from app.domains.chat.models import UserMessagePreference as _model_UserMessagePreference
+
+from app.domains.world_characters.models import WorldCharacter as _model_WorldCharacter
+
+from app.domains.worlds.models import WorldMembership as _model_WorldMembership
+
 from app.runtime.persistence.model_registration import register_models
-register_models()
+
 from app.domains.characters import models as character_models
+
 from app.domains.characters.service import profile as character_profile
-from app.core import active_hours, security, unit_of_work
+
+
+from app.core import security
+
+from app.core import unit_of_work
+
 from app.config import settings
+
 from app.core.image_generation import USER_IMAGE_MODEL_OPTIONS
+
 from app.core.redaction import redact_secret_text
+
 from app.core.sqlite_concurrency import run_sqlite_session_immediate
+
 from app.exceptions import SqliteBusyRetryExhausted
-from app.credentials import (
-    CredentialPurpose,
-    CredentialResolutionError,
-    CredentialResolver,
-)
-from app.cruds import agents as agent_crud
+
+from app.credentials import CredentialPurpose
+
+from app.credentials import CredentialResolutionError
+
+from app.credentials import CredentialResolver
+
+
+
+
 
 from app.policies import name_policy
-from app.runtime.routines import activity_policy as agent_activity_policy
-from app.domains.world_characters.service import readiness as activity_profile_readiness
-from app.domains.social import exceptions as social_errors
-from app.runtime.social.timeline import timeline_service
-from app.domains.social.service import activity_results as social_activity_results
-from app.domains.social.service import posts as social_posts
-from app.runtime.resident import execution as agent_run_service
-from app.domains.identity.service import demo_access as demo_lock
-from app.core import image_prompt_safety
-from app.domains.operations.service import maintenance as maintenance_service
-from app.runtime.social import image_generation as post_image_generation
-from app.domains.social.service import image_attachment
-from app.core import prompt_safety
-from app.domains.characters.service import media_storage as profile_media
-from app.integrations.media import files as media_files
-from app.integrations.media import images as media_images
-from app.credentials import service_images as service_image_key
-from app.domains.operations.service import settings as operation_settings
-from app.services.direct_llm import (
-    DirectLlmCallContext,
-    DirectLlmDeferred,
-    DirectLlmError,
-    RunLlmTracker,
-    generate_json,
-)
-from app.services.runtime_boundary import (
-    OpenClawGatewayClient,
-    OpenClawGatewayError,
-    openclaw_auth_profiles,
-)
-from app.domains.world_characters.public import (
-    is_owner_controlled_character,
-    lock_world_autonomy_capacity,
-    selected_autonomous_world_character,
-    set_active_world_character_autonomy,
-)
 
+from app.runtime.routines import activity_policy as agent_activity_policy
+
+from app.domains.world_characters.service import readiness as activity_profile_readiness
+
+
+
+from app.runtime.resident import execution as agent_run_service
+
+from app.domains.identity.service import demo_access as demo_lock
+
+from app.core import image_prompt_safety
+
+from app.domains.operations.service import maintenance as maintenance_service
+
+from app.runtime.social import image_generation as post_image_generation
+
+from app.domains.social.service import image_attachment
+
+from app.core import prompt_safety
+
+from app.domains.characters.service import media_storage as profile_media
+
+from app.integrations.media import files as media_files
+
+from app.integrations.media import images as media_images
+
+from app.credentials import service_images as service_image_key
+
+from app.domains.operations.service import settings as operation_settings
+
+from app.integrations.direct_llm import DirectLlmCallContext
+
+from app.integrations.direct_llm import DirectLlmDeferred
+
+from app.integrations.direct_llm import DirectLlmError
+
+from app.integrations.direct_llm import RunLlmTracker
+
+from app.integrations.direct_llm import generate_json
+
+from app.runtime.extensions.resident_adapter import OpenClawGatewayClient
+
+from app.runtime.extensions.resident_adapter import OpenClawGatewayError
+
+from app.runtime.extensions.resident_adapter import openclaw_auth_profiles
+
+from app.domains.world_characters.service.owner_identity import is_owner_controlled_character
+
+from app.domains.world_characters.service.autonomous_setup import lock_world_autonomy_capacity
+
+from app.domains.world_characters.service.autonomous_setup import selected_autonomous_world_character
+
+from app.domains.world_characters.service.autonomous_setup import set_active_world_character_autonomy
+
+from app.domains.routines.contracts.activity_presentation import ActivityPresentationReads
+
+from app.domains.routines.service import activity_presentation
+
+from app.domains.routines.service import activity_logs
+
+from app.domains.routines.service import runtime_guards
+
+from app.domains.routines.contracts.tendency_analysis import TendencyAnalysisRunner
+
+from app.domains.characters.exceptions import ActiveSlotBusyError
+
+from app.domains.identity.contracts import CharacterCredentialWorkflows
+
+from app.domains.worlds.repository import credential_scope as credential_worlds
+
+from app.domains.world_characters.repository import credential_scope as credential_world_characters
+
+from app.domains.routines.service import activity_settings
+
+from app.domains.routines.exceptions import LlmCredentialInvalidError
+
+from app.domains.routines.contracts.tendency_analysis import TendencyAnalysisWorkflows
+
+from app.domains.routines.constants import TENDENCY_LLM_TOOLS_ALLOW
+
+from app.runtime.resident import tendency_analysis
+
+from app.domains.routines.service import first_greeting
+
+from app.domains.routines.service.first_greeting import _first_greeting_available_at
+
+from app.domains.routines.schemas.first_greeting import _FirstGreetingWriterPayload
+
+from app.domains.routines.constants import FIRST_GREETING_COOLDOWN
+
+from app.domains.routines.constants import FIRST_GREETING_SESSION_MARKER
+
+from app.domains.routines.constants import FIRST_GREETING_WRITER_OUTPUT_TOKENS
+
+from app.domains.routines.contracts.first_greeting import FirstGreetingWorkflows
+
+from app.domains.social.repository import posts as social_post_queries
+
+from app.runtime.resident.first_greeting import resolve_first_greeting_key
+
+from app.runtime.resident.first_greeting import _run_first_greeting_writer
+
+from app.runtime.resident.first_greeting import _attach_first_greeting_image
+
+from app.domains.routines.contracts.manual_activity import ManualActivityWorkflows
+
+from app.domains.routines.contracts.feed_cues import FeedCueWorkflows
+
+from app.domains.routines.service import manual_activity
+
+from app.domains.routines.service.manual_activity import _manual_run_available_at
+
+from app.domains.routines.service.tick_schedule import aware_utc as _aware_utc
+
+from app.domains.routines.constants import RUN_NOW_COOLDOWN
+
+from app.domains.routines.constants import RUN_NOW_SCHEDULER_GUARD_WINDOW
+
+from app.domains.routines.constants import RUN_NOW_SCHEDULER_HEADROOM
+
+from app.domains.routines.contracts.autonomy_management import AutonomyWorkflows
+
+from app.domains.routines.service import autonomy_management
+
+from app.domains.routines.repository.autonomy import _lock_server_llm_autonomy_capacity
+
+from app.domains.routines.service.autonomy_management import _reject_server_llm_autonomy_capacity
+
+from app.domains.routines.service.autonomy_management import _reject_world_autonomy_capacity
+
+from app.domains.routines.service.autonomy_management import _log_autonomy_activation_rejection
+
+from app.runtime.resident.autonomy_reads import count_effective_active_server_llm_autonomy_agents as _effective_server_llm_autonomy_count
+
+from app.domains.identity.service import profile as identity_profile
+
+from app.domains.routines.constants import SERVER_LLM_AUTONOMY_CAPACITY_ERROR_MESSAGE
+
+from app.domains.routines.constants import WORLD_AUTONOMY_CAPACITY_ERROR_MESSAGE
+
+from app.domains.routines.constants import SERVER_LLM_AUTONOMY_CAPACITY_LOCK_KEY
+
+from app.domains.routines.schemas.tendency import _TendencyRangePayload
+
+from app.domains.routines.schemas.tendency import _TendencyActionRangesPayload
+
+from app.domains.routines.schemas.tendency import _IndependentPostInitiativePayload
+
+from app.domains.routines.schemas.tendency import _IndependentPostTopicPayload
+
+from app.domains.routines.schemas.tendency import _PlannerTendencyProfilePayload
+
+from app.domains.routines.schemas.tendency import _TendencyAnalysisPayload
+
+from app.domains.routines.service.tendency import _ensure_tendency_prompt_safety
+
+from app.domains.routines.service.tendency import _build_tendency_analysis_prompt
+
+from app.domains.routines.service.tendency import _extract_gateway_result_text
+
+from app.domains.routines.service.tendency import _parse_tendency_json
+
+from app.domains.routines.service.tendency import _normalize_tendency_payload
+
+from app.domains.routines.service.tendency import _normalize_planner_tendency_profile
+
+from app.domains.routines.service.tendency import _calibrated_independent_post_probability
+
+from app.domains.routines.service.tendency import _slug_tendency_topic_key
+
+from app.domains.routines.service.tendency import normalize_angmoo_terms_in_tendency_text
+
+from app.domains.routines.service.tendency import _safe_tendency_text
+
+from app.domains.routines.service.tendency import _clamped_tendency_int
+
+from app.domains.routines.service.tendency_settings import _mark_tendency_error
+
+from app.domains.routines.service.tendency_settings import _has_tendency_analysis
+
+from app.domains.routines.service.tendency_settings import _ensure_tendency_analysis_ready
+
+from app.domains.routines.service.tendency_settings import _clear_tendency_analysis
+
+from app.domains.routines.service.activity_management import _apply_initial_activity_settings
+
+from app.domains.routines.exceptions import AgentAutonomyCapacityError
+
+from app.domains.routines.exceptions import AgentAutonomyRetryableError
+
+from app.domains.routines.exceptions import TendencyAnalysisParseError
+
+from app.domains.routines.exceptions import TendencyPromptInjectionDetectedError
+
+from app.domains.routines.exceptions import TendencyAnalysisRequiredError
+
+from app.domains.routines.exceptions import ActivityProfileRequiredError
+
+from app.domains.routines.exceptions import AgentFeedCueConflictError
+
+from app.domains.routines.exceptions import AgentFeedCueUnavailableError
+
+from app.domains.routines.exceptions import RunNowCooldownError
+
+from app.domains.routines.exceptions import FirstGreetingCooldownError
+
+from app.domains.routines.exceptions import FirstGreetingUnavailableError
+
+from app.domains.routines.exceptions import RunNowSlotUnavailableError
+
+from app.domains.routines.exceptions import RunNowSlotBusyError
+
+from app.domains.routines.exceptions import RunNowSchedulerBusyError
+
+from app.domains.routines.exceptions import RunNowSoonScheduledError
+
+from app.domains.routines.constants import TENDENCY_ACTION_KEYS
+
+from app.domains.routines.constants import TENDENCY_INDEPENDENT_TOPIC_COUNT
+
+from app.domains.routines.constants import TENDENCY_ANALYSIS_MAX_OUTPUT_TOKENS
+
+from app.domains.routines.constants import FEED_SEED_INTEREST_CRITERIA_MAX_LENGTH
+
+from app.domains.routines.constants import TENDENCY_ACTION_DEFAULTS
+
+from app.domains.routines.constants import INDEPENDENT_POST_PROBABILITY_RANGES
+
+from app.domains.routines.constants import TENDENCY_CONTENT_CHARACTER_PHRASES
+
+from app.domains.routines.constants import TENDENCY_PERSONA_CHARACTER_PATTERN
+
+from functools import partial
+
+from app.domains.routines.contracts.activity_management import ActivityManagementReferences
+
+from app.domains.routines.service import activity_management
+
+from app.domains.routines import constants as routine_constants
+
+from app.domains.routines.repository import slots as slot_queries
+
+from app.domains.routines.service import slot_assignments as slot_assignments
+
+from app.domains.routines.service import slot_pool as slot_pool
+
+from app.domains.routines.repository import feed_cues as feed_cue_queries
+
+from app.domains.routines.repository import runs as routine_run_queries
+
+from app.domains.routines.service import feed_cues as feed_cues
+
+from app.domains.routines.service import runs as routine_runs
+
+register_models()
 
 AGENT_DETAIL_ACTIVITY_LIMIT = 200
+
 DELETED_CHARACTER_NAME = "삭제한 앵무"
+
 DELETED_CHARACTER_PLACEHOLDER = "삭제된 앵무입니다."
-# OpenClaw validates the global tool allowlist before honoring tool_choice="none".
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 DemoAccountLockedError = demo_lock.DemoAccountLockedError
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 class AgentDeleteConfirmationError(AgentServiceError):
     pass
 
-
 class AgentDeletionCredentialSyncError(AgentServiceError):
     pass
-
 
 class AgentDeletionMediaCleanupError(AgentServiceError):
     pass
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def list_agents(db: Session, user: _model_User) -> list[schemas.AgentDetailRead]:
+def list_agents(db: Session, user: _model_User) -> list[character_schemas.AgentDetailRead]:
     return character_management.list_agents(db, user, workflows=build_character_management_workflows())
 
-
-
-
-
-
-
-
-
-
 def create_agent(
-    db: Session, user: _model_User, data: schemas.AgentCreate
-) -> schemas.AgentDetailRead:
+    db: Session, user: _model_User, data: character_schemas.AgentCreate
+) -> character_schemas.AgentDetailRead:
     return character_management.create_agent(db, user, data, workflows=build_character_management_workflows())
 
-
-def _after_character_created(db, user, character, data) -> schemas.AgentDetailRead:
+def _after_character_created(db, user, character, data) -> character_schemas.AgentDetailRead:
     setting = activity_settings.ensure_setting(db, character.id)
     _apply_initial_activity_settings(db, setting, data)
     _ensure_initial_image_settings(db, character.id)
@@ -381,65 +534,30 @@ def _after_character_created(db, user, character, data) -> schemas.AgentDetailRe
     db.refresh(character)
     return _build_agent_detail(db, character)
 
-
-
-
-
-
 def _ensure_initial_image_settings(db: Session, character_id: str) -> None:
     return image_settings_owner._ensure_initial_image_settings(db, character_id, workflows=build_image_settings_workflows())
 
-
-
-
-
-
-
-
-
-
-
-
-def get_agent(db: Session, user: _model_User, character_id: str) -> schemas.AgentDetailRead:
+def get_agent(db: Session, user: _model_User, character_id: str) -> character_schemas.AgentDetailRead:
     return character_management.get_agent(db, user, character_id, workflows=build_character_management_workflows())
 
-
-
-
-def get_local_connection(db: Session, user: _model_User, character_id: str) -> schemas.AgentLocalConnectionRead:
+def get_local_connection(db: Session, user: _model_User, character_id: str) -> bot_schemas.AgentLocalConnectionRead:
     return local_key_management.get_local_connection(db, user, character_id)
 
-
-def issue_local_key(db: Session, user: _model_User, character_id: str) -> schemas.AgentLocalKeyCreateRead:
+def issue_local_key(db: Session, user: _model_User, character_id: str) -> bot_schemas.AgentLocalKeyCreateRead:
     return local_key_management.issue_local_key(db, user, character_id, workflows=build_local_key_workflows())
-
 
 def revoke_local_key(db: Session, user: _model_User, character_id: str) -> None:
     return local_key_management.revoke_local_key(db, user, character_id, workflows=build_local_key_workflows())
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 def update_profile(
     db: Session,
     user: _model_User,
     character_id: str,
-    data: schemas.AgentProfileUpdate,
-) -> schemas.AgentDetailRead:
+    data: character_schemas.AgentProfileUpdate,
+) -> character_schemas.AgentDetailRead:
     return character_management.update_profile(db, user, character_id, data, workflows=build_character_management_workflows())
 
-
-def _after_character_profile_updated(db, user, character, media_changed) -> schemas.AgentDetailRead:
+def _after_character_profile_updated(db, user, character, media_changed) -> character_schemas.AgentDetailRead:
     if media_changed:
         _invalidate_image_visual_identity_if_present(db, character.id)
     agent_crud.log_activity(
@@ -454,28 +572,23 @@ def _after_character_profile_updated(db, user, character, media_changed) -> sche
     db.refresh(character)
     return _build_agent_detail(db, character)
 
-
 def update_promotion_usage(
     db: Session,
     user: _model_User,
     character_id: str,
-    data: schemas.AgentPromotionUsageUpdate,
-) -> schemas.AgentDetailRead:
+    data: character_schemas.AgentPromotionUsageUpdate,
+) -> character_schemas.AgentDetailRead:
     return character_management.update_promotion_usage(db, user, character_id, data, workflows=build_character_management_workflows())
-
-
-
 
 def update_persona(
     db: Session,
     user: _model_User,
     character_id: str,
-    data: schemas.AgentPersonaUpdate,
-) -> schemas.AgentDetailRead:
+    data: character_schemas.AgentPersonaUpdate,
+) -> character_schemas.AgentDetailRead:
     return character_management.update_persona(db, user, character_id, data, workflows=build_character_management_workflows())
 
-
-def _after_character_persona_updated(db, user, character) -> schemas.AgentDetailRead:
+def _after_character_persona_updated(db, user, character) -> character_schemas.AgentDetailRead:
     setting = activity_settings.ensure_setting(db, character.id)
     _clear_tendency_analysis(setting)
     db.commit()
@@ -491,58 +604,28 @@ def _after_character_persona_updated(db, user, character) -> schemas.AgentDetail
     db.refresh(character)
     return _build_agent_detail(db, character)
 
-
 def upload_profile_media(
     db: Session,
     user: _model_User,
     character_id: str,
-    data: schemas.AgentProfileMediaUpload,
-) -> schemas.AgentDetailRead:
+    data: character_schemas.AgentProfileMediaUpload,
+) -> character_schemas.AgentDetailRead:
     return media_service.upload_profile_media(db, user, character_id, data, workflows=build_character_media_workflows())
 
-
-def get_image_settings(db: Session, user: _model_User, character_id: str) -> schemas.AgentImageGenerationSettingRead:
+def get_image_settings(db: Session, user: _model_User, character_id: str) -> character_schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.get_image_settings(db, user, character_id, workflows=build_image_settings_workflows())
 
-
-def update_image_settings(db: Session, user: _model_User, character_id: str, data: schemas.AgentImageGenerationSettingUpdate) -> schemas.AgentImageGenerationSettingRead:
+def update_image_settings(db: Session, user: _model_User, character_id: str, data: character_schemas.AgentImageGenerationSettingUpdate) -> character_schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.update_image_settings(db, user, character_id, data, workflows=build_image_settings_workflows())
 
-
-def upload_image_seed(db: Session, user: _model_User, character_id: str, data: schemas.AgentImageSeedUpload) -> schemas.AgentImageGenerationSettingRead:
+def upload_image_seed(db: Session, user: _model_User, character_id: str, data: character_schemas.AgentImageSeedUpload) -> character_schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.upload_image_seed(db, user, character_id, data, workflows=build_image_settings_workflows())
 
-
-def delete_image_seed(db: Session, user: _model_User, character_id: str) -> schemas.AgentImageGenerationSettingRead:
+def delete_image_seed(db: Session, user: _model_User, character_id: str) -> character_schemas.AgentImageGenerationSettingRead:
     return image_settings_owner.delete_image_seed(db, user, character_id, workflows=build_image_settings_workflows())
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def delete_agent(
-    db: Session, user: _model_User, character_id: str, data: schemas.AgentDeleteCreate
+    db: Session, user: _model_User, character_id: str, data: character_schemas.AgentDeleteCreate
 ) -> None:
     character = _get_owned_character(db, user, character_id)
     demo_lock.ensure_demo_user_mutable(user)
@@ -573,7 +656,6 @@ def delete_agent(
     except media_files.PrivateMediaCleanupError as exc:
         raise AgentDeletionMediaCleanupError("private_media_purge_failed") from exc
 
-
 def _quarantine_agent_private_media(
     db: Session, user_id: str, character_id: str
 ) -> media_files.PrivateMediaQuarantine:
@@ -592,56 +674,23 @@ def _quarantine_agent_private_media(
     )
     return media_files.quarantine_private_media(paths)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def _activity_profile_readiness(
     db: Session,
     *,
     character: character_models.Character,
     setting: _model_AgentActivitySetting,
-) -> schemas.AgentActivityProfileReadinessRead:
+) -> character_schemas.AgentActivityProfileReadinessRead:
     return activity_profile_readiness.evaluate(
         db,
         character=character,
         setting=setting,
     )
 
-
-
-
-
-
 def _resident_openclaw_sync_enabled() -> bool:
     return settings.agent_activity_engine == "openclaw"
 
-
 def _bind_slot_auth_profile(
-    slot: schemas.AgentSlotRead,
+    slot: routine_schemas_runs.AgentSlotRead,
     *,
     user_id: str,
     character: character_models.Character,
@@ -666,7 +715,6 @@ def _bind_slot_auth_profile(
     except openclaw_auth_profiles.OpenClawAuthProfileSyncError as exc:
         raise CredentialSyncError(str(exc)) from exc
 
-
 def _release_slot_auth_profile(
     slot: _model_AgentSlot,
     *,
@@ -684,7 +732,6 @@ def _release_slot_auth_profile(
     except openclaw_auth_profiles.OpenClawAuthProfileSyncError as exc:
         raise CredentialSyncError(str(exc)) from exc
 
-
 def _reload_openclaw_secrets_sync() -> None:
     token = settings.openclaw_gateway_token
     if token is None:
@@ -698,37 +745,11 @@ def _reload_openclaw_secrets_sync() -> None:
     except OpenClawGatewayError as exc:
         raise CredentialSyncError(str(exc)) from exc
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def _local_connection_read(db: Session, character: character_models.Character) -> schemas.AgentLocalConnectionRead:
+def _local_connection_read(db: Session, character: character_models.Character) -> bot_schemas.AgentLocalConnectionRead:
     return local_key_management._local_connection_read(db, character)
-
 
 def _local_key_token_prefix(token: str) -> str:
     return local_key_management._local_key_token_prefix(token)
-
 
 def _agent_deletion_slot_condition(db: Session, *, user_id: str, character_id: str):
     credential_ids = list(
@@ -743,7 +764,6 @@ def _agent_deletion_slot_condition(db: Session, *, user_id: str, character_id: s
     if credential_ids:
         conditions.append(_model_AgentSlot.assigned_credential_id.in_(credential_ids))
     return or_(*conditions) if len(conditions) > 1 else conditions[0]
-
 
 def _ensure_agent_deletion_not_busy(
     db: Session, *, user_id: str, character_id: str
@@ -776,7 +796,6 @@ def _ensure_agent_deletion_not_busy(
         raise ActiveSlotBusyError(
             "앵무가 지금 활동 중이라 삭제할 수 없습니다. 잠시 뒤 다시 시도해주세요."
         )
-
 
 def _release_openclaw_profile_for_agent(
     db: Session, *, user_id: str, character_id: str
@@ -819,7 +838,6 @@ def _release_openclaw_profile_for_agent(
         except CredentialSyncError as exc:
             raise AgentDeletionCredentialSyncError(str(exc)) from exc
 
-
 def _clear_resident_slots_for_agent(
     db: Session, *, user_id: str, character_id: str
 ) -> None:
@@ -849,7 +867,6 @@ def _clear_resident_slots_for_agent(
         slot.locked_by_run_id = None
         slot.lease_expires_at = None
         slot.last_error = None
-
 
 def _scrub_agent_data(db: Session, character: character_models.Character) -> None:
     now = datetime.now(UTC)
@@ -1035,7 +1052,6 @@ def _scrub_agent_data(db: Session, character: character_models.Character) -> Non
     character.persona_summary = DELETED_CHARACTER_PLACEHOLDER
     character.deleted_at = now
 
-
 def _deleted_character_handle(db: Session, character_id: str) -> str:
     suffix = "".join(
         char.lower() for char in character_id if char.isalnum() or char in {"-", "_"}
@@ -1055,19 +1071,9 @@ def _deleted_character_handle(db: Session, character_id: str) -> str:
         index += 1
     return candidate
 
-
-
-
-
-
-
-
-
-
-
 def _build_agent_detail(
     db: Session, character: character_models.Character, *, recent_activity_limit: int = 20
-) -> schemas.AgentDetailRead:
+) -> character_schemas.AgentDetailRead:
     setting = activity_settings.ensure_setting(db, character.id)
     credential = credential_repository.get_character_credential(db, character.id)
     slot = slot_queries.get_assigned_slot(db, character.id)
@@ -1084,23 +1090,23 @@ def _build_agent_detail(
         if character.owner_id
         else None
     )
-    return schemas.AgentDetailRead(
-        character=schemas.CharacterRead.model_validate(character),
+    return character_schemas.AgentDetailRead(
+        character=character_schemas.CharacterRead.model_validate(character),
         state=(
-            schemas.CharacterStateRead.model_validate(character.state)
+            character_schemas.CharacterStateRead.model_validate(character.state)
             if character.state
             else None
         ),
         credential=(
-            schemas.CredentialRead.model_validate(credential) if credential else None
+            schema_identity_schemas.CredentialRead.model_validate(credential) if credential else None
         ),
-        settings=schemas.AgentActivitySettingRead.model_validate(setting),
+        settings=routine_schemas.AgentActivitySettingRead.model_validate(setting),
         image_settings=_image_generation_setting_read(
             db,
             image_setting_repository.ensure_image_generation_setting(db, character.id)
         ),
         promotion_usage=_promotion_usage_read(character),
-        assigned_slot=schemas.AgentSlotRead.model_validate(slot) if slot else None,
+        assigned_slot=routine_schemas_runs.AgentSlotRead.model_validate(slot) if slot else None,
         activity_profile_readiness=_activity_profile_readiness(
             db,
             character=character,
@@ -1118,26 +1124,14 @@ def _build_agent_detail(
         ],
     )
 
-
-def _image_generation_setting_read(db: Session, setting: _model_AgentImageGenerationSetting) -> schemas.AgentImageGenerationSettingRead:
+def _image_generation_setting_read(db: Session, setting: _model_AgentImageGenerationSetting) -> character_schemas.AgentImageGenerationSettingRead:
     return image_settings_owner._image_generation_setting_read(db, setting, workflows=build_image_settings_workflows())
-
 
 def _service_image_quota_read(db: Session, character_id: str) -> dict[str, int | str]:
     return image_settings_owner._service_image_quota_read(db, character_id, workflows=build_image_settings_workflows())
 
-
 def _invalidate_image_visual_identity_if_present(db: Session, character_id: str) -> None:
     return image_settings_owner._invalidate_image_visual_identity_if_present(db, character_id)
-
-
-
-
-
-
-
-
-
 
 def build_character_management_workflows() -> CharacterManagementWorkflows:
     """Bind the current runtime callbacks (also honoring caller/test overrides)."""
@@ -1150,10 +1144,8 @@ def build_character_management_workflows() -> CharacterManagementWorkflows:
         after_persona=_after_character_persona_updated,
     )
 
-
-def _build_full_character_detail(db: Session, character: character_models.Character) -> schemas.AgentDetailRead:
+def _build_full_character_detail(db: Session, character: character_models.Character) -> character_schemas.AgentDetailRead:
     return _build_agent_detail(db, character, recent_activity_limit=AGENT_DETAIL_ACTIVITY_LIMIT)
-
 
 def build_character_media_workflows():
     from app.domains.characters.contracts import CharacterMediaWorkflows
@@ -1164,6 +1156,16 @@ def build_character_media_workflows():
         build_detail=_build_agent_detail,
     )
 
+def build_image_settings_workflows():
+    from app.domains.characters.contracts import CharacterImageSettingsWorkflows
+    from app.domains.social.repository.media import count_service_image_quota_used
+    from app.domains.routines.service.tick_schedule import APP_TIMEZONE
+    return CharacterImageSettingsWorkflows(
+        service_image_available=service_image_key.is_service_image_available,
+        service_image_available_for_model=service_image_key.is_service_image_available_for_model,
+        count_service_image_quota_used=count_service_image_quota_used,
+        app_timezone=APP_TIMEZONE,
+    )
 
 def build_activity_management_references() -> ActivityManagementReferences:
     return ActivityManagementReferences(
@@ -1176,14 +1178,7 @@ def build_activity_management_references() -> ActivityManagementReferences:
         timezone_reader=agent_activity_policy.activity_timezone,
     )
 
-
-
-
-
-
-
-
-def build_autonomy_workflows() -> AutonomyWorkflows[schemas.AgentDetailRead]:
+def build_autonomy_workflows() -> AutonomyWorkflows[character_schemas.AgentDetailRead]:
     return AutonomyWorkflows(
         get_user=identity_profile.get_user,
         get_character=character_profile.get_character,
@@ -1192,7 +1187,7 @@ def build_autonomy_workflows() -> AutonomyWorkflows[schemas.AgentDetailRead]:
         ensure_llm_mode=_ensure_llm_mode,
         ensure_auto_ticks_available=maintenance_service.ensure_auto_ticks_available,
         evaluate_readiness=_activity_profile_readiness,
-        get_credential=agent_crud.get_character_credential,
+        get_credential=identity_credentials.get_character_credential,
         select_world_character=selected_autonomous_world_character,
         lock_world_capacity=lock_world_autonomy_capacity,
         count_world_autonomy=count_enabled_autonomous_world_characters,
@@ -1212,16 +1207,6 @@ def build_autonomy_workflows() -> AutonomyWorkflows[schemas.AgentDetailRead]:
         social_character_not_found_error=social_errors.CharacterNotFoundError,
     )
 
-
-
-
-
-
-
-
-
-
-
 def build_manual_activity_workflows() -> ManualActivityWorkflows:
     return ManualActivityWorkflows(
         get_owned_character=_get_owned_character,
@@ -1238,7 +1223,7 @@ def build_manual_activity_workflows() -> ManualActivityWorkflows:
             autonomy_management._ensure_activity_profile_ready,
             workflows=build_autonomy_workflows(),
         ),
-        get_credential=agent_crud.get_character_credential,
+        get_credential=identity_credentials.get_character_credential,
         run_assigned_slot=agent_run_service.run_assigned_resident_slot_once,
         claim_temporary_slot=agent_run_service.claim_temporary_resident_slot,
         sync_enabled=_resident_openclaw_sync_enabled,
@@ -1250,7 +1235,6 @@ def build_manual_activity_workflows() -> ManualActivityWorkflows:
         execution_mode_error=AgentExecutionModeError,
         credential_required_error=CredentialRequiredError,
     )
-
 
 def build_feed_cue_workflows() -> FeedCueWorkflows:
     return FeedCueWorkflows(
@@ -1267,16 +1251,6 @@ def build_feed_cue_workflows() -> FeedCueWorkflows:
         prompt_injection_error=PromptInjectionDetectedError,
     )
 
-
-
-
-
-
-
-
-
-
-
 def build_first_greeting_workflows() -> FirstGreetingWorkflows:
     return FirstGreetingWorkflows(
         get_owned_character=_get_owned_character,
@@ -1290,25 +1264,21 @@ def build_first_greeting_workflows() -> FirstGreetingWorkflows:
         ensure_run_now_available=maintenance_service.ensure_run_now_available,
         build_activity_policy=agent_activity_policy.build_activity_policy,
         has_authored_post=social_post_queries.character_has_authored_post,
-        get_credential=agent_crud.get_character_credential,
+        get_credential=identity_credentials.get_character_credential,
         resolve_key=resolve_first_greeting_key,
         new_tracker=RunLlmTracker,
         _run_first_greeting_writer=_run_first_greeting_writer,
-        post_input=schemas.PostCreate,
-        build_response=schemas.AgentFirstGreetingRead,
-        create_post=timeline_service.create_post,
-        build_post_created_activity_result=social_activity_results.build_post_created_activity_result,
+        post_input=social_schemas.PostCreate,
+        build_response=schema_api_schemas_first_greeting.AgentFirstGreetingRead,
+        create_post=social_timeline_runtime.timeline_service.create_post,
+        build_post_created_activity_result=social_activity_results_service.build_post_created_activity_result,
         attach_image=_attach_first_greeting_image,
-        get_post=social_posts.get_post,
+        get_post=social_posts_service.get_post,
         deferred_error=DirectLlmDeferred,
         social_service_error=social_errors.CommunityServiceError,
     )
 
-
-
-
-
-def build_tendency_analysis_workflows() -> TendencyAnalysisWorkflows[schemas.AgentDetailRead]:
+def build_tendency_analysis_workflows() -> TendencyAnalysisWorkflows[character_schemas.AgentDetailRead]:
     return TendencyAnalysisWorkflows(
         get_owned_character=_get_owned_character,
         ensure_mutable=demo_lock.ensure_demo_user_mutable,
@@ -1318,16 +1288,12 @@ def build_tendency_analysis_workflows() -> TendencyAnalysisWorkflows[schemas.Age
             locked=agent_activity_policy.is_imported_world_runtime_locked_for_character,
             execution_mode_error=AgentExecutionModeError,
         ),
-        get_credential=agent_crud.get_character_credential,
+        get_credential=identity_credentials.get_character_credential,
         bind_profile=_bind_slot_auth_profile,
         release_profile=_release_slot_auth_profile,
         build_detail=_build_agent_detail,
         credential_required_error=CredentialRequiredError,
     )
-
-
-
-
 
 def build_character_credential_workflows() -> CharacterCredentialWorkflows:
     return CharacterCredentialWorkflows(
@@ -1338,10 +1304,10 @@ def build_character_credential_workflows() -> CharacterCredentialWorkflows:
         get_world_character_id=credential_world_characters.get_accessible_world_character_id,
         get_assigned_slot=slot_queries.get_assigned_slot,
         running_slot_status=routine_constants.SLOT_STATUS_RUNNING,
-        upsert_credential=agent_crud.upsert_credential,
-        get_credential=agent_crud.get_character_credential,
+        upsert_credential=identity_credential_records.upsert_credential,
+        get_credential=identity_credentials.get_character_credential,
         sync_enabled=_resident_openclaw_sync_enabled,
-        slot_read=schemas.AgentSlotRead.model_validate,
+        slot_read=routine_schemas_runs.AgentSlotRead.model_validate,
         bind_profile=_bind_slot_auth_profile,
         release_profile=_release_slot_auth_profile,
         reload_secrets=_reload_openclaw_secrets_sync,
@@ -1355,10 +1321,8 @@ def build_character_credential_workflows() -> CharacterCredentialWorkflows:
         credential_required_error=CredentialRequiredError,
     )
 
-
-def build_tendency_analysis_runner() -> TendencyAnalysisRunner[schemas.AgentDetailRead]:
+def build_tendency_analysis_runner() -> TendencyAnalysisRunner[character_schemas.AgentDetailRead]:
     return partial(tendency_analysis.analyze_tendency, workflows=build_tendency_analysis_workflows())
-
 
 def configure_character_activity_http(app: Any) -> None:
     """Connect the actual owner workflows once while the application is assembled."""
@@ -1369,23 +1333,10 @@ def configure_character_activity_http(app: Any) -> None:
     app.state.first_greeting_workflows = build_first_greeting_workflows
     app.state.tendency_analysis_runner = build_tendency_analysis_runner
 
-
 def build_activity_presentation_reads() -> ActivityPresentationReads:
     return ActivityPresentationReads(
         get_character=character_profile.get_character,
         get_user=identity_profile.get_user,
         activity_timezone_name=agent_activity_policy.activity_timezone_name,
         count_action_today=agent_activity_policy.count_action_today,
-    )
-
-
-def build_image_settings_workflows():
-    from app.domains.characters.contracts import CharacterImageSettingsWorkflows
-    from app.domains.social.repository.media import count_service_image_quota_used
-    from app.domains.routines.service.tick_schedule import APP_TIMEZONE
-    return CharacterImageSettingsWorkflows(
-        service_image_available=service_image_key.is_service_image_available,
-        service_image_available_for_model=service_image_key.is_service_image_available_for_model,
-        count_service_image_quota_used=count_service_image_quota_used,
-        app_timezone=APP_TIMEZONE,
     )

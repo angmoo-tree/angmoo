@@ -72,7 +72,7 @@ from uuid import uuid4
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app import schemas
+import app.domains.characters.schemas as schemas
 from app.domains.identity.models import User as _model_User
 from app.runtime.persistence.model_registration import register_models
 register_models()
@@ -82,14 +82,15 @@ from app.core import security
 from app.config import settings
 from app.core.redaction import redact_exact_secret_text
 from app.credentials import CredentialResolutionError, CredentialResolver
-from app.cruds import agent_runs as agent_run_crud
-from app.cruds import agents as agent_crud
+
 from app.policies import name_policy
 from app.runtime.characters import management as agent_service
 from app.runtime.routines import activity_policy as agent_activity_policy
 from app.runtime.resident import execution as agent_run_service
 from app.domains.identity.service import demo_access as demo_lock
-from app.services.direct_llm import DirectLlmCallContext, RunLlmTracker, generate_text
+from app.integrations.direct_llm import DirectLlmCallContext
+from app.integrations.direct_llm import RunLlmTracker
+from app.integrations.direct_llm import generate_text
 from app.domains.operations.service import settings as operation_settings
 from app.integrations import image_provider
 from app.integrations import pollinations_image
@@ -110,7 +111,7 @@ from app.integrations.azure_translation import (
 )
 from app.integrations import replicate_image
 from app.credentials import service_images as service_image_key
-from app.services.runtime_boundary import (
+from app.runtime.extensions.resident_adapter import (
     OpenClawGatewayClient,
     OpenClawGatewayError,
     openclaw_auth_profiles,

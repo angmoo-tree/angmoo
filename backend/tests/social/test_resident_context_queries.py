@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import Session
 
-from tests.model_fixture_support import models as registered_models
+from model_fixture_support import models as registered_models
 from app.models import Base
 from app.domains.social.models import posts as models
 from app.domains.social.repository import resident_context as queries

@@ -1,7 +1,11 @@
 from sqlalchemy.orm import Session
+
 from app.config import settings
+
 from app.domains.operations import schemas, repository as operation_repository
+
 from app.domains.operations.constants import INFO_BANNER_KEY, MAINTENANCE_BANNER_KEY
+
 from app.domains.operations.exceptions import AgentActivityMaintenanceError
 
 def get_agent_activity_maintenance(
@@ -33,48 +37,38 @@ def get_agent_activity_maintenance(
         notice_message=info["message"],
     )
 
-
 def agent_activity_maintenance_enabled(db: Session | None = None) -> bool:
     return _maintenance_banner(db)["enabled"]
-
 
 def agent_activity_blocks_auto_ticks(db: Session | None = None) -> bool:
     maintenance = _maintenance_banner(db)
     return maintenance["enabled"] and maintenance["blocks_auto_ticks"]
 
-
 def agent_activity_blocks_run_now(db: Session | None = None) -> bool:
     maintenance = _maintenance_banner(db)
     return maintenance["enabled"] and maintenance["blocks_run_now"]
-
 
 def agent_activity_blocks_feed_cues(db: Session | None = None) -> bool:
     maintenance = _maintenance_banner(db)
     return maintenance["enabled"] and maintenance["blocks_feed_cues"]
 
-
 def agent_activity_auto_tick_allowed_character_ids() -> set[str]:
     return set(settings.agent_activity_maintenance_auto_tick_allowed_character_ids)
-
 
 def ensure_auto_ticks_available(db: Session | None = None) -> None:
     if agent_activity_blocks_auto_ticks(db):
         raise AgentActivityMaintenanceError(_maintenance_banner(db)["message"])
 
-
 def ensure_run_now_available(db: Session | None = None) -> None:
     if agent_activity_blocks_run_now(db):
         raise AgentActivityMaintenanceError(_maintenance_banner(db)["message"])
-
 
 def ensure_feed_cues_available(db: Session | None = None) -> None:
     if agent_activity_blocks_feed_cues(db):
         raise AgentActivityMaintenanceError(_maintenance_banner(db)["message"])
 
-
 def ensure_agent_activity_available(db: Session | None = None) -> None:
     ensure_run_now_available(db)
-
 
 def _info_banner(db: Session | None) -> dict[str, object]:
     row = operation_repository.read_banner(db, INFO_BANNER_KEY)
@@ -95,7 +89,6 @@ def _info_banner(db: Session | None) -> dict[str, object]:
         "blocks_run_now": False,
         "blocks_feed_cues": False,
     }
-
 
 def _maintenance_banner(db: Session | None) -> dict[str, object]:
     row = operation_repository.read_banner(db, MAINTENANCE_BANNER_KEY)

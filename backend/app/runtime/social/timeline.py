@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Literal
 from sqlalchemy.orm import Session
 from app.domains.routines.service import activity_logs as agent_crud
-from app.services import community_abuse_quota
+from app.domains.social.service import abuse_quota as community_abuse_quota
 from app.runtime.relationships import sqlalchemy_social_event
 from app.domains.social.service.timeline import SocialTimelineService
 

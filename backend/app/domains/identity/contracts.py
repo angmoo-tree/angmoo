@@ -1,14 +1,24 @@
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+
+from dataclasses import field
+
 from datetime import datetime
+
 from enum import StrEnum
-from typing import Literal, Protocol, TYPE_CHECKING
+
+from typing import Literal
+
+from typing import Protocol
+
+from typing import TYPE_CHECKING
+
+from typing import Callable
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
     from app.domains.identity.models import User, LlmCredential
-
 
 class CredentialPurpose(StrEnum):
     RESIDENT_LLM = "resident_llm"
@@ -19,7 +29,6 @@ class CredentialPurpose(StrEnum):
     USER_IMAGE = "user_image"
     SERVICE_IMAGE = "service_image"
     PRIVATE_OPENCLAW = "private_openclaw"
-
 
 @dataclass(frozen=True, repr=False)
 class CredentialMaterial:
@@ -45,9 +54,7 @@ class CredentialMaterial:
 
     __str__ = __repr__
 
-
 BootstrapState = Literal["unclaimed", "claimed", "recovery_required"]
-
 
 @dataclass(frozen=True)
 class LocalOwnerCandidate:
@@ -61,7 +68,6 @@ class LocalOwnerCandidate:
     def activity_count(self) -> int:
         return self.character_count + self.world_count + self.credential_count
 
-
 @dataclass(frozen=True)
 class LocalUserSnapshot:
     user_id: str
@@ -71,7 +77,6 @@ class LocalUserSnapshot:
     feed_content_filter: str
     is_admin: bool
 
-
 @dataclass(frozen=True)
 class LocalBootstrapStatus:
     state: BootstrapState
@@ -80,12 +85,10 @@ class LocalBootstrapStatus:
     owner: LocalUserSnapshot | None
     candidates: tuple[LocalOwnerCandidate, ...]
 
-
 @dataclass(frozen=True)
 class IssuedBootstrapChallenge:
     token: str
     expires_at: datetime
-
 
 @dataclass(frozen=True)
 class IssuedLocalSession:
@@ -93,17 +96,14 @@ class IssuedLocalSession:
     expires_at: datetime
     user: LocalUserSnapshot
 
-
 class AccountDeletionWorkflow(Protocol):
     """An application-provided multi-domain transaction using the caller session."""
 
     def __call__(self, db: Session, user: User) -> None: ...
 
-
-# Character credential changes use the same attached values and caller Session.
-from typing import Callable
-
 class CredentialCharacter(Protocol):
+    """Character identity required to label and scope its stored credential."""
+
     id: str
     name: str
 

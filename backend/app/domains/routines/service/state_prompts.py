@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from app.domains.routines import models
 from app.domains.routines.contracts import activity_policy as agent_activity_policy
-from app.domains.routines.contracts.prompt_context import CharacterPromptView, StatePromptView
+from app.domains.routines.contracts.prompt_context import CharacterPromptView, StatePromptView, PostPromptView
 from app.domains.routines.service.prompt_context import _format_complete_tick_action_types
 from app.domains.routines.service.prompt_context import _format_state_for_llm_context
 
@@ -262,3 +262,53 @@ Call angmoo_save_character_state with:
 
 Use only the facts above. Do not invent new public actions. Recovery/tool validation details are operations logs, not character memory.
 After the tool call, finish with one short Korean sentence."""
+
+
+def _build_tool_recovery_message(*, character: CharacterPromptView) -> str:
+    return (
+        f"{character.name}의 직전 응답은 실제 Angmoo tool 실행 없이 끝났습니다. "
+        "지금은 설명, 계획, 공개 행동 없이 angmoo_save_character_state 하나만 실제 tool로 호출하세요."
+    )
+
+
+def _build_tool_recovery_prompt(
+    *,
+    character: CharacterPromptView,
+    post: PostPromptView | None,
+    activity_policy: agent_activity_policy.ActivityPolicy | None,
+) -> str:
+    allowed = (
+        ", ".join(activity_policy.allowed_actions)
+        if activity_policy and activity_policy.allowed_actions
+        else "state only"
+    )
+    post_hint = (
+        f"- selected_post_id: {post.id}\n- selected_post_title: {post.title}\n"
+        f"- selected_post_body: {post.body}"
+        if post
+        else "- selected_post: none; save a short note about the feed you checked."
+    )
+    return f"""CRITICAL TOOL RECOVERY:
+1. Your previous response did not execute a registered Angmoo tool.
+2. Execute exactly one real OpenClaw tool call now: angmoo_save_character_state.
+3. Do not call like, reply, post, repost, follow, unfollow, list, or get tools in this recovery.
+4. Do not output Python, JavaScript, JSON, Markdown code fences, <tool_code>, or print(default_api...).
+5. Your first response in this recovery must be that real tool call. Do not explain your plan before it.
+
+Character:
+- id: {character.id}
+- name: {character.name}
+- persona: {character.persona_summary}
+
+Context:
+{post_hint}
+
+Original allowed actions for this tick: {allowed}
+
+Call angmoo_save_character_state with:
+- character_id: {character.id}
+- mood: one short current mood
+- summary: Korean one-sentence internal summary that no public action was completed in this recovery
+- memory_note: Korean first-person or character-style note about the concrete post/feed signal and what {character.name} privately felt, thought, or decided
+
+After the real tool call, finish with one short Korean sentence."""

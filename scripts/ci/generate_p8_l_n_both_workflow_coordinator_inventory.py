@@ -46,7 +46,7 @@ REQUIRED_FILES = (
     "backend/app/domains/chat/contracts/call_tracker.py",
     "backend/app/domains/chat/contracts/workflow_recipe.py",
     "backend/app/domains/chat/public.py",
-    "backend/tests/test_p8_l_n_both_workflow_coordinator.py",
+    "backend/tests/chat/test_p8_l_n_both_workflow_coordinator.py",
     "backend/tests/test_p8_l_n_both_workflow_coordinator_inventory.py",
     "docs/architecture/backend-domains.md",
     "docs/architecture/p8-l-n-both-workflow-coordinator.md",

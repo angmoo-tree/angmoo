@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from app.domains.social.models.posts import Post as _model_Post
 from app.runtime.persistence.model_registration import register_models
 register_models()
-from app.core.search_text import build_post_search_document
+from app.domains.social.service.search_documents import build_post_search_document
 from app.domains.runtime.contracts.search import SearchIndexDocument
 from app.domains.social.contracts.search_state import SocialSearchState
 from app.runtime.search.binding import register_social_search, unregister_social_search

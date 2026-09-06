@@ -12,10 +12,10 @@ from app.runtime.social import world_feed_actions as world_feed_social_apply
 from app.runtime.social.observations import observe_source
 from app.runtime.social.subjective_composition import record_declared_subjective_context
 from app.domains.routines.repository import public_action_executions as execution_queries
-from app.domains.routines.service import public_action_executions as execution_writes
+from app.domains.routines.service import public_action_executions as execution_service
 from app.runtime.social.agent_tools import agent_tool_actions
 from app.runtime.social.feed_reaction_provider import DirectFeedReactionProvider
-from app.services.direct_llm import (
+from app.integrations.direct_llm import (
     DirectLlmDeferred,
     DirectLlmError,
     DirectLlmJsonError,
@@ -23,10 +23,10 @@ from app.services.direct_llm import (
 )
 
 
-class RuntimePublicActionExecutions:
+class WorldFeedExecutions:
     get_public_action_execution_by_signature = staticmethod(execution_queries.get_public_action_execution_by_signature)
-    create_public_action_execution = staticmethod(execution_writes.create_public_action_execution)
-    mark_public_action_execution_finished = staticmethod(execution_writes.mark_public_action_execution_finished)
+    create_public_action_execution = staticmethod(execution_service.create_public_action_execution)
+    mark_public_action_execution_finished = staticmethod(execution_service.mark_public_action_execution_finished)
 
 
 class RuntimeWorldFeedWorkflows:
@@ -34,7 +34,7 @@ class RuntimeWorldFeedWorkflows:
     llm_error = DirectLlmError
     llm_json_error = DirectLlmJsonError
     proposals = activity_proposal_runtime
-    executions = RuntimePublicActionExecutions
+    executions = WorldFeedExecutions()
     publishing = agent_tool_actions
     social_apply = world_feed_social_apply
     new_tracker = staticmethod(RunLlmTracker)

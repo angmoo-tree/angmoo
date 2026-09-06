@@ -1,18 +1,71 @@
 from __future__ import annotations
 
 import ast
+
 from pathlib import Path
 
-
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
+
 APP_ROOT = BACKEND_ROOT / "app"
+
 PUBLIC_RUNTIME_FILES = (
     APP_ROOT / "api" / "v1" / "routes" / "agent_runs.py",
     APP_ROOT / "api" / "v1" / "routes" / "agents.py",
     APP_ROOT / "runtime" / "characters" / "creator.py",
-    APP_ROOT / "services" / "agent_runs.py",
+    # All actual destinations of the original AgentRun implementation,
+    # including Memory, Routines and runtime collaborators.
+    APP_ROOT / "domains" / "characters" / "service" / "state.py",
+    APP_ROOT / "domains" / "identity" / "service" / "credential_cooldown.py",
+    APP_ROOT / "domains" / "memory" / "repository" / "daypart.py",
+    APP_ROOT / "domains" / "memory" / "service" / "daypart.py",
+    APP_ROOT / "domains" / "memory" / "service" / "daypart_observations.py",
+    APP_ROOT / "domains" / "routines" / "constants.py",
+    APP_ROOT / "domains" / "routines" / "contracts" / "backoff.py",
+    APP_ROOT / "domains" / "routines" / "exceptions.py",
+    APP_ROOT / "domains" / "routines" / "repository" / "activity_evidence.py",
+    APP_ROOT / "domains" / "routines" / "repository" / "resident_context.py",
+    APP_ROOT / "domains" / "routines" / "repository" / "run_backoff.py",
+    APP_ROOT / "domains" / "routines" / "repository" / "runs.py",
+    APP_ROOT / "domains" / "routines" / "repository" / "slots.py",
+    APP_ROOT / "domains" / "routines" / "service" / "action_admission.py",
+    APP_ROOT / "domains" / "routines" / "service" / "action_briefs.py",
+    APP_ROOT / "domains" / "routines" / "service" / "action_candidates.py",
+    APP_ROOT / "domains" / "routines" / "service" / "action_menu.py",
+    APP_ROOT / "domains" / "routines" / "service" / "action_prompts.py",
+    APP_ROOT / "domains" / "routines" / "service" / "activity_evidence.py",
+    APP_ROOT / "domains" / "routines" / "service" / "activity_settings.py",
+    APP_ROOT / "domains" / "routines" / "service" / "decision_results.py",
+    APP_ROOT / "domains" / "routines" / "service" / "execution_admission.py",
+    APP_ROOT / "domains" / "routines" / "service" / "execution_prompts.py",
+    APP_ROOT / "domains" / "routines" / "service" / "execution_results.py",
+    APP_ROOT / "domains" / "routines" / "service" / "feed_context.py",
+    APP_ROOT / "domains" / "routines" / "service" / "perception_diagnostics.py",
+    APP_ROOT / "domains" / "routines" / "service" / "perception_prompts.py",
+    APP_ROOT / "domains" / "routines" / "service" / "post_selection.py",
+    APP_ROOT / "domains" / "routines" / "service" / "prompt_context.py",
+    APP_ROOT / "domains" / "routines" / "service" / "retry_schedule.py",
+    APP_ROOT / "domains" / "routines" / "service" / "run_backoff.py",
+    APP_ROOT / "domains" / "routines" / "service" / "run_identity.py",
+    APP_ROOT / "domains" / "routines" / "service" / "run_results.py",
+    APP_ROOT / "domains" / "routines" / "service" / "session_keys.py",
+    APP_ROOT / "domains" / "routines" / "service" / "slot_requests.py",
+    APP_ROOT / "domains" / "routines" / "service" / "slot_status.py",
+    APP_ROOT / "domains" / "routines" / "service" / "social_context.py",
+    APP_ROOT / "domains" / "routines" / "service" / "state_prompts.py",
+    APP_ROOT / "domains" / "routines" / "service" / "tick_schedule.py",
+    APP_ROOT / "domains" / "routines" / "service" / "tool_policy.py",
+    APP_ROOT / "domains" / "routines" / "utils" / "context_text.py",
+    APP_ROOT / "domains" / "runtime" / "exceptions.py",
+    APP_ROOT / "domains" / "social" / "repository" / "resident_context.py",
+    APP_ROOT / "runtime" / "memory" / "daypart_observations.py",
+    APP_ROOT / "runtime" / "resident" / "credential_profiles.py",
+    APP_ROOT / "runtime" / "resident" / "decision_lanes.py",
     APP_ROOT / "runtime" / "resident" / "execution.py",
-    APP_ROOT / "services" / "agent_writing.py",
+    APP_ROOT / "runtime" / "resident" / "gateway_results.py",
+    APP_ROOT / "runtime" / "resident" / "read_only_lanes.py",
+    APP_ROOT / "runtime" / "resident" / "request_options.py",
+    APP_ROOT / "runtime" / "resident" / "execution.py",
+    APP_ROOT / "runtime" / "memory" / "daypart_observations.py",
     APP_ROOT / "runtime" / "resident" / "writing.py",
     APP_ROOT / "runtime" / "characters" / "management.py",
     APP_ROOT / "domains" / "identity" / "service" / "auth.py",
@@ -21,7 +74,6 @@ PUBLIC_RUNTIME_FILES = (
     APP_ROOT / "runtime" / "resident" / "context.py",
     APP_ROOT / "domains" / "routines" / "contracts" / "resident.py",
 )
-
 
 def _imports(path: Path) -> set[str]:
     tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
@@ -33,13 +85,11 @@ def _imports(path: Path) -> set[str]:
             imported.add(node.module)
     return imported
 
-
 def test_public_langgraph_entrypoint_has_no_openclaw_or_provider_sdk_imports():
     imports = _imports(APP_ROOT / "runtime" / "resident" / "langgraph.py")
 
     assert not {name for name in imports if "openclaw" in name.lower()}
     assert not {name for name in imports if name == "google" or name.startswith("google.")}
-
 
 def test_public_runtime_modules_do_not_import_private_openclaw_modules():
     violations: dict[str, list[str]] = {}
@@ -51,7 +101,6 @@ def test_public_runtime_modules_do_not_import_private_openclaw_modules():
             violations[str(path.relative_to(APP_ROOT))] = private_imports
 
     assert violations == {}
-
 
 def test_public_runtime_modules_do_not_import_subprocess_launchers():
     violations: dict[str, list[str]] = {}
@@ -68,7 +117,6 @@ def test_public_runtime_modules_do_not_import_subprocess_launchers():
 
     assert violations == {}
 
-
 def test_crud_modules_do_not_import_services():
     violations: dict[str, list[str]] = {}
     for path in sorted((APP_ROOT / "cruds").glob("*.py")):
@@ -79,7 +127,6 @@ def test_crud_modules_do_not_import_services():
             violations[path.name] = service_imports
 
     assert violations == {}
-
 
 def test_provider_sdk_imports_are_confined_to_provider_adapters_and_oauth():
     allowed = {
@@ -99,7 +146,6 @@ def test_provider_sdk_imports_are_confined_to_provider_adapters_and_oauth():
 
     assert violations == {}
 
-
 def test_secret_decryption_is_confined_to_credential_resolver():
     allowed = {
         "core/security.py",
@@ -115,7 +161,6 @@ def test_secret_decryption_is_confined_to_credential_resolver():
             violations.append(relative)
 
     assert violations == []
-
 
 def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
     allowed: dict[str, set[str]] = {
@@ -184,7 +229,6 @@ def test_plaintext_credential_reveal_calls_are_explicitly_allowlisted():
         RevealVisitor().visit(tree)
 
     assert observed == allowed
-
 
 def test_public_read_schemas_do_not_expose_secret_storage_fields():
     forbidden = {"encrypted_api_key", "ciphertext", "raw_key", "api_key"}

@@ -8,7 +8,7 @@ from urllib.request import Request
 
 import pytest
 
-from app import schemas
+import app.api.schemas.first_greeting as schemas
 from app.domains.social.service import image_attempts
 from app.integrations import pollinations_image, provider_http, replicate_image
 from app.runtime.characters import creator as agent_creation_drafts

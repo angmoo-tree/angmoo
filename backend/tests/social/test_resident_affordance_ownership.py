@@ -1,7 +1,7 @@
 from sqlalchemy import event, func, select
 from sqlalchemy.orm import Session
 
-from tests.model_fixture_support import models
+from model_fixture_support import models
 from app.domains.social.service.resident_affordances import (
     resident_feed_action_affordance,
 )

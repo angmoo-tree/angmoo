@@ -8,14 +8,14 @@ from types import SimpleNamespace
 import pytest
 from fastapi import FastAPI
 
-from app import main, public_main
+from app import main
 from app.config import settings
 
 
 @pytest.mark.parametrize("profile", ["full", "public"])
 def test_single_factory_keeps_both_health_contracts_and_shared_types(profile):
     app = main.create_app(profile=profile, prepare_media_directories=False)
-    compatibility = main.app if profile == "full" else public_main.app
+    compatibility = main.app if profile == "full" else main.public_app
     operation = app.openapi()["paths"]["/health"]["get"]
     assert app.openapi() == compatibility.openapi()
     assert operation["operationId"] == (
@@ -24,17 +24,10 @@ def test_single_factory_keeps_both_health_contracts_and_shared_types(profile):
     assert operation["responses"]["200"]["content"]["application/json"]["schema"][
         "additionalProperties"
     ] == ({"type": "string"} if profile == "full" else True)
-    assert public_main.HostedBackendExtension is main.HostedBackendExtension
-    assert (
-        public_main.PublicRuntimeConfigurationError
-        is main.PublicRuntimeConfigurationError
-    )
-    assert (
-        public_main.HostedExtensionConfigurationError
-        is main.HostedExtensionConfigurationError
-    )
-    assert public_main.create_app is main.create_public_app
-    assert public_main.create_lifespan is main.create_public_lifespan
+    assert not Path(main.__file__).with_name("public_main.py").exists()
+    assert main.create_public_app.keywords == {"profile": "public"}
+    assert main.create_public_lifespan.keywords["component_manager_factory"]() is None
+    assert main.create_app.__kwdefaults__["profile"] == "full"
     assert main.create_public_app.func is main.create_app
     assert main.create_public_lifespan.func is main.create_lifespan
 
@@ -74,7 +67,7 @@ def test_public_lifespan_keeps_no_component_default_while_full_uses_its_default(
         app = FastAPI()
         async with main.create_lifespan(security_validator=lambda: None)(app):
             assert calls == ["construct", "start"]
-        async with public_main.create_lifespan(security_validator=lambda: None)(app):
+        async with main.create_public_lifespan(security_validator=lambda: None)(app):
             assert calls == ["construct", "start", "stop"]
 
     asyncio.run(run())
@@ -169,17 +162,17 @@ def guarded(name, *args, **kwargs):
     return original_import(name, *args, **kwargs)
 builtins.__import__ = guarded
 handlers = tuple(logging.getLogger().handlers)
-from app import main, public_main
+from app import main
 from app import database as db
 assert db._default_engine is None and db._default_session_factory is None
 assert not root.exists()
 assert tuple(logging.getLogger().handlers) == handlers
-assert public_main.app is main.public_app
+assert not Path(main.__file__).with_name("public_main.py").exists()
 assert main.app is not main.public_app
 assert main.app.state.runtime_composition is None
-assert public_main.app.state.runtime_composition is None
+assert main.public_app.state.runtime_composition is None
 assert main.app.state.memory_batch_runtime is None
-assert public_main.app.state.memory_batch_runtime is None
+assert main.public_app.state.memory_batch_runtime is None
 main.create_app()
 assert all((root / name).is_dir() for name in ('characters', 'posts', 'world-package-imports'))
 assert db._default_engine is None and db._default_session_factory is None

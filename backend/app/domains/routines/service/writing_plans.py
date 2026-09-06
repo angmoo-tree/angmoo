@@ -4,7 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.domains.routines.contracts.planning_context import ClipContextText
+from app.domains.routines.contracts.planning_context import (
+    ClipContextText,
+    ResidentPlanningContext,
+)
 from app.domains.routines.policies.writing_contract import (
     _OWNER_FEED_CUE_MODE,
     _RELATIONSHIP_POINT_MODE,

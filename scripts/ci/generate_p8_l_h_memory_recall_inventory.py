@@ -49,8 +49,8 @@ REQUIRED_FILES = (
     "backend/app/domains/memory/repository/recall.py",
     "backend/app/runtime/memory/recall_projection.py",
     "backend/app/runtime/configuration.py",
-    "backend/app/public_main.py",
-    "backend/tests/test_p8_l_h_canonical_recall.py",
+    "backend/app/main.py",
+    "backend/tests/memory/test_p8_l_h_canonical_recall.py",
     "docs/architecture/p8-l-h-canonical-recall.md",
 )
 
@@ -135,7 +135,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/tests/test_p8_l_h_canonical_recall.py",
+        "backend/tests/memory/test_p8_l_h_canonical_recall.py",
         (
             "test_private_index_is_separate_scoped_cjk_safe_and_rollbackable",
             "test_canonical_service_revalidates_stale_fts_candidates_and_memory_off",

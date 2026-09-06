@@ -78,8 +78,8 @@ REQUIRED_FILES = (
     "backend/app/alembic/versions/20260831_0086_chat_response_request_lifecycle.py",
     "backend/app/runtime/migrations/sqlite_versions/v5_to_v6_chat_response_requests.py",
     "backend/app/runtime/migrations/sqlite_versions/manifests/v6.json",
-    "backend/tests/test_p8_l_j_response_generation_lifecycle.py",
-    "backend/tests/test_p8_l_j_response_generation_migration.py",
+    "backend/tests/chat/test_p8_l_j_response_generation_lifecycle.py",
+    "backend/tests/chat/test_p8_l_j_response_generation_migration.py",
     "docs/architecture/p8-l-j-response-generation-lifecycle.md",
 )
 
@@ -146,7 +146,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/tests/test_p8_l_j_response_generation_lifecycle.py",
+        "backend/tests/chat/test_p8_l_j_response_generation_lifecycle.py",
         (
             "test_fake_nodes_enforce_route_budget_without_live_provider",
             "test_request_wide_repair_and_duplicate_crg_are_fail_closed",

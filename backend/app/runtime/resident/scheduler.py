@@ -1,39 +1,60 @@
 from __future__ import annotations
 
 import asyncio
+
 import logging
+
 import os
+
 from pathlib import Path
+
 from time import monotonic
+
 from types import TracebackType
-from typing import Awaitable, Callable, Any
+
+from typing import Awaitable
+
+from typing import Callable
+
+from typing import Any
+
 from uuid import uuid4
 
 from app.domains.routines import schemas
-from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routines
+
 from app.runtime.routines.lifecycle_references import SqlAlchemyLifecycleReferences
 
-from app.config import Settings, settings
+from app.config import Settings
+
+from app.config import settings
+
 from app.database import SessionLocal
+
 from app.domains.runtime.service.lease_coordinator import SchedulerLeaseCoordinator
-from app.domains.runtime.exceptions import SchedulerLeaseHeldError, SchedulerLeaseLostError
+
+from app.domains.runtime.exceptions import SchedulerLeaseHeldError
+
+from app.domains.runtime.exceptions import SchedulerLeaseLostError
+
 from app.domains.runtime.contracts.lease import SchedulerTickResult
+
 from app.runtime.persistence.scheduler_lease import SqlAlchemySchedulerLeaseRepository
+
 from app.runtime.persistence.scheduler_fence import scheduler_fence
+
 from app.runtime.resident import execution as agent_runs
 
+from app.domains.routines.service.lifecycle import reconcile_all_elapsed_routines
 
 logger = logging.getLogger(__name__)
-SchedulerStateListener = Callable[[str], None]
 
+SchedulerStateListener = Callable[[str], None]
 
 class SchedulerShutdownDrainTimeout(RuntimeError):
     pass
 
-
 class SchedulerProcessLockHeld(RuntimeError):
     pass
-
 
 class SchedulerProcessLock:
     """Same-filesystem singleton guard paired with the durable SQLite lease."""
@@ -91,7 +112,6 @@ class SchedulerProcessLock:
             self._handle.close()
             self._handle = None
 
-
 def _coordinator(
     config: Settings = settings,
     session_factory: Callable[[], Any] | None = None,
@@ -110,7 +130,6 @@ def _coordinator(
         ttl_seconds=config.RESIDENT_TICK_LEASE_TTL_SECONDS,
         interval_seconds=config.resident_tick_interval_seconds,
     )
-
 
 async def _tick_once(
     config: Settings = settings,
@@ -135,7 +154,6 @@ async def _tick_once(
                 timeout_seconds=config.openclaw_timeout_seconds,
             ),
         )
-
 
 async def _run_fenced_tick_with_heartbeat(
     *,
@@ -210,7 +228,6 @@ async def _run_fenced_tick_with_heartbeat(
     )
     return tick_task.result()
 
-
 async def _sleep_until_next_tick_with_heartbeat(
     *,
     coordinator: SchedulerLeaseCoordinator,
@@ -249,7 +266,6 @@ async def _sleep_until_next_tick_with_heartbeat(
             await sleep_task
         coordinator.heartbeat(owner_id=owner_id, fencing_epoch=fencing_epoch)
     return True
-
 
 async def run_resident_tick_scheduler(
     *,

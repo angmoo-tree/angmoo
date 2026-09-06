@@ -1,5 +1,7 @@
 """Concrete image workflow: same-Session owners, credential/LLM clients and reference files."""
 from __future__ import annotations
+from app.domains.characters.repository import image_settings as image_setting_repository
+from app.domains.routines.service import activity_logs as agent_crud
 
 from app.domains.social.service import image_generation as image_policy, image_identity
 
@@ -32,15 +34,13 @@ from app.credentials import (
     CredentialResolutionError,
     CredentialResolver,
 )
-from app.domains.characters.repository import image_settings as image_setting_repository
-from app.domains.routines.service import activity_logs
 from app.integrations import image_provider
 from app.domains.social.service import media_storage as profile_media
 from app.integrations.media import files as media_files
 from app.core import image_prompt_safety
 from app.domains.operations.service import settings as operation_settings
 from app.credentials import service_images as service_image_key
-from app.services.direct_llm import (
+from app.integrations.direct_llm import (
     DirectLlmCallContext,
     DirectLlmError,
     DirectLlmImagePart,
@@ -256,7 +256,7 @@ def _log_local_api_image_rejected(
     post_id: str,
     local_key_prefix: str,
 ) -> None:
-    activity_logs.log_activity(
+    agent_crud.log_activity(
         db,
         user_id=user_id,
         character_id=character_id,

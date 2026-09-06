@@ -34,11 +34,11 @@ LadybugDB tests.
 ```text
 HTTP route
    ↓
-domain/application use case
+domain service: authorization, business flow and state transition
    ↓
-RepositoryPort / GraphProjectionPort / GraphQueryPort
-   ├─ SQLite adapter
-   └─ LadybugDB adapter
+same-owner persistence / repository and explicit collaborators
+   ├─ SQLite canonical data
+   └─ bounded projection/query contracts and LadybugDB adapter
 
 FastAPI lifespan
    ├─ scheduler component -> SQLite lease and canonical writes
@@ -47,14 +47,23 @@ FastAPI lifespan
 
 - Routes own HTTP parsing, authentication dependencies, and response/error
   conversion.
-- Domain/application code owns authorization, policy, deterministic choices,
+- Domain service code owns authorization, policy, deterministic choices,
   and transaction boundaries.
-- Repository and graph ports preserve domain-first boundaries and testability;
-  they do not promise permanent multi-database support.
+- Roles live under `app/domains/<business>`. Repository/client files and small
+  collaboration contracts separate actual SQL or external interactions where
+  useful; a separate interface layer is not mandatory for every service.
+- Runtime composes workers and cross-owner collaboration. Business services
+  do not import the runtime or bypass another domain's storage rules.
 - SQLite is the source of truth. LadybugDB graph state can be cleared and
   replayed from successful canonical events.
 - Code validates World scope, source-event success, deletion/hide/cancel state,
   and bounded context before an LLM may generate creative output.
+
+See [Backend Architecture](../../backend/ARCHITECTURE.md) for code placement,
+supported entry roles, the single `app/main.py` application factory and shared
+Base/Session ownership. [Historical compatibility](../architecture/backend-compatibility.md)
+explains the exact old import paths retained for supported data upgrades and
+extensions. PR and installation status lives in the separate results document.
 
 ## Runtime profiles
 
@@ -71,6 +80,10 @@ database, Neo4j, or external workers. Missing or invalid profiles fail closed.
 Provider-neutral contracts live under `app/providers/`. Provider adapters are
 the only modules that import an external provider SDK. Fake providers cover
 network-free success and failure scenarios.
+
+The shared Gemini adapter lives in `app/providers/gemini.py`; other transport
+adapters live in `app/integrations`. Domain `client` files supply the relevant
+business request context and interpret their supported results.
 
 `app/credentials/resolver.py` is the application boundary allowed to decrypt a
 stored credential envelope. Raw credential material is revealed only at the

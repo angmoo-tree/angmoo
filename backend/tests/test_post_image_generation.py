@@ -1,9 +1,11 @@
-from app.domains.social.service import image_identity, image_prompts, image_reference_policy
-from app.domains.social import constants as image_constants
-from app.core import security
+from app.domains.social.service import media_storage as social_media
+
 from app.domains.characters.service import image_settings_owner
 from app.domains.characters.repository import image_settings as image_setting_repository
 from app.domains.characters.service import image_settings as image_setting_service
+from app.domains.social.service import image_identity, image_prompts, image_reference_policy
+from app.domains.social import constants as image_constants
+from app.core import security
 import asyncio
 import base64
 from datetime import UTC, datetime
@@ -19,8 +21,8 @@ from pydantic import SecretStr, ValidationError
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from app import schemas
-from tests.model_fixture_support import models
+import app.domains.characters.schemas as schemas
+from model_fixture_support import models
 from app.core.image_generation import (
     POLLINATIONS_IMAGE_MODEL_FLUX_KLEIN,
     POLLINATIONS_IMAGE_MODEL_FLUX_SCHNELL,
@@ -30,10 +32,10 @@ from app.core.image_generation import (
     REPLICATE_IMAGE_MODEL_ZIMAGE_TURBO_LORA,
 )
 from app.config import settings
-from app.cruds import agents as agent_crud
+
 from app.core import image_prompt_safety
 from app.credentials import service_images as service_image_key
-from app.services import profile_media
+
 from app.runtime.social import image_generation as post_image_generation
 from app.domains.social.service import image_generation as image_policy
 from app.integrations import pollinations_image
@@ -2057,7 +2059,7 @@ def test_generated_post_image_saves_webp_under_size(tmp_path, monkeypatch) -> No
     monkeypatch.setattr(settings, "MEDIA_ROOT", str(tmp_path))
     content = _png_bytes(size=(1600, 1200), color=(80, 160, 220))
 
-    saved = profile_media.save_generated_post_image_bytes(
+    saved = social_media.save_generated_post_image_bytes(
         post_id="post-test",
         content_type="image/png",
         content=content,

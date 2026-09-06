@@ -1,4 +1,6 @@
 from __future__ import annotations
+from compatibility_retirement_support import alias_retired, export_matches, module_matches
+
 
 import hashlib
 import importlib
@@ -71,33 +73,23 @@ def test_p8_l_b_preserves_v1_transport_storage_and_call_contracts() -> None:
 
 
 def test_p8_l_b_compatibility_facades_preserve_object_identity() -> None:
-    legacy_models = importlib.import_module("app.domains.chat.models")
-    canonical_models = importlib.import_module(
-        "app.domains.chat.models"
-    )
-    legacy_schemas = importlib.import_module("app.schemas.messages")
-    canonical_schemas = importlib.import_module("app.domains.chat.schemas")
-    community_schemas = importlib.import_module("app.domains.social.schemas.community")
-    core_profile_ref = importlib.import_module("app.core.profile_ref")
-    policy = _json("security/p8_l_b_chat_domain_policy.json")
-
-    for name in policy["compatibility_exports"]["models"]:
+    legacy_models = importlib.import_module('app.domains.chat.models')
+    canonical_models = importlib.import_module('app.domains.chat.models')
+    canonical_schemas = importlib.import_module('app.domains.chat.schemas')
+    community_schemas = importlib.import_module('app.domains.social.schemas.community')
+    core_profile_ref = importlib.import_module('app.core.profile_ref')
+    policy = _json('security/p8_l_b_chat_domain_policy.json')
+    for name in policy['compatibility_exports']['models']:
         assert getattr(legacy_models, name) is getattr(canonical_models, name)
-    for name in policy["compatibility_exports"]["schemas"]:
-        assert getattr(legacy_schemas, name) is getattr(canonical_schemas, name)
+    for name in policy['compatibility_exports']['schemas']:
+        assert export_matches('app.schemas.messages', name, getattr(canonical_schemas, name))
     assert canonical_schemas.ProfileRef is core_profile_ref.ProfileRef
     assert community_schemas.ProfileRef is core_profile_ref.ProfileRef
     profile_schema = core_profile_ref.ProfileRef.model_json_schema()
-    profile_contract = policy["profile_ref_contract"]
-    assert list(profile_schema["properties"]) == profile_contract["fields"]
-    assert profile_schema["required"] == profile_contract["required_fields"]
-    assert profile_schema["properties"]["profile_type"]["enum"] == profile_contract[
-        "profile_types"
-    ]
-
-    legacy_service = importlib.import_module("app.services.messages")
-    canonical_service = importlib.import_module("app.runtime.chat.sqlalchemy_service")
-    assert legacy_service is canonical_service
-    legacy_prompt_safety = importlib.import_module("app.services.prompt_safety")
-    canonical_prompt_safety = importlib.import_module("app.core.prompt_safety")
-    assert legacy_prompt_safety is canonical_prompt_safety
+    profile_contract = policy['profile_ref_contract']
+    assert list(profile_schema['properties']) == profile_contract['fields']
+    assert profile_schema['required'] == profile_contract['required_fields']
+    assert profile_schema['properties']['profile_type']['enum'] == profile_contract['profile_types']
+    assert alias_retired('app.services.messages', 'app.runtime.chat.sqlalchemy_service')
+    canonical_prompt_safety = importlib.import_module('app.core.prompt_safety')
+    assert module_matches('app.services.prompt_safety', canonical_prompt_safety)

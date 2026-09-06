@@ -1,14 +1,14 @@
 """Same-session Social/Lore collaboration and actual gateway writer execution."""
 
 from __future__ import annotations
-from app.domains.social.repository import posts as social_post_queries
-from app.domains.social import exceptions as social_exceptions
-from app.domains.social.service import agent_tool_authorization as social_agent_tool_authorization
-from app.runtime.social import agent_tool_authorization as runtime_agent_tool_authorization
-from app.domains.social.service import resident_affordances as social_resident_affordances
-from app.domains.routines.service import feed_history_values as social_feed_history_values
-from app.runtime.social.agent_tools import agent_tool_actions
-from app.domains.social.service import posts as social_posts
+import app.domains.social.repository.posts as social_posts_repository
+import app.domains.routines.service.feed_history_values as routines_feed_history_values_service
+import app.domains.social.exceptions as social_errors
+import app.domains.social.service.agent_tool_authorization as social_agent_tool_authorization_service
+import app.domains.social.service.posts as social_posts_service
+import app.domains.social.service.resident_affordances as social_resident_affordances_service
+import app.runtime.social.agent_tool_authorization as social_agent_tool_authorization_runtime
+import app.runtime.social.agent_tools as social_agent_tools_runtime
 
 import asyncio
 import hashlib
@@ -20,7 +20,8 @@ from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.core.context_text import neutralize_context_text
-from app.cruds import agent_runs as agent_run_crud
+from app.domains.identity.repository import credentials as agent_run_crud
+
 from app.domains.characters.service import profile as character_profile
 from app.domains.characters.service import state as character_state
 from app.domains.identity.models import LlmCredential
@@ -52,10 +53,11 @@ from app.domains.routines.service.writing_results import (
 )
 from app.domains.social.schemas import community as schemas
 from app.domains.character_lore.service import documents as character_lore_service
+
+from app.domains.memory.service.daypart import record_action_memory as _record_daypart_action_memory
+from app.runtime.extensions.resident_adapter import OpenClawGatewayClient, OpenClawGatewayError
 from app.domains.character_lore.service import presentation as lore_presentation
 from app.runtime.character_lore import build_lore_workflows
-from app.domains.memory.service.daypart import record_action_memory as _record_daypart_action_memory
-from app.services.runtime_boundary import OpenClawGatewayClient, OpenClawGatewayError
 
 logger = logging.getLogger("app.services.agent_writing")
 
@@ -67,7 +69,7 @@ def prompt_workflows() -> WritingPromptWorkflows:
             writing_prompts._format_recent_activity(
                 character_id,
                 db,
-                activity_result_text=social_feed_history_values.activity_result_text_for_prompt,
+                activity_result_text=routines_feed_history_values_service.activity_result_text_for_prompt,
             )
         ),
         format_lore_prompt_context=lore_presentation.format_lore_prompt_context,
@@ -81,23 +83,23 @@ def create_agent_tool_post_from_brief(
         "agent_writing_from_brief_request_received action=post "
         "header_source=%s session=%s requested_character=%s",
         _agent_tool_header_source(session_key),
-        social_agent_tool_authorization._session_fingerprint(session_key),
+        social_agent_tool_authorization_service._session_fingerprint(session_key),
         data.author_character_id,
     )
-    run = runtime_agent_tool_authorization._get_agent_tool_run(
+    run = social_agent_tool_authorization_runtime._get_agent_tool_run(
         db,
         session_key=session_key,
         action="post",
         requested_character_id=data.author_character_id,
     )
-    character_id = social_agent_tool_authorization._agent_tool_character_id(
+    character_id = social_agent_tool_authorization_service._agent_tool_character_id(
         run,
         data.author_character_id,
         action="post",
         session_key=session_key,
     )
-    runtime_agent_tool_authorization._agent_tool_user(db, run, action="post", session_key=session_key)
-    runtime_agent_tool_authorization._ensure_tick_action_allowed(
+    social_agent_tool_authorization_runtime._agent_tool_user(db, run, action="post", session_key=session_key)
+    social_agent_tool_authorization_runtime._ensure_tick_action_allowed(
         db, session_key=session_key, run=run, action="post"
     )
     brief = _resolve_create_post_brief(run, data.brief)
@@ -130,7 +132,7 @@ def create_agent_tool_post_from_brief(
     )
     lore_chunk_ids = lore_retrieval.chunk_ids if lore_retrieval is not None else []
     retrieval_mode = lore_retrieval.mode if lore_retrieval is not None else None
-    post = agent_tool_actions.create_agent_tool_post(
+    post = social_agent_tools_runtime.agent_tool_actions.create_agent_tool_post(
         db,
         session_key,
         post_data,
@@ -168,36 +170,36 @@ def reply_agent_tool_post_from_brief(
         "agent_writing_from_brief_request_received action=reply "
         "header_source=%s session=%s requested_post=%s requested_character=%s",
         _agent_tool_header_source(session_key),
-        social_agent_tool_authorization._session_fingerprint(session_key),
+        social_agent_tool_authorization_service._session_fingerprint(session_key),
         post_id,
         data.author_character_id,
     )
-    run = runtime_agent_tool_authorization._get_agent_tool_run(
+    run = social_agent_tool_authorization_runtime._get_agent_tool_run(
         db,
         session_key=session_key,
         action="reply",
         requested_post_id=post_id,
         requested_character_id=data.author_character_id,
     )
-    character_id = social_agent_tool_authorization._agent_tool_character_id(
+    character_id = social_agent_tool_authorization_service._agent_tool_character_id(
         run,
         data.author_character_id,
         action="reply",
         session_key=session_key,
         post_id=post_id,
     )
-    runtime_agent_tool_authorization._agent_tool_user(db, run, action="reply", session_key=session_key)
-    runtime_agent_tool_authorization._ensure_tick_action_allowed(
+    social_agent_tool_authorization_runtime._agent_tool_user(db, run, action="reply", session_key=session_key)
+    social_agent_tool_authorization_runtime._ensure_tick_action_allowed(
         db, session_key=session_key, run=run, action="reply"
     )
-    target_post = social_post_queries.get_post(db, post_id)
+    target_post = social_posts_repository.get_post(db, post_id)
     if target_post is None:
-        raise social_exceptions.PostNotFoundError(post_id)
+        raise social_errors.PostNotFoundError(post_id)
     if target_post.author_character_id == character_id:
-        raise social_exceptions.AgentRunAuthorizationError(
+        raise social_errors.AgentRunAuthorizationError(
             "reply target is self-authored. Reply to another character's post in the viewed thread instead."
         )
-    social_resident_affordances._ensure_agent_can_reply_to_thread(
+    social_resident_affordances_service._ensure_agent_can_reply_to_thread(
         db, post_id=post_id, character_id=character_id
     )
 
@@ -220,7 +222,7 @@ def reply_agent_tool_post_from_brief(
             "composition returned an invalid reply payload"
         ) from exc
 
-    post = agent_tool_actions.reply_agent_tool_post(db, session_key, post_id, reply_data)
+    post = social_agent_tools_runtime.agent_tool_actions.reply_agent_tool_post(db, session_key, post_id, reply_data)
     action_memory = _build_compact_action_memory(
         kind="reply",
         post=post,
@@ -254,7 +256,7 @@ def _compose_writing_from_brief(
 ]:
     character = character_profile.get_character(db, character_id)
     if character is None or character.deleted_at is not None:
-        raise social_exceptions.CharacterNotFoundError(character_id)
+        raise social_errors.CharacterNotFoundError(character_id)
     credential = _run_credential(db, run)
     setting = activity_settings.ensure_setting(db, character_id)
     state = character_state.get_character_state(db, character_id)
@@ -383,17 +385,17 @@ def _writing_scratch_base_session_key(
         memory_session_key = session_context.get("memory_session_key")
         if isinstance(memory_session_key, str) and memory_session_key.strip():
             return memory_session_key.strip()
-    return social_agent_tool_authorization._agent_tool_lookup_session_key(
+    return social_agent_tool_authorization_service._agent_tool_lookup_session_key(
         run.session_key or fallback_session_key
     )
 
 
 def _format_reply_context(db: Session, post_id: str) -> str:
-    target = social_post_queries.get_post(db, post_id)
+    target = social_posts_repository.get_post(db, post_id)
     if target is None:
-        raise social_exceptions.PostNotFoundError(post_id)
-    root_id = social_resident_affordances._thread_root_post_id(db, post_id)
-    thread = social_posts.get_post_thread(db, root_id)
+        raise social_errors.PostNotFoundError(post_id)
+    root_id = social_resident_affordances_service._thread_root_post_id(db, post_id)
+    thread = social_posts_service.get_post_thread(db, root_id)
     lines = [
         f"root_post_id: {thread.post.id}",
         f"root_author: {thread.post.author_name} (@{thread.post.author_handle or '-'})",
@@ -404,7 +406,7 @@ def _format_reply_context(db: Session, post_id: str) -> str:
         f"target_body: {neutralize_context_text(target.body)[:1000]}",
     ]
     if target.reply_to_post_id:
-        parent = social_post_queries.get_post(db, target.reply_to_post_id)
+        parent = social_posts_repository.get_post(db, target.reply_to_post_id)
         if parent is not None:
             lines.extend(
                 [
