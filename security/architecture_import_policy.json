@@ -455,6 +455,19 @@
           "imported": "app.services.agent_activity_policy"
         }
       ]
+    },
+    {
+      "id": "ar-b5-feed-note-brief-binding",
+      "owner_stage": "L6",
+      "reason": "AR-B5-C24 runtime uses original post seed normalization until prepared Routines brief owner integration; no policy duplication.",
+      "removal_condition": "Parent binds routines.service.action_briefs.normalize_post_seed_intent and removes this exact old import.",
+      "review_date": "2026-09-06",
+      "edges": [
+        {
+          "importer": "app.runtime.social.feed_history_notes",
+          "imported": "app.services.agent_briefs"
+        }
+      ]
     }
   ],
   "legacy_module_cycles": [],
@@ -1059,7 +1072,9 @@
       "app.domains.social.service.agent_tool_actions",
       "app.domains.social.service.agent_tool_authorization",
       "app.domains.social.service.agent_tool_reads",
-      "app.domains.social.service.topic_metadata"
+      "app.domains.social.service.topic_metadata",
+      "app.domains.routines.contracts.feed_history_notes",
+      "app.domains.routines.service.feed_history_notes"
     ],
     "entries": [
       "app.domains.character_lore.contracts",
@@ -1439,7 +1454,9 @@
       "app.domains.social.service.agent_tool_actions",
       "app.domains.social.service.agent_tool_authorization",
       "app.domains.social.service.agent_tool_reads",
-      "app.domains.social.service.topic_metadata"
+      "app.domains.social.service.topic_metadata",
+      "app.domains.routines.contracts.feed_history_notes",
+      "app.domains.routines.service.feed_history_notes"
     ],
     "bridges": [
       {
@@ -3320,6 +3337,14 @@
         "owner_stage": "AR-B5 / AR-B4",
         "reason": "Unfinished tool/writing consumers call the actual Social authorization policy; old authorization function bodies are removed.",
         "removal_condition": "Complete Community tool and separate Agent writing ownership, then remove these exact old consumer imports.",
+        "review_date": "2026-09-06"
+      },
+      {
+        "importer": "app.services.community",
+        "target": "app.domains.routines.service.feed_history_notes",
+        "owner_stage": "AR-B5 / AR-B4",
+        "reason": "Remaining Community facade exposes actual Routines note helpers while final tool route/legacy removal proceeds; no note body remains in Community.",
+        "removal_condition": "Connect final tool route callers to runtime.resident.feed_history_notes and remove exact old diagnostic imports.",
         "review_date": "2026-09-06"
       }
     ]

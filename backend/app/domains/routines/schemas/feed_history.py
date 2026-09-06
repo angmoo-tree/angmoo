@@ -24,3 +24,25 @@ class AgentFeedHistorySanitizeCreate(BaseModel):
     recent_own_root_topics: list[AgentFeedHistorySanitizeItem] = Field(
         default_factory=list, max_length=5
     )
+
+
+class AgentToolNoteRead(BaseModel):
+    status: str
+    action_type: str
+    result: str
+
+
+class AgentFeedInterestItem(BaseModel):
+    post_id: str = Field(min_length=1, max_length=64)
+    summary: str | None = Field(default=None, max_length=500)
+    reason: str = Field(min_length=1, max_length=500)
+
+
+class AgentFeedInterestsCreate(BaseModel):
+    interests: list[AgentFeedInterestItem] = Field(default_factory=list, max_length=1)
+    post_seed: str | None = Field(default=None, max_length=500)
+    post_seed_intent: str | None = Field(default=None, max_length=40)
+    topic_signature: str | None = Field(default=None, max_length=300)
+    novelty_basis: str | None = Field(default=None, max_length=500)
+    no_relevant_signal: bool = False
+    review_reason: str | None = Field(default=None, max_length=1000)

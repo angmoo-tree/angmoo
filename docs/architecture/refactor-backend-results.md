@@ -1959,3 +1959,16 @@ C23 최종 확대 Social·Relationships·Tendency·LangGraph·Feed·RoutinePost 
 Integrated signed B5 C20–C23 source through 77385483 into the existing canonical DB/World/Chat/Memory/runtime preparation. The actual Lore runtime receives the new feed history owner; its removed legacy service was not restored. Existing Memory Daypart imports and newer owner workflows remain connected. Five newly introduced consumer imports use the canonical ORM owners.
 
 Focused existing and new history/tool authorization/action/inbox, Lore, RoutinePost, Tendency and LangGraph checks: **311 passed / 1 existing PostgreSQL-only skip / 2 warnings / 21.58 seconds**. Read-only original source, split symbols, assertions, suppressions, ASGI exports, API/ORM and test-node diagnostics: **0 errors in all seven**, protected 2201/current 2414. Inventory 956 modules/3510 edges; L4 956/parity99 and ER0 87/87/24/44/7 pass. The architecture check continues to reject the remaining B4/B5 legacy-to-canonical ORM consumers; no bridge was added. Linear introduction metadata, full/stock verification, sequential PRs and installation/merge closeout remain separate pending gates.
+
+
+## AR-B5-C24 — 활동 계획용 feed note·정제·진단 소유
+
+기존 note2/diagnostics4 실제 함수는 Routines로 옮기고 planning 입력/응답 DTO3도 원문 그대로 같은 schema 객체로 연결했다. 원래6함수/잔여19함수/DTO3의 전체 AST가 정확한 협력 복원 후 동일하다. Routines가 Social 내부 ORM/저장소/서비스를 직접 참조하지 않으며, 원래 canonical visibility·권한과 같은 Session의 history 데이터를 runtime이 제공한다.
+
+최초 기존69개 중59 PASS/10 FAIL은 note 테스트의 옛 mock receiver였다. 해당10함수 내부의35개 receiver를 실제 함수/바인딩으로 연결했고 원래 assertion은 그대로 유지했다. 최종 직접 회귀는 **71 PASS / 6.41초 / 기존 warning2개**다. 새 테스트나 실행 제한을 추가하지 않았으며 existing note 회귀의 immutable metadata·기록 상태·raw payload 비노출·오류 분류를 유지했다. Community19/G07/full B5/capture/Hosted는 후속이다.
+
+C24 최종 확대 검증은 **394 PASS / 기존 PostgreSQL skip1 / 70.11초 / warning3개**다. PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split evidence가 모두 통과했다. 경계 **843 module / 3037 edge / legacy182**, L4 parity99·ER0도 통과했다. 처음 runtime/resident 배치에서 생긴 실제 runtime package 순환은 Social-facing 실행 조립을 runtime/social로 옮겨 해결했고 검사 예외는 추가하지 않았다. 옛 schema 소비자 지도62개는 이미 삭제된 app/schemas/community.py 대신 실제 app/schemas/__init__.py로 정확히 연결해 동일 검사0오류를 확인했다. DTO3는 실제 정의/공통 aggregate/Social 소비자에서 동일 class 객체다.
+
+## G5 preparation integration — resident feed notes — 2026-09-06 09:36 KST
+
+Integrated B5 C24 signed source 85679b3. The three note DTOs use their actual Routines owner, while the previously moved LocalBot DTOs remain in LocalBot. Actual note runtime/test bindings preserve the newer Lore and model owners. Focused original Tendency note and topic-history checks: **70 passed / 2 warnings / 6.61 seconds**. Original source/split/assertion/suppression/ASGI/API-ORM/node diagnostics: **all seven error 0**, protected 2201/current 2414. Inventory 959/3530, L4 959/parity99 and ER0 87/87/24/44/7 pass. Full stock/CI/installer and remaining B4/B5 integration are still pending.

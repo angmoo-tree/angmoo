@@ -925,3 +925,6 @@ Social Agent Tool의 Run·캐릭터·사용자 범위와 거절 메시지는 `so
 
 
 도구의 피드/Inbox/관찰 읽기는 `social/service/agent_tool_reads.py`가 공개·행동 가능 조건, 원래 커서/스캔 상한과 중립 응답을 소유한다. 이미 전달한 알림의 session fingerprint·읽음 처리 판단도 Social에서 수행한다. Routines 활동로그 SQL은 `routines/repository/feed_history.py`가 소유하며 runtime은 같은 Session의 원래 attached 행을 제공한다. malformed 기록을 건너뛰는 경우와 일치한 잘못된 payload에서 종료하는 경우를 바꾸지 않고, 조회를 앞당기거나 별도 commit을 만들지 않는다.
+
+
+활동 계획용 feed 관심/이력 정제 note의 실제 정책과 로그는 `routines/service/feed_history_notes.py`가 소유한다. 입력/메모 응답 DTO는 `routines/schemas/feed_history.py`에 두며 Social 응답·기존 HTTP도 같은 class를 사용한다. 숨겨진 Post 판단과 도구 권한은 `runtime/social/feed_history_notes.py`의 지연 협력으로 연결하고, 서버 skeleton metadata를 클라이언트 요약이 덮어쓰지 못하게 하는 기존 판단과 로그 privacy를 유지한다.
