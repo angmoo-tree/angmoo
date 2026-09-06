@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AppShell } from "@/components/app-shell";
+import { AppShell } from "@/composition/shells/app-shell";
 import { PostDetailClient } from "@/components/post-detail-client";
 import type { PostThreadRead } from "@/features/social/public";
 import { fetchBackendJson } from "@/lib/server/backend";

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { AuthProvider } from "@/components/auth-provider";
-import { PwaServiceWorkerLifecycle } from "@/features/pwa-shell/public";
-import { DesktopWindowBridge } from "@/shared/desktop/public";
+import { AuthProvider } from "@/composition/providers/auth-provider";
+import { PwaServiceWorkerLifecycle } from "@/composition/providers/pwa-service-worker-lifecycle";
+import { DesktopWindowBridge } from "@/composition/providers/desktop-window-bridge";
 import {
   SITE_DESCRIPTION,
   SITE_ICON,
@@ -9,7 +9,7 @@ import {
   SITE_TITLE,
   SITE_URL,
 } from "@/lib/seo";
-import "./globals.css";
+import "../styles/globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

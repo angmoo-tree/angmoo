@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AppShell } from "@/components/app-shell";
+import { AppShell } from "@/composition/shells/app-shell";
 import { SearchResultsClient } from "@/components/search-results-client";
 import { fetchBackendJson } from "@/lib/server/backend";
 import type { SearchResults } from "@/lib/community";

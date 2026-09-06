@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AppShell } from "@/components/app-shell";
+import { AppShell } from "@/composition/shells/app-shell";
 import { MessagesClient } from "@/features/chat/public";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 

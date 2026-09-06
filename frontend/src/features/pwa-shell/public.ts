@@ -1,8 +1,8 @@
 export {
   detectAngmooPwaDisplayMode,
   type AngmooPwaDisplayMode,
-} from "./model/pwa-contract";
+} from "../../config/pwa";
 export {
   PwaServiceWorkerLifecycle,
   unregisterAngmooServiceWorker,
-} from "./ui/pwa-service-worker-lifecycle";
+} from "../../composition/providers/pwa-service-worker-lifecycle";

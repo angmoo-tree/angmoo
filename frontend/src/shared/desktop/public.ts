@@ -1,4 +1,4 @@
-export { DesktopWindowBridge } from "./desktop-window-bridge";
+export { DesktopWindowBridge } from "../../composition/providers/desktop-window-bridge";
 export {
   consumeDesktopWindowBootstrapRoute,
   canonicalProductRoute,

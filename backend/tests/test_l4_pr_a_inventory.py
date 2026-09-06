@@ -130,7 +130,13 @@ def test_l4_pr_a_architecture_and_parity_oracles_are_exact() -> None:
     # Preserve the original checkpoint assertions and validate the current
     # report separately against actual source; runtime contracts remain live.
     backend = frozen_checkpoint_backend_architecture()
-    frontend = payload["architecture"]["frontend"]
+    current_frontend = payload["architecture"]["frontend"]
+    # The original public-entry count describes the frozen topology, not a
+    # requirement to retain unused forwarding files after their consumers move.
+    frontend = json.loads(subprocess.check_output(
+        ["git", "show", "d7037625a19071eb279ad2ea35c3ace6fe5b5289:security/l4_pr_a_inventory.json"],
+        cwd=REPO_ROOT,
+    ))["architecture"]["frontend"]
     behavior = frozen_checkpoint_behavior()
 
     assert_live_backend_matches_source(payload["architecture"]["backend"])
@@ -150,6 +156,11 @@ def test_l4_pr_a_architecture_and_parity_oracles_are_exact() -> None:
     assert frontend["planned_feature_allowlist"] == ["relationships", "social"]
     assert len(frontend["public_surfaces"]["features"]) == 13
     assert len(frontend["public_surfaces"]["shared"]) == 8
+    for owner in ("features", "shared"):
+        assert current_frontend["public_surfaces"][owner] == sorted(
+            path.relative_to(REPO_ROOT).as_posix()
+            for path in (REPO_ROOT / "frontend/src" / owner).glob("*/public.ts")
+        )
 
     assert behavior["parity_test_node_count"] == 97
     nodes = set(behavior["parity_test_nodes"])

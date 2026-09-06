@@ -119,7 +119,43 @@ protects files/consumer oracles; actual browser/native runs prove behavior.
   checks SUCCESS, including all five Windows Installer jobs and Host Tauri.
 - Local full backend: 2720 passed, 22 skipped, 28 warnings, 757.97 seconds.
 - Merge `5c967a87cb4b72a51146d15f525a1eec3627a5a3`, 2026-09-07 03:08:15 KST.
-  Post-merge workflows are checked separately before AR-F2-B integration.
+  All seven post-merge workflows are SUCCESS. Windows Installer run 34050757126
+  passed all five build/clean-install/supported-upgrade/failure-recovery/aggregate
+  jobs. AR-F2-A is complete; next-stage integration remains sequential.
+
+## AR-F2-C product composition preparation
+
+- Move the common World/Studio screens out of Next's `app` directory. Next and
+  the static product router use the same composition; CSS bodies, state effects,
+  native window commands and PWA lifecycle behavior are retained.
+- Place product shells/navigation and bootstrap providers above features. The
+  Device frame and capability-aware link presentation remain reusable common UI.
+- Extract the single auth context/useAuth hook, Runtime status types and Worlds'
+  shell DTO ownership. Worlds no longer obtains its API DTO from Device Home.
+- Retire only the unused World App named-export facade. Record all 13 original
+  exports and their live destinations; check destination declarations, absence of
+  consumers and rejection of implementation-file retirement. Ten new regression
+  cases cover missing type exports, fake destinations and remaining consumers.
+- Preserve the historical L4 public-entry count against its pinned checkpoint;
+  compare today's public-entry list with source instead of retaining a dead file
+  to satisfy an old topology count. Frozen assertions and behavior remain intact.
+- Preparation validation: TypeScript/ESLint, Node proxy, 324-file source/browser
+  preservation and partial architecture checks pass. CI/merge and full runtime
+  verification remain pending; this section is not an AR-F2-C completion claim.
+- Next and static production builds PASS; web 21 PASS (47.5s), Settings 2 PASS
+  (8.6s), static direct-open/product behavior 68 PASS (36.0s). Full backend 2730
+  PASS, 22 existing SKIP, 28 warnings (982.82s). The later structure-assertion
+  adjustment preserves pinned historical import topology and independently
+  requires actual current screen/navigation/frame imports. It does not freeze
+  current product behavior tests or replace their fixtures.
+- Source introduction `322130952465bbe350e0a6b63dbb21d0c57eed2f` adds four source
+  files and ten retirement regression nodes; its append-only record is retained.
+  Full preservation gate PASS: 2752 protected/current nodes and 37 contracts.
+  CI and sequential integration remain required before stage completion.
+- PR #294 security scanning identified two generic-key matches in the append-only
+  source ledger. Both are exact Git blob IDs for `use-auth.ts` and `auth-context.ts`,
+  independently matched to source commit `322130952465bbe350e0a6b63dbb21d0c57eed2f`.
+  Allow only those exact lines in that ledger path; retain all other scanning.
 
 ## Temporary-file cleanup
 

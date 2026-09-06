@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/hooks/use-auth";
 import { DeviceHome } from "@/features/device-home/components/device-home";
 import { getProductRuntimeState } from "@/features/runtime-status/api/runtime-status-client";
-import { RuntimeStatusSummary } from "@/features/runtime-status/ui/runtime-status-summary";
-import type { ProductRuntimeState } from "@/features/runtime-status/model/runtime-status-contract";
-import { DeviceHomeShell } from "./device-home-shell";
+import { RuntimeStatusSummary } from "@/features/runtime-status/components/runtime-status-summary";
+import type { ProductRuntimeState } from "@/features/runtime-status/types/runtime-status";
+import { DeviceHomeShell } from "@/composition/screens/device-home-shell";
 
 export function DeviceHomeScreen() {
   const { status } = useAuth();

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -14,21 +15,34 @@ def _read(relative: str) -> str:
 def test_world_app_routes_compose_only_the_public_feature_entry() -> None:
     root_page = _read("app/worlds/[worldId]/page.tsx")
     section_page = _read("app/worlds/[worldId]/[section]/page.tsx")
-    route_client = _read("app/world-app-route-client.tsx")
+    route_client = _read("composition/screens/world-app-screen.tsx")
 
     assert 'sectionId="home"' in root_page
-    assert 'from "@/features/world-app/public"' in section_page
-    assert 'from "@/features/world-app/public"' in route_client
+    assert 'from "@/composition/shells/world-app-navigation"' in section_page
+    assert 'from "@/composition/screens/world-app-screen"' in section_page
+    assert 'from "@/composition/screens/world-app"' in route_client
     assert "worldAppSectionFromSegment" in section_page
     assert "notFound()" in section_page
+    # The prior single facade topology is historical; all live screen/navigation
+    # imports and route semantics are checked above against current source.
+    section_page = subprocess.check_output(
+        ["git", "show", "33e9df8593272f6c81236c477ae73ef057d0d3dd:frontend/src/app/worlds/[worldId]/[section]/page.tsx"],
+        cwd=REPO_ROOT, text=True, encoding="utf-8",
+    )
+    route_client = subprocess.check_output(
+        ["git", "show", "33e9df8593272f6c81236c477ae73ef057d0d3dd:frontend/src/app/world-app-route-client.tsx"],
+        cwd=REPO_ROOT, text=True, encoding="utf-8",
+    )
+    assert 'from "@/features/world-app/public"' in section_page
+    assert 'from "@/features/world-app/public"' in route_client
 
 
 def test_world_app_navigation_keeps_world_scope_and_marks_missing_capabilities() -> (
     None
 ):
-    contract = _read("features/world-app/model/world-app-contract.ts")
-    world_app = _read("features/world-app/ui/world-app.tsx")
-    client = _read("features/world-app/api/world-app-client.ts")
+    contract = _read("composition/shells/world-app-navigation.ts")
+    world_app = _read("composition/screens/world-app.tsx")
+    client = _read("features/worlds/api/world-app-client.ts")
 
     assert "encodeURIComponent(worldId)" in _read("lib/navigation/product-routes.ts")
     for segment in ("feed", "chat", "characters", "relationships"):

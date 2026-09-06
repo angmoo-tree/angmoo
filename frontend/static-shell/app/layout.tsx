@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
-import { AuthProvider } from "@/components/auth-provider";
-import { DesktopWindowBridge } from "@/shared/desktop/public";
-import { StaticNavigationBridge } from "@/shared/navigation/public";
+import { AuthProvider } from "@/composition/providers/auth-provider";
+import { DesktopWindowBridge } from "@/composition/providers/desktop-window-bridge";
+import { StaticNavigationBridge } from "@/composition/providers/static-navigation-bridge";
 import "./static-globals.css";
 
 export const metadata: Metadata = {

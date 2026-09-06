@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AppShell } from "@/components/app-shell";
+import { AppShell } from "@/composition/shells/app-shell";
 import { CharacterProfileClient } from "@/components/character-profile-client";
 import { fetchBackendJson } from "@/lib/server/backend";
 import type { FeedPage, ProfileFeedTab, ProfileRead } from "@/lib/community";

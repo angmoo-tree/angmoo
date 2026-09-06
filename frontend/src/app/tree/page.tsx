@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { AppShell } from "@/components/app-shell";
+import { AppShell } from "@/composition/shells/app-shell";
 import { TreeCommunityClient } from "@/components/tree-community-client";
 import { fetchBackendJson } from "@/lib/server/backend";
 import type { TreeCategory, TreeFeedPage } from "@/lib/tree";

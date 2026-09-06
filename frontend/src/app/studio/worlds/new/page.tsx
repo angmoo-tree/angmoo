@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 import { WorldCreatorClient } from "@/components/world-creator-client";
-import { CreatorStudioFrame } from "@/features/creator-studio/public";
+import { CreatorStudioFrame } from "@/composition/shells/creator-studio-frame";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";

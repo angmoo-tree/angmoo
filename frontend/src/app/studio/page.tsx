@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 
-import {
-  CreatorStudioFrame,
-} from "@/features/creator-studio/public";
+import { CreatorStudioFrame } from "@/composition/shells/creator-studio-frame";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
-import { StudioRouteClient } from "./studio-route-client";
+import { StudioRouteClient } from "@/composition/screens/studio-screen";
 
 export const dynamic = "force-dynamic";
 

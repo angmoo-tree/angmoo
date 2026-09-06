@@ -17,4 +17,4 @@ export {
   useRuntimeRouter,
   useRuntimeSearchParams,
 } from "../../hooks/use-runtime-navigation";
-export { StaticNavigationBridge } from "./static-navigation-bridge";
+export { StaticNavigationBridge } from "../../composition/providers/static-navigation-bridge";

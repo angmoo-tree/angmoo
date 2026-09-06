@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { worldAppSectionFromSegment } from "@/features/world-app/public";
+import { worldAppSectionFromSegment } from "@/composition/shells/world-app-navigation";
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
-import { WorldAppRouteClient } from "../../../world-app-route-client";
+import { WorldAppRouteClient } from "@/composition/screens/world-app-screen";
 
 
 type PageProps = {

@@ -1,10 +1,6 @@
 import { redirect } from "next/navigation";
 
-import {
-  productRouteWithSearchParams,
-  studioWorldRoute,
-  type ProductRouteSearchParams,
-} from "@/shared/navigation/public";
+import { productRouteWithSearchParams, studioWorldRoute, type ProductRouteSearchParams } from "@/lib/navigation/product-routes";
 
 type PageProps = {
   params: Promise<{ worldId: string }>;

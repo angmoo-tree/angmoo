@@ -97,7 +97,7 @@ def test_chat_shows_only_deterministic_evidence_capability_and_safe_dialog() -> 
 def test_memory_window_is_wide_singleton_and_phone_rejects_memory_route() -> None:
     product_windows = _read("desktop/src-tauri/src/product_windows.rs")
     product_window = _read("frontend/src/lib/desktop/product-window.ts")
-    navigation = _read("frontend/src/features/device-shell/model/device-navigation.ts")
+    navigation = _read("frontend/src/lib/navigation/device-navigation.ts")
 
     assert '"memory"' in product_windows
     assert '"/memory"' in product_windows

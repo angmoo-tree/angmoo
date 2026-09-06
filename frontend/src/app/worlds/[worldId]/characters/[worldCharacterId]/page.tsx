@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { NO_INDEX_ROBOTS } from "@/lib/seo";
 
-import { WorldAppRouteClient } from "../../../../world-app-route-client";
+import { WorldAppRouteClient } from "@/composition/screens/world-app-screen";
 
 type PageProps = {
   params: Promise<{ worldCharacterId: string; worldId: string }>;

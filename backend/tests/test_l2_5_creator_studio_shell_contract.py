@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import subprocess
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -18,6 +19,15 @@ def test_creator_studio_canonical_routes_use_public_feature_shell() -> None:
     import_page = _read("app/studio/import/page.tsx")
 
     for source in (dashboard_page, new_page, edit_page, import_page):
+        assert 'from "@/composition/shells/creator-studio-frame"' in source
+    # Preserve the old entry topology as historical evidence, while the loop
+    # above requires all current routes to call the actual shared frame.
+    for relative in ("app/studio/page.tsx", "app/studio/worlds/new/page.tsx",
+                     "app/studio/worlds/[worldId]/page.tsx", "app/studio/import/page.tsx"):
+        source = subprocess.check_output(
+            ["git", "show", "33e9df8593272f6c81236c477ae73ef057d0d3dd:frontend/src/" + relative],
+            cwd=REPO_ROOT, text=True, encoding="utf-8",
+        )
         assert 'from "@/features/creator-studio/public"' in source
     assert 'activeSection="worlds"' in dashboard_page
     assert 'activeSection="new-world"' in new_page
@@ -61,11 +71,11 @@ def test_legacy_creator_routes_redirect_to_canonical_studio_routes() -> None:
 
 
 def test_studio_shell_is_wide_and_preserves_small_viewport_accessibility() -> None:
-    shell_css = _read("features/creator-studio/ui/creator-studio-shell.module.css")
+    shell_css = _read("composition/shells/creator-studio-shell.module.css")
     dashboard_css = _read(
         "features/creator-studio/ui/creator-studio-dashboard.module.css"
     )
-    frame = _read("features/creator-studio/ui/creator-studio-frame.tsx")
+    frame = _read("composition/shells/creator-studio-frame.tsx")
 
     assert "grid-template-columns: minmax(210px, 260px) minmax(0, 1fr)" in shell_css
     assert "@media (max-width: 799px)" in shell_css
