@@ -2810,3 +2810,13 @@ ChatService·ChatRuntimePort·GenerationLifecycleService와 runtime/chat/world_g
 기존 영향 50개 검사는 통과했다. 제거 증명은 원문/계보 변조, 재생성한 class·package, 다른 실제 경로 지정, import/attribute 덮어쓰기, 자기 비교와 실제 transaction 단언 제거를 거부하는 별도 회귀로 검증한다. P8-L-B/P/Q/Today 고정 successor 인벤토리와 원본 baseline/checkpoint/additions는 변경하지 않는다. SQL Chat·message/schema/public의 순수 facade identity는 별도 단계이며 이 결과로 전체 B8 종료를 주장하지 않는다.
 
 최종 집중 검증: 실제 영향 50개 PASS, 제거 증명 34개 PASS. 고정 predecessor 및 현재 구조 인벤토리 묶음은 52 PASS와 선행 L4 parity97/99 차이 1건이며, 이 차이는 상위 통합의 signed66676863에서 이미 원본97+현재전수비교로 해결되었다. 이 source에서는 해당 단언을 수정하지 않았다. 원래 일곱 읽기 전용 보존 진단은 모두 오류0(protected2313/current2598), 경계1086 modules/4055 edges/5 exact legacy edges/cycle0이다. 원본 signed869 두 경로와 signed49의 두 노드를 읽기 전용 진단 근거로만 사용했고 source capture·원장·Hosted/통합 종료는 부모 단계에 남긴다.
+
+### AR-B8 공통 값과 실제 업무 정책의 소유 정리
+
+`core/active_hours.py`의 5개 함수와 4개 상수는 `routines/policies/active_hours.py`로 실제 이전했다. Routines 모델·설정·시간 계산, 데모 초기화와 기존 테스트의 local module 이름을 유지하고, Character management의 사용하지 않는 import 한 줄은 제거했다. 최대 17시간·30분 단위·end 24:00·자정 경계와 입력 검증의 오류/저장 순서는 바꾸지 않았다.
+
+`core/search_text.py`에서는 게시물 필드별 길이와 결합 순서를 소유한 `build_post_search_document` 한 함수만 `social/service/search_documents.py`로 이전했다. 공유 정규화와 LIKE helper 3개는 core에 그대로 남는다. 원본 글 저장·topic 변경·검색 projection과 기존 테스트의 실제 import를 연결했으며 SQL·Session·flush/commit을 추가하거나 바꾸지 않았다.
+
+공통 image 모델/설정값과 FastAPI 미디어 연결은 실제 공통 지원 역할이므로 `core/image_generation.py`·`core/public_media.py`를 유지한다. current local runtime contract의 오래된 L3/L4/L6 migrate 표기는 실제 이전/keep 사유로 정리했다. 원래 이미지 상수의 schema facade terminal identity 두 개와 정적 파일 디렉터리·check_dir 동작은 변경하지 않았다.
+
+검증: 업무/공유 15개 정의 AST와 소비자 파일 243개 정의 AST가 원문과 동일하다. 기존 활동 시간·설정·검색·Package·private preview·L0/L4 회귀 107개 PASS(기존 경고3)다. 원래 source·assertion·suppression·API/ORM·ASGI·node 진단은 오류0(protected2313/current2596)이며, LIKE2의 원래 Community 출처를 유지하도록 새 core split 기록을 맞춘 뒤 원래 split 검사도 오류0이다. 경계1092 modules/4077 edges/5 exact legacy edges/cycle0, L0 services2/core19를 확인했다. 새로운 test node 없이 원본 baseline/checkpoint/additions와 승인 목록을 보존했으며 source capture·Hosted·전체 B8 통합은 부모 단계에 남긴다.

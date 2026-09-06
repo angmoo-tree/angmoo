@@ -2,7 +2,7 @@
 from __future__ import annotations
 from datetime import UTC, datetime
 from sqlalchemy.orm import Session
-from app.core import active_hours
+from app.domains.routines.policies import active_hours
 from app.domains.routines import models, schemas
 from app.domains.routines import constants as routine_constants
 from app.domains.routines.contracts.activity_management import ActivityOwner, InitialActivitySettings, ActivityManagementReferences

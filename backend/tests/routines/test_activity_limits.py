@@ -30,7 +30,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 
 from model_fixture_support import models
-from app.core import active_hours
+from app.domains.routines.policies import active_hours
 from app.domains.routines.service import tick_schedule as agent_activity_schedule
 from app.config import settings
 from app.domains.routines import constants as agent_run_crud

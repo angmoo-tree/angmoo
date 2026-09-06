@@ -9,7 +9,8 @@ from sqlalchemy.pool import StaticPool
 
 from model_fixture_support import models
 from app.models import Base
-from app.core.search_text import build_post_search_document, normalize_search_text
+from app.core.search_text import normalize_search_text
+from app.domains.social.service.search_documents import build_post_search_document
 from app.domains.runtime.contracts.search import SearchIndexHit
 from app.domains.social.contracts.search_state import SocialSearchState
 from app.runtime.search import CallbackSearchIndexAdapter

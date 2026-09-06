@@ -30,7 +30,7 @@ from app.domains.identity.dependencies import get_current_user
 from app.core import security
 from app.models import Base
 from app.database import get_db
-from app.core.search_text import build_post_search_document
+from app.domains.social.service.search_documents import build_post_search_document
 from app.domains.device_home.repository import (
     SqlAlchemyWorldSurfaceRepository,
 )
