@@ -1407,3 +1407,12 @@ C31 PR #258/#263 API/schema/ORM·보호 변경1파일 assertion·전체 split ev
 집중 회귀는 **342 PASS /기존 PostgreSQL skip18 /29.97초 /기존 warning3개**다. 신규 테스트 노드는 없고 부모의 이미 전환한 Resident/Tree/Lore 실제 소비자에 연결할 정확한 지도와 임시 bridge 종료 조건을 남겼다. Relationships 집합/G07/full B5/capture/Hosted는 후속이다.
 
 C32 최종 보존은 PR #258/#263 API/schema/ORM·보호 변경7파일 assertion·전체 split evidence0, 경계848 module/3037 edge/legacy154 및 L4 parity99·ER0 PASS다. 실제 도입 원본과 역사 pilot 기록은 유지했으며 새 테스트 노드를 추가하지 않았다.
+
+
+## AR-B5-C33 — G07 Social·Relationships 테스트 소유 위치
+
+Social11개·Relationships7개 파일을 업무 폴더로 옮겼다. 전체18개 원문 Git-text는 두 `__file__` 부모 깊이를 원래 위치로 복원하면 동일하며,92개 parametric node가 새 위치에 정확히 한 번씩 대응한다. 공유 fixture22개 import와 CI8개 실행 경로·L4/ER0/frontend portability 목록을 실제 새 위치로 연결했다. 옛 API schema를 가리키던 frontend portability1개도 원래 source map의 실제 `schemas/manual.py`로 연결했다.
+
+초기 collection의22개 오류는 옛 root fixture import였고 실제 업무 package로 수정했다. 최종 집중은 **188 PASS /기존 PostgreSQL skip1 /114.33초 /기존 warning1개**이며 승인된 공개604개/current2303 수집과 원래92개 정확 대응이 통과했다. API/schema/ORM·보호19파일 assertion·전체 split evidence0, 경계848/3037/legacy154, L4/ER0 generator와 frontend designcheck도 통과했다.
+
+추가 CI/inventory/factory26개 중24개는 통과했다. 두 기존 고정 수치 검사는 각각 PostgreSQL marker84 `<82`, parity99 `==97`에서 실패했다. Git로 이동 전 C32의 동일 값84/99를 확인했으며, G07 때문에 늘거나 누락된 항목은 없다. 원래 단언을 완화하지 않고 부모의 잔여 source집합·동결97/현재99(검색 회귀2추가) 검증 항목으로 인계한다. Relationships public 제거와 복합 Chat/Today/image 테스트 위치·전체 B5 통합/Hosted는 후속이다.

@@ -12,7 +12,7 @@ from app.domains.social.contracts.profile_activity import (
 from app.runtime.social.profile_composition import (
     world_character_social_profile_service,
 )
-from test_p8_l_e_world_profile_social_activity import _fixture, _seed
+from social.test_p8_l_e_world_profile_social_activity import _fixture, _seed
 
 
 def test_world_profile_reads_pending_owner_values_and_rolls_back_without_commit():

@@ -8,7 +8,7 @@ from app import models
 from app.core.db import Base
 from app.domains.routines.service import public_action_executions
 from app.runtime.relationships import sqlalchemy_social_event as events
-from test_social_event_runtime import _post, _seed
+from relationships.test_social_event_runtime import _post, _seed
 
 
 @pytest.mark.parametrize("missing_execution", (False, True))

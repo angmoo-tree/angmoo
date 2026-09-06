@@ -8,7 +8,7 @@ from app import models
 from app.domains.routine_posts.contracts.interaction import RoutineInteractionInput
 from app.runtime.routine_posts.interactions import CanonicalRoutineInteractionSource
 from app.runtime.routine_posts.interactions import RuntimeRoutineInteractionReferences
-from test_social_event_runtime import _engine, _seed, _post, _record_post_event
+from relationships.test_social_event_runtime import _engine, _seed, _post, _record_post_event
 
 
 def test_routine_interactions_keep_cutoff_direction_pending_block_and_caller_rollback():

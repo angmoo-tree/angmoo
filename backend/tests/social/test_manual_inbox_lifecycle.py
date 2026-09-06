@@ -8,7 +8,7 @@ from app import models
 from app.domains.social.contracts.inbox import ManualInboxRuntimeError
 from app.runtime.social.manual_inbox import manual_inbox_service, source_id
 from routine_posts.test_runtime import _engine, _seed
-from test_social_event_runtime import _character
+from relationships.test_social_event_runtime import _character
 
 
 def test_manual_inbox_claim_is_durable_consume_rolls_back_and_rejection_commits():

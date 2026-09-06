@@ -24,7 +24,7 @@ def test_l3_representative_suites_are_required_by_local_smoke() -> None:
         "tests/routines/test_daily_activity_runtime.py",
         "tests/routine_posts/test_runtime.py",
         "tests/world_characters/test_owner_identity.py",
-        "tests/test_l3_owner_manual_social_inbox.py",
+        "tests/social/test_l3_owner_manual_social_inbox.py",
         "tests/test_l3_domain_boundary_map.py",
         "tests/test_l3_closeout_contract.py",
     ):

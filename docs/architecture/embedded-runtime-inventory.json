@@ -151,7 +151,7 @@
         "phase": "P4",
         "tests": [
           "backend/tests/routine_posts/test_runtime.py",
-          "backend/tests/test_l3_owner_manual_social_inbox.py"
+          "backend/tests/social/test_l3_owner_manual_social_inbox.py"
         ]
       },
       {
@@ -159,8 +159,8 @@
         "missing_tests": [],
         "phase": "P5",
         "tests": [
-          "backend/tests/test_world_feed_search.py",
-          "backend/tests/test_feed_reaction_intent.py"
+          "backend/tests/social/test_world_feed_search.py",
+          "backend/tests/social/test_feed_reaction_intent.py"
         ]
       },
       {
@@ -168,7 +168,7 @@
         "missing_tests": [],
         "phase": "P6",
         "tests": [
-          "backend/tests/test_social_event_runtime.py",
+          "backend/tests/relationships/test_social_event_runtime.py",
           "backend/tests/relationships/test_activity_proposals.py"
         ]
       },
@@ -179,9 +179,9 @@
         "tests": [
           "backend/tests/relationships/test_projection_commands.py",
           "backend/tests/relationships/test_projection_replay.py",
-          "backend/tests/test_graph_projection_worker.py",
-          "backend/tests/test_relationship_graph_repository.py",
-          "backend/tests/test_relationship_graph_api.py"
+          "backend/tests/relationships/test_graph_projection_worker.py",
+          "backend/tests/relationships/test_relationship_graph_repository.py",
+          "backend/tests/relationships/test_relationship_graph_api.py"
         ]
       }
     ]

@@ -100,7 +100,7 @@ def test_embedded_projection_rebuilds_and_tracks_committed_post_changes(
 
 def test_production_p5_has_no_canonical_contains_fallback() -> None:
     source = "\n".join(
-        (__import__("pathlib").Path(__file__).parents[1] / "app" / relative).read_text(
+        (__import__("pathlib").Path(__file__).parents[2] / "app" / relative).read_text(
             encoding="utf-8"
         )
         for relative in (
