@@ -2169,3 +2169,16 @@ Head `39efec7`의 Security 전체는 PASS였으나 Core backend는 pytest 전 �
 전체 pytest 수집만으로 별도 smoke 명령의 사라진 파일을 발견하지 못했던 점을 보완했다. 기존 CI policy가 실제 workflow pytest step의 literal Python 테스트 경로를 읽어 파일 존재를 확인하며, POSIX/Windows·backend 상대 경로를 지원한다. 실제 새 위치가 존재해도 옛 위치를 거절하고, 유효했던 파일을 삭제하면 거절하는5개 신규 사례와 기존 CI/활동/Memory inventory 관련 검증은 **18 PASS /9.59초**다. 동적 shell 표현과 실제 실행 결과는 해당 workflow가 계속 검증하며 이 정적 검사가 대신하지 않는다. 초기 집중 명령의 존재하지 않는 inventory 테스트 인자는 실행 전 오류로 별도 남기며, 수정 명령의18개 결과만 PASS로 계산했다.
 
 Custom history도 후보 `0108a3a`의 전체786 ancestor만 가진 별도 bare 저장소에서 **8,718 blobs /치명0**을 확인했다. 공유 저장소의 미합류 B8 경로3건과 구분했으며 원래 scanner·exact allowlist25·검사 범위 규칙은 변경하지 않았다. 원격 backend 전체·Local/Host/installer는 수정 head에서 다시 확인한다.
+
+
+## AR-B6 Chat 순차 통합 후보 — 2026-09-06
+
+검증된 B5 PR 후보 `32d27461`의145개 원장 prefix에 Chat 실제 source `74f6c06`까지를 합쳤다. 별도 merge `da73211f`와 CI 경로 회귀 승계 `6845f7d2`에서 B5 실제 Social/Relationships 계약을 Chat의 generation/evidence/Today reader에 연결했다. 두 앱의 기존 Package·Routines 조립과 새 Chat DI를 함께 유지했으며 Health/URL/operation ID 및 같은 Session·raw NDJSON·provider/rollback 순서는 원래 source를 따른다.
+
+고정6845의 Chat·쪽지·Planner·Both·근거/Today·권한 집중44파일은 **273 passed / 기존1 warning / 98.33초**다. 현재 구조는 **1007 modules / 3769 edges / legacy126**, public196 operations이며 route 보안 module은 Chat 원래 source에서 이미 정확히 전환돼 추가 변경이 필요 없었다. 이전 helper가 '수정할 항목 있음'을 가정한 검사에서0항목을 보고 중단한 것은 제품 실패가 아니며 실제 module/endpoint/access 비교는 일치한다.
+
+원본 Chat signed8개의 snapshot은 고립된 Git archive에서 수집한 기존 자료의 commit/tree를 대조했다. 새27파일 증거와26노드를145개 불변 prefix 뒤에 append해 총153개 기록을 보유한다. 원래 checkpoint/baseline/단언/skip은 그대로이며 stock 전체 Gate와 최종 backend/PR/installer는 다음 확인 항목이다. Chat의 두 runtime collaborator는 B5에서 실제 소유한 Social block query의 동일 함수에 직접 연결해 옛 Relationships 집합을 경유하지 않는다.
+
+이 후보에는 B7 Memory·Runtime·G5·G06 제거 ancestry를 합치지 않았다. 해당 후속 owner로의 실제 연결과 기록된 Chat 역사 테스트 alias 종료는 계획한 다음 PR에서 수행한다.
+
+최종 Social block query 연결은 두 runtime collaborator가 실제 같은 함수 객체를 사용함을 확인했고, 실제 경로의 preflight·HTTP 보안 회귀 **11 PASS / 7.58초**다. 앞선 명령의 존재하지 않는 테스트 파일명은 pytest 수집 전에 종료됐으며 제품 실패로 집계하지 않는다. 원래153개 source 기록 뒤의 API/ORM/assertion/node 및 backend 전체 검증을 이어간다.

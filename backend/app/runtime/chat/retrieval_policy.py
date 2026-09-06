@@ -3,9 +3,7 @@
 from sqlalchemy.orm import Session
 from app.domains.chat.service.retrieval_policy import RetrievalPolicyResolver
 from app.runtime.chat import retrieval_queries
-from app.runtime.relationships.sqlalchemy_social_event import (
-    world_character_pair_is_blocked,
-)
+from app.domains.social.repository.blocks import world_character_pair_is_blocked
 
 
 def build_retrieval_policy(session: Session) -> RetrievalPolicyResolver:

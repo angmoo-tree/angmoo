@@ -11863,10 +11863,10 @@
         "app.domains.chat.service.messages",
         "app.domains.chat.service.settings",
         "app.domains.chat.service.threads",
+        "app.domains.social.repository.blocks",
         "app.runtime.chat.evidence_reads",
         "app.runtime.chat.generation_workflows",
-        "app.runtime.chat.scope_queries",
-        "app.runtime.relationships.sqlalchemy_social_event"
+        "app.runtime.chat.scope_queries"
       ],
       "module": "app.runtime.chat.message_composition",
       "path": "backend/app/runtime/chat/message_composition.py",
@@ -11892,8 +11892,8 @@
       ],
       "imports": [
         "app.domains.chat.service.retrieval_policy",
-        "app.runtime.chat.retrieval_queries",
-        "app.runtime.relationships.sqlalchemy_social_event"
+        "app.domains.social.repository.blocks",
+        "app.runtime.chat.retrieval_queries"
       ],
       "module": "app.runtime.chat.retrieval_policy",
       "path": "backend/app/runtime/chat/retrieval_policy.py",

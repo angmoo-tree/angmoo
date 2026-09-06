@@ -8,9 +8,7 @@ from app.domains.chat.service.messages import MessageService
 from app.domains.chat.service.settings import MessageSettingsService
 from app.domains.chat.service.threads import ThreadService
 from app.runtime.chat import evidence_reads, generation_workflows, scope_queries
-from app.runtime.relationships.sqlalchemy_social_event import (
-    world_character_pair_is_blocked,
-)
+from app.domains.social.repository.blocks import world_character_pair_is_blocked
 
 settings_service = MessageSettingsService()
 thread_service = ThreadService(
