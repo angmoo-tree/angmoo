@@ -9758,6 +9758,18 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "3339eb72fff7ecfe3a9917b1a2685897a44960cf",
+      "feature_id": "AR-F4-C",
+      "reason": "Add shared Memory/native lifecycle browser regressions and CI integration",
+      "tracked_files": {
+        "browser-tests/playwright.refactor-lifecycle.config.ts": "c6eadc0a95b02c60a1eff3854acd27ea8d33dc8e",
+        "browser-tests/refactor-lifecycle.spec.ts": "6c75aa308cdb0b81573fe3925699e18f2ae22c6b"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }
