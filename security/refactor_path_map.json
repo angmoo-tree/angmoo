@@ -809,7 +809,14 @@
     "frontend/src/features/chat/ui/world-chat.module.css": "frontend/src/features/chat/components/world-chat.module.css",
     "frontend/src/features/chat/ui/world-chat.tsx": "frontend/src/features/chat/components/world-chat.tsx",
     "frontend/src/features/chat/model/chat-contract.ts": "frontend/src/features/chat/types/chat-contract.ts",
-    "frontend/src/features/chat/model/world-chat-contract.ts": "frontend/src/features/chat/types/world-chat-contract.ts"
+    "frontend/src/features/chat/model/world-chat-contract.ts": "frontend/src/features/chat/types/world-chat-contract.ts",
+    "frontend/src/features/memory/ui/memory-batch-controls.tsx": "frontend/src/features/memory/components/memory-batch-controls.tsx",
+    "frontend/src/features/memory/ui/memory-scope-summary.tsx": "frontend/src/features/memory/components/memory-scope-summary.tsx",
+    "frontend/src/features/memory/ui/memory-workspace.module.css": "frontend/src/features/memory/components/memory-workspace.module.css",
+    "frontend/src/features/memory/ui/memory-workspace.tsx": "frontend/src/features/memory/components/memory-workspace.tsx",
+    "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx": "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
+    "frontend/src/features/memory/model/memory-batch-contract.ts": "frontend/src/features/memory/types/memory-batch-contract.ts",
+    "frontend/src/features/memory/model/memory-contract.ts": "frontend/src/features/memory/types/memory-contract.ts"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -136025,6 +136032,33 @@
           "composition": "frontend/src/composition/screens/world-chat-screen.tsx",
           "slots": "frontend/src/features/chat/types/view-slots.ts",
           "preserved": "Same summary/inspector components, request-ID key, thread key, close callback, selection, effect and stream state ordering"
+        }
+      }
+    },
+    "AR-F4-B": {
+      "scope": "Memory components/types and product-owned scope loaders",
+      "files": {
+        "frontend/src/features/memory/ui/memory-batch-controls.tsx": "frontend/src/features/memory/components/memory-batch-controls.tsx",
+        "frontend/src/features/memory/ui/memory-scope-summary.tsx": "frontend/src/features/memory/components/memory-scope-summary.tsx",
+        "frontend/src/features/memory/ui/memory-workspace.module.css": "frontend/src/features/memory/components/memory-workspace.module.css",
+        "frontend/src/features/memory/ui/memory-workspace.tsx": "frontend/src/features/memory/components/memory-workspace.tsx",
+        "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx": "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
+        "frontend/src/features/memory/model/memory-batch-contract.ts": "frontend/src/features/memory/types/memory-batch-contract.ts",
+        "frontend/src/features/memory/model/memory-contract.ts": "frontend/src/features/memory/types/memory-contract.ts"
+      },
+      "status": "IMPLEMENTED - isolated validation",
+      "source_contract_consumers": [
+        "backend/tests/test_p8_l_q_frontend_memory.py",
+        "scripts/ci/generate_p8_l_q_memory_read_inspector_inventory.py",
+        "scripts/ci/generate_p8_l_r_memory_owner_control_inventory.py",
+        "scripts/ci/generate_p8_l_r_today_sns_activity_inventory.py"
+      ],
+      "frontend_extractions": {
+        "frontend/src/features/memory/ui/memory-workspace.tsx": {
+          "component": "frontend/src/features/memory/components/memory-workspace.tsx",
+          "composition": "frontend/src/composition/screens/memory-workspace-screen.tsx",
+          "input": "frontend/src/features/memory/types/scope-options.ts",
+          "preserved": "Same real loaders, invocation order, abort signal, scope selection, owner mutation and batch state; no extra wrapper DOM"
         }
       }
     }

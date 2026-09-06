@@ -1,7 +1,8 @@
 "use client";
 import {WorldChat} from "@/features/chat/components/world-chat";
 import type {WorldChatViewSlots} from "@/features/chat/types/view-slots";
-import {MemoryScopeSummary, WorldChatEvidenceInspector} from "@/features/memory/public";
+import { MemoryScopeSummary } from "@/features/memory/components/memory-scope-summary";
+import { WorldChatEvidenceInspector } from "@/features/memory/components/world-chat-evidence-inspector";
 
 const renderMemorySummary: WorldChatViewSlots["renderMemorySummary"] = input => <MemoryScopeSummary {...input} />;
 const renderEvidenceInspector: WorldChatViewSlots["renderEvidenceInspector"] = input => <WorldChatEvidenceInspector key={input.requestId ?? "closed"} {...input} />;

@@ -87,8 +87,8 @@ REQUIRED_FILES = (
     "docs/architecture/p8-l-r-today-sns-activity.md",
     "frontend/DESIGN.md",
     "frontend/src/features/memory/api/memory-client.ts",
-    "frontend/src/features/memory/model/memory-contract.ts",
-    "frontend/src/features/memory/ui/memory-workspace.tsx",
+    "frontend/src/features/memory/types/memory-contract.ts",
+    "frontend/src/features/memory/components/memory-workspace.tsx",
     "scripts/ci/generate_p8_l_r_memory_owner_control_inventory.py",
     "scripts/ci/generate_p8_l_j_response_generation_inventory.py",
     "scripts/ci/generate_p8_l_k_retrieval_router_inventory.py",
@@ -147,9 +147,9 @@ def _boundaries():
     _require("backend/app/runtime/chat/world_generation.py",
              '"today_sns_activity": "오늘 SNS 활동"', "source_revision",
              "SqlAlchemyTodaySnsSnapshotValidator")
-    _require("frontend/src/features/memory/model/memory-contract.ts", '"today_sns_activity"')
+    _require("frontend/src/features/memory/types/memory-contract.ts", '"today_sns_activity"')
     _require("frontend/src/features/memory/api/memory-client.ts", '"today_sns_activity"')
-    _require("frontend/src/features/memory/ui/memory-workspace.tsx", "오늘의 World SNS 활동")
+    _require("frontend/src/features/memory/components/memory-workspace.tsx", "오늘의 World SNS 활동")
     return {"social_contract_owner": "domains/social", "snapshot_owner": "domains/chat",
             "query_and_action_transaction_owner": "runtime/social",
             "frontend_feature": "features/memory", "framework_imports_in_pure_contracts": 0}

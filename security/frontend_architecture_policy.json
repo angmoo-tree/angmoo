@@ -46,7 +46,7 @@
       "dynamic = \"force-dynamic\""
     ],
     "frontend/src/app/memory/page.tsx": [
-      "@/features/memory/public",
+      "@/composition/screens/memory-workspace-screen",
       "MemoryWorkspace"
     ],
     "frontend/src/app/memory-explorer/page.tsx": [
@@ -110,7 +110,7 @@
       "MemoryWorkspace",
       "WorldChatEvidenceInspector"
     ],
-    "frontend/src/features/memory/ui/memory-workspace.tsx": [
+    "frontend/src/features/memory/components/memory-workspace.tsx": [
       "data-product-shell=\"memory\"",
       "getMemoryItem",
       "listMemoryItems"
@@ -293,12 +293,12 @@
     "frontend/src/features/device-shell/public.ts",
     "frontend/src/features/identity/api/session.ts",
     "frontend/src/features/memory/api/memory-client.ts",
-    "frontend/src/features/memory/model/memory-contract.ts",
+    "frontend/src/features/memory/components/memory-scope-summary.tsx",
+    "frontend/src/features/memory/components/memory-workspace.module.css",
+    "frontend/src/features/memory/components/memory-workspace.tsx",
+    "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
     "frontend/src/features/memory/public.ts",
-    "frontend/src/features/memory/ui/memory-scope-summary.tsx",
-    "frontend/src/features/memory/ui/memory-workspace.module.css",
-    "frontend/src/features/memory/ui/memory-workspace.tsx",
-    "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
+    "frontend/src/features/memory/types/memory-contract.ts",
     "frontend/src/features/pwa-shell/public.ts",
     "frontend/src/features/relationships/api/relationship-graph.ts",
     "frontend/src/features/relationships/components/relationship-graph-client.tsx",
@@ -347,6 +347,7 @@
       "creator-studio",
       "device-home",
       "identity",
+      "memory",
       "relationships",
       "runtime-status",
       "social",
@@ -423,18 +424,6 @@
       {
         "importer": "features/device-shell/public",
         "target": "lib/navigation/device-navigation",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "features/memory/ui/memory-workspace",
-        "target": "features/characters/public",
-        "owner_stage": "AR-F5-A",
-        "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
-      },
-      {
-        "importer": "features/memory/ui/memory-workspace",
-        "target": "features/device-home/public",
         "owner_stage": "AR-F5-A",
         "removal_condition": "Actual one-way import of an unmigrated caller; replace caller at its owning stage, then remove the temporary forwarding entry."
       },

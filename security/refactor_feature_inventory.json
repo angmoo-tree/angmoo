@@ -6439,14 +6439,14 @@
         "backend/app/runtime/memory/sqlite_fts5_recall.py",
         "backend/app/runtime/memory/subjective_source.py",
         "frontend/src/features/memory/api/memory-client.ts",
-        "frontend/src/features/memory/model/memory-batch-contract.ts",
-        "frontend/src/features/memory/model/memory-contract.ts",
+        "frontend/src/features/memory/types/memory-batch-contract.ts",
+        "frontend/src/features/memory/types/memory-contract.ts",
         "frontend/src/features/memory/public.ts",
-        "frontend/src/features/memory/ui/memory-batch-controls.tsx",
-        "frontend/src/features/memory/ui/memory-scope-summary.tsx",
-        "frontend/src/features/memory/ui/memory-workspace.module.css",
-        "frontend/src/features/memory/ui/memory-workspace.tsx",
-        "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
+        "frontend/src/features/memory/components/memory-batch-controls.tsx",
+        "frontend/src/features/memory/components/memory-scope-summary.tsx",
+        "frontend/src/features/memory/components/memory-workspace.module.css",
+        "frontend/src/features/memory/components/memory-workspace.tsx",
+        "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
         "backend/app/domains/memory/contracts/daypart.py",
         "backend/app/domains/memory/models/daypart.py",
         "backend/app/domains/memory/policies/daypart.py",
@@ -6458,11 +6458,15 @@
         "backend/app/domains/memory/repository/recall.py",
         "backend/app/domains/memory/repository/recall_records.py",
         "backend/app/domains/memory/service/source_evidence.py",
-        "backend/app/runtime/memory/source_queries.py"
+        "backend/app/runtime/memory/source_queries.py",
+        "frontend/src/composition/screens/memory-workspace-screen.tsx",
+        "frontend/src/features/memory/types/scope-options.ts"
       ],
       "target_paths": [
         "backend/app/domains/memory/service",
-        "frontend/src/features/memory/components"
+        "frontend/src/features/memory/components",
+        "frontend/src/composition/screens/memory-workspace-screen.tsx",
+        "frontend/src/features/memory/types/scope-options.ts"
       ],
       "entrypoints": [
         "backend/app/runtime/memory_http.py::_service",
@@ -6763,11 +6767,15 @@
         "backend/app/domains/relationships/contracts/query.py",
         "backend/app/domains/relationships/contracts/replay.py",
         "backend/app/domains/relationships/contracts/projection_commands.py",
-        "backend/app/domains/relationships/utils/projection_digest.py"
+        "backend/app/domains/relationships/utils/projection_digest.py",
+        "frontend/src/composition/screens/memory-workspace-screen.tsx",
+        "frontend/src/features/memory/types/scope-options.ts"
       ],
       "target_paths": [
         "backend/app/domains/memory/service/recall.py",
-        "backend/app/runtime/memory"
+        "backend/app/runtime/memory",
+        "frontend/src/composition/screens/memory-workspace-screen.tsx",
+        "frontend/src/features/memory/types/scope-options.ts"
       ],
       "entrypoints": [
         "backend/app/domains/memory/schemas/batch.py::MemoryBatchSettingUpdate",
@@ -7464,7 +7472,17 @@
         "frontend/src/features/chat/config/models.ts",
         "frontend/src/features/chat/types/view-slots.ts",
         "frontend/src/features/chat/utils/legacy-world-route.ts",
-        "frontend/src/composition/screens/world-chat-screen.tsx"
+        "frontend/src/composition/screens/world-chat-screen.tsx",
+        "frontend/src/features/memory/public.ts",
+        "frontend/src/features/memory/api/memory-client.ts",
+        "frontend/src/features/memory/components/memory-batch-controls.tsx",
+        "frontend/src/features/memory/components/memory-scope-summary.tsx",
+        "frontend/src/features/memory/components/memory-workspace.module.css",
+        "frontend/src/features/memory/components/memory-workspace.tsx",
+        "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
+        "frontend/src/features/memory/types/memory-batch-contract.ts",
+        "frontend/src/features/memory/types/memory-contract.ts",
+        "frontend/src/features/memory/types/scope-options.ts"
       ],
       "target_paths": [
         "backend/app/domains/chat/service",
@@ -7482,7 +7500,17 @@
         "frontend/src/features/chat/types/view-slots.ts",
         "frontend/src/features/chat/types/world-chat-contract.ts",
         "frontend/src/features/chat/utils/legacy-world-route.ts",
-        "frontend/src/composition/screens/world-chat-screen.tsx"
+        "frontend/src/composition/screens/world-chat-screen.tsx",
+        "frontend/src/features/memory/public.ts",
+        "frontend/src/features/memory/api/memory-client.ts",
+        "frontend/src/features/memory/components/memory-batch-controls.tsx",
+        "frontend/src/features/memory/components/memory-scope-summary.tsx",
+        "frontend/src/features/memory/components/memory-workspace.module.css",
+        "frontend/src/features/memory/components/memory-workspace.tsx",
+        "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
+        "frontend/src/features/memory/types/memory-batch-contract.ts",
+        "frontend/src/features/memory/types/memory-contract.ts",
+        "frontend/src/features/memory/types/scope-options.ts"
       ],
       "entrypoints": [
         "backend/app/api/v1/routes/world_chat_response.py::accept_world_message",
@@ -7800,18 +7828,31 @@
         "backend/app/domains/memory/contracts/item_store.py",
         "backend/app/domains/memory/contracts/source_evidence.py",
         "frontend/src/features/memory/api/memory-client.ts",
-        "frontend/src/features/memory/model/memory-batch-contract.ts",
-        "frontend/src/features/memory/model/memory-contract.ts",
+        "frontend/src/features/memory/types/memory-batch-contract.ts",
+        "frontend/src/features/memory/types/memory-contract.ts",
         "frontend/src/features/memory/public.ts",
-        "frontend/src/features/memory/ui/memory-batch-controls.tsx",
-        "frontend/src/features/memory/ui/memory-scope-summary.tsx",
-        "frontend/src/features/memory/ui/memory-workspace.module.css",
-        "frontend/src/features/memory/ui/memory-workspace.tsx",
-        "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx"
+        "frontend/src/features/memory/components/memory-batch-controls.tsx",
+        "frontend/src/features/memory/components/memory-scope-summary.tsx",
+        "frontend/src/features/memory/components/memory-workspace.module.css",
+        "frontend/src/features/memory/components/memory-workspace.tsx",
+        "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
+        "frontend/src/features/memory/types/scope-options.ts",
+        "frontend/src/composition/screens/memory-workspace-screen.tsx"
       ],
       "target_paths": [
         "frontend/src/features/memory/components",
-        "backend/app/domains/memory/router.py"
+        "backend/app/domains/memory/router.py",
+        "frontend/src/features/memory/public.ts",
+        "frontend/src/features/memory/api/memory-client.ts",
+        "frontend/src/features/memory/components/memory-batch-controls.tsx",
+        "frontend/src/features/memory/components/memory-scope-summary.tsx",
+        "frontend/src/features/memory/components/memory-workspace.module.css",
+        "frontend/src/features/memory/components/memory-workspace.tsx",
+        "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
+        "frontend/src/features/memory/types/memory-batch-contract.ts",
+        "frontend/src/features/memory/types/memory-contract.ts",
+        "frontend/src/features/memory/types/scope-options.ts",
+        "frontend/src/composition/screens/memory-workspace-screen.tsx"
       ],
       "entrypoints": [
         "backend/app/runtime/memory_http.py::_service",
@@ -8157,11 +8198,31 @@
         "backend/app/runtime/social/world_feed_queries.py",
         "backend/app/runtime/social/world_feed_search.py",
         "backend/app/runtime/social/sqlalchemy_unit_of_work.py",
-        "backend/app/domains/social/contracts/observation_execution.py"
+        "backend/app/domains/social/contracts/observation_execution.py",
+        "frontend/src/features/memory/public.ts",
+        "frontend/src/features/memory/api/memory-client.ts",
+        "frontend/src/features/memory/components/memory-batch-controls.tsx",
+        "frontend/src/features/memory/components/memory-scope-summary.tsx",
+        "frontend/src/features/memory/components/memory-workspace.module.css",
+        "frontend/src/features/memory/components/memory-workspace.tsx",
+        "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
+        "frontend/src/features/memory/types/memory-batch-contract.ts",
+        "frontend/src/features/memory/types/memory-contract.ts",
+        "frontend/src/features/memory/types/scope-options.ts"
       ],
       "target_paths": [
         "backend/app/domains/social/service",
-        "backend/app/domains/chat/service"
+        "backend/app/domains/chat/service",
+        "frontend/src/features/memory/public.ts",
+        "frontend/src/features/memory/api/memory-client.ts",
+        "frontend/src/features/memory/components/memory-batch-controls.tsx",
+        "frontend/src/features/memory/components/memory-scope-summary.tsx",
+        "frontend/src/features/memory/components/memory-workspace.module.css",
+        "frontend/src/features/memory/components/memory-workspace.tsx",
+        "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
+        "frontend/src/features/memory/types/memory-batch-contract.ts",
+        "frontend/src/features/memory/types/memory-contract.ts",
+        "frontend/src/features/memory/types/scope-options.ts"
       ],
       "entrypoints": [
         "backend/app/domains/chat/api/schemas.py::CharacterMessageSettingRead",
@@ -8459,14 +8520,18 @@
         "backend/app/runtime/migrations/sqlite_versions/v6_to_v7_chat_model_binding.py",
         "backend/app/runtime/migrations/sqlite_versions/v7_to_v8_social_action_subjective_context.py",
         "backend/app/runtime/migrations/sqlite_versions/v8_to_v9_memory_batch.py",
-        "frontend/src/features/memory/model/memory-batch-contract.ts",
-        "frontend/src/features/memory/ui/memory-batch-controls.tsx",
-        "scripts/ci/generate_p8_l_r_memory_batch_inventory.py"
+        "frontend/src/features/memory/types/memory-batch-contract.ts",
+        "frontend/src/features/memory/components/memory-batch-controls.tsx",
+        "scripts/ci/generate_p8_l_r_memory_batch_inventory.py",
+        "frontend/src/composition/screens/memory-workspace-screen.tsx",
+        "frontend/src/features/memory/types/scope-options.ts"
       ],
       "target_paths": [
         "backend/app/domains/memory/service",
         "backend/app/runtime/memory",
-        "backend/app/runtime/migrations"
+        "backend/app/runtime/migrations",
+        "frontend/src/composition/screens/memory-workspace-screen.tsx",
+        "frontend/src/features/memory/types/scope-options.ts"
       ],
       "entrypoints": [
         "backend/alembic/versions/20260904_0089_memory_batch.py::upgrade",
@@ -8678,26 +8743,30 @@
         "backend/app/runtime/memory/subjective_source.py",
         "backend/app/runtime/migrations/sqlite_versions/v8_to_v9_memory_batch.py",
         "frontend/src/features/memory/api/memory-client.ts",
-        "frontend/src/features/memory/model/memory-batch-contract.ts",
-        "frontend/src/features/memory/model/memory-contract.ts",
+        "frontend/src/features/memory/types/memory-batch-contract.ts",
+        "frontend/src/features/memory/types/memory-contract.ts",
         "frontend/src/features/memory/public.ts",
-        "frontend/src/features/memory/ui/memory-batch-controls.tsx",
-        "frontend/src/features/memory/ui/memory-scope-summary.tsx",
-        "frontend/src/features/memory/ui/memory-workspace.module.css",
-        "frontend/src/features/memory/ui/memory-workspace.tsx",
-        "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
+        "frontend/src/features/memory/components/memory-batch-controls.tsx",
+        "frontend/src/features/memory/components/memory-scope-summary.tsx",
+        "frontend/src/features/memory/components/memory-workspace.module.css",
+        "frontend/src/features/memory/components/memory-workspace.tsx",
+        "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
         "scripts/ci/generate_p8_l_r_memory_batch_inventory.py",
         "backend/app/domains/memory/repository/recall.py",
         "backend/app/domains/memory/repository/recall_records.py",
         "backend/app/domains/memory/service/source_evidence.py",
-        "backend/app/runtime/memory/source_queries.py"
+        "backend/app/runtime/memory/source_queries.py",
+        "frontend/src/composition/screens/memory-workspace-screen.tsx",
+        "frontend/src/features/memory/types/scope-options.ts"
       ],
       "target_paths": [
         "backend/app/domains/memory/service/batch_preparation.py",
         "backend/app/domains/memory/service/batch_selection.py",
         "backend/app/domains/memory/service/batch_scheduling.py",
         "backend/app/domains/memory/repository/batch.py",
-        "backend/app/runtime/memory/batch_runtime.py"
+        "backend/app/runtime/memory/batch_runtime.py",
+        "frontend/src/composition/screens/memory-workspace-screen.tsx",
+        "frontend/src/features/memory/types/scope-options.ts"
       ],
       "entrypoints": [
         "backend/alembic/versions/20260904_0089_memory_batch.py::upgrade",
@@ -8887,12 +8956,16 @@
         "backend/app/domains/memory/repository/recall.py",
         "backend/app/domains/memory/repository/recall_records.py",
         "backend/app/domains/memory/service/source_evidence.py",
-        "backend/app/runtime/memory/source_queries.py"
+        "backend/app/runtime/memory/source_queries.py",
+        "frontend/src/composition/screens/memory-workspace-screen.tsx",
+        "frontend/src/features/memory/types/scope-options.ts"
       ],
       "target_paths": [
         "desktop/src-tauri/src",
         "backend/app/runtime/memory",
-        "frontend/src/features/memory"
+        "frontend/src/features/memory",
+        "frontend/src/composition/screens/memory-workspace-screen.tsx",
+        "frontend/src/features/memory/types/scope-options.ts"
       ],
       "entrypoints": [
         "backend/app/runtime/memory/source_catalogs.py::build_source_catalogs",
@@ -14865,7 +14938,7 @@
   },
   "frontend_transition": {
     "checkpoint_commit": "33e9df8593272f6c81236c477ae73ef057d0d3dd",
-    "status": "AR-F3-B POST-MERGE; AR-F3-C~G CI; AR-F4-A LOCAL VALIDATION",
+    "status": "AR-F3-B POST-MERGE; AR-F3-C~G CI; AR-F4-A/B LOCAL VALIDATION",
     "documentation": "docs/architecture/refactor-frontend-results.md",
     "scope_note": "Backend completion and existing per-item state are unchanged. These stages track frontend consumers independently. AR-F1 product remains preserved.",
     "items": {
@@ -15085,6 +15158,11 @@
         "status": "IMPLEMENTED - isolated validation",
         "source_map": "security/refactor_path_map.json#details.AR-F4-A",
         "scope": "Relationship graph ownership"
+      },
+      "AR-F4-B": {
+        "status": "IMPLEMENTED - isolated validation",
+        "source_map": "security/refactor_path_map.json#details.AR-F4-B",
+        "scope": "Memory scope and owner/batch controls"
       }
     }
   }

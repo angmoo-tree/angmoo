@@ -22,37 +22,26 @@ import {
   type ReactNode,
 } from "react";
 
-import { listWorldCharacterProfiles } from "@/features/characters/public";
-import type { WorldCharacterPublicProfile } from "@/features/characters/public";
-import { getLocalWorldSurface } from "@/features/device-home/public";
-import type { WorldSurfaceItem } from "@/features/device-home/public";
-import { LocalProductLink } from "@/features/device-shell/public";
-import { PRODUCT_ROUTES, useRuntimeRouter } from "@/shared/navigation/public";
-import { Button, Dialog, Field, ProfileAvatar, Textarea } from "@/shared/ui/public";
+import { LocalProductLink } from "@/components/navigation/local-product-link";
+import { PRODUCT_ROUTES } from "@/lib/navigation/product-routes";
+import { useRuntimeRouter } from "@/hooks/use-runtime-navigation";
+import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
+import { Field, Textarea } from "@/components/ui/form-controls";
+import { ProfileAvatar } from "@/components/ui/profile-avatar";
 
-import {
-  correctMemoryItem,
-  deleteMemoryItem,
-  getMemoryItem,
-  getMemorySetting,
-  listMemoryItems,
-  MemoryApiError,
-  setMemoryPin,
-  updateMemorySetting,
-} from "../api/memory-client";
-import type {
-  MemoryItemDetailRead,
-  MemoryItemListRead,
-  MemorySettingRead,
-} from "../model/memory-contract";
+import { correctMemoryItem, deleteMemoryItem, getMemoryItem, getMemorySetting, listMemoryItems, MemoryApiError, setMemoryPin, updateMemorySetting } from "@/features/memory/api/memory-client";
+import type { MemoryItemDetailRead, MemoryItemListRead, MemorySettingRead } from "@/features/memory/types/memory-contract";
 import styles from "./memory-workspace.module.css";
-import { MemoryBatchControls } from "./memory-batch-controls";
+import { MemoryBatchControls } from "@/features/memory/components/memory-batch-controls";
 
-type MemoryWorkspaceProps = {
+import type { MemoryScopeLoaders, MemoryWorldOption, MemoryCharacterOption } from "@/features/memory/types/scope-options";
+
+export type MemoryWorkspaceProps = {
   initialMemoryId?: string;
   initialSubjectId?: string;
   initialWorldId?: string;
-};
+} & MemoryScopeLoaders;
 
 type OwnerMutation =
   | { kind: "setting"; enabled: boolean; expectedVersion: number; idempotencyKey: string }
@@ -66,10 +55,12 @@ export function MemoryWorkspace({
   initialMemoryId,
   initialSubjectId,
   initialWorldId,
+  getLocalWorldSurface,
+  listWorldCharacterProfiles,
 }: MemoryWorkspaceProps) {
   const router = useRuntimeRouter();
-  const [worlds, setWorlds] = useState<WorldSurfaceItem[]>([]);
-  const [characters, setCharacters] = useState<WorldCharacterPublicProfile[]>([]);
+  const [worlds, setWorlds] = useState<MemoryWorldOption[]>([]);
+  const [characters, setCharacters] = useState<MemoryCharacterOption[]>([]);
   const [worldId, setWorldId] = useState(initialWorldId ?? "");
   const [subjectId, setSubjectId] = useState(initialSubjectId ?? "");
   const [memoryId, setMemoryId] = useState(initialMemoryId ?? "");
@@ -166,7 +157,7 @@ export function MemoryWorkspace({
         setPhase("error");
       });
     return () => controller.abort();
-  }, [revision, subjectId, syncRoute, worldId]);
+  }, [getLocalWorldSurface, listWorldCharacterProfiles, revision, subjectId, syncRoute, worldId]);
 
   useEffect(() => {
     if (!worldId || !subjectId || !memoryId || phase !== "ready") return;

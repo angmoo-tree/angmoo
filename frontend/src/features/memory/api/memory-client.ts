@@ -1,6 +1,6 @@
-import { clearStoredUser, notifyAuthChanged } from "@/shared/auth/public";
-import { runtimeFetch } from "@/shared/runtime/public";
-import type { MemoryBatchSetting, MemoryBatchUpdate } from "../model/memory-batch-contract";
+import { clearStoredUser, notifyAuthChanged } from "@/lib/auth/browser-session";
+import { runtimeFetch } from "@/lib/runtime/runtime-config";
+import type { MemoryBatchSetting, MemoryBatchUpdate } from "@/features/memory/types/memory-batch-contract";
 
 export function getMemoryBatchSetting(worldId: string, subjectId: string, signal?: AbortSignal) {
   return requestMemoryApi<MemoryBatchSetting>(`${scopePath(worldId, subjectId)}/memory/batch-settings`, { signal })
@@ -34,14 +34,7 @@ function validateBatchSetting(value: MemoryBatchSetting, worldId: string, subjec
   return value;
 }
 
-import type {
-  MemoryItemDetailRead,
-  MemoryItemListRead,
-  MemoryItemMutationRead,
-  MemorySettingMutationRead,
-  MemorySettingRead,
-  WorldChatEvidenceRead,
-} from "../model/memory-contract";
+import type { MemoryItemDetailRead, MemoryItemListRead, MemoryItemMutationRead, MemorySettingMutationRead, MemorySettingRead, WorldChatEvidenceRead } from "@/features/memory/types/memory-contract";
 
 export class MemoryApiError extends Error {
   constructor(readonly status: number, readonly detail: string) {

@@ -22,7 +22,7 @@ import { StudioImportRouteClient } from "@/composition/screens/studio-import-scr
 import { StudioRouteClient } from "@/composition/screens/studio-screen";
 import { WorldAppRouteClient } from "@/composition/screens/world-app-screen";
 import { CreatorStudioFrame } from "@/composition/shells/creator-studio-frame";
-import { MemoryWorkspace } from "@/features/memory/public";
+import { MemoryWorkspaceScreen as MemoryWorkspace } from "@/composition/screens/memory-workspace-screen";
 import { SemanticFoundationFixture } from "@/features/ui-foundation/public";
 import { canonicalProductRoute, currentDesktopRoute, desktopWindowKindForRoute, getDesktopWindowState, subscribeDesktopRoute } from "@/lib/desktop/product-window";
 import { useRuntimeRouter } from "@/hooks/use-runtime-navigation";

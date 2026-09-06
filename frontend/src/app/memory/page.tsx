@@ -1,4 +1,4 @@
-import { MemoryWorkspace } from "@/features/memory/public";
+import { MemoryWorkspaceScreen as MemoryWorkspace } from "@/composition/screens/memory-workspace-screen";
 
 type MemoryPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

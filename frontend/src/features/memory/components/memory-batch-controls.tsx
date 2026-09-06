@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Button, Field, Input, Select } from "@/shared/ui/public";
-import { getMemoryBatchSetting, MemoryApiError, retryMemoryBatch, saveMemoryBatchSetting } from "../api/memory-client";
-import type { MemoryBatchSetting, MemoryBatchUpdate } from "../model/memory-batch-contract";
+import { Button } from "@/components/ui/button";
+import { Field, Input, Select } from "@/components/ui/form-controls";
+import { getMemoryBatchSetting, MemoryApiError, retryMemoryBatch, saveMemoryBatchSetting } from "@/features/memory/api/memory-client";
+import type { MemoryBatchSetting, MemoryBatchUpdate } from "@/features/memory/types/memory-batch-contract";
 import styles from "./memory-workspace.module.css";
 
 type Props = { worldId: string; subjectId: string; disabled: boolean; acquire: () => boolean; release: () => void; onCompleted: () => void };

@@ -3,11 +3,11 @@
 import { ExternalLink, LoaderCircle, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { LocalProductLink } from "@/features/device-shell/public";
-import { Dialog } from "@/shared/ui/public";
+import { LocalProductLink } from "@/components/navigation/local-product-link";
+import { Dialog } from "@/components/ui/dialog";
 
-import { getWorldChatEvidence } from "../api/memory-client";
-import type { WorldChatEvidenceRead } from "../model/memory-contract";
+import { getWorldChatEvidence } from "@/features/memory/api/memory-client";
+import type { WorldChatEvidenceRead } from "@/features/memory/types/memory-contract";
 import styles from "./memory-workspace.module.css";
 
 export function WorldChatEvidenceInspector({ open, onOpenChange, requestId, threadId, worldId }: { open: boolean; onOpenChange: (open: boolean) => void; requestId: string | null; threadId: string; worldId: string }) {

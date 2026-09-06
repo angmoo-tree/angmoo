@@ -93,12 +93,12 @@ REQUIRED_FILES = (
     "frontend/src/features/device-home/ui/device-home.tsx",
     "frontend/src/lib/navigation/device-navigation.ts",
     "frontend/src/features/memory/api/memory-client.ts",
-    "frontend/src/features/memory/model/memory-contract.ts",
+    "frontend/src/features/memory/types/memory-contract.ts",
     "frontend/src/features/memory/public.ts",
-    "frontend/src/features/memory/ui/memory-scope-summary.tsx",
-    "frontend/src/features/memory/ui/memory-workspace.module.css",
-    "frontend/src/features/memory/ui/memory-workspace.tsx",
-    "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
+    "frontend/src/features/memory/components/memory-scope-summary.tsx",
+    "frontend/src/features/memory/components/memory-workspace.module.css",
+    "frontend/src/features/memory/components/memory-workspace.tsx",
+    "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
     "frontend/src/lib/desktop/product-window.ts",
     "scripts/ci/check_windows_host_tauri_dev_contract.py",
     "scripts/ci/check_er6_desktop_supply_chain.py",
@@ -210,7 +210,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "frontend/src/features/memory/ui/memory-workspace.tsx",
+        "frontend/src/features/memory/components/memory-workspace.tsx",
         (
             'data-product-shell="memory"',
             "기억이 꺼져 있어요",
@@ -219,7 +219,7 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "frontend/src/features/memory/ui/world-chat-evidence-inspector.tsx",
+        "frontend/src/features/memory/components/world-chat-evidence-inspector.tsx",
         ("data-world-chat-evidence-dialog", "이 답변의 근거", "canonical_href"),
     )
     _forbid_text(

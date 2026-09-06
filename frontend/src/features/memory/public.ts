@@ -20,7 +20,7 @@ export type {
   WorldChatEvidenceItemRead,
   WorldChatEvidenceRead,
   WorldChatEvidenceSummaryRead,
-} from "./model/memory-contract";
-export { MemoryWorkspace } from "./ui/memory-workspace";
-export { MemoryScopeSummary } from "./ui/memory-scope-summary";
-export { WorldChatEvidenceInspector } from "./ui/world-chat-evidence-inspector";
+} from "./types/memory-contract";
+export { MemoryWorkspace } from "./components/memory-workspace";
+export { MemoryScopeSummary } from "./components/memory-scope-summary";
+export { WorldChatEvidenceInspector } from "./components/world-chat-evidence-inspector";

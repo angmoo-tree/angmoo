@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 
-import { LocalProductLink } from "@/features/device-shell/public";
+import { LocalProductLink } from "@/components/navigation/local-product-link";
 
-import { getMemorySetting } from "../api/memory-client";
-import type { MemorySettingRead } from "../model/memory-contract";
+import { getMemorySetting } from "@/features/memory/api/memory-client";
+import type { MemorySettingRead } from "@/features/memory/types/memory-contract";
 import styles from "./memory-workspace.module.css";
 
 export function MemoryScopeSummary({
