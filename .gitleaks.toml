@@ -235,3 +235,14 @@ regexes = [
   '''^\s*"backend/app/domains/identity/repository/runtime_access\.py":\ "e3742dabf3a5751622c6da6baf04bfb529eb469a",?\s*$''',
   '''^\s*"backend/app/domains/identity/service/runtime_access\.py":\ "20ce8cb7076f65aecfb3b30a68af1e0a250c44fb",?\s*$''',
 ]
+
+[[allowlists]]
+targetRules = ["generic-api-key"]
+description = "Exact F2-C auth hook/context Git blobs verified at signed source commit 322130952465bbe350e0a6b63dbb21d0c57eed2f; not credentials; reviewed 2026-09-07"
+condition = "AND"
+regexTarget = "line"
+paths = ['''(^|/)security/refactor_backend_additions\.json$''']
+regexes = [
+  '''^\s*"frontend/src/hooks/use-auth\.ts":\ "db40c2e4137178ce1dbce476b9d718f97df3a777",?\s*$''',
+  '''^\s*"frontend/src/lib/auth/auth-context\.ts":\ "49d031eb1d79500502c015893120c5227ec05ac6",?\s*$''',
+]
