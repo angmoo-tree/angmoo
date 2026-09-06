@@ -7,13 +7,14 @@ import pytest
 from sqlalchemy import create_engine, func, select
 from sqlalchemy.orm import Session
 
-from app.compatibility.chat_generation_lifecycle import GenerationLifecycleService
+from pathlib import Path
+from app.domains.chat.service.generation import GenerationService
 from app.domains.chat import models, schemas
 from app.domains.chat.contracts import GenerationContractError, ResponseRequestState
 from app.domains.chat.repository.response_lifecycle import (
     SqlAlchemyResponseLifecycleRepository,
 )
-from app.runtime.chat import world_generation
+from app.runtime.chat.message_composition import generation_service
 from app.runtime.chat.message_composition import thread_service
 from chat.test_p8_l_d_world_chat_identity import (
     _character,
@@ -31,12 +32,9 @@ from chat.test_p8_l_j_response_generation_lifecycle import (
 
 
 def test_http_generation_accept_and_replay_use_the_durable_owner(monkeypatch) -> None:
-    def old_wrapper_must_not_run(*args, **kwargs):
-        raise AssertionError("Production generation used its retired forwarding layer")
-
-    monkeypatch.setattr(
-        GenerationLifecycleService, "__init__", old_wrapper_must_not_run
-    )
+    backend = Path(__file__).resolve().parents[2]
+    assert not (backend / "app/compatibility/chat_generation_lifecycle.py").exists()
+    assert type(generation_service) is GenerationService
     engine = create_engine("sqlite:///:memory:")
     _create_tables(engine)
     try:
@@ -69,10 +67,10 @@ def test_http_generation_accept_and_replay_use_the_durable_owner(monkeypatch) ->
                 content="Keep this accepted message exactly once.",
                 idempotency_key="direct-request-idempotency",
             )
-            first = world_generation.accept_world_message(
+            first = generation_service.accept_world_message(
                 db, owner, "direct-world", result.thread.id, data
             )
-            replay = world_generation.accept_world_message(
+            replay = generation_service.accept_world_message(
                 db, owner, "direct-world", result.thread.id, data
             )
             assert first.outcome == "accepted"

@@ -2730,3 +2730,14 @@ Memory selection의 자격 증명 호출을 기존 `message_composition.settings
 RoutinePost가 이미 만들어진 입력에서 읽는 필드는 기존 PlanningContext의 5개와 session_key다. 이 구조를 RoutineResidentContext로 명시해, 옛 bridge가 가렸던 Resident → RoutinePost → Resident 참조 순환을 제거했다. runtime dataclass와 실제 attached 객체·Session은 바뀌지 않고 생성·복사·새 전달 서비스가 없다.
 
 검증: **124 passed / 19 existing skipped / 2 warnings / 43.98s**. 원래 workflow 11개는 정확한 receiver 2개와 annotation 1개를 대응시키면 전체 AST가 같으며, 원래 등록 호출 AST도 같다. 기존 Chat test support 속성38개는 실제 객체 또는 bound method의 self/function이 같고 Memory는 동일 설정서비스 인스턴스를 호출한다. 경계는 **1090 modules / 4072 edges / 5 exact legacy edges / cycle0**이다. 원래 보존 검사7종 읽기 진단은 오류0(protected2313/current2564)이며 signed869 최초2경로와 signed49c0f1f4 최초2test의 원본증거만 임시로 읽었다. 원장·동결 자료·원래 checker는 수정하지 않았고 parent 순차capture 및 stock/Hosted 검증은 아직 별도다. 현재 L4 1090/14/99와 Memory batch inventory도 연결했다.
+
+
+### AR-B8 Chat forwarding3와 generation 집계 제거
+
+ChatService·ChatRuntimePort·GenerationLifecycleService와 runtime/chat/world_generation.py는 실제 제품 정책을 갖지 않는 전달 계층이었다. 기존 HTTP/Memory 조립의 Thread/Message/Settings/Generation/Evidence 서비스와 durable repository를 직접 사용하도록 테스트의 소비자까지 연결했고 네 파일을 제거했다. Chat public의 전달 클래스 export 두 개도 제거했다. API·ORM·provider·same Session·commit/flush·실제 service/repository 본문은 변경하지 않았다.
+
+기존 구조 node 세 개는 단순 삭제하거나 자기 비교로 바꾸지 않는다. signed fd312 원문 네 blob, 22+9개 전달 본문과 Protocol 22개, 실제 owner 22개·저장 명령 9개의 동일 AST, composition/route binding을 검증한 경우에만 정확한 기존 node 승계를 인정한다. 메시지 테스트는 실제 ThreadService와 MessageService에서 원래 인자/반환값을 검증하고 실패 시 동일 예외와 lease 해제도 확인한다. durable 테스트의 SQLite/replay 단언은 그대로이며 constructor tripwire만 실제 옛 파일 부재와 concrete owner 확인으로 대체한다.
+
+기존 영향 50개 검사는 통과했다. 제거 증명은 원문/계보 변조, 재생성한 class·package, 다른 실제 경로 지정, import/attribute 덮어쓰기, 자기 비교와 실제 transaction 단언 제거를 거부하는 별도 회귀로 검증한다. P8-L-B/P/Q/Today 고정 successor 인벤토리와 원본 baseline/checkpoint/additions는 변경하지 않는다. SQL Chat·message/schema/public의 순수 facade identity는 별도 단계이며 이 결과로 전체 B8 종료를 주장하지 않는다.
+
+최종 집중 검증: 실제 영향 50개 PASS, 제거 증명 34개 PASS. 고정 predecessor 및 현재 구조 인벤토리 묶음은 52 PASS와 선행 L4 parity97/99 차이 1건이며, 이 차이는 상위 통합의 signed66676863에서 이미 원본97+현재전수비교로 해결되었다. 이 source에서는 해당 단언을 수정하지 않았다. 원래 일곱 읽기 전용 보존 진단은 모두 오류0(protected2313/current2598), 경계1086 modules/4055 edges/5 exact legacy edges/cycle0이다. 원본 signed869 두 경로와 signed49의 두 노드를 읽기 전용 진단 근거로만 사용했고 source capture·원장·Hosted/통합 종료는 부모 단계에 남긴다.
