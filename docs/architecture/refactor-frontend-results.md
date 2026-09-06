@@ -1,6 +1,7 @@
 # Frontend refactor execution results
 
-Current: **AR-F2-0 IN PROGRESS; AR-F2-A through AR-F5-B NOT STARTED**.
+Current: **AR-F2-0 MERGED, post-merge checks running; AR-F2-A implementation and
+validation in progress; AR-F2-B through AR-F5-B NOT STARTED**.
 The user delegated implementation, validation, PRs and merges. AR-X, P8-L-S,
 real-provider product verification, Release and Production remain separate.
 
@@ -76,10 +77,35 @@ The checkpoint uses pinned PR290 source; it must not be refreshed after a move.
 Current path changes belong in `security/refactor_path_map.json`. The stock gate
 protects files/consumer oracles; actual browser/native runs prove behavior.
 
-## Pending before AR-F2-0 closeout
+## AR-F2-0 integration
 
-- Exact-head CI, PR, merge and post-merge verification.
-- Continue AR-F2-A only after this preparation unit is integrated.
+- PR #291 head `1daca62035f4d2eb7f938d30f073cd280b540dea`: **23/23 checks
+  SUCCESS**, including all five installer gates. Latest-head backend CI:
+  **2720 passed / 22 skipped**. Frontend CI: web 21, Settings 2, static 68 and
+  fixed-environment visual 36 PASS; lint, typecheck, proxy and both builds PASS.
+- Merged as `72b6573898ad4a720125aba2905327f49aa7fbd2`. Post-merge Actions are
+  running and remain separate from the successful PR checks. AR-F2-A starts
+  from that integrated commit; its PR will not close before predecessor checks.
+
+## AR-F2-A common UI
+
+- Move 15 existing files into `components/ui`, `styles`, `hooks` and `utils`.
+  JSX, semantic values, focus/keyboard behavior, image failure fallback and
+  scroll lifecycle stay unchanged. Existing shared public exports lead to the
+  canonical implementation until their feature consumers migrate.
+- ProfileAvatar uses the already-canonical safe media helper and runtime media
+  hook directly; new common modules do not import old shared implementations.
+- Move the real source-contract paths and design markers with their consumers.
+  Do not rewrite historical source checkpoints or browser/visual assertions.
+- Local boundary/stock PASS; design remains **1408 raw colors / 33 files /
+  18 surfaces / 11 screenshots**. Related existing regressions: **94 passed**.
+  TypeScript and ESLint PASS. Next production and static builds PASS; web
+  **21 passed in 48.7s**, static **68 passed in 33.8s**. All 15 implementation/CSS
+  bodies match pinned PR290 after excluding import declarations and normalizing
+  checkout line endings. Fixed-environment visual and PR/native checks are pending.
+- The first full preservation run detected 15 stale K01/K24 current paths;
+  update only the current/target path arrays and retain historical classifications.
+  The focused inventory validation passes; the full guard rerun is in progress.
 
 ## Temporary-file cleanup
 
@@ -93,3 +119,9 @@ Python/pytest caches, no process or exact plan/architecture-document path consum
 was found. Its Git history remains available. The cleanup receipt is in workspace
 `.task-output/angmoo-refactor-8-3/backend-temp-cleanup.json`. Other worktrees and
 referenced installer/runtime evidence remain until individually assessed.
+
+The subsequent read-only audit assessed 72 remaining backend worktrees and removed
+31 more under the same conditions (32 removed total). The 41 that did not meet all
+conditions remain. Exact paths, commits and results are recorded in workspace
+`.task-output/angmoo-refactor-8-3/backend-worktree-audit.json`; no branches or
+committed history were deleted.

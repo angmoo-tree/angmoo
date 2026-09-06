@@ -14,6 +14,12 @@ legacy_reference_dependency: none
 
 # Angmoo Local Frontend Design Contract
 
+> 2026-09-07 구조 이전 위치: 공용 primitive는 `src/components/ui`, 전역 semantic token은
+> `src/styles/semantic-tokens.css`, scroll hook은 `src/hooks`, 순수 표시·scroll 도구는
+> `src/utils`가 구현을 소유한다. 아래 과거 UI 단계의 `shared/ui` 표기는 당시 위치이며
+> 시각·입력·출처 계약은 그대로 유지한다. 현재 위치와 실행 상태는
+> [ARCHITECTURE](ARCHITECTURE.md)와 [전환 결과](../docs/architecture/refactor-frontend-results.md)를 따른다.
+
 ## 0. 한 문장 결정
 
 > **Angmoo Local의 일반 사용자 화면은 angmoo.com의 성숙한 모바일 Feed·Post·Thread·Profile·Agent 표현을 시각 기준으로 계승하되, Local의 Device Home·World scope·owner-controlled identity·다중 자율활동·Tauri product-window 의미를 유지하는 하나의 Phone-first 디자인 시스템으로 구현한다.**

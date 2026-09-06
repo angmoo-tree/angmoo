@@ -23,6 +23,13 @@
     },
     {
       "classifications": [
+        "DIRECT"
+      ],
+      "path": "frontend/src/components/ui/profile-avatar.tsx",
+      "sha256": "45517c13c194765d27f282277dfa1c7490fa64acaf4fd5ed3c924c6e97b717db"
+    },
+    {
+      "classifications": [
         "LOCAL"
       ],
       "path": "frontend/src/features/characters/model/character-recent-activity-presentation.ts",
@@ -144,15 +151,8 @@
       "classifications": [
         "DIRECT"
       ],
-      "path": "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts",
-      "sha256": "756ad51b664285892de9d6cca1f589a0d55850a6cf7d8775dfc4d87ad92950ba"
-    },
-    {
-      "classifications": [
-        "DIRECT"
-      ],
-      "path": "frontend/src/shared/ui/profile-avatar.tsx",
-      "sha256": "b672a8290f161befc065fcb4ea5bd47ce2b6d13c0a6ac74348c3acec9e59f655"
+      "path": "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
+      "sha256": "524a906d423a0f4cc2eeb54ee5f3c762bfc3016f6268520b2055a6bb4d4e1590"
     }
   ],
   "browser_harness": {
@@ -298,11 +298,11 @@
       "frontend/src/features/ui-foundation/public.ts",
       "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
       "frontend/src/shared/desktop/product-window.ts",
-      "frontend/src/shared/interaction/scroll-viewport.ts",
-      "frontend/src/shared/ui/profile-avatar.tsx",
+      "frontend/src/utils/scroll-viewport.ts",
+      "frontend/src/components/ui/profile-avatar.tsx",
       "frontend/src/shared/ui/public.ts",
-      "frontend/src/shared/ui/semantic-tokens.css",
-      "frontend/src/shared/ui/status-badge.tsx",
+      "frontend/src/styles/semantic-tokens.css",
+      "frontend/src/components/ui/status-badge.tsx",
       "security/frontend_design_policy.json"
     ],
     "forbidden_matches": []
@@ -960,7 +960,7 @@
       },
       {
         "occurrences": 38,
-        "path": "frontend/src/shared/ui/semantic-tokens.css",
+        "path": "frontend/src/styles/semantic-tokens.css",
         "values": {
           "#101828": 2,
           "#147a45": 1,
@@ -1134,13 +1134,13 @@
     "classification": "LOCAL",
     "compatibility_bridges": [
       {
-        "adapter": "frontend/src/shared/ui/profile-avatar.tsx",
+        "adapter": "frontend/src/components/ui/profile-avatar.tsx",
         "composes": "Avatar",
         "existing_public_export": "ProfileAvatar",
         "impact": "transitional_existing_product_consumers"
       },
       {
-        "adapter": "frontend/src/shared/ui/status-badge.tsx",
+        "adapter": "frontend/src/components/ui/status-badge.tsx",
         "composes": "StatusChip",
         "existing_public_export": "StatusBadge",
         "impact": "transitional_existing_product_consumers"
@@ -1151,7 +1151,7 @@
       {
         "path": "frontend/src/app/globals.css",
         "present": true,
-        "sha256": "d7c98d3551dde61100ad5feb7413474f5038b315636d84c24d7947362c62a0af"
+        "sha256": "9777f4198d92371598b3f0d5734d87d149570d0d5d7ff51364e28d3efdf03670"
       },
       {
         "path": "frontend/src/app/ui-foundation/page.tsx",
@@ -1159,14 +1159,59 @@
         "sha256": "c8055c910553d7fb51a8a07fa3aa86e5f2c61c06740d589fbbf22dc460ff887f"
       },
       {
+        "path": "frontend/src/components/ui/avatar.tsx",
+        "present": true,
+        "sha256": "f3a7f8f9c6986f2a3054a4c0d8fa295859ca610029349f02c0a4373cdf4b0b67"
+      },
+      {
         "path": "frontend/src/components/ui/button.tsx",
         "present": true,
         "sha256": "8952f381f1b3df1f034fe63a48eaa952da9cb9379d0cd62c2289db5c2c72bb25"
       },
       {
+        "path": "frontend/src/components/ui/dialog.tsx",
+        "present": true,
+        "sha256": "336712019e196fd5b6220cf0a0e4da2c518d40745a3f31775e88b13bf39b1e63"
+      },
+      {
+        "path": "frontend/src/components/ui/feedback.tsx",
+        "present": true,
+        "sha256": "6e54e6b5776b751dd9627a3342345cf4c7198dc7e24cf702808aef162793c717"
+      },
+      {
+        "path": "frontend/src/components/ui/form-controls.tsx",
+        "present": true,
+        "sha256": "a0b0e64c43a40ef44950c93067adb0ac0ee42b3fc323db51745599f605c991d3"
+      },
+      {
+        "path": "frontend/src/components/ui/navigation.tsx",
+        "present": true,
+        "sha256": "3dfc714cd950860b746730c39ab7bfdc6cb3a8afdbac2e7441497d5406963ec8"
+      },
+      {
+        "path": "frontend/src/components/ui/profile-avatar.tsx",
+        "present": true,
+        "sha256": "45517c13c194765d27f282277dfa1c7490fa64acaf4fd5ed3c924c6e97b717db"
+      },
+      {
         "path": "frontend/src/components/ui/semantic-foundation.module.css",
         "present": true,
         "sha256": "ea62dda6824ed42011de5d4f4693de81f86decb6ae6fc1653422e9b45d2d1e23"
+      },
+      {
+        "path": "frontend/src/components/ui/status-badge.tsx",
+        "present": true,
+        "sha256": "7274d1c9af0dfaa54d3a5fca94423a519a354680f5724974efec3134be6aa07e"
+      },
+      {
+        "path": "frontend/src/components/ui/status.tsx",
+        "present": true,
+        "sha256": "845b0c3118cc827cbfe6bd536b30b7240bc22cc9dc020bc0e12e37208f7daa09"
+      },
+      {
+        "path": "frontend/src/components/ui/surfaces.tsx",
+        "present": true,
+        "sha256": "eeba52a626143dfbf42e8d35e4ddc428bf3d0c5ec1402190bd744a13a44997dd"
       },
       {
         "path": "frontend/src/composition/static-product-router.tsx",
@@ -1194,59 +1239,14 @@
         "sha256": "e083fbe3355cc63a915bb27f418bac2468a3c1398d8c65b720029d3117cb4db5"
       },
       {
-        "path": "frontend/src/shared/ui/avatar.tsx",
-        "present": true,
-        "sha256": "bd91bf38213e1e06243e1f05d7610da09f9b650b55cd72ece1f7283e83608ee4"
-      },
-      {
-        "path": "frontend/src/shared/ui/dialog.tsx",
-        "present": true,
-        "sha256": "0968d0638e2d98db9340d8199e5e53ef9632737c255e846ef115039b8fbd9994"
-      },
-      {
-        "path": "frontend/src/shared/ui/feedback.tsx",
-        "present": true,
-        "sha256": "7ace9c20fd7bc4177a37ce5ec2dcb43e1a9580747f62f1f47d6bdd250dd88664"
-      },
-      {
-        "path": "frontend/src/shared/ui/form-controls.tsx",
-        "present": true,
-        "sha256": "623dd198c906c428d84dc80e56ef16d8e5fb7fdfabba86a832cd6493e08d2f88"
-      },
-      {
-        "path": "frontend/src/shared/ui/navigation.tsx",
-        "present": true,
-        "sha256": "3027104d26d3678b2f76feb1446fb9628f4e8d8844ad86afdddb52388b866a8e"
-      },
-      {
-        "path": "frontend/src/shared/ui/profile-avatar.tsx",
-        "present": true,
-        "sha256": "b672a8290f161befc065fcb4ea5bd47ce2b6d13c0a6ac74348c3acec9e59f655"
-      },
-      {
         "path": "frontend/src/shared/ui/public.ts",
         "present": true,
-        "sha256": "fc162b6a3427eb2d1eb5d94d7ccabde45487386ffbd0ef0dbdb147b9f141e368"
+        "sha256": "39431caafb3236eb9a7141a2e24344852bbef8924bb2d076129b7b9ae5e91dab"
       },
       {
-        "path": "frontend/src/shared/ui/semantic-tokens.css",
+        "path": "frontend/src/styles/semantic-tokens.css",
         "present": true,
         "sha256": "10a74dfaaf8646971795da5591ef24b15eceb1a9d5073091477edad2524376ed"
-      },
-      {
-        "path": "frontend/src/shared/ui/status-badge.tsx",
-        "present": true,
-        "sha256": "7274d1c9af0dfaa54d3a5fca94423a519a354680f5724974efec3134be6aa07e"
-      },
-      {
-        "path": "frontend/src/shared/ui/status.tsx",
-        "present": true,
-        "sha256": "e8fe4b77b27c403cba360b0622b3b3a736dad9cfe44b2efeacc44e3bf3577ff8"
-      },
-      {
-        "path": "frontend/src/shared/ui/surfaces.tsx",
-        "present": true,
-        "sha256": "524a7348fe749f10507a31097d1e058fcf08c2e856e0394d30a2fee29b9772a6"
       },
       {
         "path": "frontend/src/utils/class-names.ts",

@@ -1,5 +1,12 @@
 # Frontend product-shell boundaries
 
+> **Current common ownership, 2026-09-07:** UI primitives now live in
+> `frontend/src/components/ui`, semantic tokens in `frontend/src/styles`, scroll
+> hooks in `frontend/src/hooks`, and pure presentation/scroll helpers in
+> `frontend/src/utils`. Existing shared public exports remain temporary consumer
+> bridges. The following L2.5 sections record the earlier layout; current scope
+> and verification are in [frontend results](refactor-frontend-results.md).
+
 > **Architecture refactor, 2026-09-05:** The target is described in [ARCHITECTURE](../../frontend/ARCHITECTURE.md). This document continues to describe the unmigrated code. The `refactor` section in the architecture policy activates new rules only for listed scopes; it is empty during AR-1 preparation. See [feature preservation](refactor-feature-preservation.md) for baseline, consumer mapping and validation. Existing public/layer rules below apply outside migrated scopes.
 
 This document is the contributor-facing architecture contract for the L2.5

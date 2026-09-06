@@ -669,7 +669,22 @@
     "backend/tests/test_local_bot_atomic_quota.py": "backend/tests/local_bot/test_atomic_quota.py",
     "backend/tests/test_profile_media.py": "backend/tests/media/test_profile_media.py",
     "backend/tests/test_prompt_safety.py": "backend/tests/common/test_prompt_safety.py",
-    "backend/tests/test_llm_context.py": "backend/tests/common/test_context_text.py"
+    "backend/tests/test_llm_context.py": "backend/tests/common/test_context_text.py",
+    "frontend/src/shared/interaction/scroll-viewport.ts": "frontend/src/utils/scroll-viewport.ts",
+    "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts": "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
+    "frontend/src/shared/ui/avatar.tsx": "frontend/src/components/ui/avatar.tsx",
+    "frontend/src/shared/ui/device-frame.module.css": "frontend/src/components/ui/device-frame.module.css",
+    "frontend/src/shared/ui/device-frame.tsx": "frontend/src/components/ui/device-frame.tsx",
+    "frontend/src/shared/ui/dialog.tsx": "frontend/src/components/ui/dialog.tsx",
+    "frontend/src/shared/ui/feedback.tsx": "frontend/src/components/ui/feedback.tsx",
+    "frontend/src/shared/ui/form-controls.tsx": "frontend/src/components/ui/form-controls.tsx",
+    "frontend/src/shared/ui/navigation.tsx": "frontend/src/components/ui/navigation.tsx",
+    "frontend/src/shared/ui/profile-avatar.tsx": "frontend/src/components/ui/profile-avatar.tsx",
+    "frontend/src/shared/ui/profile-presentation.ts": "frontend/src/utils/profile-presentation.ts",
+    "frontend/src/shared/ui/semantic-tokens.css": "frontend/src/styles/semantic-tokens.css",
+    "frontend/src/shared/ui/status-badge.tsx": "frontend/src/components/ui/status-badge.tsx",
+    "frontend/src/shared/ui/status.tsx": "frontend/src/components/ui/status.tsx",
+    "frontend/src/shared/ui/surfaces.tsx": "frontend/src/components/ui/surfaces.tsx"
   },
   "test_nodes": {
     "tests/test_l2_5_device_home_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds": "tests/device_home/test_world_surface.py::test_creator_studio_surface_includes_only_owner_managed_worlds",
@@ -135272,6 +135287,39 @@
       "proof": "scripts/ci/chat_forwarder_retirement.py pins the three original import-only blobs, unchanged complete actual HTTP and Request dependency AST, and existing original test function before exact getter substitution.",
       "behavior": "Real FastAPI/Request and production configure_chat_services preserve six service instance identities and four concrete types. No product endpoint, service, SQL, Session, provider or construction body changes.",
       "policy": "Removed only the three product-unused facade bridges. Retained 13 historical and 25 supported composition edges with accurate caller retirement conditions; existing boundary checker is unchanged."
+    },
+    "AR-F2-A": {
+      "scope": "Product-neutral UI, global semantic tokens, profile presentation and scroll helpers",
+      "files": {
+        "frontend/src/shared/ui/avatar.tsx": "frontend/src/components/ui/avatar.tsx",
+        "frontend/src/shared/ui/device-frame.tsx": "frontend/src/components/ui/device-frame.tsx",
+        "frontend/src/shared/ui/device-frame.module.css": "frontend/src/components/ui/device-frame.module.css",
+        "frontend/src/shared/ui/dialog.tsx": "frontend/src/components/ui/dialog.tsx",
+        "frontend/src/shared/ui/feedback.tsx": "frontend/src/components/ui/feedback.tsx",
+        "frontend/src/shared/ui/form-controls.tsx": "frontend/src/components/ui/form-controls.tsx",
+        "frontend/src/shared/ui/navigation.tsx": "frontend/src/components/ui/navigation.tsx",
+        "frontend/src/shared/ui/profile-avatar.tsx": "frontend/src/components/ui/profile-avatar.tsx",
+        "frontend/src/shared/ui/status-badge.tsx": "frontend/src/components/ui/status-badge.tsx",
+        "frontend/src/shared/ui/status.tsx": "frontend/src/components/ui/status.tsx",
+        "frontend/src/shared/ui/surfaces.tsx": "frontend/src/components/ui/surfaces.tsx",
+        "frontend/src/shared/ui/profile-presentation.ts": "frontend/src/utils/profile-presentation.ts",
+        "frontend/src/shared/interaction/scroll-viewport.ts": "frontend/src/utils/scroll-viewport.ts",
+        "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts": "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
+        "frontend/src/shared/ui/semantic-tokens.css": "frontend/src/styles/semantic-tokens.css"
+      },
+      "implementation": "Move existing JSX/CSS and functions unchanged except canonical imports. The shared UI and interaction public files remain one-way exports for unmigrated feature consumers.",
+      "consumers": [
+        "frontend/src/shared/ui/public.ts",
+        "frontend/src/shared/interaction/public.ts",
+        "frontend/src/app/globals.css"
+      ],
+      "verification": [
+        "frontend architecture/design/stock gates",
+        "existing product-shell and static product-shell scenarios",
+        "existing fixed-environment visual corpus",
+        "existing Tauri product-shell/media source contracts"
+      ],
+      "status": "IMPLEMENTED - validation in progress"
     }
   },
   "asgi_exports": {

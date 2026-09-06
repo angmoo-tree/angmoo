@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type KeyboardEvent, type ReactNode } from "react";
 
-import { classNames } from "./class-names";
+import { classNames } from "@/utils/class-names";
 import styles from "@/components/ui/semantic-foundation.module.css";
 
 export type TabItem = {

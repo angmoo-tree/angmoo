@@ -46,7 +46,7 @@
       "classification": "DIRECT",
       "hosted_blob_oid": "e9fc13cd00d15e9503bfe70fa1d42ebe4f7250e8",
       "hosted_source": "frontend/src/components/profile-avatar.tsx",
-      "local_target": "frontend/src/shared/ui/profile-avatar.tsx",
+      "local_target": "frontend/src/components/ui/profile-avatar.tsx",
       "scope": "round avatar and deterministic initial fallback anatomy"
     },
     {
@@ -81,7 +81,7 @@
       "classification": "DIRECT",
       "hosted_blob_oid": "28b84827af6dab3f3bd99c62ffa96870bb0875a1",
       "hosted_source": "frontend/src/lib/use-mobile-pull-to-refresh.ts",
-      "local_target": "frontend/src/shared/interaction/use-mobile-pull-to-refresh.ts",
+      "local_target": "frontend/src/hooks/use-mobile-pull-to-refresh.ts",
       "scope": "touch refresh interaction"
     },
     {
@@ -286,11 +286,11 @@
     "frontend/src/features/ui-foundation/public.ts",
     "frontend/src/features/ui-foundation/ui/semantic-foundation-fixture.tsx",
     "frontend/src/shared/desktop/product-window.ts",
-    "frontend/src/shared/interaction/scroll-viewport.ts",
-    "frontend/src/shared/ui/profile-avatar.tsx",
+    "frontend/src/utils/scroll-viewport.ts",
+    "frontend/src/components/ui/profile-avatar.tsx",
     "frontend/src/shared/ui/public.ts",
-    "frontend/src/shared/ui/semantic-tokens.css",
-    "frontend/src/shared/ui/status-badge.tsx",
+    "frontend/src/styles/semantic-tokens.css",
+    "frontend/src/components/ui/status-badge.tsx",
     "security/frontend_design_policy.json"
   ],
   "provenance": {
@@ -355,12 +355,12 @@
     "feature_public_export": "frontend/src/features/device-shell/public.ts",
     "owner_stage": "L4.5 UI-C",
     "product_shell": "frontend/src/features/device-shell/ui/device-shell.tsx",
-    "shared_neutral_primitive": "frontend/src/shared/ui/device-frame.tsx",
+    "shared_neutral_primitive": "frontend/src/components/ui/device-frame.tsx",
     "single_scroll_owner_marker": "data-device-scroll-owner=\"true\"",
     "tauri_titlebar_exclusion": {
       "marker": "data-device-titlebar-inset=\"true\"",
       "minimum_css_px": 44,
-      "owner": "frontend/src/shared/ui/device-frame.tsx",
+      "owner": "frontend/src/components/ui/device-frame.tsx",
       "regression": "browser-tests/static-product-shell.spec.ts"
     },
     "wide_shell_exceptions": [
@@ -400,7 +400,7 @@
       "END:angmoo-frontend-design-contract"
     ],
     "frontend/src/app/globals.css": [
-      "@import \"../shared/ui/semantic-tokens.css\";"
+      "@import \"../styles/semantic-tokens.css\";"
     ],
     "frontend/src/app/ui-foundation/page.tsx": [
       "follow: false",
@@ -528,21 +528,21 @@
       "from \"@/shared/ui/public\""
     ],
     "frontend/src/shared/ui/public.ts": [
-      "export { Avatar } from \"./avatar\";",
-      "export { Badge, StatusChip } from \"./status\";",
-      "export { BottomNavigation, PageHeader, Tabs } from \"./navigation\";",
+      "export { Avatar } from \"../../components/ui/avatar\";",
+      "export { Badge, StatusChip } from \"../../components/ui/status\";",
+      "export { BottomNavigation, PageHeader, Tabs } from \"../../components/ui/navigation\";",
       "export { Button, IconButton } from \"./button\";",
-      "export { Card, ListRow } from \"./surfaces\";",
-      "export { DegradedPanel, EmptyState, InlineError, Toast } from \"./feedback\";",
-      "export { Dialog } from \"./dialog\";",
-      "export { Field, Input, Select, Textarea } from \"./form-controls\";"
+      "export { Card, ListRow } from \"../../components/ui/surfaces\";",
+      "export { DegradedPanel, EmptyState, InlineError, Toast } from \"../../components/ui/feedback\";",
+      "export { Dialog } from \"../../components/ui/dialog\";",
+      "export { Field, Input, Select, Textarea } from \"../../components/ui/form-controls\";"
     ],
-    "frontend/src/shared/ui/profile-avatar.tsx": [
+    "frontend/src/components/ui/profile-avatar.tsx": [
       "<Avatar",
       "export function ProfileAvatar",
       "import { Avatar } from \"./avatar\";"
     ],
-    "frontend/src/shared/ui/semantic-tokens.css": [
+    "frontend/src/styles/semantic-tokens.css": [
       "--color-brand-accent: #ff6b6b;",
       "--color-brand-accent-hover: #ff5252;",
       "--color-brand-soft: #fff0ef;",
@@ -563,7 +563,7 @@
       "--spacing-phone:",
       "--text-feed-body:"
     ],
-    "frontend/src/shared/ui/status-badge.tsx": [
+    "frontend/src/components/ui/status-badge.tsx": [
       "<StatusChip",
       "export function StatusBadge",
       "import { StatusChip, type StatusChipTone } from \"./status\";"
@@ -819,13 +819,13 @@
     "classification": "LOCAL",
     "compatibility_bridges": [
       {
-        "adapter": "frontend/src/shared/ui/profile-avatar.tsx",
+        "adapter": "frontend/src/components/ui/profile-avatar.tsx",
         "composes": "Avatar",
         "existing_public_export": "ProfileAvatar",
         "impact": "transitional_existing_product_consumers"
       },
       {
-        "adapter": "frontend/src/shared/ui/status-badge.tsx",
+        "adapter": "frontend/src/components/ui/status-badge.tsx",
         "composes": "StatusChip",
         "existing_public_export": "StatusBadge",
         "impact": "transitional_existing_product_consumers"
@@ -862,15 +862,15 @@
       "scope": "global_alias_remap_only_not_full_consumer_conformance"
     },
     "primitive_sources": [
+      "frontend/src/components/ui/avatar.tsx",
       "frontend/src/components/ui/button.tsx",
+      "frontend/src/components/ui/dialog.tsx",
+      "frontend/src/components/ui/feedback.tsx",
+      "frontend/src/components/ui/form-controls.tsx",
+      "frontend/src/components/ui/navigation.tsx",
       "frontend/src/components/ui/semantic-foundation.module.css",
-      "frontend/src/shared/ui/avatar.tsx",
-      "frontend/src/shared/ui/dialog.tsx",
-      "frontend/src/shared/ui/feedback.tsx",
-      "frontend/src/shared/ui/form-controls.tsx",
-      "frontend/src/shared/ui/navigation.tsx",
-      "frontend/src/shared/ui/status.tsx",
-      "frontend/src/shared/ui/surfaces.tsx",
+      "frontend/src/components/ui/status.tsx",
+      "frontend/src/components/ui/surfaces.tsx",
       "frontend/src/utils/class-names.ts"
     ],
     "public_export": "frontend/src/shared/ui/public.ts",
@@ -879,7 +879,7 @@
       "frontend/src/features/world-packages/world-package-import-client.tsx"
     ],
     "schema": "ui-b-semantic-primitives-v1",
-    "token_source": "frontend/src/shared/ui/semantic-tokens.css"
+    "token_source": "frontend/src/styles/semantic-tokens.css"
   },
   "screenshot_inventory": {
     "baseline_call_count": 11,
