@@ -6838,6 +6838,36 @@
       "test_suppressions": {
         "tests/test_l4_parity_current_source.py": {}
       }
+    },
+    {
+      "commit": "280d4c034620046216fbde9a07aec3de2e606ebe",
+      "feature_id": "G07",
+      "reason": "Actual workflow pytest selections must follow moved test files; reject missing POSIX and Windows paths without changing source or behavioral assertions.",
+      "tracked_files": {
+        "backend/tests/test_ci_pytest_paths.py": "2cd071337241240e057a979ce4ec74235797045b"
+      },
+      "test_nodes": [
+        "tests/test_ci_pytest_paths.py::test_workflow_accepts_actual_test_role_paths[backend/tests/relationships/test_activity_proposals.py::test_runtime]",
+        "tests/test_ci_pytest_paths.py::test_workflow_accepts_actual_test_role_paths[tests/relationships/test_activity_proposals.py]",
+        "tests/test_ci_pytest_paths.py::test_workflow_accepts_actual_test_role_paths[tests\\\\relationships\\\\test_activity_proposals.py]",
+        "tests/test_ci_pytest_paths.py::test_workflow_rejects_old_path_even_when_moved_suite_exists[tests/test_activity_proposal_runtime.py]",
+        "tests/test_ci_pytest_paths.py::test_workflow_rejects_old_path_even_when_moved_suite_exists[tests\\\\test_activity_proposal_runtime.py]"
+      ],
+      "test_assertions": {
+        "tests/test_ci_pytest_paths.py": {
+          "test_workflow_accepts_actual_test_role_paths": [
+            "assert checker.check_pytest_paths(document, tmp_path) == []",
+            "assert len(checker.check_pytest_paths(document, tmp_path)) == 1"
+          ],
+          "test_workflow_rejects_old_path_even_when_moved_suite_exists": [
+            "assert len(errors) == 1",
+            "assert f'pytest test file is missing: {argument}' in errors[0]"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_ci_pytest_paths.py": {}
+      }
     }
   ]
 }
