@@ -12,8 +12,8 @@ OUTPUT = ROOT / "docs/architecture/p8-l-r-memory-batch-inventory.json"
 PREDECESSOR = ROOT / "docs/architecture/p8-l-r-today-sns-activity-inventory.json"
 PREDECESSOR_SHA256 = "2120ef3cccb09753119deebd7025f1f9a01d316c518c5d2eda053c5221cbf5ec"
 
-from app.domains.memory.domain import batch_policy as policy
-from app.domains.memory.infrastructure.batch_models import MEMORY_BATCH_TABLES
+from app.domains.memory.policies import batch as policy
+from app.domains.memory.models.batch import MEMORY_BATCH_TABLES
 from app.runtime.migrations.sqlite_versions.registry import load_sqlite_manifest
 
 
@@ -43,7 +43,7 @@ def build_inventory():
         "backend/app/public_main.py",
         "backend/app/runtime/desktop_sidecar.py",
         "backend/app/runtime/single_backend_components.py",
-        "backend/app/api/v1/routes/memory.py",
+        "backend/app/domains/memory/router.py",
         "backend/app/runtime/account_deletion.py",
         "backend/app/runtime/characters/management.py",
         "backend/tests/test_p8_l_r_memory_batch*.py",

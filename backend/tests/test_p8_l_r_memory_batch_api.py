@@ -7,20 +7,20 @@ from fastapi.testclient import TestClient
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.api.v1.routes import memory as memory_routes
+from app.runtime import memory_http as memory_routes
 from app.domains.identity.public import CredentialMaterial, CredentialPurpose
-from app.domains.memory.domain.batch_policy import (
+from app.domains.memory.policies.batch import (
     MEMORY_CONSENT_VERSION,
     MAX_SELECTION_INPUT_TOKEN_BOUND,
     memory_token_upper_bound,
 )
-from app.domains.memory.domain.errors import MemoryValidationError
-from app.domains.memory.domain.selection import MemorySelectionSource
-from app.domains.memory.infrastructure.batch_models import (
+from app.domains.memory.exceptions import MemoryValidationError
+from app.domains.memory.policies.selection_output import MemorySelectionSource
+from app.domains.memory.models.batch import (
     MemoryBatchSetting,
     MemoryBatchProfile,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import MemoryMaintenanceJob
+from app.domains.memory.models.items import MemoryMaintenanceJob
 from app.integrations.llm import memory_selection
 from app.providers.contracts import ProviderResponse, ProviderUsage
 from app.runtime.memory.shutdown import MemoryShutdownAdmissionMiddleware

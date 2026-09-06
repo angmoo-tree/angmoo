@@ -44,7 +44,7 @@ from app.domains.chat.contracts.workflow_recipe import (  # noqa: E402
 from app.domains.chat.models import (  # noqa: E402
     ChatResponseRequest,
 )
-from app.domains.memory.domain.canonical_retrieval_plan import (  # noqa: E402
+from app.domains.memory.contracts.retrieval_plan import (  # noqa: E402
     CANONICAL_PLAN_VERSION,
     MAX_CANONICAL_PLAN_STEPS,
 )

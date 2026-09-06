@@ -9,31 +9,29 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app import models
 from app.core.db import Base
-from app.domains.memory.infrastructure import SqlAlchemyMemoryRepository
-from app.domains.memory.public import (
-    CANONICAL_PRIMITIVE_REGISTRY,
-    CanonicalRecallOperation,
-    CanonicalRecallQuery,
-    CanonicalRecallService,
-    CanonicalRecallStatus,
-    MemoryKindV1,
-    MemoryRecallDocument,
-    MemoryRecallSearchQuery,
-    MemoryScope,
-    MemoryScopeService,
-    MemorySourceTypeV1,
-    MemoryValidationError,
-    MemoryWriteLifecycleService,
-    RecallDocumentKind,
+from app.runtime.memory.composition import (
+    memory_repository as SqlAlchemyMemoryRepository,
 )
-from app.runtime.memory import (
-    EmbeddedMemoryRecallProjection,
-    MemoryRecallProjectionState,
-    SqlAlchemyCanonicalRecallRepository,
-    SqlAlchemyMemoryRecallDocumentSource,
-    SqlAlchemyMemorySourceEvidenceReader,
-    SqliteMemoryRecallIndex,
-)
+from app.domains.memory.service.recall import CANONICAL_PRIMITIVE_REGISTRY
+from app.domains.memory.contracts.recall import CanonicalRecallOperation
+from app.domains.memory.contracts.recall import CanonicalRecallQuery
+from app.domains.memory.service.recall import CanonicalRecallService
+from app.domains.memory.contracts.recall import CanonicalRecallStatus
+from app.domains.memory.contracts.provenance import MemoryKindV1
+from app.domains.memory.contracts.recall import MemoryRecallDocument
+from app.domains.memory.contracts.recall import MemoryRecallSearchQuery
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.service.scope import MemoryScopeService
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+from app.domains.memory.exceptions import MemoryValidationError
+from app.domains.memory.service.items import MemoryWriteLifecycleService
+from app.domains.memory.contracts.recall import RecallDocumentKind
+from app.runtime.memory.recall_projection import EmbeddedMemoryRecallProjection
+from app.runtime.memory.recall_projection import MemoryRecallProjectionState
+from app.runtime.memory.recall_composition import canonical_recall_repository as SqlAlchemyCanonicalRecallRepository
+from app.runtime.memory.recall_composition import recall_document_source as SqlAlchemyMemoryRecallDocumentSource
+from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
+from app.runtime.memory.sqlite_fts5_recall import SqliteMemoryRecallIndex
 from app.runtime.persistence.runtime_data_path import StaticRuntimeDataPath
 
 

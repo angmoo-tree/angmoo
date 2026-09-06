@@ -8,14 +8,10 @@ import logging
 from sqlalchemy import event, select
 from sqlalchemy.orm import Session, sessionmaker
 
-from app.domains.memory.infrastructure import (
-    MemoryItem,
-    MemoryItemEvidence,
-    MemoryScopeSettingModel,
-)
-from app.runtime.memory.sqlalchemy_recall import (
-    SqlAlchemyMemoryRecallDocumentSource,
-)
+from app.domains.memory.models.items import MemoryItem
+from app.domains.memory.models.items import MemoryItemEvidence
+from app.domains.memory.models.items import MemoryScopeSettingModel
+from app.runtime.memory.recall_composition import recall_document_source as SqlAlchemyMemoryRecallDocumentSource
 from app.runtime.memory.sqlite_fts5_recall import (
     MemoryRecallIndexError,
     MemoryRecallIndexSchemaError,

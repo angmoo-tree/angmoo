@@ -12,7 +12,7 @@ from app.domains.chat.contracts.retrieval_intent import (
     RetrievalIntentEnvelope,
 )
 from app.domains.chat.contracts.workflow_recipe import RetrievalWorkflow
-from app.domains.memory.public import CANONICAL_PRIMITIVE_REGISTRY
+from app.domains.memory.service.recall import CANONICAL_PRIMITIVE_REGISTRY
 from app.domains.relationships.contracts.graph_recall_gateway import GRAPH_RECALL_PRIMITIVE_REGISTRY
 
 

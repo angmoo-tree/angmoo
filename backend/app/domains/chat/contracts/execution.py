@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     from app.domains.chat.service.response_workflow import (
         ResponseGenerationWorkflowService,
     )
-    from app.domains.memory.public import CanonicalRecallService
+    from app.domains.memory.service.recall import CanonicalRecallService
 
 
 @dataclass(frozen=True, slots=True)

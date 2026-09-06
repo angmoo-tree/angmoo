@@ -418,15 +418,30 @@
     {
       "markers": {
         "row_lock": [
-          178,
-          318
+          180,
+          320
         ]
       },
       "owner": "P8-L-O",
-      "path": "backend/app/domains/memory/infrastructure/consolidation_repository.py",
+      "path": "backend/app/domains/memory/repository/consolidation.py",
       "removal_condition": "retain while same-scope maintenance serialization and exact hot-brief source-version fencing are required",
-      "source_sha256": "a8fbe6cd8f984cd54ccacdb7ece16727cc9a6f48065756fd577f443a40754037",
+      "source_sha256": "fd0a31e5e6aeadf5b1480c34351e0ec2fb4464df968a28c355547c34ef2737a3",
       "transition_pr": "P8-L-O consolidation/hot brief"
+    },
+    {
+      "markers": {
+        "row_lock": [
+          721,
+          738,
+          782,
+          852
+        ]
+      },
+      "owner": "P8-L-G",
+      "path": "backend/app/domains/memory/repository/items.py",
+      "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
+      "source_sha256": "9fc62ea20410321d6ba2ac1d6dc436b7043c8d5e807a5d4dbcc3e0d4ad985a82",
+      "transition_pr": "P8-L-G memory write/lifecycle"
     },
     {
       "markers": {
@@ -438,24 +453,9 @@
         ]
       },
       "owner": "P8-L-G",
-      "path": "backend/app/domains/memory/infrastructure/maintenance_queue.py",
+      "path": "backend/app/domains/memory/repository/queue.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "bc0bc53a3e91b668b4c7fa08383f38043e6149ec3248605a9f66b0693170925e",
-      "transition_pr": "P8-L-G memory write/lifecycle"
-    },
-    {
-      "markers": {
-        "row_lock": [
-          720,
-          737,
-          781,
-          851
-        ]
-      },
-      "owner": "P8-L-G",
-      "path": "backend/app/domains/memory/infrastructure/repository.py",
-      "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "3136bc28ca01277a717e7e1d4ec55d32951dc956843ecec4370dd9d8d57f256e",
+      "source_sha256": "823a7fbfb1cb1f5670089455e3eab74814c7856623f8efdc9c674259c82f3a47",
       "transition_pr": "P8-L-G memory write/lifecycle"
     },
     {
@@ -1374,7 +1374,7 @@
       "owner": "P8-L-G",
       "path": "scripts/ci/generate_p8_l_g_memory_write_inventory.py",
       "removal_condition": "retain only while cross-provider same-scope serialization or its negative inventory guard is required",
-      "source_sha256": "8879065e1085cd9b1c49141eb023e6f08223df3e75a97672c34e786f1adfc8f6",
+      "source_sha256": "0d0cf9f38444c9ffef60fe528ab5c23169d782e4f5cd88217e93103d68d7a5f0",
       "transition_pr": "P8-L-G memory write/lifecycle"
     }
   ],

@@ -12,25 +12,23 @@ from sqlalchemy.orm import Session
 
 from app import models
 from app.core.db import Base
-from app.domains.memory.infrastructure import (
-    SqlAlchemyMemoryMaintenanceQueue,
-    SqlAlchemyMemoryRepository,
+from app.domains.memory.repository.queue import SqlAlchemyMemoryMaintenanceQueue
+from app.runtime.memory.composition import (
+    memory_repository as SqlAlchemyMemoryRepository,
 )
-from app.runtime.memory import SqlAlchemyMemorySourceEvidenceReader
-from app.domains.memory.public import (
-    CanonicalMemoryEvidence,
-    MemoryCandidateStatus,
-    MemoryConflictError,
-    MemoryItemStatus,
-    MemoryKindV1,
-    MemoryNotFoundError,
-    MemoryScope,
-    MemoryScopeService,
-    MemorySourceTypeV1,
-    MemoryValidationError,
-    MemoryWriteLifecycleService,
-    MemoryWriteOutcome,
-)
+from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
+from app.domains.memory.contracts.source_evidence import CanonicalMemoryEvidence
+from app.domains.memory.contracts.provenance import MemoryCandidateStatus
+from app.domains.memory.exceptions import MemoryConflictError
+from app.domains.memory.contracts.provenance import MemoryItemStatus
+from app.domains.memory.contracts.provenance import MemoryKindV1
+from app.domains.memory.exceptions import MemoryNotFoundError
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.service.scope import MemoryScopeService
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+from app.domains.memory.exceptions import MemoryValidationError
+from app.domains.memory.service.items import MemoryWriteLifecycleService
+from app.domains.memory.contracts.items import MemoryWriteOutcome
 
 
 NOW = datetime(2026, 9, 1, 12, tzinfo=UTC)

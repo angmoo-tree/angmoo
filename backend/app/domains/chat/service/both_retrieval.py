@@ -39,7 +39,7 @@ from app.domains.chat.contracts.workflow_recipe import (
     WorkflowRecipeSelection,
     select_workflow_recipe,
 )
-from app.domains.memory.public import RecallDocumentKind
+from app.domains.memory.contracts.recall import RecallDocumentKind
 from app.domains.relationships.contracts.graph_recall import GraphRecallResult
 
 

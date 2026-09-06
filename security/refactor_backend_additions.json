@@ -7201,6 +7201,383 @@
       "test_suppressions": {
         "tests/chat/test_http_ownership.py": {}
       }
+    },
+    {
+      "commit": "b285eb1db57abdd23ff8a2e24f279683c8b2a9f9",
+      "feature_id": "AR-B7",
+      "reason": "Original signed source integration: refactor(memory): own persistence and compose same-session scope reads",
+      "tracked_files": {
+        "backend/app/domains/memory/contracts/scope_references.py": "3fb5ad53006e7e0b61209dd8cd26ba6506798259",
+        "backend/app/runtime/memory/composition.py": "d5759712ba1d0679c8444204abd3792e07442f79",
+        "backend/app/runtime/memory/scope_queries.py": "27c6ccae829ea396d73f737f89baf82892091c9a",
+        "backend/tests/memory/test_scope_composition.py": "177a0fe53736e4e41d87ab2d0b3fed7f01c304fc"
+      },
+      "test_nodes": [
+        "tests/memory/test_scope_composition.py::test_memory_scope_keeps_three_reads_and_invalid_scope_error[owner]",
+        "tests/memory/test_scope_composition.py::test_memory_scope_keeps_three_reads_and_invalid_scope_error[subject]",
+        "tests/memory/test_scope_composition.py::test_memory_scope_keeps_three_reads_and_invalid_scope_error[world]",
+        "tests/memory/test_scope_composition.py::test_memory_scope_timezone_sees_caller_flush_without_committing"
+      ],
+      "test_assertions": {
+        "tests/memory/test_scope_composition.py": {
+          "test_memory_scope_timezone_sees_caller_flush_without_committing": [
+            "assert repository.session is caller",
+            "assert repository.memory._session is caller",
+            "assert repository.timezone(scope) == 'UTC'",
+            "assert repository.timezone(scope) == 'Asia/Seoul'",
+            "assert observer.get(models.World, scope.world_id).timezone == 'Asia/Seoul'"
+          ],
+          "test_memory_scope_keeps_three_reads_and_invalid_scope_error": [
+            "pytest.raises(MemoryScopeError, match='^memory_scope_invalid$')",
+            "assert len(statements) == 3",
+            "assert 'FROM users' in statements[0]",
+            "assert 'FROM worlds' in statements[1]",
+            "assert 'FROM world_characters' in statements[2]"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/memory/test_scope_composition.py": {}
+      }
+    },
+    {
+      "commit": "17854b02cb5103e9c5a685be982159babe6758a9",
+      "feature_id": "AR-B7",
+      "reason": "Original signed source integration: refactor(memory): separate owner workflows and HTTP runtime composition",
+      "tracked_files": {
+        "backend/app/domains/memory/contracts/management.py": "bc067f08be308043df971c802c2c007c8fbd129a",
+        "backend/app/domains/memory/dependencies.py": "a1065761f15d83272db605ffcca870b35b46e426",
+        "backend/app/domains/memory/service/management.py": "8c9a875a56ee6cd9781e4eddf44baae749a3cd09",
+        "backend/app/domains/memory/service/presentation.py": "6fbe9bbb976e5f24b1411d17924d9417da624eeb",
+        "backend/app/runtime/memory_http.py": "de111d32a3440d2ad3ec89331dc64668c3332a50",
+        "backend/tests/memory/test_management_transaction.py": "51bfcffd96210285c5af14cafafa647a5d9e343a"
+      },
+      "test_nodes": [
+        "tests/memory/test_management_transaction.py::test_pin_rolls_back_when_related_profile_read_fails_before_commit"
+      ],
+      "test_assertions": {
+        "tests/memory/test_management_transaction.py": {
+          "test_pin_rolls_back_when_related_profile_read_fails_before_commit": [
+            "pytest.raises(RuntimeError, match='^profile_read_unavailable$')",
+            "assert observed == [(True, 2, scope)]",
+            "assert row.pinned_at is None",
+            "assert row.version == 1"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/memory/test_management_transaction.py": {}
+      }
+    },
+    {
+      "commit": "8fa9871f81b8b2b534bdd77baae6243326e0a7c6",
+      "feature_id": "AR-B7",
+      "reason": "Original signed source integration: refactor(memory): own consent epoch and source admission persistence",
+      "tracked_files": {
+        "backend/app/domains/memory/repository/delivery.py": "f3a54bb820d8ba21d8c74bffcd6201cb9ca4395d"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "e9f881ae4fea642c6c7b4a754fcfe71ac2ba3b7c",
+      "feature_id": "AR-B7",
+      "reason": "Original signed source integration: refactor(memory): own candidate delivery and bounded batch preparation",
+      "tracked_files": {
+        "backend/app/domains/memory/contracts/batch_preparation.py": "f3884af4fafd22698fd0c684bf3fdc293b9043df",
+        "backend/app/domains/memory/service/batch_preparation.py": "73f8d7b9b45f3829181ec33f507676105046a6d9",
+        "backend/app/runtime/memory/batch_preparation.py": "33f2acbab729e6b08fe9107bebafe72e28c170f3",
+        "backend/tests/memory/preparation_support.py": "366b089cef1e00da78904353b5322e8184f08628"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "989cccadc2c36597311d6e112809a238304d6536",
+      "feature_id": "AR-B7",
+      "reason": "Original signed source integration: refactor(memory): own consent and scheduled batch triggers",
+      "tracked_files": {
+        "backend/app/domains/memory/service/batch_scheduling.py": "7fa80e023bde4f95f6d45f2ebd5c286333803c17"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
+    },
+    {
+      "commit": "9133d7a709f473755aeff149281f80c6794ceefc",
+      "feature_id": "AR-B7",
+      "reason": "Original signed source integration: refactor(memory): own canonical recall hydration and source validation",
+      "tracked_files": {
+        "backend/app/domains/memory/contracts/recall_reads.py": "05d8db4dc70eb23cb42b886fcc02e038bfc86890",
+        "backend/app/domains/memory/repository/recall_records.py": "5e78fe2974b8939b94be1c8af09c3046b9c73054",
+        "backend/app/runtime/memory/recall_composition.py": "7c52f50ba14863e668ec468758fc49dfaef414d0",
+        "backend/app/runtime/memory/recall_queries.py": "391403ffba8c5462fc166d3470f50c7c7a30ccf5",
+        "backend/tests/memory/test_canonical_read_composition.py": "41bfcf6164e1f558684f67215c4c335ea7ae32f6"
+      },
+      "test_nodes": [
+        "tests/memory/test_canonical_read_composition.py::test_character_summary_reads_use_the_current_session_without_committing",
+        "tests/memory/test_canonical_read_composition.py::test_document_hydration_revalidates_evidence_in_its_current_session"
+      ],
+      "test_assertions": {
+        "tests/memory/test_canonical_read_composition.py": {
+          "test_character_summary_reads_use_the_current_session_without_committing": [
+            "assert calls == [(counterpart,)]",
+            "assert len(records) == 1",
+            "assert 'current uncommitted summary' in records[0].text",
+            "assert session.in_transaction()",
+            "assert observer.get(Character, 'recall-counterpart-character').one_liner == original",
+            "assert observer.get(Character, character.id).one_liner == original"
+          ],
+          "test_document_hydration_revalidates_evidence_in_its_current_session": [
+            "assert calls == [message_id]",
+            "assert documents == {item_id: ()}",
+            "assert session.in_transaction()",
+            "assert observer.get(source_models.MessageMessage, message_id).content == original",
+            "assert observer.get(source_models.MessageMessage, message_id).content == original"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/memory/test_canonical_read_composition.py": {}
+      }
+    },
+    {
+      "commit": "a0b72a97bbabfb1fc2a5d1055ac992fed6c5414d",
+      "feature_id": "AR-B7",
+      "reason": "Original signed source integration: refactor(memory): own source evidence interpretation with canonical query composition",
+      "tracked_files": {
+        "backend/app/domains/memory/contracts/source_queries.py": "77a2c25a4c0a3b231dd359261f6f866aea42a741",
+        "backend/app/runtime/memory/source_composition.py": "6fc65f6d5143474726d63bba35010be4396ee2ed",
+        "backend/app/runtime/memory/source_queries.py": "4d4a0fe2e52a74a76867f2cb4022e34577cc46fe"
+      },
+      "test_nodes": [
+        "tests/test_refactor_backend_checkpoint.py::test_split_content_cache_still_detects_same_path_edits_during_a_check[source]",
+        "tests/test_refactor_backend_checkpoint.py::test_split_content_cache_still_detects_same_path_edits_during_a_check[test]"
+      ],
+      "test_assertions": {
+        "tests/test_refactor_backend_checkpoint.py": {
+          "test_pr263_checkpoint_preserves_hotfix_regressions_beyond_pr258": [
+            "assert p.checkpoint_errors(checkpoint, p.BASELINE.read_bytes()) == []",
+            "assert hotfix",
+            "assert p.missing_nodes(approved, remaining, moves, node_snapshots=[baseline['test_nodes'], checkpoint['test_nodes']]) == [deleted]"
+          ],
+          "test_checkpoint_cannot_be_recaptured_to_hide_a_regression": [
+            "assert any(('checkpoint mutated' in error for error in p.checkpoint_errors(checkpoint, p.BASELINE.read_bytes())))"
+          ],
+          "test_original_baseline_and_wrong_checkpoint_commit_are_rejected": [
+            "assert any(('exact PR263 commit' in error for error in errors))",
+            "assert any(('PR258 source baseline mutated' in error for error in errors))"
+          ],
+          "test_nodes_follow_second_move_and_count_checkpoint_lineage_once": [
+            "assert p.missing_nodes(['old::test', 'pilot::test', 'hotfix::test'], ['final::test', 'hotfix::test', 'new::test'], {'old::test': 'pilot::test', 'pilot::test': 'final::test'}, node_snapshots=[['old::test'], ['pilot::test', 'hotfix::test']]) == []"
+          ],
+          "test_move_cannot_swallow_an_independent_existing_destination": [
+            "pytest.raises(ValueError, match='independent cases cannot collapse')"
+          ],
+          "test_unexplained_missing_renamed_or_merged_test_nodes_are_rejected": [
+            "pytest.raises(ValueError, match=match)"
+          ],
+          "write": [],
+          "test_split_content_cache_still_detects_same_path_edits_during_a_check": [
+            "assert changed",
+            "assert args[:2] == ('cat-file', 'blob')",
+            "assert any(('does not define' in error and 'second' in error for error in errors))",
+            "assert any(('behavior test missing' in error for error in errors))"
+          ],
+          "snapshot": [],
+          "test_moved_test_cannot_keep_its_name_and_delete_assertion_or_raises": [
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: target}, {}, tmp_path)))"
+          ],
+          "test_assertions_inside_local_test_helpers_cannot_disappear": [
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: node}, {}, tmp_path)))"
+          ],
+          "test_new_skip_or_xfail_cannot_hide_a_collected_regression": [
+            "assert any(('skip/xfail suppression changed' in error for error in p.check_suppressions([expected], {}, tmp_path)))"
+          ],
+          "test_existing_skips_are_preserved_and_collection_hook_suppression_is_guarded": [
+            "assert p.check_suppressions([expected], {}, tmp_path) == []",
+            "assert p.check_suppressions([expected], {}, tmp_path)"
+          ],
+          "test_assertions_accept_explicit_path_move_and_additional_checks": [
+            "assert p.check_assertions([expected], {node: target}, {'backend/app/core/config.py': 'backend/app/config.py'}, tmp_path) == []",
+            "assert p.check_assertions([expected], {node: target}, {}, tmp_path)"
+          ],
+          "test_unchanged_synthetic_legacy_path_fixture_survives_real_move_without_weakening_expectations": [
+            "assert p.check_assertions([expected], {node: node}, files, tmp_path) == []",
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {node: node}, files, tmp_path)))"
+          ],
+          "test_parameterized_nodes_preserve_the_underlying_class_assertions": [
+            "assert p.check_assertions([expected], {node: target}, {}, tmp_path) == []",
+            "assert p.missing_nodes([node], [target.replace('[v8]', '[v9]')], {node: target}) == [target]"
+          ],
+          "test_missing_or_empty_marker_cannot_preserve_a_source_implementation": [
+            "assert any(('empty package marker' in error for error in p.check_sources([old], {old: target}, tmp_path)))",
+            "assert any(('source missing' in error for error in p.check_sources([old], {old: 'backend/app/missing.py'}, tmp_path)))",
+            "pytest.raises(ValueError, match='absent from frozen')"
+          ],
+          "test_source_moves_follow_multiple_steps_and_reject_unsafe_destination": [
+            "assert p.check_sources(['backend/app/old.py'], {'backend/app/old.py': 'backend/app/intermediate.py', 'backend/app/intermediate.py': 'backend/app/current.py'}, tmp_path) == []",
+            "assert p.check_sources(['backend/app/old.py'], {'backend/app/old.py': '../outside.py'}, tmp_path)"
+          ],
+          "test_addition_records_require_commit_feature_and_reason": [
+            "assert any(('exact introduction commit' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_addition_history_cannot_be_removed_or_rewritten": [
+            "assert any(('history was changed or removed' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_addition_commit_source_and_assertion_provenance_are_checked": [
+            "assert p.addition_errors(additions, checkpoint, tmp_path) == []",
+            "assert any(('source provenance changed' in error for error in errors))",
+            "assert any(('assertion provenance changed' in error for error in errors))"
+          ],
+          "test_later_commit_cannot_claim_it_introduced_an_older_unrecorded_source": [
+            "assert any(('first introduction commit' in error for error in p.addition_errors(additions, checkpoint, tmp_path)))"
+          ],
+          "test_new_committed_source_requires_record_and_mapped_destinations_are_not_new_work": [
+            "assert p.unrecorded_committed_sources(checkpoint, [], targets, tmp_path) == ['committed source lacks append-only introduction evidence: backend/app/new.py']",
+            "assert p.unrecorded_committed_sources(checkpoint, [{'tracked_files': {'backend/app/new.py': 'blob'}}], targets, tmp_path) == []"
+          ],
+          "test_capture_does_not_call_surviving_frozen_bridge_a_new_source": [
+            "assert capture.unprotected_files(tracked, [old], {old: new}) == {added: 'new-test-blob'}"
+          ],
+          "test_new_split_requires_real_symbols_consumers_and_behavior_test_evidence": [
+            "assert p.check_split_evidence({'details': {'AR-B2': detail}}, snapshots, tmp_path) == []",
+            "assert any(('split omits' in error for error in p.check_split_evidence({'details': {'AR-B2': broken}}, snapshots, tmp_path)))",
+            "assert any(('does not define' in error for error in p.check_split_evidence({'details': {'AR-B2': broken}}, snapshots, tmp_path)))"
+          ],
+          "test_package_initializer_move_normalizes_its_exact_import_spelling": [
+            "assert p.normalized_assertion(\"assert 'app.domains.identity.infrastructure' in imports\", literals) == p.normalized_assertion(\"assert 'app.domains.identity.models' in imports\", literals)",
+            "assert p.normalized_assertion(\"assert 'from app.domains.identity.infrastructure import User' in source\", literals) == p.normalized_assertion(\"assert 'from app.domains.identity.models import User' in source\", literals)"
+          ],
+          "test_package_initializer_move_does_not_normalize_unmapped_descendants": [
+            "assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])",
+            "assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])"
+          ],
+          "test_chained_literal_path_move_preserves_exact_root_and_predicate": [
+            "assert p.check_assertions([expected], {old: new}, files, tmp_path) == []",
+            "assert p.check_assertions([expected], {old: new}, {}, tmp_path)",
+            "assert any(('expectation missing or changed' in error for error in p.check_assertions([expected], {old: new}, files, tmp_path)))"
+          ],
+          "test_chained_path_normalization_rejects_unmapped_roots_calls_and_prefixes": [
+            "assert p.normalized_assertion(fragment, literals, roots=roots) == p.normalized_assertion(fragment, [])"
+          ],
+          "test_literal_roots_require_a_tracked_path_constructor_and_unique_binding": [
+            "assert p.literal_path_roots(source, 'backend/tests/test_old.py')['test_contract']['root'] == 'backend/app/domains/world_packages'",
+            "assert 'root' not in p.literal_path_roots(altered, 'backend/tests/test_old.py').get('test_contract', {})"
+          ],
+          "test_literal_path_anchor_rejects_module_rebinding_syntax": [
+            "assert 'root' not in p.literal_path_roots(source, 'backend/tests/test_old.py').get('test_contract', {})"
+          ],
+          "test_literal_path_anchor_rejects_local_rebinding_syntax": [
+            "assert 'root' not in p.literal_path_roots(source, 'backend/tests/test_old.py').get('test_contract', {})"
+          ],
+          "test_exact_windows_file_literal_uses_the_same_reviewed_move": [
+            "assert p.normalized_assertion(before, literals) == p.normalized_assertion(after, literals)",
+            "assert p.normalized_assertion(fragment, literals) == p.normalized_assertion(fragment, [])"
+          ],
+          "test_file_move_to_initializer_uses_the_canonical_package_import": [
+            "assert p.normalized_assertion(\"assert 'app.domains.world_packages.public' in text\", literals) == p.normalized_assertion(\"assert 'app.domains.world_packages.contracts' in text\", literals)",
+            "assert p.normalized_assertion(\"assert 'from app.domains.world_packages.public import WorldPackagePolicy' in text\", literals) == p.normalized_assertion(\"assert 'from app.domains.world_packages.contracts import WorldPackagePolicy' in text\", literals)"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_refactor_backend_checkpoint.py": {}
+      }
+    },
+    {
+      "commit": "d83ef86c8c9e4acbec3c4d47b37b9738f7924fdf",
+      "feature_id": "AR-B7",
+      "reason": "Original signed source integration: refactor(memory): own daypart history observations and summary persistence",
+      "tracked_files": {
+        "backend/app/core/context_clipping.py": "74eac10a166b6d946a5a12d73d1ebefc6cf83519",
+        "backend/app/domains/memory/contracts/daypart.py": "f708a94239f80ae130005ae6c15ab63c56ab7cc4",
+        "backend/app/domains/memory/models/daypart.py": "4b8366cba140d58126336c44073e864ae118c456",
+        "backend/app/domains/memory/policies/daypart.py": "06c19b82bf5027d9bcdd01dd0935268f4e6f25c9",
+        "backend/app/domains/memory/repository/daypart.py": "42e72b314081da0356a4ad4b2b43b9a71aff0ee7",
+        "backend/app/domains/memory/service/daypart.py": "0de0bc74dfe661f1030d6494b6b13ef78436903b",
+        "backend/app/domains/memory/service/daypart_observations.py": "e0cff827b781eab408a8a0b1224da8d3eaa83b96",
+        "backend/tests/memory/test_daypart_ownership.py": "db62fec561aeb393181a077b7f10d30cd3b146ab"
+      },
+      "test_nodes": [
+        "tests/memory/test_daypart_ownership.py::test_daypart_reads_keep_scopes_stable_order_limits_and_duplicate_ids",
+        "tests/memory/test_daypart_ownership.py::test_daypart_writes_keep_commits_action_admission_and_original_fields",
+        "tests/memory/test_daypart_ownership.py::test_provided_observation_commits_before_author_failure_and_keeps_retry_admission",
+        "tests/memory/test_daypart_ownership.py::test_summary_commit_failure_rolls_back_one_group_and_continues_then_retries"
+      ],
+      "test_assertions": {
+        "tests/memory/test_daypart_ownership.py": {
+          "engine": [],
+          "_event": [],
+          "_context": [],
+          "test_daypart_writes_keep_commits_action_admission_and_original_fields": [
+            "assert models.AgentDaypartMemoryEvent is AgentDaypartMemoryEvent",
+            "assert row.summary == 'a' * 2000",
+            "assert (row.character_id, row.run_id, row.source_post_id) == ('char-a', 'run-a', 'post-a')",
+            "assert (row.notification_id, row.thread_id, row.topic_signature) == (0, 'thread-a', 'topic-a')",
+            "assert row.payload == {'source': 'original'}",
+            "assert len(rows) == 2",
+            "assert (rows[1].event_type, rows[1].source_post_id, rows[1].memory_session_key) == ('action_post', 'source-post', 'session-b')",
+            "assert rows[1].summary == 'b' * 2000",
+            "assert rows[1].topic_signature == 't' * 300",
+            "assert rows[1].payload == action"
+          ],
+          "test_daypart_reads_keep_scopes_stable_order_limits_and_duplicate_ids": [
+            "assert [row['summary'] for row in daypart.history(ctx)] == [str(i) for i in range(1, 65)]",
+            "assert daypart.seen_feed_post_ids(ctx) == {f'post-{i}' for i in range(1, 68)}",
+            "assert daypart.seen_notification_ids(ctx) == set()",
+            "assert daypart.history(_context(db, memory_session_key=None)) == []",
+            "assert daypart.event_exists(db, **scope, source_post_id='post-1', notification_id=1)",
+            "assert not daypart.event_exists(db, **scope, source_post_id='post-1', notification_id=2)",
+            "assert not daypart.event_exists(db, **scope)",
+            "assert [row.id for row in daypart.recent_topic_events(db, character_id='char-a', event_type='observation_feed', cutoff=start)] == [69, *range(67, 48, -1)]",
+            "assert [row.id for row in daypart.handoff_events(db, character_id='char-a', event_types=['observation_feed'], start_utc=start, end_utc=start + timedelta(days=1))] == [69, *range(67, 56, -1)]",
+            "assert daypart.handoff_events(db, character_id='char-a', event_types=['observation_feed'], start_utc=start - timedelta(days=1), end_utc=start) == []"
+          ],
+          "test_provided_observation_commits_before_author_failure_and_keeps_retry_admission": [
+            "pytest.raises(RuntimeError, match='author read failed')",
+            "assert pending_inbox == []",
+            "assert pending_feed is feed",
+            "assert filtered['interests'] == []",
+            "assert filtered['warnings'] == ['daypart_memory_event_already_provided']",
+            "assert session is db",
+            "assert (post_id, missing) == ('feed-post', None)",
+            "assert [(row.event_type, row.source_post_id) for row in rows] == [('observation_inbox', 'inbox-post'), ('observation_feed', 'feed-post')]",
+            "assert rows[0].thread_id == 'root-a'",
+            "assert rows[1].payload == {'source_item_id': 'post:feed-post', 'seen_person': 'Feed author'}",
+            "assert observer.scalar(select(AgentDaypartMemoryEvent)).event_type == 'observation_inbox'"
+          ],
+          "test_summary_commit_failure_rolls_back_one_group_and_continues_then_retries": [
+            "assert start == datetime(2026, 6, 24, 5, tzinfo=UTC)",
+            "assert first['summaries_created'] == 1",
+            "assert first['expired_relationship_points'] == 2",
+            "assert first['summary_errors'] == [{'memory_session_key': 'group-a', 'failure_class': 'RuntimeError'}]",
+            "assert (second['summaries_created'], second['summaries_skipped']) == (1, 1)",
+            "assert len(rows) == 2",
+            "assert {row.memory_session_key for row in rows} == {'group-a', 'group-b'}",
+            "assert all((row.provided_at == (start - timedelta(microseconds=1)).replace(tzinfo=None) for row in rows))",
+            "assert all((row.payload['finalized_by_run_id'] == 'run-a' for row in rows))"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/memory/test_daypart_ownership.py": {}
+      }
+    },
+    {
+      "commit": "bc1a7c18997034b6f96965943323a617b3f9feef",
+      "feature_id": "AR-B7",
+      "reason": "Original signed source integration: refactor(memory): own consent-epoch recovery and durable delivery queries",
+      "tracked_files": {
+        "backend/app/domains/memory/repository/reconciliation.py": "90dc627245dd244539aeedeb53ba962ef91e74d4",
+        "backend/app/domains/memory/service/reconciliation.py": "492b24f2b5e5cccebaeab269e30f87b5b2a4f462",
+        "backend/app/runtime/memory/source_catalogs.py": "b70c2cc3c1dbee5b1235a291fa05795c662d7a5f"
+      },
+      "test_nodes": [],
+      "test_assertions": {},
+      "test_suppressions": {}
     }
   ]
 }

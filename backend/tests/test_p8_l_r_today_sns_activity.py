@@ -790,8 +790,8 @@ def test_router_view_is_bounded_even_with_maximum_labels_and_content(today_sessi
 @pytest.mark.parametrize("change", ("source_edit", "subjective_invalidation"))
 def test_today_inspector_revalidates_exact_revision_after_edit(today_session, change):
     from app.runtime.chat.world_generation import _chat_evidence_item
-    from app.runtime.memory.sqlalchemy_source_reader import SqlAlchemyMemorySourceEvidenceReader
-    from app.domains.memory.domain.scope import MemoryScope
+    from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
+    from app.domains.memory.contracts.scope import MemoryScope
     db, fixture = today_session
     _seed_today_activity(db, fixture)
     snapshot = _snapshot(db, fixture)

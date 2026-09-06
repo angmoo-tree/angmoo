@@ -30,11 +30,9 @@ from app.domains.chat.contracts.today_sns_activity import (
     TodaySnsActivityEntry,
     TodaySnsActivitySnapshot,
 )
-from app.domains.memory.public import (
-    CanonicalRecallStatus,
-    MemorySourceTypeV1,
-    SOURCE_KIND_BY_TYPE,
-)
+from app.domains.memory.contracts.recall import CanonicalRecallStatus
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+from app.domains.memory.contracts.recall import SOURCE_KIND_BY_TYPE
 from app.domains.relationships.contracts.graph_recall import GraphRecallStatus
 
 

@@ -12,20 +12,20 @@ from sqlalchemy.pool import StaticPool
 from app.runtime.chat.message_composition import configure_chat_services
 from app import models
 from app.domains.identity.dependencies import get_current_user
-from app.api.v1.routes.memory import router as memory_router
+from app.domains.memory.router import router as memory_router
 from app.domains.chat.router.world_chat_response import router as response_router
 from app.core.db import Base, get_db
-from app.domains.memory.infrastructure import SqlAlchemyMemoryRepository
-from app.domains.memory.public import (
-    MemoryEvidenceAvailability,
-    MemoryKindV1,
-    MemoryReadService,
-    MemoryScope,
-    MemoryScopeService,
-    MemorySourceTypeV1,
-    MemoryWriteLifecycleService,
+from app.runtime.memory.composition import (
+    memory_repository as SqlAlchemyMemoryRepository,
 )
-from app.runtime.memory import SqlAlchemyMemorySourceEvidenceReader
+from app.domains.memory.contracts.inspector import MemoryEvidenceAvailability
+from app.domains.memory.contracts.provenance import MemoryKindV1
+from app.domains.memory.service.inspector import MemoryReadService
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.service.scope import MemoryScopeService
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+from app.domains.memory.service.items import MemoryWriteLifecycleService
+from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
 
 
 NOW = datetime(2026, 9, 3, 9, tzinfo=UTC)
@@ -100,6 +100,8 @@ def _fixture() -> tuple[TestClient, object, dict[str, models.User | None]]:
     principal: dict[str, models.User | None] = {"user": None}
     app = FastAPI()
     configure_chat_services(app)
+    from app.runtime.memory_http import build_memory_workflows
+    app.state.memory_workflows = build_memory_workflows
     app.include_router(memory_router, prefix="/api/v1")
     app.include_router(response_router, prefix="/api/v1")
 

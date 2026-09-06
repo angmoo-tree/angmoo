@@ -5,14 +5,16 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from app.domains.chat.contracts import SuccessfulChatMemorySource
-from app.domains.memory.infrastructure import SqlAlchemyMemoryRepository
-from app.domains.memory.public import (
-    MemoryKindV1,
-    MemoryScope,
-    MemorySourceTypeV1,
-    MemoryWriteLifecycleService,
-)
-from app.runtime.memory import SqlAlchemyMemorySourceEvidenceReader
+from app.runtime.memory.composition import memory_repository as SqlAlchemyMemoryRepository
+from app.domains.memory.contracts.provenance import MemoryKindV1
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+from app.domains.memory.service.items import MemoryWriteLifecycleService
+from app.domains.memory.contracts.provenance import MemoryKindV1
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.contracts.provenance import MemorySourceTypeV1
+from app.domains.memory.service.items import MemoryWriteLifecycleService
+from app.runtime.memory.source_composition import source_evidence_reader as SqlAlchemyMemorySourceEvidenceReader
 
 
 class SqlAlchemySuccessfulChatMemoryProducer:

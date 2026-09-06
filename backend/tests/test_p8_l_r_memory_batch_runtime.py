@@ -5,28 +5,24 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import sessionmaker
 
 from app import models
-from app.domains.memory.application.batch_selection import MemoryBatchSelectionService
-from app.domains.memory.domain.batch_policy import MEMORY_CONSENT_VERSION
-from app.domains.memory.domain.selection import MemorySelectionDecision
-from app.domains.memory.infrastructure.batch_models import (
+from app.domains.memory.service.batch_selection import MemoryBatchSelectionService
+from app.domains.memory.policies.batch import MEMORY_CONSENT_VERSION
+from app.domains.memory.policies.selection_output import MemorySelectionDecision
+from app.domains.memory.models.batch import (
     MemoryBatchRun,
     MemorySelectionDecisionModel,
     MemorySourceDelivery,
 )
-from app.domains.memory.infrastructure.batch_repository import (
-    SqlAlchemyMemoryBatchRepository,
+from app.runtime.memory.composition import (
+    memory_batch_repository as SqlAlchemyMemoryBatchRepository,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import (
+from app.domains.memory.models.items import (
     MemoryCandidate,
     MemoryItem,
     MemoryMaintenanceJob,
 )
-from app.runtime.memory.batch_runtime import (
-    deliver_candidates,
-    enqueue_scope,
-    rebuild_briefs,
-    schedule_batches,
-)
+from memory.preparation_support import schedule_batches
+from memory.preparation_support import deliver_candidates, enqueue_scope, rebuild_briefs
 from app.runtime.memory.source_delivery import (
     install_memory_delivery,
     uninstall_memory_delivery,

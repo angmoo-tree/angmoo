@@ -20,19 +20,17 @@ OUTPUT_PATH = ROOT / "docs/architecture/p8-l-o-memory-consolidation-inventory.js
 N_INVENTORY_PATH = ROOT / "docs/architecture/p8-l-n-both-workflow-coordinator-inventory.json"
 N_INVENTORY_SHA256 = "954bcadc40545da66342e4cbfc350b8e476278cac8c2a13fd0fb565cdf143058"
 
-from app.domains.memory.domain import (  # noqa: E402
-    MAINTENANCE_LEASE_DURATION,
-    MAX_HOT_BRIEF_SOURCE_ITEMS,
-    MAX_HOT_BRIEF_SUMMARY_LENGTH,
-    MAX_MAINTENANCE_ATTEMPTS,
-    MAX_MAINTENANCE_BATCH_CANDIDATES,
-    MAX_MAINTENANCE_PROVIDER_INPUT_CHARACTERS,
-    MAX_SHUTDOWN_DRAIN_JOBS,
-    MEMORY_CONSOLIDATION_CONTRACT_VERSION,
-    MEMORY_CONSOLIDATION_POLICY_V1,
-    MEMORY_CONSOLIDATION_PROVIDER_OUTPUT_VERSION,
-    MEMORY_HOT_BRIEF_CONTRACT_VERSION,
-)
+from app.domains.memory.policies.consolidation import MAINTENANCE_LEASE_DURATION
+from app.domains.memory.policies.consolidation import MAX_HOT_BRIEF_SOURCE_ITEMS
+from app.domains.memory.policies.consolidation import MAX_HOT_BRIEF_SUMMARY_LENGTH
+from app.domains.memory.policies.consolidation import MAX_MAINTENANCE_ATTEMPTS
+from app.domains.memory.policies.consolidation import MAX_MAINTENANCE_BATCH_CANDIDATES
+from app.domains.memory.policies.consolidation import MAX_MAINTENANCE_PROVIDER_INPUT_CHARACTERS
+from app.domains.memory.policies.consolidation import MAX_SHUTDOWN_DRAIN_JOBS
+from app.domains.memory.policies.consolidation import MEMORY_CONSOLIDATION_CONTRACT_VERSION
+from app.domains.memory.policies.consolidation import MEMORY_CONSOLIDATION_POLICY_V1
+from app.domains.memory.policies.consolidation_output import MEMORY_CONSOLIDATION_PROVIDER_OUTPUT_VERSION
+from app.domains.memory.policies.consolidation import MEMORY_HOT_BRIEF_CONTRACT_VERSION
 from app.runtime.persistence.sqlite_schema import SQLITE_SCHEMA_VERSION  # noqa: E402
 
 
@@ -41,15 +39,15 @@ class InventoryError(RuntimeError):
 
 
 REQUIRED_FILES = (
-    "backend/app/domains/memory/application/consolidation.py",
-    "backend/app/domains/memory/domain/consolidation.py",
-    "backend/app/domains/memory/domain/consolidation_provider.py",
-    "backend/app/domains/memory/infrastructure/consolidation_repository.py",
-    "backend/app/domains/memory/infrastructure/maintenance_queue.py",
+    "backend/app/domains/memory/service/consolidation.py",
+    "backend/app/domains/memory/policies/consolidation.py",
+    "backend/app/domains/memory/policies/consolidation_output.py",
+    "backend/app/domains/memory/repository/consolidation.py",
+    "backend/app/domains/memory/repository/queue.py",
     "backend/app/domains/memory/infrastructure/maintenance_unit_of_work.py",
-    "backend/app/domains/memory/ports/consolidation_provider.py",
-    "backend/app/domains/memory/ports/consolidation_repository.py",
-    "backend/app/domains/memory/ports/maintenance_unit_of_work.py",
+    "backend/app/domains/memory/contracts/consolidation_provider.py",
+    "backend/app/domains/memory/contracts/consolidation_store.py",
+    "backend/app/domains/memory/contracts/maintenance_transaction.py",
     "backend/app/domains/memory/public.py",
     "backend/app/integrations/llm/memory_consolidation.py",
     "backend/tests/test_p8_l_o_memory_consolidation.py",
@@ -106,15 +104,15 @@ def _forbid_imports(relative: str, prefixes: tuple[str, ...]) -> None:
 
 def _boundary_contract() -> dict[str, Any]:
     _forbid_imports(
-        "backend/app/domains/memory/domain/consolidation.py",
+        "backend/app/domains/memory/policies/consolidation.py",
         ("app.integrations", "app.runtime", "sqlalchemy", "fastapi"),
     )
     _forbid_imports(
-        "backend/app/domains/memory/application/consolidation.py",
+        "backend/app/domains/memory/service/consolidation.py",
         ("app.integrations", "app.runtime", "sqlalchemy", "fastapi"),
     )
     _require_text(
-        "backend/app/domains/memory/application/consolidation.py",
+        "backend/app/domains/memory/service/consolidation.py",
         (
             "memory_evidence_blocked_code",
             "enqueue_maintenance=False",
@@ -142,7 +140,7 @@ def _boundary_contract() -> dict[str, Any]:
         ("app.integrations.direct_llm",),
     )
     _require_text(
-        "backend/app/domains/memory/infrastructure/consolidation_repository.py",
+        "backend/app/domains/memory/repository/consolidation.py",
         (
             "memory_item_set_digest",
             "memory_item_high_watermark",

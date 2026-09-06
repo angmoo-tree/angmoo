@@ -9,11 +9,11 @@ from app.domains.chat.policies import (
     resolve_world_chat_model_execution_policy,
 )
 from app.domains.identity.public import CredentialMaterial, CredentialPurpose
-from app.domains.memory.domain.canonical_retrieval_planner import (
+from app.domains.memory.policies.retrieval_planner import (
     canonical_retrieval_plan_response_schema,
     parse_canonical_retrieval_plan_payload,
 )
-from app.domains.memory.ports.canonical_planner_provider import (
+from app.domains.memory.contracts.planner_provider import (
     CanonicalPlannerOutputError,
     CanonicalPlannerProviderResult,
     CanonicalPlannerRequest,

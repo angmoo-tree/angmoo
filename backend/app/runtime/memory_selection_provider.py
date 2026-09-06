@@ -7,7 +7,7 @@ the Memory package must not depend back on Chat's credential composition.
 from dataclasses import replace
 
 from app.domains.identity.public import User
-from app.domains.memory.domain.errors import MemoryValidationError
+from app.domains.memory.exceptions import MemoryValidationError
 from app.integrations.llm.memory_selection import DirectLlmMemorySelectionProvider
 from app.providers.registry import MESSAGE_GOOGLE_MODELS, get_model_spec
 from app.runtime.chat.sqlalchemy_service import resolve_message_credential_material

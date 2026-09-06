@@ -4,14 +4,14 @@ from dataclasses import asdict
 import json
 
 from app.domains.identity.public import CredentialMaterial, CredentialPurpose
-from app.domains.memory.domain.batch_policy import (
+from app.domains.memory.policies.batch import (
     MAX_SELECTION_INPUT_CHARACTERS,
     MAX_SELECTION_OUTPUT_TOKENS,
     MAX_SELECTION_INPUT_TOKEN_BOUND,
     memory_token_upper_bound,
 )
-from app.domains.memory.domain.errors import MemoryValidationError
-from app.domains.memory.domain.selection import (
+from app.domains.memory.exceptions import MemoryValidationError
+from app.domains.memory.policies.selection_output import (
     MemorySelectionSource,
     parse_selection,
     selection_response_schema,

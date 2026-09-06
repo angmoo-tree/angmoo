@@ -25,13 +25,13 @@ G_INVENTORY_SHA256 = (
     "81a4b9691434e6ccb9a9a6a04ef198b27bcab0852a9e74496000829b81598562"
 )
 
-from app.domains.memory.domain.recall import (  # noqa: E402
+from app.domains.memory.contracts.recall import (  # noqa: E402
     CanonicalRecallOperation,
     MEMORY_RECALL_CONTRACT_VERSION,
     MEMORY_RECALL_GENERATION,
     MEMORY_RECALL_SCHEMA_VERSION,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import (  # noqa: E402
+from app.domains.memory.models.items import (  # noqa: E402
     MEMORY_SCHEMA_V1_TABLES,
 )
 
@@ -41,12 +41,12 @@ class InventoryError(RuntimeError):
 
 
 REQUIRED_FILES = (
-    "backend/app/domains/memory/domain/recall.py",
-    "backend/app/domains/memory/application/recall.py",
-    "backend/app/domains/memory/ports/recall.py",
+    "backend/app/domains/memory/contracts/recall.py",
+    "backend/app/domains/memory/service/recall.py",
+    "backend/app/domains/memory/contracts/recall_store.py",
     "backend/app/domains/memory/public.py",
     "backend/app/runtime/memory/sqlite_fts5_recall.py",
-    "backend/app/runtime/memory/sqlalchemy_recall.py",
+    "backend/app/domains/memory/repository/recall.py",
     "backend/app/runtime/memory/recall_projection.py",
     "backend/app/runtime/configuration.py",
     "backend/app/public_main.py",
@@ -84,7 +84,7 @@ def _require_text(relative: str, values: tuple[str, ...]) -> None:
 
 def _boundary_contract() -> dict[str, Any]:
     _require_text(
-        "backend/app/domains/memory/application/recall.py",
+        "backend/app/domains/memory/service/recall.py",
         (
             "CANONICAL_PRIMITIVE_REGISTRY",
             "class CanonicalRecallValidator",
@@ -108,15 +108,20 @@ def _boundary_contract() -> dict[str, Any]:
         ),
     )
     _require_text(
-        "backend/app/runtime/memory/sqlalchemy_recall.py",
+        "backend/app/domains/memory/repository/recall.py",
         (
             "class SqlAlchemyMemoryRecallDocumentSource",
             "class SqlAlchemyCanonicalRecallRepository",
+            "MemoryItemStatus.ACTIVE.value",
+        ),
+    )
+    _require_text(
+        "backend/app/domains/memory/repository/recall_records.py",
+        (
             "canonical.source_digest != evidence.source_digest",
             "not canonical.visible",
             "not canonical.observed_by_subject",
             "canonical.blocked",
-            "MemoryItemStatus.ACTIVE.value",
         ),
     )
     _require_text(

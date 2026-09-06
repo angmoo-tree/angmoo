@@ -94,12 +94,10 @@ from app.domains.chat.contracts.character_response_generator import (
 )
 from app.domains.chat.contracts.successful_chat_memory import SuccessfulChatMemorySource
 from app.domains.chat.contracts.retrieval_policy import RetrievalPreflightCommand
-from app.domains.memory.infrastructure import SqlAlchemyMemoryRepository
-from app.domains.memory.public import (
-    CANONICAL_PRIMITIVE_REGISTRY,
-    MemoryScope,
-    MemoryScopeService,
-)
+from app.runtime.memory.composition import memory_repository as SqlAlchemyMemoryRepository
+from app.domains.memory.service.recall import CANONICAL_PRIMITIVE_REGISTRY
+from app.domains.memory.contracts.scope import MemoryScope
+from app.domains.memory.service.scope import MemoryScopeService
 from app.domains.relationships.contracts.graph_recall_gateway import GRAPH_RECALL_PRIMITIVE_REGISTRY
 from app.runtime.chat.world_generation import (
     accept_world_message,

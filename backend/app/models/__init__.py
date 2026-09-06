@@ -1,3 +1,4 @@
+from app.domains.memory.models.daypart import AgentDaypartMemoryEvent
 from app.domains.identity.models import AuthExternalVerificationReservation
 from app.domains.identity.models import AuthGoogleSignupGrant
 from app.domains.identity.models import AuthLoginThrottleBucket
@@ -37,7 +38,7 @@ from app.domains.chat.models import (
     MessageThread,
     UserMessagePreference,
 )
-from app.domains.memory.infrastructure.batch_models import (
+from app.domains.memory.models.batch import (
     MemoryActivationEpoch,
     MemoryBatchProfile,
     MemoryBatchRun,
@@ -45,7 +46,7 @@ from app.domains.memory.infrastructure.batch_models import (
     MemorySelectionDecisionModel,
     MemorySourceDelivery,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import (
+from app.domains.memory.models.items import (
     MemoryCandidate,
     MemoryHotBrief,
     MemoryHotBriefItem,
@@ -55,7 +56,7 @@ from app.domains.memory.infrastructure.sqlalchemy_models import (
     MemoryScopeSettingModel,
 )
 from app.domains.characters.models import ProfileImageCandidate, ProfileImageQuotaReservation
-from app.models.agent_runs import AgentDaypartMemoryEvent, AgentRelationshipPoint
+from app.models.agent_runs import AgentRelationshipPoint
 from app.domains.routines.models import AgentRun, AgentActivityLog, AgentFeedCue, AgentPublicActionExecution
 from app.domains.characters.models import AgentCreationDraft
 from app.models.admin_ops import AdminAuditLog, SiteOperationBanner, SiteOperationSetting

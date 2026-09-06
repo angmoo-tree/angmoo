@@ -30,7 +30,7 @@ from app.domains.chat.infrastructure.world_scope_migration import (
 from app.domains.chat.models import (
     drop_response_request_schema,
 )
-from app.domains.memory.infrastructure.sqlalchemy_models import (
+from app.domains.memory.models.items import (
     drop_memory_schema_v1,
 )
 from app.domains.social.models.subjective_context import (
@@ -382,7 +382,7 @@ def _seed_v2_roleless(
             connection.exec_driver_sql("PRAGMA foreign_keys = OFF")
             connection.commit()
             with connection.begin():
-                from app.domains.memory.infrastructure.batch_models import (
+                from app.domains.memory.models.batch import (
                     MEMORY_BATCH_TABLES,
                 )
                 from app.core.db import Base
