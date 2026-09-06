@@ -2512,3 +2512,14 @@ Tree/Lore 순차 후보의 첫 공식 보존 검사는 보호 대상과 현재 *
 최종860개 반복 증거 행에서 사라진 consumer만 제거하고 기존 유효 탐색 경로와 actual use 위치를 연결했다. 변경 필드는 direct consumer766행, 현재 destination260행, 기존 exact node/symbol map에 따른 test 참조70행이며 겹치는 행이 있다. split-file 집합14개는 해당 원본의 모든 현재 symbol destination과 일치시켰다. 원래 old symbol·행 수·기타 source evidence는 유지했다. `_ReferenceImage`는 원본734492bf와 전체 AST가 같은 concrete runtime 정의를 사용하며 별도의 read-only Protocol을 실제 객체로 바꾸어 기록하지 않는다. 호출0인 보존 상수 `SERVICE_IMAGE_ACTIVE_RESERVATION_STATUSES`와 helper `_daily_image_count`는 기존 같은-symbol navigation을 승계하되 실제 신규 호출자는 없다고 별도 근거에 명시했다.
 
 현재 feature 경로는 기존 exact file map을 따라 LocalBot·Character Image·Identity credential·Operations로 연결했다. K13은 Activity와 Image 모델의 실제 두 소유자를 함께 유지하며 Maintenance 값은 Operations로 분류한다. **원래 production current inventory/split 검사 오류0**, 기존166 prefix 동일/현재176, 제품·테스트·검사·CI·frozen 변경0을 확인했다. 이 metadata를 고정한 뒤 공식 전체 stock 및 전체 pytest를 이어가며, 이 국소 통과를 전체 backend/Hosted/installer/병합 완료로 기록하지 않는다.
+
+
+### AR-B8-A Residual 순차 후보 검증 결과
+
+고정 `cc5a8d67b1fb8a2c4f26ab86e95f2d97f59892d7`에서 공식 `check_refactor_preservation.py --contracts --nodes`는 **PR #258 1867 / PR #263 1907 / 보호2451 = 현재2451 / items37 PASS**다. 원본 source·split·단언·suppression·API·ORM·176개 도입 원장 오류0을 확인했다. 같은 고정 tree의 backend 전체 실행은 **2428 PASS /22 SKIP /1 FAIL /기존 warnings28 /1102.57초**다. 유일한 실패는 L0 current runtime contract의 `core_modules contains duplicates`였다.
+
+Tree/Lore metadata를 합치며 기존 `app.core.context_clipping`의 AR-B4 행과 추가된 AR-B7-DAYPART 행을 같은 module key로 합치지 못한 것이 원인이다. 실제 최초 정의는 signed `d83ef86c`의 Memory Daypart source이므로 `155ebf4f`에서 AR-B7-DAYPART 원래 한 항목만 남겼다. 제품·테스트·timeout·단언·skip 조건을 바꾸지 않은 원래 L0 전체 묶음은 **6 PASS /0.30초**다. 최초 전체 실행을 실패0으로 다시 쓰거나 전체를 재실행한 것으로 기록하지 않는다.
+
+부모의 원본 Git 객체 독립 검증을 거친 exact12 hash 보정 `ce9b31d1`만 cherry-pick해 `d7f551a0`으로 고정했다. 원장에 기록된 실제 Git blob 해시가 generic-api-key로 탐지된 경우이며, 원장 파일 경로·JSON source key·정확한 hash·전체 행과 해당 rule을 함께 제한한다. 파일이나 regex 규칙 전체를 제외하지 않았다. 실제 Gitleaks8.30.1의 일치 사례 탐지0/값 변경 탐지1/다른 파일 탐지1 근거가 있고, 이 후보의 추적 tree **28.93MB /7.84초** 및 HEAD 이력 **592 commits /36.50MB /7.93초**를 `--redact`로 검사한 결과는 모두 탐지0/exit0이다.
+
+보정 후 제품·테스트·checker·CI와 전체 stock 입력(source 및 baseline/checkpoint/additions/path map/feature inventory)은 검증한 cc5a8d67과 동일하다. 기존166 prefix와 최종176 원장도 그대로다. XML에서도 유일한 실패가 해당 metadata 중복임을 확인했다. 이 단계의 로컬 보존/전체 실행 및 실패 항목 재검증 근거를 갖춘 순차 후보이며 Hosted CI·installer·post-merge·병합 및 후속 Runtime/G5/G06/B8-B 완료는 별도 Gate로 이어간다.
