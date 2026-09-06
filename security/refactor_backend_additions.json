@@ -9471,6 +9471,90 @@
       "test_nodes": [],
       "test_assertions": {},
       "test_suppressions": {}
+    },
+    {
+      "commit": "322130952465bbe350e0a6b63dbb21d0c57eed2f",
+      "feature_id": "K24",
+      "reason": "AR-F2-C auth context hook and runtime/world DTO extraction with ten facade retirement regression nodes",
+      "tracked_files": {
+        "frontend/src/features/runtime-status/types/runtime-status.ts": "2404c4b8915e2f3a5dc1b45041c875b5f8d84fc6",
+        "frontend/src/features/worlds/types/world-app.ts": "b89894806e1331c196028459ed876416b1936e55",
+        "frontend/src/hooks/use-auth.ts": "db40c2e4137178ce1dbce476b9d718f97df3a777",
+        "frontend/src/lib/auth/auth-context.ts": "49d031eb1d79500502c015893120c5227ec05ac6"
+      },
+      "test_nodes": [
+        "tests/test_refactor_frontend_foundation.py::test_facade_retirement_cannot_hide_removed_or_unrelated_code[implementation-not_static_facade]",
+        "tests/test_refactor_frontend_foundation.py::test_facade_retirement_cannot_hide_removed_or_unrelated_code[import_only-missing_export]",
+        "tests/test_refactor_frontend_foundation.py::test_facade_retirement_cannot_hide_removed_or_unrelated_code[omit_type-export_coverage]",
+        "tests/test_refactor_frontend_foundation.py::test_facade_retirement_cannot_hide_removed_or_unrelated_code[outside-missing_export]",
+        "tests/test_refactor_frontend_foundation.py::test_facade_retirement_cannot_hide_removed_or_unrelated_code[still_present-source_still_exists]",
+        "tests/test_refactor_frontend_foundation.py::test_facade_retirement_cannot_hide_removed_or_unrelated_code[unrelated-unrelated_target]",
+        "tests/test_refactor_frontend_foundation.py::test_retired_facade_preserves_each_export_at_its_actual_owner",
+        "tests/test_refactor_frontend_foundation.py::test_retired_facade_rejects_remaining_web_or_static_consumer[frontend/src/app/page.tsx-../features/old/public.ts]",
+        "tests/test_refactor_frontend_foundation.py::test_retired_facade_rejects_remaining_web_or_static_consumer[frontend/src/app/page.tsx-@/features/old/public]",
+        "tests/test_refactor_frontend_foundation.py::test_retired_facade_rejects_remaining_web_or_static_consumer[frontend/static-shell/app/page.tsx-../../src/features/old/public]"
+      ],
+      "test_assertions": {
+        "tests/test_refactor_frontend_foundation.py": {
+          "write": [],
+          "test_committed_frontend_bytes_ignore_host_line_endings": [
+            "assert frontend_stock.committed_files(ROOT)[source] == canonical"
+          ],
+          "test_unknown_feature_cannot_hide_cross_feature_import": [
+            "assert any(('refactor_cross_feature' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_final_reverse_edges_are_rejected": [
+            "assert any((expected in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_final_valid_actual_files_and_server_route_are_allowed": [
+            "assert check_completed_frontend(tmp_path) == []"
+          ],
+          "test_transitive_server_dependency_cannot_enter_shared_screen": [
+            "assert any(('frontend_client_imports_server' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_static_shell_is_checked_outside_src": [
+            "assert any(('frontend_composition_imports_app' in e for e in check_completed_frontend(tmp_path / 'frontend/src')))"
+          ],
+          "test_unreferenced_legacy_file_is_not_invisible": [
+            "assert any(('frontend_completed_legacy_file' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_calculated_dynamic_import_fails_closed": [
+            "assert any(('frontend_computed_import' in e for e in check_completed_frontend(tmp_path)))"
+          ],
+          "test_complete_scope_rejects_transition_bridges": [
+            "assert validate_scope({'complete': True, 'bridges': [{}]}, frontend=True)"
+          ],
+          "test_browser_oracle_cannot_be_skipped_weakened_or_deleted": [
+            "assert any(('frontend_oracle_changed' in e for e in verify(tmp_path, {path: original}, {})))"
+          ],
+          "test_missing_source_fails_and_exact_source_move_passes": [
+            "assert verify(tmp_path, frozen, {})",
+            "assert verify(tmp_path, frozen, {old: new}) == []"
+          ],
+          "test_path_moves_preserve_entire_browser_assertion": [
+            "assert verify(tmp_path, {path: original}, {old: new}) == []"
+          ],
+          "retirement_example": [],
+          "test_retired_facade_preserves_each_export_at_its_actual_owner": [
+            "assert verify_retirements(tmp_path, frozen, moves, details) == []"
+          ],
+          "test_facade_retirement_cannot_hide_removed_or_unrelated_code": [
+            "assert any((expected in error for error in verify_retirements(tmp_path, frozen, moves, details)))"
+          ],
+          "test_retired_facade_rejects_remaining_web_or_static_consumer": [
+            "assert any(('active_import' in error for error in verify_retirements(tmp_path, frozen, moves, details)))"
+          ],
+          "test_preservation_moves_stay_inside_repository": [
+            "pytest.raises(ValueError)"
+          ],
+          "test_frontend_only_change_reaches_each_host_event": [
+            "assert f'Hosted Windows {event} paths must include {missing}' in errors"
+          ]
+        }
+      },
+      "test_suppressions": {
+        "tests/test_refactor_frontend_foundation.py": {}
+      }
     }
   ]
 }
